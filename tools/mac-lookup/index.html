@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MAC / OUI Lookup — Bench Tools</title>
+    <meta
+      name="description"
+      content="Parse any MAC format, detect locally administered / randomized addresses, and look up IEEE OUI vendors offline."
+    />
+    <link rel="stylesheet" href="../../assets/css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="../../">
+          <span class="brand__mark" aria-hidden="true">B</span>
+          <span>Bench Tools</span>
+        </a>
+        <nav class="nav" aria-label="Primary">
+          <a href="#faq">FAQ</a>
+          <a href="../../#tools">All tools</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="site-main">
+      <header class="page-header">
+        <a class="back" href="../../">← Back to the toolbox</a>
+        <h1>MAC / OUI Lookup</h1>
+        <p>
+          Paste one MAC or a whole list—any common spelling. We’ll normalize it,
+          flag <strong>likely randomized / locally administered</strong>
+          addresses, and match the vendor from a local IEEE registry dump.
+          Nothing leaves this tab.
+        </p>
+        <div class="explainer" role="note">
+          <strong>Randomized MAC rule:</strong>
+          look at the <em>second hex character</em> of the address (first octet’s
+          low nibble). If it is
+          <span class="inline-code">2</span>,
+          <span class="inline-code">6</span>,
+          <span class="inline-code">A</span>, or
+          <span class="inline-code">E</span>,
+          the address is <strong>locally administered unicast</strong> and
+          <strong>likely randomized</strong> (Wi‑Fi privacy, many VMs, admin-set
+          MACs). Example:
+          <span class="inline-code">d<strong>a</strong>:a1:19:…</span>
+        </div>
+      </header>
+
+      <div class="stack">
+        <div class="callout callout--soft" role="note">
+          <strong>Formats we accept:</strong>
+          full MACs
+          (<span class="inline-code">aa:bb:cc:dd:ee:ff</span>,
+          dashes, Cisco
+          <span class="inline-code">aabb.ccdd.eeff</span>,
+          bare, or
+          <span class="inline-code">aabbcc-ddeeff</span>),
+          <strong>or just an OUI</strong>
+          (<span class="inline-code">aabbcc</span>,
+          <span class="inline-code">aa:bb:cc</span>,
+          <span class="inline-code">aa-bb-cc</span>
+          — the usual 6 hex chars). Longer IEEE prefixes (7 = MA-M, 9 = MA-S) work too.
+        </div>
+
+        <section class="panel" aria-labelledby="input-heading">
+          <h2 id="input-heading">Addresses</h2>
+          <p class="panel__intro">
+            One per line, or separated by commas / semicolons. Bulk paste from
+            switch tables is fine.
+          </p>
+          <form id="mac-form">
+            <div class="field field--full">
+              <label for="mac-input">MAC address(es)</label>
+              <textarea
+                id="mac-input"
+                class="mono"
+                spellcheck="false"
+                rows="6"
+                placeholder="da:a1:19:12:34:56&#10;00:1A:2B&#10;001A2B&#10;00-1A-2B&#10;001a.2b3c.4d5e&#10;F0EE7A"
+                required
+              ></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn--primary" id="lookup-btn">
+                Look up
+              </button>
+              <button type="button" class="btn btn--ghost" id="clear-btn">
+                Clear
+              </button>
+              <span class="status-line" id="status" aria-live="polite"></span>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel hidden" id="results" aria-labelledby="results-heading">
+          <div class="section-head" style="margin-bottom: 0.75rem">
+            <div>
+              <h2 id="results-heading" style="margin: 0">Results</h2>
+              <p class="panel__intro" style="margin: 0.35rem 0 0">
+                Collapsed by default — click a row for details. Header shows MAC
+                + vendor. Click a normalized form inside to copy.
+              </p>
+            </div>
+            <div class="global-actions" style="display: flex; gap: 0.5rem; flex-shrink: 0">
+              <button type="button" class="btn btn--secondary" id="expand-all">
+                Expand all
+              </button>
+              <button type="button" class="btn btn--ghost" id="collapse-all">
+                Collapse all
+              </button>
+            </div>
+          </div>
+          <div id="results-list" class="mac-results-list"></div>
+        </section>
+
+        <section class="panel faq" id="faq" aria-labelledby="faq-heading">
+          <h2 id="faq-heading">FAQ</h2>
+
+          <details open>
+            <summary>How do you detect a randomized MAC?</summary>
+            <p>
+              For a unicast address, check the <strong>second hex character</strong>
+              (the low nibble of the first octet). Values
+              <span class="inline-code">2</span>,
+              <span class="inline-code">6</span>,
+              <span class="inline-code">A</span>, or
+              <span class="inline-code">E</span>
+              mean the IEEE <strong>U/L bit is 1</strong> (locally administered)
+              and the <strong>I/G bit is 0</strong> (unicast). Phones’ Wi‑Fi
+              privacy addresses use this pattern; so do many hypervisors and
+              manually set MACs. We label that “likely randomized / locally
+              administered,” not “definitely an iPhone.”
+            </p>
+          </details>
+
+          <details>
+            <summary>Why not only the vendor OUI?</summary>
+            <p>
+              Randomized and admin-set addresses often won’t match a meaningful
+              consumer vendor—or will match a virtualization OUI. Bits first,
+              registry second, keeps you from trusting a bad vendor string.
+            </p>
+          </details>
+
+          <details>
+            <summary>Can I look up just an OUI (6 characters)?</summary>
+            <p>
+              Yes. Paste <span class="inline-code">aabbcc</span>,
+              <span class="inline-code">aa:bb:cc</span>, or
+              <span class="inline-code">aa-bb-cc</span>. That’s the classic 24-bit
+              OUI / MA-L prefix. We still apply the 2/6/A/E check on the first
+              octet. You won’t get full-MAC-only notes (VRRP host patterns, etc.)
+              because those need all 12 hex digits.
+            </p>
+          </details>
+
+          <details>
+            <summary>Is the OUI database online?</summary>
+            <p>
+              No. It’s a static <span class="inline-code">oui-data.json</span>
+              built from IEEE’s public MA-L / MA-M / MA-S CSVs and shipped with
+              the tool. Lookups never call home.
+            </p>
+          </details>
+
+          <details>
+            <summary>What can’t a MAC tell you?</summary>
+            <p>
+              Exact device model, user identity, location, or whether something
+              is “on the network right now.” OUI org names can also be holding
+              companies or ODMs, not the brand on the bezel.
+            </p>
+          </details>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <p>
+          Offline MAC decode + IEEE registry snapshot. Not affiliated with IEEE
+          or Wireshark.
+        </p>
+      </div>
+    </footer>
+
+    <script src="./mac.js"></script>
+  </body>
+</html>

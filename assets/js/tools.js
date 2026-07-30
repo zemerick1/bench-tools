@@ -1,0 +1,130 @@
+/**
+ * Tool registry for the landing page.
+ * Add an entry here when you introduce a new tool under /tools/<id>/.
+ *
+ * status: "available" | "soon"
+ */
+export const tools = [
+  {
+    id: "csr-generator",
+    title: "CSR Generator",
+    description:
+      "Whip up a CSR and the private key that goes with it—in your browser. CAs get the CSR; you keep the key.",
+    href: "./tools/csr-generator/",
+    icon: "CSR",
+    status: "available",
+    cta: "Let’s go",
+  },
+  {
+    id: "central-alerts",
+    title: "Central Alerts & Insights",
+    description:
+      "Searchable catalog of Aruba Central alerts and AI insights—filters, thresholds, and all.",
+    href: "./tools/central-alerts/",
+    icon: "CA",
+    status: "available",
+    cta: "Browse catalog",
+  },
+  {
+    id: "cert-assembler",
+    title: "Cert Assembler",
+    description:
+      "Stitch key + cert + CA bundle into Apache/Nginx PEMs or PFX/P12. Add or strip a passphrase.",
+    href: "./tools/cert-assembler/",
+    icon: "PFX",
+    status: "available",
+    cta: "Assemble",
+  },
+  {
+    id: "mac-lookup",
+    title: "MAC / OUI Lookup",
+    description:
+      "Any MAC format in → vendor, bits, and likely-randomized detection (2/6/A/E rule). Offline.",
+    href: "./tools/mac-lookup/",
+    icon: "MAC",
+    status: "available",
+    cta: "Look up",
+  },
+  {
+    id: "hardware-platform-support",
+    title: "Hardware Platform Support",
+    description:
+      "APs, gateways, switches: first AOS-10 support, parked last release, jump to release notes.",
+    href: "./tools/hardware-platform-support/",
+    icon: "HW",
+    status: "available",
+    cta: "Browse platforms",
+  },
+  {
+    id: "access-tracker",
+    title: "Access Tracker Translator",
+    description:
+      "Access Tracker is a novel. This is the sticky note: accept/reject, who, where, what they got.",
+    href: "./tools/access-tracker/",
+    icon: "AT",
+    status: "available",
+    cta: "Translate",
+  },
+];
+
+/**
+ * @param {HTMLElement | null} root
+ */
+export function renderTools(root) {
+  if (!root) return;
+
+  if (!tools.length) {
+    root.innerHTML =
+      '<div class="tools-empty">No tools registered yet. Edit <code>assets/js/tools.js</code>.</div>';
+    return;
+  }
+
+  const list = document.createElement("ul");
+  list.className = "tools-grid";
+  list.setAttribute("role", "list");
+
+  for (const tool of tools) {
+    const li = document.createElement("li");
+    const available = tool.status === "available";
+    const tag = available ? "a" : "div";
+    const card = document.createElement(tag);
+
+    card.className = available
+      ? "tool-card"
+      : "tool-card tool-card--disabled";
+
+    if (available) {
+      card.href = tool.href;
+    } else {
+      card.setAttribute("aria-disabled", "true");
+    }
+
+    const badgeClass = available ? "badge badge--available" : "badge badge--soon";
+    const badgeLabel = available ? "Available" : "Soon";
+    const cta = tool.cta || (available ? "Open tool" : "Coming soon");
+
+    card.innerHTML = `
+      <div class="tool-card__top">
+        <div class="tool-card__icon" aria-hidden="true">${escapeHtml(tool.icon || "·")}</div>
+        <span class="${badgeClass}">${badgeLabel}</span>
+      </div>
+      <h3>${escapeHtml(tool.title)}</h3>
+      <p>${escapeHtml(tool.description)}</p>
+      <span class="tool-card__cta">${escapeHtml(cta)}${available ? " →" : ""}</span>
+    `;
+
+    li.appendChild(card);
+    list.appendChild(li);
+  }
+
+  root.replaceChildren(list);
+}
+
+/** @param {string} value */
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}

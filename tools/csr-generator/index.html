@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CSR Generator — Bench Tools</title>
+    <meta
+      name="description"
+      content="Whip up a CSR and private key in your browser. We never see the key."
+    />
+    <link rel="stylesheet" href="../../assets/css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="../../">
+          <span class="brand__mark" aria-hidden="true">B</span>
+          <span>Bench Tools</span>
+        </a>
+        <nav class="nav" aria-label="Primary">
+          <a href="#next-steps">What’s next</a>
+          <a href="#faq">FAQ</a>
+          <a href="../../#tools">All tools</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="site-main">
+      <header class="page-header">
+        <a class="back" href="../../">← Back to the toolbox</a>
+        <h1>CSR Generator</h1>
+        <p>
+          Fill in a few fields, hit go, and walk away with a
+          <abbr class="term" title="Certificate Signing Request — a public file you send a CA so they can issue a certificate. It does not contain your private key.">CSR</abbr>
+          <em>and</em> the private key that matches it. Everything runs in this
+          browser tab — nothing secret gets uploaded anywhere.
+        </p>
+        <div class="explainer" role="note">
+          <strong>What’s a CSR, in human?</strong>
+          A <em>Certificate Signing Request</em> is the “please issue me a cert
+          for these names, with this public key” form you hand a certificate
+          authority. It’s public-ish. The <em>private key</em> is the secret
+          half — you keep that, never paste it into a CA form. After the CA
+          sends back a certificate, your server needs <strong>cert + private
+          key</strong> together.
+        </div>
+      </header>
+
+      <div class="stack">
+        <div class="callout callout--soft" role="note">
+          <strong>Psst — your key never visits our server.</strong>
+          Generation happens on your device with a library we ship alongside this
+          page. Refresh the tab and the key is gone from memory, so download it
+          while you’re here. We also re-parse the CSR after minting it and check
+          that it matches your form and your key.
+        </div>
+
+        <section class="panel" aria-labelledby="form-heading">
+          <h2 id="form-heading">What are we signing up for?</h2>
+          <p class="panel__intro">
+            Common Name + SANs cover most web certs. Optional org fields are
+            there if your CA is picky.
+          </p>
+
+          <form id="csr-form" novalidate>
+            <div class="form-grid">
+              <div class="field field--full">
+                <label for="cn"
+                  >Common Name (CN)
+                  <span class="hint">— usually your main domain</span></label
+                >
+                <input
+                  id="cn"
+                  name="cn"
+                  type="text"
+                  autocomplete="off"
+                  spellcheck="false"
+                  placeholder="example.com"
+                  required
+                />
+              </div>
+
+              <div class="field field--full">
+                <label for="sans"
+                  >Subject Alternative Names (SANs)
+                  <span class="hint"
+                    >— one per line or comma-separated. Apex CN auto-adds
+                    www; your CN is always included in the CSR.</span
+                  ></label
+                >
+                <textarea
+                  id="sans"
+                  name="sans"
+                  spellcheck="false"
+                  placeholder="www.example.com&#10;api.example.com"
+                ></textarea>
+                <p class="field-tip" id="san-tip" role="status">
+                  <strong>SAN tip:</strong> Browsers and most CAs care about
+                  SANs, not just the CN. For a single hostname, add it under SANs
+                  too (we already fold the CN in). For sites that answer on both
+                  apex and www, list both — e.g. <span class="inline-code">example.com</span>
+                  and <span class="inline-code">www.example.com</span>.
+                </p>
+              </div>
+
+              <div class="field">
+                <label for="key-type">Key type</label>
+                <select id="key-type" name="key-type">
+                  <option value="RSA" selected>RSA</option>
+                  <option value="ECDSA">ECDSA</option>
+                </select>
+              </div>
+
+              <div class="field" id="key-size-wrap">
+                <label for="key-size" id="key-size-label">Key size</label>
+                <select id="key-size" name="key-size"></select>
+              </div>
+
+              <div class="field">
+                <label for="passphrase"
+                  >Private key passphrase
+                  <span class="hint">— recommended</span></label
+                >
+                <input
+                  id="passphrase"
+                  name="passphrase"
+                  type="password"
+                  autocomplete="new-password"
+                  placeholder="Encrypt the downloaded key"
+                />
+              </div>
+              <div class="field">
+                <label for="passphrase2"
+                  >Confirm passphrase
+                  <span class="hint">— must match</span></label
+                >
+                <input
+                  id="passphrase2"
+                  name="passphrase2"
+                  type="password"
+                  autocomplete="new-password"
+                  placeholder="Type it again"
+                />
+              </div>
+              <div class="field field--full">
+                <p class="field-tip" id="pass-tip" role="note">
+                  <strong>Protect the key.</strong>
+                  A passphrase encrypts the private key file at rest (like a
+                  password on a vault). You’ll need it later in Cert Assembler or
+                  when installing on a server. Leave both blank only if you
+                  knowingly want an unencrypted key (lock the file down yourself).
+                </p>
+              </div>
+            </div>
+
+            <details class="details-block">
+              <summary>Optional subject fields (org, country, …)</summary>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="org">Organization (O)</label>
+                  <input id="org" name="org" type="text" autocomplete="organization" />
+                </div>
+                <div class="field">
+                  <label for="ou">Organizational unit (OU)</label>
+                  <input id="ou" name="ou" type="text" />
+                </div>
+                <div class="field">
+                  <label for="locality">Locality (L)</label>
+                  <input id="locality" name="locality" type="text" placeholder="City" />
+                </div>
+                <div class="field">
+                  <label for="state">State / province (ST)</label>
+                  <input id="state" name="state" type="text" />
+                </div>
+                <div class="field">
+                  <label for="country"
+                    >Country (C)
+                    <span class="hint">— 2 letters</span></label
+                  >
+                  <input
+                    id="country"
+                    name="country"
+                    type="text"
+                    maxlength="2"
+                    placeholder="US"
+                    autocomplete="country"
+                  />
+                </div>
+                <div class="field">
+                  <label for="email">Email</label>
+                  <input id="email" name="email" type="email" autocomplete="email" />
+                </div>
+              </div>
+            </details>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn--primary" id="generate-btn">
+                Generate key + CSR
+              </button>
+              <span class="status-line" id="status" aria-live="polite"></span>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel" aria-labelledby="openssl-heading">
+          <h2 id="openssl-heading">Prefer the CLI? Same recipe in OpenSSL</h2>
+          <p class="panel__intro">
+            This tracks the form live. Paste it into a terminal if you’d rather
+            not trust a browser — or if you’re offline later.
+          </p>
+          <div class="pre-block">
+            <pre id="openssl-cmd" class="mono"></pre>
+            <div class="pre-block__actions">
+              <button type="button" class="btn btn--secondary" id="copy-openssl">
+                Copy commands
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel hidden" id="results" aria-labelledby="results-heading">
+          <h2 id="results-heading">You’re holding the goods</h2>
+          <p class="panel__intro">
+            Download <strong>both</strong> files. The CA only wants the CSR
+            (paste the PEM text into their form). Your web server wants the
+            private key later, when the cert comes back. Full walkthrough:
+            <a href="#next-steps">what to do next</a>.
+          </p>
+
+          <div
+            class="verify-banner"
+            id="verify-banner"
+            data-state="ok"
+            role="status"
+            aria-live="polite"
+          >
+            <div class="verify-banner__mark" id="verify-mark" aria-hidden="true">✓</div>
+            <div class="verify-banner__body">
+              <strong id="verify-title">Verified in this browser</strong>
+              <p id="verify-summary">
+                We re-parsed the CSR, checked its signature, matched the private
+                key, and compared names to your form.
+              </p>
+              <ul class="verify-list" id="verify-list"></ul>
+            </div>
+          </div>
+
+          <div class="callout callout--warn" role="status">
+            <strong>Don’t lose the key.</strong>
+            If it vanishes, the shiny new certificate is a paperweight. We can’t
+            recover it — we never had it.
+          </div>
+
+          <div class="results-meta" style="margin-top: 1rem">
+            <div class="meta-chip">
+              <span>Common Name</span>
+              <strong id="meta-cn">—</strong>
+            </div>
+            <div class="meta-chip">
+              <span>Key</span>
+              <strong id="meta-key">—</strong>
+            </div>
+            <div class="meta-chip">
+              <span>SANs</span>
+              <strong id="meta-sans">—</strong>
+            </div>
+          </div>
+
+          <div class="pem-tabs" role="tablist" aria-label="PEM view">
+            <button type="button" id="tab-csr" role="tab" aria-selected="true">
+              CSR
+            </button>
+            <button type="button" id="tab-key" role="tab" aria-selected="false">
+              Private key
+            </button>
+          </div>
+
+          <div class="pre-block">
+            <pre id="pem-view" class="mono"></pre>
+            <div class="pre-block__actions">
+              <button type="button" class="btn btn--primary" id="download-both">
+                Download key + CSR
+              </button>
+              <button type="button" class="btn btn--secondary" id="download-key">
+                Key only
+              </button>
+              <button type="button" class="btn btn--secondary" id="download-csr">
+                CSR only
+              </button>
+              <button type="button" class="btn btn--ghost" id="copy-pem">
+                Copy view
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="next-steps" aria-labelledby="next-steps-heading">
+          <h2 id="next-steps-heading">What do I do with this CSR?</h2>
+          <p class="panel__intro">
+            Generating the files is only half the adventure. Here’s the usual
+            path from “I have a CSR” to “HTTPS actually works.”
+          </p>
+
+          <ol class="steps-list">
+            <li>
+              <strong>Park the private key somewhere safe.</strong>
+              Download it now, store it with the rest of the server secrets, and
+              don’t email it to yourself “just for a second.” You will need this
+              exact key when the certificate arrives. If you set a passphrase,
+              store that password too — without it the key file won’t open.
+            </li>
+            <li>
+              <strong>Submit only the CSR to your certificate authority.</strong>
+              In their order / rekey / “provide CSR” form, paste everything from
+              <span class="inline-code">-----BEGIN CERTIFICATE REQUEST-----</span>
+              through
+              <span class="inline-code">-----END CERTIFICATE REQUEST-----</span>.
+              Leave the private key out of that form entirely.
+            </li>
+            <li>
+              <strong>Finish domain (and maybe org) validation.</strong>
+              The CA will ask you to prove you control the names on the cert
+              (DNS record, HTTP file, email, etc.). OV/EV orders also check
+              business details.
+            </li>
+            <li>
+              <strong>Download the issued certificate.</strong>
+              You’ll usually get a server cert plus intermediate/chain files
+              (or a single bundle). Keep those with the key.
+            </li>
+            <li>
+              <strong>Install cert + private key on the same server.</strong>
+              Point nginx, Apache, Caddy, IIS, your load balancer, etc. at both.
+              A cert without this private key won’t decrypt TLS; a key without
+              the matching cert is just a lonely PEM file.
+            </li>
+          </ol>
+
+          <div class="callout callout--soft" style="margin-top: 1.1rem">
+            <strong>Don’t need a commercial CA?</strong>
+            For a normal public website, free automated certs (Let’s Encrypt via
+            Certbot, Caddy, etc.) often skip the “paste a CSR into a website”
+            dance entirely — the tool creates the key on the server and renews
+            for you. This page is for when a human-shaped CA form still wants a
+            CSR.
+          </div>
+
+          <h3 class="subhead">Provider docs (paste / rekey a CSR)</h3>
+          <p class="panel__intro">
+            UIs move around, so these go to each vendor’s own help pages. Use
+            your account’s “SSL,” “Certificates,” or “Rekey” area and paste the
+            CSR when asked.
+          </p>
+
+          <ul class="provider-list">
+            <li>
+              <a
+                href="https://knowledge.digicert.com/general-information/how-to-create-a-csr"
+                target="_blank"
+                rel="noopener noreferrer"
+                >DigiCert — what a CSR is &amp; what to do with it</a
+              >
+              <span class="provider-list__note"
+                >Includes “paste into the online order form.” Also see
+                <a
+                  href="https://docs.digicert.com/en/certcentral/order-and-manage-certificates/manage-certificate-orders/manage-pending-orders/update-the-csr-on-a-pending-certificate-order.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >updating a CSR on a pending order</a
+                >.</span
+              >
+            </li>
+            <li>
+              <a
+                href="https://www.godaddy.com/help/rekey-my-certificate-4976"
+                target="_blank"
+                rel="noopener noreferrer"
+                >GoDaddy — rekey / paste a CSR</a
+              >
+              <span class="provider-list__note"
+                >Manage SSL → Rekey → paste CSR (including BEGIN/END lines).
+                Related:
+                <a
+                  href="https://www.godaddy.com/help/generate-a-csr-certificate-signing-request-5343"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >generate a CSR (their overview)</a
+                >.</span
+              >
+            </li>
+            <li>
+              <a
+                href="https://www.sectigo.com/blog/what-is-a-certificate-signing-request-csr"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Sectigo — CSR guide</a
+              >
+              <span class="provider-list__note"
+                >What goes in a CSR, decoding before submit. Platform-specific
+                generate steps live in their
+                <a
+                  href="https://www.sectigo.com/knowledge-base/product/Certificate_Signing_Request_CSR"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >CSR knowledge base</a
+                >.</span
+              >
+            </li>
+            <li>
+              <a
+                href="https://www.ssl.com/guide/your-ssl-com-account-submitting-a-csr/"
+                target="_blank"
+                rel="noopener noreferrer"
+                >SSL.com — submitting a CSR in your account</a
+              >
+              <span class="provider-list__note"
+                >Step-through of pasting a CSR for an order. Background:
+                <a
+                  href="https://www.ssl.com/faqs/what-is-a-csr/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >what is a CSR?</a
+                >.</span
+              >
+            </li>
+            <li>
+              <a
+                href="https://www.namecheap.com/support/knowledgebase/article.aspx/7918/38/how-do-i-activate-an-ssl-certificate/"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Namecheap — activate an SSL certificate</a
+              >
+              <span class="provider-list__note"
+                >Activation flow where you provide a CSR for the cert you
+                bought.</span
+              >
+            </li>
+            <li>
+              <a
+                href="https://letsencrypt.org/how-it-works/"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Let’s Encrypt — how issuance works</a
+              >
+              <span class="provider-list__note"
+                >Usually you want
+                <a
+                  href="https://certbot.eff.org/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Certbot</a
+                >
+                (or similar) on the server instead of pasting a CSR by hand.
+                Advanced:
+                <a
+                  href="https://letsencrypt.org/docs/faq/#can-i-use-an-existing-private-key-or-certificate-signing-request-csr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >using an existing CSR</a
+                >.</span
+              >
+            </li>
+          </ul>
+
+          <p class="fine-print">
+            Links go to third-party docs we don’t control — wording and URLs can
+            change. If a link 404s, search your CA’s help for “submit CSR” or
+            “rekey certificate.” Hosting panels (cPanel, Plesk, cloud load
+            balancers) often have their own “paste CSR” screens too.
+          </p>
+        </section>
+
+        <section class="panel faq" id="faq" aria-labelledby="faq-heading">
+          <h2 id="faq-heading">FAQ (the “wait, what?” section)</h2>
+          <p class="panel__intro">Short answers, fewer foot-guns.</p>
+
+          <details>
+            <summary>What is a CSR?</summary>
+            <p>
+              A Certificate Signing Request is a small public file that says
+              “here’s my public key and the names I want on a certificate.” You
+              send it to a CA; they send back a cert. The matching private key
+              never goes in the CSR — and modern TLS mostly trusts the SAN list
+              for which hostnames the cert covers.
+            </p>
+          </details>
+
+          <details>
+            <summary>Do you ever see my private key?</summary>
+            <p>
+              Nope. The key is created in your browser with a JavaScript library
+              we host next to this page. It isn’t posted to a backend, logged, or
+              emailed to a mysterious admin. If you’re extra spicy about it, open
+              DevTools → Network while you generate and watch… nothing secret
+              leave the tab.
+            </p>
+          </details>
+
+          <details>
+            <summary>What does “Verified in this browser” mean?</summary>
+            <p>
+              After generation we re-parse the CSR PEM, check that its signature
+              is valid for the embedded public key, confirm that public key
+              matches the private key you can download, and compare CN / SANs /
+              subject fields to what you typed. That all happens locally — it’s
+              a sanity check, not a third-party audit.
+            </p>
+          </details>
+
+          <details>
+            <summary>Why do public CAs refuse to give me a private key?</summary>
+            <p>
+              Because if <em>they</em> generated it, either they held something
+              they shouldn’t, or they’d have to ship it to you over channels that
+              are easy to mess up. Best practice: you create the key, you keep the
+              key, you only send them the CSR (public request).
+            </p>
+            <p>
+              This tool exists for the classic oops: “I got a certificate back and
+              somehow never had the key.”
+            </p>
+          </details>
+
+          <details>
+            <summary>What do I do with these files?</summary>
+            <p>
+              Short version: stash the <span class="inline-code">.key</span>,
+              paste only the <span class="inline-code">.csr</span> into your CA,
+              then install the issued cert with that same key. Longer version
+              (and vendor doc links): see
+              <a href="#next-steps">What do I do with this CSR?</a>
+            </p>
+          </details>
+
+          <details>
+            <summary>Should I set a passphrase on the private key?</summary>
+            <p>
+              Yes, when you can. It encrypts the key file so a stolen
+              <span class="inline-code">.key</span> isn’t immediately usable.
+              You’ll type that passphrase when assembling a PFX or when your
+              server asks for the key password. The CSR itself is never
+              passphrase-protected — only the private key file is.
+            </p>
+          </details>
+
+          <details>
+            <summary>RSA or ECDSA — which should I pick?</summary>
+            <p>
+              <strong>ECDSA P-256</strong> is a great default for modern HTTPS:
+              smaller keys, snappy handshakes. <strong>RSA 2048</strong> is the
+              “works everywhere including dusty appliances” choice. Reach for
+              3072/4096 or P-384 if a policy doc is bullying you.
+            </p>
+          </details>
+
+          <details>
+            <summary>I lost the private key after the cert was issued.</summary>
+            <p>
+              Sorry — that’s a re-key story. Generate a new key + CSR, request a
+              reissue/replacement from the CA, and retire the orphaned cert. We
+              can’t fish the old key out of the void.
+            </p>
+          </details>
+
+          <details>
+            <summary>Can I just use Let’s Encrypt instead?</summary>
+            <p>
+              Often, yes! If you only need HTTPS on a public site you control,
+              tools like Certbot or Caddy mint keys and certs right on the
+              server and renew them for you. This CSR flow is for commercial CAs,
+              internal CAs, email/client certs, or anywhere a human-shaped form
+              still demands a CSR paste box.
+            </p>
+          </details>
+
+          <details>
+            <summary>Is the OpenSSL snippet identical to the browser output?</summary>
+            <p>
+              Same subject, SANs, and key type/size intent. Exact PEM bytes will
+              differ (different random key). Requires OpenSSL 1.1.1+ for
+              <span class="inline-code">-addext</span>. Older OpenSSL wants a
+              config file instead — say the word and we can add that variant
+              later.
+            </p>
+          </details>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <p>
+          Built to keep the private key in <em>your</em> pocket. Part of the
+          toolbox — not a CA, not a vault, not a cloud with feelings.
+        </p>
+      </div>
+    </footer>
+
+    <script src="../../assets/vendor/jsrsasign-all-min.js"></script>
+    <script src="./csr.js"></script>
+  </body>
+</html>

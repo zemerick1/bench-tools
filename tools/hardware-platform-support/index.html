@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hardware Platform Support — Bench Tools</title>
+    <meta
+      name="description"
+      content="Search HPE Aruba Networking platforms: first AOS-10 support, parked last release, and links to release notes."
+    />
+    <link rel="stylesheet" href="../../assets/css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="../../">
+          <span class="brand__mark" aria-hidden="true">B</span>
+          <span>Bench Tools</span>
+        </a>
+        <nav class="nav" aria-label="Primary">
+          <a href="#faq">FAQ</a>
+          <a href="../../#tools">All tools</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="site-main">
+      <header class="page-header">
+        <a class="back" href="../../">← Back to the toolbox</a>
+        <h1>Hardware Platform Support</h1>
+        <p>
+          Which boxes run which AOS-10 (and friends), when they showed up, and
+          whether they’re still on the current train or
+          <strong>parked</strong> on a last supported release—with a straight
+          shot to the release notes.
+        </p>
+        <div class="explainer" role="note">
+          <strong>How to read a row:</strong>
+          <em>First supported</em> = minimum software that brought the platform
+          in.
+          <em>Parked / last</em> = last supported release when the doc lists one;
+          <span class="inline-code">N/A</span> means still on the current line.
+          The primary release-notes button opens the
+          <strong>latest notes for that last train</strong> when parked, or the
+          <strong>newest AOS-10 build</strong> published on the
+          <a
+            href="https://arubanetworking.hpe.com/techdocs/AOS_10.x_RN_WebHelp/Content/Home.htm"
+            target="_blank"
+            rel="noopener noreferrer"
+            >release notes home</a
+          >
+          /
+          <a
+            href="https://arubanetworking.hpe.com/techdocs/AOS_10.x_RN_WebHelp/Content/all-releases.htm"
+            target="_blank"
+            rel="noopener noreferrer"
+            >all-releases</a
+          >
+          tree when last is N/A (we resolve “latest” to the highest version listed
+          there—not a vague index dump).
+        </div>
+      </header>
+
+      <div class="stack">
+        <div class="callout callout--soft" role="note">
+          <strong>About datasheets (and our pure intentions).</strong>
+          In a perfect world I’d deep-link every model to its shiny official
+          datasheet PDF so you could one-click from “is this parked?” to “how many
+          radios does it even have?” Alas, HPE would rather we
+          <em>not</em> send a fleet of helpful little robots to vacuum their entire
+          documentation empire into a duffel bag. Scraping is discouraged; we heard
+          them; we are behaving (mostly). So this page sticks to a hand-refreshed
+          support snapshot plus release-note links—no clandestine datasheet heist,
+          no “accidentally” mirrored PDF CDN, no trench-coat energy. If you need the
+          glossy one-pager, the product site still has it. We just won’t pretend we
+          nicked it for you.
+        </div>
+
+        <section class="panel" aria-labelledby="filters-heading">
+          <h2 id="filters-heading">Find a platform</h2>
+          <div class="form-grid">
+            <div class="field field--full">
+              <label for="hps-search">Search</label>
+              <input
+                id="hps-search"
+                type="search"
+                placeholder="AP-335, 9240, 6300, BR-150…"
+                autocomplete="off"
+              />
+            </div>
+            <div class="field field--full">
+              <label class="hint" style="font-weight: 600">Type</label>
+              <div class="hps-filters" id="type-filters" role="group">
+                <button type="button" class="filter-btn active" data-type="all">
+                  All
+                </button>
+                <button type="button" class="filter-btn" data-type="ap">
+                  APs
+                </button>
+                <button type="button" class="filter-btn" data-type="gateway">
+                  Gateways
+                </button>
+                <button type="button" class="filter-btn" data-type="bridge">
+                  Bridge
+                </button>
+                <button type="button" class="filter-btn" data-type="aos-cx">
+                  AOS-CX
+                </button>
+                <button type="button" class="filter-btn" data-type="aos-s">
+                  AOS-S
+                </button>
+              </div>
+            </div>
+            <div class="field field--full">
+              <label class="hint" style="font-weight: 600">Support status</label>
+              <div class="hps-filters" id="status-filters" role="group">
+                <button type="button" class="filter-btn active" data-status="all">
+                  All
+                </button>
+                <button type="button" class="filter-btn" data-status="current">
+                  Current (last = N/A)
+                </button>
+                <button type="button" class="filter-btn" data-status="parked">
+                  Parked (has last release)
+                </button>
+              </div>
+            </div>
+          </div>
+          <p class="status-line" id="hps-status" aria-live="polite" style="margin-top: 0.75rem"></p>
+          <div class="form-actions" style="margin-top: 0.5rem">
+            <button type="button" class="btn btn--secondary" id="expand-all">
+              Expand all visible
+            </button>
+            <button type="button" class="btn btn--ghost" id="collapse-all">
+              Collapse all
+            </button>
+          </div>
+        </section>
+
+        <section aria-labelledby="results-heading">
+          <h2 id="results-heading" class="visually-hidden">Results</h2>
+          <div id="hps-list" class="hps-list"></div>
+          <p id="hps-empty" class="tools-empty hidden">
+            No platforms match that search / filter.
+          </p>
+        </section>
+
+        <section class="panel faq" id="faq">
+          <h2>FAQ</h2>
+          <details open>
+            <summary>What does “parked” mean here?</summary>
+            <p>
+              The official matrix lists a
+              <strong>Last Supported Release</strong>. We label that
+              <em>parked</em>: the platform is still documented, but capped on
+              that train (for example <span class="inline-code">10.4.x.x</span>).
+              The release-notes button aims at the
+              <strong>newest published notes under that train</strong> from the
+              AOS-10 all-releases index.
+            </p>
+          </details>
+          <details>
+            <summary>How do you pick “latest AOS-10” for current platforms?</summary>
+            <p>
+              The RN
+              <a
+                href="https://arubanetworking.hpe.com/techdocs/AOS_10.x_RN_WebHelp/Content/Home.htm"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Home</a
+              >
+              page doesn’t always shout a single version number—it sends you to
+              <a
+                href="https://arubanetworking.hpe.com/techdocs/AOS_10.x_RN_WebHelp/Content/all-releases.htm"
+                target="_blank"
+                rel="noopener noreferrer"
+                >All Releases</a
+              >.
+              We walk that list, take the <strong>highest version</strong>
+              (semver-ish), and deep-link there. When you refresh the snapshot,
+              that target moves with HPE’s catalog.
+            </p>
+          </details>
+          <details>
+            <summary>Where does the data come from?</summary>
+            <p>
+              Static snapshot of HPE’s
+              <a
+                href="https://arubanetworking.hpe.com/techdocs/new-central/content/get-started/supp-devices.htm"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Supported Devices</a
+              >
+              page plus the
+              <a
+                href="https://arubanetworking.hpe.com/techdocs/AOS_10.x_RN_WebHelp/Content/all-releases.htm"
+                target="_blank"
+                rel="noopener noreferrer"
+                >AOS-10 All Releases</a
+              >
+              link map. Refresh with
+              <span class="inline-code">python3 update_data.py</span> when the
+              public docs change (see README).
+            </p>
+          </details>
+          <details>
+            <summary>Why no datasheet links?</summary>
+            <p>
+              Because we asked the universe for “one polite table of support plus
+              PDFs for every SKU,” and the universe (wearing an HPE lanyard) said
+              scraping is a no-no. We’re not mad. We’re just… link-poor. Use the
+              official product pages for datasheets; use this tool for “when did
+              it ship on AOS-10 and is it parked?”
+            </p>
+          </details>
+          <details>
+            <summary>AOS-CX / AOS-S links?</summary>
+            <p>
+              Those platforms use different firmware trains. Rows still show
+              minimum / recommended text from Central’s matrix; AOS-10 release
+              notes buttons apply to AP, gateway, and bridge rows.
+            </p>
+          </details>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <p>
+          Snapshot of public HPE Aruba Networking docs—not an official support
+          tool. Always confirm on the source page before production changes.
+        </p>
+      </div>
+    </footer>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

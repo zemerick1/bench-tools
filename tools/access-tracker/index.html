@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Access Tracker Translator — Bench Tools</title>
+    <meta
+      name="description"
+      content="ClearPass Access Tracker is a novel. This turns it into a sticky note: accept/reject, who, where, what they got."
+    />
+    <link rel="stylesheet" href="../../assets/css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="../../">
+          <span class="brand__mark" aria-hidden="true">B</span>
+          <span>Bench Tools</span>
+        </a>
+        <nav class="nav" aria-label="Primary">
+          <a href="#faq">FAQ</a>
+          <a href="../../#tools">All tools</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="site-main">
+      <header class="page-header">
+        <a class="back" href="../../">← Back to the toolbox</a>
+        <h1>Access Tracker Translator</h1>
+        <p>
+          Access Tracker is a novel. You want the
+          <strong>sticky note</strong>: did they get on, who were they, how did
+          they prove it, and what did ClearPass hand back (role, VLAN, the usual
+          loot). Drop an export. We do the skimming. All in this tab — nothing
+          phones home.
+        </p>
+        <div class="explainer" role="note">
+          <strong>Bring the whole scene of the crime:</strong>
+          from Access Tracker, export session details
+          (<span class="inline-code">DashboardDetails.zip</span>). Unzip it
+          (double-click, no ceremony), then feed us the session folder — usually
+          <span class="inline-code">tmp/R…</span> or
+          <span class="inline-code">tmp/T…</span>. Must-have:
+          <span class="inline-code">Dashboard_Details.txt</span>. Nice-to-haves:
+          <span class="inline-code">Request_Logs.html</span> and
+          <span class="inline-code">Service_Config.xml</span>.
+        </div>
+      </header>
+
+      <div class="stack">
+        <div class="callout callout--soft" role="note">
+          <strong>Stays on your machine. We don’t do zip yoga.</strong>
+          Unpacking zip files in a browser means shipping extra code we’d rather
+          not babysit. You unzip; we read the folder. Fair trade. Refresh the
+          tab and the evidence is gone from memory.
+        </div>
+
+        <section class="panel" aria-labelledby="upload-heading">
+          <h2 id="upload-heading">Feed it an export</h2>
+          <p class="panel__intro">
+            Whole session folder is best (logs + service config come along for
+            free). Or cherry-pick the files if you’re feeling precise.
+            Your browser may ask “upload everything in this folder?” — that’s
+            Chrome being careful, not us being shady. Hit allow.
+          </p>
+
+          <div
+            id="drop-zone"
+            class="at-drop"
+            tabindex="0"
+            role="button"
+            aria-label="Drop Access Tracker export folder or files here"
+          >
+            <p class="at-drop__title">Drop the folder. Or the files. We’re not picky.</p>
+            <p class="at-drop__hint">
+              Hunting for
+              <span class="inline-code">Dashboard_Details.txt</span>
+              like a raccoon for snacks.
+            </p>
+            <div class="form-actions" style="margin-top: 0.85rem; justify-content: center">
+              <label class="btn btn--primary" style="display: inline-flex; cursor: pointer">
+                Choose folder
+                <input
+                  type="file"
+                  id="folder-input"
+                  webkitdirectory
+                  directory
+                  multiple
+                  hidden
+                />
+              </label>
+              <label class="btn btn--secondary" style="display: inline-flex; cursor: pointer">
+                Choose files
+                <input
+                  type="file"
+                  id="files-input"
+                  multiple
+                  accept=".txt,.html,.htm,.xml,text/plain,text/html,application/xml,text/xml"
+                  hidden
+                />
+              </label>
+              <button type="button" class="btn btn--ghost" id="clear-btn">
+                Clear
+              </button>
+            </div>
+            <div
+              id="status"
+              class="at-flash hidden"
+              role="status"
+              aria-live="polite"
+            ></div>
+          </div>
+        </section>
+
+        <section
+          class="panel hidden"
+          id="results"
+          aria-labelledby="results-heading"
+        >
+          <div class="section-head" style="margin-bottom: 0.85rem">
+            <div>
+              <h2 id="results-heading" style="margin: 0">The sticky note</h2>
+              <p class="panel__intro" style="margin: 0.35rem 0 0">
+                End result, quick facts, <strong>why</strong> the rules fired,
+                then what ClearPass handed back. Nerd drawers underneath.
+              </p>
+            </div>
+          </div>
+          <div id="summary-host" class="at-summary"></div>
+          <div id="details-host" class="at-details-stack"></div>
+        </section>
+
+        <section class="panel faq" id="faq" aria-labelledby="faq-heading">
+          <h2 id="faq-heading">FAQ</h2>
+
+          <details open>
+            <summary>Where does this export even come from?</summary>
+            <p>
+              ClearPass: <strong>Monitoring → Access Tracker</strong>, open a
+              session, export / download dashboard details. You get
+              <span class="inline-code">DashboardDetails.zip</span> with a
+              <span class="inline-code">tmp/&lt;session-id&gt;/</span> folder
+              full of the good stuff (and some of the boring stuff).
+            </p>
+          </details>
+
+          <details>
+            <summary>Why can’t I just drop the zip?</summary>
+            <p>
+              Because zip-in-the-browser means a dependency, and this toolbox is
+              allergic to “just one more library.” Double-click extract works on
+              every OS your ticket queue has ever invented. Folder + multi-file
+              covers the same ground without the gym membership.
+            </p>
+          </details>
+
+          <details>
+            <summary>My browser yelled about uploading a folder?</summary>
+            <p>
+              That’s the browser, not a toast from us. Choosing a folder means
+              “this page can read the files inside,” so Chrome/Edge/etc. double-
+              check with you. We only look for the Access Tracker trio; we don’t
+              ship anything anywhere. Hit allow, or use
+              <strong>Choose files</strong> and pick
+              <span class="inline-code">Dashboard_Details.txt</span> by hand.
+            </p>
+          </details>
+
+          <details>
+            <summary>What if I only have Dashboard_Details.txt?</summary>
+            <p>
+              Still useful — result, identity, MAC, SSID, service, roles, and
+              the Alerts reject reason when it’s a fail. Service config explains
+              <em>why that service matched</em>. Request logs are the director’s
+              cut when CPPM bothered to write one.
+            </p>
+          </details>
+
+          <details>
+            <summary>Does this call ClearPass? The cloud? My mom?</summary>
+            <p>
+              Nope. Parsing is all client-side. Refresh and it’s gone. No CoA,
+              no API, no password archaeology — and secrets that slip through
+              get redacted like a bad sitcom.
+            </p>
+          </details>
+
+          <details>
+            <summary>RADIUS and TACACS?</summary>
+            <p>
+              Both show up in Access Tracker. We handle the usual wireless/wired
+              RADIUS fields and the TACACS summary shape (the labels are a
+              little different; life is chaos). Weird export? Keep a redacted
+              copy — samples make parsers smarter.
+            </p>
+          </details>
+
+          <details>
+            <summary>RADIUS dictionaries?</summary>
+            <p>
+              Yup — IETF, Aruba, HPE, and Juniper packed into
+              <span class="inline-code">radius-dict.json</span>. So
+              <span class="inline-code">15</span> becomes Ethernet and
+              <span class="inline-code">10</span> becomes Call-Check instead of
+              staring at you like a Sudoku. Refresh the XMLs under
+              <span class="inline-code">dictionaries/</span> and run
+              <span class="inline-code">python3 update_radius_dict.py</span>
+              when ClearPass invents new toys.
+            </p>
+          </details>
+
+          <details>
+            <summary>What we won’t invent</summary>
+            <p>
+              Full packet hex fanfic, live CoA, or a root cause when the logs
+              shrugged. Empty Alerts + empty logs = we tell you that, not a
+              bedtime story.
+            </p>
+          </details>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <p>
+          Offline Access Tracker cliff notes. Not affiliated with HPE Aruba /
+          ClearPass — just here so you can stop scrolling attribute dumps at
+          2&nbsp;a.m.
+        </p>
+      </div>
+    </footer>
+
+    <script src="./decoder.js"></script>
+  </body>
+</html>
