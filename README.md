@@ -9,7 +9,7 @@ A small, slightly informal hub of static utilities for lab nights, cert headache
 ## Quick start
 
 ```bash
-git clone https://github.com/<you>/bench-tools.git
+git clone https://github.com/zemerick1/bench-tools.git
 cd bench-tools
 python3 -m http.server 8080
 # http://localhost:8080
