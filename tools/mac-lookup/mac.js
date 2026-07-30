@@ -397,11 +397,15 @@
     const fmtHtml = formats
       .map(
         ([label, val]) =>
-          `<div class="mac-fmt"><span>${escapeHtml(
-            label
-          )}</span><code class="copyable" data-copy="${escapeHtml(
+          `<button type="button" class="mac-fmt mac-fmt--copy" data-copy="${escapeHtml(
             val
-          )}">${escapeHtml(val)}</code></div>`
+          )}" title="Click to copy ${escapeHtml(val)}" aria-label="Copy ${escapeHtml(
+            label
+          )} form ${escapeHtml(val)}">
+            <span class="mac-fmt__label">${escapeHtml(label)}</span>
+            <code class="copyable">${escapeHtml(val)}</code>
+            <span class="mac-fmt__hint" aria-hidden="true">click to copy</span>
+          </button>`
       )
       .join("");
 
@@ -492,6 +496,7 @@
             }</strong></div>
           </div>
           <h4 class="subhead">Normalized forms</h4>
+          <p class="mac-fmt-note">Click any form to copy it to the clipboard.</p>
           <div class="mac-fmt-grid">${fmtHtml}</div>
           ${notesHtml}
         </div>
@@ -557,17 +562,46 @@
     els.results.classList.remove("hidden");
 
     // All results start collapsed (no open attribute on <details>)
-    // Copy on click for format codes (don't toggle the row)
+    // Click-to-copy for normalized forms (don't toggle the row)
     els.list.querySelectorAll("[data-copy]").forEach((el) => {
       el.addEventListener("click", async (ev) => {
         ev.preventDefault();
         ev.stopPropagation();
-        const v = el.getAttribute("data-copy") || el.textContent || "";
+        const v = el.getAttribute("data-copy") || "";
+        if (!v) return;
         try {
           await navigator.clipboard.writeText(v);
           setStatus(`Copied ${v}`, "ok");
+          el.classList.add("is-copied");
+          const hint = el.querySelector(".mac-fmt__hint");
+          const prev = hint ? hint.textContent : "";
+          if (hint) hint.textContent = "copied!";
+          window.setTimeout(() => {
+            el.classList.remove("is-copied");
+            if (hint) hint.textContent = prev || "click to copy";
+          }, 1200);
         } catch {
-          setStatus("Clipboard blocked — select and copy manually.", "error");
+          // Fallback for non-secure contexts / denied clipboard
+          try {
+            const ta = document.createElement("textarea");
+            ta.value = v;
+            ta.setAttribute("readonly", "");
+            ta.style.position = "fixed";
+            ta.style.left = "-9999px";
+            document.body.appendChild(ta);
+            ta.select();
+            const ok = document.execCommand("copy");
+            document.body.removeChild(ta);
+            if (ok) {
+              setStatus(`Copied ${v}`, "ok");
+              el.classList.add("is-copied");
+              window.setTimeout(() => el.classList.remove("is-copied"), 1200);
+            } else {
+              setStatus("Clipboard blocked — select and copy manually.", "error");
+            }
+          } catch {
+            setStatus("Clipboard blocked — select and copy manually.", "error");
+          }
         }
       });
     });
