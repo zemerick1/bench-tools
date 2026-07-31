@@ -66,12 +66,12 @@ export const tools = [
     cta: "Translate",
   },
   {
-    id: "aos-cx-cli",
-    title: "AOS-CX CLI Explorer",
+    id: "cli-explorer",
+    title: "CLI Explorer",
     description:
-      "Search the 6200 CLI guide like a tree, not a 2,700-page PDF. Hierarchy + previews offline.",
-    href: "./tools/aos-cx-cli/",
-    icon: "CX",
+      "Aruba/HPE CLI in a tree, not a multi-thousand-page PDF. AOS-CX, AOS 10, more banks offline.",
+    href: "./tools/cli-explorer/",
+    icon: "CLI",
     status: "available",
     cta: "Browse CLI",
   },

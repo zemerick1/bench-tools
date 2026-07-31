@@ -25,7 +25,7 @@ python3 -m http.server 8080
 | **Hardware Platform Support** | AOS-10 first/last support matrix + release notes |
 | **Central Alerts & Insights** | Searchable Aruba Central alert / insight catalog |
 | **Access Tracker Translator** | ClearPass session export → sticky-note story + why |
-| **AOS-CX CLI Explorer** | Searchable hierarchy of the 6200 CLI guide (from PDF TOC) |
+| **CLI Explorer** | Multi-platform CLI hierarchy (AOS-CX, AOS 10, … from local PDF TOC) |
 
 ## Structure
 
