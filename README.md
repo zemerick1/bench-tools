@@ -42,11 +42,16 @@ bench-tools/
 │   ├── mac-lookup/
 │   ├── hardware-platform-support/
 │   ├── central-alerts/
-│   └── access-tracker/
-│       ├── decoder.js
-│       ├── radius-dict.json
-│       ├── update_radius_dict.py
-│       └── dictionaries/        # ClearPass RadiusDictionary XML sources
+│   ├── access-tracker/
+│   │   ├── decoder.js
+│   │   ├── radius-dict.json
+│   │   ├── update_radius_dict.py
+│   │   └── dictionaries/        # ClearPass RadiusDictionary XML sources
+│   └── cli-explorer/            # Multi-platform CLI hierarchy (AOS-CX, AOS 10, …)
+│       ├── index.html / app.js
+│       ├── build_from_pdf.py    # Offline PDF → JSON (PyMuPDF)
+│       ├── data/                # catalog.json + per-bank packs
+│       └── source/              # Local CLI PDFs only (gitignored)
 ├── docs/                        # Ideas / design notes
 └── README.md
 ```
@@ -97,6 +102,34 @@ python3 tools/access-tracker/update_radius_dict.py
 ### Hardware Platform Support / MAC Lookup
 
 - Data files ship with the tool; maintainer refresh scripts live alongside each tool
+
+### CLI Explorer
+
+Searchable, hierarchical browser for Aruba/HPE CLI reference guides (Juniper CLI Explorer–style). The UI only loads static JSON; PDFs stay on your machine.
+
+| Bank | What’s indexed |
+|------|----------------|
+| **AOS-CX 10.17** | Nested TOC from the AOS-CX CLI PDF (6200 reference guide) |
+| **AOS 10.x** | AOS 10 controller/gateway CLI reference PDF |
+
+- Platform dropdown switches banks (`data/catalog.json` + `data/<bank>/`)
+- Tree filter, command detail (syntax, description, parameters, examples)
+- Layout-aware offline extract so multi-column `show` sample tables stay readable
+- Unofficial helper — always defer to current HPE docs for production decisions
+
+Rebuild after placing official PDFs under `tools/cli-explorer/source/` (gitignored):
+
+```bash
+cd tools/cli-explorer
+python3 -m venv .venv
+.venv/bin/pip install pymupdf
+# source/cli_6200.pdf          → bank aos-cx-10.17
+# source/aos10_cli_guide.pdf   → bank aos-10
+.venv/bin/python build_from_pdf.py --bank aos-cx-10.17
+.venv/bin/python build_from_pdf.py --bank aos-10
+```
+
+See [tools/cli-explorer/README.md](./tools/cli-explorer/README.md) for presets, `--skip-preview`, and catalog refresh.
 
 ## Deploy
 
