@@ -65,6 +65,16 @@ export const tools = [
     status: "available",
     cta: "Translate",
   },
+  {
+    id: "aos-cx-cli",
+    title: "AOS-CX CLI Explorer",
+    description:
+      "Search the 6200 CLI guide like a tree, not a 2,700-page PDF. Hierarchy + previews offline.",
+    href: "./tools/aos-cx-cli/",
+    icon: "CX",
+    status: "available",
+    cta: "Browse CLI",
+  },
 ];
 
 /**
