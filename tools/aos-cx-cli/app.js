@@ -156,10 +156,11 @@
         ? `pp. ${entry.page}–${entry.pageEnd}`
         : `p. ${entry.page}`;
 
-    const syntax = entry.syntax
+    const syntaxText = [entry.syntax, entry.syntaxNo].filter(Boolean).join("\n");
+    const syntax = syntaxText
       ? `<div class="cx-block">
           <h3 class="cx-block__h">Syntax</h3>
-          <pre class="cx-syntax">${escapeHtml(entry.syntax)}</pre>
+          <pre class="cx-syntax">${escapeHtml(syntaxText)}</pre>
         </div>`
       : "";
 
@@ -170,18 +171,45 @@
         </div>`
       : "";
 
-    const preview =
-      entry.preview && !entry.description
-        ? `<div class="cx-block">
-          <h3 class="cx-block__h">Page preview</h3>
-          <pre class="cx-preview">${escapeHtml(entry.preview)}</pre>
+    const params = entry.parameters
+      ? `<div class="cx-block">
+          <h3 class="cx-block__h">Parameters</h3>
+          <pre class="cx-preview">${escapeHtml(entry.parameters)}</pre>
         </div>`
-        : entry.preview
-          ? `<details class="cx-more">
-              <summary>Full page preview</summary>
-              <pre class="cx-preview">${escapeHtml(entry.preview)}</pre>
-            </details>`
-          : `<p class="hint">No page preview in this build (tree-only). Re-run build_from_pdf.py without --skip-preview.</p>`;
+      : "";
+
+    const examples = entry.examples
+      ? `<div class="cx-block">
+          <h3 class="cx-block__h">Examples</h3>
+          <pre class="cx-syntax">${escapeHtml(entry.examples)}</pre>
+        </div>`
+      : "";
+
+    const usage = entry.usage
+      ? `<div class="cx-block">
+          <h3 class="cx-block__h">Usage</h3>
+          <p class="cx-desc">${escapeHtml(entry.usage)}</p>
+        </div>`
+      : "";
+
+    const infoBits = [
+      entry.platforms ? `<div class="meta-chip"><span>Platforms</span><strong>${escapeHtml(entry.platforms)}</strong></div>` : "",
+      entry.context ? `<div class="meta-chip"><span>Command context</span><strong>${escapeHtml(entry.context)}</strong></div>` : "",
+      entry.authority ? `<div class="meta-chip"><span>Authority</span><strong>${escapeHtml(entry.authority)}</strong></div>` : "",
+    ].filter(Boolean);
+    const info = infoBits.length
+      ? `<div class="cx-block">
+          <h3 class="cx-block__h">Command information</h3>
+          <div class="results-meta">${infoBits.join("")}</div>
+        </div>`
+      : "";
+
+    const preview = entry.preview
+      ? `<details class="cx-more">
+          <summary>Raw extracted block</summary>
+          <pre class="cx-preview">${escapeHtml(entry.preview)}</pre>
+        </details>`
+      : "";
 
     el.innerHTML = `
       <p class="cx-crumb">${escapeHtml(entry.chapter || "CLI")}</p>
@@ -192,6 +220,10 @@
       </p>
       ${syntax}
       ${desc}
+      ${params}
+      ${examples}
+      ${usage}
+      ${info}
       ${preview}
     `;
   }
