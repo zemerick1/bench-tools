@@ -29,7 +29,7 @@ export const tools = [
     id: "cert-assembler",
     title: "Cert Assembler",
     description:
-      "Stitch key + cert + CA bundle into Apache/Nginx PEMs or PFX/P12. Add or strip a passphrase.",
+      "Stitch key + cert + CA chain into ordered PEM files or PKCS#12 (PFX/P12). Add or strip a passphrase.",
     href: "./tools/cert-assembler/",
     icon: "PFX",
     status: "available",

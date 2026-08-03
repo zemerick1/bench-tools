@@ -20,7 +20,7 @@ python3 -m http.server 8080
 | Tool | What it does |
 |------|----------------|
 | **CSR Generator** | Key + CSR in the browser (RSA / ECDSA, SANs) |
-| **Cert Assembler** | Key + cert + chain → PEMs or PFX/P12 |
+| **Cert Assembler** | Key + cert + chain → ordered PEMs or PKCS#12 (PFX/P12) |
 | **MAC / OUI Lookup** | Parse MACs, randomized-MAC hint, offline OUI vendor |
 | **Hardware Platform Support** | AOS-10 first/last support matrix + release notes |
 | **Central Alerts & Insights** | Searchable Aruba Central alert / insight catalog |
@@ -74,7 +74,8 @@ Private keys never leave the tab — there is no generation backend.
 
 ### Cert Assembler
 
-- Key + leaf + chain → Apache/Nginx PEMs or PFX/P12
+- Key + leaf + CA chain → separate PEM files or PKCS#12 (PFX/P12)
+- Fullchain / PKCS#12 order: **server (end-entity) first**, then intermediates as pasted (root last when required — e.g. ClearPass-style packs)
 - Optional passphrase add/remove
 - Uses vendored [forge](https://github.com/digitalbazaar/forge) in the browser
 

@@ -462,8 +462,9 @@
         keyLabel,
       };
 
-      // --- Apache / Nginx PEMs ---
-      if (formats.includes("apache")) {
+      // --- Separate PEM files (leaf first, then chain in paste order) ---
+      // Accept legacy "apache" value from older bookmarks / cached HTML.
+      if (formats.includes("pem") || formats.includes("apache")) {
         const keyPemOut = privateKeyToPem(key, passOut || undefined);
         const certPemOut = certToPem(leaf);
         const chainPemOut = joinPems(chain.map(certToPem));
@@ -479,19 +480,19 @@
         files.push({
           name: `${name}.crt`,
           blob: textBlob(certPemOut),
-          note: "Leaf / server certificate only",
+          note: "End-entity / server certificate only",
         });
         if (chain.length) {
           files.push({
             name: `${name}.chain.crt`,
             blob: textBlob(chainPemOut),
-            note: "Intermediate CA bundle",
+            note: "CA chain in the order you provided",
           });
         }
         files.push({
           name: `${name}.fullchain.crt`,
           blob: textBlob(fullchainPemOut),
-          note: "Leaf + chain (use this for nginx ssl_certificate)",
+          note: "Leaf first, then chain (server → intermediate(s) → root if included)",
         });
       }
 

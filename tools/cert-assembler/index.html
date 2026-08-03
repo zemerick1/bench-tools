@@ -4,7 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Cert Assembler — Bench Tools</title>
-    <meta name="description" content="Combine a private key, server cert, and CA bundle into Apache/Nginx PEMs or PFX/P12. Runs entirely in your browser." />
+    <meta
+      name="description"
+      content="Combine a private key, server certificate, and CA chain into ordered PEM files or PKCS#12 (PFX/P12). Runs entirely in your browser."
+    />
     <link rel="canonical" href="https://tools.emerickcc.com/tools/cert-assembler/" />
     <meta name="robots" content="index, follow" />
     <meta name="author" content="Bench Tools" />
@@ -15,14 +18,20 @@
     <meta property="og:locale" content="en_US" />
     <meta property="og:url" content="https://tools.emerickcc.com/tools/cert-assembler/" />
     <meta property="og:title" content="Cert Assembler" />
-    <meta property="og:description" content="Combine a private key, server cert, and CA bundle into Apache/Nginx PEMs or PFX/P12. Runs entirely in your browser." />
+    <meta
+      property="og:description"
+      content="Combine a private key, server certificate, and CA chain into ordered PEM files or PKCS#12 (PFX/P12). Runs entirely in your browser."
+    />
     <meta property="og:image" content="https://tools.emerickcc.com/assets/icons/og-image.jpg" />
     <meta property="og:image:width" content="1280" />
     <meta property="og:image:height" content="720" />
     <meta property="og:image:alt" content="Bench Tools — static lab utilities" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Cert Assembler" />
-    <meta name="twitter:description" content="Combine a private key, server cert, and CA bundle into Apache/Nginx PEMs or PFX/P12. Runs entirely in your browser." />
+    <meta
+      name="twitter:description"
+      content="Combine a private key, server certificate, and CA chain into ordered PEM files or PKCS#12 (PFX/P12). Runs entirely in your browser."
+    />
     <meta name="twitter:image" content="https://tools.emerickcc.com/assets/icons/og-image.jpg" />
     <link rel="icon" href="../../assets/icons/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="../../assets/icons/favicon.ico" sizes="any" />
@@ -30,7 +39,10 @@
     <link rel="stylesheet" href="../../assets/css/styles.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <header class="site-header">
@@ -51,32 +63,26 @@
         <a class="back" href="../../">← Back to the toolbox</a>
         <h1>Cert Assembler</h1>
         <p>
-          Got a private key, a server certificate, and the CA’s bundle? Mash them
-          into <strong>Apache/Nginx PEMs</strong> or a
-          <strong>PFX / P12</strong> — and slap a passphrase on (or peel one off)
-          while you’re at it. All in this tab. Nothing gets uploaded.
+          Stitch a private key, leaf cert, and CA chain into
+          <strong>PEM files</strong> or a <strong>PKCS#12</strong> (PFX/P12).
+          Optional passphrase add/strip. Everything stays in this tab.
         </p>
         <div class="explainer" role="note">
-          <strong>Typical CA package (e.g. GoDaddy):</strong>
-          they email or let you download a <em>server cert</em> plus a
-          <em>bundle / chain</em> of intermediates. You already have the
-          <em>private key</em> from when you made the CSR. This tool is the
-          “now make files my server actually wants” step.
+          <strong>Chain order matters.</strong>
+          Fullchain and PKCS#12 put the
+          <em>end-entity (server) certificate first</em>, then intermediates
+          in the order you paste them, typically ending with the root when the
+          product wants it. Example (ClearPass-style): server cert → sub/intermediate
+          CA(s) → root CA.
         </div>
       </header>
 
       <div class="stack">
-        <div class="callout callout--soft" role="note">
-          <strong>Stays local.</strong>
-          Key material is parsed in your browser with a library we ship next to
-          this page. Refresh the tab and it’s gone from memory.
-        </div>
-
         <section class="panel" aria-labelledby="inputs-heading">
-          <h2 id="inputs-heading">Drop in the pieces</h2>
+          <h2 id="inputs-heading">Pieces</h2>
           <p class="panel__intro">
-            Paste PEM text or load files. Order doesn’t matter as much as
-            “this is the key / this is the leaf / this is the chain.”
+            Paste PEM or load files. Keep intermediates in the order your target
+            product expects (leaf is always placed first by this tool).
           </p>
 
           <form id="asm-form" novalidate>
@@ -84,7 +90,7 @@
               <div class="field field--full">
                 <label for="key-pem"
                   >Private key
-                  <span class="hint">— PEM (<span class="inline-code">.key</span>)</span></label
+                  <span class="hint">— <span class="inline-code">.key</span> / PEM</span></label
                 >
                 <textarea
                   id="key-pem"
@@ -94,9 +100,17 @@
                   required
                 ></textarea>
                 <div class="form-actions" style="margin-top: 0.5rem">
-                  <label class="btn btn--ghost" style="display: inline-flex; align-items: center; cursor: pointer">
+                  <label
+                    class="btn btn--ghost"
+                    style="display: inline-flex; align-items: center; cursor: pointer"
+                  >
                     Load key file
-                    <input type="file" id="key-file" accept=".key,.pem,.txt,text/plain,*/*" hidden />
+                    <input
+                      type="file"
+                      id="key-file"
+                      accept=".key,.pem,.txt,text/plain,*/*"
+                      hidden
+                    />
                   </label>
                 </div>
               </div>
@@ -104,7 +118,7 @@
               <div class="field field--full">
                 <label for="cert-pem"
                   >Server certificate (leaf)
-                  <span class="hint">— the cert for your domain</span></label
+                  <span class="hint">— end-entity for your hostname</span></label
                 >
                 <textarea
                   id="cert-pem"
@@ -114,28 +128,44 @@
                   required
                 ></textarea>
                 <div class="form-actions" style="margin-top: 0.5rem">
-                  <label class="btn btn--ghost" style="display: inline-flex; align-items: center; cursor: pointer">
+                  <label
+                    class="btn btn--ghost"
+                    style="display: inline-flex; align-items: center; cursor: pointer"
+                  >
                     Load cert file
-                    <input type="file" id="cert-file" accept=".crt,.cer,.pem,.txt,text/plain,*/*" hidden />
+                    <input
+                      type="file"
+                      id="cert-file"
+                      accept=".crt,.cer,.pem,.txt,text/plain,*/*"
+                      hidden
+                    />
                   </label>
                 </div>
               </div>
 
               <div class="field field--full">
                 <label for="chain-pem"
-                  >CA bundle / chain
-                  <span class="hint">— intermediates (optional but recommended)</span></label
+                  >CA chain / bundle
+                  <span class="hint">— intermediates (order preserved; optional)</span></label
                 >
                 <textarea
                   id="chain-pem"
                   class="mono"
                   spellcheck="false"
-                  placeholder="-----BEGIN CERTIFICATE-----&#10;… one or more PEMs …&#10;-----END CERTIFICATE-----"
+                  placeholder="-----BEGIN CERTIFICATE-----&#10;… intermediate(s), then root if required …&#10;-----END CERTIFICATE-----"
                 ></textarea>
                 <div class="form-actions" style="margin-top: 0.5rem">
-                  <label class="btn btn--ghost" style="display: inline-flex; align-items: center; cursor: pointer">
+                  <label
+                    class="btn btn--ghost"
+                    style="display: inline-flex; align-items: center; cursor: pointer"
+                  >
                     Load bundle file
-                    <input type="file" id="chain-file" accept=".crt,.cer,.pem,.txt,text/plain,*/*" hidden />
+                    <input
+                      type="file"
+                      id="chain-file"
+                      accept=".crt,.cer,.pem,.txt,text/plain,*/*"
+                      hidden
+                    />
                   </label>
                 </div>
               </div>
@@ -145,60 +175,57 @@
             <div class="form-grid">
               <div class="field">
                 <label for="pass-in"
-                  >Current key passphrase
-                  <span class="hint">— only if the key is encrypted</span></label
+                  >Key passphrase
+                  <span class="hint">— if the key is encrypted</span></label
                 >
                 <input
                   id="pass-in"
                   type="password"
                   autocomplete="off"
-                  placeholder="Leave blank if unencrypted"
+                  placeholder="Leave blank if none"
                 />
               </div>
               <div class="field">
                 <label for="pass-out"
                   >Output passphrase
-                  <span class="hint">— blank = no password on PEM key; PFX still needs one (or allow empty)</span></label
+                  <span class="hint">— optional for PEM; recommended for PKCS#12</span></label
                 >
                 <input
                   id="pass-out"
                   type="password"
                   autocomplete="new-password"
-                  placeholder="Optional for PEMs; recommended for PFX"
+                  placeholder="Optional"
                 />
               </div>
               <div class="field field--full">
-                <label class="hint" style="display: flex; gap: 0.5rem; align-items: flex-start; font-weight: 500">
+                <label
+                  class="hint"
+                  style="display: flex; gap: 0.5rem; align-items: flex-start; font-weight: 500"
+                >
                   <input type="checkbox" id="allow-empty-pfx" style="margin-top: 0.25rem" />
-                  <span
-                    >Allow empty password on PFX/P12 (some appliances demand it; most
-                    humans should not)</span
-                  >
+                  <span>Allow empty PKCS#12 password (only if the appliance requires it)</span>
                 </label>
               </div>
             </div>
 
-            <h3 class="subhead">What do you want out?</h3>
-            <p class="panel__intro" style="margin-bottom: 0.35rem">
-              Pick one or more formats. Each option is a separate package style.
-            </p>
+            <h3 class="subhead">Output</h3>
             <div class="format-grid" role="group" aria-label="Output formats">
               <label class="format-card">
                 <input
                   class="format-card__check"
                   type="checkbox"
                   name="fmt"
-                  value="apache"
+                  value="pem"
                   checked
                 />
-                <span class="format-card__title">Apache / Nginx PEMs</span>
+                <span class="format-card__title">PEM files</span>
                 <span class="format-card__desc">
-                  Separate files for a classic web server:
+                  Separate
                   <span class="format-card__files">.key</span>,
                   <span class="format-card__files">.crt</span>,
-                  <span class="format-card__files">.chain.crt</span>, and
+                  <span class="format-card__files">.chain.crt</span>,
                   <span class="format-card__files">.fullchain.crt</span>
-                  (leaf + chain — what Nginx usually wants).
+                  (leaf first, then your chain in order).
                 </span>
               </label>
               <label class="format-card">
@@ -211,22 +238,14 @@
                 />
                 <span class="format-card__title">PKCS#12 · .pfx</span>
                 <span class="format-card__desc">
-                  One password-protected bag with key + cert + chain. Common for
-                  Windows, IIS, and some load balancers.
+                  One bag: key + leaf + chain. Windows, IIS, many ADCs.
                 </span>
               </label>
               <label class="format-card">
-                <input
-                  class="format-card__check"
-                  type="checkbox"
-                  name="fmt"
-                  value="p12"
-                />
+                <input class="format-card__check" type="checkbox" name="fmt" value="p12" />
                 <span class="format-card__title">PKCS#12 · .p12</span>
                 <span class="format-card__desc">
-                  Same container as <span class="format-card__files">.pfx</span>
-                  — only the file extension differs. Some tools insist on
-                  <span class="format-card__files">.p12</span>.
+                  Same as .pfx — different extension only.
                 </span>
               </label>
             </div>
@@ -235,9 +254,7 @@
               <button type="submit" class="btn btn--primary" id="build-btn">
                 Assemble files
               </button>
-              <button type="button" class="btn btn--ghost" id="clear-btn">
-                Clear
-              </button>
+              <button type="button" class="btn btn--ghost" id="clear-btn">Clear</button>
               <span class="status-line" id="status" aria-live="polite"></span>
             </div>
           </form>
@@ -246,8 +263,7 @@
         <section class="panel hidden" id="results" aria-labelledby="results-heading">
           <h2 id="results-heading">Ready to download</h2>
           <p class="panel__intro">
-            We checked that the private key matches the leaf certificate. Grab
-            what you need below.
+            Private key was checked against the leaf. Download what you need.
           </p>
 
           <div
@@ -266,85 +282,63 @@
           </div>
 
           <div class="results-meta" id="meta-row"></div>
-
           <div class="download-grid" id="download-grid"></div>
-        </section>
-
-        <section class="panel" aria-labelledby="where-heading">
-          <h2 id="where-heading">Where these formats usually go</h2>
-          <ul class="steps-list">
-            <li>
-              <strong>Apache</strong> —
-              <span class="inline-code">SSLCertificateFile</span> (cert or
-              fullchain),
-              <span class="inline-code">SSLCertificateKeyFile</span> (key),
-              sometimes
-              <span class="inline-code">SSLCertificateChainFile</span> (chain)
-              on older configs.
-            </li>
-            <li>
-              <strong>Nginx</strong> —
-              <span class="inline-code">ssl_certificate</span> is usually the
-              <em>fullchain</em> (leaf + intermediates);
-              <span class="inline-code">ssl_certificate_key</span> is the private
-              key.
-            </li>
-            <li>
-              <strong>PFX / P12</strong> — import into Windows cert store, IIS,
-              some ADC/load-balancer UIs, or Java keystores (after conversion).
-            </li>
-          </ul>
         </section>
 
         <section class="panel faq" id="faq" aria-labelledby="faq-heading">
           <h2 id="faq-heading">FAQ</h2>
-          <p class="panel__intro">Fewer “why won’t my server start” moments.</p>
+
+          <details open>
+            <summary>What order should the chain be in?</summary>
+            <p>
+              This tool always writes the <strong>server (end-entity) certificate
+              first</strong>, then appends the CA bundle in the order you pasted
+              it. Many products want:
+            </p>
+            <ol>
+              <li>End-entity / server certificate</li>
+              <li>Sub / intermediate CA(s)</li>
+              <li>Root CA (when the product requires it in-file)</li>
+            </ol>
+            <p>
+              Example for ClearPass: ensure the certificate chain is arranged in
+              that exact order — server first, intermediates next, root last.
+              Web servers (Apache/Nginx) often want leaf + intermediates only;
+              the OS trust store supplies the root.
+            </p>
+          </details>
 
           <details>
             <summary>Do you upload my private key?</summary>
             <p>
-              No. Parsing and packaging happen in your browser. There’s no
-              assemble API on a server for this tool.
+              No. Parsing and packaging run in your browser. Refresh the tab and
+              it leaves memory.
             </p>
           </details>
 
           <details>
-            <summary>What’s the difference between PFX and P12?</summary>
+            <summary>PFX vs P12?</summary>
             <p>
-              Practically none for this use case — both are PKCS#12 containers
-              holding key + cert(s). Different software just prefers different
-              file extensions. We can emit either (or both).
+              Same PKCS#12 container; only the file extension differs. Emit either
+              (or both) depending on what the target UI accepts.
             </p>
           </details>
 
           <details>
-            <summary>What is the “bundle” / chain file?</summary>
+            <summary>What is the chain / bundle?</summary>
             <p>
-              Intermediate CA certificates that link your leaf cert up to a
-              trusted root. Without them, some clients show chain errors even
-              though your cert is valid. Paste whatever the CA labeled “bundle,”
-              “chain,” or “intermediate.”
-            </p>
-          </details>
-
-          <details>
-            <summary>Add vs remove a passphrase</summary>
-            <p>
-              If your key is already encrypted, fill <em>Current key
-              passphrase</em> so we can open it. Set <em>Output passphrase</em>
-              to re-encrypt the PEM key and/or protect the PFX. Leave output blank
-              to write an unencrypted PEM key (handy for many Linux web servers;
-              protect the file with filesystem permissions instead).
+              Intermediate CA certs that link your leaf up toward a trusted root.
+              Paste what the CA labeled “bundle,” “chain,” or “intermediate,” in
+              the order the target product expects.
             </p>
           </details>
 
           <details>
             <summary>Key doesn’t match certificate?</summary>
             <p>
-              Usually means the key from CSR generation isn’t the same as the
-              one you’re pasting, or you grabbed a cert for a different order.
-              We refuse to build a PFX from a mismatched pair — that package
-              would be useless (or worse, confusing).
+              The private key isn’t the one that matches this leaf (wrong CSR key,
+              or cert for a different order). We won’t build a PKCS#12 from a
+              mismatched pair.
             </p>
           </details>
         </section>
