@@ -1,13 +1,22 @@
 # Hardware Platform Support
 
-Interactive matrix of HPE Aruba Networking platforms (APs, gateways, bridge, AOS-CX, AOS-S) with **first supported** / **parked last** software and links into **AOS-10 release notes**.
+Interactive matrix of HPE Aruba Networking platforms (APs, gateways, bridge, AOS-CX, AOS-S) with **first supported** / **parked last** software per **firmware track**.
+
+Tracks:
+
+| Filter | Meaning |
+|--------|---------|
+| **AOS-10** | New Central / AOS-10 matrix + AOS-10 RN links |
+| **AOS-8 Instant** | Instant mode (IAP) — e.g. 700 Series from `8.13.3.x` |
+| **AOS-8 Controller** | On-prem controller mode — same 700 Series floor |
 
 ## Data
 
 - `data/platforms.json` — static snapshot (served to the browser)
 - Source docs:
-  - [Supported Devices](https://arubanetworking.hpe.com/techdocs/new-central/content/get-started/supp-devices.htm)
+  - [Supported Devices](https://arubanetworking.hpe.com/techdocs/new-central/content/get-started/supp-devices.htm) (AOS-10)
   - [AOS-10 All Releases](https://arubanetworking.hpe.com/techdocs/AOS_10.x_RN_WebHelp/Content/all-releases.htm)
+  - [Central Instant supported APs](https://arubanetworking.hpe.com/techdocs/central/2.5.8/content/nms/access-points/supported-platforms/supported-aps.htm) (partial; 700 Series Instant/controller `8.13.3.x` added manually)
 
 ## Refresh the snapshot
 
