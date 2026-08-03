@@ -29,7 +29,6 @@
   const KIND_LABELS = {
     "aos-10": "AOS-10",
     "aos-8-iap": "Instant (IAP 8.x)",
-    "aos-8-campus": "AOS-8 Campus",
     "aos-cx": "AOS-CX",
     "aos-s": "AOS-S",
   };
@@ -66,7 +65,6 @@
 
   function fwPillClass(kind) {
     if (kind === "aos-8-iap") return "hps-fw hps-fw--iap";
-    if (kind === "aos-8-campus") return "hps-fw hps-fw--ctrl";
     if (kind === "aos-10") return "hps-fw hps-fw--aos10";
     if (kind === "aos-cx" || kind === "aos-s") return "hps-fw hps-fw--switch";
     return "hps-fw";
@@ -162,8 +160,8 @@
       rnHtml = `<a class="btn btn--secondary" href="${escapeHtml(
         rn.url
       )}" target="_blank" rel="noopener noreferrer">${escapeHtml(rn.label)}</a>`;
-    } else if (track.kind === "aos-8-iap" || track.kind === "aos-8-campus") {
-      rnHtml = `<span class="hint">Confirm Instant / Campus notes on HPE support</span>`;
+    } else if (track.kind === "aos-8-iap") {
+      rnHtml = `<span class="hint">Confirm Instant release notes on HPE support</span>`;
     }
     const note = track.notes
       ? `<div class="hps-track__note">${escapeHtml(track.notes)}</div>`
@@ -312,7 +310,7 @@
       `Showing ${list.length} of ${c.total || 0} platforms` +
         (data && data.updated ? ` · snapshot ${data.updated}` : "") +
         (c["aos-8-iap"] != null
-          ? ` · Instant tracks ${c["aos-8-iap"]}, Campus ${c["aos-8-campus"] || 0}, AOS-10 ${c["aos-10"] || 0}`
+          ? ` · Instant tracks ${c["aos-8-iap"]}, AOS-10 ${c["aos-10"] || 0}`
           : "") +
         (latest && latest.version ? ` · latest AOS-10 ${latest.version}` : ""),
       "ok"
