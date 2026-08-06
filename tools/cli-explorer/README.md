@@ -1,54 +1,50 @@
 # CLI Explorer
 
-Searchable multi-platform CLI hierarchy (Juniper CLI Explorer–style) for
-Aruba/HPE guides. Each **bank** is a static JSON pack under `data/<bank>/`.
+Searchable browser for Aruba/HPE CLI guides (AOS-CX and AOS 10).
 
-Current presets:
+## How data is produced
 
-| Bank | PDF (local) | Notes |
-|------|-------------|--------|
-| `aos-cx-10.17` | `source/cli_6200.pdf` | AOS-CX nested outline |
-| `aos-10` | `source/aos10_cli_guide.pdf` | AOS 10 flat commands (section TOC stripped) |
+1. **Acquire** the official CLI PDF for a product / version / switch series.
+2. **Extract** commands into structured JSON (`tree` + `entries`) for the UI.
+3. **Interpolate** shared commands across platforms for the same train so the
+   data shown to users stays much smaller than shipping every full guide alone.
 
-PDFs are **not** scraped from the web — place your own copies in `source/`
-(gitignored).
+The web app only serves static HTML/JS and the JSON under `data/`. Offline
+tooling lives in `scripts/` (repo only — not part of the product UI).
 
-## Data pipeline (offline)
+## Using the app
+
+Open `/tools/cli-explorer/` from the site root.
+
+Pick **Product** → for AOS-CX also **Version** and **Switch series**, or just
+**AOS 10**. Filter the tree and open a command.
+
+## Offline tooling (`scripts/`)
+
+Run from `tools/cli-explorer/` with a local venv:
 
 ```bash
-cd tools/cli-explorer
 python3 -m venv .venv
 .venv/bin/pip install pymupdf
 
-# AOS-CX (already built if data/aos-cx-10.17/ exists)
-.venv/bin/python build_from_pdf.py --bank aos-cx-10.17
+# PDF → JSON bank
+.venv/bin/python scripts/build_from_pdf.py \
+  --pdf source/your-guide.pdf \
+  --bank aos-cx-10.18-6200 \
+  --out data/aos-cx-10.18-6200 \
+  --toc-mode nested
 
-# AOS 10
-.venv/bin/python build_from_pdf.py --bank aos-10
+# Shared vs per-platform packs (same version)
+.venv/bin/python scripts/diff_banks.py --group aos-cx-10.18 --match core \
+  --bank 6100=data/aos-cx-10.18-6100 \
+  --bank 6200=data/aos-cx-10.18-6200
 
-# Tree only (fast)
-.venv/bin/python build_from_pdf.py --bank aos-10 --skip-preview
+# Refresh data/catalog.json after adding banks
+.venv/bin/python scripts/build_from_pdf.py --catalog-only
 
-# Refresh catalog.json from folders on disk
-.venv/bin/python build_from_pdf.py --catalog-only
+# Optional: export banks to Markdown
+.venv/bin/python scripts/banks_to_markdown.py --bank aos-cx-10.18-6200
 ```
 
-Outputs per bank:
-
-| File | Purpose |
-|------|---------|
-| `data/<bank>/meta.json` | Version / counts / labels |
-| `data/<bank>/tree.json` | Hierarchy from PDF bookmarks |
-| `data/<bank>/entries.json` | Per-node page range + text preview |
-| `data/catalog.json` | Platform list for the UI selector |
-
-## UI
-
-Open `/tools/cli-explorer/` (via `python3 -m http.server` from repo root).
-Use the **Platform** dropdown to switch banks.
-
-## Notes
-
-- Unofficial helper; PDF structure drives quality.
-- Do not commit multi‑MB PDFs or `.venv/`.
-- Check HPE doc license before redistributing large derived text dumps publicly if needed.
+PDFs go in `source/` (gitignored). Generated JSON under `data/` is what the
+site uses. Markdown exports default to `markdown/` (also gitignored).
