@@ -145,7 +145,6 @@ def build_catalog(min_version: str | None = None) -> dict:
     # Default: newest train's 6200-class platform if present
     preferred_platforms = (
         "sd00007900en_us",  # 10.18 6200
-        "sd00007468en_us",  # 10.17.1000 6200
         "cli_6200",
         "sd00007913en_us",  # 10.18 6300/6400
         "cli_6300-6400",
