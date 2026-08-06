@@ -7,8 +7,22 @@
   const $ = (id) => document.getElementById(id);
   const STORAGE_KEY = "cli-explorer-bank";
 
-  /** @type {{ banks: Array<{id:string,label:string,family?:string,versionHint?:string,default?:boolean,dataPath:string}> } | null} */
+  /** @type {{ banks: Array<Bank>} | null} */
   let catalog = null;
+  /**
+   * @typedef {{
+   *   id: string,
+   *   label: string,
+   *   family: string,
+   *   versionHint: string,
+   *   platform: string|null,
+   *   default?: boolean,
+   *   dataPath?: string,
+   *   layers?: {common:string, platform:string}
+   * }} Bank
+   */
+  /** @type {Bank[]} */
+  let banks = [];
   /** @type {{ tree: any[] } | null} */
   let treeData = null;
   /** @type {Record<string, any> | null} */
@@ -19,6 +33,8 @@
   let activeBankId = null;
   let filterQ = "";
   let selectedId = null;
+  /** Prevent re-entrant select change handlers while syncing dropdowns */
+  let syncingSelects = false;
 
   function escapeHtml(s) {
     return String(s)
@@ -35,11 +51,102 @@
   }
 
   function bankById(id) {
-    return (catalog && catalog.banks || []).find((b) => b.id === id) || null;
+    return banks.find((b) => b.id === id) || null;
+  }
+
+  /** Optional map filled from catalog platformLabel fields */
+  const rawPlatformLabel = Object.create(null);
+
+  /** Human label for platform keys (cli_6200, sd0000…, etc.). */
+  function prettyPlatform(key) {
+    if (!key) return "";
+    if (rawPlatformLabel[key]) return rawPlatformLabel[key];
+    if (key.indexOf("cli_") === 0) return key.slice(4);
+    return key;
+  }
+
+  /**
+   * Normalize catalog rows so the UI always has family / version / platform.
+   * Layered AOS-CX banks use common + platform packs under data/layers/.
+   * @param {any} raw
+   * @returns {Bank}
+   */
+  function normalizeBank(raw) {
+    const id = String(raw.id || "");
+    let family = (raw.family || "").trim();
+    let versionHint = (raw.versionHint || "").trim();
+    let platform =
+      raw.platform === undefined || raw.platform === ""
+        ? null
+        : raw.platform === null
+          ? null
+          : String(raw.platform);
+
+    if (!family) {
+      if (id === "aos-10" || id.startsWith("aos-10")) family = "AOS 10";
+      else if (id.startsWith("aos-cx")) family = "AOS-CX";
+      else family = "Other";
+    }
+
+    // aos-cx-10.18-cli_6200 | aos-cx-10.18-sd00007900en_us | aos-cx-10.17
+    const cx = id.match(/^aos-cx-(\d+(?:\.\d+)*)(?:-(.+))?$/i);
+    if (cx) {
+      if (!versionHint) versionHint = cx[1];
+      if (platform === null && cx[2]) platform = cx[2];
+    }
+    if (id === "aos-10" || family === "AOS 10") {
+      family = "AOS 10";
+      if (!versionHint) versionHint = "10.x";
+      platform = null;
+    }
+
+    if (raw.platformLabel && platform) {
+      rawPlatformLabel[platform] = raw.platformLabel;
+    }
+
+    const platLabel = raw.platformLabel || prettyPlatform(platform);
+    let label = (raw.label || "").trim();
+    if (
+      !label ||
+      /^aos-cx-/i.test(label) ||
+      label === id ||
+      (platform && label.indexOf(platform) !== -1 && platLabel !== platform)
+    ) {
+      if (family === "AOS 10") label = "AOS 10.x";
+      else if (platform) label = `AOS-CX ${versionHint} · ${platLabel}`;
+      else label = `AOS-CX ${versionHint}`;
+    }
+
+    // Prefer explicit layers; else derive from version + platform key
+    let layers = raw.layers || undefined;
+    if (
+      !layers &&
+      family === "AOS-CX" &&
+      versionHint &&
+      platform &&
+      versionHint !== "10.x"
+    ) {
+      const group = `aos-cx-${versionHint}`;
+      layers = {
+        common: `data/layers/${group}/common`,
+        platform: `data/layers/${group}/platforms/${platform}`,
+      };
+    }
+
+    return {
+      id,
+      label,
+      family,
+      versionHint,
+      platform,
+      platformLabel: platLabel || null,
+      default: !!raw.default,
+      dataPath: raw.dataPath || (layers ? undefined : `data/${id}`),
+      layers,
+    };
   }
 
   function defaultBankId() {
-    const banks = (catalog && catalog.banks) || [];
     if (!banks.length) return null;
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored && banks.some((b) => b.id === stored)) return stored;
@@ -47,10 +154,232 @@
     return (def || banks[0]).id;
   }
 
+  function compareVersions(a, b) {
+    const pa = String(a).split(".").map((x) => parseInt(x, 10) || 0);
+    const pb = String(b).split(".").map((x) => parseInt(x, 10) || 0);
+    const n = Math.max(pa.length, pb.length);
+    for (let i = 0; i < n; i++) {
+      const d = (pa[i] || 0) - (pb[i] || 0);
+      if (d) return d;
+    }
+    return 0;
+  }
+
+  function families() {
+    const order = ["AOS-CX", "AOS 10"];
+    const set = new Set(banks.map((b) => b.family));
+    return [...order.filter((f) => set.has(f)), ...[...set].filter((f) => !order.includes(f))];
+  }
+
+  function versionsFor(family) {
+    const set = new Set(
+      banks.filter((b) => b.family === family).map((b) => b.versionHint)
+    );
+    return [...set].sort((a, b) => compareVersions(b, a)); // newest first
+  }
+
+  function modelsFor(family, version) {
+    return banks
+      .filter((b) => b.family === family && b.versionHint === version)
+      .slice()
+      .sort((a, b) => String(a.platform || "").localeCompare(String(b.platform || ""), undefined, { numeric: true }));
+  }
+
+  function resolveBank(family, version, platform) {
+    if (family === "AOS 10") {
+      return banks.find((b) => b.family === "AOS 10") || null;
+    }
+    const matches = banks.filter(
+      (b) => b.family === family && b.versionHint === version
+    );
+    if (!matches.length) return null;
+    if (platform != null && platform !== "") {
+      const hit = matches.find((b) => b.platform === platform);
+      if (hit) return hit;
+    }
+    return matches[0];
+  }
+
+  function setFieldVisible(wrapId, visible) {
+    const el = $(wrapId);
+    if (!el) return;
+    el.classList.toggle("is-hidden", !visible);
+  }
+
+  function fillSelect(sel, options, selected) {
+    if (!sel) return;
+    sel.innerHTML = options
+      .map(
+        (o) =>
+          `<option value="${escapeHtml(o.value)}"${
+            o.value === selected ? " selected" : ""
+          }>${escapeHtml(o.label)}</option>`
+      )
+      .join("");
+  }
+
+  /** Rebuild Product / Version / Model dropdowns from catalog + active bank. */
+  function renderSelectors(preferredBankId) {
+    const bank = bankById(preferredBankId) || bankById(defaultBankId());
+    if (!bank) return;
+
+    const famList = families();
+    const family = famList.includes(bank.family) ? bank.family : famList[0];
+    const isCx = family === "AOS-CX";
+
+    fillSelect(
+      $("cx-family"),
+      famList.map((f) => ({ value: f, label: f })),
+      family
+    );
+
+    if (isCx) {
+      setFieldVisible("cx-version-wrap", true);
+      setFieldVisible("cx-model-wrap", true);
+      const vers = versionsFor(family);
+      const version = vers.includes(bank.versionHint) ? bank.versionHint : vers[0];
+      fillSelect(
+        $("cx-version"),
+        vers.map((v) => ({ value: v, label: v })),
+        version
+      );
+      const models = modelsFor(family, version);
+      const platform =
+        models.find((m) => m.platform === bank.platform)?.platform ||
+        (models[0] && models[0].platform) ||
+        "";
+      fillSelect(
+        $("cx-model"),
+        models.map((m) => ({
+          value: m.platform || m.id,
+          label: m.platformLabel || prettyPlatform(m.platform) || m.label || m.id,
+        })),
+        platform
+      );
+      $("cx-version").disabled = vers.length <= 1;
+      $("cx-model").disabled = models.length <= 1;
+    } else {
+      // AOS 10 — no version/model drill-down
+      setFieldVisible("cx-version-wrap", false);
+      setFieldVisible("cx-model-wrap", false);
+      fillSelect($("cx-version"), [{ value: "", label: "—" }], "");
+      fillSelect($("cx-model"), [{ value: "", label: "—" }], "");
+    }
+  }
+
+  function selectionFromUi() {
+    const family = $("cx-family")?.value || "";
+    const version = $("cx-version")?.value || "";
+    const model = $("cx-model")?.value || "";
+    return resolveBank(family, version, model || null);
+  }
+
+  async function applySelectionFromUi() {
+    if (syncingSelects) return;
+    const bank = selectionFromUi();
+    if (!bank) return;
+    if (bank.id === activeBankId) {
+      renderSelectors(bank.id);
+      return;
+    }
+    try {
+      await loadBank(bank.id);
+    } catch (err) {
+      console.error(err);
+      const metaEl = $("meta-line");
+      metaEl.className = "callout callout--warn";
+      metaEl.innerHTML = `<strong>Failed to load bank.</strong>
+        <span class="hint">${escapeHtml(err.message || String(err))}</span>`;
+    }
+  }
+
   function dataBase(bank) {
     // dataPath is like "data/aos-cx-10.17" relative to tool root
     const p = (bank && bank.dataPath) || `data/${bank.id}`;
     return p.startsWith("./") ? p : `./${p}`;
+  }
+
+  function layerPath(p) {
+    if (!p) return null;
+    return p.startsWith("./") ? p : `./${p}`;
+  }
+
+  /**
+   * Merge two tree arrays by node title at each level.
+   * Platform (b) wins on same title for leaf metadata; children are unioned.
+   */
+  function mergeTrees(aNodes, bNodes) {
+    const a = Array.isArray(aNodes) ? aNodes : [];
+    const b = Array.isArray(bNodes) ? bNodes : [];
+    if (!a.length) return cloneTree(b);
+    if (!b.length) return cloneTree(a);
+
+    const byTitle = new Map();
+    const order = [];
+
+    function touch(title) {
+      if (!byTitle.has(title)) {
+        byTitle.set(title, null);
+        order.push(title);
+      }
+    }
+
+    for (const n of a) touch(n.title);
+    for (const n of b) touch(n.title);
+
+    const aMap = new Map(a.map((n) => [n.title, n]));
+    const bMap = new Map(b.map((n) => [n.title, n]));
+
+    return order.map((title) => {
+      const na = aMap.get(title);
+      const nb = bMap.get(title);
+      if (na && nb) {
+        const kidsA = na.children || [];
+        const kidsB = nb.children || [];
+        const mergedKids =
+          kidsA.length || kidsB.length ? mergeTrees(kidsA, kidsB) : undefined;
+        const base = { ...(nb.leaf === false || kidsA.length || kidsB.length ? na : nb) };
+        // Prefer platform leaf payload when both are leaves; keep structure from union
+        if (mergedKids && mergedKids.length) {
+          return {
+            ...base,
+            id: nb.id || na.id,
+            title,
+            page: nb.page || na.page,
+            pageEnd: nb.pageEnd || na.pageEnd,
+            chapter: nb.chapter || na.chapter,
+            leaf: false,
+            children: mergedKids,
+          };
+        }
+        // Both leaves (or no kids): platform wins
+        return {
+          ...na,
+          ...nb,
+          title,
+          leaf: true,
+        };
+      }
+      return cloneTree([na || nb])[0];
+    });
+  }
+
+  function cloneTree(nodes) {
+    return (nodes || []).map((n) => {
+      const c = { ...n };
+      if (n.children) c.children = cloneTree(n.children);
+      return c;
+    });
+  }
+
+  async function loadPack(base) {
+    const root = layerPath(base);
+    const [m, t, e] = await Promise.all([
+      loadJson(`${root}/meta.json`),
+      loadJson(`${root}/tree.json`),
+      loadJson(`${root}/entries.json`),
+    ]);
+    return { meta: m, tree: t, entries: e };
   }
 
   function nodeMatches(node, q) {
@@ -85,22 +414,6 @@
       else n += 1;
     }
     return n;
-  }
-
-  function renderBankSelect() {
-    const sel = $("cx-bank");
-    if (!sel || !catalog) return;
-    const banks = catalog.banks || [];
-    sel.innerHTML = banks
-      .map((b) => {
-        const label = b.family
-          ? `${escapeHtml(b.label)}`
-          : escapeHtml(b.label || b.id);
-        return `<option value="${escapeHtml(b.id)}">${label}</option>`;
-      })
-      .join("");
-    if (activeBankId) sel.value = activeBankId;
-    sel.disabled = banks.length <= 1;
   }
 
   function renderTree() {
@@ -357,7 +670,6 @@
   async function loadBank(bankId) {
     const bank = bankById(bankId);
     if (!bank) throw new Error(`Unknown bank: ${bankId}`);
-    const base = dataBase(bank);
     const metaEl = $("meta-line");
     metaEl.className = "callout callout--soft";
     metaEl.textContent = `Loading ${bank.label || bankId}…`;
@@ -365,17 +677,84 @@
     $("cx-count").textContent = "";
     clearDetail();
 
-    const [m, t, e] = await Promise.all([
-      loadJson(`${base}/meta.json`),
-      loadJson(`${base}/tree.json`),
-      loadJson(`${base}/entries.json`),
-    ]);
+    let m;
+    let t;
+    let e;
+
+    if (bank.layers && bank.layers.common && bank.layers.platform) {
+      // Layered: common + platform delta (join hidden from the user)
+      let common;
+      let platform;
+      try {
+        [common, platform] = await Promise.all([
+          loadPack(bank.layers.common),
+          loadPack(bank.layers.platform),
+        ]);
+      } catch (layerErr) {
+        // Fall back to full bank if layers missing
+        if (bank.dataPath) {
+          console.warn("Layer load failed, falling back to dataPath", layerErr);
+          const pack = await loadPack(dataBase(bank));
+          m = pack.meta;
+          t = pack.tree;
+          e = pack.entries;
+        } else {
+          throw layerErr;
+        }
+      }
+      if (common && platform) {
+        e = Object.assign({}, common.entries, platform.entries);
+        t = {
+          tree: mergeTrees(
+            common.tree.tree || common.tree,
+            platform.tree.tree || platform.tree
+          ),
+        };
+        const leafCount =
+          (common.meta.commonLeaves || 0) +
+          (platform.meta.uniqueLeaves || 0) +
+          (platform.meta.overrideLeaves || 0) +
+          (platform.meta.partialLeaves || 0);
+        m = Object.assign({}, common.meta, platform.meta, {
+          label: bank.label || platform.meta.label || common.meta.label,
+          layered: true,
+          layerCommon: bank.layers.common,
+          layerPlatform: bank.layers.platform,
+          tocCount:
+            (common.meta.entryCount || 0) + (platform.meta.entryCount || 0),
+          leafCount: leafCount || undefined,
+          sourceNote:
+            bank.label
+              ? `Layered pack (common + ${bank.platformLabel || bank.platform || "platform"})`
+              : common.meta.sourceNote,
+        });
+      }
+    } else {
+      const base = dataBase(bank);
+      if (!base || base === "./undefined" || base.endsWith("undefined")) {
+        throw new Error(
+          `Bank ${bankId} has no layers and no dataPath (full bank missing)`
+        );
+      }
+      const pack = await loadPack(base);
+      m = pack.meta;
+      t = pack.tree;
+      e = pack.entries;
+    }
+
     meta = m;
     treeData = t;
     entries = e;
     activeBankId = bankId;
     localStorage.setItem(STORAGE_KEY, bankId);
-    if ($("cx-bank")) $("cx-bank").value = bankId;
+    syncingSelects = true;
+    try {
+      renderSelectors(bankId);
+    } finally {
+      syncingSelects = false;
+    }
+    // Prefer catalog label in chrome
+    if (bank.label) meta = Object.assign({}, meta, { label: bank.label });
     filterQ = "";
     if ($("cx-filter")) $("cx-filter").value = "";
     updateMetaLine();
@@ -389,7 +768,7 @@
       if (!catalog.banks || !catalog.banks.length) {
         throw new Error("catalog.json has no banks");
       }
-      renderBankSelect();
+      banks = catalog.banks.map(normalizeBank);
       const id = defaultBankId();
       await loadBank(id);
     } catch (err) {
@@ -397,26 +776,41 @@
       metaEl.className = "callout callout--warn";
       metaEl.innerHTML = `<strong>CLI data not ready.</strong>
         Place PDFs under <span class="inline-code">source/</span> and run
-        <span class="inline-code">.venv/bin/python build_from_pdf.py --bank aos-cx-10.17</span>
-        (and optionally <span class="inline-code">--bank aos-10</span>).
+        <span class="inline-code">.venv/bin/python build_from_pdf.py</span>
+        for each bank.
         <br><span class="hint">${escapeHtml(err.message || String(err))}</span>`;
     }
 
-    const bankSel = $("cx-bank");
-    if (bankSel) {
-      bankSel.addEventListener("change", async (e) => {
-        const id = e.target.value;
-        if (!id || id === activeBankId) return;
-        try {
-          await loadBank(id);
-        } catch (err) {
-          console.error(err);
-          metaEl.className = "callout callout--warn";
-          metaEl.innerHTML = `<strong>Failed to load bank.</strong>
-            <span class="hint">${escapeHtml(err.message || String(err))}</span>`;
-        }
-      });
-    }
+    const onFamilyChange = async () => {
+      if (syncingSelects) return;
+      const family = $("cx-family").value;
+      if (family === "AOS 10") {
+        const b = resolveBank("AOS 10", "10.x", null);
+        if (b) await loadBank(b.id);
+        return;
+      }
+      // AOS-CX: pick newest version + first model
+      const vers = versionsFor(family);
+      const version = vers[0];
+      const models = modelsFor(family, version);
+      const b = models[0] || resolveBank(family, version, null);
+      if (b) await loadBank(b.id);
+    };
+
+    const onVersionChange = async () => {
+      if (syncingSelects) return;
+      const family = $("cx-family").value;
+      const version = $("cx-version").value;
+      const models = modelsFor(family, version);
+      const prevModel = $("cx-model").value;
+      const keep = models.find((m) => m.platform === prevModel);
+      const b = keep || models[0];
+      if (b) await loadBank(b.id);
+    };
+
+    $("cx-family")?.addEventListener("change", onFamilyChange);
+    $("cx-version")?.addEventListener("change", onVersionChange);
+    $("cx-model")?.addEventListener("change", () => applySelectionFromUi());
 
     $("cx-filter").addEventListener("input", (e) => {
       filterQ = e.target.value || "";
