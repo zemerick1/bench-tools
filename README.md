@@ -25,7 +25,7 @@ python3 -m http.server 8080
 | **Hardware Platform Support** | AOS-10 first/last support matrix + release notes |
 | **Central Alerts & Insights** | Searchable Aruba Central alert / insight catalog |
 | **Access Tracker Translator** | ClearPass session export → sticky-note story + why |
-| **CLI Explorer** | Multi-platform CLI hierarchy (AOS-CX, AOS 10, … from local PDF TOC) |
+| **CLI Explorer** | AOS-CX 10.13.x–10.18.x (per switch series) + AOS 10 CLI hierarchy from local PDF TOC |
 
 ## Structure
 
@@ -47,10 +47,11 @@ bench-tools/
 │   │   ├── radius-dict.json
 │   │   ├── update_radius_dict.py
 │   │   └── dictionaries/        # ClearPass RadiusDictionary XML sources
-│   └── cli-explorer/            # Multi-platform CLI hierarchy (AOS-CX, AOS 10, …)
+│   └── cli-explorer/            # AOS-CX 10.13.x–10.18.x + AOS 10
 │       ├── index.html / app.js
-│       ├── build_from_pdf.py    # Offline PDF → JSON (PyMuPDF)
-│       ├── data/                # catalog.json + per-bank packs
+│       ├── scripts/             # Offline PDF → layers pipeline (not web UI)
+│       ├── data/                # catalog.json, layers/, aos-10/
+│       ├── full-banks/          # Local full extracts only (gitignored)
 │       └── source/              # Local CLI PDFs only (gitignored)
 ├── docs/                        # Ideas / design notes
 └── README.md
@@ -108,29 +109,37 @@ python3 tools/access-tracker/update_radius_dict.py
 
 Searchable, hierarchical browser for Aruba/HPE CLI reference guides (Juniper CLI Explorer–style). The UI only loads static JSON; PDFs stay on your machine.
 
-| Bank | What’s indexed |
-|------|----------------|
-| **AOS-CX 10.17** | Nested TOC from the AOS-CX CLI PDF (6200 reference guide) |
+| Product | What’s indexed |
+|---------|----------------|
+| **AOS-CX 10.13.x – 10.18.x** | Nested TOC from the official per-series CLI PDFs (layered common + platform packs for each software train) |
 | **AOS 10.x** | AOS 10 controller/gateway CLI reference PDF |
 
-- Platform dropdown switches banks (`data/catalog.json` + `data/<bank>/`)
-- Tree filter, command detail (syntax, description, parameters, examples)
-- Layout-aware offline extract so multi-column `show` sample tables stay readable
+- Pick **Product → Version → Switch series** for AOS-CX (or product alone for AOS 10)
+- Catalog + layered packs (`data/catalog.json`, `data/layers/`, `data/aos-10/`)
+- Tree filter, command detail (syntax, description, parameters, examples, raw extract)
+- Offline extract pipeline under `tools/cli-explorer/scripts/` (not part of the public UI)
 - Unofficial helper — always defer to current HPE docs for production decisions
 
-Rebuild after placing official PDFs under `tools/cli-explorer/source/` (gitignored):
+Rebuild / layer after placing official PDFs under `tools/cli-explorer/source/` (gitignored):
 
 ```bash
 cd tools/cli-explorer
 python3 -m venv .venv
 .venv/bin/pip install pymupdf
-# source/cli_6200.pdf          → bank aos-cx-10.17
-# source/aos10_cli_guide.pdf   → bank aos-10
-.venv/bin/python build_from_pdf.py --bank aos-cx-10.17
-.venv/bin/python build_from_pdf.py --bank aos-10
+# PDF → full bank (keep under full-banks/, gitignored)
+.venv/bin/python scripts/build_from_pdf.py \
+  --pdf source/your-guide.pdf \
+  --bank aos-cx-10.18-cli_6200 \
+  --out full-banks/aos-cx-10.18-cli_6200 \
+  --toc-mode nested
+# Shared vs per-platform layers for one train → data/layers/
+.venv/bin/python scripts/diff_banks.py --group aos-cx-10.18 --match core \
+  --bank cli_6200=full-banks/aos-cx-10.18-cli_6200 \
+  --bank cli_6300-6400=full-banks/aos-cx-10.18-cli_6300-6400
+.venv/bin/python scripts/build_catalog.py
 ```
 
-See [tools/cli-explorer/README.md](./tools/cli-explorer/README.md) for presets, `--skip-preview`, and catalog refresh.
+See [tools/cli-explorer/README.md](./tools/cli-explorer/README.md) for the full pipeline and ship surface.
 
 ## Deploy
 
