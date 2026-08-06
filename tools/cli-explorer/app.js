@@ -54,9 +54,20 @@
     return banks.find((b) => b.id === id) || null;
   }
 
+  /** Optional map filled from catalog platformLabel fields */
+  const rawPlatformLabel = Object.create(null);
+
+  /** Human label for platform keys (cli_6200, sd0000…, etc.). */
+  function prettyPlatform(key) {
+    if (!key) return "";
+    if (rawPlatformLabel[key]) return rawPlatformLabel[key];
+    if (key.indexOf("cli_") === 0) return key.slice(4);
+    return key;
+  }
+
   /**
    * Normalize catalog rows so the UI always has family / version / platform.
-   * Accepts both hand-written catalog entries and bare folder ids.
+   * Layered AOS-CX banks use common + platform packs under data/layers/.
    * @param {any} raw
    * @returns {Bank}
    */
@@ -77,13 +88,11 @@
       else family = "Other";
     }
 
-    // aos-cx-10.18-6100  |  aos-cx-10.17  |  aos-cx-10.17.1000-6200
+    // aos-cx-10.18-cli_6200 | aos-cx-10.18-sd00007900en_us | aos-cx-10.17
     const cx = id.match(/^aos-cx-(\d+(?:\.\d+)*)(?:-(.+))?$/i);
     if (cx) {
       if (!versionHint) versionHint = cx[1];
       if (platform === null && cx[2]) platform = cx[2];
-      // legacy single-bank 10.17 build was from the 6200 PDF
-      if (platform === null && versionHint === "10.17") platform = "6200";
     }
     if (id === "aos-10" || family === "AOS 10") {
       family = "AOS 10";
@@ -91,11 +100,37 @@
       platform = null;
     }
 
+    if (raw.platformLabel && platform) {
+      rawPlatformLabel[platform] = raw.platformLabel;
+    }
+
+    const platLabel = raw.platformLabel || prettyPlatform(platform);
     let label = (raw.label || "").trim();
-    if (!label || /^aos-cx-/i.test(label) || label === id) {
+    if (
+      !label ||
+      /^aos-cx-/i.test(label) ||
+      label === id ||
+      (platform && label.indexOf(platform) !== -1 && platLabel !== platform)
+    ) {
       if (family === "AOS 10") label = "AOS 10.x";
-      else if (platform) label = `AOS-CX ${versionHint} · ${platform}`;
+      else if (platform) label = `AOS-CX ${versionHint} · ${platLabel}`;
       else label = `AOS-CX ${versionHint}`;
+    }
+
+    // Prefer explicit layers; else derive from version + platform key
+    let layers = raw.layers || undefined;
+    if (
+      !layers &&
+      family === "AOS-CX" &&
+      versionHint &&
+      platform &&
+      versionHint !== "10.x"
+    ) {
+      const group = `aos-cx-${versionHint}`;
+      layers = {
+        common: `data/layers/${group}/common`,
+        platform: `data/layers/${group}/platforms/${platform}`,
+      };
     }
 
     return {
@@ -104,9 +139,10 @@
       family,
       versionHint,
       platform,
+      platformLabel: platLabel || null,
       default: !!raw.default,
-      dataPath: raw.dataPath || `data/${id}`,
-      layers: raw.layers || undefined,
+      dataPath: raw.dataPath || (layers ? undefined : `data/${id}`),
+      layers,
     };
   }
 
@@ -216,7 +252,7 @@
         $("cx-model"),
         models.map((m) => ({
           value: m.platform || m.id,
-          label: m.platform || m.label || m.id,
+          label: m.platformLabel || prettyPlatform(m.platform) || m.label || m.id,
         })),
         platform
       );
@@ -646,30 +682,60 @@
     let e;
 
     if (bank.layers && bank.layers.common && bank.layers.platform) {
-      // Layered bank: common + platform delta (join is hidden from the user)
-      const [common, platform] = await Promise.all([
-        loadPack(bank.layers.common),
-        loadPack(bank.layers.platform),
-      ]);
-      e = Object.assign({}, common.entries, platform.entries);
-      t = {
-        tree: mergeTrees(common.tree.tree || common.tree, platform.tree.tree || platform.tree),
-      };
-      m = Object.assign({}, common.meta, platform.meta, {
-        label: bank.label || platform.meta.label || common.meta.label,
-        layered: true,
-        layerCommon: bank.layers.common,
-        layerPlatform: bank.layers.platform,
-        tocCount:
-          (common.meta.entryCount || 0) + (platform.meta.entryCount || 0),
-        leafCount:
-          (common.meta.commonLeaves || common.meta.leafCount || 0) +
+      // Layered: common + platform delta (join hidden from the user)
+      let common;
+      let platform;
+      try {
+        [common, platform] = await Promise.all([
+          loadPack(bank.layers.common),
+          loadPack(bank.layers.platform),
+        ]);
+      } catch (layerErr) {
+        // Fall back to full bank if layers missing
+        if (bank.dataPath) {
+          console.warn("Layer load failed, falling back to dataPath", layerErr);
+          const pack = await loadPack(dataBase(bank));
+          m = pack.meta;
+          t = pack.tree;
+          e = pack.entries;
+        } else {
+          throw layerErr;
+        }
+      }
+      if (common && platform) {
+        e = Object.assign({}, common.entries, platform.entries);
+        t = {
+          tree: mergeTrees(
+            common.tree.tree || common.tree,
+            platform.tree.tree || platform.tree
+          ),
+        };
+        const leafCount =
+          (common.meta.commonLeaves || 0) +
           (platform.meta.uniqueLeaves || 0) +
           (platform.meta.overrideLeaves || 0) +
-          (platform.meta.partialLeaves || 0),
-      });
+          (platform.meta.partialLeaves || 0);
+        m = Object.assign({}, common.meta, platform.meta, {
+          label: bank.label || platform.meta.label || common.meta.label,
+          layered: true,
+          layerCommon: bank.layers.common,
+          layerPlatform: bank.layers.platform,
+          tocCount:
+            (common.meta.entryCount || 0) + (platform.meta.entryCount || 0),
+          leafCount: leafCount || undefined,
+          sourceNote:
+            bank.label
+              ? `Layered pack (common + ${bank.platformLabel || bank.platform || "platform"})`
+              : common.meta.sourceNote,
+        });
+      }
     } else {
       const base = dataBase(bank);
+      if (!base || base === "./undefined" || base.endsWith("undefined")) {
+        throw new Error(
+          `Bank ${bankId} has no layers and no dataPath (full bank missing)`
+        );
+      }
       const pack = await loadPack(base);
       m = pack.meta;
       t = pack.tree;
