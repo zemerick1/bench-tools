@@ -26,6 +26,7 @@ python3 -m http.server 8080
 | **Central Alerts & Insights** | Searchable Aruba Central alert / insight catalog |
 | **Access Tracker Translator** | ClearPass session export → sticky-note story + why |
 | **CLI Explorer** | AOS-CX 10.13.x–10.18.x (per switch series) + AOS 10 CLI hierarchy from local PDF TOC |
+| **Show-Tech Sticky Note** | Paste show-tech → facts + loud lines (not a fake RCA) |
 
 ## Structure
 
@@ -47,6 +48,7 @@ bench-tools/
 │   │   ├── radius-dict.json
 │   │   ├── update_radius_dict.py
 │   │   └── dictionaries/        # ClearPass RadiusDictionary XML sources
+│   ├── show-tech/               # show-tech sticky note (facts + flags)
 │   └── cli-explorer/            # AOS-CX 10.13.x–10.18.x + AOS 10
 │       ├── index.html / app.js
 │       ├── scripts/             # Offline PDF → layers pipeline (not web UI)

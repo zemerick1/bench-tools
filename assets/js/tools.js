@@ -75,6 +75,16 @@ export const tools = [
     status: "available",
     cta: "Browse CLI",
   },
+  {
+    id: "show-tech",
+    title: "Show-Tech Sticky Note",
+    description:
+      "Paste a show-tech novel. Get facts + lines that already look wrong — not a fake RCA.",
+    href: "./tools/show-tech/",
+    icon: "ST",
+    status: "available",
+    cta: "Make sticky note",
+  },
 ];
 
 /**
