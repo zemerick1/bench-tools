@@ -28,15 +28,6 @@ python3 -m http.server 8080
 | **CLI Explorer** | AOS-CX 10.13.x–10.18.x (per switch series) + AOS 10 CLI hierarchy from local PDF TOC |
 | **Show-Tech Sticky Note** | Paste a novel-length show-tech → sticky facts + loud lines (**not** an RCA) |
 
-### Show-Tech Sticky Note — what this is / is not
-
-**What it is:** A browser helper for *reading* an Aruba show-tech or support log. A single AOS-CX dump can be ~200k+ lines; this tool skims identity (who/what/version), Central status, traffic mode / IPSec hints where relevant, and groups lines that already use scary words—so you can brief a ticket or an SE without scrolling a novel.
-
-**What it is not:** A root-cause analysis. It does **not** decide “the network is broken because X,” invent a fault tree, or replace TAC/docs. Quiet output does not mean healthy; loud output does not mean the real RCA. Confirm on the dump and official documentation before production changes.
-
-- Offline: paste or drop plain text (`tools/show-tech/`)
-- Refresh parsers against local samples with `node tools/show-tech/test_parser.js` (customer logs stay gitignored)
-
 ## Structure
 
 ```
@@ -57,7 +48,12 @@ bench-tools/
 │   │   ├── radius-dict.json
 │   │   ├── update_radius_dict.py
 │   │   └── dictionaries/        # ClearPass RadiusDictionary XML sources
-│   ├── show-tech/               # show-tech sticky note (facts + flags)
+│   ├── show-tech/               # Show-tech sticky note (facts + flags, not RCA)
+│   │   ├── index.html / app.js / parser.js / line_class.js
+│   │   ├── fixtures/            # Line-class decision-table tests
+│   │   ├── test_parser.js       # Shipped-entry tests vs log-samples/
+│   │   ├── log-samples/         # Local dumps only (gitignored)
+│   │   └── docs/                # Local event-log PDFs (gitignored)
 │   └── cli-explorer/            # AOS-CX 10.13.x–10.18.x + AOS 10
 │       ├── index.html / app.js
 │       ├── scripts/             # Offline PDF → layers pipeline (not web UI)
@@ -105,6 +101,30 @@ Rebuild dictionaries after dropping new ClearPass XML exports into `tools/access
 ```bash
 python3 tools/access-tracker/update_radius_dict.py
 ```
+
+### Show-Tech Sticky Note
+
+Browser helper for *reading* an Aruba show-tech / support log. A single AOS-CX dump can be ~200k+ lines; this skims identity, Central status, traffic mode / IPSec hints, and groups lines that already use scary words—so you can brief a ticket or an SE without scrolling a novel.
+
+**What it is**
+
+- Offline paste/drop of plain text under `tools/show-tech/`
+- Sticky note + clear facts + “looks wrong” findings + ticket paste + export
+- Personas: AOS-CX, AOS-10 AP / Microbranch / VPNC / gateway, Instant (AOS-8)
+
+**What it is not**
+
+- **Not an RCA.** It does not decide “the network is broken because X,” invent a fault tree, or replace TAC/docs.
+- Quiet output ≠ healthy; loud output ≠ the real root cause. Confirm on the dump and official docs before production changes.
+- Plain-text session logs only — not full `.tar.gz` tech bundles.
+
+Refresh parsers against local samples (customer logs stay gitignored):
+
+```bash
+node tools/show-tech/test_parser.js
+```
+
+See [tools/show-tech/README.md](./tools/show-tech/README.md) for personas, PuTTY capture notes, and local docs.
 
 ### Central Alerts & Insights
 
