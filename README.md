@@ -27,6 +27,7 @@ python3 -m http.server 8080
 | **Access Tracker Translator** | ClearPass session export → sticky-note story + why |
 | **CLI Explorer** | AOS-CX 10.13.x–10.18.x (per switch series) + AOS 10 CLI hierarchy from local PDF TOC |
 | **Show-Tech Sticky Note** | Paste a novel-length show-tech → sticky facts + loud lines (**not** an RCA) |
+| **Subnet Planner** | Buildings × roles × device counts → meshed greenfield IPv4 scheme (**not** a calculator) |
 
 ## Structure
 
@@ -54,6 +55,9 @@ bench-tools/
 │   │   ├── test_parser.js       # Shipped-entry tests vs log-samples/
 │   │   ├── log-samples/         # Local dumps only (gitignored)
 │   │   └── docs/                # Local event-log PDFs (gitignored)
+│   ├── subnet-planner/          # Greenfield multi-building IPv4 scheme (not a calculator)
+│   │   ├── index.html / app.js / planner.js
+│   │   └── test_planner.js
 │   └── cli-explorer/            # AOS-CX 10.13.x–10.18.x + AOS 10
 │       ├── index.html / app.js
 │       ├── scripts/             # Offline PDF → layers pipeline (not web UI)
@@ -101,6 +105,16 @@ Rebuild dictionaries after dropping new ClearPass XML exports into `tools/access
 ```bash
 python3 tools/access-tracker/update_radius_dict.py
 ```
+
+### Subnet Planner
+
+Greenfield multi-building IPv4 scheme designer under `tools/subnet-planner/`. You enter buildings and roles (Students, IoT, Infrastructure…) with **devices per building**; the tool picks prefixes with **≥50% headroom**, meshes aligned parents, leaves **reserved lanes** for growth, and sets gateway **`.1`**. Oversizing allowed; undersizing and VLAN 1 as a design choice are not.
+
+```bash
+node tools/subnet-planner/test_planner.js
+```
+
+See [tools/subnet-planner/README.md](./tools/subnet-planner/README.md).
 
 ### Show-Tech Sticky Note
 

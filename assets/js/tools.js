@@ -85,6 +85,16 @@ export const tools = [
     status: "available",
     cta: "Make sticky note",
   },
+  {
+    id: "subnet-planner",
+    title: "Subnet Planner",
+    description:
+      "Buildings × roles × device counts → a meshed greenfield IPv4 scheme. Not a calculator in a trench coat.",
+    href: "./tools/subnet-planner/",
+    icon: "SP",
+    status: "available",
+    cta: "Plan subnets",
+  },
 ];
 
 /**
