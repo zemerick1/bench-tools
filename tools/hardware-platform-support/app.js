@@ -1,5 +1,6 @@
 /**
  * Hardware Platform Support — correlated multi-track matrix (platforms.json)
+ * Aruba firmware tracks + HPE Juniper Pathfinder (EX / QFX / Mist APs).
  */
 
 (function () {
@@ -9,6 +10,7 @@
 
   const els = {
     search: $("hps-search"),
+    vendorFilters: $("vendor-filters"),
     typeFilters: $("type-filters"),
     firmwareFilters: $("firmware-filters"),
     statusFilters: $("status-filters"),
@@ -21,6 +23,7 @@
 
   /** @type {null | object} */
   let data = null;
+  let vendorFilt = "all";
   let typeFilt = "all";
   let firmwareFilt = "all";
   let statusFilt = "all";
@@ -31,7 +34,19 @@
     "aos-8-iap": "Instant (IAP 8.x)",
     "aos-cx": "AOS-CX",
     "aos-s": "AOS-S",
+    junos: "Junos",
+    mist: "Mist AP",
   };
+
+  const TYPE_ORDER = [
+    "ap",
+    "gateway",
+    "bridge",
+    "aos-cx",
+    "aos-s",
+    "ex",
+    "qfx",
+  ];
 
   function escapeHtml(v) {
     return String(v ?? "")
@@ -63,11 +78,30 @@
     return KIND_LABELS[kind] || kind;
   }
 
+  function vendorOf(d) {
+    return d.vendor || "aruba";
+  }
+
+  function vendorLabelOf(d) {
+    if (d.vendorLabel) return d.vendorLabel;
+    return vendorOf(d) === "juniper" ? "HPE Juniper" : "HPE Aruba";
+  }
+
+  function isJuniper(d) {
+    return vendorOf(d) === "juniper";
+  }
+
   function fwPillClass(kind) {
     if (kind === "aos-8-iap") return "hps-fw hps-fw--iap";
     if (kind === "aos-10") return "hps-fw hps-fw--aos10";
+    if (kind === "junos") return "hps-fw hps-fw--junos";
+    if (kind === "mist") return "hps-fw hps-fw--mist";
     if (kind === "aos-cx" || kind === "aos-s") return "hps-fw hps-fw--switch";
     return "hps-fw";
+  }
+
+  function vendorPillClass(v) {
+    return v === "juniper" ? "hps-vendor hps-vendor--juniper" : "hps-vendor hps-vendor--aruba";
   }
 
   /** Normalize legacy single-track rows into tracks[] */
@@ -84,6 +118,7 @@
         notes: d.notes || "",
         minRnUrl: d.minRnUrl,
         lastRnUrl: d.lastRnUrl,
+        pathfinderUrl: d.pathfinderUrl,
       },
     ];
   }
@@ -127,10 +162,11 @@
   }
 
   function summaryFirstLast(tracks) {
-    // Prefer AOS-10 for collapsed summary, else first track
     const t =
       tracks.find((x) => x.kind === "aos-10") ||
       tracks.find((x) => x.kind === "aos-8-iap") ||
+      tracks.find((x) => x.kind === "junos") ||
+      tracks.find((x) => x.kind === "mist") ||
       tracks[0];
     if (!t) return { first: "—", last: "—" };
     return {
@@ -146,7 +182,28 @@
     return "current";
   }
 
-  function renderTrackRow(track) {
+  function groupKey(d) {
+    const v = vendorOf(d);
+    if (v === "juniper") {
+      return `juniper::${d.series || d.family || d.typeLabel || d.type}`;
+    }
+    const fam = (d.family || "").trim();
+    if (fam && d.type !== "ap") {
+      return `aruba::${d.type}::${fam}`;
+    }
+    return `aruba::${d.type}::${d.typeLabel || d.type}`;
+  }
+
+  function groupTitle(d) {
+    if (isJuniper(d)) {
+      return d.series || d.family || d.typeLabel || "Juniper";
+    }
+    const fam = (d.family || "").trim();
+    if (fam && d.type !== "ap") return fam;
+    return d.typeLabel || d.type || "Platforms";
+  }
+
+  function renderTrackRow(track, device) {
     const label = track.label || kindLabel(track.kind);
     const minLbl = releaseLabel(track.minRelease);
     const lastLbl = releaseLabel(track.lastRelease);
@@ -154,6 +211,23 @@
     const statusPill = parked
       ? '<span class="mac-pill mac-pill--warn">parked</span>'
       : '<span class="mac-pill mac-pill--ok">current</span>';
+
+    // Juniper / Pathfinder tracks — no fake firmware mins (button is on the card body)
+    if (track.kind === "junos" || track.kind === "mist" || (device && isJuniper(device))) {
+      return `
+        <div class="hps-track" data-track="${escapeHtml(track.kind)}">
+          <div class="hps-track__head">
+            <span class="${fwPillClass(track.kind)}">${escapeHtml(label)}</span>
+            ${
+              device && device.isEol
+                ? '<span class="mac-pill mac-pill--warn">EOL</span>'
+                : statusPill
+            }
+          </div>
+        </div>
+      `;
+    }
+
     const rn = trackRn(track);
     let rnHtml = "";
     if (rn) {
@@ -187,11 +261,33 @@
     `;
   }
 
+  function renderArubaSummary(d, tracks, sum) {
+    if (tracks.length === 1) {
+      return ` · first <span class="mono">${escapeHtml(
+        sum.first
+      )}</span> · last <span class="mono">${escapeHtml(sum.last)}</span>`;
+    }
+    return ` · <span class="mono">${tracks.length}</span> firmware tracks`;
+  }
+
+  function renderJuniperSummary(d) {
+    const series = d.series || d.family || "";
+    const code = d.productCodeName || "";
+    const bits = [];
+    if (series) bits.push(escapeHtml(series));
+    if (code) bits.push(`<span class="mono">${escapeHtml(code)}</span>`);
+    return bits.length ? ` · ${bits.join(" · ")}` : "";
+  }
+
   function renderRow(d) {
     const tracks = tracksOf(d);
     const status = overallStatus(tracks);
-    const statusPill =
-      status === "parked"
+    const juniper = isJuniper(d);
+    const statusPill = juniper
+      ? d.isEol
+        ? '<span class="mac-pill mac-pill--warn">EOL</span>'
+        : '<span class="mac-pill mac-pill--ok">current</span>'
+      : status === "parked"
         ? '<span class="mac-pill mac-pill--warn">parked</span>'
         : '<span class="mac-pill mac-pill--ok">current</span>';
     const sum = summaryFirstLast(tracks);
@@ -203,6 +299,10 @@
           )}</span>`
       )
       .join("");
+    const vLabel = vendorLabelOf(d);
+    const vPill = `<span class="${vendorPillClass(
+      vendorOf(d)
+    )}">${escapeHtml(vLabel)}</span>`;
 
     const install = d.installMode
       ? `<div class="meta-chip"><span>Install mode</span><strong>${escapeHtml(
@@ -214,39 +314,53 @@
       ? `<p class="hps-notes">${escapeHtml(d.notes)}</p>`
       : "";
 
-    return `
-      <details class="mac-card hps-card" data-type="${escapeHtml(
-        d.type
-      )}" data-status="${escapeHtml(status)}" data-model="${escapeHtml(
-      d.model
-    )}" data-family="${escapeHtml(d.family || "")}" data-tracks="${escapeHtml(
-      tracks.map((t) => t.kind).join(",")
-    )}">
-        <summary class="mac-card__summary">
-          <span class="mac-card__summary-main">
-            <span class="mac-card__addr mono">${escapeHtml(d.model)}</span>
-            <span class="mac-card__vendor">
-              ${escapeHtml(d.typeLabel || d.type)}
-              ${d.family ? " · " + escapeHtml(d.family) : ""}
-              ${
-                tracks.length === 1
-                  ? ` · first <span class="mono">${escapeHtml(
-                      sum.first
-                    )}</span> · last <span class="mono">${escapeHtml(
-                      sum.last
-                    )}</span>`
-                  : ` · <span class="mono">${tracks.length}</span> firmware tracks`
-              }
-            </span>
-          </span>
-          <span class="mac-card__summary-meta">
-            <span class="hps-fw-row">${trackPills}</span>
-            ${statusPill}
-            <span class="mac-chevron" aria-hidden="true"></span>
-          </span>
-        </summary>
-        <div class="mac-card__body">
+    const summaryExtra = juniper
+      ? renderJuniperSummary(d)
+      : renderArubaSummary(d, tracks, sum);
+
+    let bodyExtra = "";
+    if (juniper) {
+      const pf = d.pathfinderUrl
+        ? `<a class="btn btn--secondary" href="${escapeHtml(
+            d.pathfinderUrl
+          )}" target="_blank" rel="noopener noreferrer">Open in Pathfinder</a>`
+        : "";
+      const trackPillsExpanded = tracks
+        .map(
+          (t) =>
+            `<span class="${fwPillClass(t.kind)}">${escapeHtml(
+              t.label || kindLabel(t.kind)
+            )}</span>`
+        )
+        .join(" ");
+      bodyExtra = `
           <div class="results-meta">
+            <div class="meta-chip"><span>Vendor</span><strong>${escapeHtml(
+              vLabel
+            )}</strong></div>
+            <div class="meta-chip"><span>Type</span><strong>${escapeHtml(
+              d.typeLabel || d.type
+            )}</strong></div>
+            <div class="meta-chip"><span>Series</span><strong>${escapeHtml(
+              d.series || d.family || "—"
+            )}</strong></div>
+            <div class="meta-chip"><span>Pathfinder code</span><strong class="mono">${escapeHtml(
+              d.productCodeName || "—"
+            )}</strong></div>
+            <div class="meta-chip"><span>Lifecycle</span><strong>${
+              d.isEol ? "EOL" : "Current"
+            }</strong></div>
+            <div class="meta-chip"><span>Line</span><strong>${trackPillsExpanded}</strong></div>
+          </div>
+          ${deviceNotes}
+          <div class="hps-actions">${pf}</div>
+        `;
+    } else {
+      bodyExtra = `
+          <div class="results-meta">
+            <div class="meta-chip"><span>Vendor</span><strong>${escapeHtml(
+              vLabel
+            )}</strong></div>
             <div class="meta-chip"><span>Type</span><strong>${escapeHtml(
               d.typeLabel || d.type
             )}</strong></div>
@@ -258,8 +372,37 @@
           ${deviceNotes}
           <h3 class="hps-tracks-heading">Firmware support</h3>
           <div class="hps-tracks">
-            ${tracks.map(renderTrackRow).join("")}
+            ${tracks.map((t) => renderTrackRow(t, d)).join("")}
           </div>
+        `;
+    }
+
+    return `
+      <details class="mac-card hps-card" data-vendor="${escapeHtml(
+        vendorOf(d)
+      )}" data-type="${escapeHtml(d.type)}" data-status="${escapeHtml(
+      status
+    )}" data-model="${escapeHtml(d.model)}" data-family="${escapeHtml(
+      d.family || ""
+    )}" data-series="${escapeHtml(
+      d.series || d.family || ""
+    )}" data-tracks="${escapeHtml(tracks.map((t) => t.kind).join(","))}">
+        <summary class="mac-card__summary">
+          <span class="mac-card__summary-main">
+            <span class="mac-card__addr mono">${escapeHtml(d.model)}</span>
+            <span class="mac-card__vendor">
+              ${escapeHtml(d.typeLabel || d.type)}${summaryExtra}
+            </span>
+          </span>
+          <span class="mac-card__summary-meta">
+            ${vPill}
+            <span class="hps-fw-row">${trackPills}</span>
+            ${statusPill}
+            <span class="mac-chevron" aria-hidden="true"></span>
+          </span>
+        </summary>
+        <div class="mac-card__body">
+          ${bodyExtra}
         </div>
       </details>
     `;
@@ -270,6 +413,8 @@
     const q = query.trim().toLowerCase();
     return data.devices.filter((d) => {
       const tracks = tracksOf(d);
+      const v = vendorOf(d);
+      if (vendorFilt !== "all" && v !== vendorFilt) return false;
       if (typeFilt !== "all" && d.type !== typeFilt) return false;
       if (firmwareFilt !== "all") {
         if (!tracks.some((t) => t.kind === firmwareFilt)) return false;
@@ -280,9 +425,16 @@
       const hay = [
         d.model,
         d.family,
+        d.series,
+        d.category,
         d.typeLabel,
         d.notes,
         d.installMode,
+        d.productCodeName,
+        d.pathfinderUrl,
+        d.vendor,
+        d.vendorLabel,
+        d.isEol ? "eol" : "",
         ...tracks.map((t) =>
           [
             t.kind,
@@ -299,22 +451,87 @@
     });
   }
 
+  function groupDevices(list) {
+    const map = new Map();
+    for (const d of list) {
+      const key = groupKey(d);
+      if (!map.has(key)) {
+        map.set(key, {
+          key,
+          title: groupTitle(d),
+          vendor: vendorOf(d),
+          vendorLabel: vendorLabelOf(d),
+          type: d.type,
+          devices: [],
+        });
+      }
+      map.get(key).devices.push(d);
+    }
+    const groups = Array.from(map.values());
+    groups.sort((a, b) => {
+      const va = a.vendor === "juniper" ? 1 : 0;
+      const vb = b.vendor === "juniper" ? 1 : 0;
+      if (va !== vb) return va - vb;
+      const ta = TYPE_ORDER.indexOf(a.type);
+      const tb = TYPE_ORDER.indexOf(b.type);
+      if (ta !== tb) return (ta < 0 ? 99 : ta) - (tb < 0 ? 99 : tb);
+      return a.title.localeCompare(b.title);
+    });
+    return groups;
+  }
+
+  function renderGroup(group, openByDefault) {
+    const n = group.devices.length;
+    const openAttr = openByDefault ? " open" : "";
+    const vPill = `<span class="${vendorPillClass(
+      group.vendor
+    )}">${escapeHtml(group.vendorLabel)}</span>`;
+    return `
+      <details class="hps-group"${openAttr} data-group="${escapeHtml(
+      group.key
+    )}">
+        <summary class="hps-group__summary">
+          <span class="hps-group__title">${escapeHtml(group.title)}</span>
+          <span class="hps-group__meta">
+            ${vPill}
+            <span class="hps-group__count mono">${n}</span>
+            <span class="mac-chevron" aria-hidden="true"></span>
+          </span>
+        </summary>
+        <div class="hps-group__body">
+          ${group.devices.map(renderRow).join("")}
+        </div>
+      </details>
+    `;
+  }
+
   function render() {
     const list = visibleDevices();
-    els.list.innerHTML = list.map(renderRow).join("");
+    const groups = groupDevices(list);
+    // Only auto-open series groups on search (not on vendor/type filter alone).
+    // Product cards always start collapsed.
+    const openGroups = Boolean(query.trim());
+
+    els.list.innerHTML = groups.map((g) => renderGroup(g, openGroups)).join("");
     els.empty.classList.toggle("hidden", list.length > 0);
 
     const c = data ? data.counts : {};
     const latest = latestAos10();
-    setStatus(
-      `Showing ${list.length} of ${c.total || 0} platforms` +
-        (data && data.updated ? ` · snapshot ${data.updated}` : "") +
-        (c["aos-8-iap"] != null
-          ? ` · Instant tracks ${c["aos-8-iap"]}, AOS-10 ${c["aos-10"] || 0}`
-          : "") +
-        (latest && latest.version ? ` · latest AOS-10 ${latest.version}` : ""),
-      "ok"
-    );
+    const parts = [
+      `Showing ${list.length} of ${c.total || 0} platforms`,
+      data && data.updated ? `Aruba snapshot ${data.updated}` : null,
+      data && data.juniperUpdated ? `Juniper ${data.juniperUpdated}` : null,
+      c.aruba != null ? `Aruba ${c.aruba}` : null,
+      c.juniper != null ? `Juniper ${c.juniper}` : null,
+      c["aos-8-iap"] != null
+        ? `Instant ${c["aos-8-iap"]}, AOS-10 ${c["aos-10"] || 0}`
+        : null,
+      c.ex != null || c.qfx != null
+        ? `EX ${c.ex || 0}, QFX ${c.qfx || 0}`
+        : null,
+      latest && latest.version ? `latest AOS-10 ${latest.version}` : null,
+    ].filter(Boolean);
+    setStatus(parts.join(" · "), "ok");
   }
 
   function wireFilters(root, attr, setter) {
@@ -341,7 +558,7 @@
     } catch (err) {
       console.error(err);
       setStatus(
-        "Could not load data/platforms.json. Run update_data.py or check the path.",
+        "Could not load data/platforms.json. Run update_data.py / update_juniper.py or check the path.",
         "error"
       );
     }
@@ -352,6 +569,9 @@
     render();
   });
 
+  wireFilters(els.vendorFilters, "data-vendor", (v) => {
+    vendorFilt = v;
+  });
   wireFilters(els.typeFilters, "data-type", (v) => {
     typeFilt = v;
   });
@@ -363,12 +583,18 @@
   });
 
   els.expandAll.addEventListener("click", () => {
+    els.list.querySelectorAll("details.hps-group").forEach((d) => {
+      d.open = true;
+    });
     els.list.querySelectorAll("details.hps-card").forEach((d) => {
       d.open = true;
     });
   });
   els.collapseAll.addEventListener("click", () => {
     els.list.querySelectorAll("details.hps-card").forEach((d) => {
+      d.open = false;
+    });
+    els.list.querySelectorAll("details.hps-group").forEach((d) => {
       d.open = false;
     });
   });

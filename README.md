@@ -22,7 +22,7 @@ python3 -m http.server 8080
 | **CSR Generator** | Key + CSR in the browser (RSA / ECDSA, SANs) |
 | **Cert Assembler** | Key + cert + chain → ordered PEMs or PKCS#12 (PFX/P12) |
 | **MAC / OUI Lookup** | Parse MACs, randomized-MAC hint, offline OUI vendor |
-| **Hardware Platform Support** | AOS-10 first/last support matrix + release notes |
+| **Hardware Platform Support** | Aruba AOS-10/Instant matrix + Juniper EX/QFX/AP Pathfinder |
 | **Central Alerts & Insights** | Searchable Aruba Central alert / insight catalog |
 | **Access Tracker Translator** | ClearPass session export → sticky-note story + why |
 | **CLI Explorer** | AOS-CX 10.13.x–10.18.x (per switch series) + AOS 10 CLI hierarchy from local PDF TOC |
@@ -104,6 +104,7 @@ python3 tools/access-tracker/update_radius_dict.py
 ### Hardware Platform Support / MAC Lookup
 
 - Data files ship with the tool; maintainer refresh scripts live alongside each tool
+- Juniper EX / QFX / Mist APs: `tools/hardware-platform-support/update_juniper.py` (merges Pathfinder catalog into `platforms.json` without rewriting Aruba rows)
 
 ### CLI Explorer
 
