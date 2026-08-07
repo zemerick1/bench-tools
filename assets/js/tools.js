@@ -49,7 +49,7 @@ export const tools = [
     id: "hardware-platform-support",
     title: "Hardware Platform Support",
     description:
-      "APs, gateways, switches: first AOS-10 support, parked last release, jump to release notes.",
+      "Aruba AOS-10 / Instant tracks plus HPE Juniper EX, QFX, and Mist APs with Pathfinder links.",
     href: "./tools/hardware-platform-support/",
     icon: "HW",
     status: "available",
