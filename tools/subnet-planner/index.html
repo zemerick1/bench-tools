@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Subnet Planner — Bench Tools</title>
+    <meta
+      name="description"
+      content="Greenfield multi-building IPv4 subnet scheme: roles, VLANs, headroom, spaced lanes. Not a calculator cosplaying as a design."
+    />
+    <link rel="canonical" href="https://tools.emerickcc.com/tools/subnet-planner/" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Bench Tools" />
+    <meta name="theme-color" content="#0f6e56" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Bench Tools" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://tools.emerickcc.com/tools/subnet-planner/" />
+    <meta property="og:title" content="Subnet Planner" />
+    <meta
+      property="og:description"
+      content="Greenfield multi-building IPv4 subnet scheme: roles, VLANs, headroom, spaced lanes. Not a calculator cosplaying as a design."
+    />
+    <meta property="og:image" content="https://tools.emerickcc.com/assets/icons/og-image.jpg" />
+    <meta property="og:image:width" content="1280" />
+    <meta property="og:image:height" content="720" />
+    <meta property="og:image:alt" content="Bench Tools — static lab utilities" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Subnet Planner" />
+    <meta
+      name="twitter:description"
+      content="Greenfield multi-building IPv4 subnet scheme: roles, VLANs, headroom, spaced lanes. Not a calculator cosplaying as a design."
+    />
+    <meta name="twitter:image" content="https://tools.emerickcc.com/assets/icons/og-image.jpg" />
+    <link rel="icon" href="../../assets/icons/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="../../assets/icons/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png" />
+    <link rel="stylesheet" href="../../assets/css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="../../">
+          <span class="brand__mark" aria-hidden="true">B</span>
+          <span>Bench Tools</span>
+        </a>
+        <nav class="nav" aria-label="Primary">
+          <a href="#faq">FAQ</a>
+          <a href="../../#tools">All tools</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="site-main site-main--wide sp-main">
+      <header class="page-header page-header--full">
+        <a class="back" href="../../">← Back to the toolbox</a>
+        <h1>Subnet Planner</h1>
+        <p>
+          If everything is on VLAN 1 today, this is the from-scratch plan for
+          separating infrastructure, users, IoT, and the rest — by building, with
+          headroom and room to grow. It is
+          <strong>not</strong> a CIDR calculator with a marketing team.
+        </p>
+        <div class="explainer" role="note">
+          <strong>What this is:</strong>
+          a greenfield IPv4 plan. You say how many buildings and how many devices
+          per role at each building. We pick masks (you may oversize), assign
+          VLANs if you shrug, mesh the blocks so they don’t overlap, and leave
+          <strong>spacing</strong> so tomorrow’s growth doesn’t renumber
+          yesterday’s neighbor.
+          <br /><br />
+          <strong>What this is not:</strong>
+          brownfield IPAM, DHCP config, floor/room design, or IPv6 (still a myth
+          here). Quiet output does not mean your production network is fine —
+          this tab has never met your production network.
+        </div>
+      </header>
+
+      <div class="stack">
+        <div class="callout callout--soft" role="note">
+          <strong>Stays in this tab.</strong>
+          No upload, no cloud “design AI,” no surprise bill. Refresh and the plan
+          evaporates with your dignity.
+        </div>
+
+        <div class="callout callout--warn" role="note">
+          <strong>Plan for growth.</strong>
+          Every size includes <strong>at least 50% headroom</strong> on the count
+          you enter. Subnets get a <strong>reserved lane</strong> (one bit wider)
+          so packing them back-to-back doesn’t trap you. If you already know
+          you’ll need a cathedral, oversize the prefix — we allow greed, not
+          undersizing.
+        </div>
+
+        <section class="panel" aria-labelledby="buildings-heading">
+          <h2 id="buildings-heading">1. Buildings</h2>
+          <p class="panel__intro">
+            One row per building. Floors and rooms are out of scope.
+            <strong>Site number</strong> is human numbering: site
+            <strong>1</strong> is addressed as slot <strong>1</strong>
+            (e.g. <span class="inline-code">10.10.1.0/…</span>), not zero.
+            Leave it blank and we assign <strong>1, 2, 3…</strong> in row order.
+          </p>
+          <div class="sp-table-scroll">
+            <table class="sp-form-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Site #</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="sp-buildings-body"></tbody>
+            </table>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn--secondary" id="sp-add-building">Add building</button>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="connect-heading">
+          <h2 id="connect-heading">2. Do buildings need to talk to each other?</h2>
+          <p class="panel__intro">
+            Example: can a PC at HQ reach a camera or printer at another building
+            over your network (VPN, SD-WAN, or similar)?
+          </p>
+          <div class="sp-radio-row" role="radiogroup" aria-label="Building connectivity">
+            <label class="sp-radio">
+              <input type="radio" name="sp-connect" value="connected" checked />
+              <span>
+                <strong>Yes</strong> (most multi-building networks)
+                <span class="sp-radio__hint">
+                  Each building gets its own unique IP ranges. Required if sites
+                  share a network path.
+                </span>
+              </span>
+            </label>
+            <label class="sp-radio">
+              <input type="radio" name="sp-connect" value="isolated" />
+              <span>
+                <strong>No</strong> — buildings never reach each other
+                <span class="sp-radio__hint">
+                  Rare. We still give each building unique addresses in this
+                  planner so you are safe if you connect them later.
+                </span>
+              </span>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="roles-heading">
+          <h2 id="roles-heading">3. Roles (device types / VLANs)</h2>
+          <p class="panel__intro">
+            Name the purpose. Enter <strong>how many devices you expect per building</strong>
+            for that role (e.g. Students — 1000). VLAN ID optional (we assign 10,
+            20, 30…). Prefix override optional — only to go <em>bigger</em> than
+            the math (never smaller than <span class="inline-code">/25</span>).
+            Infrastructure is pre-loaded because switches and APs deserve their
+            own quiet VLAN.
+          </p>
+          <div class="form-actions" style="margin-bottom: 0.75rem">
+            <button type="button" class="btn btn--secondary" id="sp-starter-vlan1">
+              I only use VLAN 1 today
+            </button>
+          </div>
+          <div id="sp-starter-note" class="callout callout--soft" hidden></div>
+          <div class="sp-table-scroll">
+            <table class="sp-form-table">
+              <thead>
+                <tr>
+                  <th>Role name</th>
+                  <th>Devices / building</th>
+                  <th>VLAN (optional)</th>
+                  <th>Prefix override</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="sp-roles-body"></tbody>
+            </table>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn--secondary" id="sp-add-role">Add role</button>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="space-heading">
+          <h2 id="space-heading">4. Private address space</h2>
+          <p class="panel__intro">
+            Greenfield only. We assume you get the whole block for this design.
+            <strong>10.x</strong> is the grown-up default.
+          </p>
+          <div class="field">
+            <label for="sp-space">RFC1918 playground</label>
+            <select id="sp-space">
+              <option value="10.0.0.0/8" selected>10.0.0.0/8 (recommended)</option>
+              <option value="172.16.0.0/12">172.16.0.0/12</option>
+              <option value="192.168.0.0/16">192.168.0.0/16</option>
+            </select>
+            <p class="hint">IPv6 is not invited.</p>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="order-heading">
+          <h2 id="order-heading">5. Site number: second or third number in the IP?</h2>
+          <p class="panel__intro">
+            In an address like <span class="inline-code">10.a.b.c</span>,
+            <strong>a</strong> is the second number and <strong>b</strong> is the third.
+            Pick where <strong>site</strong> goes. Site numbers are human
+            <strong>1, 2, 3…</strong> (site 1 is never “computer zero”).
+          </p>
+          <div class="sp-radio-row" role="radiogroup" aria-label="Where site number appears in the IP">
+            <label class="sp-radio">
+              <input type="radio" name="sp-site-pos" value="second" checked />
+              <span>
+                <strong>Second number</strong> (default)
+                <span class="sp-radio__hint">
+                  Shape: <span class="inline-code">10.&lt;site&gt;.x.x</span> —
+                  e.g. site <strong>1</strong> → everything under
+                  <span class="inline-code">10.1.…</span>, site <strong>2</strong> →
+                  <span class="inline-code">10.2.…</span>.
+                  Roles are packed under the site (large student blocks allowed).
+                </span>
+              </span>
+            </label>
+            <label class="sp-radio">
+              <input type="radio" name="sp-site-pos" value="third" />
+              <span>
+                <strong>Third number</strong>
+                <span class="sp-radio__hint">
+                  Shape: <span class="inline-code">10.&lt;vlan&gt;.&lt;site&gt;.x</span> —
+                  e.g. site <strong>1</strong>, VLAN <strong>20</strong> →
+                  <span class="inline-code">10.20.1.0/…</span>.
+                  Each site keeps that third number; max size per cell is
+                  <span class="inline-code">/24</span> (or <span class="inline-code">/25</span>).
+                  Big roles (thousands of devices) need “second number” instead.
+                </span>
+              </span>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="go-heading">
+          <h2 id="go-heading">6. Generate the plan</h2>
+          <p class="panel__intro">
+            We mesh roles into aligned parents, slice spaced lanes per building,
+            put the live subnet at the start of each lane, gateway
+            <span class="inline-code">.1</span>. Validation will refuse undersize,
+            VLAN 1 cosplay, duplicate VLANs, and empty names. Oversizing is a free
+            country.
+          </p>
+          <div class="form-actions">
+            <button type="button" class="btn btn--primary" id="sp-generate">Build the scheme</button>
+          </div>
+          <div id="sp-errors" class="callout callout--danger" hidden></div>
+          <div id="sp-warnings" class="callout callout--warn" hidden style="margin-top: 0.75rem"></div>
+        </section>
+
+        <section class="panel" aria-labelledby="out-heading">
+          <h2 id="out-heading">Plan</h2>
+          <div id="sp-empty" class="sp-empty">
+            No scheme yet. Add buildings, put real numbers on roles, hit
+            <strong>Build the scheme</strong>. The table will stop being shy.
+          </div>
+          <div id="sp-output" hidden>
+            <!-- Filled by app.js on each successful build (table + sticky together). -->
+          </div>
+        </section>
+
+        <section class="panel faq" id="faq" aria-labelledby="faq-heading">
+          <h2 id="faq-heading">FAQ</h2>
+          <details>
+            <summary>Is this a subnet calculator?</summary>
+            <p>
+              A calculator tells you the broadcast of a prefix you already chose.
+              This builds the scheme for you — the table you use when designing
+              (or redesigning) addressing before
+              <span class="inline-code">vlan 1</span> becomes “the plan” at every
+              building.
+            </p>
+          </details>
+          <details>
+            <summary>Why isn’t everything a /24?</summary>
+            <p>
+              Because 1000 students + 50% headroom is not 254 addresses. We size
+              from device counts. Small roles still get at least a
+              <span class="inline-code">/25</span> — we do not hand out
+              <span class="inline-code">/27</span> or
+              <span class="inline-code">/28</span> scraps. You may oversize.
+            </p>
+          </details>
+          <details>
+            <summary>What’s a “reserved lane” / “reservation ends”?</summary>
+            <p>
+              The live subnet is what you use today. The reserved lane is extra
+              room so that site can grow without taking the next building’s
+              addresses. <strong>Reservation ends</strong> is the last IP still
+              held for that building/role — stay at or below it when you expand.
+            </p>
+          </details>
+          <details>
+            <summary>Can I add another role later (Cameras, Voice, …)?</summary>
+            <p>
+              Yes. Each role gets its own second-octet block under
+              <span class="inline-code">10.&lt;vlan&gt;.…</span> (or the private
+              space you chose). Auto VLAN IDs step 10, 20, 30… so unused IDs in
+              between are free if you set them by hand. After you generate a plan,
+              the <strong>Room to grow</strong> box shows the next free auto VLAN
+              and how many second-octet slots are still open. Adding a role means
+              re-running the planner with that row included (greenfield redesign is
+              cheap; renumbering production is not).
+            </p>
+          </details>
+          <details>
+            <summary>Do buildings need to talk to each other?</summary>
+            <p>
+              If devices at one building should reach devices at another over the
+              network, choose <strong>Yes</strong> so every subnet is unique. If
+              buildings are completely separate forever, choose <strong>No</strong>
+              — we still use unique addresses in this greenfield plan.
+            </p>
+          </details>
+          <details>
+            <summary>Brownfield?</summary>
+            <p>
+              Not this tool. This is “if I designed it from scratch.” Existing
+              10.10.0.0/16 landmines are your archaeology project.
+            </p>
+          </details>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <p>Bench Tools — offline on purpose.</p>
+      </div>
+    </footer>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
