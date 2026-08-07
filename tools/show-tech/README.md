@@ -8,7 +8,28 @@ Turn an Aruba **show-tech** / support text dump into:
 4. **For the ticket** — copy/paste block  
 5. **Export report (.txt)** — sticky + facts + findings + ticket (**not** “sections we noticed”)
 
-Not a root-cause engine. Not a health score. Not TAC with worse benefits.
+## What this is / is not
+
+### What this is
+
+A **deciphering aid** for huge session logs. An AOS-CX `show tech` can easily run past **~220,000 lines**. Nobody wants to hand that to a human and say “good luck.” This tool:
+
+- Pulls **clear facts** the dump already states (hostname, model, serial, version, uptime, Central, etc.)
+- **Highlights** lines that already look loud (core dumps, CRITICAL, IPSec down events, …) with a bit of neighbor context
+- Gives you a **sticky note + ticket paste** so the next person isn’t starting from page 1 of the novel
+
+All offline in the browser. You bring the text; we don’t phone home.
+
+### What this is **not**
+
+| Not this | Why |
+|----------|-----|
+| **A root-cause analysis (RCA)** | We do not conclude *why* the box is broken or name a single guilty feature. |
+| **A health score / “all clear”** | No findings ≠ healthy. We only flag patterns we know how to spot. |
+| **TAC or official HPE support** | Tables go stale; dumps disagree; edge cases win. Confirm on source docs and live TAC when it matters. |
+| **A full support-bundle unpacker** | Plain-text PuTTY (or similar) logs only—not `.tar.gz` tech bundles. |
+
+If you need an RCA, use this output as **orientation**, then do the real work in the log, the lab, and the ticket thread.
 
 ## Personas sniffed
 
