@@ -1337,14 +1337,17 @@
     for (let i = 0; i < lines.length; i++) {
       const L = lines[i].trim();
       if (/^Command\s*:\s*show\s+/i.test(L) && L.length < 100) {
+        // Strip "Command :" only — the line already starts with "show …"
+        // (replacing with "show " produced "show show clock").
         found.push({
-          title: L.replace(/^Command\s*:\s*/i, "show "),
+          title: L.replace(/^Command\s*:\s*/i, "").trim(),
           line: i + 1,
         });
       } else if (
         /^show\s+[a-z]/i.test(L) &&
         L.length < 80 &&
-        !/^show\s*$/i.test(L)
+        !/^show\s*$/i.test(L) &&
+        !/^Command\s*:/i.test(L)
       ) {
         found.push({ title: L, line: i + 1 });
       } else if (/^\[Begin\]\s+/i.test(L)) {
@@ -1361,10 +1364,10 @@
   }
 
   function oneLiner(family, facts, findings, central) {
+    // Keep this short — identity + vibe only. Uptime, Central, family detail live under Clear facts.
     const host = factGet(facts, "Hostname");
     const model = factGet(facts, "Model / product");
     const ver = factGet(facts, "Software version");
-    const up = factGet(facts, "Uptime");
     const high = findings
       .filter((f) => f.severity === "high")
       .reduce((n, f) => n + f.count, 0);
@@ -1374,26 +1377,17 @@
     const groups = findings.length;
 
     const who = [host, model].filter(Boolean).join(" · ") || family.label;
-    const soft = ver ? ` on ${ver}` : "";
-    const time = up ? `, up ${up}` : "";
-    let centralBit = "";
-    if (central && central.connected === true) {
-      centralBit = central.server
-        ? ` Central: connected → ${central.server}.`
-        : " Central: connected.";
-    } else if (central && central.connected === false) {
-      centralBit = " Central: not connected.";
-    } else if (central && central.statusRaw) {
-      centralBit = ` Central: ${central.statusRaw}.`;
-    }
+    const soft = ver ? ` · ${ver}` : "";
     let mood;
-    if (high)
-      mood = `${groups} finding group${groups === 1 ? "" : "s"} (${high} high hit${high === 1 ? "" : "s"}) — bring snacks for TAC.`;
-    else if (med)
-      mood = `${groups} finding group${groups === 1 ? "" : "s"} worth a human glance.`;
-    else mood = "no loud red words survived the noise filter (quiet ≠ innocent).";
+    if (high) {
+      mood = `${groups} finding group${groups === 1 ? "" : "s"} (${high} high) — see Looks wrong.`;
+    } else if (med) {
+      mood = `${groups} finding group${groups === 1 ? "" : "s"} worth a glance — see Looks wrong.`;
+    } else {
+      mood = "No loud hits in the filter (quiet ≠ healthy). Details under Clear facts.";
+    }
 
-    return `${who}${soft}${time}. Family guess: ${family.short}.${centralBit} ${mood}`;
+    return `${who}${soft}. ${mood}`;
   }
 
   /**
