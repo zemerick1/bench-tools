@@ -16,16 +16,6 @@ export const tools = [
     cta: "Let’s go",
   },
   {
-    id: "central-alerts",
-    title: "Central Alerts & Insights",
-    description:
-      "Searchable catalog of Aruba Central alerts and AI insights—filters, thresholds, and all.",
-    href: "./tools/central-alerts/",
-    icon: "CA",
-    status: "available",
-    cta: "Browse catalog",
-  },
-  {
     id: "cert-assembler",
     title: "Cert Assembler",
     description:
@@ -34,6 +24,16 @@ export const tools = [
     icon: "PFX",
     status: "available",
     cta: "Assemble",
+  },
+  {
+    id: "central-alerts",
+    title: "Central Alerts & Insights",
+    description:
+      "Searchable catalog of Aruba Central alerts and AI insights—filters, thresholds, and all.",
+    href: "./tools/central-alerts/",
+    icon: "CA",
+    status: "available",
+    cta: "Browse catalog",
   },
   {
     id: "mac-lookup",
