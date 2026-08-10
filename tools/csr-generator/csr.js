@@ -12,6 +12,9 @@
   /** SAN hostnames we last auto-inserted from the CN (lowercase). */
   let autoSansFromCn = [];
 
+  /** Minimum passphrase length when encrypting the private key PEM. */
+  const MIN_PASSPHRASE_LEN = 12;
+
   const $ = (id) => document.getElementById(id);
 
   const els = {
@@ -24,6 +27,9 @@
     keySizeLabel: $("key-size-label"),
     passphrase: $("passphrase"),
     passphrase2: $("passphrase2"),
+    allowUnencrypted: $("allow-unencrypted"),
+    unencryptedWarn: $("unencrypted-warn"),
+    passTip: $("pass-tip"),
     org: $("org"),
     ou: $("ou"),
     locality: $("locality"),
@@ -31,6 +37,8 @@
     country: $("country"),
     email: $("email"),
     generateBtn: $("generate-btn"),
+    clearSecretsBtn: $("clear-secrets-btn"),
+    clearResultsBtn: $("clear-results-btn"),
     status: $("status"),
     openssl: $("openssl-cmd"),
     copyOpenssl: $("copy-openssl"),
@@ -335,7 +343,73 @@
       .replaceAll("&", "&amp;")
       .replaceAll("<", "&lt;")
       .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;");
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
+  /**
+   * Show/hide the loud unencrypted-key warning; keep tip honest about the mode.
+   */
+  function refreshPassphraseUi() {
+    const pass = (els.passphrase && els.passphrase.value) || "";
+    const pass2 = (els.passphrase2 && els.passphrase2.value) || "";
+    const allow =
+      els.allowUnencrypted && els.allowUnencrypted.checked;
+    const blank = !pass && !pass2;
+
+    if (els.unencryptedWarn) {
+      const showWarn = allow && blank;
+      els.unencryptedWarn.classList.toggle("hidden", !showWarn);
+    }
+
+    if (els.passTip) {
+      if (allow && blank) {
+        els.passTip.dataset.tone = "danger";
+        els.passTip.innerHTML =
+          `<strong>Unencrypted export enabled.</strong> ` +
+          `Both passphrase fields are blank and you opted in. The ` +
+          `<span class="inline-code">.key</span> will be readable by anyone ` +
+          `who gets the file. Only do this when a device requires it.`;
+      } else if (pass || pass2) {
+        els.passTip.dataset.tone = "";
+        els.passTip.innerHTML =
+          `<strong>Protect the key.</strong> ` +
+          `Use at least ${MIN_PASSPHRASE_LEN} characters; both fields must match. ` +
+          `You’ll need this passphrase later in Cert Assembler or on the server.`;
+      } else {
+        els.passTip.dataset.tone = "";
+        els.passTip.innerHTML =
+          `<strong>Protect the key.</strong> ` +
+          `A passphrase (${MIN_PASSPHRASE_LEN}+ characters) encrypts the private key PEM at rest. ` +
+          `Prefer that whenever the target allows it. To force a blank (unencrypted) key, ` +
+          `check the box below and read the warning.`;
+      }
+    }
+  }
+
+  /**
+   * Drop private key / CSR material from memory and the DOM.
+   * Does not delete files already downloaded to disk.
+   */
+  function forgetSecrets(opts) {
+    const silent = opts && opts.silent;
+    lastResult = null;
+    if (els.pemView) els.pemView.textContent = "";
+    if (els.results) els.results.classList.add("hidden");
+    if (els.verifyList) els.verifyList.innerHTML = "";
+    if (els.metaCn) els.metaCn.textContent = "—";
+    if (els.metaKey) els.metaKey.textContent = "—";
+    if (els.metaSans) els.metaSans.textContent = "—";
+    if (els.passphrase) els.passphrase.value = "";
+    if (els.passphrase2) els.passphrase2.value = "";
+    if (els.allowUnencrypted) els.allowUnencrypted.checked = false;
+    refreshPassphraseUi();
+    if (!silent) {
+      setStatus(
+        "Key material cleared from this tab (downloads on disk are unchanged).",
+        "ok"
+      );
+    }
   }
 
   function fileBaseName() {
@@ -683,20 +757,31 @@
 
     const pass = (els.passphrase && els.passphrase.value) || "";
     const pass2 = (els.passphrase2 && els.passphrase2.value) || "";
+    const allowUnencrypted =
+      els.allowUnencrypted && els.allowUnencrypted.checked;
+
     if (pass || pass2) {
       if (pass !== pass2) {
         setStatus("Passphrases don’t match — fix that and try again.", "error");
         els.passphrase2.focus();
         return;
       }
-      if (pass.length < 4) {
+      if (pass.length < MIN_PASSPHRASE_LEN) {
         setStatus(
-          "Use at least 4 characters for the passphrase (longer is better).",
+          `Use at least ${MIN_PASSPHRASE_LEN} characters for the passphrase (or clear both fields and allow unencrypted if a device requires it).`,
           "error"
         );
         els.passphrase.focus();
         return;
       }
+    } else if (!allowUnencrypted) {
+      setStatus(
+        `Set a passphrase (${MIN_PASSPHRASE_LEN}+ characters), or check “Allow unencrypted private key” if a device requires a blank passphrase.`,
+        "error"
+      );
+      if (els.allowUnencrypted) els.allowUnencrypted.focus();
+      else if (els.passphrase) els.passphrase.focus();
+      return;
     }
 
     const type = els.keyType.value;
@@ -798,8 +883,8 @@
           setStatus(
             encrypted
               ? "Done and verified. Key is passphrase-protected — remember that password."
-              : "Done and verified. Key is unencrypted — protect the file yourself.",
-            "ok"
+              : "Done and verified. ⚠ Key is UNENCRYPTED — protect the file; anyone with it can use it.",
+            encrypted ? "ok" : "error"
           );
         } else {
           setStatus(
@@ -860,6 +945,9 @@
         }
         refreshOpenssl();
         if (el === els.cn || el === els.sans) refreshSanTip();
+        if (el === els.passphrase || el === els.passphrase2) {
+          refreshPassphraseUi();
+        }
       });
       el.addEventListener("change", () => {
         if (el === els.cn) {
@@ -867,12 +955,40 @@
         }
         refreshOpenssl();
         if (el === els.cn || el === els.sans) refreshSanTip();
+        if (el === els.passphrase || el === els.passphrase2) {
+          refreshPassphraseUi();
+        }
       });
     });
+
+  if (els.allowUnencrypted) {
+    els.allowUnencrypted.addEventListener("change", () => {
+      refreshPassphraseUi();
+      refreshOpenssl();
+    });
+  }
 
   els.form.addEventListener("submit", (e) => {
     e.preventDefault();
     generate();
+  });
+
+  function onClearSecretsClick() {
+    forgetSecrets();
+  }
+
+  if (els.clearSecretsBtn) {
+    els.clearSecretsBtn.addEventListener("click", onClearSecretsClick);
+  }
+  if (els.clearResultsBtn) {
+    els.clearResultsBtn.addEventListener("click", onClearSecretsClick);
+  }
+
+  window.addEventListener("beforeunload", (e) => {
+    if (!lastResult) return;
+    // Browsers show a generic leave-site dialog; we only need to trigger it.
+    e.preventDefault();
+    e.returnValue = "";
   });
 
   els.copyOpenssl.addEventListener("click", () => {
@@ -923,4 +1039,5 @@
   updateKeySizeOptions();
   refreshOpenssl();
   refreshSanTip();
+  refreshPassphraseUi();
 })();

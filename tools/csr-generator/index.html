@@ -28,10 +28,7 @@
     <link rel="icon" href="../../assets/icons/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png" />
     <link rel="stylesheet" href="../../assets/css/styles.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  </head>
+</head>
   <body>
     <header class="site-header">
       <div class="site-header__inner">
@@ -141,13 +138,14 @@
               <div class="field">
                 <label for="passphrase"
                   >Private key passphrase
-                  <span class="hint">— recommended</span></label
+                  <span class="hint">— 12+ characters</span></label
                 >
                 <input
                   id="passphrase"
                   name="passphrase"
                   type="password"
                   autocomplete="new-password"
+                  minlength="12"
                   placeholder="Encrypt the downloaded key"
                 />
               </div>
@@ -161,16 +159,31 @@
                   name="passphrase2"
                   type="password"
                   autocomplete="new-password"
+                  minlength="12"
                   placeholder="Type it again"
                 />
               </div>
               <div class="field field--full">
                 <p class="field-tip" id="pass-tip" role="note">
                   <strong>Protect the key.</strong>
-                  A passphrase encrypts the private key file at rest (like a
-                  password on a vault). You’ll need it later in Cert Assembler or
-                  when installing on a server. Leave both blank only if you
-                  knowingly want an unencrypted key (lock the file down yourself).
+                  A passphrase (12+ characters) encrypts the private key PEM at
+                  rest. You’ll need it later in Cert Assembler or when installing
+                  on a server. Prefer a long unique phrase — not a short PIN.
+                </p>
+                <label class="check-row check-row--danger" for="allow-unencrypted">
+                  <input type="checkbox" id="allow-unencrypted" name="allow-unencrypted" />
+                  <span
+                    >Allow <strong>unencrypted</strong> private key (blank
+                    passphrase). Only if a device or workflow requires it — this
+                    is a bad idea on shared disks or email.</span
+                  >
+                </label>
+                <p class="field-tip hidden" id="unencrypted-warn" data-tone="danger" role="alert">
+                  <strong>⚠ Unencrypted key mode.</strong>
+                  Anyone who gets the <span class="inline-code">.key</span> file
+                  can use it immediately — no password. Some appliances insist on
+                  this; lock the file down, don’t email it, and delete copies you
+                  don’t need. Prefer a passphrase whenever the target allows it.
                 </p>
               </div>
             </div>
@@ -218,6 +231,9 @@
             <div class="form-actions">
               <button type="submit" class="btn btn--primary" id="generate-btn">
                 Generate key + CSR
+              </button>
+              <button type="button" class="btn btn--ghost" id="clear-secrets-btn">
+                Clear key from this tab
               </button>
               <span class="status-line" id="status" aria-live="polite"></span>
             </div>
@@ -311,6 +327,9 @@
               </button>
               <button type="button" class="btn btn--ghost" id="copy-pem">
                 Copy view
+              </button>
+              <button type="button" class="btn btn--ghost" id="clear-results-btn">
+                Forget key material
               </button>
             </div>
           </div>
@@ -557,11 +576,18 @@
           <details>
             <summary>Should I set a passphrase on the private key?</summary>
             <p>
-              Yes, when you can. It encrypts the key file so a stolen
+              Yes, when you can. Use <strong>at least 12 characters</strong>. It
+              encrypts the key file so a stolen
               <span class="inline-code">.key</span> isn’t immediately usable.
               You’ll type that passphrase when assembling a PFX or when your
               server asks for the key password. The CSR itself is never
               passphrase-protected — only the private key file is.
+            </p>
+            <p>
+              Some devices only accept an unencrypted key. In that case check
+              <strong>Allow unencrypted private key</strong>, read the warning,
+              and treat the file like a password sitting in plaintext — tight
+              permissions, no email, delete spare copies.
             </p>
           </details>
 
@@ -618,7 +644,16 @@
       </div>
     </footer>
 
-    <script src="../../assets/vendor/jsrsasign-all-min.js"></script>
-    <script src="./csr.js"></script>
+    <!-- integrity hashes refreshed when vendor/app JS changes (openssl dgst -sha384 -binary FILE | openssl base64 -A) -->
+    <script
+      src="../../assets/vendor/jsrsasign-all-min.js"
+      integrity="sha384-vbfVWK2rJ9x1Xsycv0IIV02oWFwkOZ5Ohb/cQGU2ldysPOlCR4OtdM1nvOZFbpzk"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="./csr.js"
+      integrity="sha384-uaP3B7o/F9M+kDP7eKiwNFAFimv0TpJsaQa+1MJ0esudparNW0Vjbf6UmMz6gg2j"
+      crossorigin="anonymous"
+    ></script>
   </body>
 </html>
