@@ -286,12 +286,135 @@
     return model;
   }
 
-  /** AP/IAP CLI prompt: AP-name:10# or AP-name:fc# */
+  /** AP/IAP CLI prompt: AP-name:10# or AP-name:fc# or "HeadEnd 3# show …" */
   function apPromptHostname(text) {
-    return firstLineMatch(
-      text,
-      /^([A-Za-z0-9_.-]+):[A-Za-z0-9]+#/m
+    return (
+      firstLineMatch(text, /^([A-Za-z0-9_.-]+):[A-Za-z0-9]+#/m) ||
+      // Portal / free-text hostname prompts: "HeadEnd 3# show version"
+      // Require a real CLI verb after # so config tokens like name_#guest#_ never match.
+      firstLineMatch(
+        text,
+        /^([A-Za-z][A-Za-z0-9_.-]*(?:[ ][A-Za-z0-9_.-]+){0,3})#\s+(?:show|clear|ping|configure|dir|copy|commit|write|reload)\b/im
+      )
     );
+  }
+
+  /** Unique NameServer values (prefer last cloud/summary block order). */
+  function collectNameServers(text) {
+    const re = /^[ \t]*NameServer[ \t]*:[ \t]*(\S+)/gim;
+    const out = [];
+    const seen = new Set();
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      const v = m[1].trim();
+      if (!v || /^(None|N\/A|--)$/i.test(v)) continue;
+      if (seen.has(v)) continue;
+      seen.add(v);
+      out.push(v);
+    }
+    return out;
+  }
+
+  /**
+   * wlan auth-server NAME + following ip X.X.X.X (skip 127.0.0.1 / InternalServer).
+   */
+  function collectRadiusServers(text) {
+    const lines = String(text || "").split("\n");
+    const out = [];
+    const seen = new Set();
+    let name = null;
+    for (const raw of lines) {
+      const line = raw.replace(/\r/g, "");
+      const nm = line.match(/^[ \t]*wlan auth-server[ \t]+(\S+)/i);
+      if (nm) {
+        name = nm[1].trim();
+        continue;
+      }
+      if (!name) continue;
+      const ipm = line.match(/^[ \t]*ip[ \t]+(\d{1,3}(?:\.\d{1,3}){3})\b/i);
+      if (ipm) {
+        const ip = ipm[1];
+        if (!/^127\./.test(ip) && !/^InternalServer$/i.test(name)) {
+          const key = name + "|" + ip;
+          if (!seen.has(key)) {
+            seen.add(key);
+            out.push(name + " " + ip);
+          }
+        }
+        name = null;
+        continue;
+      }
+      // left the block
+      if (/^[ \t]*wlan\s/i.test(line) || /^[ \t]*[a-z].*[a-z0-9-]+\s*$/i.test(line.trim()) && !/^[ \t]*(port|acctport|key|nas-ip|cppm|timeout|retransmit|src-interface|enable|disable)\b/i.test(line)) {
+        if (!/^[ \t]*(port|acctport|key|nas-ip|cppm|timeout|retransmit)\b/i.test(line)) {
+          // only reset on clear new stanza starters
+          if (/^[ \t]*(wlan |ssid |aaa |rf |ids |dpi |ip |vlan |hash-|name |version )/i.test(line)) {
+            name = null;
+          }
+        }
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Shared AP/Instant/Microbranch sticky facts (site orientation, not RCA).
+   * 1 reboot/core · 2 DNS · 3 Activate · 4 mesh · 6 RADIUS inventory
+   */
+  function extractApSiteFacts(text, facts) {
+    // Reboot (AP wording — gateway uses Reboot Cause: elsewhere)
+    const reboot =
+      firstLineMatch(text, /AP Reboot reason:\s*([^\n]+)/i) ||
+      firstLineMatch(
+        text,
+        /Reboot Time and Cause:\s*AP Reboot reason:\s*([^\n]+)/i
+      );
+    addFact(facts, "Reboot cause", reboot);
+
+    if (/Core file has generated/i.test(text)) {
+      addFact(
+        facts,
+        "Core file",
+        "Generated (export with copy core-file tftp/sftp)"
+      );
+    }
+
+    const dns = collectNameServers(text);
+    if (dns.length) addFact(facts, "DNS servers", dns.join(", "));
+
+    // Activate — prefer last snapshot when dump re-runs show activate status
+    const actStatus = lastLineMatch(
+      text,
+      /^[ \t]*Activate Status[ \t]*:[ \t]*(\S+)/im
+    );
+    const actServer = lastLineMatch(
+      text,
+      /^[ \t]*Activate Server[ \t]*:[ \t]*(\S+)/im
+    );
+    const actProv = lastLineMatch(
+      text,
+      /^[ \t]*Last provision time[ \t]*:[ \t]*([^\n]+)/im
+    );
+    const actInterval = lastLineMatch(
+      text,
+      /^[ \t]*Provision interval[ \t]*:[ \t]*([^\n]+)/im
+    );
+    addFact(facts, "Activate status", actStatus);
+    addFact(facts, "Activate server", actServer);
+    if (actProv) {
+      let p = actProv.trim();
+      if (actInterval) p += " (interval " + actInterval.trim() + ")";
+      addFact(facts, "Last provision", p);
+    }
+
+    // Mesh — running-config mesh-role / mesh-cluster (not table Mesh Role column)
+    const meshRole = firstLineMatch(text, /^mesh-role\s+(\S+)/im);
+    const meshCluster = firstLineMatch(text, /^mesh-cluster\s+(\S+)/im);
+    addFact(facts, "Mesh role", meshRole);
+    addFact(facts, "Mesh cluster", meshCluster);
+
+    const radius = collectRadiusServers(text);
+    if (radius.length) addFact(facts, "RADIUS servers", radius.join(", "));
   }
 
   function dedupeFacts(facts) {
@@ -438,8 +561,8 @@
       apPromptHostname(text) ||
         // Prompt-style ap-env: name:AP-OfficeDesk_b1:10
         firstLineMatch(text, /^name:([A-Za-z0-9_.-]+):[A-Za-z0-9]+/im) ||
-        // Bare ap-env name (no :suffix): name:AP-Garage
-        firstLineMatch(text, /^name:([A-Za-z0-9_.-]+)\s*$/im) ||
+        // Bare ap-env name (spaces ok): name:HeadEnd 3
+        firstLineMatch(text, /^name:([A-Za-z0-9_ ./-]+)\s*$/im) ||
         firstLineMatch(text, /^[ \t]*Name[ \t]*:[ \t]*((?:AP|MB|IAP)-[A-Za-z0-9_.-]+)\s*$/im)
     );
     addFact(
@@ -481,6 +604,7 @@
       "Central uptime",
       firstLineMatch(text, /Aruba Central uptimes\s*:\s*(\S+)/i)
     );
+    extractApSiteFacts(text, facts);
   }
 
   function extractAos10Ap(text) {
@@ -1137,6 +1261,14 @@
       maxHits: 3,
     },
     {
+      id: "ap-core-file",
+      severity: "high",
+      title: "AP core file generated",
+      hint: "AP said a core file exists. Pull it with copy core-file before the next power-reset erases the crime scene.",
+      re: /Core file has generated/i,
+      maxHits: 3,
+    },
+    {
       id: "core-dump",
       severity: "high",
       title: "Core dump / crashinfo payload",
@@ -1268,6 +1400,17 @@
       maxHits: 10,
     },
     {
+      id: "health-ie-status",
+      severity: "high",
+      title: "Health IE named status fault",
+      hint: "Beacon Health IE encoded a named failure (DNS A/AAAA, NTP time sync, websocket, etc.). Read central_status / network_status — not Previous Layer cascade alone.",
+      re: /(?:health IE|Health IE update).{0,400}(?:Unable To Resolve A\/AAAA|NTP Date & Time Sync Failure|Websocket connection failure|central_status:\d+\(Other Failure\))/i,
+      excludeIf: (line) =>
+        /Enable the health IE broadcast/i.test(line) ||
+        /Disable the health IE broadcast/i.test(line),
+      maxHits: 10,
+    },
+    {
       id: "activate-provision-fail",
       severity: "high",
       title: "Activate provisioning failure",
@@ -1308,6 +1451,8 @@
         /lws_getaddrinfo|CONNECT_FAILED|libwebsocket connect failed|Websocket connection failure|Unable To Resolve A\/AAAA/i.test(
           line
         ) ||
+        /NTP Date & Time Sync Failure/i.test(line) ||
+        /Core file has generated/i.test(line) ||
         (/\bCentral\b/i.test(line) &&
           /\bFailed\b/i.test(line) &&
           /(?:dns error|Connection error)/i.test(line)) ||

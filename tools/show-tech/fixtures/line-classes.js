@@ -212,4 +212,19 @@ module.exports = [
     kind: "signal_fault",
     ruleId: "central-conn-fail",
   },
+  {
+    line: 'Core file has generated, you can use the command "copy core-file tftp/sftp" to get it',
+    kind: "signal_fault",
+    ruleId: "ap-core-file",
+  },
+  {
+    line: "Aug 10 10:48:48   cli[8457]: <341004> <WARN> |AP|  AP health IE version:0, ip_version:0(IP Version 4), uplink_status:0(Uplink Existed), uplink_type:0(Ethernet), network_status:0(Successful), proxy_status:0(Successful), activate_status:0(Successful), central_status:1(Unable To Resolve A/AAAA), ap_health_ie:0x40000",
+    kind: "signal_fault",
+    ruleId: "health-ie-status",
+  },
+  {
+    line: "Aug 10 13:03:37   cli[8457]: <341004> <WARN> |AP|  AP health IE version:0, network_status:6(NTP Date & Time Sync Failure), central_status:7(Previous Layer Failure)",
+    kind: "signal_fault",
+    ruleId: "health-ie-status",
+  },
 ];

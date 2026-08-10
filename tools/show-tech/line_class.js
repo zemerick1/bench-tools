@@ -186,6 +186,21 @@
     return /Total number of core dumps\s*:\s*([1-9]\d*)\b/i.test(line);
   }
 
+  function isApCoreFileGenerated(line) {
+    return /Core file has generated/i.test(line);
+  }
+
+  /** Health IE named status codes we care about (not Previous Layer cascade). */
+  function isHealthIeNamedStatus(line) {
+    const t = String(line || "");
+    if (!/health IE|Health IE update/i.test(t)) return false;
+    if (/Unable To Resolve A\/AAAA/i.test(t)) return true;
+    if (/NTP Date & Time Sync Failure/i.test(t)) return true;
+    if (/Websocket connection failure/i.test(t)) return true;
+    if (/central_status:\d+\(Other Failure\)/i.test(t)) return true;
+    return false;
+  }
+
   /**
    * @param {string} line
    * @returns {{ kind: string, reason: string }}
@@ -221,6 +236,8 @@
     // --- signals (active faults / alarms) ---
     if (isNonZeroCoreCount(t))
       return { kind: "signal_fault", reason: "non-zero core dump count" };
+    if (isApCoreFileGenerated(t))
+      return { kind: "signal_fault", reason: "AP core file generated" };
     if (/IKE\s+FAILED\b|RC_ERROR_IKE/i.test(t))
       return { kind: "signal_fault", reason: "IKE FAILED" };
     if (/\bIPSEC_TUNNEL_DOWN\b/i.test(t))
@@ -324,6 +341,9 @@
         kind: "signal_fault",
         reason: "Health IE broadcast — Central/CoP connectivity issues",
       };
+    // Named Health IE status codes (DNS / NTP / websocket) — not Previous Layer cascade alone
+    if (isHealthIeNamedStatus(t))
+      return { kind: "signal_fault", reason: "Health IE named status fault" };
     // Non-zero cloud connect-fail counter from show ap debug cloud-server
     if (/Connect establish failed\s+[1-9]\d*/i.test(t))
       return {
@@ -360,6 +380,8 @@
     isCriticalColumn,
     isSectionTitle,
     isNonZeroCoreCount,
+    isApCoreFileGenerated,
+    isHealthIeNamedStatus,
   };
 
   if (typeof module !== "undefined" && module.exports) {
