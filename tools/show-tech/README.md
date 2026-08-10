@@ -71,5 +71,5 @@ node tools/show-tech/test_parser.js
 - `line_class.js` — single noise/signal classifier  
 - `parser.js` — family, facts, Central, IPSec health, findings  
 - `app.js` — UI, PuTTY help, export  
-- `fixtures/line-classes.js` — decision-table tests  
-- `test_parser.js` — shipped-entry tests against `log-samples/`  
+- `fixtures/line-classes.js` — decision-table tests (**synthetic lab strings only**)  
+- `test_parser.js` — unit fixtures + optional local `log-samples/` (gitignored; customer dumps stay offline)  

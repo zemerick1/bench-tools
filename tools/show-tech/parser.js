@@ -286,11 +286,11 @@
     return model;
   }
 
-  /** AP/IAP CLI prompt: AP-name:10# or AP-name:fc# or "HeadEnd 3# show …" */
+  /** AP/IAP CLI prompt: AP-name:10# or AP-name:fc# or "Lab AP 01# show …" */
   function apPromptHostname(text) {
     return (
       firstLineMatch(text, /^([A-Za-z0-9_.-]+):[A-Za-z0-9]+#/m) ||
-      // Portal / free-text hostname prompts: "HeadEnd 3# show version"
+      // Free-text hostname prompts: "Lab AP 01# show version"
       // Require a real CLI verb after # so config tokens like name_#guest#_ never match.
       firstLineMatch(
         text,
@@ -561,7 +561,7 @@
       apPromptHostname(text) ||
         // Prompt-style ap-env: name:AP-OfficeDesk_b1:10
         firstLineMatch(text, /^name:([A-Za-z0-9_.-]+):[A-Za-z0-9]+/im) ||
-        // Bare ap-env name (spaces ok): name:HeadEnd 3
+        // Bare ap-env name (spaces ok): name:Lab AP 01
         firstLineMatch(text, /^name:([A-Za-z0-9_ ./-]+)\s*$/im) ||
         firstLineMatch(text, /^[ \t]*Name[ \t]*:[ \t]*((?:AP|MB|IAP)-[A-Za-z0-9_.-]+)\s*$/im)
     );

@@ -179,14 +179,15 @@ Last fail reason       :dns error
 
 console.log("\n=== Health IE + RADIUS KPIs; zero-counter FAIL noise ===");
 {
+  // Synthetic lab strings only — never paste customer dumps into fixtures.
   const r = parseTechDump(
     `
 Frames that failed FP spoofing check                                 0
 Packet dpi session copy to dpimgr failed                             0
-Aug 10 12:50:27.072  deauth        4c:82:0c:c8:49:b8  f4:9a:b1:89:6c:b3  0       Unspecified Failure (seq num 4065)
-Aug 10 13:03:37   cli[8457]: <341004> <WARN> |AP|  Enable the health IE broadcast due to Central/CoP connectivity issues
-Aug 10 13:03:40   cli[8457]: <341004> <WARN> |AP|  Disable the health IE broadcast due to Central/CoP login done
-Aug 10 11:22:32   cli[8457]: <341004> <WARN> |AP|  Client 12:40:75:b9:ee:71 authenticate fail because RADIUS server connection failure
+Aug 10 12:50:27.072  deauth        aa:bb:cc:00:00:01  aa:bb:cc:00:00:02  0       Unspecified Failure (seq num 4065)
+Aug 10 13:03:37   cli[1001]: <341004> <WARN> |AP|  Enable the health IE broadcast due to Central/CoP connectivity issues
+Aug 10 13:03:40   cli[1001]: <341004> <WARN> |AP|  Disable the health IE broadcast due to Central/CoP login done
+Aug 10 11:22:32   cli[1001]: <341004> <WARN> |AP|  Client aa:bb:cc:00:11:22 authenticate fail because RADIUS server connection failure
 Connect establish failed   19(43)
 `,
     { filename: "kpi-fixture" }
@@ -213,46 +214,51 @@ Connect establish failed   19(43)
 
 console.log("\n=== AP site facts 1–6 (reboot, DNS, Activate, mesh, Health IE, RADIUS) ===");
 {
+  // Fully synthetic — lab RFC1918, fake serial, no customer hostnames.
   const dump = `
-HeadEnd 3# show version
-AOS-10 (MODEL: 765), Version 10.8.0.2 LSR
+Lab-AP-01# show version
+AOS-10 (MODEL: 515), Version 10.8.0.0 SSR
 AP uptime is 4 hours 43 minutes 20 seconds
 Reboot Time and Cause: AP Reboot reason: Power-reset
 Core file has generated, you can use the command "copy core-file tftp/sftp" to get it
-name:HeadEnd 3
+name:Lab-AP-01
 mesh-role portal
-mesh-cluster HSCluster wpa3-sae deadbeef priority 5
-wlan auth-server NS1
- ip 10.82.96.35
+mesh-cluster LabMeshCluster wpa3-sae deadbeef priority 5
+wlan auth-server RADIUS-A
+ ip 10.10.20.11
  port 1812
-wlan auth-server NS2
- ip 10.82.96.45
+wlan auth-server RADIUS-B
+ ip 10.10.20.12
  port 1812
-IAP Serial Number        :VNW8MPK0FP
+IAP Serial Number        :SNLAB00001
 Activate Server          :device.arubanetworks.com
 Activate Status          :enabled
-Last provision time      :2026-08-10 12:57:08
+Last provision time      :2026-01-15 12:00:00
 Provision interval       :5 minutes
-NameServer           :8.8.8.8
-NameServer           :8.8.4.4
+NameServer           :1.1.1.1
+NameServer           :1.0.0.1
 Aruba Central server               :device-uswest5.central.arubanetworks.com
 Aruba Central status               :Login_done
-Aug 10 10:48:48   cli[8457]: <341004> <WARN> |AP|  AP health IE version:0, network_status:0(Successful), central_status:1(Unable To Resolve A/AAAA)
-Aug 10 13:03:37   cli[8457]: <341004> <WARN> |AP|  AP health IE version:0, network_status:6(NTP Date & Time Sync Failure), central_status:7(Previous Layer Failure)
+Aug 10 10:48:48   cli[1001]: <341004> <WARN> |AP|  AP health IE version:0, network_status:0(Successful), central_status:1(Unable To Resolve A/AAAA)
+Aug 10 13:03:37   cli[1001]: <341004> <WARN> |AP|  AP health IE version:0, network_status:6(NTP Date & Time Sync Failure), central_status:7(Previous Layer Failure)
 `;
   const r = parseTechDump(dump, { filename: "ap-site-facts-fixture" });
   const fm = factMap(r);
-  ok(/HeadEnd 3/i.test(fm.Hostname || ""), "hostname HeadEnd 3");
+  ok(/Lab-AP-01/i.test(fm.Hostname || ""), "hostname Lab-AP-01");
   ok(/Power-reset/i.test(fm["Reboot cause"] || ""), "reboot Power-reset");
   ok(/Generated/i.test(fm["Core file"] || ""), "core file fact");
-  ok(/8\.8\.8\.8/.test(fm["DNS servers"] || "") && /8\.8\.4\.4/.test(fm["DNS servers"] || ""), "DNS servers");
+  ok(
+    /1\.1\.1\.1/.test(fm["DNS servers"] || "") &&
+      /1\.0\.0\.1/.test(fm["DNS servers"] || ""),
+    "DNS servers"
+  );
   ok(/enabled/i.test(fm["Activate status"] || ""), "Activate status");
   ok(/device\.arubanetworks\.com/i.test(fm["Activate server"] || ""), "Activate server");
-  ok(/12:57:08/.test(fm["Last provision"] || ""), "Last provision");
+  ok(/12:00:00/.test(fm["Last provision"] || ""), "Last provision");
   ok(/portal/i.test(fm["Mesh role"] || ""), "Mesh role portal");
-  ok(/HSCluster/i.test(fm["Mesh cluster"] || ""), "Mesh cluster");
-  ok(/NS1 10\.82\.96\.35/.test(fm["RADIUS servers"] || ""), "RADIUS NS1");
-  ok(/NS2 10\.82\.96\.45/.test(fm["RADIUS servers"] || ""), "RADIUS NS2");
+  ok(/LabMeshCluster/i.test(fm["Mesh cluster"] || ""), "Mesh cluster");
+  ok(/RADIUS-A 10\.10\.20\.11/.test(fm["RADIUS servers"] || ""), "RADIUS-A");
+  ok(/RADIUS-B 10\.10\.20\.12/.test(fm["RADIUS servers"] || ""), "RADIUS-B");
   ok(!!groupById(r, "ap-core-file"), "finding ap-core-file");
   ok(!!groupById(r, "health-ie-status"), "finding health-ie-status");
   ok(

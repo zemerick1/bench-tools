@@ -167,17 +167,17 @@ module.exports = [
     ruleId: "activate-provision-fail",
   },
   {
-    line: "Aug 10 13:04:01   cli[8457]: <341004> <WARN> |AP HeadEnd 3@10.82.65.201 cli|  awc Activate provision timed out",
+    line: "Aug 10 13:04:01   cli[1001]: <341004> <WARN> |AP Lab-AP-01@10.10.10.50 cli|  awc Activate provision timed out",
     kind: "signal_fault",
     ruleId: "activate-provision-fail",
   },
   {
-    line: "Aug 10 13:03:37   cli[8457]: <341004> <WARN> |AP HeadEnd 3@10.82.65.201 cli|  Enable the health IE broadcast due to Central/CoP connectivity issues",
+    line: "Aug 10 13:03:37   cli[1001]: <341004> <WARN> |AP Lab-AP-01@10.10.10.50 cli|  Enable the health IE broadcast due to Central/CoP connectivity issues",
     kind: "signal_fault",
     ruleId: "central-health-ie",
   },
   {
-    line: "Aug 10 11:22:32   cli[8457]: <341004> <WARN> |AP HeadEnd 3@10.82.65.201 cli|  AP 10.82.65.201: Client 12:40:75:b9:ee:71 authenticate fail because RADIUS server connection failure",
+    line: "Aug 10 11:22:32   cli[1001]: <341004> <WARN> |AP Lab-AP-01@10.10.10.50 cli|  AP 10.10.10.50: Client aa:bb:cc:00:11:22 authenticate fail because RADIUS server connection failure",
     kind: "signal_fault",
     ruleId: "radius-conn-fail",
   },
