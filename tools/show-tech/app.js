@@ -78,12 +78,12 @@
   }
 
   function renderFindingGroup(g) {
-    const openFirst = g.severity === "high" ? " open" : "";
+    // Always start collapsed — user opens groups of interest.
     const samples = g.evidence
       .map((ev) => renderEvidenceBlock(ev))
       .join("");
     return `
-      <details class="st-finding st-finding--${escapeHtml(g.severity)}"${openFirst}>
+      <details class="st-finding st-finding--${escapeHtml(g.severity)}">
         <summary class="st-finding__summary">
           ${severityPill(g.severity)}
           <span class="st-finding__title">${escapeHtml(g.title)}</span>

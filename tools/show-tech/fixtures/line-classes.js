@@ -167,17 +167,17 @@ module.exports = [
     ruleId: "activate-provision-fail",
   },
   {
-    line: "Aug 10 13:04:01   cli[8457]: <341004> <WARN> |AP HeadEnd 3@10.82.65.201 cli|  awc Activate provision timed out",
+    line: "Aug 10 13:04:01   cli[1001]: <341004> <WARN> |AP Lab-AP-01@10.10.10.50 cli|  awc Activate provision timed out",
     kind: "signal_fault",
     ruleId: "activate-provision-fail",
   },
   {
-    line: "Aug 10 13:03:37   cli[8457]: <341004> <WARN> |AP HeadEnd 3@10.82.65.201 cli|  Enable the health IE broadcast due to Central/CoP connectivity issues",
+    line: "Aug 10 13:03:37   cli[1001]: <341004> <WARN> |AP Lab-AP-01@10.10.10.50 cli|  Enable the health IE broadcast due to Central/CoP connectivity issues",
     kind: "signal_fault",
     ruleId: "central-health-ie",
   },
   {
-    line: "Aug 10 11:22:32   cli[8457]: <341004> <WARN> |AP HeadEnd 3@10.82.65.201 cli|  AP 10.82.65.201: Client 12:40:75:b9:ee:71 authenticate fail because RADIUS server connection failure",
+    line: "Aug 10 11:22:32   cli[1001]: <341004> <WARN> |AP Lab-AP-01@10.10.10.50 cli|  AP 10.10.10.50: Client aa:bb:cc:00:11:22 authenticate fail because RADIUS server connection failure",
     kind: "signal_fault",
     ruleId: "radius-conn-fail",
   },
@@ -211,5 +211,20 @@ module.exports = [
     line: 'Aug 10 14:10:00   awc[8454]: [cloud] wsc: LWS_CALLBACK_CLIENT_CONNECTION_ERROR "ipv6 lws_getaddrinfo46 failed"',
     kind: "signal_fault",
     ruleId: "central-conn-fail",
+  },
+  {
+    line: 'Core file has generated, you can use the command "copy core-file tftp/sftp" to get it',
+    kind: "signal_fault",
+    ruleId: "ap-core-file",
+  },
+  {
+    line: "Aug 10 10:48:48   cli[8457]: <341004> <WARN> |AP|  AP health IE version:0, ip_version:0(IP Version 4), uplink_status:0(Uplink Existed), uplink_type:0(Ethernet), network_status:0(Successful), proxy_status:0(Successful), activate_status:0(Successful), central_status:1(Unable To Resolve A/AAAA), ap_health_ie:0x40000",
+    kind: "signal_fault",
+    ruleId: "health-ie-status",
+  },
+  {
+    line: "Aug 10 13:03:37   cli[8457]: <341004> <WARN> |AP|  AP health IE version:0, network_status:6(NTP Date & Time Sync Failure), central_status:7(Previous Layer Failure)",
+    kind: "signal_fault",
+    ruleId: "health-ie-status",
   },
 ];
