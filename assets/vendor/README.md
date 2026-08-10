@@ -9,4 +9,5 @@ the corresponding `<script>` tags in tool HTML:
 openssl dgst -sha384 -binary path/to/file.js | openssl base64 -A
 ```
 
-Then set `integrity="sha384-<output>"` (keep `crossorigin="anonymous"`).
+Then set `integrity="sha384-<output>"`. Do not add `crossorigin` for same-origin
+scripts (it forces a CORS fetch and can break loading on static hosts).
