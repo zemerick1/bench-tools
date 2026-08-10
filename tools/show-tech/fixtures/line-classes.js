@@ -151,4 +151,65 @@ module.exports = [
     kind: "signal_fault",
     ruleId: "ipsec-sa-not-up",
   },
+  {
+    line: "Mon Aug 10 13:02:54 2026  Central   Failed       Connection error with Aruba Central server device-uswest5.central.arubanetworks.com reason dns error",
+    kind: "signal_fault",
+    ruleId: "central-conn-fail",
+  },
+  {
+    line: "Last fail reason       :dns error",
+    kind: "signal_fault",
+    ruleId: "central-conn-fail",
+  },
+  {
+    line: "Mon Aug 10 13:04:01 2026  Activate  Failed       Provisioning failed: did not receive a response from Activate server after 91 seconds",
+    kind: "signal_fault",
+    ruleId: "activate-provision-fail",
+  },
+  {
+    line: "Aug 10 13:04:01   cli[8457]: <341004> <WARN> |AP HeadEnd 3@10.82.65.201 cli|  awc Activate provision timed out",
+    kind: "signal_fault",
+    ruleId: "activate-provision-fail",
+  },
+  {
+    line: "Aug 10 13:03:37   cli[8457]: <341004> <WARN> |AP HeadEnd 3@10.82.65.201 cli|  Enable the health IE broadcast due to Central/CoP connectivity issues",
+    kind: "signal_fault",
+    ruleId: "central-health-ie",
+  },
+  {
+    line: "Aug 10 11:22:32   cli[8457]: <341004> <WARN> |AP HeadEnd 3@10.82.65.201 cli|  AP 10.82.65.201: Client 12:40:75:b9:ee:71 authenticate fail because RADIUS server connection failure",
+    kind: "signal_fault",
+    ruleId: "radius-conn-fail",
+  },
+  // zero datapath counters must stay noise (failed-line used to vacuum these up)
+  {
+    line: "Frames that failed FP spoofing check                                 0",
+    kind: "noise_zero_counter",
+  },
+  {
+    line: "Packet dpi session copy to dpimgr failed                             0",
+    kind: "noise_zero_counter",
+  },
+  {
+    line: "number of msg prepare failure                    :0",
+    kind: "noise_zero_counter",
+  },
+  {
+    line: "Interface  Queue  Alloc  Free  In-use  Max  Failed",
+    kind: "noise_table_header",
+  },
+  {
+    line: "Connect establish failed   0(20)",
+    kind: "noise_zero_counter",
+  },
+  {
+    line: "Connect establish failed   19(43)",
+    kind: "signal_fault",
+    ruleId: "central-conn-fail",
+  },
+  {
+    line: 'Aug 10 14:10:00   awc[8454]: [cloud] wsc: LWS_CALLBACK_CLIENT_CONNECTION_ERROR "ipv6 lws_getaddrinfo46 failed"',
+    kind: "signal_fault",
+    ruleId: "central-conn-fail",
+  },
 ];

@@ -139,6 +139,78 @@ Central disconnection reason            : N/A
   ok(cx.mist && cx.mist.status === "coming_soon", "Mist coming_soon");
 }
 
+console.log("\n=== AP Central: prefer last cloud-server + surface dns fail ===");
+{
+  const ap = extractCentral(`
+Aruba Central server               :device-uswest5.central.arubanetworks.com
+Aruba Central status               :Connecting
+Last fail reason       :dns error
+Last fail time         :2026-08-10 13:59:38
+Last down reason       :Connect closed
+Last down time         :2026-08-10 13:02:13
+Aruba Central        :Connected
+Aruba Central server               :device-uswest5.central.arubanetworks.com
+Aruba Central status               :Login_done
+Last fail reason       :dns error
+Last fail time         :2026-08-10 14:49:46
+Last down reason       :Connect closed
+Last down time         :2026-08-10 15:00:42
+`);
+  ok(ap.connected === true, "AP last status Login_done → connected");
+  ok(/Login_done/i.test(ap.statusRaw || ""), "AP status detail Login_done");
+  ok(/dns error/i.test(ap.lastConnectFailReason || ""), "AP last connect fail dns error");
+  ok(/14:49:46/.test(ap.lastConnectFailTime || ""), "AP last fail time is latest");
+  ok(/Connect closed/i.test(ap.lastDisconnectReason || ""), "AP last down reason");
+  const r = parseTechDump(
+    `
+Mon Aug 10 13:02:54 2026  Central   Failed       Connection error with Aruba Central server device-uswest5.central.arubanetworks.com reason dns error
+Mon Aug 10 13:04:01 2026  Activate  Failed       Provisioning failed: did not receive a response from Activate server after 91 seconds
+Last fail reason       :dns error
+`,
+    { filename: "central-fail-fixture" }
+  );
+  ok(!!groupById(r, "central-conn-fail"), "finding central-conn-fail");
+  ok(!!groupById(r, "activate-provision-fail"), "finding activate-provision-fail");
+  ok(
+    highEvidenceLines(r).length > 0,
+    "Central/Activate failures produce HIGH evidence"
+  );
+}
+
+console.log("\n=== Health IE + RADIUS KPIs; zero-counter FAIL noise ===");
+{
+  const r = parseTechDump(
+    `
+Frames that failed FP spoofing check                                 0
+Packet dpi session copy to dpimgr failed                             0
+Aug 10 12:50:27.072  deauth        4c:82:0c:c8:49:b8  f4:9a:b1:89:6c:b3  0       Unspecified Failure (seq num 4065)
+Aug 10 13:03:37   cli[8457]: <341004> <WARN> |AP|  Enable the health IE broadcast due to Central/CoP connectivity issues
+Aug 10 13:03:40   cli[8457]: <341004> <WARN> |AP|  Disable the health IE broadcast due to Central/CoP login done
+Aug 10 11:22:32   cli[8457]: <341004> <WARN> |AP|  Client 12:40:75:b9:ee:71 authenticate fail because RADIUS server connection failure
+Connect establish failed   19(43)
+`,
+    { filename: "kpi-fixture" }
+  );
+  ok(!!groupById(r, "central-health-ie"), "finding central-health-ie");
+  ok(!!groupById(r, "radius-conn-fail"), "finding radius-conn-fail");
+  ok(!!groupById(r, "central-conn-fail"), "non-zero Connect establish failed");
+  const failed = groupById(r, "failed-line");
+  ok(
+    !failed ||
+      !failed.evidence.some((e) =>
+        /spoofing check|dpi session|Unspecified Failure/i.test(e.text)
+      ),
+    "failed-line skips zero counters and deauth Unspecified Failure"
+  );
+  ok(
+    !anyEvidenceIncludes(r, /Disable the health IE broadcast/i) ||
+      !groupById(r, "central-health-ie")?.evidence.some((e) =>
+        /Disable the health IE/i.test(e.text)
+      ),
+    "Disable health IE (recovery) is not a health-ie finding"
+  );
+}
+
 /** Mirror of app export contract (must stay in sync with buildExport intent) */
 function buildExportShape(result) {
   const parts = ["Sticky note", "Clear facts", "Looks wrong", "For the ticket"];

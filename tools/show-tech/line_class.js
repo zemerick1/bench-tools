@@ -47,6 +47,15 @@
     ) {
       return true;
     }
+    // e.g. "Interface  Queue  Alloc  Free  In-use  Max  Failed"
+    if (
+      /\bInterface\b/i.test(t) &&
+      /\bQueue\b/i.test(t) &&
+      /\bFailed\b/i.test(t) &&
+      !/\d{2}:\d{2}/.test(t)
+    ) {
+      return true;
+    }
     const words = t.split(/\s+/).filter(Boolean);
     if (words.length >= 5) {
       const upperish = words.filter((w) =>
@@ -54,6 +63,16 @@
       ).length;
       if (upperish / words.length >= 0.7 && /\bFAIL\b|\bCrashInfo\b/i.test(t))
         return true;
+    }
+    // Title-case column headers ending in Failed/Fail (no timestamps/colons)
+    if (
+      words.length >= 4 &&
+      words.length <= 12 &&
+      !/:\s*\S|\d{2}:\d{2}/.test(t) &&
+      /\b(?:Failed|Fail|Failure|Error|Status)\b/i.test(t) &&
+      words.every((w) => /^[A-Za-z][A-Za-z0-9_./%-]*$/.test(w))
+    ) {
+      return true;
     }
     return false;
   }
@@ -121,6 +140,19 @@
     if (/\b0-PASS\s+1-FAIL\b/i.test(t)) return true;
     if (/ANTENNA CHECKS\s*:\s*\(/i.test(t)) return true;
     if (/ERROR events\b/i.test(t) && /\bTotal\s*:\s*0\b/i.test(t)) return true;
+    // Datapath/stats counters: "… failure :0" / "… failed … 0"
+    // (not syslog — those have timestamps / severity tags)
+    if (
+      /\bfail(?:ed|ure)s?\b/i.test(t) &&
+      /(?::\s*|\s+)0\s*$/.test(t) &&
+      !/\d{4}-\d{2}-\d{2}|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b|\d{2}:\d{2}:\d{2}|<\d{6}>|daemon\./i.test(
+        t
+      )
+    ) {
+      return true;
+    }
+    // Cloud-server debug: "Connect establish failed   0(20)" happy path
+    if (/Connect establish failed\s+0(?:\(|\s|$)/i.test(t)) return true;
     return false;
   }
 
@@ -249,6 +281,61 @@
       if (/\b(exceed|critical|alarm|fault|sensor)\b/i.test(t))
         return { kind: "signal_active_alarm", reason: "temperature alarm language" };
     }
+
+    // Aruba Central / Activate connectivity (event log + cloud-server + syslog)
+    if (
+      /Connection error with Aruba Central/i.test(t) ||
+      (/\bCentral\b/i.test(t) &&
+        /\bFailed\b/i.test(t) &&
+        /(?:dns error|Connection error|reason\s+dns)/i.test(t))
+    )
+      return { kind: "signal_fault", reason: "Central connection failure" };
+    if (
+      /Last fail reason\s*:\s*\S+/i.test(t) &&
+      !/Last fail reason\s*:\s*(?:N\/A|None|--)\b/i.test(t)
+    )
+      return { kind: "signal_fault", reason: "Central last fail reason" };
+    if (
+      /fail reason\s*:\s*dns error/i.test(t) ||
+      (/\bdns error\b/i.test(t) &&
+        /(?:central|activate|awc|cloud)/i.test(t)) ||
+      /lws_getaddrinfo\w*\s+failed/i.test(t) ||
+      /CONNECT_FAILED/i.test(t) ||
+      /libwebsocket connect failed/i.test(t) ||
+      /Websocket connection failure/i.test(t) ||
+      /Unable To Resolve A\/AAAA/i.test(t)
+    )
+      return { kind: "signal_fault", reason: "Central/Activate DNS error" };
+    if (
+      /Provisioning failed\b/i.test(t) ||
+      /awc Activate provision timed out/i.test(t) ||
+      (/\bActivate\b/i.test(t) &&
+        /\bFailed\b/i.test(t) &&
+        /(?:provision|dns look|empty response|did not receive)/i.test(t))
+    )
+      return { kind: "signal_fault", reason: "Activate provisioning failure" };
+    // Health IE in beacons when Central/CoP is down (Enable = problem; Disable = recovery)
+    if (
+      /Enable the health IE broadcast due to Central\/CoP connectivity issues/i.test(
+        t
+      )
+    )
+      return {
+        kind: "signal_fault",
+        reason: "Health IE broadcast — Central/CoP connectivity issues",
+      };
+    // Non-zero cloud connect-fail counter from show ap debug cloud-server
+    if (/Connect establish failed\s+[1-9]\d*/i.test(t))
+      return {
+        kind: "signal_fault",
+        reason: "Connect establish failed (non-zero)",
+      };
+    // Client auth blocked because RADIUS is unreachable
+    if (
+      /RADIUS server connection failure/i.test(t) ||
+      /authenticate fail because RADIUS/i.test(t)
+    )
+      return { kind: "signal_fault", reason: "RADIUS server connection failure" };
 
     return { kind: "other", reason: "unclassified" };
   }

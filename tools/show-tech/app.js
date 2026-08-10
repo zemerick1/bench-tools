@@ -109,6 +109,7 @@
       "Central status detail",
       "Central server",
       "Central last disconnect",
+      "Central last connect fail",
       "Mist status",
     ]);
     const platform = facts.filter((x) => !centralLabels.has(x.label));
@@ -380,6 +381,11 @@
       let disc = c.lastDisconnectReason || "Unknown (not in dump)";
       if (c.lastDisconnectTime) disc += ` @ ${c.lastDisconnectTime}`;
       lines.push(`  - Last disconnect reason: ${disc}`);
+      if (c.lastConnectFailReason) {
+        let fail = c.lastConnectFailReason;
+        if (c.lastConnectFailTime) fail += ` @ ${c.lastConnectFailTime}`;
+        lines.push(`  - Last connect fail: ${fail}`);
+      }
     } else {
       lines.push("  - Connected now: Unknown (not in dump)");
       lines.push("  - Server: Unknown (not in dump)");

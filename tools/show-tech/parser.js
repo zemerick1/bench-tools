@@ -84,6 +84,18 @@
     return (m[1] || m[0]).trim();
   }
 
+  /** Last capture-group match (multi-snapshot dumps: prefer newest cloud-server). */
+  function lastLineMatch(text, re) {
+    const flags = re.flags.includes("g") ? re.flags : re.flags + "g";
+    const g = new RegExp(re.source, flags);
+    let m;
+    let last = null;
+    while ((m = g.exec(text)) !== null) {
+      last = (m[1] || m[0]).trim();
+    }
+    return last;
+  }
+
   function firstLabelValue(text, labels) {
     for (const label of labels) {
       const re = new RegExp(
@@ -869,6 +881,8 @@
       server: null,
       lastDisconnectReason: null,
       lastDisconnectTime: null,
+      lastConnectFailReason: null,
+      lastConnectFailTime: null,
       source: null, // cx | ap-cloud | gateway | null
       mist: {
         status: "coming_soon",
@@ -973,40 +987,41 @@
     }
 
     // --- AP / Instant: cloud-server + activate + cloud last down ---
-    const apConnected = firstLineMatch(
+    // Prefer *last* snapshot — long PuTTY dumps often re-run show ap debug cloud-server.
+    const apConnected = lastLineMatch(
       text,
       /^[ \t]*Aruba Central[ \t]*:[ \t]*(Connected|Not Connected|Disconnected)\b/im
     );
-    const apStatus = firstLineMatch(
+    const apStatus = lastLineMatch(
       text,
       /^[ \t]*Aruba Central status[ \t]*:[ \t]*(\S+)/im
     );
     const apServer =
-      firstLineMatch(
+      lastLineMatch(
         text,
         /^[ \t]*Aruba Central [Ss]erver(?:\s+path)?[ \t]*:[ \t]*(\S*central\.arubanetworks\.com\S*)/im
       ) ||
-      firstLineMatch(
+      lastLineMatch(
         text,
         /^[ \t]*Aruba Central [Ss]erver[ \t]*:[ \t]*(\S+)/im
       ) ||
-      firstLineMatch(
+      lastLineMatch(
         text,
         /^[ \t]*Central server of rule in flash[ \t]*:[ \t]*(\S+)/im
       );
-    const apDownReason = firstLineMatch(
+    const apDownReason = lastLineMatch(
       text,
       /^[ \t]*Last down reason[ \t]*:[ \t]*([^\n]+)/im
     );
-    const apDownTime = firstLineMatch(
+    const apDownTime = lastLineMatch(
       text,
       /^[ \t]*Last down time[ \t]*:[ \t]*([^\n]+)/im
     );
-    const apFailReason = firstLineMatch(
+    const apFailReason = lastLineMatch(
       text,
       /^[ \t]*Last fail reason[ \t]*:[ \t]*([^\n]+)/im
     );
-    const apFailTime = firstLineMatch(
+    const apFailTime = lastLineMatch(
       text,
       /^[ \t]*Last fail time[ \t]*:[ \t]*([^\n]+)/im
     );
@@ -1015,26 +1030,40 @@
       central.source = "ap-cloud";
       central.server =
         apServer && !/^(None|N\/A|--)$/i.test(apServer) ? apServer : null;
-      // Prefer human Connected line; fall back to Login_done style
-      if (apConnected) {
-        central.statusRaw = apConnected;
-        central.connected = /^connected$/i.test(apConnected.trim());
-      } else if (apStatus) {
+      // cloud-server "Aruba Central status" is authoritative over inventory
+      // "Aruba Central : Connected" when both exist in the dump.
+      if (apStatus) {
         central.statusRaw = apStatus;
-        // Login_done / login_done ⇒ connected; others unknown/false
         const s = apStatus.toLowerCase();
-        if (/login_done|connected/.test(s)) central.connected = true;
-        else if (/disconnect|fail|down|error/.test(s))
+        if (/login_done|^connected$/.test(s)) central.connected = true;
+        else if (
+          /disconnect|fail|down|error|connecting|init|not_connected|not-connected/.test(
+            s
+          )
+        )
           central.connected = false;
         else central.connected = null;
+      } else if (apConnected) {
+        central.statusRaw = apConnected;
+        central.connected = /^connected$/i.test(apConnected.trim());
       }
-      // Prefer last *down* (actual disconnect) over last *fail* (connect attempt)
+      // Always keep last connect-fail (e.g. dns error) — often the real story
+      // even when the session is Login_done again.
+      if (
+        apFailReason &&
+        !/^(N\/A|NA|None|--)$/i.test(apFailReason.trim())
+      ) {
+        central.lastConnectFailReason = apFailReason.trim();
+        central.lastConnectFailTime = apFailTime ? apFailTime.trim() : null;
+      }
+      // Prefer last *down* (actual disconnect) for disconnect field; fall back to fail
       if (apDownReason) {
         central.lastDisconnectReason = apDownReason.trim();
         central.lastDisconnectTime = apDownTime ? apDownTime.trim() : null;
-      } else if (apFailReason) {
-        central.lastDisconnectReason = "connect fail: " + apFailReason.trim();
-        central.lastDisconnectTime = apFailTime ? apFailTime.trim() : null;
+      } else if (central.lastConnectFailReason) {
+        central.lastDisconnectReason =
+          "connect fail: " + central.lastConnectFailReason;
+        central.lastDisconnectTime = central.lastConnectFailTime || null;
       }
       return central;
     }
@@ -1079,6 +1108,11 @@
       disc = "Unknown @ " + central.lastDisconnectTime;
     }
     addFact(facts, "Central last disconnect", disc);
+    if (central.lastConnectFailReason) {
+      let fail = String(central.lastConnectFailReason).trim();
+      if (central.lastConnectFailTime) fail += " @ " + central.lastConnectFailTime;
+      addFact(facts, "Central last connect fail", fail);
+    }
     addFact(
       facts,
       "Mist status",
@@ -1214,16 +1248,81 @@
       maxHits: 4,
     },
     {
+      id: "central-conn-fail",
+      severity: "high",
+      title: "Aruba Central connection failure",
+      hint: "Central agent could not stay up — DNS, firewall, proxy, or Activate redirect. Check name resolution to *.central.arubanetworks.com and outbound 443.",
+      re: /Connection error with Aruba Central|Last fail reason\s*:\s*\S+|fail reason\s*:\s*dns error|(?:\bCentral\b.{0,40}\bFailed\b.{0,80}(?:dns error|Connection error))|Connect establish failed\s+[1-9]\d*|lws_getaddrinfo\w*\s+failed|CONNECT_FAILED|libwebsocket connect failed|Websocket connection failure|Unable To Resolve A\/AAAA/i,
+      excludeIf: (line) =>
+        /Last fail reason\s*:\s*(?:N\/A|None|--)\b/i.test(line) ||
+        /prov_subscribe_received/i.test(line) ||
+        /Connect establish failed\s+0(?:\(|\s|$)/i.test(line),
+      maxHits: 12,
+    },
+    {
+      id: "central-health-ie",
+      severity: "high",
+      title: "Health IE broadcast (Central/CoP down)",
+      hint: "AP enables a beacon information element when it loses Central/CoP. Client-visible KPI for cloud disconnects — not the same as uplink down.",
+      re: /Enable the health IE broadcast due to Central\/CoP connectivity issues/i,
+      maxHits: 10,
+    },
+    {
+      id: "activate-provision-fail",
+      severity: "high",
+      title: "Activate provisioning failure",
+      hint: "ZTP/Activate did not finish — timeout, empty response, or DNS. Device may keep retrying every provision interval.",
+      re: /Provisioning failed\b|awc Activate provision timed out|(?:\bActivate\b.{0,20}\bFailed\b.{0,80}(?:provision|dns look|empty response|did not receive))/i,
+      maxHits: 12,
+    },
+    {
+      id: "radius-conn-fail",
+      severity: "high",
+      title: "RADIUS server connection failure",
+      hint: "Clients cannot authenticate because the AP cannot reach RADIUS. Check server IP/UDP 1812 path, routing, and firewall — separate from Central cloud.",
+      re: /RADIUS server connection failure|authenticate fail because RADIUS/i,
+      maxHits: 10,
+    },
+    {
       id: "failed-line",
       severity: "med",
       title: "Explicit FAIL / FAILED",
-      hint: "A real failure token, not a table column or legend auditioning for drama.",
-      re: /\bFAIL(?:ED|URE)?\b/,
+      hint: "A real failure token, not a zero datapath counter or 802.11 deauth reason code.",
+      // Prefer log/event FAIL tokens. Zero counters are noise in line_class.
+      // Avoid bare /i so config tokens like auth-failure-denylist don't match.
+      re: /(?:^|[^A-Za-z-])(?:FAILED|FAILURE|Failed|Failure|failed|failure)(?:[^A-Za-z-]|$)/,
       excludeIf: (line) =>
         /IKE\s+FAILED\b/i.test(line) ||
+        /Connection error with Aruba Central/i.test(line) ||
+        /Provisioning failed\b/i.test(line) ||
+        /awc Activate provision timed out/i.test(line) ||
+        /Last fail reason\s*:/i.test(line) ||
+        /Connect establish failed/i.test(line) ||
+        /RADIUS server connection failure|authenticate fail because RADIUS/i.test(
+          line
+        ) ||
+        /health IE broadcast due to Central/i.test(line) ||
+        // Health IE status dumps pack enum text like "(Previous Layer Failure)" —
+        // not generic FAIL hits; dedicated rules cover the Enable event.
+        /Health IE update|AP health IE version/i.test(line) ||
+        /lws_getaddrinfo|CONNECT_FAILED|libwebsocket connect failed|Websocket connection failure|Unable To Resolve A\/AAAA/i.test(
+          line
+        ) ||
+        (/\bCentral\b/i.test(line) &&
+          /\bFailed\b/i.test(line) &&
+          /(?:dns error|Connection error)/i.test(line)) ||
+        (/\bActivate\b/i.test(line) &&
+          /\bFailed\b/i.test(line) &&
+          /(?:provision|dns look|empty response|did not receive)/i.test(line)) ||
+        // 802.11 station table / deauth reason strings (not a system failure)
+        /\bUnspecified Failure\b/i.test(line) ||
+        /\bdeauth\b/i.test(line) ||
         /\bFailures?\s+\d+\s*\|?\s*$/i.test(line.trim()) ||
         /\bFail(?:ures)?\s{2,}\d+/i.test(line) ||
-        /failed to\s+(?:parse|load optional)/i.test(line),
+        /failed to\s+(?:parse|load optional)/i.test(line) ||
+        /Cloud Last connect fail status/i.test(line) ||
+        // residual zero-ish counters that slip past isZeroCounter
+        /(?::\s*|\s+)0\s*$/.test(line.trim()),
       maxHits: 12,
     },
     {
@@ -1234,6 +1333,8 @@
       re: /(?:^|[\s\[|:.,])ERROR(?:[\s\]|:.,]|$)/,
       excludeIf: (line) =>
         /error-disabled/i.test(line) ||
+        /Connection error with Aruba Central/i.test(line) ||
+        /Last fail reason\s*:/i.test(line) ||
         (/\bERROR\b/.test(line) &&
           (line.match(/\s{2,}/g) || []).length >= 2 &&
           !/\d{4}-\d{2}-\d{2}|ERROR:/.test(line) &&
