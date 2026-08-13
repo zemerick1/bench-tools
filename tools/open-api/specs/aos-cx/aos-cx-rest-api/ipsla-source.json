@@ -1,0 +1,2573 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "ipsla_source",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "ipsla_source"
+    }
+  ],
+  "paths": {
+    "/system/ipsla_sources": {
+      "get": {
+        "tags": [
+          "ipsla_source"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "domain_name_server": {
+                      "type": "string",
+                      "description": "IPv4/IPv6 address of the DNS server to be used for resolve destination hostnames. If not provided, name server for the respective VRF will be used instead. This column value can be empty.",
+                      "maxLength": 256
+                    },
+                    "effective_source_ip": {
+                      "type": "string",
+                      "description": "Source IP that is being used by the IP SLA outgoing probes that belong to this specific session.  IP address is selected using following priority: 1. source_ip 2. source_interface 3. VRF.effective_source_ip.ipsla  If neither of them is populated, then regular routing rules takes place.",
+                      "maxLength": 256,
+                      "minLength": 7
+                    },
+                    "enable": {
+                      "type": "boolean",
+                      "description": "Enables IP SLA session."
+                    },
+                    "frequency": {
+                      "type": "integer",
+                      "description": "Time gap (in seconds) between two consecutive probes of the SLA session.",
+                      "maximum": 604800,
+                      "minimum": 5
+                    },
+                    "history_interval": {
+                      "type": "integer",
+                      "description": "Period of time in seconds that IPSLA probe history in maintained. Minimum value is two times of probe-interval and Maximum is two hours.",
+                      "maximum": 7200,
+                      "minimum": 10
+                    },
+                    "history_sla_results": {
+                      "type": "object",
+                      "description": "Historical results of the session. Updated only when requested. Derived from SLA statistics and results obtained during the history interval period.",
+                      "properties": {
+                        "average_dns_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average time taken to complete DNS resolution in last history_interval period."
+                        },
+                        "average_ds_delays": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average delay on the destination to source direction in last history_interval period. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "average_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average RTT value (in milliseconds) calculated in last history_interval period."
+                        },
+                        "average_sd_delays": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average delay on the source to destination direction in last history_interval period. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "average_tcpconnect_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average time taken to establish TCP connection in last history_interval period."
+                        },
+                        "average_tlsconnect_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average time taken to establish TLS connection in last history_interval period."
+                        },
+                        "bind_errors": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times failed to bind interface or ip address in last history_interval priod."
+                        },
+                        "destination_address_unreachable_count": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times destination address was unreachable in last history_interval period."
+                        },
+                        "dns_error": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS error occurred in last history_interval period."
+                        },
+                        "dns_resolution_failures": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed in last history_interval period."
+                        },
+                        "http_error": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times HTTP/S error occurred in last history_interval period."
+                        },
+                        "max_dns_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum time taken to complete DNS resolution in last history_interval period."
+                        },
+                        "max_ds_delay": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum delay on the destination to source direction in last history_interval period. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "max_negative_jitter_ds": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum negative jitter on the destination to source direction in last history_interval period."
+                        },
+                        "max_negative_jitter_sd": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum negative jitter on the source to destination direction in last history_interval period."
+                        },
+                        "max_positive_ds_jitter": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum positive jitter on destination to source direction in last history_interval period."
+                        },
+                        "max_positive_sd_jitter": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum positive jitter on source to destination direction in last history_interval period."
+                        },
+                        "max_sd_delay": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum delay on the source to destination direction in last history_interval period. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "max_tcpconnect_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum time taken to establish TCP connection in last history_interval period."
+                        },
+                        "max_tlsconnect_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum time taken to establish TLS connection in last history_interval period."
+                        },
+                        "maximum_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum RTT value (in milliseconds) in last history_interval period."
+                        },
+                        "min_dns_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum time taken to complete DNS resolution in last history_interval period."
+                        },
+                        "min_ds_delay": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum delay on the destination to source direction in last history_interval period. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "min_negative_jitter_ds": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum negative jitter on the destination to source direction in last history_interval period."
+                        },
+                        "min_negative_jitter_sd": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum negative jitter on the source to destination direction in last history_interval period."
+                        },
+                        "min_positive_ds_jitter": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum positive jitter on destination to source direction in last history_interval period."
+                        },
+                        "min_positive_sd_jitter": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum positive jitter on source to destination direction in last history_interval period."
+                        },
+                        "min_sd_delay": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum delay on the source to destination direction in last history_interval period. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "min_tcpconnect_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum time taken to establish TCP connection in last history_interval period."
+                        },
+                        "min_tlsconnect_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum time taken to establish TLS connection in last history_interval period."
+                        },
+                        "minimum_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum RTT value (in milliseconds) in last history_interval period."
+                        },
+                        "negative_ds_jitter_average": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average of negative jitters that occurred on the destination to source direction in last history_interval period."
+                        },
+                        "negative_ds_jitter_number": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times negative jitter occurred on the destination to source direction in last history_interval period."
+                        },
+                        "negative_ds_jitter_sum": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Sum of negative jitters that occurred on the destination to source direction in last history_interval period."
+                        },
+                        "negative_sd_jitter_average": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average of negative jitters that occurred on the source to destination direction in last history_interval period."
+                        },
+                        "negative_sd_jitter_number": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times negative jitter occurred on the source to destination direction in last history_interval period."
+                        },
+                        "negative_sd_jitter_sum": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Sum of negative jitters that occurred on the source to destination direction in last history_interval period."
+                        },
+                        "num_of_packets_rx": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of packets received in last history_interval period."
+                        },
+                        "num_of_packets_tx": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of packets transmitted in last history_interval period."
+                        },
+                        "positive_ds_jitter_average": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average of positive jitters that occurred on the destination to source direction in last history_interval period."
+                        },
+                        "positive_ds_jitter_count": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times positive jitter occurred on the destination to source direction in last history_interval period."
+                        },
+                        "positive_ds_jitter_sum": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Sum of positive jitters that occurred on the destination to source direction in last history_interval period."
+                        },
+                        "positive_sd_jitter_average": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average of positive jitters that occurred on the source to destination direction in last history_interval period."
+                        },
+                        "positive_sd_jitter_count": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times positive jitter occurred on the source to destination direction in last history_interval period."
+                        },
+                        "positive_sd_jitter_sum": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Sum of positive jitters that occurred on the source to destination direction in last history_interval period."
+                        },
+                        "probes_timed_out": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of requests that timed out in last history_interval period."
+                        },
+                        "probes_transmitted": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of successful probes that were transmitted in last history_interval priod."
+                        },
+                        "socket_receive_errors": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times failed to receive packet in last history_interval priod."
+                        },
+                        "ssl_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times SSL handshake was completed in last history_interval period."
+                        },
+                        "transmission_errors": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times failed to transmit a probe in last history_interval priod."
+                        },
+                        "voip_icpif": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Calculated Planning Impairment Factor(ICPIF) value. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "voip_mos": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Mean Opinion Square value. Applicable only for UDP VOIP jitter probes."
+                        }
+                      }
+                    },
+                    "http_sla": {
+                      "type": "object",
+                      "description": "Configuration parameters for HTTP sessions.",
+                      "properties": {
+                        "cache_disable": {
+                          "type": "boolean",
+                          "description": "Disables caching of the web pages."
+                        },
+                        "proxy_url": {
+                          "type": "string",
+                          "description": "URL address of the proxy server. Example: http://www.example.com:8080 ",
+                          "maxLength": 2000,
+                          "minLength": 1
+                        },
+                        "raw_request": {
+                          "type": "string",
+                          "description": "HTTP raw payload.",
+                          "maxLength": 1024,
+                          "minLength": 1
+                        },
+                        "type": {
+                          "type": "string",
+                          "description": "Request type for HTTP SLA: `get`: uses HTTP payload generated by the system. `raw`: raw_request specifies HTTP payload to be used for SLA probe.",
+                          "enum": [
+                            "get",
+                            "raw"
+                          ]
+                        },
+                        "url": {
+                          "type": "string",
+                          "description": "URL address to reach HTTP server. For HTTP probes, responder configuration is ignored and URL is used for host and port instead. If URL doesn't specify the port number, port 80 will be used for HTTP. Example: http://www.example.com:81  If the type is 'raw', then resource part and the parameters will be ignored. For example: if URL is 'http://www.example.com/path/example.html', then '/path/example.html' is ignored.",
+                          "maxLength": 2000,
+                          "minLength": 1
+                        },
+                        "version_number": {
+                          "type": "string",
+                          "description": "HTTP version number to be used with 'get' type probes. For HTTP 'raw' type, version number is part of the payload.",
+                          "enum": [
+                            "1.0",
+                            "1.1"
+                          ]
+                        }
+                      }
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [ipsla_source](#/ipsla_source)<br>Unique identifier of the specific IP SLA session.",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "payload_size": {
+                      "type": "integer",
+                      "description": "Size of the payload to add to ICMP echo and UDP echo probes. This value is zero for ICMP echo and 28 for other probes. This column value can be empty.",
+                      "maximum": 1440,
+                      "minimum": 0
+                    },
+                    "persistence": {
+                      "type": "string",
+                      "description": "Persistence of IPSLA session, i.e how the IP SLA session is provisioned: `persistent`   :  IP SLA session created by CLI or REST that will be retained                      over system reboot. `volatile`     :  IP SLA session typically created by Aruba Central                      that will not be reatined over system reboot.",
+                      "enum": [
+                        "persistent",
+                        "volatile"
+                      ]
+                    },
+                    "responder": {
+                      "type": "object",
+                      "description": "IP SLA responder address. Has to be populated for all SLA types except for HTTP/s that uses URL instead.",
+                      "properties": {
+                        "hostname": {
+                          "type": "string",
+                          "description": "Hostname, FQDN or IPv4/IPv6 address of the IP SLA responder. Ignored for HTTP/s type, URL is used instead.",
+                          "maxLength": 256,
+                          "minLength": 1
+                        },
+                        "port": {
+                          "type": "integer",
+                          "description": "Transport layer port number of the IP SLA responder. Responder port number is not needed for icmp_echo and ignored for HTTP/S.",
+                          "maximum": 65535,
+                          "minimum": 1
+                        }
+                      }
+                    },
+                    "sla_results": {
+                      "type": "object",
+                      "description": "Most recent results of the session.",
+                      "properties": {
+                        "average_ds_delays": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average delay on the destination to source direction. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "average_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average RTT value (in milliseconds) calculated on this session."
+                        },
+                        "average_sd_delays": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average delay on the source to destination direction. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "dhcp_server_ip": {
+                          "type": "string",
+                          "description": "IP of the DHCP server that responded to the latest SLA probe."
+                        },
+                        "dns_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time taken to complete last DNS resolution."
+                        },
+                        "dnserror": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "DNS error that occurred during the last DNS query."
+                        },
+                        "httperror": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "HTTP/S error that occurred during the last HTTP/S transaction."
+                        },
+                        "httptransaction_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time taken to complete last http transaction."
+                        },
+                        "max_ds_delay": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum delay on the destination to source direction. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "max_negative_jitter_ds": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum negative jitter on the destination to source direction."
+                        },
+                        "max_negative_jitter_sd": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum negative jitter on the source to destination direction."
+                        },
+                        "max_positive_ds_jitter": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum positive jitter on destination to source direction."
+                        },
+                        "max_positive_sd_jitter": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum positive jitter on source to destination direction."
+                        },
+                        "max_sd_delay": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum delay on the source to destination direction. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "maximum_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum RTT value (in milliseconds) on this session."
+                        },
+                        "min_ds_delay": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum delay on the destination to source direction. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "min_negative_jitter_ds": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum negative jitter on the destination to source direction."
+                        },
+                        "min_negative_jitter_sd": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum negative jitter on the source to destination direction."
+                        },
+                        "min_positive_ds_jitter": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum positive jitter on destination to source direction."
+                        },
+                        "min_positive_sd_jitter": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum positive jitter on source to destination direction."
+                        },
+                        "min_sd_delay": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum delay on the source to destination direction. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "minimum_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum RTT value (in milliseconds) on this session."
+                        },
+                        "negative_ds_jitter_average": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average of negative jitters that occurred on the destination to source direction."
+                        },
+                        "negative_ds_jitter_number": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times negative jitter occurred on the destination to source direction."
+                        },
+                        "negative_ds_jitter_sum": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Sum of negative jitters that occurred on the destination to source direction."
+                        },
+                        "negative_sd_jitter_average": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average of negative jitters that occurred on the source to destination direction."
+                        },
+                        "negative_sd_jitter_number": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times negative jitter occurred on the source to destination direction."
+                        },
+                        "negative_sd_jitter_sum": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Sum of negative jitters that occurred on the source to destination direction."
+                        },
+                        "num_of_packets_rx": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of packets received in the last probe."
+                        },
+                        "num_of_packets_tx": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of packets transmitted in the last probe."
+                        },
+                        "positive_ds_jitter_average": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average of positive jitters that occurred on the destination to source direction."
+                        },
+                        "positive_ds_jitter_count": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times positive jitter occurred on the destination to source direction."
+                        },
+                        "positive_ds_jitter_sum": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Sum of positive jitters that occurred on the destination to source direction."
+                        },
+                        "positive_sd_jitter_average": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average of positive jitters that occurred on the source to destination direction."
+                        },
+                        "positive_sd_jitter_count": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times positive jitter occurred on the source to destination direction."
+                        },
+                        "positive_sd_jitter_sum": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Sum of positive jitters that occurred on the source to destination direction."
+                        },
+                        "resolved_ip": {
+                          "type": "string",
+                          "description": "IP resolved from the latest DNS or DHCP probe."
+                        },
+                        "ssl_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time taken for the last SSL handshake."
+                        },
+                        "tcpconnect_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time taken to establish last TCP connection ."
+                        },
+                        "tlsconnect_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time taken to establish last TLS connection ."
+                        },
+                        "voip_icpif": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Calculated Planning Impairment Factor(ICPIF) value. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "voip_mos": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Mean Opinion Square value. Applicable only for UDP VOIP jitter probes."
+                        }
+                      }
+                    },
+                    "source_interface": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>Helps detemining the source IPv4/IPv6 address for the probes. If interface have both IPv4 and IPv6 address, IP is chosen based on the destination IP.If source_ip is present, then source_interface  configuration is overriden. If both are missing, it will default to 'VRF.effective_source_ip.ipsla'. This column value can be empty."
+                    },
+                    "source_ip": {
+                      "type": "string",
+                      "description": "Source IPv4/IPv6 address for outgoing IP SLA packets. If not specified, the address will either follow source_interface configuration or if it's missing as well, will default to 'VRF.effective_source_ip.ipsla'. This column value can be empty.",
+                      "maxLength": 256
+                    },
+                    "source_port_number": {
+                      "type": "integer",
+                      "description": "In case of TCP and UDP probes, allows specification of the specific source port. If not specified the port will be chosen by the system. This column value can be empty.",
+                      "maximum": 65535,
+                      "minimum": 1
+                    },
+                    "statistics": {
+                      "type": "object",
+                      "description": "Counters for all SLA probe types. Updated after every probe.",
+                      "properties": {
+                        "bind_error": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times failed to bind interface or ip address."
+                        },
+                        "destination_address_unreachable_count": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times destination address was unreachable."
+                        },
+                        "dhcp_failed": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DHCP operation failed"
+                        },
+                        "dhcp_nack": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DHCP operation failed due to DHCP-NACK from the server"
+                        },
+                        "dhcp_no_offer": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DHCP operation failed because DHCP-Offer is not received"
+                        },
+                        "dns_format_error": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed due to DNS query format error. RFC 1035 RCODE: 1"
+                        },
+                        "dns_name_exists": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed due to 'Name-Exists when it should not' error. RFC 2136 RCODE: 6"
+                        },
+                        "dns_non_existent_domain": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed due to non-existent domain. RFC 1035 RCODE: 3"
+                        },
+                        "dns_not_authoritative": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed due to 'Server Not Authoritative for zone' error. RFC 2136 RCODE: 9"
+                        },
+                        "dns_not_implemented": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed due to not implemented error. RFC 1035 RCODE: 4"
+                        },
+                        "dns_not_zone": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed due to 'Name not contained in zone' error. RFC 2136 RCODE: 10"
+                        },
+                        "dns_query_refused": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed due to query refused error. RFC 1035 RCODE: 5"
+                        },
+                        "dns_resolution_failures": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed."
+                        },
+                        "dns_rrset_exists": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed due to 'RR Set Exists when it should not' error. RFC 2136 RCODE: 7"
+                        },
+                        "dns_server_failure": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed due to server failure error. RFC 1035 RCODE: 2"
+                        },
+                        "probes_timed_out": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of requests that timed out."
+                        },
+                        "probes_transmitted": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of successful probes that were transmitted ."
+                        },
+                        "socket_receive_error": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times failed to receive packet."
+                        },
+                        "transmission_error": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times failed to transmit a probe."
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "object",
+                      "description": "Status of the IP SLA session.",
+                      "properties": {
+                        "last_probe_time": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time (in seconds from epoch) at which the last probe was initiated."
+                        },
+                        "state": {
+                          "type": "string",
+                          "description": "Operational state of the session: `running`:                    fully operational `bind_error`:                 another service is using the same source port `dns_resolution_error`:       failed to resolve destination hostname `no_route`:                   no available route to the responder `internal_error`:             unexpected error prevents SLA session `disabled`:                   the session is administratively disabled `configuration_incomplete`:   some of the necessary parameters are not                               configured to schedule the given SLA `ntp_not_synchronised`:       System clock is not synchronized with NTP server `waiting_to_run`:             Waiting for the current set of running sessions to complete.                               IPSLA sessions run in turns and not all at the same time.",
+                          "enum": [
+                            "running",
+                            "bind_error",
+                            "dns_resolution_error",
+                            "no_route",
+                            "internal_error",
+                            "disabled",
+                            "configuration_incomplete",
+                            "ntp_not_synchronized",
+                            "waiting_to_run"
+                          ]
+                        }
+                      }
+                    },
+                    "tos": {
+                      "type": "integer",
+                      "description": "Type of Service (TOS) to set on the packets of UDP echo, UDP VOIP and ICMP echo probes.",
+                      "maximum": 255,
+                      "minimum": 0
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Type of IP SLA: `icmp_echo`:         measures Round Trip Time(RTT) between source and                      responder using ICMP. `udp_echo`:          measures one way or RTT latency between                      the source and the responder using UDP. `tcp_connect`:       measures the time that it takes to perform TCP Connect                      operation between the source and the responder. `udp_jitter_voip`:   measures packet loss, one way delay, RTT,                      Mean Opinion Scores (MOS),                      (Impairment) Calculated Planning Impairment Factor (ICPIF)                      between the source and the responder using VOIP traffic. `http`:              measures HTTP response time for a web page.                      This includes the time taken for DNS resolution, TCP connect                      and fetching of the web page. 'dns':               measures the time taken for DNS resolution                      for the given hostname and nameserver. 'dhcp':              measures the time taken to perform DHCP operation                      on the given source interface.",
+                      "enum": [
+                        "icmp_echo",
+                        "udp_echo",
+                        "tcp_connect",
+                        "udp_jitter_voip",
+                        "http",
+                        "dns",
+                        "dhcp"
+                      ]
+                    },
+                    "voip_jitter_sla": {
+                      "type": "object",
+                      "description": "Configuration parameters for VOIP jitter",
+                      "properties": {
+                        "advantage_factor": {
+                          "type": "integer",
+                          "description": "Advantage factor value for VOIP jitter.",
+                          "maximum": 20,
+                          "minimum": 0
+                        },
+                        "codec_type": {
+                          "type": "string",
+                          "description": "CODEC to be used for the probes.",
+                          "enum": [
+                            "g711a",
+                            "g711u",
+                            "g729a"
+                          ]
+                        }
+                      }
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [VRF](#/VRF)<br>VRF to be used for sending the probes."
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "type",
+                    "vrf"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "persistence",
+                  "source_interface",
+                  "name",
+                  "payload_size",
+                  "history_interval",
+                  "vrf",
+                  "source_ip",
+                  "effective_source_ip",
+                  "type",
+                  "status",
+                  "sla_results",
+                  "tos",
+                  "frequency",
+                  "voip_jitter_sla",
+                  "statistics",
+                  "history_sla_results",
+                  "enable",
+                  "source_port_number",
+                  "http_sla",
+                  "domain_name_server",
+                  "responder"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "ipsla_source"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "domain_name_server": {
+                    "type": "string",
+                    "description": "IPv4/IPv6 address of the DNS server to be used for resolve destination hostnames. If not provided, name server for the respective VRF will be used instead. This column value can be empty.",
+                    "maxLength": 256
+                  },
+                  "enable": {
+                    "type": "boolean",
+                    "description": "Enables IP SLA session."
+                  },
+                  "frequency": {
+                    "type": "integer",
+                    "description": "Time gap (in seconds) between two consecutive probes of the SLA session.",
+                    "maximum": 604800,
+                    "minimum": 5
+                  },
+                  "history_interval": {
+                    "type": "integer",
+                    "description": "Period of time in seconds that IPSLA probe history in maintained. Minimum value is two times of probe-interval and Maximum is two hours.",
+                    "maximum": 7200,
+                    "minimum": 10
+                  },
+                  "http_sla": {
+                    "type": "object",
+                    "description": "Configuration parameters for HTTP sessions.",
+                    "properties": {
+                      "cache_disable": {
+                        "type": "boolean",
+                        "description": "Disables caching of the web pages."
+                      },
+                      "proxy_url": {
+                        "type": "string",
+                        "description": "URL address of the proxy server. Example: http://www.example.com:8080 ",
+                        "maxLength": 2000,
+                        "minLength": 1
+                      },
+                      "raw_request": {
+                        "type": "string",
+                        "description": "HTTP raw payload.",
+                        "maxLength": 1024,
+                        "minLength": 1
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "Request type for HTTP SLA: `get`: uses HTTP payload generated by the system. `raw`: raw_request specifies HTTP payload to be used for SLA probe.",
+                        "enum": [
+                          "get",
+                          "raw"
+                        ]
+                      },
+                      "url": {
+                        "type": "string",
+                        "description": "URL address to reach HTTP server. For HTTP probes, responder configuration is ignored and URL is used for host and port instead. If URL doesn't specify the port number, port 80 will be used for HTTP. Example: http://www.example.com:81  If the type is 'raw', then resource part and the parameters will be ignored. For example: if URL is 'http://www.example.com/path/example.html', then '/path/example.html' is ignored.",
+                        "maxLength": 2000,
+                        "minLength": 1
+                      },
+                      "version_number": {
+                        "type": "string",
+                        "description": "HTTP version number to be used with 'get' type probes. For HTTP 'raw' type, version number is part of the payload.",
+                        "enum": [
+                          "1.0",
+                          "1.1"
+                        ]
+                      }
+                    }
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [ipsla_source](#/ipsla_source)<br>Unique identifier of the specific IP SLA session.",
+                    "maxLength": 64,
+                    "minLength": 1
+                  },
+                  "payload_size": {
+                    "type": "integer",
+                    "description": "Size of the payload to add to ICMP echo and UDP echo probes. This value is zero for ICMP echo and 28 for other probes. This column value can be empty.",
+                    "maximum": 1440,
+                    "minimum": 0
+                  },
+                  "persistence": {
+                    "type": "string",
+                    "description": "Persistence of IPSLA session, i.e how the IP SLA session is provisioned: `persistent`   :  IP SLA session created by CLI or REST that will be retained                      over system reboot. `volatile`     :  IP SLA session typically created by Aruba Central                      that will not be reatined over system reboot.",
+                    "enum": [
+                      "persistent",
+                      "volatile"
+                    ]
+                  },
+                  "responder": {
+                    "type": "object",
+                    "description": "IP SLA responder address. Has to be populated for all SLA types except for HTTP/s that uses URL instead.",
+                    "properties": {
+                      "hostname": {
+                        "type": "string",
+                        "description": "Hostname, FQDN or IPv4/IPv6 address of the IP SLA responder. Ignored for HTTP/s type, URL is used instead.",
+                        "maxLength": 256,
+                        "minLength": 1
+                      },
+                      "port": {
+                        "type": "integer",
+                        "description": "Transport layer port number of the IP SLA responder. Responder port number is not needed for icmp_echo and ignored for HTTP/S.",
+                        "maximum": 65535,
+                        "minimum": 1
+                      }
+                    }
+                  },
+                  "source_interface": {
+                    "type": "string",
+                    "description": "Reference Resource: [Port](#/Port)<br>Helps detemining the source IPv4/IPv6 address for the probes. If interface have both IPv4 and IPv6 address, IP is chosen based on the destination IP.If source_ip is present, then source_interface  configuration is overriden. If both are missing, it will default to 'VRF.effective_source_ip.ipsla'. This column value can be empty."
+                  },
+                  "source_ip": {
+                    "type": "string",
+                    "description": "Source IPv4/IPv6 address for outgoing IP SLA packets. If not specified, the address will either follow source_interface configuration or if it's missing as well, will default to 'VRF.effective_source_ip.ipsla'. This column value can be empty.",
+                    "maxLength": 256
+                  },
+                  "source_port_number": {
+                    "type": "integer",
+                    "description": "In case of TCP and UDP probes, allows specification of the specific source port. If not specified the port will be chosen by the system. This column value can be empty.",
+                    "maximum": 65535,
+                    "minimum": 1
+                  },
+                  "tos": {
+                    "type": "integer",
+                    "description": "Type of Service (TOS) to set on the packets of UDP echo, UDP VOIP and ICMP echo probes.",
+                    "maximum": 255,
+                    "minimum": 0
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "Type of IP SLA: `icmp_echo`:         measures Round Trip Time(RTT) between source and                      responder using ICMP. `udp_echo`:          measures one way or RTT latency between                      the source and the responder using UDP. `tcp_connect`:       measures the time that it takes to perform TCP Connect                      operation between the source and the responder. `udp_jitter_voip`:   measures packet loss, one way delay, RTT,                      Mean Opinion Scores (MOS),                      (Impairment) Calculated Planning Impairment Factor (ICPIF)                      between the source and the responder using VOIP traffic. `http`:              measures HTTP response time for a web page.                      This includes the time taken for DNS resolution, TCP connect                      and fetching of the web page. 'dns':               measures the time taken for DNS resolution                      for the given hostname and nameserver. 'dhcp':              measures the time taken to perform DHCP operation                      on the given source interface.",
+                    "enum": [
+                      "icmp_echo",
+                      "udp_echo",
+                      "tcp_connect",
+                      "udp_jitter_voip",
+                      "http",
+                      "dns",
+                      "dhcp"
+                    ]
+                  },
+                  "voip_jitter_sla": {
+                    "type": "object",
+                    "description": "Configuration parameters for VOIP jitter",
+                    "properties": {
+                      "advantage_factor": {
+                        "type": "integer",
+                        "description": "Advantage factor value for VOIP jitter.",
+                        "maximum": 20,
+                        "minimum": 0
+                      },
+                      "codec_type": {
+                        "type": "string",
+                        "description": "CODEC to be used for the probes.",
+                        "enum": [
+                          "g711a",
+                          "g711u",
+                          "g729a"
+                        ]
+                      }
+                    }
+                  },
+                  "vrf": {
+                    "type": "string",
+                    "description": "Reference Resource: [VRF](#/VRF)<br>VRF to be used for sending the probes."
+                  }
+                },
+                "required": [
+                  "name",
+                  "type",
+                  "vrf"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/system/ipsla_sources/{ipsla_source.name}": {
+      "get": {
+        "tags": [
+          "ipsla_source"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "domain_name_server": {
+                      "type": "string",
+                      "description": "IPv4/IPv6 address of the DNS server to be used for resolve destination hostnames. If not provided, name server for the respective VRF will be used instead. This column value can be empty.",
+                      "maxLength": 256
+                    },
+                    "effective_source_ip": {
+                      "type": "string",
+                      "description": "Source IP that is being used by the IP SLA outgoing probes that belong to this specific session.  IP address is selected using following priority: 1. source_ip 2. source_interface 3. VRF.effective_source_ip.ipsla  If neither of them is populated, then regular routing rules takes place.",
+                      "maxLength": 256,
+                      "minLength": 7
+                    },
+                    "enable": {
+                      "type": "boolean",
+                      "description": "Enables IP SLA session."
+                    },
+                    "frequency": {
+                      "type": "integer",
+                      "description": "Time gap (in seconds) between two consecutive probes of the SLA session.",
+                      "maximum": 604800,
+                      "minimum": 5
+                    },
+                    "history_interval": {
+                      "type": "integer",
+                      "description": "Period of time in seconds that IPSLA probe history in maintained. Minimum value is two times of probe-interval and Maximum is two hours.",
+                      "maximum": 7200,
+                      "minimum": 10
+                    },
+                    "history_sla_results": {
+                      "type": "object",
+                      "description": "Historical results of the session. Updated only when requested. Derived from SLA statistics and results obtained during the history interval period.",
+                      "properties": {
+                        "average_dns_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average time taken to complete DNS resolution in last history_interval period."
+                        },
+                        "average_ds_delays": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average delay on the destination to source direction in last history_interval period. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "average_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average RTT value (in milliseconds) calculated in last history_interval period."
+                        },
+                        "average_sd_delays": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average delay on the source to destination direction in last history_interval period. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "average_tcpconnect_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average time taken to establish TCP connection in last history_interval period."
+                        },
+                        "average_tlsconnect_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average time taken to establish TLS connection in last history_interval period."
+                        },
+                        "bind_errors": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times failed to bind interface or ip address in last history_interval priod."
+                        },
+                        "destination_address_unreachable_count": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times destination address was unreachable in last history_interval period."
+                        },
+                        "dns_error": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS error occurred in last history_interval period."
+                        },
+                        "dns_resolution_failures": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed in last history_interval period."
+                        },
+                        "http_error": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times HTTP/S error occurred in last history_interval period."
+                        },
+                        "max_dns_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum time taken to complete DNS resolution in last history_interval period."
+                        },
+                        "max_ds_delay": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum delay on the destination to source direction in last history_interval period. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "max_negative_jitter_ds": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum negative jitter on the destination to source direction in last history_interval period."
+                        },
+                        "max_negative_jitter_sd": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum negative jitter on the source to destination direction in last history_interval period."
+                        },
+                        "max_positive_ds_jitter": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum positive jitter on destination to source direction in last history_interval period."
+                        },
+                        "max_positive_sd_jitter": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum positive jitter on source to destination direction in last history_interval period."
+                        },
+                        "max_sd_delay": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum delay on the source to destination direction in last history_interval period. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "max_tcpconnect_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum time taken to establish TCP connection in last history_interval period."
+                        },
+                        "max_tlsconnect_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum time taken to establish TLS connection in last history_interval period."
+                        },
+                        "maximum_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum RTT value (in milliseconds) in last history_interval period."
+                        },
+                        "min_dns_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum time taken to complete DNS resolution in last history_interval period."
+                        },
+                        "min_ds_delay": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum delay on the destination to source direction in last history_interval period. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "min_negative_jitter_ds": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum negative jitter on the destination to source direction in last history_interval period."
+                        },
+                        "min_negative_jitter_sd": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum negative jitter on the source to destination direction in last history_interval period."
+                        },
+                        "min_positive_ds_jitter": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum positive jitter on destination to source direction in last history_interval period."
+                        },
+                        "min_positive_sd_jitter": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum positive jitter on source to destination direction in last history_interval period."
+                        },
+                        "min_sd_delay": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum delay on the source to destination direction in last history_interval period. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "min_tcpconnect_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum time taken to establish TCP connection in last history_interval period."
+                        },
+                        "min_tlsconnect_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum time taken to establish TLS connection in last history_interval period."
+                        },
+                        "minimum_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum RTT value (in milliseconds) in last history_interval period."
+                        },
+                        "negative_ds_jitter_average": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average of negative jitters that occurred on the destination to source direction in last history_interval period."
+                        },
+                        "negative_ds_jitter_number": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times negative jitter occurred on the destination to source direction in last history_interval period."
+                        },
+                        "negative_ds_jitter_sum": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Sum of negative jitters that occurred on the destination to source direction in last history_interval period."
+                        },
+                        "negative_sd_jitter_average": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average of negative jitters that occurred on the source to destination direction in last history_interval period."
+                        },
+                        "negative_sd_jitter_number": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times negative jitter occurred on the source to destination direction in last history_interval period."
+                        },
+                        "negative_sd_jitter_sum": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Sum of negative jitters that occurred on the source to destination direction in last history_interval period."
+                        },
+                        "num_of_packets_rx": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of packets received in last history_interval period."
+                        },
+                        "num_of_packets_tx": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of packets transmitted in last history_interval period."
+                        },
+                        "positive_ds_jitter_average": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average of positive jitters that occurred on the destination to source direction in last history_interval period."
+                        },
+                        "positive_ds_jitter_count": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times positive jitter occurred on the destination to source direction in last history_interval period."
+                        },
+                        "positive_ds_jitter_sum": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Sum of positive jitters that occurred on the destination to source direction in last history_interval period."
+                        },
+                        "positive_sd_jitter_average": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average of positive jitters that occurred on the source to destination direction in last history_interval period."
+                        },
+                        "positive_sd_jitter_count": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times positive jitter occurred on the source to destination direction in last history_interval period."
+                        },
+                        "positive_sd_jitter_sum": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Sum of positive jitters that occurred on the source to destination direction in last history_interval period."
+                        },
+                        "probes_timed_out": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of requests that timed out in last history_interval period."
+                        },
+                        "probes_transmitted": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of successful probes that were transmitted in last history_interval priod."
+                        },
+                        "socket_receive_errors": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times failed to receive packet in last history_interval priod."
+                        },
+                        "ssl_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times SSL handshake was completed in last history_interval period."
+                        },
+                        "transmission_errors": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times failed to transmit a probe in last history_interval priod."
+                        },
+                        "voip_icpif": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Calculated Planning Impairment Factor(ICPIF) value. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "voip_mos": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Mean Opinion Square value. Applicable only for UDP VOIP jitter probes."
+                        }
+                      }
+                    },
+                    "http_sla": {
+                      "type": "object",
+                      "description": "Configuration parameters for HTTP sessions.",
+                      "properties": {
+                        "cache_disable": {
+                          "type": "boolean",
+                          "description": "Disables caching of the web pages."
+                        },
+                        "proxy_url": {
+                          "type": "string",
+                          "description": "URL address of the proxy server. Example: http://www.example.com:8080 ",
+                          "maxLength": 2000,
+                          "minLength": 1
+                        },
+                        "raw_request": {
+                          "type": "string",
+                          "description": "HTTP raw payload.",
+                          "maxLength": 1024,
+                          "minLength": 1
+                        },
+                        "type": {
+                          "type": "string",
+                          "description": "Request type for HTTP SLA: `get`: uses HTTP payload generated by the system. `raw`: raw_request specifies HTTP payload to be used for SLA probe.",
+                          "enum": [
+                            "get",
+                            "raw"
+                          ]
+                        },
+                        "url": {
+                          "type": "string",
+                          "description": "URL address to reach HTTP server. For HTTP probes, responder configuration is ignored and URL is used for host and port instead. If URL doesn't specify the port number, port 80 will be used for HTTP. Example: http://www.example.com:81  If the type is 'raw', then resource part and the parameters will be ignored. For example: if URL is 'http://www.example.com/path/example.html', then '/path/example.html' is ignored.",
+                          "maxLength": 2000,
+                          "minLength": 1
+                        },
+                        "version_number": {
+                          "type": "string",
+                          "description": "HTTP version number to be used with 'get' type probes. For HTTP 'raw' type, version number is part of the payload.",
+                          "enum": [
+                            "1.0",
+                            "1.1"
+                          ]
+                        }
+                      }
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [ipsla_source](#/ipsla_source)<br>Unique identifier of the specific IP SLA session.",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "payload_size": {
+                      "type": "integer",
+                      "description": "Size of the payload to add to ICMP echo and UDP echo probes. This value is zero for ICMP echo and 28 for other probes. This column value can be empty.",
+                      "maximum": 1440,
+                      "minimum": 0
+                    },
+                    "persistence": {
+                      "type": "string",
+                      "description": "Persistence of IPSLA session, i.e how the IP SLA session is provisioned: `persistent`   :  IP SLA session created by CLI or REST that will be retained                      over system reboot. `volatile`     :  IP SLA session typically created by Aruba Central                      that will not be reatined over system reboot.",
+                      "enum": [
+                        "persistent",
+                        "volatile"
+                      ]
+                    },
+                    "responder": {
+                      "type": "object",
+                      "description": "IP SLA responder address. Has to be populated for all SLA types except for HTTP/s that uses URL instead.",
+                      "properties": {
+                        "hostname": {
+                          "type": "string",
+                          "description": "Hostname, FQDN or IPv4/IPv6 address of the IP SLA responder. Ignored for HTTP/s type, URL is used instead.",
+                          "maxLength": 256,
+                          "minLength": 1
+                        },
+                        "port": {
+                          "type": "integer",
+                          "description": "Transport layer port number of the IP SLA responder. Responder port number is not needed for icmp_echo and ignored for HTTP/S.",
+                          "maximum": 65535,
+                          "minimum": 1
+                        }
+                      }
+                    },
+                    "sla_results": {
+                      "type": "object",
+                      "description": "Most recent results of the session.",
+                      "properties": {
+                        "average_ds_delays": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average delay on the destination to source direction. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "average_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average RTT value (in milliseconds) calculated on this session."
+                        },
+                        "average_sd_delays": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average delay on the source to destination direction. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "dhcp_server_ip": {
+                          "type": "string",
+                          "description": "IP of the DHCP server that responded to the latest SLA probe."
+                        },
+                        "dns_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time taken to complete last DNS resolution."
+                        },
+                        "dnserror": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "DNS error that occurred during the last DNS query."
+                        },
+                        "httperror": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "HTTP/S error that occurred during the last HTTP/S transaction."
+                        },
+                        "httptransaction_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time taken to complete last http transaction."
+                        },
+                        "max_ds_delay": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum delay on the destination to source direction. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "max_negative_jitter_ds": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum negative jitter on the destination to source direction."
+                        },
+                        "max_negative_jitter_sd": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum negative jitter on the source to destination direction."
+                        },
+                        "max_positive_ds_jitter": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum positive jitter on destination to source direction."
+                        },
+                        "max_positive_sd_jitter": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum positive jitter on source to destination direction."
+                        },
+                        "max_sd_delay": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum delay on the source to destination direction. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "maximum_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Maximum RTT value (in milliseconds) on this session."
+                        },
+                        "min_ds_delay": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum delay on the destination to source direction. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "min_negative_jitter_ds": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum negative jitter on the destination to source direction."
+                        },
+                        "min_negative_jitter_sd": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum negative jitter on the source to destination direction."
+                        },
+                        "min_positive_ds_jitter": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum positive jitter on destination to source direction."
+                        },
+                        "min_positive_sd_jitter": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum positive jitter on source to destination direction."
+                        },
+                        "min_sd_delay": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum delay on the source to destination direction. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "minimum_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Minimum RTT value (in milliseconds) on this session."
+                        },
+                        "negative_ds_jitter_average": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average of negative jitters that occurred on the destination to source direction."
+                        },
+                        "negative_ds_jitter_number": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times negative jitter occurred on the destination to source direction."
+                        },
+                        "negative_ds_jitter_sum": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Sum of negative jitters that occurred on the destination to source direction."
+                        },
+                        "negative_sd_jitter_average": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average of negative jitters that occurred on the source to destination direction."
+                        },
+                        "negative_sd_jitter_number": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times negative jitter occurred on the source to destination direction."
+                        },
+                        "negative_sd_jitter_sum": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Sum of negative jitters that occurred on the source to destination direction."
+                        },
+                        "num_of_packets_rx": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of packets received in the last probe."
+                        },
+                        "num_of_packets_tx": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of packets transmitted in the last probe."
+                        },
+                        "positive_ds_jitter_average": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average of positive jitters that occurred on the destination to source direction."
+                        },
+                        "positive_ds_jitter_count": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times positive jitter occurred on the destination to source direction."
+                        },
+                        "positive_ds_jitter_sum": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Sum of positive jitters that occurred on the destination to source direction."
+                        },
+                        "positive_sd_jitter_average": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Average of positive jitters that occurred on the source to destination direction."
+                        },
+                        "positive_sd_jitter_count": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times positive jitter occurred on the source to destination direction."
+                        },
+                        "positive_sd_jitter_sum": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Sum of positive jitters that occurred on the source to destination direction."
+                        },
+                        "resolved_ip": {
+                          "type": "string",
+                          "description": "IP resolved from the latest DNS or DHCP probe."
+                        },
+                        "ssl_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time taken for the last SSL handshake."
+                        },
+                        "tcpconnect_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time taken to establish last TCP connection ."
+                        },
+                        "tlsconnect_rtt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time taken to establish last TLS connection ."
+                        },
+                        "voip_icpif": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Calculated Planning Impairment Factor(ICPIF) value. Applicable only for UDP VOIP jitter probes."
+                        },
+                        "voip_mos": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Mean Opinion Square value. Applicable only for UDP VOIP jitter probes."
+                        }
+                      }
+                    },
+                    "source_interface": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>Helps detemining the source IPv4/IPv6 address for the probes. If interface have both IPv4 and IPv6 address, IP is chosen based on the destination IP.If source_ip is present, then source_interface  configuration is overriden. If both are missing, it will default to 'VRF.effective_source_ip.ipsla'. This column value can be empty."
+                    },
+                    "source_ip": {
+                      "type": "string",
+                      "description": "Source IPv4/IPv6 address for outgoing IP SLA packets. If not specified, the address will either follow source_interface configuration or if it's missing as well, will default to 'VRF.effective_source_ip.ipsla'. This column value can be empty.",
+                      "maxLength": 256
+                    },
+                    "source_port_number": {
+                      "type": "integer",
+                      "description": "In case of TCP and UDP probes, allows specification of the specific source port. If not specified the port will be chosen by the system. This column value can be empty.",
+                      "maximum": 65535,
+                      "minimum": 1
+                    },
+                    "statistics": {
+                      "type": "object",
+                      "description": "Counters for all SLA probe types. Updated after every probe.",
+                      "properties": {
+                        "bind_error": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times failed to bind interface or ip address."
+                        },
+                        "destination_address_unreachable_count": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times destination address was unreachable."
+                        },
+                        "dhcp_failed": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DHCP operation failed"
+                        },
+                        "dhcp_nack": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DHCP operation failed due to DHCP-NACK from the server"
+                        },
+                        "dhcp_no_offer": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DHCP operation failed because DHCP-Offer is not received"
+                        },
+                        "dns_format_error": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed due to DNS query format error. RFC 1035 RCODE: 1"
+                        },
+                        "dns_name_exists": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed due to 'Name-Exists when it should not' error. RFC 2136 RCODE: 6"
+                        },
+                        "dns_non_existent_domain": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed due to non-existent domain. RFC 1035 RCODE: 3"
+                        },
+                        "dns_not_authoritative": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed due to 'Server Not Authoritative for zone' error. RFC 2136 RCODE: 9"
+                        },
+                        "dns_not_implemented": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed due to not implemented error. RFC 1035 RCODE: 4"
+                        },
+                        "dns_not_zone": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed due to 'Name not contained in zone' error. RFC 2136 RCODE: 10"
+                        },
+                        "dns_query_refused": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed due to query refused error. RFC 1035 RCODE: 5"
+                        },
+                        "dns_resolution_failures": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed."
+                        },
+                        "dns_rrset_exists": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed due to 'RR Set Exists when it should not' error. RFC 2136 RCODE: 7"
+                        },
+                        "dns_server_failure": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times DNS resolution failed due to server failure error. RFC 1035 RCODE: 2"
+                        },
+                        "probes_timed_out": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of requests that timed out."
+                        },
+                        "probes_transmitted": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of successful probes that were transmitted ."
+                        },
+                        "socket_receive_error": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times failed to receive packet."
+                        },
+                        "transmission_error": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times failed to transmit a probe."
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "object",
+                      "description": "Status of the IP SLA session.",
+                      "properties": {
+                        "last_probe_time": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time (in seconds from epoch) at which the last probe was initiated."
+                        },
+                        "state": {
+                          "type": "string",
+                          "description": "Operational state of the session: `running`:                    fully operational `bind_error`:                 another service is using the same source port `dns_resolution_error`:       failed to resolve destination hostname `no_route`:                   no available route to the responder `internal_error`:             unexpected error prevents SLA session `disabled`:                   the session is administratively disabled `configuration_incomplete`:   some of the necessary parameters are not                               configured to schedule the given SLA `ntp_not_synchronised`:       System clock is not synchronized with NTP server `waiting_to_run`:             Waiting for the current set of running sessions to complete.                               IPSLA sessions run in turns and not all at the same time.",
+                          "enum": [
+                            "running",
+                            "bind_error",
+                            "dns_resolution_error",
+                            "no_route",
+                            "internal_error",
+                            "disabled",
+                            "configuration_incomplete",
+                            "ntp_not_synchronized",
+                            "waiting_to_run"
+                          ]
+                        }
+                      }
+                    },
+                    "tos": {
+                      "type": "integer",
+                      "description": "Type of Service (TOS) to set on the packets of UDP echo, UDP VOIP and ICMP echo probes.",
+                      "maximum": 255,
+                      "minimum": 0
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Type of IP SLA: `icmp_echo`:         measures Round Trip Time(RTT) between source and                      responder using ICMP. `udp_echo`:          measures one way or RTT latency between                      the source and the responder using UDP. `tcp_connect`:       measures the time that it takes to perform TCP Connect                      operation between the source and the responder. `udp_jitter_voip`:   measures packet loss, one way delay, RTT,                      Mean Opinion Scores (MOS),                      (Impairment) Calculated Planning Impairment Factor (ICPIF)                      between the source and the responder using VOIP traffic. `http`:              measures HTTP response time for a web page.                      This includes the time taken for DNS resolution, TCP connect                      and fetching of the web page. 'dns':               measures the time taken for DNS resolution                      for the given hostname and nameserver. 'dhcp':              measures the time taken to perform DHCP operation                      on the given source interface.",
+                      "enum": [
+                        "icmp_echo",
+                        "udp_echo",
+                        "tcp_connect",
+                        "udp_jitter_voip",
+                        "http",
+                        "dns",
+                        "dhcp"
+                      ]
+                    },
+                    "voip_jitter_sla": {
+                      "type": "object",
+                      "description": "Configuration parameters for VOIP jitter",
+                      "properties": {
+                        "advantage_factor": {
+                          "type": "integer",
+                          "description": "Advantage factor value for VOIP jitter.",
+                          "maximum": 20,
+                          "minimum": 0
+                        },
+                        "codec_type": {
+                          "type": "string",
+                          "description": "CODEC to be used for the probes.",
+                          "enum": [
+                            "g711a",
+                            "g711u",
+                            "g729a"
+                          ]
+                        }
+                      }
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [VRF](#/VRF)<br>VRF to be used for sending the probes."
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "type",
+                    "vrf"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "ipsla_source.name",
+            "in": "path",
+            "description": "Reference Resource: [ipsla_source](#/ipsla_source)<br>Unique identifier of the specific IP SLA session.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "source_interface",
+                  "name",
+                  "payload_size",
+                  "persistence",
+                  "source_ip",
+                  "effective_source_ip",
+                  "type",
+                  "status",
+                  "sla_results",
+                  "history_interval",
+                  "vrf",
+                  "frequency",
+                  "voip_jitter_sla",
+                  "tos",
+                  "source_port_number",
+                  "http_sla",
+                  "domain_name_server",
+                  "responder",
+                  "statistics",
+                  "history_sla_results",
+                  "enable"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "ipsla_source"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "domain_name_server": {
+                    "type": "string",
+                    "description": "IPv4/IPv6 address of the DNS server to be used for resolve destination hostnames. If not provided, name server for the respective VRF will be used instead. This column value can be empty.",
+                    "maxLength": 256
+                  },
+                  "enable": {
+                    "type": "boolean",
+                    "description": "Enables IP SLA session."
+                  },
+                  "frequency": {
+                    "type": "integer",
+                    "description": "Time gap (in seconds) between two consecutive probes of the SLA session.",
+                    "maximum": 604800,
+                    "minimum": 5
+                  },
+                  "history_interval": {
+                    "type": "integer",
+                    "description": "Period of time in seconds that IPSLA probe history in maintained. Minimum value is two times of probe-interval and Maximum is two hours.",
+                    "maximum": 7200,
+                    "minimum": 10
+                  },
+                  "http_sla": {
+                    "type": "object",
+                    "description": "Configuration parameters for HTTP sessions.",
+                    "properties": {
+                      "cache_disable": {
+                        "type": "boolean",
+                        "description": "Disables caching of the web pages."
+                      },
+                      "proxy_url": {
+                        "type": "string",
+                        "description": "URL address of the proxy server. Example: http://www.example.com:8080 ",
+                        "maxLength": 2000,
+                        "minLength": 1
+                      },
+                      "raw_request": {
+                        "type": "string",
+                        "description": "HTTP raw payload.",
+                        "maxLength": 1024,
+                        "minLength": 1
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "Request type for HTTP SLA: `get`: uses HTTP payload generated by the system. `raw`: raw_request specifies HTTP payload to be used for SLA probe.",
+                        "enum": [
+                          "get",
+                          "raw"
+                        ]
+                      },
+                      "url": {
+                        "type": "string",
+                        "description": "URL address to reach HTTP server. For HTTP probes, responder configuration is ignored and URL is used for host and port instead. If URL doesn't specify the port number, port 80 will be used for HTTP. Example: http://www.example.com:81  If the type is 'raw', then resource part and the parameters will be ignored. For example: if URL is 'http://www.example.com/path/example.html', then '/path/example.html' is ignored.",
+                        "maxLength": 2000,
+                        "minLength": 1
+                      },
+                      "version_number": {
+                        "type": "string",
+                        "description": "HTTP version number to be used with 'get' type probes. For HTTP 'raw' type, version number is part of the payload.",
+                        "enum": [
+                          "1.0",
+                          "1.1"
+                        ]
+                      }
+                    }
+                  },
+                  "payload_size": {
+                    "type": "integer",
+                    "description": "Size of the payload to add to ICMP echo and UDP echo probes. This value is zero for ICMP echo and 28 for other probes. This column value can be empty.",
+                    "maximum": 1440,
+                    "minimum": 0
+                  },
+                  "responder": {
+                    "type": "object",
+                    "description": "IP SLA responder address. Has to be populated for all SLA types except for HTTP/s that uses URL instead.",
+                    "properties": {
+                      "hostname": {
+                        "type": "string",
+                        "description": "Hostname, FQDN or IPv4/IPv6 address of the IP SLA responder. Ignored for HTTP/s type, URL is used instead.",
+                        "maxLength": 256,
+                        "minLength": 1
+                      },
+                      "port": {
+                        "type": "integer",
+                        "description": "Transport layer port number of the IP SLA responder. Responder port number is not needed for icmp_echo and ignored for HTTP/S.",
+                        "maximum": 65535,
+                        "minimum": 1
+                      }
+                    }
+                  },
+                  "source_interface": {
+                    "type": "string",
+                    "description": "Reference Resource: [Port](#/Port)<br>Helps detemining the source IPv4/IPv6 address for the probes. If interface have both IPv4 and IPv6 address, IP is chosen based on the destination IP.If source_ip is present, then source_interface  configuration is overriden. If both are missing, it will default to 'VRF.effective_source_ip.ipsla'. This column value can be empty."
+                  },
+                  "source_ip": {
+                    "type": "string",
+                    "description": "Source IPv4/IPv6 address for outgoing IP SLA packets. If not specified, the address will either follow source_interface configuration or if it's missing as well, will default to 'VRF.effective_source_ip.ipsla'. This column value can be empty.",
+                    "maxLength": 256
+                  },
+                  "source_port_number": {
+                    "type": "integer",
+                    "description": "In case of TCP and UDP probes, allows specification of the specific source port. If not specified the port will be chosen by the system. This column value can be empty.",
+                    "maximum": 65535,
+                    "minimum": 1
+                  },
+                  "tos": {
+                    "type": "integer",
+                    "description": "Type of Service (TOS) to set on the packets of UDP echo, UDP VOIP and ICMP echo probes.",
+                    "maximum": 255,
+                    "minimum": 0
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "Type of IP SLA: `icmp_echo`:         measures Round Trip Time(RTT) between source and                      responder using ICMP. `udp_echo`:          measures one way or RTT latency between                      the source and the responder using UDP. `tcp_connect`:       measures the time that it takes to perform TCP Connect                      operation between the source and the responder. `udp_jitter_voip`:   measures packet loss, one way delay, RTT,                      Mean Opinion Scores (MOS),                      (Impairment) Calculated Planning Impairment Factor (ICPIF)                      between the source and the responder using VOIP traffic. `http`:              measures HTTP response time for a web page.                      This includes the time taken for DNS resolution, TCP connect                      and fetching of the web page. 'dns':               measures the time taken for DNS resolution                      for the given hostname and nameserver. 'dhcp':              measures the time taken to perform DHCP operation                      on the given source interface.",
+                    "enum": [
+                      "icmp_echo",
+                      "udp_echo",
+                      "tcp_connect",
+                      "udp_jitter_voip",
+                      "http",
+                      "dns",
+                      "dhcp"
+                    ]
+                  },
+                  "voip_jitter_sla": {
+                    "type": "object",
+                    "description": "Configuration parameters for VOIP jitter",
+                    "properties": {
+                      "advantage_factor": {
+                        "type": "integer",
+                        "description": "Advantage factor value for VOIP jitter.",
+                        "maximum": 20,
+                        "minimum": 0
+                      },
+                      "codec_type": {
+                        "type": "string",
+                        "description": "CODEC to be used for the probes.",
+                        "enum": [
+                          "g711a",
+                          "g711u",
+                          "g729a"
+                        ]
+                      }
+                    }
+                  },
+                  "vrf": {
+                    "type": "string",
+                    "description": "Reference Resource: [VRF](#/VRF)<br>VRF to be used for sending the probes."
+                  }
+                },
+                "required": [
+                  "type",
+                  "vrf"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "ipsla_source.name",
+            "in": "path",
+            "description": "Reference Resource: [ipsla_source](#/ipsla_source)<br>Unique identifier of the specific IP SLA session.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "ipsla_source"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "ipsla_source.name",
+            "in": "path",
+            "description": "Reference Resource: [ipsla_source](#/ipsla_source)<br>Unique identifier of the specific IP SLA session.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "ipsla_source"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "domain_name_server": {
+                    "type": "string",
+                    "description": "IPv4/IPv6 address of the DNS server to be used for resolve destination hostnames. If not provided, name server for the respective VRF will be used instead. This column value can be empty.",
+                    "maxLength": 256
+                  },
+                  "enable": {
+                    "type": "boolean",
+                    "description": "Enables IP SLA session."
+                  },
+                  "frequency": {
+                    "type": "integer",
+                    "description": "Time gap (in seconds) between two consecutive probes of the SLA session.",
+                    "maximum": 604800,
+                    "minimum": 5
+                  },
+                  "history_interval": {
+                    "type": "integer",
+                    "description": "Period of time in seconds that IPSLA probe history in maintained. Minimum value is two times of probe-interval and Maximum is two hours.",
+                    "maximum": 7200,
+                    "minimum": 10
+                  },
+                  "http_sla": {
+                    "type": "object",
+                    "description": "Configuration parameters for HTTP sessions.",
+                    "properties": {
+                      "cache_disable": {
+                        "type": "boolean",
+                        "description": "Disables caching of the web pages."
+                      },
+                      "proxy_url": {
+                        "type": "string",
+                        "description": "URL address of the proxy server. Example: http://www.example.com:8080 ",
+                        "maxLength": 2000,
+                        "minLength": 1
+                      },
+                      "raw_request": {
+                        "type": "string",
+                        "description": "HTTP raw payload.",
+                        "maxLength": 1024,
+                        "minLength": 1
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "Request type for HTTP SLA: `get`: uses HTTP payload generated by the system. `raw`: raw_request specifies HTTP payload to be used for SLA probe.",
+                        "enum": [
+                          "get",
+                          "raw"
+                        ]
+                      },
+                      "url": {
+                        "type": "string",
+                        "description": "URL address to reach HTTP server. For HTTP probes, responder configuration is ignored and URL is used for host and port instead. If URL doesn't specify the port number, port 80 will be used for HTTP. Example: http://www.example.com:81  If the type is 'raw', then resource part and the parameters will be ignored. For example: if URL is 'http://www.example.com/path/example.html', then '/path/example.html' is ignored.",
+                        "maxLength": 2000,
+                        "minLength": 1
+                      },
+                      "version_number": {
+                        "type": "string",
+                        "description": "HTTP version number to be used with 'get' type probes. For HTTP 'raw' type, version number is part of the payload.",
+                        "enum": [
+                          "1.0",
+                          "1.1"
+                        ]
+                      }
+                    }
+                  },
+                  "payload_size": {
+                    "type": "integer",
+                    "description": "Size of the payload to add to ICMP echo and UDP echo probes. This value is zero for ICMP echo and 28 for other probes. This column value can be empty.",
+                    "maximum": 1440,
+                    "minimum": 0
+                  },
+                  "responder": {
+                    "type": "object",
+                    "description": "IP SLA responder address. Has to be populated for all SLA types except for HTTP/s that uses URL instead.",
+                    "properties": {
+                      "hostname": {
+                        "type": "string",
+                        "description": "Hostname, FQDN or IPv4/IPv6 address of the IP SLA responder. Ignored for HTTP/s type, URL is used instead.",
+                        "maxLength": 256,
+                        "minLength": 1
+                      },
+                      "port": {
+                        "type": "integer",
+                        "description": "Transport layer port number of the IP SLA responder. Responder port number is not needed for icmp_echo and ignored for HTTP/S.",
+                        "maximum": 65535,
+                        "minimum": 1
+                      }
+                    }
+                  },
+                  "source_interface": {
+                    "type": "string",
+                    "description": "Reference Resource: [Port](#/Port)<br>Helps detemining the source IPv4/IPv6 address for the probes. If interface have both IPv4 and IPv6 address, IP is chosen based on the destination IP.If source_ip is present, then source_interface  configuration is overriden. If both are missing, it will default to 'VRF.effective_source_ip.ipsla'. This column value can be empty."
+                  },
+                  "source_ip": {
+                    "type": "string",
+                    "description": "Source IPv4/IPv6 address for outgoing IP SLA packets. If not specified, the address will either follow source_interface configuration or if it's missing as well, will default to 'VRF.effective_source_ip.ipsla'. This column value can be empty.",
+                    "maxLength": 256
+                  },
+                  "source_port_number": {
+                    "type": "integer",
+                    "description": "In case of TCP and UDP probes, allows specification of the specific source port. If not specified the port will be chosen by the system. This column value can be empty.",
+                    "maximum": 65535,
+                    "minimum": 1
+                  },
+                  "tos": {
+                    "type": "integer",
+                    "description": "Type of Service (TOS) to set on the packets of UDP echo, UDP VOIP and ICMP echo probes.",
+                    "maximum": 255,
+                    "minimum": 0
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "Type of IP SLA: `icmp_echo`:         measures Round Trip Time(RTT) between source and                      responder using ICMP. `udp_echo`:          measures one way or RTT latency between                      the source and the responder using UDP. `tcp_connect`:       measures the time that it takes to perform TCP Connect                      operation between the source and the responder. `udp_jitter_voip`:   measures packet loss, one way delay, RTT,                      Mean Opinion Scores (MOS),                      (Impairment) Calculated Planning Impairment Factor (ICPIF)                      between the source and the responder using VOIP traffic. `http`:              measures HTTP response time for a web page.                      This includes the time taken for DNS resolution, TCP connect                      and fetching of the web page. 'dns':               measures the time taken for DNS resolution                      for the given hostname and nameserver. 'dhcp':              measures the time taken to perform DHCP operation                      on the given source interface.",
+                    "enum": [
+                      "icmp_echo",
+                      "udp_echo",
+                      "tcp_connect",
+                      "udp_jitter_voip",
+                      "http",
+                      "dns",
+                      "dhcp"
+                    ]
+                  },
+                  "voip_jitter_sla": {
+                    "type": "object",
+                    "description": "Configuration parameters for VOIP jitter",
+                    "properties": {
+                      "advantage_factor": {
+                        "type": "integer",
+                        "description": "Advantage factor value for VOIP jitter.",
+                        "maximum": 20,
+                        "minimum": 0
+                      },
+                      "codec_type": {
+                        "type": "string",
+                        "description": "CODEC to be used for the probes.",
+                        "enum": [
+                          "g711a",
+                          "g711u",
+                          "g729a"
+                        ]
+                      }
+                    }
+                  },
+                  "vrf": {
+                    "type": "string",
+                    "description": "Reference Resource: [VRF](#/VRF)<br>VRF to be used for sending the probes."
+                  }
+                },
+                "required": [
+                  "type",
+                  "vrf"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "ipsla_source.name",
+            "in": "path",
+            "description": "Reference Resource: [ipsla_source](#/ipsla_source)<br>Unique identifier of the specific IP SLA session.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

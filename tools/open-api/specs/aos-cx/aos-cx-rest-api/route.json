@@ -1,0 +1,594 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Route",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Route"
+    }
+  ],
+  "paths": {
+    "/system/vrfs/{VRF.name}/routes": {
+      "get": {
+        "tags": [
+          "Route"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "address_family": {
+                      "type": "string",
+                      "description": "Represents the address family for this entry. Default value is `ipv4`.",
+                      "enum": [
+                        "ipv4",
+                        "ipv6"
+                      ]
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "description": "Indicates any special attributes this Route entry has.",
+                      "properties": {
+                        "is_host_route": {
+                          "type": "boolean",
+                          "description": "`is_host_route`:  When this route attribute is set to true, it is programmed in the host table instead of the route table."
+                        }
+                      }
+                    },
+                    "distance": {
+                      "type": "integer",
+                      "description": "Administrative distance for the route entry. This value is populated every time a protocol or a user adds a new entry. The default value is 1 which is the default distance for static routes.",
+                      "maximum": 255,
+                      "minimum": 0
+                    },
+                    "from": {
+                      "type": "string",
+                      "description": "Protocol that is responsible for this entry: `bgp`:       the route is created by BGP protocol `ospf`:      the route is created by OSPF protocol `static`:    the route is configured by the user `connected`: the route is for a directly connected subnet 'local':     route for the IP address configured on the device itself 'bgp-unnumbered': route for the IP address configured on the unnumbered interface `bgp-unnumbered` : route for the IP address configured on unnumbered interface `rip`: the route is created by RIP protocol",
+                      "enum": [
+                        "connected",
+                        "static",
+                        "bgp",
+                        "ospf",
+                        "local",
+                        "rip",
+                        "bgp-unnumbered"
+                      ]
+                    },
+                    "metric": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "This is the BGP Multi Exit Discriminator (MED) attribute used in best path selection. The MED provides a dynamic way to influence another AS in the way to reach a certain route when there are multiple entry points for that AS.  BGP decision process takes weight, local preference, AS path, Origin and MED into account.  For selection, if all other factors are equal, the exit point with the lowest MED is preferred. Default value is 0",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "nexthops": {
+                      "type": "array",
+                      "description": "Reference Resource: [Nexthop](#/Nexthop)<br>List of all the nexthops for this entry. This will be empty in case of nullroute.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "prefix": {
+                      "type": "string",
+                      "description": "Reference Resource: [Route](#/Route)<br>IPv4 or IPv6 destination prefix and mask in the address/mask format. Example: 192.168.0.0/16",
+                      "maxLength": 49
+                    },
+                    "protocol_private": {
+                      "type": "boolean",
+                      "description": "Indicates that this row is a protocol specific route entry. The entries which have this value set, should not participate in routing. Example: BGP can store routes for reference and future selection but should not currently be used for forwarding. Default is `false`."
+                    },
+                    "route_age": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time (in seconds from Epoch) when this route was added.",
+                      "minimum": 0
+                    },
+                    "selected": {
+                      "type": "boolean",
+                      "description": "Route table can have entries which may not be selected for forwarding. This flag indicates if this entry is selected as an active route for forwarding. Default is `false`."
+                    },
+                    "source_vrfs": {
+                      "type": "array",
+                      "description": "Reference Resource: [VRF](#/VRF)<br>List of VRFs that this route originated from. This is only set for  routes that have been leaked from one VRF to another.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "sub_address_family": {
+                      "type": "string",
+                      "description": "Represents more information regarding this entry. Default is `unicast`.",
+                      "enum": [
+                        "unicast",
+                        "multicast",
+                        "vpn"
+                      ]
+                    },
+                    "sub_protocol_type": {
+                      "type": "string",
+                      "description": "Specifies the sub-protocol type of the route: ospf_intra_area : OSPF Intra Area route ospf_inter_area : OSPF Inter Area route ospf_type1_ext  : OSPF Extrenal Type-1 route ospf_type2_ext  : OSPF External Type-2 route ospf_type1_nssa : OSPF Type-1 NSSA route ospf_type2_nssa : OSPF Type-2 NSSA route bgp_int         : BGP Internal route bgp_ext         : BGP External route bgp_vpn         : BGP VPN route bgp_evpn        : BGP EVPN route"
+                    },
+                    "sub_type": {
+                      "type": "string",
+                      "description": "Indicates the type of route.",
+                      "enum": [
+                        "protected",
+                        "none"
+                      ]
+                    },
+                    "tag": {
+                      "type": "object",
+                      "description": "Reference Resource: [Nexthop](#/Nexthop)<br>Tag value associated with this route.",
+                      "properties": {
+                        "URI": {
+                          "type": "integer",
+                          "format": "int64",
+                          "maximum": 4294967295,
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Specifies whether the route is of type nullroute, reject, forward or local: `forward`:   the packets that match the route for destination will be forwarded              based on the nexthop entry. `reject`:    the packets that match the route for destination will be discarded              and an ICMP unreachable message is sent to the sender. `nullroute`: the packets that match the route for destination will be silently              discarded without sending any ICMP message to the sender. `nullroute`: the packets that match the route for destination will be silently              discarded without sending any ICMP message to the sender. 'local':     the packets that match the route for destination will be consumed by              the device and will not be forwarded.",
+                      "enum": [
+                        "forward",
+                        "nullroute",
+                        "reject",
+                        "local"
+                      ]
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [Route](#/Route)<br>VRF that the route belongs to."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "prefix",
+                  "protocol_private",
+                  "tag",
+                  "nexthops",
+                  "source_vrfs",
+                  "from",
+                  "sub_address_family",
+                  "metric",
+                  "sub_protocol_type",
+                  "type",
+                  "selected",
+                  "distance",
+                  "attributes",
+                  "sub_type",
+                  "address_family",
+                  "route_age"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/vrfs/{VRF.name}/routes/{Route.prefix}": {
+      "get": {
+        "tags": [
+          "Route"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "address_family": {
+                      "type": "string",
+                      "description": "Represents the address family for this entry. Default value is `ipv4`.",
+                      "enum": [
+                        "ipv4",
+                        "ipv6"
+                      ]
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "description": "Indicates any special attributes this Route entry has.",
+                      "properties": {
+                        "is_host_route": {
+                          "type": "boolean",
+                          "description": "`is_host_route`:  When this route attribute is set to true, it is programmed in the host table instead of the route table."
+                        }
+                      }
+                    },
+                    "distance": {
+                      "type": "integer",
+                      "description": "Administrative distance for the route entry. This value is populated every time a protocol or a user adds a new entry. The default value is 1 which is the default distance for static routes.",
+                      "maximum": 255,
+                      "minimum": 0
+                    },
+                    "from": {
+                      "type": "string",
+                      "description": "Protocol that is responsible for this entry: `bgp`:       the route is created by BGP protocol `ospf`:      the route is created by OSPF protocol `static`:    the route is configured by the user `connected`: the route is for a directly connected subnet 'local':     route for the IP address configured on the device itself 'bgp-unnumbered': route for the IP address configured on the unnumbered interface `bgp-unnumbered` : route for the IP address configured on unnumbered interface `rip`: the route is created by RIP protocol",
+                      "enum": [
+                        "connected",
+                        "static",
+                        "bgp",
+                        "ospf",
+                        "local",
+                        "rip",
+                        "bgp-unnumbered"
+                      ]
+                    },
+                    "metric": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "This is the BGP Multi Exit Discriminator (MED) attribute used in best path selection. The MED provides a dynamic way to influence another AS in the way to reach a certain route when there are multiple entry points for that AS.  BGP decision process takes weight, local preference, AS path, Origin and MED into account.  For selection, if all other factors are equal, the exit point with the lowest MED is preferred. Default value is 0",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "nexthops": {
+                      "type": "array",
+                      "description": "Reference Resource: [Nexthop](#/Nexthop)<br>List of all the nexthops for this entry. This will be empty in case of nullroute.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "prefix": {
+                      "type": "string",
+                      "description": "Reference Resource: [Route](#/Route)<br>IPv4 or IPv6 destination prefix and mask in the address/mask format. Example: 192.168.0.0/16",
+                      "maxLength": 49
+                    },
+                    "protocol_private": {
+                      "type": "boolean",
+                      "description": "Indicates that this row is a protocol specific route entry. The entries which have this value set, should not participate in routing. Example: BGP can store routes for reference and future selection but should not currently be used for forwarding. Default is `false`."
+                    },
+                    "route_age": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time (in seconds from Epoch) when this route was added.",
+                      "minimum": 0
+                    },
+                    "selected": {
+                      "type": "boolean",
+                      "description": "Route table can have entries which may not be selected for forwarding. This flag indicates if this entry is selected as an active route for forwarding. Default is `false`."
+                    },
+                    "source_vrfs": {
+                      "type": "array",
+                      "description": "Reference Resource: [VRF](#/VRF)<br>List of VRFs that this route originated from. This is only set for  routes that have been leaked from one VRF to another.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "sub_address_family": {
+                      "type": "string",
+                      "description": "Represents more information regarding this entry. Default is `unicast`.",
+                      "enum": [
+                        "unicast",
+                        "multicast",
+                        "vpn"
+                      ]
+                    },
+                    "sub_protocol_type": {
+                      "type": "string",
+                      "description": "Specifies the sub-protocol type of the route: ospf_intra_area : OSPF Intra Area route ospf_inter_area : OSPF Inter Area route ospf_type1_ext  : OSPF Extrenal Type-1 route ospf_type2_ext  : OSPF External Type-2 route ospf_type1_nssa : OSPF Type-1 NSSA route ospf_type2_nssa : OSPF Type-2 NSSA route bgp_int         : BGP Internal route bgp_ext         : BGP External route bgp_vpn         : BGP VPN route bgp_evpn        : BGP EVPN route"
+                    },
+                    "sub_type": {
+                      "type": "string",
+                      "description": "Indicates the type of route.",
+                      "enum": [
+                        "protected",
+                        "none"
+                      ]
+                    },
+                    "tag": {
+                      "type": "object",
+                      "description": "Reference Resource: [Nexthop](#/Nexthop)<br>Tag value associated with this route.",
+                      "properties": {
+                        "URI": {
+                          "type": "integer",
+                          "format": "int64",
+                          "maximum": 4294967295,
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Specifies whether the route is of type nullroute, reject, forward or local: `forward`:   the packets that match the route for destination will be forwarded              based on the nexthop entry. `reject`:    the packets that match the route for destination will be discarded              and an ICMP unreachable message is sent to the sender. `nullroute`: the packets that match the route for destination will be silently              discarded without sending any ICMP message to the sender. `nullroute`: the packets that match the route for destination will be silently              discarded without sending any ICMP message to the sender. 'local':     the packets that match the route for destination will be consumed by              the device and will not be forwarded.",
+                      "enum": [
+                        "forward",
+                        "nullroute",
+                        "reject",
+                        "local"
+                      ]
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [Route](#/Route)<br>VRF that the route belongs to."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Route.prefix",
+            "in": "path",
+            "description": "Reference Resource: [Route](#/Route)<br>IPv4 or IPv6 destination prefix and mask in the address/mask format. Example: 192.168.0.0/16",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "protocol_private",
+                  "tag",
+                  "nexthops",
+                  "source_vrfs",
+                  "prefix",
+                  "from",
+                  "sub_address_family",
+                  "metric",
+                  "sub_protocol_type",
+                  "type",
+                  "distance",
+                  "attributes",
+                  "sub_type",
+                  "selected",
+                  "route_age",
+                  "address_family"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

@@ -1,0 +1,1137 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Sites AP Templates",
+    "version": "2602.1.1"
+  },
+  "servers": [
+    {
+      "description": "Mist Global 01",
+      "url": "https://api.mist.com"
+    },
+    {
+      "description": "Mist Global 02",
+      "url": "https://api.gc1.mist.com"
+    },
+    {
+      "description": "Mist Global 03",
+      "url": "https://api.ac2.mist.com"
+    },
+    {
+      "description": "Mist Global 04",
+      "url": "https://api.gc2.mist.com"
+    },
+    {
+      "description": "Mist Global 05",
+      "url": "https://api.gc4.mist.com"
+    },
+    {
+      "description": "Mist EMEA 01",
+      "url": "https://api.eu.mist.com"
+    },
+    {
+      "description": "Mist EMEA 02",
+      "url": "https://api.gc3.mist.com"
+    },
+    {
+      "description": "Mist EMEA 03",
+      "url": "https://api.ac6.mist.com"
+    },
+    {
+      "description": "Mist EMEA 04",
+      "url": "https://api.gc6.mist.com"
+    },
+    {
+      "description": "Mist APAC 01",
+      "url": "https://api.ac5.mist.com"
+    },
+    {
+      "description": "Mist APAC 02",
+      "url": "https://api.gc5.mist.com"
+    },
+    {
+      "description": "Mist APAC 03",
+      "url": "https://api.gc7.mist.com"
+    }
+  ],
+  "security": [
+    {
+      "apiToken": []
+    },
+    {
+      "basicAuth": []
+    },
+    {
+      "basicAuth": [],
+      "csrfToken": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "AP Templates are defining Wi-Fi and AP settings that can be assigned to Access Points based on different types of rules.\n\nSite AP Templates are created and managed at the site level and can only be referenced and used within that particular site.",
+      "name": "Sites AP Templates"
+    }
+  ],
+  "paths": {
+    "/api/v1/sites/{site_id}/aptemplates/derived": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        }
+      ],
+      "get": {
+        "description": "Get the list of derived AP Templates for a site",
+        "operationId": "listSiteApTemplatesDerived",
+        "parameters": [
+          {
+            "description": "Whether resolve the site variables",
+            "in": "query",
+            "name": "resolve",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AptemplatesArray"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "listSiteApTemplatesDerived",
+        "tags": [
+          "Sites AP Templates"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ap_port_config": {
+        "additionalProperties": false,
+        "properties": {
+          "disabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "dynamic_vlan": {
+            "$ref": "#/components/schemas/ap_port_config_dynamic_vlan"
+          },
+          "enable_mac_auth": {
+            "default": false,
+            "type": "boolean"
+          },
+          "forwarding": {
+            "$ref": "#/components/schemas/ap_port_config_forwarding"
+          },
+          "mac_auth_preferred": {
+            "default": false,
+            "description": "When `true`, we'll do dot1x then mac_auth. enable this to prefer mac_auth",
+            "type": "boolean"
+          },
+          "mac_auth_protocol": {
+            "$ref": "#/components/schemas/ap_port_config_mac_auth_protocol"
+          },
+          "mist_nac": {
+            "$ref": "#/components/schemas/wlan_mist_nac"
+          },
+          "mx_tunnel_id": {
+            "default": "",
+            "description": "If `forwarding`==`mxtunnel`, vlan_ids comes from mxtunnel",
+            "examples": [
+              "08cd7499-5841-51c8-e663-fb16b6f3b45e"
+            ],
+            "format": "uuid",
+            "type": "string"
+          },
+          "mxtunnel_name": {
+            "default": "",
+            "description": "If `forwarding`==`site_mxedge`, vlan_ids comes from site_mxedge (`mxtunnels` under site setting)",
+            "type": "string"
+          },
+          "port_auth": {
+            "$ref": "#/components/schemas/ap_port_config_port_auth"
+          },
+          "port_vlan_id": {
+            "description": "If `forwarding`==`limited`",
+            "examples": [
+              1
+            ],
+            "maximum": 4094,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "radius_config": {
+            "$ref": "#/components/schemas/radius_config"
+          },
+          "radsec": {
+            "$ref": "#/components/schemas/radsec"
+          },
+          "vlan_id": {
+            "description": "Optional to specify the vlan id for a tunnel if forwarding is for `wxtunnel`, `mxtunnel` or `site_mxedge`.\n  * if vlan_id is not specified then it will use first one in vlan_ids[] of the mxtunnel.\n  * if forwarding == site_mxedge, vlan_ids comes from site_mxedge (`mxtunnels` under site setting)",
+            "examples": [
+              9
+            ],
+            "maximum": 4094,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "vlan_ids": {
+            "description": "If `forwarding`==`limited`, comma separated list of additional vlan ids allowed on this port",
+            "examples": [
+              "10,20,30"
+            ],
+            "type": "string"
+          },
+          "wxtunnel_id": {
+            "default": "",
+            "description": "If `forwarding`==`wxtunnel`, the port is bridged to the vlan of the session",
+            "examples": [
+              "7dae216d-7c98-a51b-e068-dd7d477b7216"
+            ],
+            "format": "uuid",
+            "type": "string"
+          },
+          "wxtunnel_remote_id": {
+            "default": "",
+            "description": "If `forwarding`==`wxtunnel`, the port is bridged to the vlan of the session",
+            "examples": [
+              "wifiguest"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ap_port_config_dynamic_vlan": {
+        "additionalProperties": false,
+        "description": "Optional dynamic vlan",
+        "properties": {
+          "default_vlan_id": {
+            "examples": [
+              999
+            ],
+            "maximum": 4094,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string"
+          },
+          "vlans": {
+            "additionalProperties": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "examples": [
+              {
+                "1-10": null,
+                "user": null
+              }
+            ],
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "ap_port_config_forwarding": {
+        "default": "all",
+        "description": "enum: \n  * `all`: local breakout, All VLANs\n  * `limited`: local breakout, only the VLANs configured in `port_vlan_id` and `vlan_ids`\n  * `mxtunnel`: central breakout to an Org Mist Edge (requires `mxtunnel_id`)\n  * `site_mxedge`: central breakout to a Site Mist Edge (requires `mxtunnel_name`)\n  * `wxtunnel`': central breakout to an Org WxTunnel (requires `wxtunnel_id`)",
+        "enum": [
+          "all",
+          "limited",
+          "mxtunnel",
+          "site_mxedge",
+          "wxtunnel"
+        ],
+        "examples": [
+          "all"
+        ],
+        "type": "string"
+      },
+      "ap_port_config_mac_auth_protocol": {
+        "default": "pap",
+        "description": "if `enable_mac_auth`==`true`, allows user to select an authentication protocol. enum: `eap-md5`, `eap-peap`, `pap`",
+        "enum": [
+          "eap-md5",
+          "eap-peap",
+          "pap"
+        ],
+        "type": "string"
+      },
+      "ap_port_config_port_auth": {
+        "default": "none",
+        "description": "When doing port auth. enum: `dot1x`, `none`",
+        "enum": [
+          "dot1x",
+          "none"
+        ],
+        "examples": [
+          "none"
+        ],
+        "type": "string"
+      },
+      "ap_template": {
+        "properties": {
+          "ap_matching": {
+            "$ref": "#/components/schemas/ap_template_matching"
+          },
+          "created_time": {
+            "$ref": "#/components/schemas/created_time"
+          },
+          "for_site": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "id": {
+            "$ref": "#/components/schemas/id"
+          },
+          "modified_time": {
+            "$ref": "#/components/schemas/modified_time"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/org_id"
+          },
+          "site_id": {
+            "$ref": "#/components/schemas/site_id"
+          },
+          "wifi": {
+            "$ref": "#/components/schemas/ap_template_wifi"
+          }
+        },
+        "required": [
+          "ap_matching"
+        ],
+        "type": "object"
+      },
+      "ap_template_matching": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "rules": {
+            "$ref": "#/components/schemas/ap_template_matching_rules"
+          }
+        },
+        "type": "object"
+      },
+      "ap_template_matching_rule": {
+        "additionalProperties": false,
+        "properties": {
+          "match_model": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "port_config": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ap_port_config"
+            },
+            "description": "Property key is the interface(s) name (e.g. \"eth1,eth2\")",
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "ap_template_matching_rules": {
+        "items": {
+          "$ref": "#/components/schemas/ap_template_matching_rule"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "ap_template_wifi": {
+        "additionalProperties": false,
+        "properties": {
+          "cisco_enabled": {
+            "type": "boolean"
+          },
+          "disable_11k": {
+            "default": false,
+            "type": "boolean"
+          },
+          "disable_radios_when_power_constrained": {
+            "type": "boolean"
+          },
+          "enable_arp_spoof": {
+            "type": "boolean"
+          },
+          "enable_shared_radio_scanning": {
+            "default": false,
+            "type": "boolean"
+          },
+          "enabled": {
+            "default": true,
+            "type": "boolean"
+          },
+          "locate_connected": {
+            "default": false,
+            "type": "boolean"
+          },
+          "locate_unconnected": {
+            "default": false,
+            "type": "boolean"
+          },
+          "mesh_allow_dfs": {
+            "default": false,
+            "type": "boolean"
+          },
+          "mesh_enable_crm": {
+            "type": "boolean"
+          },
+          "mesh_enabled": {
+            "type": "boolean"
+          },
+          "proxy_arp": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ap_templates": {
+        "items": {
+          "$ref": "#/components/schemas/ap_template"
+        },
+        "type": "array"
+      },
+      "created_time": {
+        "description": "When the object has been created, in epoch",
+        "format": "double",
+        "readOnly": true,
+        "type": "number"
+      },
+      "id": {
+        "description": "Unique ID of the object instance in the Mist Organization",
+        "examples": [
+          "53f10664-3ce8-4c27-b382-0ef66432349f"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "modified_time": {
+        "description": "When the object has been modified for the last time, in epoch",
+        "format": "double",
+        "readOnly": true,
+        "type": "number"
+      },
+      "org_id": {
+        "examples": [
+          "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "radius_acct_port": {
+        "anyOf": [
+          {
+            "maximum": 65545,
+            "minimum": 1,
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "description": "Radius Auth Port, value from 1 to 65535, default is 1813"
+      },
+      "radius_acct_server": {
+        "additionalProperties": false,
+        "properties": {
+          "host": {
+            "description": "IP/ hostname of RADIUS server",
+            "examples": [
+              "1.2.3.4"
+            ],
+            "type": "string"
+          },
+          "keywrap_enabled": {
+            "type": "boolean"
+          },
+          "keywrap_format": {
+            "$ref": "#/components/schemas/radius_keywrap_format"
+          },
+          "keywrap_kek": {
+            "examples": [
+              "1122334455"
+            ],
+            "type": "string"
+          },
+          "keywrap_mack": {
+            "examples": [
+              "1122334455"
+            ],
+            "type": "string"
+          },
+          "port": {
+            "$ref": "#/components/schemas/radius_acct_port"
+          },
+          "secret": {
+            "description": "Secret of RADIUS server",
+            "examples": [
+              "testing123"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "host",
+          "secret"
+        ],
+        "type": "object"
+      },
+      "radius_acct_servers": {
+        "items": {
+          "$ref": "#/components/schemas/radius_acct_server"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "radius_auth_port": {
+        "anyOf": [
+          {
+            "maximum": 65545,
+            "minimum": 1,
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "description": "Radius Auth Port, value from 1 to 65535, default is 1812"
+      },
+      "radius_auth_server": {
+        "additionalProperties": false,
+        "description": "Authentication Server",
+        "properties": {
+          "host": {
+            "description": "IP/ hostname of RADIUS server",
+            "examples": [
+              "1.2.3.4"
+            ],
+            "type": "string"
+          },
+          "keywrap_enabled": {
+            "type": "boolean"
+          },
+          "keywrap_format": {
+            "$ref": "#/components/schemas/radius_keywrap_format"
+          },
+          "keywrap_kek": {
+            "examples": [
+              "1122334455"
+            ],
+            "type": "string"
+          },
+          "keywrap_mack": {
+            "examples": [
+              "1122334455"
+            ],
+            "type": "string"
+          },
+          "port": {
+            "$ref": "#/components/schemas/radius_auth_port"
+          },
+          "require_message_authenticator": {
+            "default": false,
+            "description": "Whether to require Message-Authenticator in requests",
+            "type": "boolean"
+          },
+          "secret": {
+            "description": "Secret of RADIUS server",
+            "examples": [
+              "testing123"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "host",
+          "secret"
+        ],
+        "type": "object"
+      },
+      "radius_auth_servers": {
+        "items": {
+          "$ref": "#/components/schemas/radius_auth_server"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "radius_config": {
+        "additionalProperties": false,
+        "description": "Junos Radius config",
+        "properties": {
+          "acct_interim_interval": {
+            "default": 0,
+            "description": "How frequently should interim accounting be reported, 60-65535. default is 0 (use one specified in Access-Accept request from RADIUS Server). Very frequent messages can affect the performance of the radius server, 600 and up is recommended when enabled",
+            "maximum": 65535,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "acct_servers": {
+            "$ref": "#/components/schemas/radius_acct_servers"
+          },
+          "auth_servers": {
+            "$ref": "#/components/schemas/radius_auth_servers"
+          },
+          "auth_servers_retries": {
+            "default": 3,
+            "description": "radius auth session retries",
+            "type": "integer"
+          },
+          "auth_servers_timeout": {
+            "default": 5,
+            "description": "radius auth session timeout",
+            "type": "integer"
+          },
+          "coa_enabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "coa_port": {
+            "default": 3799,
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "network": {
+            "description": "use `network`or `source_ip`, which network the RADIUS server resides, if there's static IP for this network, we'd use it as source-ip",
+            "type": "string"
+          },
+          "source_ip": {
+            "description": "use `network`or `source_ip`",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "radius_keywrap_format": {
+        "description": "enum: `ascii`, `hex`",
+        "enum": [
+          "ascii",
+          "hex"
+        ],
+        "type": "string"
+      },
+      "radsec": {
+        "additionalProperties": false,
+        "description": "RadSec settings",
+        "properties": {
+          "coa_enabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "idle_timeout": {
+            "$ref": "#/components/schemas/radsec_idle_timeout"
+          },
+          "mxcluster_ids": {
+            "$ref": "#/components/schemas/radsec_mxcluster_ids"
+          },
+          "proxy_hosts": {
+            "$ref": "#/components/schemas/radsec_proxy_hosts"
+          },
+          "server_name": {
+            "description": "Name of the server to verify (against the cacerts in Org Setting). Only if not Mist Edge.",
+            "examples": [
+              "radsec.abc.com"
+            ],
+            "type": "string"
+          },
+          "servers": {
+            "$ref": "#/components/schemas/radsec_servers"
+          },
+          "use_mxedge": {
+            "description": "use mxedge(s) as RadSec Proxy",
+            "type": "boolean"
+          },
+          "use_site_mxedge": {
+            "default": false,
+            "description": "To use Site mxedges when this WLAN does not use mxtunnel",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "radsec_idle_timeout": {
+        "anyOf": [
+          {
+            "default": 60,
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "description": "Radsec Idle Timeout in seconds. Default is 60"
+      },
+      "radsec_mxcluster_ids": {
+        "description": "To use Org mxedges when this WLAN does not use mxtunnel, specify their mxcluster_ids. Org mxedge(s) identified by mxcluster_ids",
+        "items": {
+          "examples": [
+            "572586b7-f97b-a22b-526c-8b97a3f609c4"
+          ],
+          "format": "uuid",
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "radsec_proxy_hosts": {
+        "description": "Default is site.mxedge.radsec.proxy_hosts which must be a superset of all `wlans[*].radsec.proxy_hosts`. When `radsec.proxy_hosts` are not used, tunnel peers (org or site mxedges) are used irrespective of `use_site_mxedge`",
+        "items": {
+          "examples": [
+            "mxedge1.local"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "radsec_server": {
+        "additionalProperties": false,
+        "properties": {
+          "host": {
+            "examples": [
+              "1.1.1.1"
+            ],
+            "type": "string"
+          },
+          "port": {
+            "examples": [
+              1812
+            ],
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "radsec_servers": {
+        "description": "List of RadSec Servers. Only if not Mist Edge.",
+        "items": {
+          "$ref": "#/components/schemas/radsec_server"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "response_http400": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http401": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Authentication credentials were not provided."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http403": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "You do not have permission to perform this action."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http404": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http429": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "site_id": {
+        "examples": [
+          "441a1214-6928-442a-8e92-e1d34b8ec6a6"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "wlan_mist_nac": {
+        "additionalProperties": false,
+        "properties": {
+          "acct_interim_interval": {
+            "default": 0,
+            "description": "How frequently should interim accounting be reported, 60-65535. default is 0 (use one specified in Access-Accept request from Server). Very frequent messages can affect the performance of the radius server, 600 and up is recommended when enabled.",
+            "examples": [
+              60
+            ],
+            "maximum": 65535,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "auth_servers_retries": {
+            "default": 2,
+            "description": "Radius auth session retries. Following fast timers are set if `fast_dot1x_timers` knob is enabled. \"retries\" are set to value of `auth_servers_timeout`. \"max-requests\" is also set when setting `auth_servers_retries` is set to default value to 3.",
+            "examples": [
+              3
+            ],
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "auth_servers_timeout": {
+            "default": 5,
+            "description": "Radius auth session timeout. Following fast timers are set if `fast_dot1x_timers` knob is enabled. \"quite-period\" and \"transmit-period\" are set to half the value of `auth_servers_timeout`. \"supplicant-timeout\" is also set when setting `auth_servers_timeout` is set to default value of 10.",
+            "examples": [
+              5
+            ],
+            "maximum": 30,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "coa_enabled": {
+            "default": false,
+            "description": "Allows a RADIUS server to dynamically modify the authorization status of a user session.",
+            "type": "boolean"
+          },
+          "coa_port": {
+            "description": "the communication port used for “Change of Authorization” (CoA) messages",
+            "examples": [
+              3799
+            ],
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "enabled": {
+            "default": false,
+            "description": "When enabled:\n  * `auth_servers` is ignored\n  * `acct_servers` is ignored\n  * `auth_servers_*` are ignored\n  * `coa_servers` is ignored\n  * `radsec` is ignored\n  * `coa_enabled` is assumed",
+            "type": "boolean"
+          },
+          "fast_dot1x_timers": {
+            "default": false,
+            "description": "If set to true, sets default fast-timers with values calculated from `auth_servers_timeout` and `auth_server_retries`.",
+            "type": "boolean"
+          },
+          "network": {
+            "description": "Which network the mist nac server resides in",
+            "examples": [
+              "default"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source_ip": {
+            "description": "In case there is a static IP for this network, we can specify it using source ip",
+            "examples": [
+              "1.2.3.4"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      }
+    },
+    "responses": {
+      "AptemplatesArray": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/AptemplatesArrayExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/ap_templates"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/AptemplatesArrayExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/ap_templates"
+            }
+          }
+        },
+        "description": "Example response"
+      },
+      "HTTP400": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          }
+        },
+        "description": "Bad Syntax"
+      },
+      "HTTP401": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          }
+        },
+        "description": "Unauthorized"
+      },
+      "HTTP403": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          }
+        },
+        "description": "Permission Denied"
+      },
+      "HTTP404": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          }
+        },
+        "description": "Not found. The API endpoint doesn’t exist or resource doesn’ t exist"
+      },
+      "HTTP429": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          }
+        },
+        "description": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+      }
+    },
+    "parameters": {
+      "site_id": {
+        "in": "path",
+        "name": "site_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      }
+    },
+    "examples": {
+      "AptemplatesArrayExample": {
+        "value": [
+          {
+            "ap_matching": {
+              "enabled": true,
+              "rules": [
+                {
+                  "match_model": "string",
+                  "name": "string",
+                  "port_config": {
+                    "eth1,eth2": {
+                      "disabled": true,
+                      "dynamic_vlan": {
+                        "default_vlan_id": 999,
+                        "enabled": true
+                      },
+                      "port_vlan_id": 1,
+                      "vlan_id": 9,
+                      "vlan_ids": "1, 10, 50"
+                    }
+                  }
+                }
+              ]
+            },
+            "created_time": 0,
+            "for_site": true,
+            "id": "497f6eca-6276-4993-bfeb-53cbbbba9f08",
+            "modified_time": 0,
+            "org_id": "a40f5d1f-d889-42e9-94ea-b9b33585fc6b",
+            "site_id": "72771e6a-6f5e-4de4-a5b9-1266c4197811",
+            "wifi": {
+              "cisco_enabled": true,
+              "disable_11k": false,
+              "disable_radios_when_power_constrained": true,
+              "enable_arp_spoof": true,
+              "enable_shared_radio_scanning": false,
+              "enabled": true,
+              "locate_connected": false,
+              "locate_unconnected": false,
+              "mesh_allow_dfs": false,
+              "mesh_enable_crm": true,
+              "mesh_enabled": true,
+              "proxy_arp": false
+            }
+          }
+        ]
+      },
+      "HTTP400Example": {
+        "value": {
+          "detail": "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+        }
+      },
+      "HTTP401Example": {
+        "value": {
+          "detail": "Authentication credentials were not provided."
+        }
+      },
+      "HTTP403Example": {
+        "value": {
+          "detail": "You do not have permission to perform this action."
+        }
+      },
+      "HTTP429Example": {
+        "value": {
+          "detail": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+        }
+      }
+    },
+    "securitySchemes": {
+      "apiToken": {
+        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey",
+        "x-scalar-secret-token": "Token YOUR_API_TOKEN"
+      },
+      "basicAuth": {
+        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
+        "scheme": "basic",
+        "type": "http"
+      },
+      "csrfToken": {
+        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "in": "header",
+        "name": "X-CSRFToken",
+        "type": "apiKey"
+      }
+    }
+  }
+}

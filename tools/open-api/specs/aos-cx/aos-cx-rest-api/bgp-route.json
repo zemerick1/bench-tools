@@ -1,0 +1,863 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "BGP_Route",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "BGP_Route"
+    }
+  ],
+  "paths": {
+    "/system/vrfs/{VRF.name}/bgp_routes": {
+      "get": {
+        "tags": [
+          "BGP_Route"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "address_family": {
+                      "type": "string",
+                      "description": "Address family. Default value is `ipv4`.",
+                      "enum": [
+                        "ipv4",
+                        "ipv6",
+                        "l2vpn",
+                        "vpnv4"
+                      ]
+                    },
+                    "aggregate": {
+                      "type": "boolean",
+                      "description": "Specifies whether the notification is sent to upstream routers that the route is aggregated. Default is false."
+                    },
+                    "aggregator": {
+                      "type": "string",
+                      "description": "IP address of the BGP node responsible for route aggregation. Empty if route is not aggregated.",
+                      "maxLength": 30
+                    },
+                    "aggregator_as": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Originating AS number of the aggregate route. Default value is 0.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "community": {
+                      "type": "string",
+                      "description": "Space delimited list of community names for the route.",
+                      "maxLength": 80
+                    },
+                    "creation_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Epoch time of the route arrival from the neighbor.",
+                      "minimum": 0
+                    },
+                    "distance": {
+                      "type": "integer",
+                      "description": "Administrative distance. Default value is 0.",
+                      "maximum": 255,
+                      "minimum": 0
+                    },
+                    "ecommunity": {
+                      "type": "string",
+                      "description": "Space delimited list of extended community names for the route.",
+                      "maxLength": 704
+                    },
+                    "evpn_filters": {
+                      "type": "object",
+                      "properties": {
+                        "route_type": {
+                          "type": "integer",
+                          "description": "Specifies the route-type to filter on.",
+                          "maximum": 5,
+                          "minimum": 2
+                        }
+                      }
+                    },
+                    "evpn_prefix": {
+                      "type": "string",
+                      "description": "EVPN destination prefix. Examples: EVPN Type 1 Prefix - 100:1-[1]:[0]:[0000.0000.0010.0000]           EVPN Type 2 Prefix - 100:1-[2]:[0]:[0]:[48]:[0006.f63f.e3c1]:[32]:[172.16.30.33]           EVPN Type 3 Prefix - 2.2.2.2:10-[3]:[0]:[32]:[10.1.1.1]           EVPN Type 4 Prefix - 100:1-[4]:[0000.0000.0010.0000]:[10.1.1.1]           EVPN Type 5 prefix - 100:1-[5]:[0]:[0]:[24]:[10.10.10.0] This is used for querying a particular EVPN prefix.",
+                      "maxLength": 128
+                    },
+                    "flags": {
+                      "type": "array",
+                      "description": "'DAMPED':        Suppress routes from being advertised due to flapping. 'HISTORY':       Router does not have a best path for the route based                  on historical information. 'STALE':         Used with nonstop forwarding to indicate that the route                  is stale and needs to be refreshed when the peer is reestablished. 'VALID':         Route has a valid next-hop. 'DMED_CHECK':    Route is evaluated as a part of an effort to identify                  preferred entry point into the local AS from the neighboring autonomous system. 'DMED_SELECTED': Route is selected as a preferred entry point into                  the local AS from the neighboring autonomous system. 'REMOVED':       Route has been removed from the list of advertised routes                  to the neighboring autonomous system. 'SELECTED':      Route had been selected as a best path to                  the destination prefix. 'COUNTED':       Route has been included in the internal prefix list count. 'MULTIPATH':     Route has been included as apart of the multipath route                  selection to the destination prefix. 'IGP_CHANGED':   Set for routes exchanged over iBGP intradomain                  autonomous system networks.",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "IGP_CHANGED",
+                          "DAMPED",
+                          "HISTORY",
+                          "SELECTED",
+                          "VALID",
+                          "DMED_CHECK",
+                          "DMED_SELECTED",
+                          "STALE",
+                          "REMOVED",
+                          "COUNTED",
+                          "MULTIPATH"
+                        ]
+                      },
+                      "maxItems": 13
+                    },
+                    "flap_info": {
+                      "type": "object",
+                      "properties": {
+                        "flap_count": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times the route has flapped.",
+                          "minimum": 0
+                        },
+                        "flap_reuse_time": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time (in seconds from epoch) when the  route will be unsuppressed. If route is not suppressed, then flap_reuse_time will be empty.",
+                          "minimum": 0
+                        },
+                        "flap_start_time": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time (in seconds from epoch) when the route first flapped.",
+                          "minimum": 0
+                        },
+                        "penalty": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Penalty accumulated on the route.",
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "metric": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "BGP Multi Exit Discriminator (MED) attribute.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "nexthop": {
+                      "type": "string",
+                      "description": "IP address of the nexthop device. If the next-hop address is link-local IPv6, nexthop will be output interface name. Empty if the route is self-originated.",
+                      "maxLength": 45
+                    },
+                    "nexthop_link_local": {
+                      "type": "string",
+                      "description": "IPv6 link local address of the nexthop device.",
+                      "maxLength": 45,
+                      "minLength": 3
+                    },
+                    "path_attributes": {
+                      "type": "object",
+                      "properties": {
+                        "bgp_as_path": {
+                          "type": "string",
+                          "description": "List of AS path number for a route. Example: 200,300,400"
+                        },
+                        "bgp_flags": {
+                          "type": "string",
+                          "description": "Route status flags. Valid values are `history`, `damped`,`multipath`,`valid`, `selected`."
+                        },
+                        "bgp_loc_pref": {
+                          "type": "string",
+                          "description": "Local preference path attribute."
+                        },
+                        "bgp_origin": {
+                          "type": "string",
+                          "description": "Indicates whether a route is `IGP`, `EGP` or `incomplete`. Default is 'incomplete'."
+                        }
+                      }
+                    },
+                    "path_id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Reference Resource: [BGP_Route](#/BGP_Route)<br>Path ID associated with this prefix. If the peer does not send a path ID, the path ID will be set to 0.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "peer": {
+                      "type": "string",
+                      "description": "Reference Resource: [BGP_Route](#/BGP_Route)<br>",
+                      "maxLength": 45
+                    },
+                    "prefix": {
+                      "type": "string",
+                      "description": "Reference Resource: [BGP_Route](#/BGP_Route)<br>IPv4, IPv6 or EVPN destination prefix. Examples: IPv4 Prefix - 192.168.0.0/16           IPv6 Prefix - 2002::2/64           EVPN Type 1 Prefix - 100:1-[1]:[0]:[0000.0000.0010.0000]           EVPN Type 2 Prefix - 100:1-[2]:[0]:[0]:[48]:[0006.f63f.e3c1]:[32]:[172.16.30.33]           EVPN Type 3 Prefix - 2.2.2.2:10-[3]:[0]:[32]:[10.1.1.1]           EVPN Type 4 Prefix - 100:1-[4]:[0000.0000.0010.0000]:[10.1.1.1]           EVPN Type 5 prefix - 100:1-[5]:[0]:[0]:[24]:[10.10.10.0]",
+                      "maxLength": 128
+                    },
+                    "prefix_accepted": {
+                      "type": "boolean",
+                      "description": "Specifies whether the received prefix (or routes) was accepted."
+                    },
+                    "prefix_advertised": {
+                      "type": "boolean",
+                      "description": "Specifies whether the prefix (or route) is advertised to neighbors."
+                    },
+                    "prefix_match_type": {
+                      "type": "string",
+                      "description": "'exact':         Route is an exact match with the specified mask 'longer-prefix': Route is a more-specific match compared to the specified mask.",
+                      "enum": [
+                        "exact",
+                        "longer-prefix"
+                      ]
+                    },
+                    "prefix_rejected": {
+                      "type": "boolean",
+                      "description": "Specifies whether the received prefix (or routes) was rejected."
+                    },
+                    "protocol_iBGP": {
+                      "type": "boolean",
+                      "description": "Specifies whether the route was learned through iBGP session. 'true':    Route originated via iBGP session 'false':   Route did not originate via iBGP session, default value"
+                    },
+                    "protocol_internal": {
+                      "type": "boolean",
+                      "description": "Specifies whether the route originated locally on the BGP peer 'true':    Route originated locally 'false':   Route did not originate locally, default value"
+                    },
+                    "sub_address_family": {
+                      "type": "string",
+                      "description": "Subsequent address family. Default is `unicast`.",
+                      "enum": [
+                        "unicast",
+                        "multicast",
+                        "vpn",
+                        "evpn"
+                      ]
+                    },
+                    "vni": {
+                      "type": "integer",
+                      "description": "Reference Resource: [BGP_Route](#/BGP_Route)<br>Specifies Virtual Network Identifier. This is specific to EVPN routes and will be -1 for all non-EVPN routes.",
+                      "maximum": 16777215,
+                      "minimum": -1
+                    },
+                    "vni_type": {
+                      "type": "string",
+                      "description": "Specifies Virtual Network Identifier type.",
+                      "enum": [
+                        "l3vni",
+                        "l2vni"
+                      ]
+                    },
+                    "vpnv4_routes": {
+                      "type": "array",
+                      "description": "Reference Resource: [BGP_VPNv4_Route](#/BGP_VPNv4_Route)<br>Reference to VPNv4 route attributes.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [BGP_Route](#/BGP_Route)<br>Reference to the VRF to which this route belongs."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "peer",
+                  "address_family",
+                  "aggregate",
+                  "nexthop",
+                  "prefix_match_type",
+                  "path_attributes",
+                  "aggregator",
+                  "evpn_filters",
+                  "aggregator_as",
+                  "nexthop_link_local",
+                  "protocol_internal",
+                  "prefix_rejected",
+                  "sub_address_family",
+                  "distance",
+                  "flags",
+                  "creation_time",
+                  "evpn_prefix",
+                  "vpnv4_routes",
+                  "vni",
+                  "protocol_iBGP",
+                  "community",
+                  "flap_info",
+                  "prefix",
+                  "vni_type",
+                  "ecommunity",
+                  "metric",
+                  "prefix_advertised",
+                  "path_id",
+                  "prefix_accepted"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/vrfs/{VRF.name}/bgp_routes/{BGP_Route.prefix},{BGP_Route.peer},{BGP_Route.vni},{BGP_Route.path_id}": {
+      "get": {
+        "tags": [
+          "BGP_Route"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "address_family": {
+                      "type": "string",
+                      "description": "Address family. Default value is `ipv4`.",
+                      "enum": [
+                        "ipv4",
+                        "ipv6",
+                        "l2vpn",
+                        "vpnv4"
+                      ]
+                    },
+                    "aggregate": {
+                      "type": "boolean",
+                      "description": "Specifies whether the notification is sent to upstream routers that the route is aggregated. Default is false."
+                    },
+                    "aggregator": {
+                      "type": "string",
+                      "description": "IP address of the BGP node responsible for route aggregation. Empty if route is not aggregated.",
+                      "maxLength": 30
+                    },
+                    "aggregator_as": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Originating AS number of the aggregate route. Default value is 0.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "community": {
+                      "type": "string",
+                      "description": "Space delimited list of community names for the route.",
+                      "maxLength": 80
+                    },
+                    "creation_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Epoch time of the route arrival from the neighbor.",
+                      "minimum": 0
+                    },
+                    "distance": {
+                      "type": "integer",
+                      "description": "Administrative distance. Default value is 0.",
+                      "maximum": 255,
+                      "minimum": 0
+                    },
+                    "ecommunity": {
+                      "type": "string",
+                      "description": "Space delimited list of extended community names for the route.",
+                      "maxLength": 704
+                    },
+                    "evpn_filters": {
+                      "type": "object",
+                      "properties": {
+                        "route_type": {
+                          "type": "integer",
+                          "description": "Specifies the route-type to filter on.",
+                          "maximum": 5,
+                          "minimum": 2
+                        }
+                      }
+                    },
+                    "evpn_prefix": {
+                      "type": "string",
+                      "description": "EVPN destination prefix. Examples: EVPN Type 1 Prefix - 100:1-[1]:[0]:[0000.0000.0010.0000]           EVPN Type 2 Prefix - 100:1-[2]:[0]:[0]:[48]:[0006.f63f.e3c1]:[32]:[172.16.30.33]           EVPN Type 3 Prefix - 2.2.2.2:10-[3]:[0]:[32]:[10.1.1.1]           EVPN Type 4 Prefix - 100:1-[4]:[0000.0000.0010.0000]:[10.1.1.1]           EVPN Type 5 prefix - 100:1-[5]:[0]:[0]:[24]:[10.10.10.0] This is used for querying a particular EVPN prefix.",
+                      "maxLength": 128
+                    },
+                    "flags": {
+                      "type": "array",
+                      "description": "'DAMPED':        Suppress routes from being advertised due to flapping. 'HISTORY':       Router does not have a best path for the route based                  on historical information. 'STALE':         Used with nonstop forwarding to indicate that the route                  is stale and needs to be refreshed when the peer is reestablished. 'VALID':         Route has a valid next-hop. 'DMED_CHECK':    Route is evaluated as a part of an effort to identify                  preferred entry point into the local AS from the neighboring autonomous system. 'DMED_SELECTED': Route is selected as a preferred entry point into                  the local AS from the neighboring autonomous system. 'REMOVED':       Route has been removed from the list of advertised routes                  to the neighboring autonomous system. 'SELECTED':      Route had been selected as a best path to                  the destination prefix. 'COUNTED':       Route has been included in the internal prefix list count. 'MULTIPATH':     Route has been included as apart of the multipath route                  selection to the destination prefix. 'IGP_CHANGED':   Set for routes exchanged over iBGP intradomain                  autonomous system networks.",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "IGP_CHANGED",
+                          "DAMPED",
+                          "HISTORY",
+                          "SELECTED",
+                          "VALID",
+                          "DMED_CHECK",
+                          "DMED_SELECTED",
+                          "STALE",
+                          "REMOVED",
+                          "COUNTED",
+                          "MULTIPATH"
+                        ]
+                      },
+                      "maxItems": 13
+                    },
+                    "flap_info": {
+                      "type": "object",
+                      "properties": {
+                        "flap_count": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times the route has flapped.",
+                          "minimum": 0
+                        },
+                        "flap_reuse_time": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time (in seconds from epoch) when the  route will be unsuppressed. If route is not suppressed, then flap_reuse_time will be empty.",
+                          "minimum": 0
+                        },
+                        "flap_start_time": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time (in seconds from epoch) when the route first flapped.",
+                          "minimum": 0
+                        },
+                        "penalty": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Penalty accumulated on the route.",
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "metric": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "BGP Multi Exit Discriminator (MED) attribute.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "nexthop": {
+                      "type": "string",
+                      "description": "IP address of the nexthop device. If the next-hop address is link-local IPv6, nexthop will be output interface name. Empty if the route is self-originated.",
+                      "maxLength": 45
+                    },
+                    "nexthop_link_local": {
+                      "type": "string",
+                      "description": "IPv6 link local address of the nexthop device.",
+                      "maxLength": 45,
+                      "minLength": 3
+                    },
+                    "path_attributes": {
+                      "type": "object",
+                      "properties": {
+                        "bgp_as_path": {
+                          "type": "string",
+                          "description": "List of AS path number for a route. Example: 200,300,400"
+                        },
+                        "bgp_flags": {
+                          "type": "string",
+                          "description": "Route status flags. Valid values are `history`, `damped`,`multipath`,`valid`, `selected`."
+                        },
+                        "bgp_loc_pref": {
+                          "type": "string",
+                          "description": "Local preference path attribute."
+                        },
+                        "bgp_origin": {
+                          "type": "string",
+                          "description": "Indicates whether a route is `IGP`, `EGP` or `incomplete`. Default is 'incomplete'."
+                        }
+                      }
+                    },
+                    "path_id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Reference Resource: [BGP_Route](#/BGP_Route)<br>Path ID associated with this prefix. If the peer does not send a path ID, the path ID will be set to 0.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "peer": {
+                      "type": "string",
+                      "description": "Reference Resource: [BGP_Route](#/BGP_Route)<br>",
+                      "maxLength": 45
+                    },
+                    "prefix": {
+                      "type": "string",
+                      "description": "Reference Resource: [BGP_Route](#/BGP_Route)<br>IPv4, IPv6 or EVPN destination prefix. Examples: IPv4 Prefix - 192.168.0.0/16           IPv6 Prefix - 2002::2/64           EVPN Type 1 Prefix - 100:1-[1]:[0]:[0000.0000.0010.0000]           EVPN Type 2 Prefix - 100:1-[2]:[0]:[0]:[48]:[0006.f63f.e3c1]:[32]:[172.16.30.33]           EVPN Type 3 Prefix - 2.2.2.2:10-[3]:[0]:[32]:[10.1.1.1]           EVPN Type 4 Prefix - 100:1-[4]:[0000.0000.0010.0000]:[10.1.1.1]           EVPN Type 5 prefix - 100:1-[5]:[0]:[0]:[24]:[10.10.10.0]",
+                      "maxLength": 128
+                    },
+                    "prefix_accepted": {
+                      "type": "boolean",
+                      "description": "Specifies whether the received prefix (or routes) was accepted."
+                    },
+                    "prefix_advertised": {
+                      "type": "boolean",
+                      "description": "Specifies whether the prefix (or route) is advertised to neighbors."
+                    },
+                    "prefix_match_type": {
+                      "type": "string",
+                      "description": "'exact':         Route is an exact match with the specified mask 'longer-prefix': Route is a more-specific match compared to the specified mask.",
+                      "enum": [
+                        "exact",
+                        "longer-prefix"
+                      ]
+                    },
+                    "prefix_rejected": {
+                      "type": "boolean",
+                      "description": "Specifies whether the received prefix (or routes) was rejected."
+                    },
+                    "protocol_iBGP": {
+                      "type": "boolean",
+                      "description": "Specifies whether the route was learned through iBGP session. 'true':    Route originated via iBGP session 'false':   Route did not originate via iBGP session, default value"
+                    },
+                    "protocol_internal": {
+                      "type": "boolean",
+                      "description": "Specifies whether the route originated locally on the BGP peer 'true':    Route originated locally 'false':   Route did not originate locally, default value"
+                    },
+                    "sub_address_family": {
+                      "type": "string",
+                      "description": "Subsequent address family. Default is `unicast`.",
+                      "enum": [
+                        "unicast",
+                        "multicast",
+                        "vpn",
+                        "evpn"
+                      ]
+                    },
+                    "vni": {
+                      "type": "integer",
+                      "description": "Reference Resource: [BGP_Route](#/BGP_Route)<br>Specifies Virtual Network Identifier. This is specific to EVPN routes and will be -1 for all non-EVPN routes.",
+                      "maximum": 16777215,
+                      "minimum": -1
+                    },
+                    "vni_type": {
+                      "type": "string",
+                      "description": "Specifies Virtual Network Identifier type.",
+                      "enum": [
+                        "l3vni",
+                        "l2vni"
+                      ]
+                    },
+                    "vpnv4_routes": {
+                      "type": "array",
+                      "description": "Reference Resource: [BGP_VPNv4_Route](#/BGP_VPNv4_Route)<br>Reference to VPNv4 route attributes.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [BGP_Route](#/BGP_Route)<br>Reference to the VRF to which this route belongs."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "BGP_Route.prefix",
+            "in": "path",
+            "description": "Reference Resource: [BGP_Route](#/BGP_Route)<br>IPv4, IPv6 or EVPN destination prefix. Examples: IPv4 Prefix - 192.168.0.0/16           IPv6 Prefix - 2002::2/64           EVPN Type 1 Prefix - 100:1-[1]:[0]:[0000.0000.0010.0000]           EVPN Type 2 Prefix - 100:1-[2]:[0]:[0]:[48]:[0006.f63f.e3c1]:[32]:[172.16.30.33]           EVPN Type 3 Prefix - 2.2.2.2:10-[3]:[0]:[32]:[10.1.1.1]           EVPN Type 4 Prefix - 100:1-[4]:[0000.0000.0010.0000]:[10.1.1.1]           EVPN Type 5 prefix - 100:1-[5]:[0]:[0]:[24]:[10.10.10.0]",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "BGP_Route.peer",
+            "in": "path",
+            "description": "Reference Resource: [BGP_Route](#/BGP_Route)<br>",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "BGP_Route.vni",
+            "in": "path",
+            "description": "Reference Resource: [BGP_Route](#/BGP_Route)<br>Specifies Virtual Network Identifier. This is specific to EVPN routes and will be -1 for all non-EVPN routes.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "BGP_Route.path_id",
+            "in": "path",
+            "description": "Reference Resource: [BGP_Route](#/BGP_Route)<br>Path ID associated with this prefix. If the peer does not send a path ID, the path ID will be set to 0.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "evpn_filters",
+                  "aggregator_as",
+                  "aggregator",
+                  "protocol_internal",
+                  "nexthop_link_local",
+                  "sub_address_family",
+                  "distance",
+                  "flags",
+                  "creation_time",
+                  "evpn_prefix",
+                  "vpnv4_routes",
+                  "prefix_rejected",
+                  "protocol_iBGP",
+                  "community",
+                  "flap_info",
+                  "prefix",
+                  "vni",
+                  "ecommunity",
+                  "metric",
+                  "prefix_advertised",
+                  "vni_type",
+                  "prefix_accepted",
+                  "path_id",
+                  "address_family",
+                  "aggregate",
+                  "nexthop",
+                  "prefix_match_type",
+                  "peer",
+                  "path_attributes"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

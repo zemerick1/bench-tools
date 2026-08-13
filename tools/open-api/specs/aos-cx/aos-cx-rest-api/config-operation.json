@@ -1,0 +1,809 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Config_Operation",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Config_Operation"
+    }
+  ],
+  "paths": {
+    "/system/config_operations": {
+      "get": {
+        "tags": [
+          "Config_Operation"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "additional_processing": {
+                      "type": "object",
+                      "description": "Specify additional information results obtained from config operation execution.",
+                      "properties": {
+                        "ccf": {
+                          "type": "string",
+                          "description": "CCF data results when config operation was executed.",
+                          "maxLength": 255
+                        },
+                        "diff_mode": {
+                          "type": "string",
+                          "description": "Used for diff operations to use an alternate diff mode",
+                          "maxLength": 255
+                        }
+                      }
+                    },
+                    "attempts": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Number of times this config operation has been attempted."
+                    },
+                    "audit_ip_address": {
+                      "type": "string",
+                      "description": "Specifies the IP address (IPv4/IPv6) which is used to track the operation for audit logging purposes.",
+                      "maxLength": 49
+                    },
+                    "audit_user": {
+                      "type": "string",
+                      "description": "Specifies the user which is used to track the operation for audit logging purposes.",
+                      "maxLength": 255
+                    },
+                    "creation_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Seconds since the epoch when the config operation row was created."
+                    },
+                    "destination_type": {
+                      "type": "array",
+                      "description": "'url': URL to a file, e.g. a file-server on the network or on a USB drive. 'startupConfig': startup config. 'runningConfig': running config. 'checkpoint': checkpoint.",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "url",
+                          "startupConfig",
+                          "runningConfig",
+                          "checkpoint"
+                        ]
+                      },
+                      "maxItems": 2
+                    },
+                    "destination_url_or_checkpoint_name": {
+                      "type": "string",
+                      "description": "The URL for the destination configuration or checkpoint name. This field is empty unless the destination type is either 'url' or 'checkpoint'.",
+                      "maxLength": 255,
+                      "minLength": 1
+                    },
+                    "end_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Seconds since the epoch when the copy operation 'state' became 'successful' or 'failed'."
+                    },
+                    "exported_config_format": {
+                      "type": "array",
+                      "description": "'cli': command line interface with 'show running' format. 'json': JavaScript Object Notation.",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "cli",
+                          "json"
+                        ]
+                      },
+                      "maxItems": 2
+                    },
+                    "failure_state": {
+                      "type": "string",
+                      "description": "'attemptsExceeded': maximum number of unsuccessful attempts for this configuration copy operation exceeded. 'authenticationFailed': user/pass combination failed. 'badFilename': bad filename/path/permissions. 'busy': there is another configuration copy operation running. Retry later. 'configChanged': the configuration changed while the copy operation was in progress. 'invalidConfig': source config is invalid. 'invalidRequest': the request contains an invalid parameter combination. 'invalidURL': provided URL is invalid. 'systemNotReady': system is not ready to copy configuration. 'timeout': the network may be overloaded, or the remote file server may not be responding. 'duplicateCheckpoint': there is a checkpoint with the same configuration in it 'checkpointNotFound': the specified checkpoint does not exist 'diskFull': file system is full, can not save operation results 'invalidIOResult': system I/O error 'resourcesFailed': external resources failure or busy, can not execute operation. 'insufficientSystemMemory': insufficient free system memory available to execute the operation. 'unknown': failure unknown.",
+                      "enum": [
+                        "attemptsExceeded",
+                        "authenticationFailed",
+                        "badFilename",
+                        "busy",
+                        "configChanged",
+                        "invalidConfig",
+                        "invalidRequest",
+                        "invalidURL",
+                        "systemNotReady",
+                        "timeout",
+                        "duplicateCheckpoint",
+                        "checkpointNotFound",
+                        "diskFull",
+                        "invalidIOResult",
+                        "resourcesFailed",
+                        "insufficientSystemMemory",
+                        "unknown"
+                      ]
+                    },
+                    "last_config_change_timestamp": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Timestamp of the latest configuration change obtained by the user."
+                    },
+                    "operation": {
+                      "type": "array",
+                      "description": "'copy': copy a configuration from a source to a destination. 'validate': validate a configuration.             Validation only applies to configuration in CLI format. JSON configuration is copied as-is. 'read': read a configuration from source. 'diff': compares configurations between source and destination. 'hash': generate hash value from specific config or checkpoint 'timer': start checkpoint auto time counter (ARM). 'confirm': checkpoint auto confirm command (ACK). 'lock': requests a lock for a legacy config operation.",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "copy",
+                          "validate",
+                          "read",
+                          "diff",
+                          "hash",
+                          "timer",
+                          "confirm",
+                          "lock"
+                        ]
+                      },
+                      "maxItems": 2
+                    },
+                    "operation_index": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Reference Resource: [Config_Operation](#/Config_Operation)<br>Unique copy operation index. If the requester is 'snmp', this value is expected to match its corresponding arubaWiredConfigurationCopyIndex value."
+                    },
+                    "range_end_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "End time to use for read specfic configurations."
+                    },
+                    "range_start_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Start time to use for read specfic configurations"
+                    },
+                    "requester": {
+                      "type": "string",
+                      "description": "Reference Resource: [Config_Operation](#/Config_Operation)<br>'autoCheckpoint': config checkpoint auto save process 'boot': boot process daemon. 'checkpoint': automatic configuration checkpoint. 'cli': command line interface. 'cmf': configuration migration framework. 'issu': ISSU process daemon 'mgmtmd': management module daemon. 'modules': line card management daemon 'rest': REST server. 'snmp': SNMP via the ARUBAWIRED CONFIG MIB. 'vsf': virtual switching and forwarding daemon. 'vsx': virtual switching extension daemon. 'vsxSwUpgrade': virtual switching extension software upgrade daemon. 'vsxSync': virtual switching extension configuration synchronization daemon. 'ztp': zero-touch provisioning daemon.",
+                      "enum": [
+                        "autoCheckpoint",
+                        "boot",
+                        "checkpoint",
+                        "cli",
+                        "cmf",
+                        "issu",
+                        "mgmtmd",
+                        "modules",
+                        "rest",
+                        "snmp",
+                        "vsf",
+                        "vsx",
+                        "vsxSwUpgrade",
+                        "vsxSync",
+                        "ztp"
+                      ]
+                    },
+                    "requester_index": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Reference Resource: [Config_Operation](#/Config_Operation)<br>unique identifier for the requester of the configuration operation"
+                    },
+                    "source_format": {
+                      "type": "string",
+                      "description": "'full': the entire configuration in CLI or JSON format. 'diff': the entire configuration in CLI format plus added/removed lines.",
+                      "enum": [
+                        "full",
+                        "diff"
+                      ]
+                    },
+                    "source_type": {
+                      "type": "string",
+                      "description": "'url': URL to a file, e.g. a file-server on the network or on a USB drive.        When operation is 'validate' this is an internal URL used for dry run. 'startupConfig': startup config. 'runningConfig': running config. 'checkpoint': checkpoint.",
+                      "enum": [
+                        "url",
+                        "startupConfig",
+                        "runningConfig",
+                        "checkpoint"
+                      ]
+                    },
+                    "source_url_or_checkpoint_name": {
+                      "type": "string",
+                      "description": "The URL for the source configuration or checkpoint name. This field is empty unless the source type is either 'url' or 'checkpoint'.",
+                      "maxLength": 255,
+                      "minLength": 1
+                    },
+                    "start_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Seconds since the epoch when the copy operation 'state' became 'running'."
+                    },
+                    "state": {
+                      "type": "string",
+                      "description": "'notReady': not ready to be serviced. Only request 'snmp' entries should ever be 'notReady'. Other requesters should have all required information at the time they create the config operation request. 'ready': ready to be serviced. 'running': copy operation is running. 'background': copy operation is not currently running but its waiting for an event. 'successful': copy operation was successful. 'failed': copy operation failed. See the failure state for more details.",
+                      "enum": [
+                        "notReady",
+                        "ready",
+                        "running",
+                        "background",
+                        "successful",
+                        "failed"
+                      ]
+                    },
+                    "user_name": {
+                      "type": "string",
+                      "description": "Specifies the username used to authenticate with a remote server in order to download or upload the configuration.",
+                      "maxLength": 255
+                    },
+                    "user_password": {
+                      "type": "string",
+                      "description": "Specifies the password used to authenticate with a remote server in order to download or upload the configuration.",
+                      "maxLength": 255
+                    },
+                    "vrf_name": {
+                      "type": "string",
+                      "description": "Specifies the vrf used to connect to the remote server in order to download or upload the configuration.",
+                      "maxLength": 255
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "state",
+                  "failure_state",
+                  "vrf_name",
+                  "additional_processing",
+                  "requester_index",
+                  "source_url_or_checkpoint_name",
+                  "destination_url_or_checkpoint_name",
+                  "exported_config_format",
+                  "audit_user",
+                  "range_end_time",
+                  "requester",
+                  "user_name",
+                  "creation_time",
+                  "end_time",
+                  "last_config_change_timestamp",
+                  "audit_ip_address",
+                  "source_format",
+                  "destination_type",
+                  "user_password",
+                  "attempts",
+                  "range_start_time",
+                  "operation_index",
+                  "operation",
+                  "source_type",
+                  "start_time"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/config_operations/{Config_Operation.requester},{Config_Operation.requester_index},{Config_Operation.operation_index}": {
+      "get": {
+        "tags": [
+          "Config_Operation"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "additional_processing": {
+                      "type": "object",
+                      "description": "Specify additional information results obtained from config operation execution.",
+                      "properties": {
+                        "ccf": {
+                          "type": "string",
+                          "description": "CCF data results when config operation was executed.",
+                          "maxLength": 255
+                        },
+                        "diff_mode": {
+                          "type": "string",
+                          "description": "Used for diff operations to use an alternate diff mode",
+                          "maxLength": 255
+                        }
+                      }
+                    },
+                    "attempts": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Number of times this config operation has been attempted."
+                    },
+                    "audit_ip_address": {
+                      "type": "string",
+                      "description": "Specifies the IP address (IPv4/IPv6) which is used to track the operation for audit logging purposes.",
+                      "maxLength": 49
+                    },
+                    "audit_user": {
+                      "type": "string",
+                      "description": "Specifies the user which is used to track the operation for audit logging purposes.",
+                      "maxLength": 255
+                    },
+                    "creation_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Seconds since the epoch when the config operation row was created."
+                    },
+                    "destination_type": {
+                      "type": "array",
+                      "description": "'url': URL to a file, e.g. a file-server on the network or on a USB drive. 'startupConfig': startup config. 'runningConfig': running config. 'checkpoint': checkpoint.",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "url",
+                          "startupConfig",
+                          "runningConfig",
+                          "checkpoint"
+                        ]
+                      },
+                      "maxItems": 2
+                    },
+                    "destination_url_or_checkpoint_name": {
+                      "type": "string",
+                      "description": "The URL for the destination configuration or checkpoint name. This field is empty unless the destination type is either 'url' or 'checkpoint'.",
+                      "maxLength": 255,
+                      "minLength": 1
+                    },
+                    "end_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Seconds since the epoch when the copy operation 'state' became 'successful' or 'failed'."
+                    },
+                    "exported_config_format": {
+                      "type": "array",
+                      "description": "'cli': command line interface with 'show running' format. 'json': JavaScript Object Notation.",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "cli",
+                          "json"
+                        ]
+                      },
+                      "maxItems": 2
+                    },
+                    "failure_state": {
+                      "type": "string",
+                      "description": "'attemptsExceeded': maximum number of unsuccessful attempts for this configuration copy operation exceeded. 'authenticationFailed': user/pass combination failed. 'badFilename': bad filename/path/permissions. 'busy': there is another configuration copy operation running. Retry later. 'configChanged': the configuration changed while the copy operation was in progress. 'invalidConfig': source config is invalid. 'invalidRequest': the request contains an invalid parameter combination. 'invalidURL': provided URL is invalid. 'systemNotReady': system is not ready to copy configuration. 'timeout': the network may be overloaded, or the remote file server may not be responding. 'duplicateCheckpoint': there is a checkpoint with the same configuration in it 'checkpointNotFound': the specified checkpoint does not exist 'diskFull': file system is full, can not save operation results 'invalidIOResult': system I/O error 'resourcesFailed': external resources failure or busy, can not execute operation. 'insufficientSystemMemory': insufficient free system memory available to execute the operation. 'unknown': failure unknown.",
+                      "enum": [
+                        "attemptsExceeded",
+                        "authenticationFailed",
+                        "badFilename",
+                        "busy",
+                        "configChanged",
+                        "invalidConfig",
+                        "invalidRequest",
+                        "invalidURL",
+                        "systemNotReady",
+                        "timeout",
+                        "duplicateCheckpoint",
+                        "checkpointNotFound",
+                        "diskFull",
+                        "invalidIOResult",
+                        "resourcesFailed",
+                        "insufficientSystemMemory",
+                        "unknown"
+                      ]
+                    },
+                    "last_config_change_timestamp": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Timestamp of the latest configuration change obtained by the user."
+                    },
+                    "operation": {
+                      "type": "array",
+                      "description": "'copy': copy a configuration from a source to a destination. 'validate': validate a configuration.             Validation only applies to configuration in CLI format. JSON configuration is copied as-is. 'read': read a configuration from source. 'diff': compares configurations between source and destination. 'hash': generate hash value from specific config or checkpoint 'timer': start checkpoint auto time counter (ARM). 'confirm': checkpoint auto confirm command (ACK). 'lock': requests a lock for a legacy config operation.",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "copy",
+                          "validate",
+                          "read",
+                          "diff",
+                          "hash",
+                          "timer",
+                          "confirm",
+                          "lock"
+                        ]
+                      },
+                      "maxItems": 2
+                    },
+                    "operation_index": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Reference Resource: [Config_Operation](#/Config_Operation)<br>Unique copy operation index. If the requester is 'snmp', this value is expected to match its corresponding arubaWiredConfigurationCopyIndex value."
+                    },
+                    "range_end_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "End time to use for read specfic configurations."
+                    },
+                    "range_start_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Start time to use for read specfic configurations"
+                    },
+                    "requester": {
+                      "type": "string",
+                      "description": "Reference Resource: [Config_Operation](#/Config_Operation)<br>'autoCheckpoint': config checkpoint auto save process 'boot': boot process daemon. 'checkpoint': automatic configuration checkpoint. 'cli': command line interface. 'cmf': configuration migration framework. 'issu': ISSU process daemon 'mgmtmd': management module daemon. 'modules': line card management daemon 'rest': REST server. 'snmp': SNMP via the ARUBAWIRED CONFIG MIB. 'vsf': virtual switching and forwarding daemon. 'vsx': virtual switching extension daemon. 'vsxSwUpgrade': virtual switching extension software upgrade daemon. 'vsxSync': virtual switching extension configuration synchronization daemon. 'ztp': zero-touch provisioning daemon.",
+                      "enum": [
+                        "autoCheckpoint",
+                        "boot",
+                        "checkpoint",
+                        "cli",
+                        "cmf",
+                        "issu",
+                        "mgmtmd",
+                        "modules",
+                        "rest",
+                        "snmp",
+                        "vsf",
+                        "vsx",
+                        "vsxSwUpgrade",
+                        "vsxSync",
+                        "ztp"
+                      ]
+                    },
+                    "requester_index": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Reference Resource: [Config_Operation](#/Config_Operation)<br>unique identifier for the requester of the configuration operation"
+                    },
+                    "source_format": {
+                      "type": "string",
+                      "description": "'full': the entire configuration in CLI or JSON format. 'diff': the entire configuration in CLI format plus added/removed lines.",
+                      "enum": [
+                        "full",
+                        "diff"
+                      ]
+                    },
+                    "source_type": {
+                      "type": "string",
+                      "description": "'url': URL to a file, e.g. a file-server on the network or on a USB drive.        When operation is 'validate' this is an internal URL used for dry run. 'startupConfig': startup config. 'runningConfig': running config. 'checkpoint': checkpoint.",
+                      "enum": [
+                        "url",
+                        "startupConfig",
+                        "runningConfig",
+                        "checkpoint"
+                      ]
+                    },
+                    "source_url_or_checkpoint_name": {
+                      "type": "string",
+                      "description": "The URL for the source configuration or checkpoint name. This field is empty unless the source type is either 'url' or 'checkpoint'.",
+                      "maxLength": 255,
+                      "minLength": 1
+                    },
+                    "start_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Seconds since the epoch when the copy operation 'state' became 'running'."
+                    },
+                    "state": {
+                      "type": "string",
+                      "description": "'notReady': not ready to be serviced. Only request 'snmp' entries should ever be 'notReady'. Other requesters should have all required information at the time they create the config operation request. 'ready': ready to be serviced. 'running': copy operation is running. 'background': copy operation is not currently running but its waiting for an event. 'successful': copy operation was successful. 'failed': copy operation failed. See the failure state for more details.",
+                      "enum": [
+                        "notReady",
+                        "ready",
+                        "running",
+                        "background",
+                        "successful",
+                        "failed"
+                      ]
+                    },
+                    "user_name": {
+                      "type": "string",
+                      "description": "Specifies the username used to authenticate with a remote server in order to download or upload the configuration.",
+                      "maxLength": 255
+                    },
+                    "user_password": {
+                      "type": "string",
+                      "description": "Specifies the password used to authenticate with a remote server in order to download or upload the configuration.",
+                      "maxLength": 255
+                    },
+                    "vrf_name": {
+                      "type": "string",
+                      "description": "Specifies the vrf used to connect to the remote server in order to download or upload the configuration.",
+                      "maxLength": 255
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Config_Operation.requester",
+            "in": "path",
+            "description": "Reference Resource: [Config_Operation](#/Config_Operation)<br>'autoCheckpoint': config checkpoint auto save process 'boot': boot process daemon. 'checkpoint': automatic configuration checkpoint. 'cli': command line interface. 'cmf': configuration migration framework. 'issu': ISSU process daemon 'mgmtmd': management module daemon. 'modules': line card management daemon 'rest': REST server. 'snmp': SNMP via the ARUBAWIRED CONFIG MIB. 'vsf': virtual switching and forwarding daemon. 'vsx': virtual switching extension daemon. 'vsxSwUpgrade': virtual switching extension software upgrade daemon. 'vsxSync': virtual switching extension configuration synchronization daemon. 'ztp': zero-touch provisioning daemon.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "autoCheckpoint",
+                "boot",
+                "checkpoint",
+                "cli",
+                "cmf",
+                "issu",
+                "mgmtmd",
+                "modules",
+                "rest",
+                "snmp",
+                "vsf",
+                "vsx",
+                "vsxSwUpgrade",
+                "vsxSync",
+                "ztp"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "Config_Operation.requester_index",
+            "in": "path",
+            "description": "Reference Resource: [Config_Operation](#/Config_Operation)<br>unique identifier for the requester of the configuration operation",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Config_Operation.operation_index",
+            "in": "path",
+            "description": "Reference Resource: [Config_Operation](#/Config_Operation)<br>Unique copy operation index. If the requester is 'snmp', this value is expected to match its corresponding arubaWiredConfigurationCopyIndex value.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "source_format",
+                  "destination_type",
+                  "user_password",
+                  "attempts",
+                  "last_config_change_timestamp",
+                  "audit_ip_address",
+                  "operation_index",
+                  "operation",
+                  "source_type",
+                  "start_time",
+                  "range_start_time",
+                  "additional_processing",
+                  "requester_index",
+                  "source_url_or_checkpoint_name",
+                  "destination_url_or_checkpoint_name",
+                  "exported_config_format",
+                  "state",
+                  "failure_state",
+                  "vrf_name",
+                  "audit_user",
+                  "requester",
+                  "user_name",
+                  "creation_time",
+                  "end_time",
+                  "range_end_time"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

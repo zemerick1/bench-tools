@@ -1,0 +1,360 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Logs",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Logs"
+    }
+  ],
+  "paths": {
+    "/logs/accounting": {
+      "get": {
+        "description": "Get current accounting log entries.",
+        "summary": "Accounting Log entries in AOS-CX format.",
+        "tags": [
+          "Logs"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "since",
+            "in": "query",
+            "description": "Fetch logs since the time specified. Valid format: YYYY-MM-DD hh:mm:ss. Relative words like yesterday, today, now,1 day ago, 10 hours ago, 12 minutes ago are accepted. Words like hour ago, minute ago and day ago must precede with a positive integer and can be in plural form too",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "description": "Fetch logs until the time specified. Valid format: YYYY-MM-DD hh:mm:ss. Relative words like yesterday, today, now,1 day ago, 10 hours ago, 12 minutes ago are accepted. Words like hour ago, minute ago and day ago must precede with a positive integer and can be in plural form too",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of log entries in the response.Valid range is 1-1000",
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1
+            }
+          }
+        ]
+      }
+    },
+    "/logs/audit": {
+      "get": {
+        "description": "Get Audit Logs",
+        "summary": "Audit logs.",
+        "tags": [
+          "Logs"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "description": "Bad Gateway"
+          }
+        },
+        "parameters": [
+          {
+            "name": "since",
+            "in": "query",
+            "description": "MM/DD/YY hh:mm:ss, relative words like yesterday, today, now, recent, this-week, week-ago, this-month, this-year are accepted",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "description": "MM/DD/YY hh:mm:ss, relative words like yesterday, today, now, recent, this-week, week-ago, this-month, this-year are accepted",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "session",
+            "in": "query",
+            "description": "session type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "REST",
+                "CLI"
+              ]
+            }
+          },
+          {
+            "name": "username",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "usergroup",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "administrators",
+                "operators",
+                "auditors"
+              ]
+            }
+          },
+          {
+            "name": "isConfig",
+            "in": "query",
+            "description": "config context",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "yes",
+                "no"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/logs/event": {
+      "get": {
+        "description": "Get current log entries.",
+        "summary": "Log entries.",
+        "tags": [
+          "Logs"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "priority",
+            "in": "query",
+            "description": "Log priority levels. Valid values 0-7. The format is either integer or integer range(e.g. 1..3). Single integer option will match events with equal or lower severity than this value. Integer range option will match all events with priority in the range.",
+            "schema": {
+              "type": "integer",
+              "maximum": 7,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "description": "Fetch logs since the time specified. Valid format: YYYY-MM-DD hh:mm:ss. Relative words like yesterday, today, now,1 day ago, 10 hours ago, 12 minutes ago are accepted. Words like hour ago, minute ago and day ago must precede with a positive integer and can be in plural form too",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "description": "Fetch logs until the time specified. Valid format: YYYY-MM-DD hh:mm:ss. Relative words like yesterday, today, now,1 day ago, 10 hours ago, 12 minutes ago are accepted. Words like hour ago, minute ago and day ago must precede with a positive integer and can be in plural form too",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of log entries in the response.Valid range is 1-1000",
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "MESSAGE",
+            "in": "query",
+            "description": "Exact log message that is expected to be matched.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "MESSAGE_ID",
+            "in": "query",
+            "description": "A comma separated list of 128-bit message identifiers for recognizing certain message types. Use MESSAGE_ID 50c0fa81c2a545ec982a54293f1b1945 and 73d7a43eaf714f97bbdf2b251b21cade to query all of the events in the systemd journal. Default value is 50c0fa81c2a545ec982a54293f1b1945.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ID",
+            "in": "query",
+            "description": "A comma separated list of event log identifiers.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "IP",
+            "in": "query",
+            "description": "A comma separated list of event log filter ip addresses.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "MAC",
+            "in": "query",
+            "description": "A comma separated list of event log filter mac addresses.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "EVENT_CATEGORY",
+            "in": "query",
+            "description": "The event category. For retrieving only the events in a specific category.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SYSLOG_IDENTIFIER",
+            "in": "query",
+            "description": "This is the module generating the log message. Use this field to filter logs by a specific module.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "NAE_AGENT_NAME",
+            "in": "query",
+            "description": "The NAE agent name. This field is only included in messages sent by NAE backend when an alert happens and indicates which agent generated that alert.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "_PID",
+            "in": "query",
+            "description": "The Process ID of the process that is generating the log entry.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "_GID",
+            "in": "query",
+            "description": "The Group ID of the process that is generating the log entry.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "_UID",
+            "in": "query",
+            "description": "The User ID of the process that is generating the log entry.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

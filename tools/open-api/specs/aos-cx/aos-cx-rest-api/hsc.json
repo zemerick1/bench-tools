@@ -1,0 +1,461 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "HSC",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "HSC"
+    }
+  ],
+  "paths": {
+    "/system/hsc": {
+      "get": {
+        "tags": [
+          "HSC"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "bfd_enable": {
+                      "type": "boolean",
+                      "description": "Enables BFD sessions between HSC and remote VTEPs. BFD between HSC and remote VTEPs becomes operational only when it is also enabled at the system level."
+                    },
+                    "connections": {
+                      "type": "object",
+                      "description": "Connection information of remote controller(s).",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "port": {
+                              "type": "integer",
+                              "description": "TCP port of the remote controller to which HSC is connected.",
+                              "maximum": 65535,
+                              "minimum": 1024
+                            },
+                            "state": {
+                              "type": "string",
+                              "description": "The state of the connection to the remote controller:  `void`:        connection is disabled. `backoff`:     attempting to reconnect at an increasing period. `connecting`:  attempting to connect. `active`:      connected, remote controller(NSX) responsive. `idle`:        connection is idle. Waiting for response to keep-alive.",
+                              "enum": [
+                                "void",
+                                "backoff",
+                                "connecting",
+                                "active",
+                                "idle"
+                              ]
+                            },
+                            "status": {
+                              "type": "string",
+                              "description": "The status of the connection to the remote controller: `up`:    connected to the remote controller(NSX). `down`:  not connected to the remote controller(NSX).",
+                              "enum": [
+                                "up",
+                                "down"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "enable": {
+                      "type": "boolean",
+                      "description": "Indicates whether HSC feature is enabled or disabled."
+                    },
+                    "manager_ip": {
+                      "type": "string",
+                      "description": "IP address of the remote controller (e.g NSX).",
+                      "maxLength": 45
+                    },
+                    "manager_port": {
+                      "type": "integer",
+                      "description": "TCP port of the remote controller, which HSC connects to.",
+                      "maximum": 65535,
+                      "minimum": 1024
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "manager_ip",
+                  "manager_port",
+                  "enable",
+                  "bfd_enable",
+                  "connections"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "HSC"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "bfd_enable": {
+                    "type": "boolean",
+                    "description": "Enables BFD sessions between HSC and remote VTEPs. BFD between HSC and remote VTEPs becomes operational only when it is also enabled at the system level."
+                  },
+                  "enable": {
+                    "type": "boolean",
+                    "description": "Indicates whether HSC feature is enabled or disabled."
+                  },
+                  "manager_ip": {
+                    "type": "string",
+                    "description": "IP address of the remote controller (e.g NSX).",
+                    "maxLength": 45
+                  },
+                  "manager_port": {
+                    "type": "integer",
+                    "description": "TCP port of the remote controller, which HSC connects to.",
+                    "maximum": 65535,
+                    "minimum": 1024
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "HSC"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "bfd_enable": {
+                    "type": "boolean",
+                    "description": "Enables BFD sessions between HSC and remote VTEPs. BFD between HSC and remote VTEPs becomes operational only when it is also enabled at the system level."
+                  },
+                  "enable": {
+                    "type": "boolean",
+                    "description": "Indicates whether HSC feature is enabled or disabled."
+                  },
+                  "manager_ip": {
+                    "type": "string",
+                    "description": "IP address of the remote controller (e.g NSX).",
+                    "maxLength": 45
+                  },
+                  "manager_port": {
+                    "type": "integer",
+                    "description": "TCP port of the remote controller, which HSC connects to.",
+                    "maximum": 65535,
+                    "minimum": 1024
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "HSC"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "HSC"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "bfd_enable": {
+                    "type": "boolean",
+                    "description": "Enables BFD sessions between HSC and remote VTEPs. BFD between HSC and remote VTEPs becomes operational only when it is also enabled at the system level."
+                  },
+                  "enable": {
+                    "type": "boolean",
+                    "description": "Indicates whether HSC feature is enabled or disabled."
+                  },
+                  "manager_ip": {
+                    "type": "string",
+                    "description": "IP address of the remote controller (e.g NSX).",
+                    "maxLength": 45
+                  },
+                  "manager_port": {
+                    "type": "integer",
+                    "description": "TCP port of the remote controller, which HSC connects to.",
+                    "maximum": 65535,
+                    "minimum": 1024
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

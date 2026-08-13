@@ -1,0 +1,886 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Hot_Patch",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Hot_Patch"
+    }
+  ],
+  "paths": {
+    "/system/hot_patches": {
+      "get": {
+        "tags": [
+          "Hot_Patch"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "compatible_sw_version": {
+                      "type": "string",
+                      "description": "Version of software that is compatible with this hot-patch."
+                    },
+                    "control_state": {
+                      "type": "string",
+                      "description": "Defines the state of the hot patch. Valid values are: `active`:   The hot-patch is configured to be applied. `inactive`: The hot-patch is configured to not be applied.",
+                      "enum": [
+                        "active",
+                        "inactive"
+                      ]
+                    },
+                    "download_url": {
+                      "type": "string",
+                      "description": "The source file path for upload and download.",
+                      "maxLength": 2048
+                    },
+                    "download_vrf": {
+                      "type": "string",
+                      "description": "Name of VRF to use for transfer."
+                    },
+                    "issues_fixed": {
+                      "type": "string",
+                      "description": "Issues fixed by this hot-patch."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Hot_Patch](#/Hot_Patch)<br>Name of the hot-patch file.",
+                      "maxLength": 256,
+                      "minLength": 1
+                    },
+                    "origin": {
+                      "type": "string",
+                      "description": "Indicator of whether the hot-patch is built-in (system-defined) or configured. Built-in hot-patches cannot be modified or deleted by users.",
+                      "enum": [
+                        "built-in",
+                        "configuration"
+                      ]
+                    },
+                    "patch_info": {
+                      "type": "object",
+                      "description": "Information about the hot-patch file.",
+                      "properties": {
+                        "build_date": {
+                          "type": "string",
+                          "description": "The build date of the hot-patch in format YYYY-MM-DD HH:MM:SS TZD."
+                        },
+                        "build_id": {
+                          "type": "string",
+                          "description": "The build id string of the hot-patch."
+                        },
+                        "build_sha": {
+                          "type": "string",
+                          "description": "The build sha of the hot-patch."
+                        },
+                        "os_name": {
+                          "type": "string",
+                          "description": "Name of the operating system used by the hot-patch."
+                        },
+                        "sha_256": {
+                          "type": "string",
+                          "description": "The SHA256 calculated for the hot-patch file."
+                        }
+                      }
+                    },
+                    "phase_completed": {
+                      "type": "string",
+                      "description": "Indicates the installation phase completed."
+                    },
+                    "phase_requested": {
+                      "type": "string",
+                      "description": "Indicates the installation phase requested by orchestration."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "State of the hot-patch: not_applied    : Hot-patch is not applied. applying       : Hot-patch is currently being applied applied        : Hot-patch has been applied. apply_failed   : Hot-patch failed to apply. incompatible   : Hot-patch is incompatible with this system or running software. not_applicable : Hot-patch does not apply to this system. invalid        : Hot-patch is invalid. missing        : Hot-patch file is missing. unapplying     : Hot-patch is currently being un-applied. unapply_failed : Hot-Patch failed to unapply.",
+                      "enum": [
+                        "not_applied",
+                        "applying",
+                        "applied",
+                        "apply_failed",
+                        "incompatible",
+                        "not_applicable",
+                        "invalid",
+                        "missing",
+                        "unapplying",
+                        "unapply_failed"
+                      ]
+                    },
+                    "subsystem_exclude": {
+                      "type": "object",
+                      "description": "Reference Resource: [Subsystem](#/Subsystem)<br>Indication that a subsystem is to be excluded from hot-patch installation. `true`   : Do not install the hot-patch on this subsystem. `false`  : Install the hot-patch on this subsystem.",
+                      "properties": {
+                        "URI": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "subsystem_phase": {
+                      "type": "object",
+                      "description": "Reference Resource: [Subsystem](#/Subsystem)<br>The most recent phase completed by the referenced subsystem.",
+                      "properties": {
+                        "URI": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "subsystem_status": {
+                      "type": "object",
+                      "description": "Reference Resource: [Subsystem](#/Subsystem)<br>State of the hot-patch on the referenced subsystem. Valid values are: not_applied    : Hot-patch is not applied. applying       : Hot-patch is currently being applied. applied        : Hot-patch has been applied. apply_failed   : Hot-patch failed to apply. incompatible   : Hot-patch is incompatible with this system or running software. not_applicable : Hot-patch does not apply to this system. invalid        : Hot-patch is invalid. missing        : Hot-patch file is missing. unapplying     : Hot-patch is currently being un-applied. unapply_failed : Hot-Patch failed to unapply.",
+                      "properties": {
+                        "URI": {
+                          "type": "string",
+                          "enum": [
+                            "not_applied",
+                            "applying",
+                            "applied",
+                            "apply_failed",
+                            "incompatible",
+                            "not_applicable",
+                            "invalid",
+                            "missing",
+                            "unapplying",
+                            "unapply_failed"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "download_url",
+                    "name",
+                    "download_vrf"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "status",
+                  "download_url",
+                  "compatible_sw_version",
+                  "issues_fixed",
+                  "phase_requested",
+                  "phase_completed",
+                  "origin",
+                  "name",
+                  "subsystem_status",
+                  "subsystem_phase",
+                  "subsystem_exclude",
+                  "download_vrf",
+                  "patch_info",
+                  "control_state"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Hot_Patch"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "control_state": {
+                    "type": "string",
+                    "description": "Defines the state of the hot patch. Valid values are: `active`:   The hot-patch is configured to be applied. `inactive`: The hot-patch is configured to not be applied.",
+                    "enum": [
+                      "active",
+                      "inactive"
+                    ]
+                  },
+                  "download_url": {
+                    "type": "string",
+                    "description": "The source file path for upload and download.",
+                    "maxLength": 2048
+                  },
+                  "download_vrf": {
+                    "type": "string",
+                    "description": "Name of VRF to use for transfer."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [Hot_Patch](#/Hot_Patch)<br>Name of the hot-patch file.",
+                    "maxLength": 256,
+                    "minLength": 1
+                  },
+                  "origin": {
+                    "type": "string",
+                    "description": "Indicator of whether the hot-patch is built-in (system-defined) or configured. Built-in hot-patches cannot be modified or deleted by users.",
+                    "enum": [
+                      "built-in",
+                      "configuration"
+                    ]
+                  }
+                },
+                "required": [
+                  "download_url",
+                  "name",
+                  "download_vrf"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/system/hot_patches/{Hot_Patch.name}": {
+      "get": {
+        "tags": [
+          "Hot_Patch"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "compatible_sw_version": {
+                      "type": "string",
+                      "description": "Version of software that is compatible with this hot-patch."
+                    },
+                    "control_state": {
+                      "type": "string",
+                      "description": "Defines the state of the hot patch. Valid values are: `active`:   The hot-patch is configured to be applied. `inactive`: The hot-patch is configured to not be applied.",
+                      "enum": [
+                        "active",
+                        "inactive"
+                      ]
+                    },
+                    "download_url": {
+                      "type": "string",
+                      "description": "The source file path for upload and download.",
+                      "maxLength": 2048
+                    },
+                    "download_vrf": {
+                      "type": "string",
+                      "description": "Name of VRF to use for transfer."
+                    },
+                    "issues_fixed": {
+                      "type": "string",
+                      "description": "Issues fixed by this hot-patch."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Hot_Patch](#/Hot_Patch)<br>Name of the hot-patch file.",
+                      "maxLength": 256,
+                      "minLength": 1
+                    },
+                    "origin": {
+                      "type": "string",
+                      "description": "Indicator of whether the hot-patch is built-in (system-defined) or configured. Built-in hot-patches cannot be modified or deleted by users.",
+                      "enum": [
+                        "built-in",
+                        "configuration"
+                      ]
+                    },
+                    "patch_info": {
+                      "type": "object",
+                      "description": "Information about the hot-patch file.",
+                      "properties": {
+                        "build_date": {
+                          "type": "string",
+                          "description": "The build date of the hot-patch in format YYYY-MM-DD HH:MM:SS TZD."
+                        },
+                        "build_id": {
+                          "type": "string",
+                          "description": "The build id string of the hot-patch."
+                        },
+                        "build_sha": {
+                          "type": "string",
+                          "description": "The build sha of the hot-patch."
+                        },
+                        "os_name": {
+                          "type": "string",
+                          "description": "Name of the operating system used by the hot-patch."
+                        },
+                        "sha_256": {
+                          "type": "string",
+                          "description": "The SHA256 calculated for the hot-patch file."
+                        }
+                      }
+                    },
+                    "phase_completed": {
+                      "type": "string",
+                      "description": "Indicates the installation phase completed."
+                    },
+                    "phase_requested": {
+                      "type": "string",
+                      "description": "Indicates the installation phase requested by orchestration."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "State of the hot-patch: not_applied    : Hot-patch is not applied. applying       : Hot-patch is currently being applied applied        : Hot-patch has been applied. apply_failed   : Hot-patch failed to apply. incompatible   : Hot-patch is incompatible with this system or running software. not_applicable : Hot-patch does not apply to this system. invalid        : Hot-patch is invalid. missing        : Hot-patch file is missing. unapplying     : Hot-patch is currently being un-applied. unapply_failed : Hot-Patch failed to unapply.",
+                      "enum": [
+                        "not_applied",
+                        "applying",
+                        "applied",
+                        "apply_failed",
+                        "incompatible",
+                        "not_applicable",
+                        "invalid",
+                        "missing",
+                        "unapplying",
+                        "unapply_failed"
+                      ]
+                    },
+                    "subsystem_exclude": {
+                      "type": "object",
+                      "description": "Reference Resource: [Subsystem](#/Subsystem)<br>Indication that a subsystem is to be excluded from hot-patch installation. `true`   : Do not install the hot-patch on this subsystem. `false`  : Install the hot-patch on this subsystem.",
+                      "properties": {
+                        "URI": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "subsystem_phase": {
+                      "type": "object",
+                      "description": "Reference Resource: [Subsystem](#/Subsystem)<br>The most recent phase completed by the referenced subsystem.",
+                      "properties": {
+                        "URI": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "subsystem_status": {
+                      "type": "object",
+                      "description": "Reference Resource: [Subsystem](#/Subsystem)<br>State of the hot-patch on the referenced subsystem. Valid values are: not_applied    : Hot-patch is not applied. applying       : Hot-patch is currently being applied. applied        : Hot-patch has been applied. apply_failed   : Hot-patch failed to apply. incompatible   : Hot-patch is incompatible with this system or running software. not_applicable : Hot-patch does not apply to this system. invalid        : Hot-patch is invalid. missing        : Hot-patch file is missing. unapplying     : Hot-patch is currently being un-applied. unapply_failed : Hot-Patch failed to unapply.",
+                      "properties": {
+                        "URI": {
+                          "type": "string",
+                          "enum": [
+                            "not_applied",
+                            "applying",
+                            "applied",
+                            "apply_failed",
+                            "incompatible",
+                            "not_applicable",
+                            "invalid",
+                            "missing",
+                            "unapplying",
+                            "unapply_failed"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "download_vrf",
+                    "download_url"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Hot_Patch.name",
+            "in": "path",
+            "description": "Reference Resource: [Hot_Patch](#/Hot_Patch)<br>Name of the hot-patch file.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "status",
+                  "download_url",
+                  "origin",
+                  "name",
+                  "compatible_sw_version",
+                  "issues_fixed",
+                  "phase_requested",
+                  "phase_completed",
+                  "subsystem_status",
+                  "subsystem_phase",
+                  "patch_info",
+                  "control_state",
+                  "subsystem_exclude",
+                  "download_vrf"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Hot_Patch"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "control_state": {
+                    "type": "string",
+                    "description": "Defines the state of the hot patch. Valid values are: `active`:   The hot-patch is configured to be applied. `inactive`: The hot-patch is configured to not be applied.",
+                    "enum": [
+                      "active",
+                      "inactive"
+                    ]
+                  },
+                  "download_url": {
+                    "type": "string",
+                    "description": "The source file path for upload and download.",
+                    "maxLength": 2048
+                  },
+                  "download_vrf": {
+                    "type": "string",
+                    "description": "Name of VRF to use for transfer."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [Hot_Patch](#/Hot_Patch)<br>Name of the hot-patch file.",
+                    "maxLength": 256,
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "download_url",
+                  "name",
+                  "download_vrf"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Hot_Patch.name",
+            "in": "path",
+            "description": "Reference Resource: [Hot_Patch](#/Hot_Patch)<br>Name of the hot-patch file.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Hot_Patch"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Hot_Patch.name",
+            "in": "path",
+            "description": "Reference Resource: [Hot_Patch](#/Hot_Patch)<br>Name of the hot-patch file.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Hot_Patch"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "control_state": {
+                    "type": "string",
+                    "description": "Defines the state of the hot patch. Valid values are: `active`:   The hot-patch is configured to be applied. `inactive`: The hot-patch is configured to not be applied.",
+                    "enum": [
+                      "active",
+                      "inactive"
+                    ]
+                  },
+                  "download_url": {
+                    "type": "string",
+                    "description": "The source file path for upload and download.",
+                    "maxLength": 2048
+                  },
+                  "download_vrf": {
+                    "type": "string",
+                    "description": "Name of VRF to use for transfer."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [Hot_Patch](#/Hot_Patch)<br>Name of the hot-patch file.",
+                    "maxLength": 256,
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "download_url",
+                  "name",
+                  "download_vrf"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Hot_Patch.name",
+            "in": "path",
+            "description": "Reference Resource: [Hot_Patch](#/Hot_Patch)<br>Name of the hot-patch file.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

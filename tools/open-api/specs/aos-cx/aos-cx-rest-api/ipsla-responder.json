@@ -1,0 +1,609 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "ipsla_responder",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "ipsla_responder"
+    }
+  ],
+  "paths": {
+    "/system/ipsla_responders": {
+      "get": {
+        "tags": [
+          "ipsla_responder"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ipsla_responder_statistics": {
+                      "type": "array",
+                      "description": "Reference Resource: [ipsla_responder_statistics](#/ipsla_responder_statistics)<br>Responder statistics for different IP SLA sources.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [ipsla_responder](#/ipsla_responder)<br>SLA name that uniquely identifies an IP SLA Responder.",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "persistence": {
+                      "type": "string",
+                      "description": "Persistence of IPSLA session, i.e how the IP SLA session is provisioned: `persistent`   :  IP SLA session created by CLI or REST that will be retained                      over system reboot. `volatile`     :  IP SLA  session typically created by Aruba Central                      that will not be reatined over system reboot.",
+                      "enum": [
+                        "persistent",
+                        "volatile"
+                      ]
+                    },
+                    "responder_interface": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>Interface for listening for IP SLA probes. If both responder_ip and responder_interface are provided responder_ip will be used. If both responder_ip or responder_interface are NOT provided, the responder listens on all L3 interfaces in a given VRF. This column value can be empty."
+                    },
+                    "responder_ip": {
+                      "type": "string",
+                      "description": "IP address for listening for IP SLA probes. If both responder_ip and responder_interface are provided responder_ip will be used. If both responder_ip or responder_interface are NOT provided, the responder listens on all L3 interfaces in a given VRF. This column value can be empty.",
+                      "maxLength": 256
+                    },
+                    "responder_port_number": {
+                      "type": "integer",
+                      "description": "TCP/UDP port number on which the responder needs to listen for the probes.",
+                      "maximum": 65535,
+                      "minimum": 1
+                    },
+                    "responder_type": {
+                      "type": "string",
+                      "description": "The version of IP address used by the responder.",
+                      "enum": [
+                        "ipv4",
+                        "ipv6"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Running status of IP SLA responder: `not_running_yet`:    responder is configured, but not running yet. `running`:            responder is fully operational. `bind_failure`:       TCP or UDP port number is being used by some other service. `internal_error`:     unexpected error prevents responder operation.",
+                      "enum": [
+                        "not_running_yet",
+                        "running",
+                        "bind_failure",
+                        "internal_error"
+                      ]
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Type of IP SLA: `udp_echo`:         responds to UDP echo probes. `tcp_connect`:      responds to TCP connect requests. `udp_jitter_voip`:  responds to UDP VOIP probes.",
+                      "enum": [
+                        "udp_echo",
+                        "tcp_connect",
+                        "udp_jitter_voip"
+                      ]
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [VRF](#/VRF)<br>VRF on which the responder listens for IP SLA packets."
+                    }
+                  },
+                  "required": [
+                    "responder_port_number",
+                    "name",
+                    "type",
+                    "vrf"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "responder_port_number",
+                  "responder_interface",
+                  "responder_type",
+                  "status",
+                  "persistence",
+                  "ipsla_responder_statistics",
+                  "responder_ip",
+                  "type",
+                  "vrf",
+                  "name"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "ipsla_responder"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [ipsla_responder](#/ipsla_responder)<br>SLA name that uniquely identifies an IP SLA Responder.",
+                    "maxLength": 64,
+                    "minLength": 1
+                  },
+                  "persistence": {
+                    "type": "string",
+                    "description": "Persistence of IPSLA session, i.e how the IP SLA session is provisioned: `persistent`   :  IP SLA session created by CLI or REST that will be retained                      over system reboot. `volatile`     :  IP SLA  session typically created by Aruba Central                      that will not be reatined over system reboot.",
+                    "enum": [
+                      "persistent",
+                      "volatile"
+                    ]
+                  },
+                  "responder_interface": {
+                    "type": "string",
+                    "description": "Reference Resource: [Port](#/Port)<br>Interface for listening for IP SLA probes. If both responder_ip and responder_interface are provided responder_ip will be used. If both responder_ip or responder_interface are NOT provided, the responder listens on all L3 interfaces in a given VRF. This column value can be empty."
+                  },
+                  "responder_ip": {
+                    "type": "string",
+                    "description": "IP address for listening for IP SLA probes. If both responder_ip and responder_interface are provided responder_ip will be used. If both responder_ip or responder_interface are NOT provided, the responder listens on all L3 interfaces in a given VRF. This column value can be empty.",
+                    "maxLength": 256
+                  },
+                  "responder_port_number": {
+                    "type": "integer",
+                    "description": "TCP/UDP port number on which the responder needs to listen for the probes.",
+                    "maximum": 65535,
+                    "minimum": 1
+                  },
+                  "responder_type": {
+                    "type": "string",
+                    "description": "The version of IP address used by the responder.",
+                    "enum": [
+                      "ipv4",
+                      "ipv6"
+                    ]
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "Type of IP SLA: `udp_echo`:         responds to UDP echo probes. `tcp_connect`:      responds to TCP connect requests. `udp_jitter_voip`:  responds to UDP VOIP probes.",
+                    "enum": [
+                      "udp_echo",
+                      "tcp_connect",
+                      "udp_jitter_voip"
+                    ]
+                  },
+                  "vrf": {
+                    "type": "string",
+                    "description": "Reference Resource: [VRF](#/VRF)<br>VRF on which the responder listens for IP SLA packets."
+                  }
+                },
+                "required": [
+                  "responder_port_number",
+                  "name",
+                  "type",
+                  "vrf"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/system/ipsla_responders/{ipsla_responder.name}": {
+      "get": {
+        "tags": [
+          "ipsla_responder"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ipsla_responder_statistics": {
+                      "type": "array",
+                      "description": "Reference Resource: [ipsla_responder_statistics](#/ipsla_responder_statistics)<br>Responder statistics for different IP SLA sources.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [ipsla_responder](#/ipsla_responder)<br>SLA name that uniquely identifies an IP SLA Responder.",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "persistence": {
+                      "type": "string",
+                      "description": "Persistence of IPSLA session, i.e how the IP SLA session is provisioned: `persistent`   :  IP SLA session created by CLI or REST that will be retained                      over system reboot. `volatile`     :  IP SLA  session typically created by Aruba Central                      that will not be reatined over system reboot.",
+                      "enum": [
+                        "persistent",
+                        "volatile"
+                      ]
+                    },
+                    "responder_interface": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>Interface for listening for IP SLA probes. If both responder_ip and responder_interface are provided responder_ip will be used. If both responder_ip or responder_interface are NOT provided, the responder listens on all L3 interfaces in a given VRF. This column value can be empty."
+                    },
+                    "responder_ip": {
+                      "type": "string",
+                      "description": "IP address for listening for IP SLA probes. If both responder_ip and responder_interface are provided responder_ip will be used. If both responder_ip or responder_interface are NOT provided, the responder listens on all L3 interfaces in a given VRF. This column value can be empty.",
+                      "maxLength": 256
+                    },
+                    "responder_port_number": {
+                      "type": "integer",
+                      "description": "TCP/UDP port number on which the responder needs to listen for the probes.",
+                      "maximum": 65535,
+                      "minimum": 1
+                    },
+                    "responder_type": {
+                      "type": "string",
+                      "description": "The version of IP address used by the responder.",
+                      "enum": [
+                        "ipv4",
+                        "ipv6"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Running status of IP SLA responder: `not_running_yet`:    responder is configured, but not running yet. `running`:            responder is fully operational. `bind_failure`:       TCP or UDP port number is being used by some other service. `internal_error`:     unexpected error prevents responder operation.",
+                      "enum": [
+                        "not_running_yet",
+                        "running",
+                        "bind_failure",
+                        "internal_error"
+                      ]
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Type of IP SLA: `udp_echo`:         responds to UDP echo probes. `tcp_connect`:      responds to TCP connect requests. `udp_jitter_voip`:  responds to UDP VOIP probes.",
+                      "enum": [
+                        "udp_echo",
+                        "tcp_connect",
+                        "udp_jitter_voip"
+                      ]
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [VRF](#/VRF)<br>VRF on which the responder listens for IP SLA packets."
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "responder_port_number",
+                    "type",
+                    "vrf"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "ipsla_responder.name",
+            "in": "path",
+            "description": "Reference Resource: [ipsla_responder](#/ipsla_responder)<br>SLA name that uniquely identifies an IP SLA Responder.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "responder_type",
+                  "status",
+                  "persistence",
+                  "ipsla_responder_statistics",
+                  "responder_port_number",
+                  "responder_interface",
+                  "vrf",
+                  "name",
+                  "responder_ip",
+                  "type"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "ipsla_responder"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "ipsla_responder.name",
+            "in": "path",
+            "description": "Reference Resource: [ipsla_responder](#/ipsla_responder)<br>SLA name that uniquely identifies an IP SLA Responder.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

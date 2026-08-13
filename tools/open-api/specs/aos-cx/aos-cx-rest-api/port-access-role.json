@@ -1,0 +1,1635 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Port_Access_Role",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Port_Access_Role"
+    }
+  ],
+  "paths": {
+    "/system/port_access_roles": {
+      "get": {
+        "tags": [
+          "Port_Access_Role"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "auth_mode": {
+                      "type": "string",
+                      "description": "Indicates, whether each individual client on the port needs to be authenticated separately to gain access to the network. `client-mode`: every client needs to be authenticated to be                granted network access. `device-mode`: only one of the attached clients must be                authenticated for all clients to be granted                network access. `multi-domain`:limit the number of authenticated clients to one                 'voice' client and a configured number of 'data'                 clients. By default allowed 'data' client is                 also one. If empty, then port_access_auth_mode of the `Port` is used. ",
+                      "enum": [
+                        "client-mode",
+                        "device-mode",
+                        "multi-domain"
+                      ]
+                    },
+                    "base_role_name": {
+                      "type": "string",
+                      "description": "Name of the role from which this role has been derived. This will be published for the roles that are derived from a combination of user-role and RADIUS attributes.",
+                      "maxLength": 128,
+                      "minLength": 1
+                    },
+                    "cached_reauth_period": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Duration in seconds until when cached re-authentication is allowed for clients on-boarded via this role. If empty, then Port_Access_Auth_Configuration.cached_reauth_period of the `Port` is used.",
+                      "maximum": 4294967295,
+                      "minimum": 30
+                    },
+                    "captive_portal_profile": {
+                      "type": "string",
+                      "description": "Reference Resource: [Captive_Portal_Profile](#/Captive_Portal_Profile)<br>Captive portal profile associated with this access role."
+                    },
+                    "client_inactivity_monitor": {
+                      "type": "string",
+                      "description": "Sets the inactivity mode  `configured_timeout`: value set by `client_inactivity_time` will be used for                        tracking inactivity  `dynamic_timeout`:    client will expire after global dynamic ageout value  `no_timeout`:         client will never ageout and stays in system.                        Example: mac-pinning",
+                      "enum": [
+                        "configured_timeout",
+                        "dynamic_timeout",
+                        "no_timeout"
+                      ]
+                    },
+                    "client_inactivity_timeout": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time in seconds after which a client will be removed from the port for lack of activity. This is only applicable when client_inactivity_monitor mode is set to 'configured_timeout'.",
+                      "maximum": 4294967295,
+                      "minimum": 60
+                    },
+                    "creation_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time in seconds since epoch when this role was created.",
+                      "minimum": 0
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Free text description of role.",
+                      "maxLength": 256,
+                      "minLength": 1
+                    },
+                    "device_traffic_class": {
+                      "type": "string",
+                      "description": "Specifies the class of client this role is associated with.",
+                      "enum": [
+                        "voice"
+                      ]
+                    },
+                    "download_status": {
+                      "type": "object",
+                      "properties": {
+                        "failure_reason": {
+                          "type": "string",
+                          "description": "Response for the download request:  `server_not_reachable`:             server not reachable.  `authentication_failure`:           invalid user-id or password.  `certificate_invalid`:              server certificate not valid.  `certificate_missing`:              server certificate not configured.  `invalid_role_name`:                role name specified not found on server.  `parsing_failed`:                   failed to parse the downloaded file.  `server_timed_out`:                 server failed to respond.  `credentials_missing`:              server credentials not configured.  `internal_error`:                   error while downloading or                                      installing role.  `failed_during_issu`:               failed to install while issu is in                                      progress. Applicable for downloadable roles only.",
+                          "enum": [
+                            "server_not_reachable",
+                            "authentication_failure",
+                            "certificate_invalid",
+                            "certificate_missing",
+                            "invalid_role_name",
+                            "parsing_failed",
+                            "server_timed_out",
+                            "credentials_missing",
+                            "internal_error",
+                            "failed_during_issu"
+                          ]
+                        },
+                        "state": {
+                          "type": "string",
+                          "description": "Determines role state. Applicable for downloadable roles only. The states are:  `completed`:    role has been downloaded successfully.  `in_progress`:  role is being downloaded from the server.  `failed`:       role could not be downloaded from the server.",
+                          "enum": [
+                            "completed",
+                            "in_progress",
+                            "failed"
+                          ]
+                        }
+                      }
+                    },
+                    "gateway_zone": {
+                      "type": "string",
+                      "description": "Gateway zone associated with this user role."
+                    },
+                    "in_gbp": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_GBP](#/Port_Access_GBP)<br>Ingress port-access Group Based policy."
+                    },
+                    "in_policy": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_Policy](#/Port_Access_Policy)<br>Ingress port-access policy, to be applied when this role is assigned."
+                    },
+                    "macsec_policy": {
+                      "type": "string",
+                      "description": "Reference Resource: [MACsec_Policy](#/MACsec_Policy)<br>MACsec policy associated with this user role. When not set, if the client is authenticated by 802.1X with this role on a port where MACsec is enabled for the 802.1X authenticator, traffic ingressing this port will be dropped."
+                    },
+                    "max_session_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "The maximum number of seconds of service to provide to the client before termination of session. If empty, the maximum session time is indefinite.",
+                      "maximum": 4294967295,
+                      "minimum": 1
+                    },
+                    "mtu": {
+                      "type": "integer",
+                      "description": "The MTU (maximum transmission unit); i.e. the largest amount of data that can be transmitted in an IP packet. If empty, then active_ip_mtu value of the `Port` is used.",
+                      "maximum": 9198,
+                      "minimum": 68
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_Role](#/Port_Access_Role)<br>Name of the role.",
+                      "maxLength": 128,
+                      "minLength": 1
+                    },
+                    "origin": {
+                      "type": "string",
+                      "description": "Origin of the access role, i.e., how the access role  is created.  `local`:           access role is configured locally on the switch.  `downloaded`:      downloaded from Clearpass Policy Manager (CPPM) server.  `radius`:          translated from the attributes assigned by RADIUS server.",
+                      "enum": [
+                        "downloaded",
+                        "local",
+                        "radius"
+                      ]
+                    },
+                    "poe_allocate_by_method": {
+                      "type": "string",
+                      "description": "PoE power allocation method associated with this role Allows control over the power allocation strategy used. Two power allocation strategies are supported:  `class`:    the PSE uses the power ramp-up signature of the PD              to identify the PD's power class and use the power              level for the specified class.  `usage`:    power is delivered as requested by a PD. If empty, then config.allocate_by_method value of the `PoE_Interface` is used.",
+                      "enum": [
+                        "class",
+                        "usage"
+                      ]
+                    },
+                    "poe_priority": {
+                      "type": "string",
+                      "description": "If the PoE demand exceeds the PoE budget, the switch will deny power to some ports. PoE prioritization is the way the switch  determines which ports are to receive power. The priorities are:  `critical`: the active PoE ports at this level are provisioned              before the PoE ports at any other level are provisioned.  `high`:     the active PoE ports at this level are provisioned              before the low priority PoE ports are provisioned.  `low`:      the active PoE ports at this level are provisioned              only if there is power available after provisioning              any active PoE ports at the higher priority levels. If empty, then config.priority value of the `PoE_Interface` is used.",
+                      "enum": [
+                        "low",
+                        "high",
+                        "critical"
+                      ]
+                    },
+                    "pvlan_port_type": {
+                      "type": "string",
+                      "description": "Specifies the port's type in the context of Private-VLAN. If empty, the pvlan_port_type value of the 'Port' is used.",
+                      "enum": [
+                        "promiscuous",
+                        "secondary"
+                      ]
+                    },
+                    "qos_trust_mode": {
+                      "type": "string",
+                      "description": "Specifies the individual port QoS Trust Mode.  `none`: no fields are inspected on arriving packets. The initial local-         priority and color meta-data values are taken from PCP 0 entry of the COS Map. `cos`:  will use the PCP of the outermost 802.1 VLAN tag to index the COS Map         entry to initialize the local-priority and color meta-data values of the packet.         For untagged packets, the initial local-priority and color meta-data values are         taken from code_point 0 entry of the COS Map. `dscp`: will use the DSCP value of IP packets to index the DSCP Map entry to         initialize the local-priority and color meta-data values of the packet.  For         non-IP packets, what meta-data values are assigned is hardware dependent. If empty, then qos_config.qos_trust value of the `Port` is used.",
+                      "enum": [
+                        "none",
+                        "cos",
+                        "dscp"
+                      ]
+                    },
+                    "radius_overridden_attributes": {
+                      "type": "array",
+                      "description": "List of attributes in Source role that are overridden by RADIUS attributes.",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "auth_mode",
+                          "cached_reauth_period",
+                          "captive_portal_profile",
+                          "client_inactivity_monitor",
+                          "client_inactivity_timeout",
+                          "device_traffic_class",
+                          "gateway_zone",
+                          "in_gbp",
+                          "max_session_time",
+                          "in_policy",
+                          "mtu",
+                          "poe_priority",
+                          "poe_allocate_by_method",
+                          "qos_trust_mode",
+                          "pvlan_port_type",
+                          "reauth_period",
+                          "stp_admin_edge_port",
+                          "ubt_gateway_clearpass_role",
+                          "ubt_gateway_role",
+                          "vlan_mode",
+                          "vlan_group_name",
+                          "vlan_name_tag",
+                          "vlan_name_trunks",
+                          "vlan_tag",
+                          "vlan_trunks",
+                          "macsec_policy"
+                        ]
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "reauth_period": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time period in seconds to enforce periodic re-authentication of the clients. If empty, then Port_Access_Auth_Configuration.reauth_period of the `Port` is used.",
+                      "maximum": 4294967295,
+                      "minimum": 1
+                    },
+                    "stp_admin_edge_port": {
+                      "type": "boolean",
+                      "description": "Specifies whether the port will operate as an STP admin_edge port. If empty, then [stp_config].admin_edge_port_enable of the `Port` is used."
+                    },
+                    "ubt_gateway_clearpass_role": {
+                      "type": "string",
+                      "description": "Indicates the role name that will be communicated to the UBT  cluster. The cluster needs to download the role definition from  ClearPass.",
+                      "maxLength": 128,
+                      "minLength": 1
+                    },
+                    "ubt_gateway_role": {
+                      "type": "string",
+                      "description": "Role to be assigned to tunneled clients on the UBT cluster side.",
+                      "maxLength": 63,
+                      "minLength": 1
+                    },
+                    "vlan_group_name": {
+                      "type": "string",
+                      "description": "VLAN group name associated with this user role via RADIUS.",
+                      "maxLength": 32,
+                      "minLength": 2
+                    },
+                    "vlan_mode": {
+                      "type": "string",
+                      "description": "When empty, default mode is selected as follows:  `access`:           if the vlan_tag contains a value, role contains an access vlan                      and the vlan_trunks will be empty.  `trunk`:            if the vlan_tag is empty, and the vlan_trunks is non-empty,                      then role has no-native vlan specified. If the mode is explicitly configured:  `native-tagged`:    value contained in vlan_tag refers to native vlan                      and that vlan has to be tagged.  `native-untagged`:  value contained in vlan_tag refers to native vlan                      and that vlan has to be untagged.",
+                      "enum": [
+                        "trunk",
+                        "access",
+                        "native-tagged",
+                        "native-untagged"
+                      ]
+                    },
+                    "vlan_name_tag": {
+                      "type": "string",
+                      "description": "The untagged VLAN, identified by name, to which users of this access role are assigned. If empty, VLAN identifier corresponding to the vlan_tag is used if set. Otherwise, vlan_tag of the 'Port' is used.",
+                      "maxLength": 32,
+                      "minLength": 1
+                    },
+                    "vlan_name_trunks": {
+                      "type": "array",
+                      "description": "The tagged VLAN(s), identified by their names, to which users of this access role are assigned. If empty, VLAN identifier corresponding to the vlan_trunks is used if set. Otherwise, vlan_trunks of the 'Port' is used.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 50
+                    },
+                    "vlan_tag": {
+                      "type": "integer",
+                      "description": "The untagged VLAN identifier to which users of this access role are assigned. If empty, VLAN identifier corresponding to the vlan_name_tag is used if set. Otherwise, vlan_tag of the 'Port' is used.",
+                      "maximum": 4094,
+                      "minimum": 1
+                    },
+                    "vlan_trunks": {
+                      "type": "array",
+                      "description": "The tagged VLAN identifier(s) to which users of this access role are assigned. If empty, VLAN identifier corresponding to the vlan_name_trunks is used if set. Otherwise, vlan_trunks of the 'Port' is used.",
+                      "items": {
+                        "type": "integer"
+                      },
+                      "maxItems": 1024
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "in_gbp",
+                  "client_inactivity_monitor",
+                  "max_session_time",
+                  "vlan_name_tag",
+                  "pvlan_port_type",
+                  "vlan_group_name",
+                  "device_traffic_class",
+                  "captive_portal_profile",
+                  "creation_time",
+                  "ubt_gateway_role",
+                  "macsec_policy",
+                  "description",
+                  "in_policy",
+                  "client_inactivity_timeout",
+                  "qos_trust_mode",
+                  "cached_reauth_period",
+                  "radius_overridden_attributes",
+                  "vlan_mode",
+                  "vlan_trunks",
+                  "name",
+                  "reauth_period",
+                  "mtu",
+                  "poe_priority",
+                  "stp_admin_edge_port",
+                  "base_role_name",
+                  "vlan_tag",
+                  "vlan_name_trunks",
+                  "auth_mode",
+                  "download_status",
+                  "origin",
+                  "gateway_zone",
+                  "ubt_gateway_clearpass_role",
+                  "poe_allocate_by_method"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Port_Access_Role"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "auth_mode": {
+                    "type": "string",
+                    "description": "Indicates, whether each individual client on the port needs to be authenticated separately to gain access to the network. `client-mode`: every client needs to be authenticated to be                granted network access. `device-mode`: only one of the attached clients must be                authenticated for all clients to be granted                network access. `multi-domain`:limit the number of authenticated clients to one                 'voice' client and a configured number of 'data'                 clients. By default allowed 'data' client is                 also one. If empty, then port_access_auth_mode of the `Port` is used. ",
+                    "enum": [
+                      "client-mode",
+                      "device-mode",
+                      "multi-domain"
+                    ]
+                  },
+                  "cached_reauth_period": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Duration in seconds until when cached re-authentication is allowed for clients on-boarded via this role. If empty, then Port_Access_Auth_Configuration.cached_reauth_period of the `Port` is used.",
+                    "maximum": 4294967295,
+                    "minimum": 30
+                  },
+                  "captive_portal_profile": {
+                    "type": "string",
+                    "description": "Reference Resource: [Captive_Portal_Profile](#/Captive_Portal_Profile)<br>Captive portal profile associated with this access role."
+                  },
+                  "client_inactivity_monitor": {
+                    "type": "string",
+                    "description": "Sets the inactivity mode  `configured_timeout`: value set by `client_inactivity_time` will be used for                        tracking inactivity  `dynamic_timeout`:    client will expire after global dynamic ageout value  `no_timeout`:         client will never ageout and stays in system.                        Example: mac-pinning",
+                    "enum": [
+                      "configured_timeout",
+                      "dynamic_timeout",
+                      "no_timeout"
+                    ]
+                  },
+                  "client_inactivity_timeout": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Time in seconds after which a client will be removed from the port for lack of activity. This is only applicable when client_inactivity_monitor mode is set to 'configured_timeout'.",
+                    "maximum": 4294967295,
+                    "minimum": 60
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Free text description of role.",
+                    "maxLength": 256,
+                    "minLength": 1
+                  },
+                  "device_traffic_class": {
+                    "type": "string",
+                    "description": "Specifies the class of client this role is associated with.",
+                    "enum": [
+                      "voice"
+                    ]
+                  },
+                  "gateway_zone": {
+                    "type": "string",
+                    "description": "Gateway zone associated with this user role."
+                  },
+                  "in_gbp": {
+                    "type": "string",
+                    "description": "Reference Resource: [Port_Access_GBP](#/Port_Access_GBP)<br>Ingress port-access Group Based policy."
+                  },
+                  "in_policy": {
+                    "type": "string",
+                    "description": "Reference Resource: [Port_Access_Policy](#/Port_Access_Policy)<br>Ingress port-access policy, to be applied when this role is assigned."
+                  },
+                  "macsec_policy": {
+                    "type": "string",
+                    "description": "Reference Resource: [MACsec_Policy](#/MACsec_Policy)<br>MACsec policy associated with this user role. When not set, if the client is authenticated by 802.1X with this role on a port where MACsec is enabled for the 802.1X authenticator, traffic ingressing this port will be dropped."
+                  },
+                  "max_session_time": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "The maximum number of seconds of service to provide to the client before termination of session. If empty, the maximum session time is indefinite.",
+                    "maximum": 4294967295,
+                    "minimum": 1
+                  },
+                  "mtu": {
+                    "type": "integer",
+                    "description": "The MTU (maximum transmission unit); i.e. the largest amount of data that can be transmitted in an IP packet. If empty, then active_ip_mtu value of the `Port` is used.",
+                    "maximum": 9198,
+                    "minimum": 68
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [Port_Access_Role](#/Port_Access_Role)<br>Name of the role.",
+                    "maxLength": 128,
+                    "minLength": 1
+                  },
+                  "origin": {
+                    "type": "string",
+                    "description": "Origin of the access role, i.e., how the access role  is created.  `local`:           access role is configured locally on the switch.  `downloaded`:      downloaded from Clearpass Policy Manager (CPPM) server.  `radius`:          translated from the attributes assigned by RADIUS server.",
+                    "enum": [
+                      "downloaded",
+                      "local",
+                      "radius"
+                    ]
+                  },
+                  "poe_allocate_by_method": {
+                    "type": "string",
+                    "description": "PoE power allocation method associated with this role Allows control over the power allocation strategy used. Two power allocation strategies are supported:  `class`:    the PSE uses the power ramp-up signature of the PD              to identify the PD's power class and use the power              level for the specified class.  `usage`:    power is delivered as requested by a PD. If empty, then config.allocate_by_method value of the `PoE_Interface` is used.",
+                    "enum": [
+                      "class",
+                      "usage"
+                    ]
+                  },
+                  "poe_priority": {
+                    "type": "string",
+                    "description": "If the PoE demand exceeds the PoE budget, the switch will deny power to some ports. PoE prioritization is the way the switch  determines which ports are to receive power. The priorities are:  `critical`: the active PoE ports at this level are provisioned              before the PoE ports at any other level are provisioned.  `high`:     the active PoE ports at this level are provisioned              before the low priority PoE ports are provisioned.  `low`:      the active PoE ports at this level are provisioned              only if there is power available after provisioning              any active PoE ports at the higher priority levels. If empty, then config.priority value of the `PoE_Interface` is used.",
+                    "enum": [
+                      "low",
+                      "high",
+                      "critical"
+                    ]
+                  },
+                  "pvlan_port_type": {
+                    "type": "string",
+                    "description": "Specifies the port's type in the context of Private-VLAN. If empty, the pvlan_port_type value of the 'Port' is used.",
+                    "enum": [
+                      "promiscuous",
+                      "secondary"
+                    ]
+                  },
+                  "qos_trust_mode": {
+                    "type": "string",
+                    "description": "Specifies the individual port QoS Trust Mode.  `none`: no fields are inspected on arriving packets. The initial local-         priority and color meta-data values are taken from PCP 0 entry of the COS Map. `cos`:  will use the PCP of the outermost 802.1 VLAN tag to index the COS Map         entry to initialize the local-priority and color meta-data values of the packet.         For untagged packets, the initial local-priority and color meta-data values are         taken from code_point 0 entry of the COS Map. `dscp`: will use the DSCP value of IP packets to index the DSCP Map entry to         initialize the local-priority and color meta-data values of the packet.  For         non-IP packets, what meta-data values are assigned is hardware dependent. If empty, then qos_config.qos_trust value of the `Port` is used.",
+                    "enum": [
+                      "none",
+                      "cos",
+                      "dscp"
+                    ]
+                  },
+                  "reauth_period": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Time period in seconds to enforce periodic re-authentication of the clients. If empty, then Port_Access_Auth_Configuration.reauth_period of the `Port` is used.",
+                    "maximum": 4294967295,
+                    "minimum": 1
+                  },
+                  "stp_admin_edge_port": {
+                    "type": "boolean",
+                    "description": "Specifies whether the port will operate as an STP admin_edge port. If empty, then [stp_config].admin_edge_port_enable of the `Port` is used."
+                  },
+                  "ubt_gateway_role": {
+                    "type": "string",
+                    "description": "Role to be assigned to tunneled clients on the UBT cluster side.",
+                    "maxLength": 63,
+                    "minLength": 1
+                  },
+                  "vlan_mode": {
+                    "type": "string",
+                    "description": "When empty, default mode is selected as follows:  `access`:           if the vlan_tag contains a value, role contains an access vlan                      and the vlan_trunks will be empty.  `trunk`:            if the vlan_tag is empty, and the vlan_trunks is non-empty,                      then role has no-native vlan specified. If the mode is explicitly configured:  `native-tagged`:    value contained in vlan_tag refers to native vlan                      and that vlan has to be tagged.  `native-untagged`:  value contained in vlan_tag refers to native vlan                      and that vlan has to be untagged.",
+                    "enum": [
+                      "trunk",
+                      "access",
+                      "native-tagged",
+                      "native-untagged"
+                    ]
+                  },
+                  "vlan_name_tag": {
+                    "type": "string",
+                    "description": "The untagged VLAN, identified by name, to which users of this access role are assigned. If empty, VLAN identifier corresponding to the vlan_tag is used if set. Otherwise, vlan_tag of the 'Port' is used.",
+                    "maxLength": 32,
+                    "minLength": 1
+                  },
+                  "vlan_name_trunks": {
+                    "type": "array",
+                    "description": "The tagged VLAN(s), identified by their names, to which users of this access role are assigned. If empty, VLAN identifier corresponding to the vlan_trunks is used if set. Otherwise, vlan_trunks of the 'Port' is used.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 50
+                  },
+                  "vlan_tag": {
+                    "type": "integer",
+                    "description": "The untagged VLAN identifier to which users of this access role are assigned. If empty, VLAN identifier corresponding to the vlan_name_tag is used if set. Otherwise, vlan_tag of the 'Port' is used.",
+                    "maximum": 4094,
+                    "minimum": 1
+                  },
+                  "vlan_trunks": {
+                    "type": "array",
+                    "description": "The tagged VLAN identifier(s) to which users of this access role are assigned. If empty, VLAN identifier corresponding to the vlan_name_trunks is used if set. Otherwise, vlan_trunks of the 'Port' is used.",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "maxItems": 1024
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/system/port_access_roles/{Port_Access_Role.name}": {
+      "get": {
+        "tags": [
+          "Port_Access_Role"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "auth_mode": {
+                      "type": "string",
+                      "description": "Indicates, whether each individual client on the port needs to be authenticated separately to gain access to the network. `client-mode`: every client needs to be authenticated to be                granted network access. `device-mode`: only one of the attached clients must be                authenticated for all clients to be granted                network access. `multi-domain`:limit the number of authenticated clients to one                 'voice' client and a configured number of 'data'                 clients. By default allowed 'data' client is                 also one. If empty, then port_access_auth_mode of the `Port` is used. ",
+                      "enum": [
+                        "client-mode",
+                        "device-mode",
+                        "multi-domain"
+                      ]
+                    },
+                    "base_role_name": {
+                      "type": "string",
+                      "description": "Name of the role from which this role has been derived. This will be published for the roles that are derived from a combination of user-role and RADIUS attributes.",
+                      "maxLength": 128,
+                      "minLength": 1
+                    },
+                    "cached_reauth_period": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Duration in seconds until when cached re-authentication is allowed for clients on-boarded via this role. If empty, then Port_Access_Auth_Configuration.cached_reauth_period of the `Port` is used.",
+                      "maximum": 4294967295,
+                      "minimum": 30
+                    },
+                    "captive_portal_profile": {
+                      "type": "string",
+                      "description": "Reference Resource: [Captive_Portal_Profile](#/Captive_Portal_Profile)<br>Captive portal profile associated with this access role."
+                    },
+                    "client_inactivity_monitor": {
+                      "type": "string",
+                      "description": "Sets the inactivity mode  `configured_timeout`: value set by `client_inactivity_time` will be used for                        tracking inactivity  `dynamic_timeout`:    client will expire after global dynamic ageout value  `no_timeout`:         client will never ageout and stays in system.                        Example: mac-pinning",
+                      "enum": [
+                        "configured_timeout",
+                        "dynamic_timeout",
+                        "no_timeout"
+                      ]
+                    },
+                    "client_inactivity_timeout": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time in seconds after which a client will be removed from the port for lack of activity. This is only applicable when client_inactivity_monitor mode is set to 'configured_timeout'.",
+                      "maximum": 4294967295,
+                      "minimum": 60
+                    },
+                    "creation_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time in seconds since epoch when this role was created.",
+                      "minimum": 0
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Free text description of role.",
+                      "maxLength": 256,
+                      "minLength": 1
+                    },
+                    "device_traffic_class": {
+                      "type": "string",
+                      "description": "Specifies the class of client this role is associated with.",
+                      "enum": [
+                        "voice"
+                      ]
+                    },
+                    "download_status": {
+                      "type": "object",
+                      "properties": {
+                        "failure_reason": {
+                          "type": "string",
+                          "description": "Response for the download request:  `server_not_reachable`:             server not reachable.  `authentication_failure`:           invalid user-id or password.  `certificate_invalid`:              server certificate not valid.  `certificate_missing`:              server certificate not configured.  `invalid_role_name`:                role name specified not found on server.  `parsing_failed`:                   failed to parse the downloaded file.  `server_timed_out`:                 server failed to respond.  `credentials_missing`:              server credentials not configured.  `internal_error`:                   error while downloading or                                      installing role.  `failed_during_issu`:               failed to install while issu is in                                      progress. Applicable for downloadable roles only.",
+                          "enum": [
+                            "server_not_reachable",
+                            "authentication_failure",
+                            "certificate_invalid",
+                            "certificate_missing",
+                            "invalid_role_name",
+                            "parsing_failed",
+                            "server_timed_out",
+                            "credentials_missing",
+                            "internal_error",
+                            "failed_during_issu"
+                          ]
+                        },
+                        "state": {
+                          "type": "string",
+                          "description": "Determines role state. Applicable for downloadable roles only. The states are:  `completed`:    role has been downloaded successfully.  `in_progress`:  role is being downloaded from the server.  `failed`:       role could not be downloaded from the server.",
+                          "enum": [
+                            "completed",
+                            "in_progress",
+                            "failed"
+                          ]
+                        }
+                      }
+                    },
+                    "gateway_zone": {
+                      "type": "string",
+                      "description": "Gateway zone associated with this user role."
+                    },
+                    "in_gbp": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_GBP](#/Port_Access_GBP)<br>Ingress port-access Group Based policy."
+                    },
+                    "in_policy": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_Policy](#/Port_Access_Policy)<br>Ingress port-access policy, to be applied when this role is assigned."
+                    },
+                    "macsec_policy": {
+                      "type": "string",
+                      "description": "Reference Resource: [MACsec_Policy](#/MACsec_Policy)<br>MACsec policy associated with this user role. When not set, if the client is authenticated by 802.1X with this role on a port where MACsec is enabled for the 802.1X authenticator, traffic ingressing this port will be dropped."
+                    },
+                    "max_session_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "The maximum number of seconds of service to provide to the client before termination of session. If empty, the maximum session time is indefinite.",
+                      "maximum": 4294967295,
+                      "minimum": 1
+                    },
+                    "mtu": {
+                      "type": "integer",
+                      "description": "The MTU (maximum transmission unit); i.e. the largest amount of data that can be transmitted in an IP packet. If empty, then active_ip_mtu value of the `Port` is used.",
+                      "maximum": 9198,
+                      "minimum": 68
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_Role](#/Port_Access_Role)<br>Name of the role.",
+                      "maxLength": 128,
+                      "minLength": 1
+                    },
+                    "origin": {
+                      "type": "string",
+                      "description": "Origin of the access role, i.e., how the access role  is created.  `local`:           access role is configured locally on the switch.  `downloaded`:      downloaded from Clearpass Policy Manager (CPPM) server.  `radius`:          translated from the attributes assigned by RADIUS server.",
+                      "enum": [
+                        "downloaded",
+                        "local",
+                        "radius"
+                      ]
+                    },
+                    "poe_allocate_by_method": {
+                      "type": "string",
+                      "description": "PoE power allocation method associated with this role Allows control over the power allocation strategy used. Two power allocation strategies are supported:  `class`:    the PSE uses the power ramp-up signature of the PD              to identify the PD's power class and use the power              level for the specified class.  `usage`:    power is delivered as requested by a PD. If empty, then config.allocate_by_method value of the `PoE_Interface` is used.",
+                      "enum": [
+                        "class",
+                        "usage"
+                      ]
+                    },
+                    "poe_priority": {
+                      "type": "string",
+                      "description": "If the PoE demand exceeds the PoE budget, the switch will deny power to some ports. PoE prioritization is the way the switch  determines which ports are to receive power. The priorities are:  `critical`: the active PoE ports at this level are provisioned              before the PoE ports at any other level are provisioned.  `high`:     the active PoE ports at this level are provisioned              before the low priority PoE ports are provisioned.  `low`:      the active PoE ports at this level are provisioned              only if there is power available after provisioning              any active PoE ports at the higher priority levels. If empty, then config.priority value of the `PoE_Interface` is used.",
+                      "enum": [
+                        "low",
+                        "high",
+                        "critical"
+                      ]
+                    },
+                    "pvlan_port_type": {
+                      "type": "string",
+                      "description": "Specifies the port's type in the context of Private-VLAN. If empty, the pvlan_port_type value of the 'Port' is used.",
+                      "enum": [
+                        "promiscuous",
+                        "secondary"
+                      ]
+                    },
+                    "qos_trust_mode": {
+                      "type": "string",
+                      "description": "Specifies the individual port QoS Trust Mode.  `none`: no fields are inspected on arriving packets. The initial local-         priority and color meta-data values are taken from PCP 0 entry of the COS Map. `cos`:  will use the PCP of the outermost 802.1 VLAN tag to index the COS Map         entry to initialize the local-priority and color meta-data values of the packet.         For untagged packets, the initial local-priority and color meta-data values are         taken from code_point 0 entry of the COS Map. `dscp`: will use the DSCP value of IP packets to index the DSCP Map entry to         initialize the local-priority and color meta-data values of the packet.  For         non-IP packets, what meta-data values are assigned is hardware dependent. If empty, then qos_config.qos_trust value of the `Port` is used.",
+                      "enum": [
+                        "none",
+                        "cos",
+                        "dscp"
+                      ]
+                    },
+                    "radius_overridden_attributes": {
+                      "type": "array",
+                      "description": "List of attributes in Source role that are overridden by RADIUS attributes.",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "auth_mode",
+                          "cached_reauth_period",
+                          "captive_portal_profile",
+                          "client_inactivity_monitor",
+                          "client_inactivity_timeout",
+                          "device_traffic_class",
+                          "gateway_zone",
+                          "in_gbp",
+                          "max_session_time",
+                          "in_policy",
+                          "mtu",
+                          "poe_priority",
+                          "poe_allocate_by_method",
+                          "qos_trust_mode",
+                          "pvlan_port_type",
+                          "reauth_period",
+                          "stp_admin_edge_port",
+                          "ubt_gateway_clearpass_role",
+                          "ubt_gateway_role",
+                          "vlan_mode",
+                          "vlan_group_name",
+                          "vlan_name_tag",
+                          "vlan_name_trunks",
+                          "vlan_tag",
+                          "vlan_trunks",
+                          "macsec_policy"
+                        ]
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "reauth_period": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time period in seconds to enforce periodic re-authentication of the clients. If empty, then Port_Access_Auth_Configuration.reauth_period of the `Port` is used.",
+                      "maximum": 4294967295,
+                      "minimum": 1
+                    },
+                    "stp_admin_edge_port": {
+                      "type": "boolean",
+                      "description": "Specifies whether the port will operate as an STP admin_edge port. If empty, then [stp_config].admin_edge_port_enable of the `Port` is used."
+                    },
+                    "ubt_gateway_clearpass_role": {
+                      "type": "string",
+                      "description": "Indicates the role name that will be communicated to the UBT  cluster. The cluster needs to download the role definition from  ClearPass.",
+                      "maxLength": 128,
+                      "minLength": 1
+                    },
+                    "ubt_gateway_role": {
+                      "type": "string",
+                      "description": "Role to be assigned to tunneled clients on the UBT cluster side.",
+                      "maxLength": 63,
+                      "minLength": 1
+                    },
+                    "vlan_group_name": {
+                      "type": "string",
+                      "description": "VLAN group name associated with this user role via RADIUS.",
+                      "maxLength": 32,
+                      "minLength": 2
+                    },
+                    "vlan_mode": {
+                      "type": "string",
+                      "description": "When empty, default mode is selected as follows:  `access`:           if the vlan_tag contains a value, role contains an access vlan                      and the vlan_trunks will be empty.  `trunk`:            if the vlan_tag is empty, and the vlan_trunks is non-empty,                      then role has no-native vlan specified. If the mode is explicitly configured:  `native-tagged`:    value contained in vlan_tag refers to native vlan                      and that vlan has to be tagged.  `native-untagged`:  value contained in vlan_tag refers to native vlan                      and that vlan has to be untagged.",
+                      "enum": [
+                        "trunk",
+                        "access",
+                        "native-tagged",
+                        "native-untagged"
+                      ]
+                    },
+                    "vlan_name_tag": {
+                      "type": "string",
+                      "description": "The untagged VLAN, identified by name, to which users of this access role are assigned. If empty, VLAN identifier corresponding to the vlan_tag is used if set. Otherwise, vlan_tag of the 'Port' is used.",
+                      "maxLength": 32,
+                      "minLength": 1
+                    },
+                    "vlan_name_trunks": {
+                      "type": "array",
+                      "description": "The tagged VLAN(s), identified by their names, to which users of this access role are assigned. If empty, VLAN identifier corresponding to the vlan_trunks is used if set. Otherwise, vlan_trunks of the 'Port' is used.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 50
+                    },
+                    "vlan_tag": {
+                      "type": "integer",
+                      "description": "The untagged VLAN identifier to which users of this access role are assigned. If empty, VLAN identifier corresponding to the vlan_name_tag is used if set. Otherwise, vlan_tag of the 'Port' is used.",
+                      "maximum": 4094,
+                      "minimum": 1
+                    },
+                    "vlan_trunks": {
+                      "type": "array",
+                      "description": "The tagged VLAN identifier(s) to which users of this access role are assigned. If empty, VLAN identifier corresponding to the vlan_name_trunks is used if set. Otherwise, vlan_trunks of the 'Port' is used.",
+                      "items": {
+                        "type": "integer"
+                      },
+                      "maxItems": 1024
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Port_Access_Role.name",
+            "in": "path",
+            "description": "Reference Resource: [Port_Access_Role](#/Port_Access_Role)<br>Name of the role.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ubt_gateway_clearpass_role",
+                  "gateway_zone",
+                  "poe_allocate_by_method",
+                  "client_inactivity_monitor",
+                  "max_session_time",
+                  "vlan_name_tag",
+                  "pvlan_port_type",
+                  "vlan_group_name",
+                  "device_traffic_class",
+                  "captive_portal_profile",
+                  "in_gbp",
+                  "ubt_gateway_role",
+                  "macsec_policy",
+                  "description",
+                  "creation_time",
+                  "client_inactivity_timeout",
+                  "qos_trust_mode",
+                  "cached_reauth_period",
+                  "radius_overridden_attributes",
+                  "in_policy",
+                  "vlan_trunks",
+                  "name",
+                  "vlan_mode",
+                  "reauth_period",
+                  "mtu",
+                  "poe_priority",
+                  "stp_admin_edge_port",
+                  "base_role_name",
+                  "vlan_name_trunks",
+                  "auth_mode",
+                  "download_status",
+                  "origin",
+                  "vlan_tag"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Port_Access_Role"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "auth_mode": {
+                    "type": "string",
+                    "description": "Indicates, whether each individual client on the port needs to be authenticated separately to gain access to the network. `client-mode`: every client needs to be authenticated to be                granted network access. `device-mode`: only one of the attached clients must be                authenticated for all clients to be granted                network access. `multi-domain`:limit the number of authenticated clients to one                 'voice' client and a configured number of 'data'                 clients. By default allowed 'data' client is                 also one. If empty, then port_access_auth_mode of the `Port` is used. ",
+                    "enum": [
+                      "client-mode",
+                      "device-mode",
+                      "multi-domain"
+                    ]
+                  },
+                  "cached_reauth_period": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Duration in seconds until when cached re-authentication is allowed for clients on-boarded via this role. If empty, then Port_Access_Auth_Configuration.cached_reauth_period of the `Port` is used.",
+                    "maximum": 4294967295,
+                    "minimum": 30
+                  },
+                  "captive_portal_profile": {
+                    "type": "string",
+                    "description": "Reference Resource: [Captive_Portal_Profile](#/Captive_Portal_Profile)<br>Captive portal profile associated with this access role."
+                  },
+                  "client_inactivity_monitor": {
+                    "type": "string",
+                    "description": "Sets the inactivity mode  `configured_timeout`: value set by `client_inactivity_time` will be used for                        tracking inactivity  `dynamic_timeout`:    client will expire after global dynamic ageout value  `no_timeout`:         client will never ageout and stays in system.                        Example: mac-pinning",
+                    "enum": [
+                      "configured_timeout",
+                      "dynamic_timeout",
+                      "no_timeout"
+                    ]
+                  },
+                  "client_inactivity_timeout": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Time in seconds after which a client will be removed from the port for lack of activity. This is only applicable when client_inactivity_monitor mode is set to 'configured_timeout'.",
+                    "maximum": 4294967295,
+                    "minimum": 60
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Free text description of role.",
+                    "maxLength": 256,
+                    "minLength": 1
+                  },
+                  "device_traffic_class": {
+                    "type": "string",
+                    "description": "Specifies the class of client this role is associated with.",
+                    "enum": [
+                      "voice"
+                    ]
+                  },
+                  "gateway_zone": {
+                    "type": "string",
+                    "description": "Gateway zone associated with this user role."
+                  },
+                  "in_gbp": {
+                    "type": "string",
+                    "description": "Reference Resource: [Port_Access_GBP](#/Port_Access_GBP)<br>Ingress port-access Group Based policy."
+                  },
+                  "in_policy": {
+                    "type": "string",
+                    "description": "Reference Resource: [Port_Access_Policy](#/Port_Access_Policy)<br>Ingress port-access policy, to be applied when this role is assigned."
+                  },
+                  "macsec_policy": {
+                    "type": "string",
+                    "description": "Reference Resource: [MACsec_Policy](#/MACsec_Policy)<br>MACsec policy associated with this user role. When not set, if the client is authenticated by 802.1X with this role on a port where MACsec is enabled for the 802.1X authenticator, traffic ingressing this port will be dropped."
+                  },
+                  "max_session_time": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "The maximum number of seconds of service to provide to the client before termination of session. If empty, the maximum session time is indefinite.",
+                    "maximum": 4294967295,
+                    "minimum": 1
+                  },
+                  "mtu": {
+                    "type": "integer",
+                    "description": "The MTU (maximum transmission unit); i.e. the largest amount of data that can be transmitted in an IP packet. If empty, then active_ip_mtu value of the `Port` is used.",
+                    "maximum": 9198,
+                    "minimum": 68
+                  },
+                  "poe_allocate_by_method": {
+                    "type": "string",
+                    "description": "PoE power allocation method associated with this role Allows control over the power allocation strategy used. Two power allocation strategies are supported:  `class`:    the PSE uses the power ramp-up signature of the PD              to identify the PD's power class and use the power              level for the specified class.  `usage`:    power is delivered as requested by a PD. If empty, then config.allocate_by_method value of the `PoE_Interface` is used.",
+                    "enum": [
+                      "class",
+                      "usage"
+                    ]
+                  },
+                  "poe_priority": {
+                    "type": "string",
+                    "description": "If the PoE demand exceeds the PoE budget, the switch will deny power to some ports. PoE prioritization is the way the switch  determines which ports are to receive power. The priorities are:  `critical`: the active PoE ports at this level are provisioned              before the PoE ports at any other level are provisioned.  `high`:     the active PoE ports at this level are provisioned              before the low priority PoE ports are provisioned.  `low`:      the active PoE ports at this level are provisioned              only if there is power available after provisioning              any active PoE ports at the higher priority levels. If empty, then config.priority value of the `PoE_Interface` is used.",
+                    "enum": [
+                      "low",
+                      "high",
+                      "critical"
+                    ]
+                  },
+                  "pvlan_port_type": {
+                    "type": "string",
+                    "description": "Specifies the port's type in the context of Private-VLAN. If empty, the pvlan_port_type value of the 'Port' is used.",
+                    "enum": [
+                      "promiscuous",
+                      "secondary"
+                    ]
+                  },
+                  "qos_trust_mode": {
+                    "type": "string",
+                    "description": "Specifies the individual port QoS Trust Mode.  `none`: no fields are inspected on arriving packets. The initial local-         priority and color meta-data values are taken from PCP 0 entry of the COS Map. `cos`:  will use the PCP of the outermost 802.1 VLAN tag to index the COS Map         entry to initialize the local-priority and color meta-data values of the packet.         For untagged packets, the initial local-priority and color meta-data values are         taken from code_point 0 entry of the COS Map. `dscp`: will use the DSCP value of IP packets to index the DSCP Map entry to         initialize the local-priority and color meta-data values of the packet.  For         non-IP packets, what meta-data values are assigned is hardware dependent. If empty, then qos_config.qos_trust value of the `Port` is used.",
+                    "enum": [
+                      "none",
+                      "cos",
+                      "dscp"
+                    ]
+                  },
+                  "reauth_period": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Time period in seconds to enforce periodic re-authentication of the clients. If empty, then Port_Access_Auth_Configuration.reauth_period of the `Port` is used.",
+                    "maximum": 4294967295,
+                    "minimum": 1
+                  },
+                  "stp_admin_edge_port": {
+                    "type": "boolean",
+                    "description": "Specifies whether the port will operate as an STP admin_edge port. If empty, then [stp_config].admin_edge_port_enable of the `Port` is used."
+                  },
+                  "ubt_gateway_role": {
+                    "type": "string",
+                    "description": "Role to be assigned to tunneled clients on the UBT cluster side.",
+                    "maxLength": 63,
+                    "minLength": 1
+                  },
+                  "vlan_mode": {
+                    "type": "string",
+                    "description": "When empty, default mode is selected as follows:  `access`:           if the vlan_tag contains a value, role contains an access vlan                      and the vlan_trunks will be empty.  `trunk`:            if the vlan_tag is empty, and the vlan_trunks is non-empty,                      then role has no-native vlan specified. If the mode is explicitly configured:  `native-tagged`:    value contained in vlan_tag refers to native vlan                      and that vlan has to be tagged.  `native-untagged`:  value contained in vlan_tag refers to native vlan                      and that vlan has to be untagged.",
+                    "enum": [
+                      "trunk",
+                      "access",
+                      "native-tagged",
+                      "native-untagged"
+                    ]
+                  },
+                  "vlan_name_tag": {
+                    "type": "string",
+                    "description": "The untagged VLAN, identified by name, to which users of this access role are assigned. If empty, VLAN identifier corresponding to the vlan_tag is used if set. Otherwise, vlan_tag of the 'Port' is used.",
+                    "maxLength": 32,
+                    "minLength": 1
+                  },
+                  "vlan_name_trunks": {
+                    "type": "array",
+                    "description": "The tagged VLAN(s), identified by their names, to which users of this access role are assigned. If empty, VLAN identifier corresponding to the vlan_trunks is used if set. Otherwise, vlan_trunks of the 'Port' is used.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 50
+                  },
+                  "vlan_tag": {
+                    "type": "integer",
+                    "description": "The untagged VLAN identifier to which users of this access role are assigned. If empty, VLAN identifier corresponding to the vlan_name_tag is used if set. Otherwise, vlan_tag of the 'Port' is used.",
+                    "maximum": 4094,
+                    "minimum": 1
+                  },
+                  "vlan_trunks": {
+                    "type": "array",
+                    "description": "The tagged VLAN identifier(s) to which users of this access role are assigned. If empty, VLAN identifier corresponding to the vlan_name_trunks is used if set. Otherwise, vlan_trunks of the 'Port' is used.",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "maxItems": 1024
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Port_Access_Role.name",
+            "in": "path",
+            "description": "Reference Resource: [Port_Access_Role](#/Port_Access_Role)<br>Name of the role.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Port_Access_Role"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Port_Access_Role.name",
+            "in": "path",
+            "description": "Reference Resource: [Port_Access_Role](#/Port_Access_Role)<br>Name of the role.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Port_Access_Role"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "auth_mode": {
+                    "type": "string",
+                    "description": "Indicates, whether each individual client on the port needs to be authenticated separately to gain access to the network. `client-mode`: every client needs to be authenticated to be                granted network access. `device-mode`: only one of the attached clients must be                authenticated for all clients to be granted                network access. `multi-domain`:limit the number of authenticated clients to one                 'voice' client and a configured number of 'data'                 clients. By default allowed 'data' client is                 also one. If empty, then port_access_auth_mode of the `Port` is used. ",
+                    "enum": [
+                      "client-mode",
+                      "device-mode",
+                      "multi-domain"
+                    ]
+                  },
+                  "cached_reauth_period": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Duration in seconds until when cached re-authentication is allowed for clients on-boarded via this role. If empty, then Port_Access_Auth_Configuration.cached_reauth_period of the `Port` is used.",
+                    "maximum": 4294967295,
+                    "minimum": 30
+                  },
+                  "captive_portal_profile": {
+                    "type": "string",
+                    "description": "Reference Resource: [Captive_Portal_Profile](#/Captive_Portal_Profile)<br>Captive portal profile associated with this access role."
+                  },
+                  "client_inactivity_monitor": {
+                    "type": "string",
+                    "description": "Sets the inactivity mode  `configured_timeout`: value set by `client_inactivity_time` will be used for                        tracking inactivity  `dynamic_timeout`:    client will expire after global dynamic ageout value  `no_timeout`:         client will never ageout and stays in system.                        Example: mac-pinning",
+                    "enum": [
+                      "configured_timeout",
+                      "dynamic_timeout",
+                      "no_timeout"
+                    ]
+                  },
+                  "client_inactivity_timeout": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Time in seconds after which a client will be removed from the port for lack of activity. This is only applicable when client_inactivity_monitor mode is set to 'configured_timeout'.",
+                    "maximum": 4294967295,
+                    "minimum": 60
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Free text description of role.",
+                    "maxLength": 256,
+                    "minLength": 1
+                  },
+                  "device_traffic_class": {
+                    "type": "string",
+                    "description": "Specifies the class of client this role is associated with.",
+                    "enum": [
+                      "voice"
+                    ]
+                  },
+                  "gateway_zone": {
+                    "type": "string",
+                    "description": "Gateway zone associated with this user role."
+                  },
+                  "in_gbp": {
+                    "type": "string",
+                    "description": "Reference Resource: [Port_Access_GBP](#/Port_Access_GBP)<br>Ingress port-access Group Based policy."
+                  },
+                  "in_policy": {
+                    "type": "string",
+                    "description": "Reference Resource: [Port_Access_Policy](#/Port_Access_Policy)<br>Ingress port-access policy, to be applied when this role is assigned."
+                  },
+                  "macsec_policy": {
+                    "type": "string",
+                    "description": "Reference Resource: [MACsec_Policy](#/MACsec_Policy)<br>MACsec policy associated with this user role. When not set, if the client is authenticated by 802.1X with this role on a port where MACsec is enabled for the 802.1X authenticator, traffic ingressing this port will be dropped."
+                  },
+                  "max_session_time": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "The maximum number of seconds of service to provide to the client before termination of session. If empty, the maximum session time is indefinite.",
+                    "maximum": 4294967295,
+                    "minimum": 1
+                  },
+                  "mtu": {
+                    "type": "integer",
+                    "description": "The MTU (maximum transmission unit); i.e. the largest amount of data that can be transmitted in an IP packet. If empty, then active_ip_mtu value of the `Port` is used.",
+                    "maximum": 9198,
+                    "minimum": 68
+                  },
+                  "poe_allocate_by_method": {
+                    "type": "string",
+                    "description": "PoE power allocation method associated with this role Allows control over the power allocation strategy used. Two power allocation strategies are supported:  `class`:    the PSE uses the power ramp-up signature of the PD              to identify the PD's power class and use the power              level for the specified class.  `usage`:    power is delivered as requested by a PD. If empty, then config.allocate_by_method value of the `PoE_Interface` is used.",
+                    "enum": [
+                      "class",
+                      "usage"
+                    ]
+                  },
+                  "poe_priority": {
+                    "type": "string",
+                    "description": "If the PoE demand exceeds the PoE budget, the switch will deny power to some ports. PoE prioritization is the way the switch  determines which ports are to receive power. The priorities are:  `critical`: the active PoE ports at this level are provisioned              before the PoE ports at any other level are provisioned.  `high`:     the active PoE ports at this level are provisioned              before the low priority PoE ports are provisioned.  `low`:      the active PoE ports at this level are provisioned              only if there is power available after provisioning              any active PoE ports at the higher priority levels. If empty, then config.priority value of the `PoE_Interface` is used.",
+                    "enum": [
+                      "low",
+                      "high",
+                      "critical"
+                    ]
+                  },
+                  "pvlan_port_type": {
+                    "type": "string",
+                    "description": "Specifies the port's type in the context of Private-VLAN. If empty, the pvlan_port_type value of the 'Port' is used.",
+                    "enum": [
+                      "promiscuous",
+                      "secondary"
+                    ]
+                  },
+                  "qos_trust_mode": {
+                    "type": "string",
+                    "description": "Specifies the individual port QoS Trust Mode.  `none`: no fields are inspected on arriving packets. The initial local-         priority and color meta-data values are taken from PCP 0 entry of the COS Map. `cos`:  will use the PCP of the outermost 802.1 VLAN tag to index the COS Map         entry to initialize the local-priority and color meta-data values of the packet.         For untagged packets, the initial local-priority and color meta-data values are         taken from code_point 0 entry of the COS Map. `dscp`: will use the DSCP value of IP packets to index the DSCP Map entry to         initialize the local-priority and color meta-data values of the packet.  For         non-IP packets, what meta-data values are assigned is hardware dependent. If empty, then qos_config.qos_trust value of the `Port` is used.",
+                    "enum": [
+                      "none",
+                      "cos",
+                      "dscp"
+                    ]
+                  },
+                  "reauth_period": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Time period in seconds to enforce periodic re-authentication of the clients. If empty, then Port_Access_Auth_Configuration.reauth_period of the `Port` is used.",
+                    "maximum": 4294967295,
+                    "minimum": 1
+                  },
+                  "stp_admin_edge_port": {
+                    "type": "boolean",
+                    "description": "Specifies whether the port will operate as an STP admin_edge port. If empty, then [stp_config].admin_edge_port_enable of the `Port` is used."
+                  },
+                  "ubt_gateway_role": {
+                    "type": "string",
+                    "description": "Role to be assigned to tunneled clients on the UBT cluster side.",
+                    "maxLength": 63,
+                    "minLength": 1
+                  },
+                  "vlan_mode": {
+                    "type": "string",
+                    "description": "When empty, default mode is selected as follows:  `access`:           if the vlan_tag contains a value, role contains an access vlan                      and the vlan_trunks will be empty.  `trunk`:            if the vlan_tag is empty, and the vlan_trunks is non-empty,                      then role has no-native vlan specified. If the mode is explicitly configured:  `native-tagged`:    value contained in vlan_tag refers to native vlan                      and that vlan has to be tagged.  `native-untagged`:  value contained in vlan_tag refers to native vlan                      and that vlan has to be untagged.",
+                    "enum": [
+                      "trunk",
+                      "access",
+                      "native-tagged",
+                      "native-untagged"
+                    ]
+                  },
+                  "vlan_name_tag": {
+                    "type": "string",
+                    "description": "The untagged VLAN, identified by name, to which users of this access role are assigned. If empty, VLAN identifier corresponding to the vlan_tag is used if set. Otherwise, vlan_tag of the 'Port' is used.",
+                    "maxLength": 32,
+                    "minLength": 1
+                  },
+                  "vlan_name_trunks": {
+                    "type": "array",
+                    "description": "The tagged VLAN(s), identified by their names, to which users of this access role are assigned. If empty, VLAN identifier corresponding to the vlan_trunks is used if set. Otherwise, vlan_trunks of the 'Port' is used.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 50
+                  },
+                  "vlan_tag": {
+                    "type": "integer",
+                    "description": "The untagged VLAN identifier to which users of this access role are assigned. If empty, VLAN identifier corresponding to the vlan_name_tag is used if set. Otherwise, vlan_tag of the 'Port' is used.",
+                    "maximum": 4094,
+                    "minimum": 1
+                  },
+                  "vlan_trunks": {
+                    "type": "array",
+                    "description": "The tagged VLAN identifier(s) to which users of this access role are assigned. If empty, VLAN identifier corresponding to the vlan_name_trunks is used if set. Otherwise, vlan_trunks of the 'Port' is used.",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "maxItems": 1024
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Port_Access_Role.name",
+            "in": "path",
+            "description": "Reference Resource: [Port_Access_Role](#/Port_Access_Role)<br>Name of the role.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

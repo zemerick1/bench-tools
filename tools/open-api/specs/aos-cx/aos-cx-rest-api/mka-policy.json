@@ -1,0 +1,823 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "MKA_Policy",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "MKA_Policy"
+    }
+  ],
+  "paths": {
+    "/system/mka_policies": {
+      "get": {
+        "tags": [
+          "MKA_Policy"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "cak": {
+                      "type": "string",
+                      "description": "Secure Connectivity Assocation Key (CAK) associated with this policy. This is only applicable when the mode is set to PSK."
+                    },
+                    "ckn": {
+                      "type": "string",
+                      "description": "Connectivity Association Key Name (CKN) associated with this policy. This is only applicable when the mode is set to PSK.",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "eapol_destination_mac": {
+                      "type": "string",
+                      "description": "The destination MAC address to use in EAPoL packets for MKA. If not set, the default EAPoL multicast MAC 01:80:c2:00:00:03 is used.",
+                      "maxLength": 17,
+                      "minLength": 17
+                    },
+                    "eapol_dot1q_tagged": {
+                      "type": "boolean",
+                      "description": "Transmit the EAPoL frames for MKA with a 802.1q tag. The VLAN used for the 802.1q tag is picked from the [Port Table](#/Port)."
+                    },
+                    "eapol_eth_type": {
+                      "type": "string",
+                      "description": "The Ether-Type to be used in EAPoL packets for MKA. When not configured, the default Ether-Type 0x888e is used.",
+                      "maxLength": 4,
+                      "minLength": 4
+                    },
+                    "key_server_priority": {
+                      "type": "integer",
+                      "description": "MKA participant priority used to determine which participant is elected as the key server. A value of 255 indicates that this participant will not become the key server.",
+                      "maximum": 255,
+                      "minimum": 0
+                    },
+                    "keychain": {
+                      "type": "string",
+                      "description": "Reference Resource: [Keychain](#/Keychain)<br>The keychain from which the CKN and CAK are derived for this policy. This is only applicable when the mode is set to PSK."
+                    },
+                    "mode": {
+                      "type": "string",
+                      "description": "The MKA policy mode.  `psk`:     Policy mode is Pre-Shared Key. In this mode the CAK             and CKN of the MKA policy are statically             configured by the user.  `eap-tls`: Policy mode is EAP over Transport layer Security             Protocol(TLS). In this mode, the CAK and CKN of the             MKA policy are derived from EAP MSK             (Master Session Key).",
+                      "enum": [
+                        "psk",
+                        "eap-tls"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [MKA_Policy](#/MKA_Policy)<br>Name of the MKA policy.",
+                      "maxLength": 32,
+                      "minLength": 1
+                    },
+                    "origin": {
+                      "type": "string",
+                      "description": "Origin of the MKA policy, i.e., how the policy is provisioned:  `static`:  policy is provisioned by the administrator via CLI or             REST.  `dynamic`: policy is provisioned based on attributes provided by             the RADIUS server.",
+                      "enum": [
+                        "dynamic",
+                        "static"
+                      ]
+                    },
+                    "transmit_interval": {
+                      "type": "integer",
+                      "description": "MKA transmit interval in seconds.",
+                      "maximum": 6,
+                      "minimum": 2
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "eapol_destination_mac",
+                  "eapol_dot1q_tagged",
+                  "eapol_eth_type",
+                  "origin",
+                  "ckn",
+                  "keychain",
+                  "key_server_priority",
+                  "transmit_interval",
+                  "name",
+                  "mode",
+                  "cak"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "MKA_Policy"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "cak": {
+                    "type": "string",
+                    "description": "Secure Connectivity Assocation Key (CAK) associated with this policy. This is only applicable when the mode is set to PSK."
+                  },
+                  "ckn": {
+                    "type": "string",
+                    "description": "Connectivity Association Key Name (CKN) associated with this policy. This is only applicable when the mode is set to PSK.",
+                    "maxLength": 64,
+                    "minLength": 1
+                  },
+                  "eapol_destination_mac": {
+                    "type": "string",
+                    "description": "The destination MAC address to use in EAPoL packets for MKA. If not set, the default EAPoL multicast MAC 01:80:c2:00:00:03 is used.",
+                    "maxLength": 17,
+                    "minLength": 17
+                  },
+                  "eapol_dot1q_tagged": {
+                    "type": "boolean",
+                    "description": "Transmit the EAPoL frames for MKA with a 802.1q tag. The VLAN used for the 802.1q tag is picked from the [Port Table](#/Port)."
+                  },
+                  "eapol_eth_type": {
+                    "type": "string",
+                    "description": "The Ether-Type to be used in EAPoL packets for MKA. When not configured, the default Ether-Type 0x888e is used.",
+                    "maxLength": 4,
+                    "minLength": 4
+                  },
+                  "key_server_priority": {
+                    "type": "integer",
+                    "description": "MKA participant priority used to determine which participant is elected as the key server. A value of 255 indicates that this participant will not become the key server.",
+                    "maximum": 255,
+                    "minimum": 0
+                  },
+                  "keychain": {
+                    "type": "string",
+                    "description": "Reference Resource: [Keychain](#/Keychain)<br>The keychain from which the CKN and CAK are derived for this policy. This is only applicable when the mode is set to PSK."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "description": "The MKA policy mode.  `psk`:     Policy mode is Pre-Shared Key. In this mode the CAK             and CKN of the MKA policy are statically             configured by the user.  `eap-tls`: Policy mode is EAP over Transport layer Security             Protocol(TLS). In this mode, the CAK and CKN of the             MKA policy are derived from EAP MSK             (Master Session Key).",
+                    "enum": [
+                      "psk",
+                      "eap-tls"
+                    ]
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [MKA_Policy](#/MKA_Policy)<br>Name of the MKA policy.",
+                    "maxLength": 32,
+                    "minLength": 1
+                  },
+                  "origin": {
+                    "type": "string",
+                    "description": "Origin of the MKA policy, i.e., how the policy is provisioned:  `static`:  policy is provisioned by the administrator via CLI or             REST.  `dynamic`: policy is provisioned based on attributes provided by             the RADIUS server.",
+                    "enum": [
+                      "dynamic",
+                      "static"
+                    ]
+                  },
+                  "transmit_interval": {
+                    "type": "integer",
+                    "description": "MKA transmit interval in seconds.",
+                    "maximum": 6,
+                    "minimum": 2
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/system/mka_policies/{MKA_Policy.name}": {
+      "get": {
+        "tags": [
+          "MKA_Policy"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "cak": {
+                      "type": "string",
+                      "description": "Secure Connectivity Assocation Key (CAK) associated with this policy. This is only applicable when the mode is set to PSK."
+                    },
+                    "ckn": {
+                      "type": "string",
+                      "description": "Connectivity Association Key Name (CKN) associated with this policy. This is only applicable when the mode is set to PSK.",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "eapol_destination_mac": {
+                      "type": "string",
+                      "description": "The destination MAC address to use in EAPoL packets for MKA. If not set, the default EAPoL multicast MAC 01:80:c2:00:00:03 is used.",
+                      "maxLength": 17,
+                      "minLength": 17
+                    },
+                    "eapol_dot1q_tagged": {
+                      "type": "boolean",
+                      "description": "Transmit the EAPoL frames for MKA with a 802.1q tag. The VLAN used for the 802.1q tag is picked from the [Port Table](#/Port)."
+                    },
+                    "eapol_eth_type": {
+                      "type": "string",
+                      "description": "The Ether-Type to be used in EAPoL packets for MKA. When not configured, the default Ether-Type 0x888e is used.",
+                      "maxLength": 4,
+                      "minLength": 4
+                    },
+                    "key_server_priority": {
+                      "type": "integer",
+                      "description": "MKA participant priority used to determine which participant is elected as the key server. A value of 255 indicates that this participant will not become the key server.",
+                      "maximum": 255,
+                      "minimum": 0
+                    },
+                    "keychain": {
+                      "type": "string",
+                      "description": "Reference Resource: [Keychain](#/Keychain)<br>The keychain from which the CKN and CAK are derived for this policy. This is only applicable when the mode is set to PSK."
+                    },
+                    "mode": {
+                      "type": "string",
+                      "description": "The MKA policy mode.  `psk`:     Policy mode is Pre-Shared Key. In this mode the CAK             and CKN of the MKA policy are statically             configured by the user.  `eap-tls`: Policy mode is EAP over Transport layer Security             Protocol(TLS). In this mode, the CAK and CKN of the             MKA policy are derived from EAP MSK             (Master Session Key).",
+                      "enum": [
+                        "psk",
+                        "eap-tls"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [MKA_Policy](#/MKA_Policy)<br>Name of the MKA policy.",
+                      "maxLength": 32,
+                      "minLength": 1
+                    },
+                    "origin": {
+                      "type": "string",
+                      "description": "Origin of the MKA policy, i.e., how the policy is provisioned:  `static`:  policy is provisioned by the administrator via CLI or             REST.  `dynamic`: policy is provisioned based on attributes provided by             the RADIUS server.",
+                      "enum": [
+                        "dynamic",
+                        "static"
+                      ]
+                    },
+                    "transmit_interval": {
+                      "type": "integer",
+                      "description": "MKA transmit interval in seconds.",
+                      "maximum": 6,
+                      "minimum": 2
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "MKA_Policy.name",
+            "in": "path",
+            "description": "Reference Resource: [MKA_Policy](#/MKA_Policy)<br>Name of the MKA policy.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "origin",
+                  "ckn",
+                  "keychain",
+                  "eapol_destination_mac",
+                  "eapol_dot1q_tagged",
+                  "eapol_eth_type",
+                  "name",
+                  "mode",
+                  "cak",
+                  "key_server_priority",
+                  "transmit_interval"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "MKA_Policy"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "cak": {
+                    "type": "string",
+                    "description": "Secure Connectivity Assocation Key (CAK) associated with this policy. This is only applicable when the mode is set to PSK."
+                  },
+                  "ckn": {
+                    "type": "string",
+                    "description": "Connectivity Association Key Name (CKN) associated with this policy. This is only applicable when the mode is set to PSK.",
+                    "maxLength": 64,
+                    "minLength": 1
+                  },
+                  "eapol_destination_mac": {
+                    "type": "string",
+                    "description": "The destination MAC address to use in EAPoL packets for MKA. If not set, the default EAPoL multicast MAC 01:80:c2:00:00:03 is used.",
+                    "maxLength": 17,
+                    "minLength": 17
+                  },
+                  "eapol_dot1q_tagged": {
+                    "type": "boolean",
+                    "description": "Transmit the EAPoL frames for MKA with a 802.1q tag. The VLAN used for the 802.1q tag is picked from the [Port Table](#/Port)."
+                  },
+                  "eapol_eth_type": {
+                    "type": "string",
+                    "description": "The Ether-Type to be used in EAPoL packets for MKA. When not configured, the default Ether-Type 0x888e is used.",
+                    "maxLength": 4,
+                    "minLength": 4
+                  },
+                  "key_server_priority": {
+                    "type": "integer",
+                    "description": "MKA participant priority used to determine which participant is elected as the key server. A value of 255 indicates that this participant will not become the key server.",
+                    "maximum": 255,
+                    "minimum": 0
+                  },
+                  "keychain": {
+                    "type": "string",
+                    "description": "Reference Resource: [Keychain](#/Keychain)<br>The keychain from which the CKN and CAK are derived for this policy. This is only applicable when the mode is set to PSK."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "description": "The MKA policy mode.  `psk`:     Policy mode is Pre-Shared Key. In this mode the CAK             and CKN of the MKA policy are statically             configured by the user.  `eap-tls`: Policy mode is EAP over Transport layer Security             Protocol(TLS). In this mode, the CAK and CKN of the             MKA policy are derived from EAP MSK             (Master Session Key).",
+                    "enum": [
+                      "psk",
+                      "eap-tls"
+                    ]
+                  },
+                  "transmit_interval": {
+                    "type": "integer",
+                    "description": "MKA transmit interval in seconds.",
+                    "maximum": 6,
+                    "minimum": 2
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "MKA_Policy.name",
+            "in": "path",
+            "description": "Reference Resource: [MKA_Policy](#/MKA_Policy)<br>Name of the MKA policy.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "MKA_Policy"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "MKA_Policy.name",
+            "in": "path",
+            "description": "Reference Resource: [MKA_Policy](#/MKA_Policy)<br>Name of the MKA policy.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "MKA_Policy"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "cak": {
+                    "type": "string",
+                    "description": "Secure Connectivity Assocation Key (CAK) associated with this policy. This is only applicable when the mode is set to PSK."
+                  },
+                  "ckn": {
+                    "type": "string",
+                    "description": "Connectivity Association Key Name (CKN) associated with this policy. This is only applicable when the mode is set to PSK.",
+                    "maxLength": 64,
+                    "minLength": 1
+                  },
+                  "eapol_destination_mac": {
+                    "type": "string",
+                    "description": "The destination MAC address to use in EAPoL packets for MKA. If not set, the default EAPoL multicast MAC 01:80:c2:00:00:03 is used.",
+                    "maxLength": 17,
+                    "minLength": 17
+                  },
+                  "eapol_dot1q_tagged": {
+                    "type": "boolean",
+                    "description": "Transmit the EAPoL frames for MKA with a 802.1q tag. The VLAN used for the 802.1q tag is picked from the [Port Table](#/Port)."
+                  },
+                  "eapol_eth_type": {
+                    "type": "string",
+                    "description": "The Ether-Type to be used in EAPoL packets for MKA. When not configured, the default Ether-Type 0x888e is used.",
+                    "maxLength": 4,
+                    "minLength": 4
+                  },
+                  "key_server_priority": {
+                    "type": "integer",
+                    "description": "MKA participant priority used to determine which participant is elected as the key server. A value of 255 indicates that this participant will not become the key server.",
+                    "maximum": 255,
+                    "minimum": 0
+                  },
+                  "keychain": {
+                    "type": "string",
+                    "description": "Reference Resource: [Keychain](#/Keychain)<br>The keychain from which the CKN and CAK are derived for this policy. This is only applicable when the mode is set to PSK."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "description": "The MKA policy mode.  `psk`:     Policy mode is Pre-Shared Key. In this mode the CAK             and CKN of the MKA policy are statically             configured by the user.  `eap-tls`: Policy mode is EAP over Transport layer Security             Protocol(TLS). In this mode, the CAK and CKN of the             MKA policy are derived from EAP MSK             (Master Session Key).",
+                    "enum": [
+                      "psk",
+                      "eap-tls"
+                    ]
+                  },
+                  "transmit_interval": {
+                    "type": "integer",
+                    "description": "MKA transmit interval in seconds.",
+                    "maximum": 6,
+                    "minimum": 2
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "MKA_Policy.name",
+            "in": "path",
+            "description": "Reference Resource: [MKA_Policy](#/MKA_Policy)<br>Name of the MKA policy.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

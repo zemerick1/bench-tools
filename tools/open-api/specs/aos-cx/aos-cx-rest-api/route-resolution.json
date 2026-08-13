@@ -1,0 +1,608 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Route_Resolution",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Route_Resolution"
+    }
+  ],
+  "paths": {
+    "/system/vrfs/{VRF.name}/route_resolutions": {
+      "get": {
+        "tags": [
+          "Route_Resolution"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "address": {
+                      "type": "string",
+                      "description": "Reference Resource: [Route_Resolution](#/Route_Resolution)<br>Destination IP address to be resolved. If exact prefix match is requested, then the agent needs to specify the address and mask in address/mask format.",
+                      "maxLength": 49
+                    },
+                    "coalescence_id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Hash value calculated based on Origin, VRF, Address, and  L2 Details, which are processed as tuples of Nexthop, MAC Address  and Port",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "exact_prefix_match": {
+                      "type": "boolean",
+                      "description": "Specifies whether exact prefix match is requested by the agent."
+                    },
+                    "interfaces": {
+                      "type": "array",
+                      "description": "Reference Resource: [Interface](#/Interface)<br>List of interfaces for which individual ECMP groups are required. Generally used for tunneling: tunnels that share same destinations, would have different source addresses and would thus require separate ECMP groups.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "l2_details": {
+                      "type": "object",
+                      "description": "Reference Resource: [Port](#/Port)<br>Per nexthop egress resolution.",
+                      "properties": {
+                        "URI": {
+                          "type": "object",
+                          "properties": {
+                            "string": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "l2_resolution_required": {
+                      "type": "boolean",
+                      "description": "Specifies whether L2 resolution down to port, MAC, VLAN is required."
+                    },
+                    "origin": {
+                      "type": "string",
+                      "description": "Reference Resource: [Route_Resolution](#/Route_Resolution)<br>Agent in the system that requires address to be resolved.",
+                      "enum": [
+                        "pim",
+                        "bfd",
+                        "mpls",
+                        "pbr",
+                        "mirror",
+                        "vxlan",
+                        "l2_gre",
+                        "l3_gre",
+                        "l3_ip_tunnel",
+                        "msdp",
+                        "radius_server",
+                        "rdisc",
+                        "nae",
+                        "bidir"
+                      ]
+                    },
+                    "port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Route_Resolution](#/Route_Resolution)<br>Specifies the L3 interface of the address for which resolution is requested. This is only required if the resolution request is for an IPv6 link-local address."
+                    },
+                    "route_details": {
+                      "type": "object",
+                      "properties": {
+                        "distance": {
+                          "type": "integer",
+                          "description": "Administrative distance for the route entry.",
+                          "maximum": 255,
+                          "minimum": 0
+                        },
+                        "from": {
+                          "type": "string",
+                          "description": "Source of this route: 'connected':  subnet is directly connected to the switch 'static':     route is configured manually on the switch 'bgp':        sourced from BGP protocol 'ospf':       sourced from OSPF protocol 'local':      it's an IP address configured on the switch itself",
+                          "enum": [
+                            "connected",
+                            "static",
+                            "bgp",
+                            "ospf",
+                            "local"
+                          ]
+                        },
+                        "metric": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Metric associated with this route entry.",
+                          "maximum": 4294967295,
+                          "minimum": 0
+                        },
+                        "prefix": {
+                          "type": "string",
+                          "description": "IPv4 or IPv6 destination prefix and mask in the address/mask format. Example 192.168.0.0/16",
+                          "maxLength": 49
+                        },
+                        "type": {
+                          "type": "string",
+                          "description": "Specifies if the route is of type nullroute, reject, forward or local: 'forward':    the packets that match the route for destination will be forwarded               based on the nexthop entry. 'reject':     the packets that match the route for destination will be discarded               and an ICMP unreachable message is sent to the sender. 'nullroute':  the packets that match the route for destination will be silently               discarded without sending any ICMP message to the sender. 'local':      the packets that match the route for destination will be consumed by               the device and will not be forwarded.",
+                          "enum": [
+                            "forward",
+                            "nullroute",
+                            "reject",
+                            "local"
+                          ]
+                        }
+                      }
+                    },
+                    "route_nexthops": {
+                      "type": "array",
+                      "description": "Reference Resource: [Nexthop](#/Nexthop)<br>List of all the nexthops for this entry. This will be empty in case of nullroute/reject.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [Route_Resolution](#/Route_Resolution)<br>VRF of the address."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "interfaces",
+                  "l2_details",
+                  "route_nexthops",
+                  "exact_prefix_match",
+                  "l2_resolution_required",
+                  "port",
+                  "route_details",
+                  "address",
+                  "coalescence_id",
+                  "origin"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/vrfs/{VRF.name}/route_resolutions/{Route_Resolution.origin},{Route_Resolution.address},{Route_Resolution.port}": {
+      "get": {
+        "tags": [
+          "Route_Resolution"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "address": {
+                      "type": "string",
+                      "description": "Reference Resource: [Route_Resolution](#/Route_Resolution)<br>Destination IP address to be resolved. If exact prefix match is requested, then the agent needs to specify the address and mask in address/mask format.",
+                      "maxLength": 49
+                    },
+                    "coalescence_id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Hash value calculated based on Origin, VRF, Address, and  L2 Details, which are processed as tuples of Nexthop, MAC Address  and Port",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "exact_prefix_match": {
+                      "type": "boolean",
+                      "description": "Specifies whether exact prefix match is requested by the agent."
+                    },
+                    "interfaces": {
+                      "type": "array",
+                      "description": "Reference Resource: [Interface](#/Interface)<br>List of interfaces for which individual ECMP groups are required. Generally used for tunneling: tunnels that share same destinations, would have different source addresses and would thus require separate ECMP groups.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "l2_details": {
+                      "type": "object",
+                      "description": "Reference Resource: [Port](#/Port)<br>Per nexthop egress resolution.",
+                      "properties": {
+                        "URI": {
+                          "type": "object",
+                          "properties": {
+                            "string": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "l2_resolution_required": {
+                      "type": "boolean",
+                      "description": "Specifies whether L2 resolution down to port, MAC, VLAN is required."
+                    },
+                    "origin": {
+                      "type": "string",
+                      "description": "Reference Resource: [Route_Resolution](#/Route_Resolution)<br>Agent in the system that requires address to be resolved.",
+                      "enum": [
+                        "pim",
+                        "bfd",
+                        "mpls",
+                        "pbr",
+                        "mirror",
+                        "vxlan",
+                        "l2_gre",
+                        "l3_gre",
+                        "l3_ip_tunnel",
+                        "msdp",
+                        "radius_server",
+                        "rdisc",
+                        "nae",
+                        "bidir"
+                      ]
+                    },
+                    "port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Route_Resolution](#/Route_Resolution)<br>Specifies the L3 interface of the address for which resolution is requested. This is only required if the resolution request is for an IPv6 link-local address."
+                    },
+                    "route_details": {
+                      "type": "object",
+                      "properties": {
+                        "distance": {
+                          "type": "integer",
+                          "description": "Administrative distance for the route entry.",
+                          "maximum": 255,
+                          "minimum": 0
+                        },
+                        "from": {
+                          "type": "string",
+                          "description": "Source of this route: 'connected':  subnet is directly connected to the switch 'static':     route is configured manually on the switch 'bgp':        sourced from BGP protocol 'ospf':       sourced from OSPF protocol 'local':      it's an IP address configured on the switch itself",
+                          "enum": [
+                            "connected",
+                            "static",
+                            "bgp",
+                            "ospf",
+                            "local"
+                          ]
+                        },
+                        "metric": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Metric associated with this route entry.",
+                          "maximum": 4294967295,
+                          "minimum": 0
+                        },
+                        "prefix": {
+                          "type": "string",
+                          "description": "IPv4 or IPv6 destination prefix and mask in the address/mask format. Example 192.168.0.0/16",
+                          "maxLength": 49
+                        },
+                        "type": {
+                          "type": "string",
+                          "description": "Specifies if the route is of type nullroute, reject, forward or local: 'forward':    the packets that match the route for destination will be forwarded               based on the nexthop entry. 'reject':     the packets that match the route for destination will be discarded               and an ICMP unreachable message is sent to the sender. 'nullroute':  the packets that match the route for destination will be silently               discarded without sending any ICMP message to the sender. 'local':      the packets that match the route for destination will be consumed by               the device and will not be forwarded.",
+                          "enum": [
+                            "forward",
+                            "nullroute",
+                            "reject",
+                            "local"
+                          ]
+                        }
+                      }
+                    },
+                    "route_nexthops": {
+                      "type": "array",
+                      "description": "Reference Resource: [Nexthop](#/Nexthop)<br>List of all the nexthops for this entry. This will be empty in case of nullroute/reject.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [Route_Resolution](#/Route_Resolution)<br>VRF of the address."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Route_Resolution.origin",
+            "in": "path",
+            "description": "Reference Resource: [Route_Resolution](#/Route_Resolution)<br>Agent in the system that requires address to be resolved.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pim",
+                "bfd",
+                "mpls",
+                "pbr",
+                "mirror",
+                "vxlan",
+                "l2_gre",
+                "l3_gre",
+                "l3_ip_tunnel",
+                "msdp",
+                "radius_server",
+                "rdisc",
+                "nae",
+                "bidir"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "Route_Resolution.address",
+            "in": "path",
+            "description": "Reference Resource: [Route_Resolution](#/Route_Resolution)<br>Destination IP address to be resolved. If exact prefix match is requested, then the agent needs to specify the address and mask in address/mask format.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Route_Resolution.port",
+            "in": "path",
+            "description": "Reference Resource: [Route_Resolution](#/Route_Resolution)<br>Specifies the L3 interface of the address for which resolution is requested. This is only required if the resolution request is for an IPv6 link-local address.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "coalescence_id",
+                  "origin",
+                  "address",
+                  "interfaces",
+                  "l2_details",
+                  "exact_prefix_match",
+                  "route_nexthops",
+                  "port",
+                  "route_details",
+                  "l2_resolution_required"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

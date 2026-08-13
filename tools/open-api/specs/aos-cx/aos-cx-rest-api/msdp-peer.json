@@ -1,0 +1,1150 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "MSDP_Peer",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "MSDP_Peer"
+    }
+  ],
+  "paths": {
+    "/system/vrfs/{VRF.name}/msdp_router/msdp_peers": {
+      "get": {
+        "tags": [
+          "MSDP_Peer"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "address": {
+                      "type": "string",
+                      "description": "Reference Resource: [MSDP_Peer](#/MSDP_Peer)<br>IPv4 address of the MSDP Peer.",
+                      "maxLength": 15
+                    },
+                    "as_number": {
+                      "type": "integer",
+                      "description": "AS number on which the peer is configured. Local AS is assumed, if it is not specified.",
+                      "maximum": 65535,
+                      "minimum": 1
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Optional description of the MSDP Peer.",
+                      "maxLength": 80
+                    },
+                    "enable": {
+                      "type": "boolean",
+                      "description": "Enables MSDP communication with the peer."
+                    },
+                    "md5_password": {
+                      "type": "string",
+                      "description": "MD5 password for the peer. If this is not set, then there is no password for the peer.",
+                      "maxLength": 90
+                    },
+                    "mesh_group_name": {
+                      "type": "string",
+                      "description": "Name of the mesh group, if the peer is configured as a part of mesh group. If this is not set, then the peer is not part of mesh group.",
+                      "maxLength": 20
+                    },
+                    "msdp_router": {
+                      "type": "string",
+                      "description": "Reference Resource: [MSDP_Peer](#/MSDP_Peer)<br>MSDP Router on which the MSDP Peer is configured."
+                    },
+                    "msdp_sa_caches": {},
+                    "port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>Source Interface to be used for communication to the peer. If not configured, MSDP will not communicate to the peer."
+                    },
+                    "sa_filter": {
+                      "type": "object",
+                      "description": "Reference Resource: [ACL](#/ACL)<br>",
+                      "properties": {
+                        "in": {
+                          "type": "string",
+                          "description": "Reference Resource: [ACL](#/ACL)<br>Ingress ACL to filter processing of MSDP Source Active messages received from peer devices. When this is not configured, all MSDP Source Active messages will be processed."
+                        },
+                        "out": {
+                          "type": "string",
+                          "description": "Reference Resource: [ACL](#/ACL)<br>Egress ACL to filter MSDP Source Active messages sent to peer devices. When this is not configured, MSDP Source Active messages sent to the peer are not subject to any access list filtering and sent as is."
+                        }
+                      }
+                    },
+                    "sa_limit": {
+                      "type": "integer",
+                      "description": "Maximum number of (S, G) entries that can be accepted  from the Peer.",
+                      "maximum": 65535,
+                      "minimum": 0
+                    },
+                    "statistics": {
+                      "type": "object",
+                      "description": "Statistics of the MSDP peer. Updated every five seconds.",
+                      "properties": {
+                        "number_of_reset": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of session reset occurred. Session reset happens when MSDP message with TLV format error is recieved by the peer."
+                        },
+                        "sa_filter_drop_count_in": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of incoming SA messages dropped by the filter."
+                        },
+                        "sa_filter_drop_count_out": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of outgoing SA messages dropped by the filter."
+                        },
+                        "sa_learnt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of Active Sources learnt from the MSDP Peer."
+                        },
+                        "sa_messages_sent": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of SA messages sent by the peer."
+                        }
+                      }
+                    },
+                    "statistics_clear_performed": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Number of times the statistics for this MSDP peer have been cleared.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "statistics_clear_requested": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Number of times a request was made to clear the statistics for this MSDP peer.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "status": {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "type": "string",
+                          "description": "Current state of the peer: 'up':       TCP connection is established with the peer 'down' :    TCP connection with the peer is not established.             This might happen for various reasons, such as             interface not being configured or going down,             or peer being disabled.",
+                          "enum": [
+                            "up",
+                            "down"
+                          ]
+                        },
+                        "tcp_connection_establishment_time": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The epoch time at which the TCP connection was established."
+                        }
+                      }
+                    },
+                    "timers": {
+                      "type": "object",
+                      "properties": {
+                        "connection_retry_interval": {
+                          "type": "integer",
+                          "description": "MSDP connection retry interval in seconds. Maximum time the peer will wait before attempting to reestablish the TCP connection when connection reset happens.",
+                          "maximum": 65535,
+                          "minimum": 1
+                        },
+                        "hold_time": {
+                          "type": "integer",
+                          "description": "MSDP Peer hold time in seconds. Indicates the time which the local MSDP will wait for keepalive messages from the MSDP Peer before declaring it down.",
+                          "maximum": 65535,
+                          "minimum": 3
+                        },
+                        "keepalive_time": {
+                          "type": "integer",
+                          "description": "MSDP keepalive time in seconds. Indicates the interval at which keepalive messages will be sent to the MSDP Peer.",
+                          "maximum": 65535,
+                          "minimum": 1
+                        }
+                      }
+                    },
+                    "vsx_sync_exclude": {
+                      "type": "string",
+                      "description": "When not set to all_attributes_and_dependents, msdp peer information is not synced from vsx primary to secondary. If this is not set, then msdp peer information is synced.",
+                      "enum": [
+                        "all_attributes_and_dependents"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "address",
+                    "msdp_router"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "description",
+                  "sa_limit",
+                  "sa_filter",
+                  "timers",
+                  "statistics_clear_requested",
+                  "port",
+                  "enable",
+                  "mesh_group_name",
+                  "md5_password",
+                  "as_number",
+                  "vsx_sync_exclude",
+                  "statistics",
+                  "statistics_clear_performed",
+                  "address",
+                  "status",
+                  "msdp_sa_caches"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "MSDP_Peer"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "address": {
+                    "type": "string",
+                    "description": "Reference Resource: [MSDP_Peer](#/MSDP_Peer)<br>IPv4 address of the MSDP Peer.",
+                    "maxLength": 15
+                  },
+                  "as_number": {
+                    "type": "integer",
+                    "description": "AS number on which the peer is configured. Local AS is assumed, if it is not specified.",
+                    "maximum": 65535,
+                    "minimum": 1
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Optional description of the MSDP Peer.",
+                    "maxLength": 80
+                  },
+                  "enable": {
+                    "type": "boolean",
+                    "description": "Enables MSDP communication with the peer."
+                  },
+                  "md5_password": {
+                    "type": "string",
+                    "description": "MD5 password for the peer. If this is not set, then there is no password for the peer.",
+                    "maxLength": 90
+                  },
+                  "mesh_group_name": {
+                    "type": "string",
+                    "description": "Name of the mesh group, if the peer is configured as a part of mesh group. If this is not set, then the peer is not part of mesh group.",
+                    "maxLength": 20
+                  },
+                  "msdp_router": {
+                    "type": "string",
+                    "description": "Reference Resource: [MSDP_Peer](#/MSDP_Peer)<br>MSDP Router on which the MSDP Peer is configured."
+                  },
+                  "port": {
+                    "type": "string",
+                    "description": "Reference Resource: [Port](#/Port)<br>Source Interface to be used for communication to the peer. If not configured, MSDP will not communicate to the peer."
+                  },
+                  "sa_filter": {
+                    "type": "object",
+                    "description": "Reference Resource: [ACL](#/ACL)<br>",
+                    "properties": {
+                      "in": {
+                        "type": "string",
+                        "description": "Reference Resource: [ACL](#/ACL)<br>Ingress ACL to filter processing of MSDP Source Active messages received from peer devices. When this is not configured, all MSDP Source Active messages will be processed."
+                      },
+                      "out": {
+                        "type": "string",
+                        "description": "Reference Resource: [ACL](#/ACL)<br>Egress ACL to filter MSDP Source Active messages sent to peer devices. When this is not configured, MSDP Source Active messages sent to the peer are not subject to any access list filtering and sent as is."
+                      }
+                    }
+                  },
+                  "sa_limit": {
+                    "type": "integer",
+                    "description": "Maximum number of (S, G) entries that can be accepted  from the Peer.",
+                    "maximum": 65535,
+                    "minimum": 0
+                  },
+                  "timers": {
+                    "type": "object",
+                    "properties": {
+                      "connection_retry_interval": {
+                        "type": "integer",
+                        "description": "MSDP connection retry interval in seconds. Maximum time the peer will wait before attempting to reestablish the TCP connection when connection reset happens.",
+                        "maximum": 65535,
+                        "minimum": 1
+                      },
+                      "hold_time": {
+                        "type": "integer",
+                        "description": "MSDP Peer hold time in seconds. Indicates the time which the local MSDP will wait for keepalive messages from the MSDP Peer before declaring it down.",
+                        "maximum": 65535,
+                        "minimum": 3
+                      },
+                      "keepalive_time": {
+                        "type": "integer",
+                        "description": "MSDP keepalive time in seconds. Indicates the interval at which keepalive messages will be sent to the MSDP Peer.",
+                        "maximum": 65535,
+                        "minimum": 1
+                      }
+                    }
+                  },
+                  "vsx_sync_exclude": {
+                    "type": "string",
+                    "description": "When not set to all_attributes_and_dependents, msdp peer information is not synced from vsx primary to secondary. If this is not set, then msdp peer information is synced.",
+                    "enum": [
+                      "all_attributes_and_dependents"
+                    ]
+                  }
+                },
+                "required": [
+                  "msdp_router",
+                  "address"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    },
+    "/system/vrfs/{VRF.name}/msdp_router/msdp_peers/{MSDP_Peer.address}": {
+      "get": {
+        "tags": [
+          "MSDP_Peer"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "address": {
+                      "type": "string",
+                      "description": "Reference Resource: [MSDP_Peer](#/MSDP_Peer)<br>IPv4 address of the MSDP Peer.",
+                      "maxLength": 15
+                    },
+                    "as_number": {
+                      "type": "integer",
+                      "description": "AS number on which the peer is configured. Local AS is assumed, if it is not specified.",
+                      "maximum": 65535,
+                      "minimum": 1
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Optional description of the MSDP Peer.",
+                      "maxLength": 80
+                    },
+                    "enable": {
+                      "type": "boolean",
+                      "description": "Enables MSDP communication with the peer."
+                    },
+                    "md5_password": {
+                      "type": "string",
+                      "description": "MD5 password for the peer. If this is not set, then there is no password for the peer.",
+                      "maxLength": 90
+                    },
+                    "mesh_group_name": {
+                      "type": "string",
+                      "description": "Name of the mesh group, if the peer is configured as a part of mesh group. If this is not set, then the peer is not part of mesh group.",
+                      "maxLength": 20
+                    },
+                    "msdp_router": {
+                      "type": "string",
+                      "description": "Reference Resource: [MSDP_Peer](#/MSDP_Peer)<br>MSDP Router on which the MSDP Peer is configured."
+                    },
+                    "msdp_sa_caches": {},
+                    "port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>Source Interface to be used for communication to the peer. If not configured, MSDP will not communicate to the peer."
+                    },
+                    "sa_filter": {
+                      "type": "object",
+                      "description": "Reference Resource: [ACL](#/ACL)<br>",
+                      "properties": {
+                        "in": {
+                          "type": "string",
+                          "description": "Reference Resource: [ACL](#/ACL)<br>Ingress ACL to filter processing of MSDP Source Active messages received from peer devices. When this is not configured, all MSDP Source Active messages will be processed."
+                        },
+                        "out": {
+                          "type": "string",
+                          "description": "Reference Resource: [ACL](#/ACL)<br>Egress ACL to filter MSDP Source Active messages sent to peer devices. When this is not configured, MSDP Source Active messages sent to the peer are not subject to any access list filtering and sent as is."
+                        }
+                      }
+                    },
+                    "sa_limit": {
+                      "type": "integer",
+                      "description": "Maximum number of (S, G) entries that can be accepted  from the Peer.",
+                      "maximum": 65535,
+                      "minimum": 0
+                    },
+                    "statistics": {
+                      "type": "object",
+                      "description": "Statistics of the MSDP peer. Updated every five seconds.",
+                      "properties": {
+                        "number_of_reset": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of session reset occurred. Session reset happens when MSDP message with TLV format error is recieved by the peer."
+                        },
+                        "sa_filter_drop_count_in": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of incoming SA messages dropped by the filter."
+                        },
+                        "sa_filter_drop_count_out": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of outgoing SA messages dropped by the filter."
+                        },
+                        "sa_learnt": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of Active Sources learnt from the MSDP Peer."
+                        },
+                        "sa_messages_sent": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of SA messages sent by the peer."
+                        }
+                      }
+                    },
+                    "statistics_clear_performed": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Number of times the statistics for this MSDP peer have been cleared.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "statistics_clear_requested": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Number of times a request was made to clear the statistics for this MSDP peer.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "status": {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "type": "string",
+                          "description": "Current state of the peer: 'up':       TCP connection is established with the peer 'down' :    TCP connection with the peer is not established.             This might happen for various reasons, such as             interface not being configured or going down,             or peer being disabled.",
+                          "enum": [
+                            "up",
+                            "down"
+                          ]
+                        },
+                        "tcp_connection_establishment_time": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The epoch time at which the TCP connection was established."
+                        }
+                      }
+                    },
+                    "timers": {
+                      "type": "object",
+                      "properties": {
+                        "connection_retry_interval": {
+                          "type": "integer",
+                          "description": "MSDP connection retry interval in seconds. Maximum time the peer will wait before attempting to reestablish the TCP connection when connection reset happens.",
+                          "maximum": 65535,
+                          "minimum": 1
+                        },
+                        "hold_time": {
+                          "type": "integer",
+                          "description": "MSDP Peer hold time in seconds. Indicates the time which the local MSDP will wait for keepalive messages from the MSDP Peer before declaring it down.",
+                          "maximum": 65535,
+                          "minimum": 3
+                        },
+                        "keepalive_time": {
+                          "type": "integer",
+                          "description": "MSDP keepalive time in seconds. Indicates the interval at which keepalive messages will be sent to the MSDP Peer.",
+                          "maximum": 65535,
+                          "minimum": 1
+                        }
+                      }
+                    },
+                    "vsx_sync_exclude": {
+                      "type": "string",
+                      "description": "When not set to all_attributes_and_dependents, msdp peer information is not synced from vsx primary to secondary. If this is not set, then msdp peer information is synced.",
+                      "enum": [
+                        "all_attributes_and_dependents"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "msdp_router",
+                    "address"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "MSDP_Peer.address",
+            "in": "path",
+            "description": "Reference Resource: [MSDP_Peer](#/MSDP_Peer)<br>IPv4 address of the MSDP Peer.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "timers",
+                  "statistics_clear_requested",
+                  "description",
+                  "sa_limit",
+                  "sa_filter",
+                  "as_number",
+                  "port",
+                  "enable",
+                  "mesh_group_name",
+                  "md5_password",
+                  "vsx_sync_exclude",
+                  "statistics",
+                  "statistics_clear_performed",
+                  "address",
+                  "status",
+                  "msdp_sa_caches"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "MSDP_Peer"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "as_number": {
+                    "type": "integer",
+                    "description": "AS number on which the peer is configured. Local AS is assumed, if it is not specified.",
+                    "maximum": 65535,
+                    "minimum": 1
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Optional description of the MSDP Peer.",
+                    "maxLength": 80
+                  },
+                  "enable": {
+                    "type": "boolean",
+                    "description": "Enables MSDP communication with the peer."
+                  },
+                  "md5_password": {
+                    "type": "string",
+                    "description": "MD5 password for the peer. If this is not set, then there is no password for the peer.",
+                    "maxLength": 90
+                  },
+                  "mesh_group_name": {
+                    "type": "string",
+                    "description": "Name of the mesh group, if the peer is configured as a part of mesh group. If this is not set, then the peer is not part of mesh group.",
+                    "maxLength": 20
+                  },
+                  "port": {
+                    "type": "string",
+                    "description": "Reference Resource: [Port](#/Port)<br>Source Interface to be used for communication to the peer. If not configured, MSDP will not communicate to the peer."
+                  },
+                  "sa_filter": {
+                    "type": "object",
+                    "description": "Reference Resource: [ACL](#/ACL)<br>",
+                    "properties": {
+                      "in": {
+                        "type": "string",
+                        "description": "Reference Resource: [ACL](#/ACL)<br>Ingress ACL to filter processing of MSDP Source Active messages received from peer devices. When this is not configured, all MSDP Source Active messages will be processed."
+                      },
+                      "out": {
+                        "type": "string",
+                        "description": "Reference Resource: [ACL](#/ACL)<br>Egress ACL to filter MSDP Source Active messages sent to peer devices. When this is not configured, MSDP Source Active messages sent to the peer are not subject to any access list filtering and sent as is."
+                      }
+                    }
+                  },
+                  "sa_limit": {
+                    "type": "integer",
+                    "description": "Maximum number of (S, G) entries that can be accepted  from the Peer.",
+                    "maximum": 65535,
+                    "minimum": 0
+                  },
+                  "timers": {
+                    "type": "object",
+                    "properties": {
+                      "connection_retry_interval": {
+                        "type": "integer",
+                        "description": "MSDP connection retry interval in seconds. Maximum time the peer will wait before attempting to reestablish the TCP connection when connection reset happens.",
+                        "maximum": 65535,
+                        "minimum": 1
+                      },
+                      "hold_time": {
+                        "type": "integer",
+                        "description": "MSDP Peer hold time in seconds. Indicates the time which the local MSDP will wait for keepalive messages from the MSDP Peer before declaring it down.",
+                        "maximum": 65535,
+                        "minimum": 3
+                      },
+                      "keepalive_time": {
+                        "type": "integer",
+                        "description": "MSDP keepalive time in seconds. Indicates the interval at which keepalive messages will be sent to the MSDP Peer.",
+                        "maximum": 65535,
+                        "minimum": 1
+                      }
+                    }
+                  },
+                  "vsx_sync_exclude": {
+                    "type": "string",
+                    "description": "When not set to all_attributes_and_dependents, msdp peer information is not synced from vsx primary to secondary. If this is not set, then msdp peer information is synced.",
+                    "enum": [
+                      "all_attributes_and_dependents"
+                    ]
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "MSDP_Peer.address",
+            "in": "path",
+            "description": "Reference Resource: [MSDP_Peer](#/MSDP_Peer)<br>IPv4 address of the MSDP Peer.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "MSDP_Peer"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "MSDP_Peer.address",
+            "in": "path",
+            "description": "Reference Resource: [MSDP_Peer](#/MSDP_Peer)<br>IPv4 address of the MSDP Peer.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "MSDP_Peer"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "as_number": {
+                    "type": "integer",
+                    "description": "AS number on which the peer is configured. Local AS is assumed, if it is not specified.",
+                    "maximum": 65535,
+                    "minimum": 1
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Optional description of the MSDP Peer.",
+                    "maxLength": 80
+                  },
+                  "enable": {
+                    "type": "boolean",
+                    "description": "Enables MSDP communication with the peer."
+                  },
+                  "md5_password": {
+                    "type": "string",
+                    "description": "MD5 password for the peer. If this is not set, then there is no password for the peer.",
+                    "maxLength": 90
+                  },
+                  "mesh_group_name": {
+                    "type": "string",
+                    "description": "Name of the mesh group, if the peer is configured as a part of mesh group. If this is not set, then the peer is not part of mesh group.",
+                    "maxLength": 20
+                  },
+                  "port": {
+                    "type": "string",
+                    "description": "Reference Resource: [Port](#/Port)<br>Source Interface to be used for communication to the peer. If not configured, MSDP will not communicate to the peer."
+                  },
+                  "sa_filter": {
+                    "type": "object",
+                    "description": "Reference Resource: [ACL](#/ACL)<br>",
+                    "properties": {
+                      "in": {
+                        "type": "string",
+                        "description": "Reference Resource: [ACL](#/ACL)<br>Ingress ACL to filter processing of MSDP Source Active messages received from peer devices. When this is not configured, all MSDP Source Active messages will be processed."
+                      },
+                      "out": {
+                        "type": "string",
+                        "description": "Reference Resource: [ACL](#/ACL)<br>Egress ACL to filter MSDP Source Active messages sent to peer devices. When this is not configured, MSDP Source Active messages sent to the peer are not subject to any access list filtering and sent as is."
+                      }
+                    }
+                  },
+                  "sa_limit": {
+                    "type": "integer",
+                    "description": "Maximum number of (S, G) entries that can be accepted  from the Peer.",
+                    "maximum": 65535,
+                    "minimum": 0
+                  },
+                  "timers": {
+                    "type": "object",
+                    "properties": {
+                      "connection_retry_interval": {
+                        "type": "integer",
+                        "description": "MSDP connection retry interval in seconds. Maximum time the peer will wait before attempting to reestablish the TCP connection when connection reset happens.",
+                        "maximum": 65535,
+                        "minimum": 1
+                      },
+                      "hold_time": {
+                        "type": "integer",
+                        "description": "MSDP Peer hold time in seconds. Indicates the time which the local MSDP will wait for keepalive messages from the MSDP Peer before declaring it down.",
+                        "maximum": 65535,
+                        "minimum": 3
+                      },
+                      "keepalive_time": {
+                        "type": "integer",
+                        "description": "MSDP keepalive time in seconds. Indicates the interval at which keepalive messages will be sent to the MSDP Peer.",
+                        "maximum": 65535,
+                        "minimum": 1
+                      }
+                    }
+                  },
+                  "vsx_sync_exclude": {
+                    "type": "string",
+                    "description": "When not set to all_attributes_and_dependents, msdp peer information is not synced from vsx primary to secondary. If this is not set, then msdp peer information is synced.",
+                    "enum": [
+                      "all_attributes_and_dependents"
+                    ]
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "MSDP_Peer.address",
+            "in": "path",
+            "description": "Reference Resource: [MSDP_Peer](#/MSDP_Peer)<br>IPv4 address of the MSDP Peer.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

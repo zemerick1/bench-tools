@@ -1,0 +1,1903 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "OSPF_Route",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "OSPF_Route"
+    }
+  ],
+  "paths": {
+    "/system/vrfs/{VRF.name}/ospf_routers/{OSPF_Router.instance_tag}/ospf_routes": {
+      "get": {
+        "tags": [
+          "OSPF_Route"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ospf_area": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>OSPF Area to which the route belongs."
+                    },
+                    "ospf_router": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>OSPF Router to which the route belongs."
+                    },
+                    "path": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>The nexthop of the route. For example x.x.x.x/ifName (or) directly attached to ifName."
+                    },
+                    "path_type": {
+                      "type": "string",
+                      "description": "The value indicates whether the path type is inter-area, intra-area, or external.",
+                      "enum": [
+                        "intra_area",
+                        "inter_area",
+                        "external"
+                      ]
+                    },
+                    "prefix": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the prefix address in A.B.C.D/M format or border router-id in A.B.C.D format.",
+                      "maxLength": 49
+                    },
+                    "route_info": {
+                      "type": "object",
+                      "properties": {
+                        "cost": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The cost metric of the route. ",
+                          "maximum": 16777215
+                        },
+                        "ext_type": {
+                          "type": "string",
+                          "description": "External Type 1 or Type 2 Route.  For External routes only. ",
+                          "enum": [
+                            "ext_type_1",
+                            "ext_type_2"
+                          ]
+                        },
+                        "spf_index": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Internal number of the shortest path first (SPF) calculation that installs this route.",
+                          "maximum": 4294967295
+                        },
+                        "type2_cost": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The External Type 2 route cost. ",
+                          "maximum": 16777215
+                        }
+                      }
+                    },
+                    "route_type": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the the type of the route. route_to_abr  -> Specifies that this is a route to an Area Border Router route_to_asbr -> Specifies that this is a route to an Autonomous System Border Router route_to_abr_asbr -> Specifies that this is a route to an Area Border Router and Autonomous System Border Router route_to_prefix -> Specifies any route to a network.",
+                      "enum": [
+                        "route_to_abr",
+                        "route_to_asbr",
+                        "route_to_abr_asbr",
+                        "route_to_prefix"
+                      ]
+                    },
+                    "vlink_route": {
+                      "type": "boolean",
+                      "description": "This determines whether this is a route to virtual link."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Router.instance_tag",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Router](#/OSPF_Router)<br>The list of all the OSPFv2 Router instances.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "route_type",
+                  "vlink_route",
+                  "route_info",
+                  "prefix",
+                  "path_type",
+                  "path",
+                  "ospf_area"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/vrfs/{VRF.name}/ospf_routers/{OSPF_Router.instance_tag}/ospf_routes/{OSPF_Route.route_type},{OSPF_Route.prefix},{OSPF_Route.path},{OSPF_Route.ospf_area}": {
+      "get": {
+        "tags": [
+          "OSPF_Route"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ospf_area": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>OSPF Area to which the route belongs."
+                    },
+                    "ospf_router": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>OSPF Router to which the route belongs."
+                    },
+                    "path": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>The nexthop of the route. For example x.x.x.x/ifName (or) directly attached to ifName."
+                    },
+                    "path_type": {
+                      "type": "string",
+                      "description": "The value indicates whether the path type is inter-area, intra-area, or external.",
+                      "enum": [
+                        "intra_area",
+                        "inter_area",
+                        "external"
+                      ]
+                    },
+                    "prefix": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the prefix address in A.B.C.D/M format or border router-id in A.B.C.D format.",
+                      "maxLength": 49
+                    },
+                    "route_info": {
+                      "type": "object",
+                      "properties": {
+                        "cost": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The cost metric of the route. ",
+                          "maximum": 16777215
+                        },
+                        "ext_type": {
+                          "type": "string",
+                          "description": "External Type 1 or Type 2 Route.  For External routes only. ",
+                          "enum": [
+                            "ext_type_1",
+                            "ext_type_2"
+                          ]
+                        },
+                        "spf_index": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Internal number of the shortest path first (SPF) calculation that installs this route.",
+                          "maximum": 4294967295
+                        },
+                        "type2_cost": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The External Type 2 route cost. ",
+                          "maximum": 16777215
+                        }
+                      }
+                    },
+                    "route_type": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the the type of the route. route_to_abr  -> Specifies that this is a route to an Area Border Router route_to_asbr -> Specifies that this is a route to an Autonomous System Border Router route_to_abr_asbr -> Specifies that this is a route to an Area Border Router and Autonomous System Border Router route_to_prefix -> Specifies any route to a network.",
+                      "enum": [
+                        "route_to_abr",
+                        "route_to_asbr",
+                        "route_to_abr_asbr",
+                        "route_to_prefix"
+                      ]
+                    },
+                    "vlink_route": {
+                      "type": "boolean",
+                      "description": "This determines whether this is a route to virtual link."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Router.instance_tag",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Router](#/OSPF_Router)<br>The list of all the OSPFv2 Router instances.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Route.route_type",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the the type of the route. route_to_abr  -> Specifies that this is a route to an Area Border Router route_to_asbr -> Specifies that this is a route to an Autonomous System Border Router route_to_abr_asbr -> Specifies that this is a route to an Area Border Router and Autonomous System Border Router route_to_prefix -> Specifies any route to a network.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "route_to_abr",
+                "route_to_asbr",
+                "route_to_abr_asbr",
+                "route_to_prefix"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Route.prefix",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the prefix address in A.B.C.D/M format or border router-id in A.B.C.D format.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Route.path",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>The nexthop of the route. For example x.x.x.x/ifName (or) directly attached to ifName.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Route.ospf_area",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>OSPF Area to which the route belongs.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "route_type",
+                  "vlink_route",
+                  "route_info",
+                  "prefix",
+                  "path_type",
+                  "path",
+                  "ospf_area"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/vrfs/{VRF.name}/ospfv3_af4_routers/{OSPF_Router.instance_tag}/ospf_routes": {
+      "get": {
+        "tags": [
+          "OSPF_Route"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ospf_area": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>OSPF Area to which the route belongs."
+                    },
+                    "ospf_router": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>OSPF Router to which the route belongs."
+                    },
+                    "path": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>The nexthop of the route. For example x.x.x.x/ifName (or) directly attached to ifName."
+                    },
+                    "path_type": {
+                      "type": "string",
+                      "description": "The value indicates whether the path type is inter-area, intra-area, or external.",
+                      "enum": [
+                        "intra_area",
+                        "inter_area",
+                        "external"
+                      ]
+                    },
+                    "prefix": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the prefix address in A.B.C.D/M format or border router-id in A.B.C.D format.",
+                      "maxLength": 49
+                    },
+                    "route_info": {
+                      "type": "object",
+                      "properties": {
+                        "cost": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The cost metric of the route. ",
+                          "maximum": 16777215
+                        },
+                        "ext_type": {
+                          "type": "string",
+                          "description": "External Type 1 or Type 2 Route.  For External routes only. ",
+                          "enum": [
+                            "ext_type_1",
+                            "ext_type_2"
+                          ]
+                        },
+                        "spf_index": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Internal number of the shortest path first (SPF) calculation that installs this route.",
+                          "maximum": 4294967295
+                        },
+                        "type2_cost": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The External Type 2 route cost. ",
+                          "maximum": 16777215
+                        }
+                      }
+                    },
+                    "route_type": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the the type of the route. route_to_abr  -> Specifies that this is a route to an Area Border Router route_to_asbr -> Specifies that this is a route to an Autonomous System Border Router route_to_abr_asbr -> Specifies that this is a route to an Area Border Router and Autonomous System Border Router route_to_prefix -> Specifies any route to a network.",
+                      "enum": [
+                        "route_to_abr",
+                        "route_to_asbr",
+                        "route_to_abr_asbr",
+                        "route_to_prefix"
+                      ]
+                    },
+                    "vlink_route": {
+                      "type": "boolean",
+                      "description": "This determines whether this is a route to virtual link."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Router.instance_tag",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Router](#/OSPF_Router)<br>The list of all the OSPFv3 Router instances for IPv4 Unicast  Address Family.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ospf_area",
+                  "route_type",
+                  "vlink_route",
+                  "route_info",
+                  "prefix",
+                  "path_type",
+                  "path"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/vrfs/{VRF.name}/ospfv3_af4_routers/{OSPF_Router.instance_tag}/ospf_routes/{OSPF_Route.route_type},{OSPF_Route.prefix},{OSPF_Route.path},{OSPF_Route.ospf_area}": {
+      "get": {
+        "tags": [
+          "OSPF_Route"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ospf_area": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>OSPF Area to which the route belongs."
+                    },
+                    "ospf_router": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>OSPF Router to which the route belongs."
+                    },
+                    "path": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>The nexthop of the route. For example x.x.x.x/ifName (or) directly attached to ifName."
+                    },
+                    "path_type": {
+                      "type": "string",
+                      "description": "The value indicates whether the path type is inter-area, intra-area, or external.",
+                      "enum": [
+                        "intra_area",
+                        "inter_area",
+                        "external"
+                      ]
+                    },
+                    "prefix": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the prefix address in A.B.C.D/M format or border router-id in A.B.C.D format.",
+                      "maxLength": 49
+                    },
+                    "route_info": {
+                      "type": "object",
+                      "properties": {
+                        "cost": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The cost metric of the route. ",
+                          "maximum": 16777215
+                        },
+                        "ext_type": {
+                          "type": "string",
+                          "description": "External Type 1 or Type 2 Route.  For External routes only. ",
+                          "enum": [
+                            "ext_type_1",
+                            "ext_type_2"
+                          ]
+                        },
+                        "spf_index": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Internal number of the shortest path first (SPF) calculation that installs this route.",
+                          "maximum": 4294967295
+                        },
+                        "type2_cost": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The External Type 2 route cost. ",
+                          "maximum": 16777215
+                        }
+                      }
+                    },
+                    "route_type": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the the type of the route. route_to_abr  -> Specifies that this is a route to an Area Border Router route_to_asbr -> Specifies that this is a route to an Autonomous System Border Router route_to_abr_asbr -> Specifies that this is a route to an Area Border Router and Autonomous System Border Router route_to_prefix -> Specifies any route to a network.",
+                      "enum": [
+                        "route_to_abr",
+                        "route_to_asbr",
+                        "route_to_abr_asbr",
+                        "route_to_prefix"
+                      ]
+                    },
+                    "vlink_route": {
+                      "type": "boolean",
+                      "description": "This determines whether this is a route to virtual link."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Router.instance_tag",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Router](#/OSPF_Router)<br>The list of all the OSPFv3 Router instances for IPv4 Unicast  Address Family.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Route.route_type",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the the type of the route. route_to_abr  -> Specifies that this is a route to an Area Border Router route_to_asbr -> Specifies that this is a route to an Autonomous System Border Router route_to_abr_asbr -> Specifies that this is a route to an Area Border Router and Autonomous System Border Router route_to_prefix -> Specifies any route to a network.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "route_to_abr",
+                "route_to_asbr",
+                "route_to_abr_asbr",
+                "route_to_prefix"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Route.prefix",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the prefix address in A.B.C.D/M format or border router-id in A.B.C.D format.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Route.path",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>The nexthop of the route. For example x.x.x.x/ifName (or) directly attached to ifName.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Route.ospf_area",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>OSPF Area to which the route belongs.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "route_info",
+                  "prefix",
+                  "path_type",
+                  "path",
+                  "ospf_area",
+                  "route_type",
+                  "vlink_route"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/vrfs/{VRF.name}/ospfv3_af6_routers/{OSPF_Router.instance_tag}/ospf_routes": {
+      "get": {
+        "tags": [
+          "OSPF_Route"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ospf_area": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>OSPF Area to which the route belongs."
+                    },
+                    "ospf_router": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>OSPF Router to which the route belongs."
+                    },
+                    "path": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>The nexthop of the route. For example x.x.x.x/ifName (or) directly attached to ifName."
+                    },
+                    "path_type": {
+                      "type": "string",
+                      "description": "The value indicates whether the path type is inter-area, intra-area, or external.",
+                      "enum": [
+                        "intra_area",
+                        "inter_area",
+                        "external"
+                      ]
+                    },
+                    "prefix": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the prefix address in A.B.C.D/M format or border router-id in A.B.C.D format.",
+                      "maxLength": 49
+                    },
+                    "route_info": {
+                      "type": "object",
+                      "properties": {
+                        "cost": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The cost metric of the route. ",
+                          "maximum": 16777215
+                        },
+                        "ext_type": {
+                          "type": "string",
+                          "description": "External Type 1 or Type 2 Route.  For External routes only. ",
+                          "enum": [
+                            "ext_type_1",
+                            "ext_type_2"
+                          ]
+                        },
+                        "spf_index": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Internal number of the shortest path first (SPF) calculation that installs this route.",
+                          "maximum": 4294967295
+                        },
+                        "type2_cost": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The External Type 2 route cost. ",
+                          "maximum": 16777215
+                        }
+                      }
+                    },
+                    "route_type": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the the type of the route. route_to_abr  -> Specifies that this is a route to an Area Border Router route_to_asbr -> Specifies that this is a route to an Autonomous System Border Router route_to_abr_asbr -> Specifies that this is a route to an Area Border Router and Autonomous System Border Router route_to_prefix -> Specifies any route to a network.",
+                      "enum": [
+                        "route_to_abr",
+                        "route_to_asbr",
+                        "route_to_abr_asbr",
+                        "route_to_prefix"
+                      ]
+                    },
+                    "vlink_route": {
+                      "type": "boolean",
+                      "description": "This determines whether this is a route to virtual link."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Router.instance_tag",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Router](#/OSPF_Router)<br>The list of all the OSPFv3 Router instances for IPv6 Unicast  Address Family.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "path",
+                  "ospf_area",
+                  "route_type",
+                  "vlink_route",
+                  "route_info",
+                  "prefix",
+                  "path_type"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/vrfs/{VRF.name}/ospfv3_af6_routers/{OSPF_Router.instance_tag}/ospf_routes/{OSPF_Route.route_type},{OSPF_Route.prefix},{OSPF_Route.path},{OSPF_Route.ospf_area}": {
+      "get": {
+        "tags": [
+          "OSPF_Route"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ospf_area": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>OSPF Area to which the route belongs."
+                    },
+                    "ospf_router": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>OSPF Router to which the route belongs."
+                    },
+                    "path": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>The nexthop of the route. For example x.x.x.x/ifName (or) directly attached to ifName."
+                    },
+                    "path_type": {
+                      "type": "string",
+                      "description": "The value indicates whether the path type is inter-area, intra-area, or external.",
+                      "enum": [
+                        "intra_area",
+                        "inter_area",
+                        "external"
+                      ]
+                    },
+                    "prefix": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the prefix address in A.B.C.D/M format or border router-id in A.B.C.D format.",
+                      "maxLength": 49
+                    },
+                    "route_info": {
+                      "type": "object",
+                      "properties": {
+                        "cost": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The cost metric of the route. ",
+                          "maximum": 16777215
+                        },
+                        "ext_type": {
+                          "type": "string",
+                          "description": "External Type 1 or Type 2 Route.  For External routes only. ",
+                          "enum": [
+                            "ext_type_1",
+                            "ext_type_2"
+                          ]
+                        },
+                        "spf_index": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Internal number of the shortest path first (SPF) calculation that installs this route.",
+                          "maximum": 4294967295
+                        },
+                        "type2_cost": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The External Type 2 route cost. ",
+                          "maximum": 16777215
+                        }
+                      }
+                    },
+                    "route_type": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the the type of the route. route_to_abr  -> Specifies that this is a route to an Area Border Router route_to_asbr -> Specifies that this is a route to an Autonomous System Border Router route_to_abr_asbr -> Specifies that this is a route to an Area Border Router and Autonomous System Border Router route_to_prefix -> Specifies any route to a network.",
+                      "enum": [
+                        "route_to_abr",
+                        "route_to_asbr",
+                        "route_to_abr_asbr",
+                        "route_to_prefix"
+                      ]
+                    },
+                    "vlink_route": {
+                      "type": "boolean",
+                      "description": "This determines whether this is a route to virtual link."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Router.instance_tag",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Router](#/OSPF_Router)<br>The list of all the OSPFv3 Router instances for IPv6 Unicast  Address Family.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Route.route_type",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the the type of the route. route_to_abr  -> Specifies that this is a route to an Area Border Router route_to_asbr -> Specifies that this is a route to an Autonomous System Border Router route_to_abr_asbr -> Specifies that this is a route to an Area Border Router and Autonomous System Border Router route_to_prefix -> Specifies any route to a network.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "route_to_abr",
+                "route_to_asbr",
+                "route_to_abr_asbr",
+                "route_to_prefix"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Route.prefix",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the prefix address in A.B.C.D/M format or border router-id in A.B.C.D format.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Route.path",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>The nexthop of the route. For example x.x.x.x/ifName (or) directly attached to ifName.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Route.ospf_area",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>OSPF Area to which the route belongs.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "vlink_route",
+                  "route_info",
+                  "prefix",
+                  "path_type",
+                  "path",
+                  "ospf_area",
+                  "route_type"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/vrfs/{VRF.name}/ospfv3_routers/{OSPF_Router.instance_tag}/ospf_routes": {
+      "get": {
+        "tags": [
+          "OSPF_Route"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ospf_area": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>OSPF Area to which the route belongs."
+                    },
+                    "ospf_router": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>OSPF Router to which the route belongs."
+                    },
+                    "path": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>The nexthop of the route. For example x.x.x.x/ifName (or) directly attached to ifName."
+                    },
+                    "path_type": {
+                      "type": "string",
+                      "description": "The value indicates whether the path type is inter-area, intra-area, or external.",
+                      "enum": [
+                        "intra_area",
+                        "inter_area",
+                        "external"
+                      ]
+                    },
+                    "prefix": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the prefix address in A.B.C.D/M format or border router-id in A.B.C.D format.",
+                      "maxLength": 49
+                    },
+                    "route_info": {
+                      "type": "object",
+                      "properties": {
+                        "cost": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The cost metric of the route. ",
+                          "maximum": 16777215
+                        },
+                        "ext_type": {
+                          "type": "string",
+                          "description": "External Type 1 or Type 2 Route.  For External routes only. ",
+                          "enum": [
+                            "ext_type_1",
+                            "ext_type_2"
+                          ]
+                        },
+                        "spf_index": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Internal number of the shortest path first (SPF) calculation that installs this route.",
+                          "maximum": 4294967295
+                        },
+                        "type2_cost": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The External Type 2 route cost. ",
+                          "maximum": 16777215
+                        }
+                      }
+                    },
+                    "route_type": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the the type of the route. route_to_abr  -> Specifies that this is a route to an Area Border Router route_to_asbr -> Specifies that this is a route to an Autonomous System Border Router route_to_abr_asbr -> Specifies that this is a route to an Area Border Router and Autonomous System Border Router route_to_prefix -> Specifies any route to a network.",
+                      "enum": [
+                        "route_to_abr",
+                        "route_to_asbr",
+                        "route_to_abr_asbr",
+                        "route_to_prefix"
+                      ]
+                    },
+                    "vlink_route": {
+                      "type": "boolean",
+                      "description": "This determines whether this is a route to virtual link."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Router.instance_tag",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Router](#/OSPF_Router)<br>The list of all the OSPFv3 Router instances.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "path_type",
+                  "path",
+                  "ospf_area",
+                  "route_type",
+                  "vlink_route",
+                  "route_info",
+                  "prefix"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/vrfs/{VRF.name}/ospfv3_routers/{OSPF_Router.instance_tag}/ospf_routes/{OSPF_Route.route_type},{OSPF_Route.prefix},{OSPF_Route.path},{OSPF_Route.ospf_area}": {
+      "get": {
+        "tags": [
+          "OSPF_Route"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ospf_area": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>OSPF Area to which the route belongs."
+                    },
+                    "ospf_router": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>OSPF Router to which the route belongs."
+                    },
+                    "path": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>The nexthop of the route. For example x.x.x.x/ifName (or) directly attached to ifName."
+                    },
+                    "path_type": {
+                      "type": "string",
+                      "description": "The value indicates whether the path type is inter-area, intra-area, or external.",
+                      "enum": [
+                        "intra_area",
+                        "inter_area",
+                        "external"
+                      ]
+                    },
+                    "prefix": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the prefix address in A.B.C.D/M format or border router-id in A.B.C.D format.",
+                      "maxLength": 49
+                    },
+                    "route_info": {
+                      "type": "object",
+                      "properties": {
+                        "cost": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The cost metric of the route. ",
+                          "maximum": 16777215
+                        },
+                        "ext_type": {
+                          "type": "string",
+                          "description": "External Type 1 or Type 2 Route.  For External routes only. ",
+                          "enum": [
+                            "ext_type_1",
+                            "ext_type_2"
+                          ]
+                        },
+                        "spf_index": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Internal number of the shortest path first (SPF) calculation that installs this route.",
+                          "maximum": 4294967295
+                        },
+                        "type2_cost": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The External Type 2 route cost. ",
+                          "maximum": 16777215
+                        }
+                      }
+                    },
+                    "route_type": {
+                      "type": "string",
+                      "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the the type of the route. route_to_abr  -> Specifies that this is a route to an Area Border Router route_to_asbr -> Specifies that this is a route to an Autonomous System Border Router route_to_abr_asbr -> Specifies that this is a route to an Area Border Router and Autonomous System Border Router route_to_prefix -> Specifies any route to a network.",
+                      "enum": [
+                        "route_to_abr",
+                        "route_to_asbr",
+                        "route_to_abr_asbr",
+                        "route_to_prefix"
+                      ]
+                    },
+                    "vlink_route": {
+                      "type": "boolean",
+                      "description": "This determines whether this is a route to virtual link."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Router.instance_tag",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Router](#/OSPF_Router)<br>The list of all the OSPFv3 Router instances.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Route.route_type",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the the type of the route. route_to_abr  -> Specifies that this is a route to an Area Border Router route_to_asbr -> Specifies that this is a route to an Autonomous System Border Router route_to_abr_asbr -> Specifies that this is a route to an Area Border Router and Autonomous System Border Router route_to_prefix -> Specifies any route to a network.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "route_to_abr",
+                "route_to_asbr",
+                "route_to_abr_asbr",
+                "route_to_prefix"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Route.prefix",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>Specifies the prefix address in A.B.C.D/M format or border router-id in A.B.C.D format.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Route.path",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>The nexthop of the route. For example x.x.x.x/ifName (or) directly attached to ifName.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "OSPF_Route.ospf_area",
+            "in": "path",
+            "description": "Reference Resource: [OSPF_Route](#/OSPF_Route)<br>OSPF Area to which the route belongs.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "path_type",
+                  "path",
+                  "ospf_area",
+                  "route_type",
+                  "vlink_route",
+                  "route_info",
+                  "prefix"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

@@ -1,0 +1,2456 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "BGP_Router",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "BGP_Router"
+    }
+  ],
+  "paths": {
+    "/system/vrfs/{VRF.name}/bgp_routers": {
+      "get": {
+        "tags": [
+          "BGP_Router"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "agg_split_horizon": {
+                      "type": "boolean",
+                      "description": "If enabled, BGP will not advertise the aggregated route back to  the peer, that advertises the same network If disabled, BGP will advertise the aggregated route to the peer  that advertises the same network"
+                    },
+                    "aggregate_addresses": {
+                      "type": "object",
+                      "description": "Reference Resource: [Aggregate_address](#/Aggregate_address)<br>Aggregate addresses keyed by the IP address and mask.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "string": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "always_compare_med": {
+                      "type": "boolean",
+                      "description": "Specifies whether MED should be compared from different neighbors."
+                    },
+                    "asn": {
+                      "type": "integer",
+                      "description": "Reference Resource: [BGP_Router](#/BGP_Router)<br>BGP routers keyed by ASN value."
+                    },
+                    "asnotation": {
+                      "type": "string",
+                      "description": "Specifies the representation of Four-Octet AS Numbers in show commands. 'dotted':       All the ASNs greater than 65535 should be displayed in AA.NN format. 'dotted-plus':  All the ASNs irrespective of value should be displayed in AA.NN format. 'plain-text':   All the ASNs should be displayed in plain-text format.",
+                      "enum": [
+                        "dotted",
+                        "dotted-plus",
+                        "plain-text"
+                      ]
+                    },
+                    "bestpath_as_path_ignore": {
+                      "type": "boolean",
+                      "description": "Specifies whether the AS path length should be ignored when determining the preferred route."
+                    },
+                    "bestpath_as_path_multipath_relax": {
+                      "type": "boolean",
+                      "description": "Specifies whether to consider two or more BGP routes as ecmp routes  when routes AS PATH length is same but AS PATHs are different."
+                    },
+                    "bestpath_compare_routerid": {
+                      "type": "boolean",
+                      "description": "Specifies whether the BGP router IDs should be compared to select the best path."
+                    },
+                    "bestpath_med_confed": {
+                      "type": "boolean",
+                      "description": "Specifies whether the router should consider the MED value when choosing a path from among those advertised by different ASes within a confederation.  All active BGP sessions belonging to this VRF will be restarted when this configuration is changed for it to take effect."
+                    },
+                    "bestpath_med_missing_as_worst": {
+                      "type": "boolean",
+                      "description": "Specifies whether the missing MED value should be treated as 0xFFFFFFFF."
+                    },
+                    "bgp_neighbors": {
+                      "type": "object",
+                      "description": "Reference Resource: [BGP_Neighbor](#/BGP_Neighbor)<br>BGP neighbors keyed by IP/IFNAME or neighbor groups keyed by any string name.",
+                      "properties": {
+                        "string": {
+                          "type": "string",
+                          "description": "Reference resource URI of BGP_Neighbor"
+                        }
+                      }
+                    },
+                    "cluster_id": {
+                      "type": "string",
+                      "description": "Cluster ID of this router. Cluster-id can be a 32-bit integer in a range of 1-4294967295 or a valid IPv4 address. If no cluster-id is configured, router-id will be used.",
+                      "maxLength": 15
+                    },
+                    "confederation_id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Confederation identifier assigned to this router. This is an optional field and when its not configured Confederation identifier is not set for this router.",
+                      "maximum": 4294967295,
+                      "minimum": 1
+                    },
+                    "confederation_peers": {
+                      "type": "array",
+                      "description": "Confederation peers associated with this router.",
+                      "items": {
+                        "type": "integer"
+                      },
+                      "maxItems": 1024
+                    },
+                    "dampening": {
+                      "type": "object",
+                      "description": "Route flap dampening configuration parameters at the router level for all routes. Dampening can be either at the router level for all routes or for selected routes via a route-map. If 'dampening_route_map' is configured, then BGP router level dampening parameters are ignored.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "half_life": {
+                              "type": "integer",
+                              "description": "Amount of time (in minutes) that must elapse to reduce the penalty by one half.",
+                              "maximum": 45,
+                              "minimum": 1
+                            },
+                            "max_suppress_time": {
+                              "type": "integer",
+                              "description": "The longest amount of time (in minutes) that a route can be suppressed.",
+                              "maximum": 255,
+                              "minimum": 1
+                            },
+                            "reuse": {
+                              "type": "integer",
+                              "description": "If the penalty is less than the reuse limit, a suppressed route that is up will no longer be suppressed.",
+                              "maximum": 20000,
+                              "minimum": 1
+                            },
+                            "suppress": {
+                              "type": "integer",
+                              "description": "If the penalty is greater than the suppress limit, the route is suppressed.",
+                              "maximum": 20000,
+                              "minimum": 1
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "dampening_route_map": {
+                      "type": "object",
+                      "description": "Reference Resource: [Route_Map](#/Route_Map)<br>Route-map that specifies the criteria for route-flap dampening Dampening can be either at the router level for all routes or for  selected routes via a route-map. If 'dampening_route_map' is configured, then BGP router level dampening parameters are ignored.",
+                      "properties": {
+                        "ipv4-unicast": {
+                          "type": "string",
+                          "description": "Reference Resource: [Route_Map](#/Route_Map)<br>"
+                        },
+                        "ipv6-unicast": {
+                          "type": "string",
+                          "description": "Reference Resource: [Route_Map](#/Route_Map)<br>"
+                        }
+                      }
+                    },
+                    "deterministic_med": {
+                      "type": "boolean",
+                      "description": "Specifies whether BGP should select the best-MED path among paths advertised from the neighboring AS."
+                    },
+                    "dynamic_bgp_neighbors": {
+                      "type": "object",
+                      "description": "Reference Resource: [BGP_Neighbor](#/BGP_Neighbor)<br>Dynamic BGP neighbors keyed by IP.",
+                      "properties": {
+                        "string": {
+                          "type": "string",
+                          "description": "Reference resource URI of BGP_Neighbor"
+                        }
+                      }
+                    },
+                    "ebgp_distance": {
+                      "type": "integer",
+                      "description": "Administrative distance for ebgp routes.",
+                      "maximum": 255,
+                      "minimum": 1
+                    },
+                    "fast_external_fallover": {
+                      "type": "boolean",
+                      "description": "Enables fast fall-over for directly connected EBGP sessions."
+                    },
+                    "gr_enable": {
+                      "type": "boolean",
+                      "description": "Specifies whether the graceful restart procedures should be performed in the event of peer or router failure."
+                    },
+                    "gr_restart_timer": {
+                      "type": "integer",
+                      "description": "Maximum time in seconds that the BGP Speaker requires to restart and establish BGP session with peers.",
+                      "maximum": 3600,
+                      "minimum": 1
+                    },
+                    "gr_stale_timer": {
+                      "type": "integer",
+                      "description": "The time that the BGP Speaker will keep the peers' routes as stale.",
+                      "maximum": 3600,
+                      "minimum": 1
+                    },
+                    "ibgp_distance": {
+                      "type": "integer",
+                      "description": "Administrative distance for ibgp routes.",
+                      "maximum": 255,
+                      "minimum": 1
+                    },
+                    "local_pref": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Local preference of the routes.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "log_neighbor_changes": {
+                      "type": "boolean",
+                      "description": "Enables logging of neighbor status changes."
+                    },
+                    "maxas_limit": {
+                      "type": "integer",
+                      "description": "Limit on the maximum AS numbers allowed in the routes learned from the peers.",
+                      "maximum": 32,
+                      "minimum": 1
+                    },
+                    "maximum_paths": {
+                      "type": "object",
+                      "description": "Number of paths BGP may install into the routing table.",
+                      "properties": {
+                        "all-afs": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of paths BGP may install into the routing table."
+                        }
+                      }
+                    },
+                    "networks": {
+                      "type": "object",
+                      "description": "Networks to be announced.",
+                      "properties": {
+                        "string": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "maxItems": 9223372036854776000
+                        }
+                      }
+                    },
+                    "networks_route_maps": {
+                      "type": "object",
+                      "description": "Reference Resource: [Route_Map](#/Route_Map)<br>Route Maps to be applied to the networks.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "string": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "protocol_disable": {
+                      "type": "boolean",
+                      "description": "Disable this BGP instance."
+                    },
+                    "redistribute": {
+                      "type": "object",
+                      "description": "Types of routes that should be redistributed by BGP.",
+                      "properties": {
+                        "string": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "connected",
+                              "local-loopback",
+                              "static",
+                              "ospf"
+                            ]
+                          },
+                          "maxItems": 6
+                        }
+                      }
+                    },
+                    "redistribute_metric": {
+                      "type": "object",
+                      "description": "Types of metric that should be redistributed by BGP.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "ospf": {
+                              "type": "boolean",
+                              "description": "If enabled ospf metric should be redistributed by BGP."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "redistribute_ospf": {
+                      "type": "object",
+                      "description": "Reference Resource: [OSPF_Router](#/OSPF_Router)<br>OSPF routes that should be redistributed by BGP.",
+                      "properties": {
+                        "string": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "maxItems": 8
+                        }
+                      }
+                    },
+                    "redistribute_ospf_metric": {
+                      "type": "object",
+                      "description": "Reference Resource: [OSPF_Router](#/OSPF_Router)<br>OSPF metric that should be redistributed by BGP MED.",
+                      "properties": {
+                        "string": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "maxItems": 8
+                        }
+                      }
+                    },
+                    "redistribute_ospf_route_map": {
+                      "type": "object",
+                      "description": "Reference Resource: [Route_Map](#/Route_Map)<br>Route Maps to be applied when redistributing routes.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "URI": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "redistribute_route_map": {
+                      "type": "object",
+                      "description": "Reference Resource: [Route_Map](#/Route_Map)<br>Route Maps to be applied when redistributing routes.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "string": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "router_id": {
+                      "type": "string",
+                      "description": "Router ID for the given ASN. If not configured, then highest IP address of all the loopbacks is chosen and if Loopback is also not configured then highest   IP address on any interface is chosen.",
+                      "maxLength": 15
+                    },
+                    "status": {
+                      "type": "object",
+                      "properties": {
+                        "bgp_selected_router_id": {
+                          "type": "string",
+                          "description": "IP address selected to be bgp router-id."
+                        }
+                      }
+                    },
+                    "timers": {
+                      "type": "object",
+                      "properties": {
+                        "connect-retry": {
+                          "type": "integer",
+                          "description": "BGP connect-retry time in seconds. ",
+                          "maximum": 65535,
+                          "minimum": 1
+                        },
+                        "holdtime": {
+                          "type": "integer",
+                          "description": "BGP hold time in seconds. ",
+                          "maximum": 65535,
+                          "minimum": 0
+                        },
+                        "keepalive": {
+                          "type": "integer",
+                          "description": "BGP keepalive time in seconds. ",
+                          "maximum": 65535,
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "trap_enable": {
+                      "type": "boolean",
+                      "description": "Enable SNMP trap generation for BGP related events."
+                    },
+                    "update_group_enable": {
+                      "type": "boolean",
+                      "description": "Enable update-group feature. This is used to optimize the BGP route advertisement process."
+                    }
+                  },
+                  "required": [
+                    "asn"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "protocol_disable",
+                  "gr_enable",
+                  "bestpath_compare_routerid",
+                  "agg_split_horizon",
+                  "maximum_paths",
+                  "timers",
+                  "ebgp_distance",
+                  "bestpath_as_path_ignore",
+                  "bestpath_med_confed",
+                  "asnotation",
+                  "redistribute",
+                  "deterministic_med",
+                  "bestpath_as_path_multipath_relax",
+                  "networks",
+                  "redistribute_ospf_metric",
+                  "gr_restart_timer",
+                  "trap_enable",
+                  "aggregate_addresses",
+                  "redistribute_ospf",
+                  "maxas_limit",
+                  "dynamic_bgp_neighbors",
+                  "status",
+                  "cluster_id",
+                  "local_pref",
+                  "redistribute_route_map",
+                  "redistribute_metric",
+                  "router_id",
+                  "always_compare_med",
+                  "update_group_enable",
+                  "log_neighbor_changes",
+                  "dampening",
+                  "ibgp_distance",
+                  "confederation_id",
+                  "networks_route_maps",
+                  "redistribute_ospf_route_map",
+                  "gr_stale_timer",
+                  "bgp_neighbors",
+                  "bestpath_med_missing_as_worst",
+                  "confederation_peers",
+                  "fast_external_fallover",
+                  "dampening_route_map"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "BGP_Router"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "agg_split_horizon": {
+                    "type": "boolean",
+                    "description": "If enabled, BGP will not advertise the aggregated route back to  the peer, that advertises the same network If disabled, BGP will advertise the aggregated route to the peer  that advertises the same network"
+                  },
+                  "aggregate_addresses": {
+                    "type": "object",
+                    "description": "Reference Resource: [Aggregate_address](#/Aggregate_address)<br>Aggregate addresses keyed by the IP address and mask.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "string": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "always_compare_med": {
+                    "type": "boolean",
+                    "description": "Specifies whether MED should be compared from different neighbors."
+                  },
+                  "asn": {
+                    "type": "integer",
+                    "description": "Reference Resource: [BGP_Router](#/BGP_Router)<br>BGP routers keyed by ASN value."
+                  },
+                  "asnotation": {
+                    "type": "string",
+                    "description": "Specifies the representation of Four-Octet AS Numbers in show commands. 'dotted':       All the ASNs greater than 65535 should be displayed in AA.NN format. 'dotted-plus':  All the ASNs irrespective of value should be displayed in AA.NN format. 'plain-text':   All the ASNs should be displayed in plain-text format.",
+                    "enum": [
+                      "dotted",
+                      "dotted-plus",
+                      "plain-text"
+                    ]
+                  },
+                  "bestpath_as_path_ignore": {
+                    "type": "boolean",
+                    "description": "Specifies whether the AS path length should be ignored when determining the preferred route."
+                  },
+                  "bestpath_as_path_multipath_relax": {
+                    "type": "boolean",
+                    "description": "Specifies whether to consider two or more BGP routes as ecmp routes  when routes AS PATH length is same but AS PATHs are different."
+                  },
+                  "bestpath_compare_routerid": {
+                    "type": "boolean",
+                    "description": "Specifies whether the BGP router IDs should be compared to select the best path."
+                  },
+                  "bestpath_med_confed": {
+                    "type": "boolean",
+                    "description": "Specifies whether the router should consider the MED value when choosing a path from among those advertised by different ASes within a confederation.  All active BGP sessions belonging to this VRF will be restarted when this configuration is changed for it to take effect."
+                  },
+                  "bestpath_med_missing_as_worst": {
+                    "type": "boolean",
+                    "description": "Specifies whether the missing MED value should be treated as 0xFFFFFFFF."
+                  },
+                  "bgp_neighbors": {
+                    "type": "object",
+                    "description": "Reference Resource: [BGP_Neighbor](#/BGP_Neighbor)<br>BGP neighbors keyed by IP/IFNAME or neighbor groups keyed by any string name.",
+                    "properties": {
+                      "string": {
+                        "type": "string",
+                        "description": "Reference resource URI of BGP_Neighbor"
+                      }
+                    }
+                  },
+                  "cluster_id": {
+                    "type": "string",
+                    "description": "Cluster ID of this router. Cluster-id can be a 32-bit integer in a range of 1-4294967295 or a valid IPv4 address. If no cluster-id is configured, router-id will be used.",
+                    "maxLength": 15
+                  },
+                  "confederation_id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Confederation identifier assigned to this router. This is an optional field and when its not configured Confederation identifier is not set for this router.",
+                    "maximum": 4294967295,
+                    "minimum": 1
+                  },
+                  "confederation_peers": {
+                    "type": "array",
+                    "description": "Confederation peers associated with this router.",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "maxItems": 1024
+                  },
+                  "dampening": {
+                    "type": "object",
+                    "description": "Route flap dampening configuration parameters at the router level for all routes. Dampening can be either at the router level for all routes or for selected routes via a route-map. If 'dampening_route_map' is configured, then BGP router level dampening parameters are ignored.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "half_life": {
+                            "type": "integer",
+                            "description": "Amount of time (in minutes) that must elapse to reduce the penalty by one half.",
+                            "maximum": 45,
+                            "minimum": 1
+                          },
+                          "max_suppress_time": {
+                            "type": "integer",
+                            "description": "The longest amount of time (in minutes) that a route can be suppressed.",
+                            "maximum": 255,
+                            "minimum": 1
+                          },
+                          "reuse": {
+                            "type": "integer",
+                            "description": "If the penalty is less than the reuse limit, a suppressed route that is up will no longer be suppressed.",
+                            "maximum": 20000,
+                            "minimum": 1
+                          },
+                          "suppress": {
+                            "type": "integer",
+                            "description": "If the penalty is greater than the suppress limit, the route is suppressed.",
+                            "maximum": 20000,
+                            "minimum": 1
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "dampening_route_map": {
+                    "type": "object",
+                    "description": "Reference Resource: [Route_Map](#/Route_Map)<br>Route-map that specifies the criteria for route-flap dampening Dampening can be either at the router level for all routes or for  selected routes via a route-map. If 'dampening_route_map' is configured, then BGP router level dampening parameters are ignored.",
+                    "properties": {
+                      "ipv4-unicast": {
+                        "type": "string",
+                        "description": "Reference Resource: [Route_Map](#/Route_Map)<br>"
+                      },
+                      "ipv6-unicast": {
+                        "type": "string",
+                        "description": "Reference Resource: [Route_Map](#/Route_Map)<br>"
+                      }
+                    }
+                  },
+                  "deterministic_med": {
+                    "type": "boolean",
+                    "description": "Specifies whether BGP should select the best-MED path among paths advertised from the neighboring AS."
+                  },
+                  "ebgp_distance": {
+                    "type": "integer",
+                    "description": "Administrative distance for ebgp routes.",
+                    "maximum": 255,
+                    "minimum": 1
+                  },
+                  "fast_external_fallover": {
+                    "type": "boolean",
+                    "description": "Enables fast fall-over for directly connected EBGP sessions."
+                  },
+                  "gr_enable": {
+                    "type": "boolean",
+                    "description": "Specifies whether the graceful restart procedures should be performed in the event of peer or router failure."
+                  },
+                  "gr_restart_timer": {
+                    "type": "integer",
+                    "description": "Maximum time in seconds that the BGP Speaker requires to restart and establish BGP session with peers.",
+                    "maximum": 3600,
+                    "minimum": 1
+                  },
+                  "gr_stale_timer": {
+                    "type": "integer",
+                    "description": "The time that the BGP Speaker will keep the peers' routes as stale.",
+                    "maximum": 3600,
+                    "minimum": 1
+                  },
+                  "ibgp_distance": {
+                    "type": "integer",
+                    "description": "Administrative distance for ibgp routes.",
+                    "maximum": 255,
+                    "minimum": 1
+                  },
+                  "local_pref": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Local preference of the routes.",
+                    "maximum": 4294967295,
+                    "minimum": 0
+                  },
+                  "log_neighbor_changes": {
+                    "type": "boolean",
+                    "description": "Enables logging of neighbor status changes."
+                  },
+                  "maxas_limit": {
+                    "type": "integer",
+                    "description": "Limit on the maximum AS numbers allowed in the routes learned from the peers.",
+                    "maximum": 32,
+                    "minimum": 1
+                  },
+                  "maximum_paths": {
+                    "type": "object",
+                    "description": "Number of paths BGP may install into the routing table.",
+                    "properties": {
+                      "all-afs": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Number of paths BGP may install into the routing table."
+                      }
+                    }
+                  },
+                  "networks": {
+                    "type": "object",
+                    "description": "Networks to be announced.",
+                    "properties": {
+                      "string": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "maxItems": 9223372036854776000
+                      }
+                    }
+                  },
+                  "networks_route_maps": {
+                    "type": "object",
+                    "description": "Reference Resource: [Route_Map](#/Route_Map)<br>Route Maps to be applied to the networks.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "string": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "protocol_disable": {
+                    "type": "boolean",
+                    "description": "Disable this BGP instance."
+                  },
+                  "redistribute": {
+                    "type": "object",
+                    "description": "Types of routes that should be redistributed by BGP.",
+                    "properties": {
+                      "string": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "connected",
+                            "local-loopback",
+                            "static",
+                            "ospf"
+                          ]
+                        },
+                        "maxItems": 6
+                      }
+                    }
+                  },
+                  "redistribute_metric": {
+                    "type": "object",
+                    "description": "Types of metric that should be redistributed by BGP.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "ospf": {
+                            "type": "boolean",
+                            "description": "If enabled ospf metric should be redistributed by BGP."
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "redistribute_ospf": {
+                    "type": "object",
+                    "description": "Reference Resource: [OSPF_Router](#/OSPF_Router)<br>OSPF routes that should be redistributed by BGP.",
+                    "properties": {
+                      "string": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "maxItems": 8
+                      }
+                    }
+                  },
+                  "redistribute_ospf_metric": {
+                    "type": "object",
+                    "description": "Reference Resource: [OSPF_Router](#/OSPF_Router)<br>OSPF metric that should be redistributed by BGP MED.",
+                    "properties": {
+                      "string": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "maxItems": 8
+                      }
+                    }
+                  },
+                  "redistribute_ospf_route_map": {
+                    "type": "object",
+                    "description": "Reference Resource: [Route_Map](#/Route_Map)<br>Route Maps to be applied when redistributing routes.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "URI": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "redistribute_route_map": {
+                    "type": "object",
+                    "description": "Reference Resource: [Route_Map](#/Route_Map)<br>Route Maps to be applied when redistributing routes.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "string": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "router_id": {
+                    "type": "string",
+                    "description": "Router ID for the given ASN. If not configured, then highest IP address of all the loopbacks is chosen and if Loopback is also not configured then highest   IP address on any interface is chosen.",
+                    "maxLength": 15
+                  },
+                  "timers": {
+                    "type": "object",
+                    "properties": {
+                      "connect-retry": {
+                        "type": "integer",
+                        "description": "BGP connect-retry time in seconds. ",
+                        "maximum": 65535,
+                        "minimum": 1
+                      },
+                      "holdtime": {
+                        "type": "integer",
+                        "description": "BGP hold time in seconds. ",
+                        "maximum": 65535,
+                        "minimum": 0
+                      },
+                      "keepalive": {
+                        "type": "integer",
+                        "description": "BGP keepalive time in seconds. ",
+                        "maximum": 65535,
+                        "minimum": 0
+                      }
+                    }
+                  },
+                  "trap_enable": {
+                    "type": "boolean",
+                    "description": "Enable SNMP trap generation for BGP related events."
+                  },
+                  "update_group_enable": {
+                    "type": "boolean",
+                    "description": "Enable update-group feature. This is used to optimize the BGP route advertisement process."
+                  }
+                },
+                "required": [
+                  "asn"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    },
+    "/system/vrfs/{VRF.name}/bgp_routers/{BGP_Router.asn}": {
+      "get": {
+        "tags": [
+          "BGP_Router"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "agg_split_horizon": {
+                      "type": "boolean",
+                      "description": "If enabled, BGP will not advertise the aggregated route back to  the peer, that advertises the same network If disabled, BGP will advertise the aggregated route to the peer  that advertises the same network"
+                    },
+                    "aggregate_addresses": {
+                      "type": "object",
+                      "description": "Reference Resource: [Aggregate_address](#/Aggregate_address)<br>Aggregate addresses keyed by the IP address and mask.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "string": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "always_compare_med": {
+                      "type": "boolean",
+                      "description": "Specifies whether MED should be compared from different neighbors."
+                    },
+                    "asn": {
+                      "type": "integer",
+                      "description": "Reference Resource: [BGP_Router](#/BGP_Router)<br>BGP routers keyed by ASN value."
+                    },
+                    "asnotation": {
+                      "type": "string",
+                      "description": "Specifies the representation of Four-Octet AS Numbers in show commands. 'dotted':       All the ASNs greater than 65535 should be displayed in AA.NN format. 'dotted-plus':  All the ASNs irrespective of value should be displayed in AA.NN format. 'plain-text':   All the ASNs should be displayed in plain-text format.",
+                      "enum": [
+                        "dotted",
+                        "dotted-plus",
+                        "plain-text"
+                      ]
+                    },
+                    "bestpath_as_path_ignore": {
+                      "type": "boolean",
+                      "description": "Specifies whether the AS path length should be ignored when determining the preferred route."
+                    },
+                    "bestpath_as_path_multipath_relax": {
+                      "type": "boolean",
+                      "description": "Specifies whether to consider two or more BGP routes as ecmp routes  when routes AS PATH length is same but AS PATHs are different."
+                    },
+                    "bestpath_compare_routerid": {
+                      "type": "boolean",
+                      "description": "Specifies whether the BGP router IDs should be compared to select the best path."
+                    },
+                    "bestpath_med_confed": {
+                      "type": "boolean",
+                      "description": "Specifies whether the router should consider the MED value when choosing a path from among those advertised by different ASes within a confederation.  All active BGP sessions belonging to this VRF will be restarted when this configuration is changed for it to take effect."
+                    },
+                    "bestpath_med_missing_as_worst": {
+                      "type": "boolean",
+                      "description": "Specifies whether the missing MED value should be treated as 0xFFFFFFFF."
+                    },
+                    "bgp_neighbors": {
+                      "type": "object",
+                      "description": "Reference Resource: [BGP_Neighbor](#/BGP_Neighbor)<br>BGP neighbors keyed by IP/IFNAME or neighbor groups keyed by any string name.",
+                      "properties": {
+                        "string": {
+                          "type": "string",
+                          "description": "Reference resource URI of BGP_Neighbor"
+                        }
+                      }
+                    },
+                    "cluster_id": {
+                      "type": "string",
+                      "description": "Cluster ID of this router. Cluster-id can be a 32-bit integer in a range of 1-4294967295 or a valid IPv4 address. If no cluster-id is configured, router-id will be used.",
+                      "maxLength": 15
+                    },
+                    "confederation_id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Confederation identifier assigned to this router. This is an optional field and when its not configured Confederation identifier is not set for this router.",
+                      "maximum": 4294967295,
+                      "minimum": 1
+                    },
+                    "confederation_peers": {
+                      "type": "array",
+                      "description": "Confederation peers associated with this router.",
+                      "items": {
+                        "type": "integer"
+                      },
+                      "maxItems": 1024
+                    },
+                    "dampening": {
+                      "type": "object",
+                      "description": "Route flap dampening configuration parameters at the router level for all routes. Dampening can be either at the router level for all routes or for selected routes via a route-map. If 'dampening_route_map' is configured, then BGP router level dampening parameters are ignored.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "half_life": {
+                              "type": "integer",
+                              "description": "Amount of time (in minutes) that must elapse to reduce the penalty by one half.",
+                              "maximum": 45,
+                              "minimum": 1
+                            },
+                            "max_suppress_time": {
+                              "type": "integer",
+                              "description": "The longest amount of time (in minutes) that a route can be suppressed.",
+                              "maximum": 255,
+                              "minimum": 1
+                            },
+                            "reuse": {
+                              "type": "integer",
+                              "description": "If the penalty is less than the reuse limit, a suppressed route that is up will no longer be suppressed.",
+                              "maximum": 20000,
+                              "minimum": 1
+                            },
+                            "suppress": {
+                              "type": "integer",
+                              "description": "If the penalty is greater than the suppress limit, the route is suppressed.",
+                              "maximum": 20000,
+                              "minimum": 1
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "dampening_route_map": {
+                      "type": "object",
+                      "description": "Reference Resource: [Route_Map](#/Route_Map)<br>Route-map that specifies the criteria for route-flap dampening Dampening can be either at the router level for all routes or for  selected routes via a route-map. If 'dampening_route_map' is configured, then BGP router level dampening parameters are ignored.",
+                      "properties": {
+                        "ipv4-unicast": {
+                          "type": "string",
+                          "description": "Reference Resource: [Route_Map](#/Route_Map)<br>"
+                        },
+                        "ipv6-unicast": {
+                          "type": "string",
+                          "description": "Reference Resource: [Route_Map](#/Route_Map)<br>"
+                        }
+                      }
+                    },
+                    "deterministic_med": {
+                      "type": "boolean",
+                      "description": "Specifies whether BGP should select the best-MED path among paths advertised from the neighboring AS."
+                    },
+                    "dynamic_bgp_neighbors": {
+                      "type": "object",
+                      "description": "Reference Resource: [BGP_Neighbor](#/BGP_Neighbor)<br>Dynamic BGP neighbors keyed by IP.",
+                      "properties": {
+                        "string": {
+                          "type": "string",
+                          "description": "Reference resource URI of BGP_Neighbor"
+                        }
+                      }
+                    },
+                    "ebgp_distance": {
+                      "type": "integer",
+                      "description": "Administrative distance for ebgp routes.",
+                      "maximum": 255,
+                      "minimum": 1
+                    },
+                    "fast_external_fallover": {
+                      "type": "boolean",
+                      "description": "Enables fast fall-over for directly connected EBGP sessions."
+                    },
+                    "gr_enable": {
+                      "type": "boolean",
+                      "description": "Specifies whether the graceful restart procedures should be performed in the event of peer or router failure."
+                    },
+                    "gr_restart_timer": {
+                      "type": "integer",
+                      "description": "Maximum time in seconds that the BGP Speaker requires to restart and establish BGP session with peers.",
+                      "maximum": 3600,
+                      "minimum": 1
+                    },
+                    "gr_stale_timer": {
+                      "type": "integer",
+                      "description": "The time that the BGP Speaker will keep the peers' routes as stale.",
+                      "maximum": 3600,
+                      "minimum": 1
+                    },
+                    "ibgp_distance": {
+                      "type": "integer",
+                      "description": "Administrative distance for ibgp routes.",
+                      "maximum": 255,
+                      "minimum": 1
+                    },
+                    "local_pref": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Local preference of the routes.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "log_neighbor_changes": {
+                      "type": "boolean",
+                      "description": "Enables logging of neighbor status changes."
+                    },
+                    "maxas_limit": {
+                      "type": "integer",
+                      "description": "Limit on the maximum AS numbers allowed in the routes learned from the peers.",
+                      "maximum": 32,
+                      "minimum": 1
+                    },
+                    "maximum_paths": {
+                      "type": "object",
+                      "description": "Number of paths BGP may install into the routing table.",
+                      "properties": {
+                        "all-afs": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of paths BGP may install into the routing table."
+                        }
+                      }
+                    },
+                    "networks": {
+                      "type": "object",
+                      "description": "Networks to be announced.",
+                      "properties": {
+                        "string": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "maxItems": 9223372036854776000
+                        }
+                      }
+                    },
+                    "networks_route_maps": {
+                      "type": "object",
+                      "description": "Reference Resource: [Route_Map](#/Route_Map)<br>Route Maps to be applied to the networks.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "string": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "protocol_disable": {
+                      "type": "boolean",
+                      "description": "Disable this BGP instance."
+                    },
+                    "redistribute": {
+                      "type": "object",
+                      "description": "Types of routes that should be redistributed by BGP.",
+                      "properties": {
+                        "string": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "connected",
+                              "local-loopback",
+                              "static",
+                              "ospf"
+                            ]
+                          },
+                          "maxItems": 6
+                        }
+                      }
+                    },
+                    "redistribute_metric": {
+                      "type": "object",
+                      "description": "Types of metric that should be redistributed by BGP.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "ospf": {
+                              "type": "boolean",
+                              "description": "If enabled ospf metric should be redistributed by BGP."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "redistribute_ospf": {
+                      "type": "object",
+                      "description": "Reference Resource: [OSPF_Router](#/OSPF_Router)<br>OSPF routes that should be redistributed by BGP.",
+                      "properties": {
+                        "string": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "maxItems": 8
+                        }
+                      }
+                    },
+                    "redistribute_ospf_metric": {
+                      "type": "object",
+                      "description": "Reference Resource: [OSPF_Router](#/OSPF_Router)<br>OSPF metric that should be redistributed by BGP MED.",
+                      "properties": {
+                        "string": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "maxItems": 8
+                        }
+                      }
+                    },
+                    "redistribute_ospf_route_map": {
+                      "type": "object",
+                      "description": "Reference Resource: [Route_Map](#/Route_Map)<br>Route Maps to be applied when redistributing routes.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "URI": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "redistribute_route_map": {
+                      "type": "object",
+                      "description": "Reference Resource: [Route_Map](#/Route_Map)<br>Route Maps to be applied when redistributing routes.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "string": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "router_id": {
+                      "type": "string",
+                      "description": "Router ID for the given ASN. If not configured, then highest IP address of all the loopbacks is chosen and if Loopback is also not configured then highest   IP address on any interface is chosen.",
+                      "maxLength": 15
+                    },
+                    "status": {
+                      "type": "object",
+                      "properties": {
+                        "bgp_selected_router_id": {
+                          "type": "string",
+                          "description": "IP address selected to be bgp router-id."
+                        }
+                      }
+                    },
+                    "timers": {
+                      "type": "object",
+                      "properties": {
+                        "connect-retry": {
+                          "type": "integer",
+                          "description": "BGP connect-retry time in seconds. ",
+                          "maximum": 65535,
+                          "minimum": 1
+                        },
+                        "holdtime": {
+                          "type": "integer",
+                          "description": "BGP hold time in seconds. ",
+                          "maximum": 65535,
+                          "minimum": 0
+                        },
+                        "keepalive": {
+                          "type": "integer",
+                          "description": "BGP keepalive time in seconds. ",
+                          "maximum": 65535,
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "trap_enable": {
+                      "type": "boolean",
+                      "description": "Enable SNMP trap generation for BGP related events."
+                    },
+                    "update_group_enable": {
+                      "type": "boolean",
+                      "description": "Enable update-group feature. This is used to optimize the BGP route advertisement process."
+                    }
+                  },
+                  "required": [
+                    "asn"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "BGP_Router.asn",
+            "in": "path",
+            "description": "Reference Resource: [BGP_Router](#/BGP_Router)<br>BGP routers keyed by ASN value.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "asnotation",
+                  "redistribute",
+                  "deterministic_med",
+                  "ebgp_distance",
+                  "bestpath_as_path_ignore",
+                  "bestpath_med_confed",
+                  "gr_restart_timer",
+                  "trap_enable",
+                  "bestpath_as_path_multipath_relax",
+                  "networks",
+                  "redistribute_ospf_metric",
+                  "dynamic_bgp_neighbors",
+                  "status",
+                  "aggregate_addresses",
+                  "redistribute_ospf",
+                  "maxas_limit",
+                  "redistribute_metric",
+                  "cluster_id",
+                  "local_pref",
+                  "redistribute_route_map",
+                  "update_group_enable",
+                  "router_id",
+                  "always_compare_med",
+                  "redistribute_ospf_route_map",
+                  "gr_stale_timer",
+                  "bgp_neighbors",
+                  "log_neighbor_changes",
+                  "dampening",
+                  "ibgp_distance",
+                  "confederation_id",
+                  "networks_route_maps",
+                  "dampening_route_map",
+                  "bestpath_med_missing_as_worst",
+                  "confederation_peers",
+                  "fast_external_fallover",
+                  "agg_split_horizon",
+                  "maximum_paths",
+                  "timers",
+                  "protocol_disable",
+                  "gr_enable",
+                  "bestpath_compare_routerid"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "BGP_Router"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "agg_split_horizon": {
+                    "type": "boolean",
+                    "description": "If enabled, BGP will not advertise the aggregated route back to  the peer, that advertises the same network If disabled, BGP will advertise the aggregated route to the peer  that advertises the same network"
+                  },
+                  "aggregate_addresses": {
+                    "type": "object",
+                    "description": "Reference Resource: [Aggregate_address](#/Aggregate_address)<br>Aggregate addresses keyed by the IP address and mask.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "string": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "always_compare_med": {
+                    "type": "boolean",
+                    "description": "Specifies whether MED should be compared from different neighbors."
+                  },
+                  "asn": {
+                    "type": "integer",
+                    "description": "Reference Resource: [BGP_Router](#/BGP_Router)<br>BGP routers keyed by ASN value."
+                  },
+                  "asnotation": {
+                    "type": "string",
+                    "description": "Specifies the representation of Four-Octet AS Numbers in show commands. 'dotted':       All the ASNs greater than 65535 should be displayed in AA.NN format. 'dotted-plus':  All the ASNs irrespective of value should be displayed in AA.NN format. 'plain-text':   All the ASNs should be displayed in plain-text format.",
+                    "enum": [
+                      "dotted",
+                      "dotted-plus",
+                      "plain-text"
+                    ]
+                  },
+                  "bestpath_as_path_ignore": {
+                    "type": "boolean",
+                    "description": "Specifies whether the AS path length should be ignored when determining the preferred route."
+                  },
+                  "bestpath_as_path_multipath_relax": {
+                    "type": "boolean",
+                    "description": "Specifies whether to consider two or more BGP routes as ecmp routes  when routes AS PATH length is same but AS PATHs are different."
+                  },
+                  "bestpath_compare_routerid": {
+                    "type": "boolean",
+                    "description": "Specifies whether the BGP router IDs should be compared to select the best path."
+                  },
+                  "bestpath_med_confed": {
+                    "type": "boolean",
+                    "description": "Specifies whether the router should consider the MED value when choosing a path from among those advertised by different ASes within a confederation.  All active BGP sessions belonging to this VRF will be restarted when this configuration is changed for it to take effect."
+                  },
+                  "bestpath_med_missing_as_worst": {
+                    "type": "boolean",
+                    "description": "Specifies whether the missing MED value should be treated as 0xFFFFFFFF."
+                  },
+                  "bgp_neighbors": {
+                    "type": "object",
+                    "description": "Reference Resource: [BGP_Neighbor](#/BGP_Neighbor)<br>BGP neighbors keyed by IP/IFNAME or neighbor groups keyed by any string name.",
+                    "properties": {
+                      "string": {
+                        "type": "string",
+                        "description": "Reference resource URI of BGP_Neighbor"
+                      }
+                    }
+                  },
+                  "cluster_id": {
+                    "type": "string",
+                    "description": "Cluster ID of this router. Cluster-id can be a 32-bit integer in a range of 1-4294967295 or a valid IPv4 address. If no cluster-id is configured, router-id will be used.",
+                    "maxLength": 15
+                  },
+                  "confederation_id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Confederation identifier assigned to this router. This is an optional field and when its not configured Confederation identifier is not set for this router.",
+                    "maximum": 4294967295,
+                    "minimum": 1
+                  },
+                  "confederation_peers": {
+                    "type": "array",
+                    "description": "Confederation peers associated with this router.",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "maxItems": 1024
+                  },
+                  "dampening": {
+                    "type": "object",
+                    "description": "Route flap dampening configuration parameters at the router level for all routes. Dampening can be either at the router level for all routes or for selected routes via a route-map. If 'dampening_route_map' is configured, then BGP router level dampening parameters are ignored.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "half_life": {
+                            "type": "integer",
+                            "description": "Amount of time (in minutes) that must elapse to reduce the penalty by one half.",
+                            "maximum": 45,
+                            "minimum": 1
+                          },
+                          "max_suppress_time": {
+                            "type": "integer",
+                            "description": "The longest amount of time (in minutes) that a route can be suppressed.",
+                            "maximum": 255,
+                            "minimum": 1
+                          },
+                          "reuse": {
+                            "type": "integer",
+                            "description": "If the penalty is less than the reuse limit, a suppressed route that is up will no longer be suppressed.",
+                            "maximum": 20000,
+                            "minimum": 1
+                          },
+                          "suppress": {
+                            "type": "integer",
+                            "description": "If the penalty is greater than the suppress limit, the route is suppressed.",
+                            "maximum": 20000,
+                            "minimum": 1
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "dampening_route_map": {
+                    "type": "object",
+                    "description": "Reference Resource: [Route_Map](#/Route_Map)<br>Route-map that specifies the criteria for route-flap dampening Dampening can be either at the router level for all routes or for  selected routes via a route-map. If 'dampening_route_map' is configured, then BGP router level dampening parameters are ignored.",
+                    "properties": {
+                      "ipv4-unicast": {
+                        "type": "string",
+                        "description": "Reference Resource: [Route_Map](#/Route_Map)<br>"
+                      },
+                      "ipv6-unicast": {
+                        "type": "string",
+                        "description": "Reference Resource: [Route_Map](#/Route_Map)<br>"
+                      }
+                    }
+                  },
+                  "deterministic_med": {
+                    "type": "boolean",
+                    "description": "Specifies whether BGP should select the best-MED path among paths advertised from the neighboring AS."
+                  },
+                  "ebgp_distance": {
+                    "type": "integer",
+                    "description": "Administrative distance for ebgp routes.",
+                    "maximum": 255,
+                    "minimum": 1
+                  },
+                  "fast_external_fallover": {
+                    "type": "boolean",
+                    "description": "Enables fast fall-over for directly connected EBGP sessions."
+                  },
+                  "gr_enable": {
+                    "type": "boolean",
+                    "description": "Specifies whether the graceful restart procedures should be performed in the event of peer or router failure."
+                  },
+                  "gr_restart_timer": {
+                    "type": "integer",
+                    "description": "Maximum time in seconds that the BGP Speaker requires to restart and establish BGP session with peers.",
+                    "maximum": 3600,
+                    "minimum": 1
+                  },
+                  "gr_stale_timer": {
+                    "type": "integer",
+                    "description": "The time that the BGP Speaker will keep the peers' routes as stale.",
+                    "maximum": 3600,
+                    "minimum": 1
+                  },
+                  "ibgp_distance": {
+                    "type": "integer",
+                    "description": "Administrative distance for ibgp routes.",
+                    "maximum": 255,
+                    "minimum": 1
+                  },
+                  "local_pref": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Local preference of the routes.",
+                    "maximum": 4294967295,
+                    "minimum": 0
+                  },
+                  "log_neighbor_changes": {
+                    "type": "boolean",
+                    "description": "Enables logging of neighbor status changes."
+                  },
+                  "maxas_limit": {
+                    "type": "integer",
+                    "description": "Limit on the maximum AS numbers allowed in the routes learned from the peers.",
+                    "maximum": 32,
+                    "minimum": 1
+                  },
+                  "maximum_paths": {
+                    "type": "object",
+                    "description": "Number of paths BGP may install into the routing table.",
+                    "properties": {
+                      "all-afs": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Number of paths BGP may install into the routing table."
+                      }
+                    }
+                  },
+                  "networks": {
+                    "type": "object",
+                    "description": "Networks to be announced.",
+                    "properties": {
+                      "string": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "maxItems": 9223372036854776000
+                      }
+                    }
+                  },
+                  "networks_route_maps": {
+                    "type": "object",
+                    "description": "Reference Resource: [Route_Map](#/Route_Map)<br>Route Maps to be applied to the networks.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "string": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "protocol_disable": {
+                    "type": "boolean",
+                    "description": "Disable this BGP instance."
+                  },
+                  "redistribute": {
+                    "type": "object",
+                    "description": "Types of routes that should be redistributed by BGP.",
+                    "properties": {
+                      "string": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "connected",
+                            "local-loopback",
+                            "static",
+                            "ospf"
+                          ]
+                        },
+                        "maxItems": 6
+                      }
+                    }
+                  },
+                  "redistribute_metric": {
+                    "type": "object",
+                    "description": "Types of metric that should be redistributed by BGP.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "ospf": {
+                            "type": "boolean",
+                            "description": "If enabled ospf metric should be redistributed by BGP."
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "redistribute_ospf": {
+                    "type": "object",
+                    "description": "Reference Resource: [OSPF_Router](#/OSPF_Router)<br>OSPF routes that should be redistributed by BGP.",
+                    "properties": {
+                      "string": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "maxItems": 8
+                      }
+                    }
+                  },
+                  "redistribute_ospf_metric": {
+                    "type": "object",
+                    "description": "Reference Resource: [OSPF_Router](#/OSPF_Router)<br>OSPF metric that should be redistributed by BGP MED.",
+                    "properties": {
+                      "string": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "maxItems": 8
+                      }
+                    }
+                  },
+                  "redistribute_ospf_route_map": {
+                    "type": "object",
+                    "description": "Reference Resource: [Route_Map](#/Route_Map)<br>Route Maps to be applied when redistributing routes.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "URI": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "redistribute_route_map": {
+                    "type": "object",
+                    "description": "Reference Resource: [Route_Map](#/Route_Map)<br>Route Maps to be applied when redistributing routes.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "string": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "router_id": {
+                    "type": "string",
+                    "description": "Router ID for the given ASN. If not configured, then highest IP address of all the loopbacks is chosen and if Loopback is also not configured then highest   IP address on any interface is chosen.",
+                    "maxLength": 15
+                  },
+                  "timers": {
+                    "type": "object",
+                    "properties": {
+                      "connect-retry": {
+                        "type": "integer",
+                        "description": "BGP connect-retry time in seconds. ",
+                        "maximum": 65535,
+                        "minimum": 1
+                      },
+                      "holdtime": {
+                        "type": "integer",
+                        "description": "BGP hold time in seconds. ",
+                        "maximum": 65535,
+                        "minimum": 0
+                      },
+                      "keepalive": {
+                        "type": "integer",
+                        "description": "BGP keepalive time in seconds. ",
+                        "maximum": 65535,
+                        "minimum": 0
+                      }
+                    }
+                  },
+                  "trap_enable": {
+                    "type": "boolean",
+                    "description": "Enable SNMP trap generation for BGP related events."
+                  },
+                  "update_group_enable": {
+                    "type": "boolean",
+                    "description": "Enable update-group feature. This is used to optimize the BGP route advertisement process."
+                  }
+                },
+                "required": [
+                  "asn"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "BGP_Router.asn",
+            "in": "path",
+            "description": "Reference Resource: [BGP_Router](#/BGP_Router)<br>BGP routers keyed by ASN value.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "BGP_Router"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "BGP_Router.asn",
+            "in": "path",
+            "description": "Reference Resource: [BGP_Router](#/BGP_Router)<br>BGP routers keyed by ASN value.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "BGP_Router"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "agg_split_horizon": {
+                    "type": "boolean",
+                    "description": "If enabled, BGP will not advertise the aggregated route back to  the peer, that advertises the same network If disabled, BGP will advertise the aggregated route to the peer  that advertises the same network"
+                  },
+                  "aggregate_addresses": {
+                    "type": "object",
+                    "description": "Reference Resource: [Aggregate_address](#/Aggregate_address)<br>Aggregate addresses keyed by the IP address and mask.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "string": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "always_compare_med": {
+                    "type": "boolean",
+                    "description": "Specifies whether MED should be compared from different neighbors."
+                  },
+                  "asn": {
+                    "type": "integer",
+                    "description": "Reference Resource: [BGP_Router](#/BGP_Router)<br>BGP routers keyed by ASN value."
+                  },
+                  "asnotation": {
+                    "type": "string",
+                    "description": "Specifies the representation of Four-Octet AS Numbers in show commands. 'dotted':       All the ASNs greater than 65535 should be displayed in AA.NN format. 'dotted-plus':  All the ASNs irrespective of value should be displayed in AA.NN format. 'plain-text':   All the ASNs should be displayed in plain-text format.",
+                    "enum": [
+                      "dotted",
+                      "dotted-plus",
+                      "plain-text"
+                    ]
+                  },
+                  "bestpath_as_path_ignore": {
+                    "type": "boolean",
+                    "description": "Specifies whether the AS path length should be ignored when determining the preferred route."
+                  },
+                  "bestpath_as_path_multipath_relax": {
+                    "type": "boolean",
+                    "description": "Specifies whether to consider two or more BGP routes as ecmp routes  when routes AS PATH length is same but AS PATHs are different."
+                  },
+                  "bestpath_compare_routerid": {
+                    "type": "boolean",
+                    "description": "Specifies whether the BGP router IDs should be compared to select the best path."
+                  },
+                  "bestpath_med_confed": {
+                    "type": "boolean",
+                    "description": "Specifies whether the router should consider the MED value when choosing a path from among those advertised by different ASes within a confederation.  All active BGP sessions belonging to this VRF will be restarted when this configuration is changed for it to take effect."
+                  },
+                  "bestpath_med_missing_as_worst": {
+                    "type": "boolean",
+                    "description": "Specifies whether the missing MED value should be treated as 0xFFFFFFFF."
+                  },
+                  "bgp_neighbors": {
+                    "type": "object",
+                    "description": "Reference Resource: [BGP_Neighbor](#/BGP_Neighbor)<br>BGP neighbors keyed by IP/IFNAME or neighbor groups keyed by any string name.",
+                    "properties": {
+                      "string": {
+                        "type": "string",
+                        "description": "Reference resource URI of BGP_Neighbor"
+                      }
+                    }
+                  },
+                  "cluster_id": {
+                    "type": "string",
+                    "description": "Cluster ID of this router. Cluster-id can be a 32-bit integer in a range of 1-4294967295 or a valid IPv4 address. If no cluster-id is configured, router-id will be used.",
+                    "maxLength": 15
+                  },
+                  "confederation_id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Confederation identifier assigned to this router. This is an optional field and when its not configured Confederation identifier is not set for this router.",
+                    "maximum": 4294967295,
+                    "minimum": 1
+                  },
+                  "confederation_peers": {
+                    "type": "array",
+                    "description": "Confederation peers associated with this router.",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "maxItems": 1024
+                  },
+                  "dampening": {
+                    "type": "object",
+                    "description": "Route flap dampening configuration parameters at the router level for all routes. Dampening can be either at the router level for all routes or for selected routes via a route-map. If 'dampening_route_map' is configured, then BGP router level dampening parameters are ignored.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "half_life": {
+                            "type": "integer",
+                            "description": "Amount of time (in minutes) that must elapse to reduce the penalty by one half.",
+                            "maximum": 45,
+                            "minimum": 1
+                          },
+                          "max_suppress_time": {
+                            "type": "integer",
+                            "description": "The longest amount of time (in minutes) that a route can be suppressed.",
+                            "maximum": 255,
+                            "minimum": 1
+                          },
+                          "reuse": {
+                            "type": "integer",
+                            "description": "If the penalty is less than the reuse limit, a suppressed route that is up will no longer be suppressed.",
+                            "maximum": 20000,
+                            "minimum": 1
+                          },
+                          "suppress": {
+                            "type": "integer",
+                            "description": "If the penalty is greater than the suppress limit, the route is suppressed.",
+                            "maximum": 20000,
+                            "minimum": 1
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "dampening_route_map": {
+                    "type": "object",
+                    "description": "Reference Resource: [Route_Map](#/Route_Map)<br>Route-map that specifies the criteria for route-flap dampening Dampening can be either at the router level for all routes or for  selected routes via a route-map. If 'dampening_route_map' is configured, then BGP router level dampening parameters are ignored.",
+                    "properties": {
+                      "ipv4-unicast": {
+                        "type": "string",
+                        "description": "Reference Resource: [Route_Map](#/Route_Map)<br>"
+                      },
+                      "ipv6-unicast": {
+                        "type": "string",
+                        "description": "Reference Resource: [Route_Map](#/Route_Map)<br>"
+                      }
+                    }
+                  },
+                  "deterministic_med": {
+                    "type": "boolean",
+                    "description": "Specifies whether BGP should select the best-MED path among paths advertised from the neighboring AS."
+                  },
+                  "ebgp_distance": {
+                    "type": "integer",
+                    "description": "Administrative distance for ebgp routes.",
+                    "maximum": 255,
+                    "minimum": 1
+                  },
+                  "fast_external_fallover": {
+                    "type": "boolean",
+                    "description": "Enables fast fall-over for directly connected EBGP sessions."
+                  },
+                  "gr_enable": {
+                    "type": "boolean",
+                    "description": "Specifies whether the graceful restart procedures should be performed in the event of peer or router failure."
+                  },
+                  "gr_restart_timer": {
+                    "type": "integer",
+                    "description": "Maximum time in seconds that the BGP Speaker requires to restart and establish BGP session with peers.",
+                    "maximum": 3600,
+                    "minimum": 1
+                  },
+                  "gr_stale_timer": {
+                    "type": "integer",
+                    "description": "The time that the BGP Speaker will keep the peers' routes as stale.",
+                    "maximum": 3600,
+                    "minimum": 1
+                  },
+                  "ibgp_distance": {
+                    "type": "integer",
+                    "description": "Administrative distance for ibgp routes.",
+                    "maximum": 255,
+                    "minimum": 1
+                  },
+                  "local_pref": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Local preference of the routes.",
+                    "maximum": 4294967295,
+                    "minimum": 0
+                  },
+                  "log_neighbor_changes": {
+                    "type": "boolean",
+                    "description": "Enables logging of neighbor status changes."
+                  },
+                  "maxas_limit": {
+                    "type": "integer",
+                    "description": "Limit on the maximum AS numbers allowed in the routes learned from the peers.",
+                    "maximum": 32,
+                    "minimum": 1
+                  },
+                  "maximum_paths": {
+                    "type": "object",
+                    "description": "Number of paths BGP may install into the routing table.",
+                    "properties": {
+                      "all-afs": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Number of paths BGP may install into the routing table."
+                      }
+                    }
+                  },
+                  "networks": {
+                    "type": "object",
+                    "description": "Networks to be announced.",
+                    "properties": {
+                      "string": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "maxItems": 9223372036854776000
+                      }
+                    }
+                  },
+                  "networks_route_maps": {
+                    "type": "object",
+                    "description": "Reference Resource: [Route_Map](#/Route_Map)<br>Route Maps to be applied to the networks.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "string": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "protocol_disable": {
+                    "type": "boolean",
+                    "description": "Disable this BGP instance."
+                  },
+                  "redistribute": {
+                    "type": "object",
+                    "description": "Types of routes that should be redistributed by BGP.",
+                    "properties": {
+                      "string": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "connected",
+                            "local-loopback",
+                            "static",
+                            "ospf"
+                          ]
+                        },
+                        "maxItems": 6
+                      }
+                    }
+                  },
+                  "redistribute_metric": {
+                    "type": "object",
+                    "description": "Types of metric that should be redistributed by BGP.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "ospf": {
+                            "type": "boolean",
+                            "description": "If enabled ospf metric should be redistributed by BGP."
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "redistribute_ospf": {
+                    "type": "object",
+                    "description": "Reference Resource: [OSPF_Router](#/OSPF_Router)<br>OSPF routes that should be redistributed by BGP.",
+                    "properties": {
+                      "string": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "maxItems": 8
+                      }
+                    }
+                  },
+                  "redistribute_ospf_metric": {
+                    "type": "object",
+                    "description": "Reference Resource: [OSPF_Router](#/OSPF_Router)<br>OSPF metric that should be redistributed by BGP MED.",
+                    "properties": {
+                      "string": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "maxItems": 8
+                      }
+                    }
+                  },
+                  "redistribute_ospf_route_map": {
+                    "type": "object",
+                    "description": "Reference Resource: [Route_Map](#/Route_Map)<br>Route Maps to be applied when redistributing routes.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "URI": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "redistribute_route_map": {
+                    "type": "object",
+                    "description": "Reference Resource: [Route_Map](#/Route_Map)<br>Route Maps to be applied when redistributing routes.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "string": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "router_id": {
+                    "type": "string",
+                    "description": "Router ID for the given ASN. If not configured, then highest IP address of all the loopbacks is chosen and if Loopback is also not configured then highest   IP address on any interface is chosen.",
+                    "maxLength": 15
+                  },
+                  "timers": {
+                    "type": "object",
+                    "properties": {
+                      "connect-retry": {
+                        "type": "integer",
+                        "description": "BGP connect-retry time in seconds. ",
+                        "maximum": 65535,
+                        "minimum": 1
+                      },
+                      "holdtime": {
+                        "type": "integer",
+                        "description": "BGP hold time in seconds. ",
+                        "maximum": 65535,
+                        "minimum": 0
+                      },
+                      "keepalive": {
+                        "type": "integer",
+                        "description": "BGP keepalive time in seconds. ",
+                        "maximum": 65535,
+                        "minimum": 0
+                      }
+                    }
+                  },
+                  "trap_enable": {
+                    "type": "boolean",
+                    "description": "Enable SNMP trap generation for BGP related events."
+                  },
+                  "update_group_enable": {
+                    "type": "boolean",
+                    "description": "Enable update-group feature. This is used to optimize the BGP route advertisement process."
+                  }
+                },
+                "required": [
+                  "asn"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "BGP_Router.asn",
+            "in": "path",
+            "description": "Reference Resource: [BGP_Router](#/BGP_Router)<br>BGP routers keyed by ASN value.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

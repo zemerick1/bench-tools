@@ -1,0 +1,675 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "YANG_View",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "YANG_View"
+    }
+  ],
+  "paths": {
+    "/system/yang_views": {
+      "get": {
+        "tags": [
+          "YANG_View"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "injected_view": {
+                      "type": "string",
+                      "description": "Injected view content a tarball encoded in Base64 with the required files for having an injected view. In case built-in views this column will remain empty. The max length represents a 256KB script.",
+                      "maxLength": 342000
+                    },
+                    "invalid_reason": {
+                      "type": "string",
+                      "description": "'not_applicable': this column is not applicable to this row. (i.e. no failure) 'bad_file_name': bad filename/path/permissions. 'invalid_type': injected views' type should be declared as injected. 'invalid_YANG': the YANG view contains invalid YANG statements. 'invalid_protocol_buffer': the Protocol Buffer definition contains invalid statements. 'max_amount_of_injected_views_reached': reached the maximum amount of injected views. 'error_uncompressing': Failed uncompressing YANG View. 'error_loading': Failed loading YANG View. 'error_deleting': Failed removing YANG View. 'error_initializing': Failed to initialize the YANG View. 'unsupported_extension': The YANG view contains an unsupported extension. 'unsupported_model_relationship': The YANG view contains an unsupported model relationship.",
+                      "enum": [
+                        "not_applicable",
+                        "bad_file_name",
+                        "invalid_type",
+                        "invalid_YANG",
+                        "invalid_protocol_buffer",
+                        "max_amount_of_injected_views_reached",
+                        "error_uncompressing",
+                        "error_loading",
+                        "error_deleting",
+                        "error_initializing",
+                        "unsupported_extension",
+                        "unsupported_model_relationship"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [YANG_View](#/YANG_View)<br>Specifies the YANG view name.",
+                      "maxLength": 255,
+                      "minLength": 1
+                    },
+                    "revision": {
+                      "type": "string",
+                      "description": "The YANG view revision.",
+                      "maxLength": 255
+                    },
+                    "sha256sum": {
+                      "type": "string",
+                      "description": "sha256sum associated to the injected file.",
+                      "maxLength": 255
+                    },
+                    "state": {
+                      "type": "string",
+                      "description": "'uninitialized': the YANG view has not been yet initialized. 'validating': the YANG view is being validated. 'invalid': the YANG view is invalid. See 'invalid_reason' for more details. 'active': the YANG View is active and can be accessed by external users.",
+                      "enum": [
+                        "uninitialized",
+                        "validating",
+                        "invalid",
+                        "active"
+                      ]
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "'built-in': the view corresponds to a built-in view. 'injected':  the view corresponds to an injected view",
+                      "enum": [
+                        "built-in",
+                        "injected"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "injected_view",
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "revision",
+                  "injected_view",
+                  "name",
+                  "type",
+                  "state",
+                  "invalid_reason",
+                  "sha256sum"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "YANG_View"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "injected_view": {
+                    "type": "string",
+                    "description": "Injected view content a tarball encoded in Base64 with the required files for having an injected view. In case built-in views this column will remain empty. The max length represents a 256KB script.",
+                    "maxLength": 342000
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [YANG_View](#/YANG_View)<br>Specifies the YANG view name.",
+                    "maxLength": 255,
+                    "minLength": 1
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "'built-in': the view corresponds to a built-in view. 'injected':  the view corresponds to an injected view",
+                    "enum": [
+                      "built-in",
+                      "injected"
+                    ]
+                  }
+                },
+                "required": [
+                  "injected_view",
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/system/yang_views/{YANG_View.name}": {
+      "get": {
+        "tags": [
+          "YANG_View"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "injected_view": {
+                      "type": "string",
+                      "description": "Injected view content a tarball encoded in Base64 with the required files for having an injected view. In case built-in views this column will remain empty. The max length represents a 256KB script.",
+                      "maxLength": 342000
+                    },
+                    "invalid_reason": {
+                      "type": "string",
+                      "description": "'not_applicable': this column is not applicable to this row. (i.e. no failure) 'bad_file_name': bad filename/path/permissions. 'invalid_type': injected views' type should be declared as injected. 'invalid_YANG': the YANG view contains invalid YANG statements. 'invalid_protocol_buffer': the Protocol Buffer definition contains invalid statements. 'max_amount_of_injected_views_reached': reached the maximum amount of injected views. 'error_uncompressing': Failed uncompressing YANG View. 'error_loading': Failed loading YANG View. 'error_deleting': Failed removing YANG View. 'error_initializing': Failed to initialize the YANG View. 'unsupported_extension': The YANG view contains an unsupported extension. 'unsupported_model_relationship': The YANG view contains an unsupported model relationship.",
+                      "enum": [
+                        "not_applicable",
+                        "bad_file_name",
+                        "invalid_type",
+                        "invalid_YANG",
+                        "invalid_protocol_buffer",
+                        "max_amount_of_injected_views_reached",
+                        "error_uncompressing",
+                        "error_loading",
+                        "error_deleting",
+                        "error_initializing",
+                        "unsupported_extension",
+                        "unsupported_model_relationship"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [YANG_View](#/YANG_View)<br>Specifies the YANG view name.",
+                      "maxLength": 255,
+                      "minLength": 1
+                    },
+                    "revision": {
+                      "type": "string",
+                      "description": "The YANG view revision.",
+                      "maxLength": 255
+                    },
+                    "sha256sum": {
+                      "type": "string",
+                      "description": "sha256sum associated to the injected file.",
+                      "maxLength": 255
+                    },
+                    "state": {
+                      "type": "string",
+                      "description": "'uninitialized': the YANG view has not been yet initialized. 'validating': the YANG view is being validated. 'invalid': the YANG view is invalid. See 'invalid_reason' for more details. 'active': the YANG View is active and can be accessed by external users.",
+                      "enum": [
+                        "uninitialized",
+                        "validating",
+                        "invalid",
+                        "active"
+                      ]
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "'built-in': the view corresponds to a built-in view. 'injected':  the view corresponds to an injected view",
+                      "enum": [
+                        "built-in",
+                        "injected"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "injected_view",
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "YANG_View.name",
+            "in": "path",
+            "description": "Reference Resource: [YANG_View](#/YANG_View)<br>Specifies the YANG view name.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "name",
+                  "type",
+                  "state",
+                  "invalid_reason",
+                  "sha256sum",
+                  "revision",
+                  "injected_view"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "YANG_View"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "injected_view": {
+                    "type": "string",
+                    "description": "Injected view content a tarball encoded in Base64 with the required files for having an injected view. In case built-in views this column will remain empty. The max length represents a 256KB script.",
+                    "maxLength": 342000
+                  }
+                },
+                "required": [
+                  "injected_view"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "YANG_View.name",
+            "in": "path",
+            "description": "Reference Resource: [YANG_View](#/YANG_View)<br>Specifies the YANG view name.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "YANG_View"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "YANG_View.name",
+            "in": "path",
+            "description": "Reference Resource: [YANG_View](#/YANG_View)<br>Specifies the YANG view name.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "YANG_View"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "injected_view": {
+                    "type": "string",
+                    "description": "Injected view content a tarball encoded in Base64 with the required files for having an injected view. In case built-in views this column will remain empty. The max length represents a 256KB script.",
+                    "maxLength": 342000
+                  }
+                },
+                "required": [
+                  "injected_view"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "YANG_View.name",
+            "in": "path",
+            "description": "Reference Resource: [YANG_View](#/YANG_View)<br>Specifies the YANG view name.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

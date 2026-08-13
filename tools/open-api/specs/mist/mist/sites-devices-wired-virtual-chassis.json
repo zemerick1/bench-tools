@@ -1,0 +1,1829 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Sites Devices - Wired - Virtual Chassis",
+    "version": "2602.1.1"
+  },
+  "servers": [
+    {
+      "description": "Mist Global 01",
+      "url": "https://api.mist.com"
+    },
+    {
+      "description": "Mist Global 02",
+      "url": "https://api.gc1.mist.com"
+    },
+    {
+      "description": "Mist Global 03",
+      "url": "https://api.ac2.mist.com"
+    },
+    {
+      "description": "Mist Global 04",
+      "url": "https://api.gc2.mist.com"
+    },
+    {
+      "description": "Mist Global 05",
+      "url": "https://api.gc4.mist.com"
+    },
+    {
+      "description": "Mist EMEA 01",
+      "url": "https://api.eu.mist.com"
+    },
+    {
+      "description": "Mist EMEA 02",
+      "url": "https://api.gc3.mist.com"
+    },
+    {
+      "description": "Mist EMEA 03",
+      "url": "https://api.ac6.mist.com"
+    },
+    {
+      "description": "Mist EMEA 04",
+      "url": "https://api.gc6.mist.com"
+    },
+    {
+      "description": "Mist APAC 01",
+      "url": "https://api.ac5.mist.com"
+    },
+    {
+      "description": "Mist APAC 02",
+      "url": "https://api.gc5.mist.com"
+    },
+    {
+      "description": "Mist APAC 03",
+      "url": "https://api.gc7.mist.com"
+    }
+  ],
+  "security": [
+    {
+      "apiToken": []
+    },
+    {
+      "basicAuth": []
+    },
+    {
+      "basicAuth": [],
+      "csrfToken": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "API Calls specific to the Juniper Switches Virtual Chassis managed by Mist",
+      "name": "Sites Devices - Wired - Virtual Chassis"
+    }
+  ],
+  "paths": {
+    "/api/v1/sites/{site_id}/devices/{device_id}/set_vc_port_mode": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Change VCP port mode\n\n\nSome switch model allows changing VCP port behaviors, e.g. - use them as regular network ports - change vcp protocol Note, this command will reboot the switch",
+        "operationId": "changeSiteSwitchVcPortMode",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "mode": "network"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/vc_port"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "changeSiteSwitchVcPortMode",
+        "tags": [
+          "Sites Devices - Wired - Virtual Chassis"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/vc": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "get": {
+        "description": "Get VC Status\n\nThe API returns a combined view of the VC status which includes topology and stats_",
+        "operationId": "getSiteDeviceVirtualChassis",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/VirtualChassis"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getSiteDeviceVirtualChassis",
+        "tags": [
+          "Sites Devices - Wired - Virtual Chassis"
+        ]
+      },
+      "put": {
+        "description": "The VC creation and adding member switch API will update the device' s virtual chassis config which is applied after VC is formed to create JUNOS pre-provisioned virtual chassis configuration.\n\n**Note:** Update Device's VC config can achieve similar purpose by directly modifying current virtual_chassis config. However, it cannot fulfill requests to enabling vc_ports on new members that are yet to belong to current VC.\n\n\n## Change to use preprovisioned VC\nTo switch the VC to use preprovisioned VC, enable preprovisioned in virtual_chassis config. Both vc_role master and backup will be matched to routing-engine role in Junos preprovisioned VC config.\n\nIn this config, fpc0 has to be the same as the mac of device_id. Use renumber if you want to replace fpc0 which involves device_id change.\n\n**Notice:** to configure preprovisioned VC, every member of the VC must be in the inventory.\n\n## Add new members\nFor models (e.g. EX4300 and up) having dedicated VC ports, it is easier to add new member switches into a VC by just connecting cables with the dedicated VC ports. Cloud will detect the new members and update the inventory.\n\nFor EX2300 VC, adding new members requires to follow the procedures below:\n1. Powering on the new member switches and ensuring cables are not connected to any VC ports.\n2. Claim or adopt all new member switches under the VC's organization Inventory\n3. Assign all new member switches to the same Site as the VC\n4. Invoke vc command to add switches to the VC.\n5. Connect the cables to the VC ports for these switches\n6. After a while, the Org's Inventory shows that new switches has been added into the VC.\n\n## Removing member switch\nTo remove a member switch from the VC, following the procedures below:\n\n1. Ensuring the VC is connected to the cloud first\n2. Unplug the cable from the VC port of the switch\n3. Waiting for the VC state (vc_state) of this switch is changed to not-present\n4. Invoke update_vc with remove to remove this switch from the VC\n5. The Org's Inventory shows the switch is removed.\n\nPlease notice that member ID 0 (fpc0) cannot be removed. When a VC has two switches left, unplugging the cable may result in the situation that fpc0 becomes a line card (LC). When this situation is happening, please re-plug in the cable, wait for both switches becoming present (show virtual-chassis) and then removing the cable again.\n\n## Renumber a member switch\nWhen a member switch doesn' t work properly and needed to be replaced, the renumber API could be used. The following two types of renumber are supported:\n\n1. Replace a non-fpc0 member switch\n2. Replace fpc0. When fpc0 is replaced, PAPI device config and JUNOS config will be both updated.\n\nFor renumber to work, the following procedures are needed: \n1. Ensuring the VC is connected to the cloud and the state of the member switch to be replaced must be non present. \n2. Adding the new member switch to the VC \n3. Waiting for the VC state (vc_state) of this VC to be updated to API server \n4. Invoke vc with renumber to replace\\ the new member switch from fpc X to\n\n## Perprovision VC members\nBy specifying \"preprovision\" op, you can convert the current VC to pre-provisioned mode, update VC members as well as specify vc_ports when adding new members for device models without dedicated vc ports. Use renumber for fpc0 replacement which involves device_id change.\n\nNote: \n1. vc_ports is used for adding new members and not needed if \n  * the device model has dedicated vc ports, or \n  * no new member is added \n2. New VC members to be added should exist in the same Site as the VC",
+        "operationId": "updateSiteVirtualChassisMember",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "adding-two-new-switches-as-line-cards-into-the-VC": {
+                  "value": {
+                    "members": [
+                      {
+                        "mac": "aff827549235",
+                        "member_id": 2,
+                        "vc_ports": [
+                          "xe-0/1/0",
+                          "xe-0/1/1"
+                        ],
+                        "vc_role": "linecard"
+                      },
+                      {
+                        "mac": "8396cd00777c",
+                        "member_id": 3,
+                        "vc_ports": [
+                          "xe-0/1/0",
+                          "xe-0/1/1"
+                        ],
+                        "vc_role": "linecard"
+                      }
+                    ],
+                    "op": "add"
+                  }
+                },
+                "convert-to-pre-provisioned-VC": {
+                  "value": {
+                    "members": [
+                      {
+                        "mac": "aff827549235",
+                        "member_id": 0,
+                        "vc_ports": [
+                          "xe-0/1/0",
+                          "xe-0/1/1"
+                        ]
+                      },
+                      {
+                        "mac": "8396cd00777c",
+                        "member_id": 1,
+                        "vc_ports": [
+                          "xe-0/1/0",
+                          "xe-0/1/1"
+                        ],
+                        "vc_role": "backup"
+                      }
+                    ],
+                    "op": "preprovision"
+                  }
+                },
+                "removing-two-switches-from-VC": {
+                  "value": {
+                    "members": [
+                      {
+                        "member": 2
+                      },
+                      {
+                        "member": 3
+                      }
+                    ],
+                    "op": "remove"
+                  }
+                },
+                "renumber-member-ID-3-to-member-ID-2": {
+                  "value": {
+                    "member": 3,
+                    "new-member": 2,
+                    "op": "renumber"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/virtual_chassis_update"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "updateSiteVirtualChassisMember",
+        "tags": [
+          "Sites Devices - Wired - Virtual Chassis"
+        ]
+      },
+      "post": {
+        "description": "For models (e.g. EX3400 and up) having dedicated VC ports, it is easier to form a VC by just connecting cables with the dedicated VC ports. Cloud will detect the new VC and update the inventory.  \nIn case that the user would like to choose the dedicated switch as a VC master or for EX2300-C-12P and EX2300-C-12T which doesn't have dedicated VC ports, below are procedures to automate the VC creation:\n1. Power on the switch that is chosen as the VC master first, and then powering on the other member switches.\n2. Claim or adopt all these switches under the same organization's Inventory\n3. Assign these switches into the same Site\n4. Wait for all the switches to be connected to Mist\n5. Invoke vc command on the switch chosen to be the VC master. For EX2300-C-12P, VC ports will be created automatically.\n6. Connect the cables to the VC ports for these switches\n7. Wait for the VC to be formed. The Org's inventory will be updated for the new VC.",
+        "operationId": "createSiteVirtualChassis",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "create-a-VC-with-three-members": {
+                  "value": {
+                    "members": [
+                      {
+                        "mac": "aff827549235",
+                        "vc_ports": [
+                          "xe-0/1/0"
+                        ],
+                        "vc_role": "master"
+                      },
+                      {
+                        "mac": "8396cd006c8c",
+                        "vc_ports": [
+                          "xe-0/1/0",
+                          "xe-0/1/1"
+                        ],
+                        "vc_role": "backup"
+                      },
+                      {
+                        "mac": "8396cd00888c",
+                        "vc_ports": [
+                          "xe-0/1/0"
+                        ],
+                        "vc_role": "linecard"
+                      }
+                    ]
+                  }
+                },
+                "create-a-pre-provisioned-VC-with-three-members": {
+                  "value": {
+                    "members": [
+                      {
+                        "mac": "aff827549235",
+                        "member_id": 0,
+                        "vc_ports": [
+                          "xe-0/1/0",
+                          "xe-0/1/1"
+                        ],
+                        "vc_role": "master"
+                      },
+                      {
+                        "mac": "8396cd006c8c",
+                        "member_id": 1,
+                        "vc_ports": [
+                          "xe-0/1/0",
+                          "xe-0/1/1"
+                        ],
+                        "vc_role": "linecard"
+                      },
+                      {
+                        "mac": "8396cd00888c",
+                        "member_id": 2,
+                        "vc_ports": [
+                          "xe-0/1/0",
+                          "xe-0/1/1"
+                        ],
+                        "vc_role": "backup"
+                      }
+                    ],
+                    "preprovisioned": true
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/virtual_chassis_config"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "createSiteVirtualChassis",
+        "tags": [
+          "Sites Devices - Wired - Virtual Chassis"
+        ]
+      },
+      "delete": {
+        "description": "When all the member switches of VC are removed and only member ID 0 is left, the cloud would detect this situation and automatically changes the single switch to non-VC role.\n\nFor some unexpected cases that the VC is gone and disconnected, the API below could be used to change the state of VC’s switches to be standalone. After it is executed, all the switches will be shown as standalone switches under Inventory.",
+        "operationId": "deleteSiteVirtualChassis",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "deleteSiteVirtualChassis",
+        "tags": [
+          "Sites Devices - Wired - Virtual Chassis"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/vc/convert_to_virtualmac": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Converts an FPC0-based VC to a Virtualmac VC, removing the limitation where the device ID must change whenever FPC0 is renumbered or removed.\n\n\nHTTP400 Error possible reasons:\n  - The device is not an OC device\n  - Virtualmac VC is disabled in the Org Knob settings\n  - The VC is already a Virtualmac VC\n  - The VC is currently disconnected\n  - The device is standalone\n  - A new FPC0 exists with its own device config, causing ambiguity.",
+        "operationId": "convertSiteVirtualChassisToVirtualMac",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "convertSiteVirtualChassisToVirtualMac",
+        "tags": [
+          "Sites Devices - Wired - Virtual Chassis"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/vc/vc_port": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Set VC port",
+        "operationId": "setSiteVcPort",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "delete-VC-port-of-xe-0/1/1-of-member-0-and-member-2": {
+                  "value": {
+                    "members": [
+                      {
+                        "member": 0,
+                        "vc_ports": [
+                          "xe-0/1/1"
+                        ]
+                      },
+                      {
+                        "member": 2,
+                        "vc_ports": [
+                          "xe-0/1/1"
+                        ]
+                      }
+                    ],
+                    "op": "delete"
+                  }
+                },
+                "set-VC-port-of-xe-0/1/1-of-member-0-and-member-2": {
+                  "value": {
+                    "members": [
+                      {
+                        "member": 0,
+                        "vc_ports": [
+                          "xe-0/1/1"
+                        ]
+                      },
+                      {
+                        "member": 2,
+                        "vc_ports": [
+                          "xe-0/1/1"
+                        ]
+                      }
+                    ],
+                    "op": "set"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/virtual_chassis_port"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "setSiteVcPort",
+        "tags": [
+          "Sites Devices - Wired - Virtual Chassis"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "config_vc_port_member": {
+        "additionalProperties": false,
+        "properties": {
+          "member": {
+            "type": "number"
+          },
+          "vc_ports": {
+            "$ref": "#/components/schemas/strings"
+          }
+        },
+        "required": [
+          "member"
+        ],
+        "type": "object"
+      },
+      "cpu_stat": {
+        "additionalProperties": false,
+        "properties": {
+          "idle": {
+            "description": "Percentage of CPU time that is idle",
+            "readOnly": true,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "interrupt": {
+            "description": "Percentage of CPU time being used by interrupts",
+            "readOnly": true,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "load_avg": {
+            "$ref": "#/components/schemas/cpu_stat_load_avg"
+          },
+          "system": {
+            "description": "Percentage of CPU time being used by system processes",
+            "readOnly": true,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "usage": {
+            "description": "CPU usage",
+            "readOnly": true,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "user": {
+            "description": "Percentage of CPU time being used by user processes",
+            "readOnly": true,
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "cpu_stat_load_avg": {
+        "description": "Load averages for the last 1, 5, and 15 minutes",
+        "items": {
+          "type": "number"
+        },
+        "type": "array"
+      },
+      "id": {
+        "description": "Unique ID of the object instance in the Mist Organization",
+        "examples": [
+          "53f10664-3ce8-4c27-b382-0ef66432349f"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "last_seen": {
+        "description": "Last seen timestamp",
+        "examples": [
+          1470417522
+        ],
+        "format": "double",
+        "readOnly": true,
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "memory_stat": {
+        "additionalProperties": false,
+        "description": "Memory usage stat (for virtual chassis, memory usage of master RE)",
+        "properties": {
+          "usage": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "usage"
+        ],
+        "type": "object"
+      },
+      "module_stat_item_errors": {
+        "description": "Used to report all error states the device node is running into. An error should always have `type` and `since` fields, and could have some other fields specific to that type.",
+        "items": {
+          "$ref": "#/components/schemas/module_stat_item_errors_items"
+        },
+        "type": "array"
+      },
+      "module_stat_item_errors_items": {
+        "additionalProperties": false,
+        "properties": {
+          "feature": {
+            "examples": [
+              "Mist-Management"
+            ],
+            "type": "string"
+          },
+          "minimum_version": {
+            "examples": [
+              "128T-6.0.0-1"
+            ],
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "since": {
+            "examples": [
+              1657497600
+            ],
+            "type": "integer"
+          },
+          "type": {
+            "examples": [
+              "FW_UPGRADE_REQUIRED_BY_FEATURE"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "since",
+          "type"
+        ],
+        "type": "object"
+      },
+      "module_stat_item_fans": {
+        "items": {
+          "$ref": "#/components/schemas/module_stat_item_fans_items"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "module_stat_item_fans_items": {
+        "additionalProperties": false,
+        "properties": {
+          "airflow": {
+            "examples": [
+              "out"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "examples": [
+              "Fan 0"
+            ],
+            "type": "string"
+          },
+          "rpm": {
+            "type": "integer"
+          },
+          "status": {
+            "examples": [
+              "ok"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "module_stat_item_pics": {
+        "items": {
+          "$ref": "#/components/schemas/module_stat_item_pics_item"
+        },
+        "type": "array"
+      },
+      "module_stat_item_pics_item": {
+        "additionalProperties": false,
+        "properties": {
+          "index": {
+            "type": "integer"
+          },
+          "model_number": {
+            "type": "string"
+          },
+          "port_groups": {
+            "$ref": "#/components/schemas/module_stat_item_pics_item_port_groups"
+          }
+        },
+        "type": "object"
+      },
+      "module_stat_item_pics_item_port_groups": {
+        "items": {
+          "$ref": "#/components/schemas/module_stat_item_pics_item_port_groups_item"
+        },
+        "type": "array"
+      },
+      "module_stat_item_pics_item_port_groups_item": {
+        "additionalProperties": false,
+        "properties": {
+          "count": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "module_stat_item_poe": {
+        "additionalProperties": false,
+        "properties": {
+          "max_power": {
+            "examples": [
+              250
+            ],
+            "type": "number"
+          },
+          "power_draw": {
+            "examples": [
+              120.3
+            ],
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "module_stat_item_psus": {
+        "items": {
+          "$ref": "#/components/schemas/module_stat_item_psus_item"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "module_stat_item_psus_item": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "examples": [
+              "Power Supply 0"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "examples": [
+              "ok"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "module_stat_item_temperatures": {
+        "items": {
+          "$ref": "#/components/schemas/module_stat_item_temperatures_item"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "module_stat_item_temperatures_item": {
+        "additionalProperties": false,
+        "properties": {
+          "celsius": {
+            "examples": [
+              45
+            ],
+            "type": "number"
+          },
+          "name": {
+            "examples": [
+              "CPU"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "examples": [
+              "ok"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "module_stat_item_vc_links": {
+        "items": {
+          "$ref": "#/components/schemas/module_stat_item_vc_links_item"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "module_stat_item_vc_links_item": {
+        "additionalProperties": false,
+        "properties": {
+          "neighbor_module_idx": {
+            "examples": [
+              1
+            ],
+            "type": "integer"
+          },
+          "neighbor_port_id": {
+            "examples": [
+              "vcp-255/1/0"
+            ],
+            "type": "string"
+          },
+          "port_id": {
+            "examples": [
+              "vcp-255/1/0"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "org_id": {
+        "examples": [
+          "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "response_http400": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http401": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Authentication credentials were not provided."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http403": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "You do not have permission to perform this action."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http404": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http429": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_virtual_chassis_config": {
+        "additionalProperties": false,
+        "properties": {
+          "config_type": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/components/schemas/id"
+          },
+          "locating": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "mac": {
+            "type": "string"
+          },
+          "members": {
+            "$ref": "#/components/schemas/stats_switch_module_stat"
+          },
+          "model": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "num_routing_engines": {
+            "description": "routing-engine count",
+            "examples": [
+              1
+            ],
+            "type": "integer"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/org_id"
+          },
+          "serial": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "site_id": {
+            "$ref": "#/components/schemas/site_id"
+          },
+          "status": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "vc_mac": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "site_id": {
+        "examples": [
+          "441a1214-6928-442a-8e92-e1d34b8ec6a6"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "stats_switch_module_stat": {
+        "items": {
+          "$ref": "#/components/schemas/stats_switch_module_stat_item"
+        },
+        "minItems": 1,
+        "type": "array",
+        "uniqueItems": true
+      },
+      "stats_switch_module_stat_item": {
+        "additionalProperties": false,
+        "properties": {
+          "backup_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "bios_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "boot_partition": {
+            "type": "string"
+          },
+          "cpld_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "cpu_stat": {
+            "$ref": "#/components/schemas/cpu_stat"
+          },
+          "errors": {
+            "$ref": "#/components/schemas/module_stat_item_errors"
+          },
+          "fans": {
+            "$ref": "#/components/schemas/module_stat_item_fans"
+          },
+          "fpc_idx": {
+            "readOnly": true,
+            "type": "integer"
+          },
+          "fpga_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "last_seen": {
+            "$ref": "#/components/schemas/last_seen"
+          },
+          "locating": {
+            "type": "boolean"
+          },
+          "mac": {
+            "examples": [
+              "fc3342123456"
+            ],
+            "type": "string"
+          },
+          "memory_stat": {
+            "$ref": "#/components/schemas/memory_stat"
+          },
+          "model": {
+            "examples": [
+              "EX4300-48P"
+            ],
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "optics_cpld_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "pending_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "pics": {
+            "$ref": "#/components/schemas/module_stat_item_pics"
+          },
+          "poe": {
+            "$ref": "#/components/schemas/module_stat_item_poe"
+          },
+          "poe_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "power_cpld_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "psus": {
+            "$ref": "#/components/schemas/module_stat_item_psus"
+          },
+          "re_fpga_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "recovery_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "serial": {
+            "examples": [
+              "PX8716230021"
+            ],
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "temperatures": {
+            "$ref": "#/components/schemas/module_stat_item_temperatures"
+          },
+          "tmc_fpga_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "type": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "uboot_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "uptime": {
+            "readOnly": true,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "vc_links": {
+            "$ref": "#/components/schemas/module_stat_item_vc_links"
+          },
+          "vc_mode": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "vc_role": {
+            "description": "enum: `master`, `backup`, `linecard`",
+            "examples": [
+              "master"
+            ],
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "vc_state": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "strings": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "vc_port": {
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/vc_port_mode"
+          }
+        },
+        "type": "object"
+      },
+      "vc_port_mode": {
+        "description": "enum: `network`, `vcp-higig`, `vcp-hgoe`",
+        "enum": [
+          "network",
+          "vcp-higig",
+          "vcp-hgoe"
+        ],
+        "type": "string"
+      },
+      "virtual_chassis_config": {
+        "description": "Virtual Chassis",
+        "properties": {
+          "locating": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "members": {
+            "$ref": "#/components/schemas/virtual_chassis_config_members"
+          },
+          "preprovisioned": {
+            "default": false,
+            "description": "To create the Virtual Chassis in Pre-Provisioned mode",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "virtual_chassis_config_member": {
+        "additionalProperties": false,
+        "properties": {
+          "locating": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "mac": {
+            "description": "fpc0, same as the mac of device_id",
+            "type": "string"
+          },
+          "member_id": {
+            "description": "For preprovisionned virtual chassis",
+            "type": "integer"
+          },
+          "vc_ports": {
+            "$ref": "#/components/schemas/strings"
+          },
+          "vc_role": {
+            "$ref": "#/components/schemas/virtual_chassis_config_member_vc_role"
+          }
+        },
+        "required": [
+          "mac",
+          "vc_role"
+        ],
+        "type": "object"
+      },
+      "virtual_chassis_config_member_vc_role": {
+        "description": "enum: `backup`, `linecard`, `master`",
+        "enum": [
+          "backup",
+          "linecard",
+          "master"
+        ],
+        "type": "string"
+      },
+      "virtual_chassis_config_members": {
+        "items": {
+          "$ref": "#/components/schemas/virtual_chassis_config_member"
+        },
+        "type": "array"
+      },
+      "virtual_chassis_member_update": {
+        "additionalProperties": false,
+        "properties": {
+          "mac": {
+            "description": "Required if `op`==`add` or `op`==`preprovision`.",
+            "type": "string"
+          },
+          "member": {
+            "description": "Required if `op`==`remove`",
+            "type": "integer"
+          },
+          "member_id": {
+            "description": "Required if `op`==`preprovision`. Optional if `op`==`add`",
+            "type": "integer"
+          },
+          "vc_ports": {
+            "$ref": "#/components/schemas/virtual_chassis_member_update_vc_ports"
+          },
+          "vc_role": {
+            "$ref": "#/components/schemas/virtual_chassis_member_update_vc_role"
+          }
+        },
+        "type": "object"
+      },
+      "virtual_chassis_member_update_vc_ports": {
+        "description": "Required if `op`==`add` or `op`==`preprovision`",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "virtual_chassis_member_update_vc_role": {
+        "description": "Required if `op`==`add` or `op`==`preprovision`. enum: `backup`, `linecard`, `master`",
+        "enum": [
+          "backup",
+          "linecard",
+          "master"
+        ],
+        "type": "string"
+      },
+      "virtual_chassis_port": {
+        "properties": {
+          "members": {
+            "$ref": "#/components/schemas/virtual_chassis_port_members"
+          },
+          "op": {
+            "$ref": "#/components/schemas/virtual_chassis_port_operation"
+          }
+        },
+        "required": [
+          "op",
+          "members"
+        ],
+        "type": "object"
+      },
+      "virtual_chassis_port_members": {
+        "items": {
+          "$ref": "#/components/schemas/config_vc_port_member"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "virtual_chassis_port_operation": {
+        "description": "enum: `delete`, `set`",
+        "enum": [
+          "delete",
+          "set"
+        ],
+        "minLength": 1,
+        "type": "string"
+      },
+      "virtual_chassis_update": {
+        "description": "Virtual Chassis",
+        "properties": {
+          "member": {
+            "description": "Only if `op`==`renumber`",
+            "type": "integer"
+          },
+          "members": {
+            "$ref": "#/components/schemas/virtual_chassis_update_members"
+          },
+          "new-member": {
+            "description": "Only if `op`==`renumber`",
+            "type": "integer"
+          },
+          "op": {
+            "$ref": "#/components/schemas/virtual_chassis_update_op"
+          }
+        },
+        "type": "object"
+      },
+      "virtual_chassis_update_members": {
+        "items": {
+          "$ref": "#/components/schemas/virtual_chassis_member_update"
+        },
+        "type": "array"
+      },
+      "virtual_chassis_update_op": {
+        "description": "enum: `add`, `preprovision`, `remove`, `renumber`",
+        "enum": [
+          "add",
+          "preprovision",
+          "remove",
+          "renumber"
+        ],
+        "type": "string"
+      }
+    },
+    "responses": {
+      "HTTP400": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          }
+        },
+        "description": "Bad Syntax"
+      },
+      "HTTP401": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          }
+        },
+        "description": "Unauthorized"
+      },
+      "HTTP403": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          }
+        },
+        "description": "Permission Denied"
+      },
+      "HTTP404": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          }
+        },
+        "description": "Not found. The API endpoint doesn’t exist or resource doesn’ t exist"
+      },
+      "HTTP429": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          }
+        },
+        "description": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+      },
+      "OK": {
+        "description": "OK"
+      },
+      "VirtualChassis": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/VirtualChassisExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_virtual_chassis_config"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/VirtualChassisExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_virtual_chassis_config"
+            }
+          }
+        },
+        "description": "Example response"
+      }
+    },
+    "parameters": {
+      "device_id": {
+        "in": "path",
+        "name": "device_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "site_id": {
+        "in": "path",
+        "name": "site_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      }
+    },
+    "examples": {
+      "HTTP400Example": {
+        "value": {
+          "detail": "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+        }
+      },
+      "HTTP401Example": {
+        "value": {
+          "detail": "Authentication credentials were not provided."
+        }
+      },
+      "HTTP403Example": {
+        "value": {
+          "detail": "You do not have permission to perform this action."
+        }
+      },
+      "HTTP429Example": {
+        "value": {
+          "detail": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+        }
+      },
+      "VirtualChassisExample": {
+        "value": {
+          "config_type": "nonprovisioned",
+          "id": "00000000-0000-0000-1000-52d9107af289",
+          "mac": "52d9107af289",
+          "members": [
+            {
+              "boot_partition": "junos",
+              "cpld_version": "6",
+              "cpu_stat": {
+                "idle": 69,
+                "interrupt": 1,
+                "load_avg": [
+                  0.8,
+                  1.09,
+                  1.07
+                ],
+                "system": 11,
+                "user": 19
+              },
+              "fans": [
+                {
+                  "airflow": "out",
+                  "name": "Fan Tray 0 Fan 0",
+                  "rpm": 0,
+                  "status": "ok"
+                },
+                {
+                  "airflow": "out",
+                  "name": "Fan Tray 1 Fan 0",
+                  "rpm": 0,
+                  "status": "ok"
+                }
+              ],
+              "fpc_idx": 0,
+              "mac": "52d9107af289",
+              "memory_stat": {
+                "usage": 42
+              },
+              "model": "EX2300-48P",
+              "pics": [
+                {
+                  "index": 0,
+                  "model_number": "EX2300-48P",
+                  "port_groups": [
+                    {
+                      "count": 48,
+                      "type": "GE"
+                    }
+                  ]
+                },
+                {
+                  "index": 1,
+                  "model_number": "EX2300-48P",
+                  "port_groups": [
+                    {
+                      "count": 4,
+                      "type": "SFP/SFP+"
+                    }
+                  ]
+                }
+              ],
+              "poe": {
+                "max_power": 750,
+                "power_draw": 40.4,
+                "status": "AT_MODE"
+              },
+              "poe_version": "2.1.1.19.3 (type1)",
+              "psus": [
+                {
+                  "name": "Power Supply 0",
+                  "status": "ok"
+                }
+              ],
+              "recovery_version": "21.4R3-S4.18",
+              "serial": "JW0000000000",
+              "temperatures": [
+                {
+                  "celsius": 33,
+                  "name": "CPU Sensor",
+                  "status": "ok"
+                },
+                {
+                  "celsius": 29,
+                  "name": "PSU Sensor",
+                  "status": "ok"
+                }
+              ],
+              "type": "fpc",
+              "uboot_version": "U-Boot 2016.01-rc1 (Nov 11 2016 - 14:26:00 -0800)  1.3.2",
+              "uptime": 27636720,
+              "vc_links": [
+                {
+                  "neighbor_module_idx": 1,
+                  "neighbor_port_id": "vcp-1/1/0",
+                  "port_id": "vcp-0/1/0"
+                }
+              ],
+              "vc_mode": "HiGiG",
+              "vc_role": "master",
+              "vc_state": "present",
+              "version": "21.4R3-S4.18"
+            },
+            {
+              "boot_partition": "junos",
+              "cpld_version": "6",
+              "cpu_stat": {
+                "idle": 76,
+                "interrupt": 0,
+                "load_avg": [
+                  0.96,
+                  0.87,
+                  0.76
+                ],
+                "system": 6,
+                "user": 17
+              },
+              "fans": [
+                {
+                  "airflow": "out",
+                  "name": "Fan Tray 0 Fan 0",
+                  "rpm": 0,
+                  "status": "ok"
+                },
+                {
+                  "airflow": "out",
+                  "name": "Fan Tray 1 Fan 0",
+                  "rpm": 0,
+                  "status": "ok"
+                }
+              ],
+              "fpc_idx": 1,
+              "mac": "d0dd4991652d",
+              "memory_stat": {
+                "usage": 18
+              },
+              "model": "EX2300-48P",
+              "pics": [
+                {
+                  "index": 0,
+                  "model_number": "EX2300-48P",
+                  "port_groups": [
+                    {
+                      "count": 48,
+                      "type": "GE"
+                    }
+                  ]
+                },
+                {
+                  "index": 1,
+                  "model_number": "EX2300-48P",
+                  "port_groups": [
+                    {
+                      "count": 4,
+                      "type": "SFP/SFP+"
+                    }
+                  ]
+                }
+              ],
+              "poe": {
+                "max_power": 750,
+                "power_draw": 21.2,
+                "status": "AT_MODE"
+              },
+              "poe_version": "2.1.1.19.3 (type1)",
+              "psus": [
+                {
+                  "name": "Power Supply 0",
+                  "status": "ok"
+                }
+              ],
+              "recovery_version": "21.4R3-S4.18",
+              "serial": "JW3619300922",
+              "temperatures": [
+                {
+                  "celsius": 32,
+                  "name": "CPU Sensor",
+                  "status": "ok"
+                },
+                {
+                  "celsius": 29,
+                  "name": "PSU Sensor",
+                  "status": "ok"
+                }
+              ],
+              "type": "fpc",
+              "uboot_version": "U-Boot 2016.01-rc1 (Nov 11 2016 - 14:26:00 -0800)  1.3.2",
+              "uptime": 27636720,
+              "vc_links": [
+                {
+                  "neighbor_module_idx": 0,
+                  "neighbor_port_id": "vcp-0/1/0",
+                  "port_id": "vcp-1/1/0"
+                }
+              ],
+              "vc_mode": "HiGiG",
+              "vc_role": "backup",
+              "vc_state": "present",
+              "version": "21.4R3-S4.18"
+            }
+          ],
+          "model": "EX2300-48P",
+          "num_routing_engines": 1,
+          "org_id": "1e9a61a9-bc42-42ca-bf67-1ad87443d9b8",
+          "serial": "JW3619300157",
+          "site_id": "ab0aca7a-d45c-469b-b3bb-4fe240642d0b",
+          "status": "connected",
+          "type": "switch",
+          "vc_mac": "52d9107af289"
+        }
+      }
+    },
+    "securitySchemes": {
+      "apiToken": {
+        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey",
+        "x-scalar-secret-token": "Token YOUR_API_TOKEN"
+      },
+      "basicAuth": {
+        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
+        "scheme": "basic",
+        "type": "http"
+      },
+      "csrfToken": {
+        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "in": "header",
+        "name": "X-CSRFToken",
+        "type": "apiKey"
+      }
+    }
+  }
+}

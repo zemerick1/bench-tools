@@ -1,0 +1,2159 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Utilities Common",
+    "version": "2602.1.1"
+  },
+  "servers": [
+    {
+      "description": "Mist Global 01",
+      "url": "https://api.mist.com"
+    },
+    {
+      "description": "Mist Global 02",
+      "url": "https://api.gc1.mist.com"
+    },
+    {
+      "description": "Mist Global 03",
+      "url": "https://api.ac2.mist.com"
+    },
+    {
+      "description": "Mist Global 04",
+      "url": "https://api.gc2.mist.com"
+    },
+    {
+      "description": "Mist Global 05",
+      "url": "https://api.gc4.mist.com"
+    },
+    {
+      "description": "Mist EMEA 01",
+      "url": "https://api.eu.mist.com"
+    },
+    {
+      "description": "Mist EMEA 02",
+      "url": "https://api.gc3.mist.com"
+    },
+    {
+      "description": "Mist EMEA 03",
+      "url": "https://api.ac6.mist.com"
+    },
+    {
+      "description": "Mist EMEA 04",
+      "url": "https://api.gc6.mist.com"
+    },
+    {
+      "description": "Mist APAC 01",
+      "url": "https://api.ac5.mist.com"
+    },
+    {
+      "description": "Mist APAC 02",
+      "url": "https://api.gc5.mist.com"
+    },
+    {
+      "description": "Mist APAC 03",
+      "url": "https://api.gc7.mist.com"
+    }
+  ],
+  "security": [
+    {
+      "apiToken": []
+    },
+    {
+      "basicAuth": []
+    },
+    {
+      "basicAuth": [],
+      "csrfToken": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "API Calls to use Devices Troubleshooting tools.\n\n\nSome API Calls can be used with any type of devices (Access Points, Switches and Gateways), and some others may be limited to some types of devices (e.g. \"Junos Only\")",
+      "name": "Utilities Common"
+    }
+  ],
+  "paths": {
+    "/api/v1/sites/{site_id}/devices/restart": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        }
+      ],
+      "post": {
+        "description": "Note that only the devices that are connected will be restarted.",
+        "operationId": "restartSiteMultipleDevices",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "device_ids": [
+                      "00000000-0000-0000-1000-5c5b35584a6f",
+                      "00000000-0000-0000-1000-5c5b350ea3b3"
+                    ]
+                  }
+                },
+                "Example2": {
+                  "value": {
+                    "device_ids": [
+                      "421f6eca-6276-4893-bfeb-53cbbbba6f02"
+                    ],
+                    "node": "node0"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/utils_devices_restart_multi"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "restartSiteMultipleDevices",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/arp": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "ARP can be performed on the Device. The output will be available through websocket. As there can be multiple command issued against the same AP at the same time and the output all goes through the same websocket stream, session is introduced for demux.\n\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n##### Example output from ws stream\n```json\n{ \n \"event\": \"data\", \n \"channel\": \"/sites/4ac1dcf4-9d8b-7211-65c4-057819f0862b/devices/00000000-0000-0000-1000-5c5b350e0060/cmd\", \n \"data\": { \n   \"session\": \"session_id\", \n   \"raw\": \n   \"Output\": \"\\tMAC\\t\\tDEV\\tVLAN\\tRx Packets\\t\\t Rx Bytes\\t\\tTx Packets\\t\\t Tx Bytes\\tFlows\\tIdle sec\\n-----------------------------------------------------------------------------------------------------------------------\"\n  } \n}\n```",
+        "operationId": "arpFromDevice",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "node": "node0"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/ha_cluster_node"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/WebsocketSession"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "arpFromDevice",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/bounce_port": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Port Bounce can be performed from Switch/Gateway.\n\n **Note:** Ports starting with vme, ae, irb, and HA control ports (for SSR only) are not supported\n\nThe output will be available through websocket. As there can be multiple command issued against the same AP at the same time and the output all goes through the same websocket stream, session is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n##### Example output from ws stream\n```json\n{\n    \"event\": \"data\",\n    \"channel\": \"/sites/4ac1dcf4-9d8b-7211-65c4-057819f0862b/devices/00000000-0000-0000-1000-5c5b350e0060/cmd\",\n    \"data\": {\n        \"session\": \"session_id\",\n        \"raw\": \"Port bounce complete.\"\n    }\n}\n```",
+        "operationId": "bounceDevicePort",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "ports": [
+                      "ge-0/0/0",
+                      "ge-0/0/1"
+                    ]
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/utils_bounce_port"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "bounceDevicePort",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/clear_mac_table": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Clear MAC Table from the Device.\n\nThe output will be available through websocket. As there can be multiple command issued against the same device at the same time and the output all goes through the same websocket stream, `session` is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n",
+        "operationId": "clearSiteDeviceMacTable",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/utils_mac_table"
+              }
+            }
+          },
+          "description": "All attributes are optional"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/WebsocketSession"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "clearSiteDeviceMacTable",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/clear_policy_hit_count": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Clear application policy hit counts for all the policies",
+        "operationId": "clearSiteDevicePolicyHitCount",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/WebsocketSessionWithUrl"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "clearSiteDevicePolicyHitCount",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/config_cmd": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "get": {
+        "description": "Get Config CLI Commands\nFor a brown-field switch deployment where we adopted the switch through Adoption Command, we do not wipe out / overwrite the existing config automatically. Instead, we generate CLI commands that we would have generated. The user can inspect, modify, and incorporate this into their existing config manually.\n\nOnce they feel comfortable about the config we generate, they can enable allow_mist_config where we will take full control of their config like a claimed switch",
+        "operationId": "getSiteDeviceConfigCmd",
+        "parameters": [
+          {
+            "description": "Make output cmds sorted (for better readability) or not.",
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DeviceConfigCmd"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getSiteDeviceConfigCmd",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/locate": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "### Access Points\nLocate an Access Point by blinking it's LED.\nIt is a persisted state that has to be stopped by calling Stop Locating API\n\n### Switches\nLocate a Switch by blinking all port LEDs. \nBy default, request is sent to `master` switch and LEDs will keep flashing for 5 minutes.\nIn case of virtual chassis (VC) the desired member mac has to be passed in the request payload. \nAt anypoint, only one VC member can be requested to flash the LED. \nTo stop LED flashing before the duration ends /unlocate API request can be made. \nIf /unlocate API is not called LED will continue to flash on device for the given duration. \nDefault duration is 5 minutes and 120 minutes is the maximum.",
+        "operationId": "startSiteLocateDevice",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/locate_switch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "startSiteLocateDevice",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/monitor_traffic": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Monitor traffic on switches and SRX.\n  * JUNOS uses cmd \"monitor interface <port>\" to monitor traffic on particular <port>\n  * JUNOS uses cmd \"monitor interface traffic\" to monitor traffic on all ports",
+        "operationId": "monitorSiteDeviceTraffic",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/utils_monitor_traffic"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/WebsocketSessionWithUrl"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "monitorSiteDeviceTraffic",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/ping": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Ping from AP, Switch and SSR\n\nPing can be performed from the Device. The output will be available through websocket. As there can be multiple command issued against the same AP at the same time and the output all goes through the same websocket stream, session is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n##### Example output from ws stream\n```json\n{\n    \"event\": \"data\",\n    \"channel\": \"/sites/4ac1dcf4-9d8b-7211-65c4-057819f0862b/devices/00000000-0000-0000-1000-5c5b350e0060/cmd\",\n    \"data\": {\n        \"session\": \"session_id\",\n        \"raw\": \"64 bytes from 23.211.0.110: seq=8 ttl=58 time=12.323 ms\\n\"\n    }\n}\n```",
+        "operationId": "pingFromDevice",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "count": 10,
+                    "host": "1.1.1.1"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/utils_ping"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/WebsocketSession"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "pingFromDevice",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/readopt": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "For the octerm devices, the device ID must come from fpc0. However, for a VC, the users may change the original fpc0 from CLI. To fix the issue, the readopt API could be used to trigger the readopt process so the device would get the correct device ID to connect the cloud.",
+        "operationId": "readoptSiteOctermDevice",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "readoptSiteOctermDevice",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/release_dhcp_leases": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Releases an active DHCP lease.",
+        "operationId": "releaseSiteDeviceDhcpLease",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "port_id": "ge-0/0/1.10"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/utils_release_dhcp_leases"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "description": "Parameter `port ` absent"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "releaseSiteDeviceDhcpLease",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/reprovision": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "To force one device to reprovision itself again.",
+        "operationId": "reprovisionSiteOctermDevice",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "readoptSiteOctermDevice",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/request_ztp_password": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "In the case where something happens during/after ZTP, the root-password is modified (required for ZTP to set up outbound-ssh) but the user-defined password config has not be configured. This API can be used to retrieve the temporary password.",
+        "operationId": "getSiteDeviceZtpPassword",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Example": {
+                    "value": {
+                      "root_password": "REDACTED"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/root_password_string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getSiteDeviceZtpPassword",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/restart": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Restart / Reboot a device",
+        "operationId": "restartSiteDevice",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/utils_devices_restart"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "restartSiteDevice",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/shell": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Create Shell Session",
+        "operationId": "createSiteDeviceShellSession",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/shell_node"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/WebsocketSessionWithUrl"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "createSiteDeviceShellSession",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/show_arp": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Get ARP Table from the Device.\n\nThe output will be available through websocket. As there can be multiple command issued against the same device at the same time and the output all goes through the same websocket stream, `session` is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n",
+        "operationId": "showSiteDeviceArpTable",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/utils_show_arp"
+              }
+            }
+          },
+          "description": "All attributes are optional"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/WebsocketSession"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "showSiteDeviceArpTable",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/show_bgp_summary": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Get BGP Summary from SSR, SRX and Switch.\n\n\nThe output will be available through websocket. As there can be multiple command issued against the same device at the same time and the output all goes through the same websocket stream, `session` is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n\n}\n```\n\n##### Example output from ws stream\n```\nTue 2024-04-23 16:36:06 UTC\nRetrieving bgp entries...\nBGP table version is 354, local router ID is 10.224.8.16, vrf id 0\nDefault local pref 100, local AS 65000\nStatus codes:  s suppressed, d damped, h history, * valid, > best, = multipath,\n              i internal, r RIB_failure, S Stale, R Removed\nNexthop codes: @NNN nexthop's vrf id, < announce-nh-self\nOrigin codes:  i - IGP, e - EGP, ? - incomplete\nRPKI validation codes: V valid, I invalid, N Not found\n\n  Network                                      Next Hop                                  Metric LocPrf Weight Path\n*> 161.161.161.0/24\n```\"",
+        "operationId": "showSiteDeviceBgpSummary",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/utils_show_bgp_summary"
+              }
+            }
+          },
+          "description": "All attributes are optional"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/WebsocketSession"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "showSiteDeviceBgpSummary",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/show_dhcp_leases": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Shows DHCP leases",
+        "operationId": "showSiteDeviceDhcpLeases",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/utils_show_dhcp_leases"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/WebsocketSession"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "showSiteDeviceDhcpLeases",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/show_dot1x": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Get Dot1X Table from the Device.\n\nThe output will be available through websocket. As there can be multiple command issued against the same device at the same time and the output all goes through the same websocket stream, `session` is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n",
+        "operationId": "showSiteDeviceDot1xTable",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/utils_show_dot1x"
+              }
+            }
+          },
+          "description": "All attributes are optional"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/WebsocketSession"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "showSiteDeviceDot1xTable",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/show_evpn_database": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Get EVPN Database from the Device. The output will be available through websocket.",
+        "operationId": "showSiteDeviceEvpnDatabase",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/utils_show_evpn_database"
+              }
+            }
+          },
+          "description": "All attributes are optional"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/WebsocketSession"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "showSiteDeviceEvpnDatabase",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/show_forwarding_table": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Get forwarding table from the Device. The output will be available through websocket. As there can be multiple command issued against the same device at the same time and the output all goes through the same websocket stream, `session` is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n\n##### Example output from ws stream\n```\nMon 2024-05-20 16:47:30 UTC Retrieving fib entries… Entry Count: 3268 Capacity:    22668 ==================== ====== ======= ================== ===== ====================== =========== =========== ====== IP Prefix            Port   Proto   Tenant             VRF   Service                Next Hops   Vector      Cost ==================== ====== ======= ================== ===== ====================== =========== =========== ====== 0.0.0.0/0               0   None    Old_Mgmt           -     internet-wan_and_lte   1-2.0       broadband      1 1-4.0       lte           10 branch1-Kiosk      -     internet-wan_and_lte   1-2.0       broadband      1 1-4.0       lte           10 branch1-MGT        -     internet-wan_and_lte   1-2.0       broadband      1 1-4.0       lte           10 3.1.1.0/24              0   None    Old_Mgmt           -     internet-wan_and_lte   1-2.0       broadband      1 1-4.0       lte           10 branch1-Kiosk      -     internet-wan_and_lte   1-2.0       broadband      1 1-4.0       lte           10 branch1-MGT        -     internet-wan_and_lte   1-2.0       broadband      1 1-4.0       lte           10\n\n```\n",
+        "operationId": "showSiteDeviceForwardingTable",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/utils_show_forwarding_table"
+              }
+            }
+          },
+          "description": "All attributes are optional"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/WebsocketSession"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "showSiteDeviceForwardingTable",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/show_mac_table": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Get MAC Table from the Device.\n\nThe output will be available through websocket. As there can be multiple command issued against the same device at the same time and the output all goes through the same websocket stream, `session` is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n",
+        "operationId": "showSiteDeviceMacTable",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/utils_mac_table"
+              }
+            }
+          },
+          "description": "All attributes are optional"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/WebsocketSession"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "showSiteDeviceMacTable",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/support": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Support / Upload device support files\n\n#### Info Param\n| Name | Type | Description |\n| --- | --- | --- |\n| process | string | Upload 1 file with output of show system processes extensive |\n| outbound-ssh | string | Upload 1 file that concatenates all /var/log/outbound-ssh.log* files |\n| messages | string | Upload 1 to 10 /var/log/messages* files |\n| core-dumps | string | Upload all core dump files, if any |\n| full | string | Upload 1 file with output of request support information, 1 file that concatenates all /var/log/outbound-ssh.log files, all core dump files, the 3 most recent /var/log/messages files, and Mist agent logs (for Junos devices running the Mist agent) |\n| var-logs | string | Upload all non-empty files in the /var/log/ directory |\n| jma-logs | string | Upload Mist agent logs (for Junos devices running the Mist agent only) |\n\"",
+        "operationId": "uploadSiteDeviceSupportFile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "info": "full"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/utils_send_support_logs"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "description": "Device not online"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "uploadSiteDeviceSupportFile",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/traceroute": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Traceroute can be performed from the Device.\n\nThe output will be available through websocket. As there can be multiple command issued against the same Device at the same time and the output all goes through the same websocket stream, session is introduced for demux.\n\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}```\n\n\n\n#### Example output from ws stream\n\n```json\n{  \n  \"channel\": \"/sites/d6fb4f96-xxxx-xxxx-xxxx-xxxxxxxxxxxx/devices/00000000-0000-0000-1000-xxxxxxxxxxxx/cmd\",\n  \"event\": \"data\",\n  \"data\": {\n    \"session\": \"9106e908-74dc-4a4f-9050-9c2adcaf44a5\",\n    \"raw\": \"Running traceroute...\\ntraceroute to 8.8.8.8, 64 hops max\\n 0  192.168.1.1 1 ms  192.168.1.1 1 ms  192.168.1.1 1 ms\\n 1  80.10.236.81 2 ms  80.10.236.81 4 ms  80.10.236.81 2 ms\\n 2  193.253.80.250 3 ms  193.253.80.250 2 ms  193.253.80.250 2 ms\\n 3  193.252.159.41 2 ms  193.252.159.41 1 ms  193.252.159.41 3 ms\\n\"\n  }\n}\n```\n\"",
+        "operationId": "tracerouteFromDevice",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "host": "string",
+                    "port": 33434,
+                    "protocol": "udp"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/utils_traceroute"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/WebsocketSession"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "tracerouteFromDevice",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/unlocate": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Stop Locate a Device",
+        "operationId": "stopSiteLocateDevice",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "stopSiteLocateDevice",
+        "tags": [
+          "Utilities Common"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ha_cluster_node": {
+        "properties": {
+          "node": {
+            "$ref": "#/components/schemas/ha_cluster_node_enum"
+          }
+        },
+        "type": "object"
+      },
+      "ha_cluster_node_enum": {
+        "description": "only for HA. enum: `node0`, `node1`",
+        "enum": [
+          "node0",
+          "node1"
+        ],
+        "type": "string"
+      },
+      "locate_switch": {
+        "properties": {
+          "duration": {
+            "default": 5,
+            "description": "Minutes the leds should keep flashing",
+            "maximum": 120,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "mac": {
+            "description": "For virtual chassis, the MAC of the member",
+            "examples": [
+              "f01c2d4ff760"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_device_config_cli": {
+        "additionalProperties": false,
+        "properties": {
+          "cli": {
+            "$ref": "#/components/schemas/strings"
+          }
+        },
+        "required": [
+          "cli"
+        ],
+        "type": "object"
+      },
+      "response_http400": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http401": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Authentication credentials were not provided."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http403": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "You do not have permission to perform this action."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http404": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http429": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "root_password_string": {
+        "additionalProperties": false,
+        "properties": {
+          "root_password": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "root_password"
+        ],
+        "type": "object"
+      },
+      "shell_node": {
+        "properties": {
+          "node": {
+            "$ref": "#/components/schemas/ha_cluster_node_enum"
+          }
+        },
+        "type": "object"
+      },
+      "strings": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "utils_bounce_port": {
+        "properties": {
+          "ports": {
+            "$ref": "#/components/schemas/utils_bounce_port_ports"
+          }
+        },
+        "type": "object"
+      },
+      "utils_bounce_port_ports": {
+        "description": "List of ports to bounce",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "utils_devices_restart": {
+        "properties": {
+          "member": {
+            "description": "Optional for VC member",
+            "maximum": 9,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "node": {
+            "$ref": "#/components/schemas/utils_devices_restart_node"
+          }
+        },
+        "type": "object"
+      },
+      "utils_devices_restart_multi": {
+        "properties": {
+          "device_ids": {
+            "$ref": "#/components/schemas/utils_devices_restart_multi_device_ids"
+          },
+          "node": {
+            "description": "only for SSR: if node is not present, both nodes are restarted. For other devices: node should not be present",
+            "type": "string"
+          }
+        },
+        "required": [
+          "device_ids"
+        ],
+        "type": "object"
+      },
+      "utils_devices_restart_multi_device_ids": {
+        "items": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "utils_devices_restart_node": {
+        "description": "only for SRX/SSR: if node is not present, both nodes are restarted. For other devices: node should not be present",
+        "enum": [
+          "node0",
+          "node1"
+        ],
+        "type": "string"
+      },
+      "utils_mac_table": {
+        "properties": {
+          "mac_address": {
+            "examples": [
+              "f8c1165c6400"
+            ],
+            "type": "string"
+          },
+          "port_id": {
+            "examples": [
+              "ge-0/0/0.0"
+            ],
+            "type": "string"
+          },
+          "vlan_id": {
+            "examples": [
+              "ge-0/0/0.0"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "utils_monitor_traffic": {
+        "properties": {
+          "port": {
+            "description": "Port name, if no port input is provided then all ports will be monitored",
+            "examples": [
+              "ge-0/0/1"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "utils_ping": {
+        "properties": {
+          "count": {
+            "default": 10,
+            "type": "integer"
+          },
+          "egress_interface": {
+            "description": "Interface through which packet needs to egress",
+            "type": "string"
+          },
+          "host": {
+            "examples": [
+              "1.1.1.1"
+            ],
+            "format": "ipv4",
+            "type": "string"
+          },
+          "node": {
+            "$ref": "#/components/schemas/ha_cluster_node_enum"
+          },
+          "size": {
+            "default": 56,
+            "maximum": 65535,
+            "minimum": 56,
+            "type": "integer"
+          },
+          "use_ipv6": {
+            "default": false,
+            "type": "boolean"
+          },
+          "vrf": {
+            "description": "VRF/Routing instance through which the packet needs to be sent",
+            "type": "string"
+          }
+        },
+        "required": [
+          "host"
+        ],
+        "type": "object"
+      },
+      "utils_release_dhcp_leases": {
+        "description": "Note: \n  * valid combinations for Junos: \n    * `port_id` \n    * `macs` + `network`\n  * valid combinations for SSR: \n    * `port_id` \n    * `macs` + `network`\n    * `port_id` + `network`\n    * `network`\n  * if network or port_id is specified and macs is empty, it means all clients under network or port_id",
+        "properties": {
+          "mac": {
+            "$ref": "#/components/schemas/utils_release_dhcp_leases_mac"
+          },
+          "network": {
+            "description": "The network for the leases IPs to be released",
+            "examples": [
+              "guest"
+            ],
+            "type": "string"
+          },
+          "node": {
+            "$ref": "#/components/schemas/ha_cluster_node_enum"
+          },
+          "port_id": {
+            "description": "The network interface on which to release the current DHCP release",
+            "examples": [
+              "ge-0/0/1.10"
+            ],
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "port_id"
+        ],
+        "type": "object"
+      },
+      "utils_release_dhcp_leases_mac": {
+        "description": "A list of client macs to be released",
+        "examples": [
+          [
+            "90ec77aabbcc",
+            "90ec77aabbdd"
+          ]
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "utils_send_support_logs": {
+        "properties": {
+          "info": {
+            "$ref": "#/components/schemas/utils_send_support_logs_info"
+          },
+          "node": {
+            "description": "optional: for SSR, if node is not present, both nodes support files are uploaded",
+            "type": "string"
+          },
+          "num_messages_files": {
+            "default": 1,
+            "description": "optional: number of most recent messages files to upload.",
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "utils_send_support_logs_info": {
+        "default": "full",
+        "description": "Optional, enum: \n    * `code-dumps`: Upload all core dump files, if any found\n    * `full`: Upload 1 file with output of `request support information`, 1 file that concatenates all `/var/log/outbound-ssh.log*` files, all core dump files, the 5 most recent `/var/log/messages*` files, and Mist agent logs\n    * `messages`: Upload 1 to 10 `/var/log/messages*` files\n    * `outbound-ssh`: Upload 1 file that concatenates all `/var/log/outbound-ssh.log*` files\n    * `process`: Upload 1 file with output of show `system processes extensive``\n    * `var-logs`: Upload all non-empty files in the `/var/log/` directory",
+        "enum": [
+          "code-dumps",
+          "full",
+          "messages",
+          "outbound-ssh",
+          "process",
+          "var-logs"
+        ],
+        "type": "string"
+      },
+      "utils_show_arp": {
+        "properties": {
+          "duration": {
+            "default": 0,
+            "description": "Duration in sec for which refresh is enabled. Should be set only if interval is configured to non-zero value.",
+            "maximum": 300,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "interval": {
+            "default": 0,
+            "description": "Rate at which output will refresh",
+            "maximum": 10,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "ip": {
+            "description": "IP Address",
+            "examples": [
+              "192.168.30.7"
+            ],
+            "type": "string"
+          },
+          "port_id": {
+            "description": "Device Port ID",
+            "examples": [
+              "ge-0/0/0.0"
+            ],
+            "type": "string"
+          },
+          "vrf": {
+            "description": "VRF Name",
+            "examples": [
+              "guest"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "utils_show_bgp_summary": {
+        "properties": {
+          "node": {
+            "$ref": "#/components/schemas/ha_cluster_node_enum"
+          }
+        },
+        "type": "object"
+      },
+      "utils_show_dhcp_leases": {
+        "properties": {
+          "network": {
+            "description": "DHCP network for the leases, returns full table if not specified",
+            "examples": [
+              "guest"
+            ],
+            "type": "string"
+          },
+          "node": {
+            "$ref": "#/components/schemas/ha_cluster_node_enum"
+          }
+        },
+        "required": [
+          "network"
+        ],
+        "type": "object"
+      },
+      "utils_show_dot1x": {
+        "properties": {
+          "duration": {
+            "default": 0,
+            "description": "Duration in sec for which refresh is enabled. Should be set only if interval is configured to non-zero value.",
+            "maximum": 300,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "interval": {
+            "default": 0,
+            "description": "Rate at which output will refresh",
+            "maximum": 10,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "port_id": {
+            "description": "Device Port ID",
+            "examples": [
+              "ge-0/0/0.0"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "utils_show_evpn_database": {
+        "properties": {
+          "duration": {
+            "default": 0,
+            "description": "Duration in sec for which refresh is enabled. Should be set only if interval is configured to non-zero value.",
+            "maximum": 300,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "interval": {
+            "default": 0,
+            "description": "Rate at which output will refresh",
+            "maximum": 10,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "mac": {
+            "description": "Client mac filter",
+            "examples": [
+              "f8c1165c6400"
+            ],
+            "type": "string"
+          },
+          "port_id": {
+            "description": "Interface name",
+            "examples": [
+              "ge-0/0/0.0"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "utils_show_forwarding_table": {
+        "properties": {
+          "node": {
+            "$ref": "#/components/schemas/ha_cluster_node_enum"
+          },
+          "prefix": {
+            "description": "IP Prefix",
+            "examples": [
+              "3.1.1.0/24"
+            ],
+            "type": "string"
+          },
+          "service_ip": {
+            "description": "Only supported with SSR",
+            "examples": [
+              "3.1.1.10"
+            ],
+            "type": "string"
+          },
+          "service_name": {
+            "description": "Only supported with SSR",
+            "examples": [
+              "internet-wan_and_lte"
+            ],
+            "type": "string"
+          },
+          "service_port": {
+            "description": "Only supported with SSR",
+            "examples": [
+              32768
+            ],
+            "type": "integer"
+          },
+          "service_protocol": {
+            "description": "Only supported with SSR",
+            "examples": [
+              "udp"
+            ],
+            "type": "string"
+          },
+          "service_tenant": {
+            "description": "Only supported with SSR",
+            "examples": [
+              "branch1-wifi-mgt"
+            ],
+            "type": "string"
+          },
+          "vrf": {
+            "description": "VRF Name",
+            "examples": [
+              "guest"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "utils_traceroute": {
+        "properties": {
+          "host": {
+            "description": "Host name",
+            "type": "string"
+          },
+          "network": {
+            "default": "internal",
+            "description": "For SSR, optional, the source to initiate traceroute from",
+            "type": "string"
+          },
+          "node": {
+            "$ref": "#/components/schemas/ha_cluster_node_enum"
+          },
+          "port": {
+            "default": 33434,
+            "description": "When `protocol`==`udp`, not supported in SSR. The udp port to use",
+            "type": "integer"
+          },
+          "protocol": {
+            "$ref": "#/components/schemas/utils_traceroute_protocol"
+          },
+          "timeout": {
+            "default": 60,
+            "description": "Not supported in SSR. Maximum time in seconds to wait for the response",
+            "type": "integer"
+          },
+          "use_ipv6": {
+            "default": false,
+            "type": "boolean"
+          },
+          "vrf": {
+            "description": "For SRX, optional, the source to initiate traceroute from. by default, master VRF/RI is assumed",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "utils_traceroute_protocol": {
+        "default": "udp",
+        "description": "enum: `icmp` (Only supported by AP/MxEdge), `udp`",
+        "enum": [
+          "icmp",
+          "udp"
+        ],
+        "type": "string"
+      },
+      "websocket_session": {
+        "additionalProperties": false,
+        "properties": {
+          "session": {
+            "examples": [
+              "19e73828-937f-05e6-f709-e29efdb0a82b"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "session"
+        ],
+        "type": "object"
+      },
+      "websocket_session_with_url": {
+        "additionalProperties": false,
+        "properties": {
+          "session": {
+            "examples": [
+              "19e73828-937f-05e6-f709-e29efdb0a82b"
+            ],
+            "type": "string"
+          },
+          "url": {
+            "examples": [
+              "wss://api-ws.mist.com/ssh?jwt=xxxx"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "session",
+          "url"
+        ],
+        "type": "object"
+      }
+    },
+    "responses": {
+      "DeviceConfigCmd": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/DeviceConfigCmdExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_device_config_cli"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/DeviceConfigCmdExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_device_config_cli"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "HTTP400": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          }
+        },
+        "description": "Bad Syntax"
+      },
+      "HTTP401": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          }
+        },
+        "description": "Unauthorized"
+      },
+      "HTTP403": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          }
+        },
+        "description": "Permission Denied"
+      },
+      "HTTP404": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          }
+        },
+        "description": "Not found. The API endpoint doesn’t exist or resource doesn’ t exist"
+      },
+      "HTTP429": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          }
+        },
+        "description": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+      },
+      "OK": {
+        "description": "OK"
+      },
+      "WebsocketSession": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/websocket_session"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/websocket_session"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "WebsocketSessionWithUrl": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/websocket_session_with_url"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/websocket_session_with_url"
+            }
+          }
+        },
+        "description": "OK"
+      }
+    },
+    "parameters": {
+      "device_id": {
+        "in": "path",
+        "name": "device_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "site_id": {
+        "in": "path",
+        "name": "site_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      }
+    },
+    "examples": {
+      "DeviceConfigCmdExample": {
+        "value": {
+          "cli": [
+            "set system hostname corp-a135"
+          ]
+        }
+      },
+      "HTTP400Example": {
+        "value": {
+          "detail": "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+        }
+      },
+      "HTTP401Example": {
+        "value": {
+          "detail": "Authentication credentials were not provided."
+        }
+      },
+      "HTTP403Example": {
+        "value": {
+          "detail": "You do not have permission to perform this action."
+        }
+      },
+      "HTTP429Example": {
+        "value": {
+          "detail": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+        }
+      }
+    },
+    "securitySchemes": {
+      "apiToken": {
+        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey",
+        "x-scalar-secret-token": "Token YOUR_API_TOKEN"
+      },
+      "basicAuth": {
+        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
+        "scheme": "basic",
+        "type": "http"
+      },
+      "csrfToken": {
+        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "in": "header",
+        "name": "X-CSRFToken",
+        "type": "apiKey"
+      }
+    }
+  }
+}

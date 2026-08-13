@@ -1,0 +1,652 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "QoS",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "QoS"
+    }
+  ],
+  "paths": {
+    "/system/qos": {
+      "get": {
+        "tags": [
+          "QoS"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "hw_default": {
+                      "type": "boolean",
+                      "description": "When true, this row signifies the hardware default schedule profile.  Default schedule profile is \"Strict Priority\" when any of the following occur:  +No row in this table has hw_default true +More than one row in this table has hw_default true +Any [Queue](#/Queue) rows referenced do not have their hw_default true"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [QoS](#/QoS)<br>There must be a user-defined name of the schedule profile.",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "queues": {
+                      "type": "object",
+                      "description": "Reference Resource: [Queue](#/Queue)<br>Schedule parameters for individual queues.  Queues are numbered in *priority order*, with zero being the lowest priority. The maximum number of queues is hardware dependent.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "description": "Reference resource URI of Queue"
+                        }
+                      }
+                    },
+                    "vsx_sync": {
+                      "type": "array",
+                      "description": "Controls which attributes should be synchronized between VSX peers. 'all_attributes_and_dependents': the entire schedule profile, including its entries, should be synchronized.",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "all_attributes_and_dependents"
+                        ]
+                      },
+                      "maxItems": 9223372036854776000
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "name",
+                  "queues",
+                  "hw_default",
+                  "vsx_sync"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "QoS"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "hw_default": {
+                    "type": "boolean",
+                    "description": "When true, this row signifies the hardware default schedule profile.  Default schedule profile is \"Strict Priority\" when any of the following occur:  +No row in this table has hw_default true +More than one row in this table has hw_default true +Any [Queue](#/Queue) rows referenced do not have their hw_default true"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [QoS](#/QoS)<br>There must be a user-defined name of the schedule profile.",
+                    "maxLength": 64,
+                    "minLength": 1
+                  },
+                  "queues": {
+                    "type": "object",
+                    "description": "Reference Resource: [Queue](#/Queue)<br>Schedule parameters for individual queues.  Queues are numbered in *priority order*, with zero being the lowest priority. The maximum number of queues is hardware dependent.",
+                    "properties": {
+                      "integer": {
+                        "type": "string",
+                        "description": "Reference resource URI of Queue"
+                      }
+                    }
+                  },
+                  "vsx_sync": {
+                    "type": "array",
+                    "description": "Controls which attributes should be synchronized between VSX peers. 'all_attributes_and_dependents': the entire schedule profile, including its entries, should be synchronized.",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "all_attributes_and_dependents"
+                      ]
+                    },
+                    "maxItems": 9223372036854776000
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/system/qos/{QoS.name}": {
+      "get": {
+        "tags": [
+          "QoS"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "hw_default": {
+                      "type": "boolean",
+                      "description": "When true, this row signifies the hardware default schedule profile.  Default schedule profile is \"Strict Priority\" when any of the following occur:  +No row in this table has hw_default true +More than one row in this table has hw_default true +Any [Queue](#/Queue) rows referenced do not have their hw_default true"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [QoS](#/QoS)<br>There must be a user-defined name of the schedule profile.",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "queues": {
+                      "type": "object",
+                      "description": "Reference Resource: [Queue](#/Queue)<br>Schedule parameters for individual queues.  Queues are numbered in *priority order*, with zero being the lowest priority. The maximum number of queues is hardware dependent.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "description": "Reference resource URI of Queue"
+                        }
+                      }
+                    },
+                    "vsx_sync": {
+                      "type": "array",
+                      "description": "Controls which attributes should be synchronized between VSX peers. 'all_attributes_and_dependents': the entire schedule profile, including its entries, should be synchronized.",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "all_attributes_and_dependents"
+                        ]
+                      },
+                      "maxItems": 9223372036854776000
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "QoS.name",
+            "in": "path",
+            "description": "Reference Resource: [QoS](#/QoS)<br>There must be a user-defined name of the schedule profile.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "name",
+                  "queues",
+                  "hw_default",
+                  "vsx_sync"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "QoS"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "queues": {
+                    "type": "object",
+                    "description": "Reference Resource: [Queue](#/Queue)<br>Schedule parameters for individual queues.  Queues are numbered in *priority order*, with zero being the lowest priority. The maximum number of queues is hardware dependent.",
+                    "properties": {
+                      "integer": {
+                        "type": "string",
+                        "description": "Reference resource URI of Queue"
+                      }
+                    }
+                  },
+                  "vsx_sync": {
+                    "type": "array",
+                    "description": "Controls which attributes should be synchronized between VSX peers. 'all_attributes_and_dependents': the entire schedule profile, including its entries, should be synchronized.",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "all_attributes_and_dependents"
+                      ]
+                    },
+                    "maxItems": 9223372036854776000
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "QoS.name",
+            "in": "path",
+            "description": "Reference Resource: [QoS](#/QoS)<br>There must be a user-defined name of the schedule profile.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "QoS"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "QoS.name",
+            "in": "path",
+            "description": "Reference Resource: [QoS](#/QoS)<br>There must be a user-defined name of the schedule profile.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "QoS"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "queues": {
+                    "type": "object",
+                    "description": "Reference Resource: [Queue](#/Queue)<br>Schedule parameters for individual queues.  Queues are numbered in *priority order*, with zero being the lowest priority. The maximum number of queues is hardware dependent.",
+                    "properties": {
+                      "integer": {
+                        "type": "string",
+                        "description": "Reference resource URI of Queue"
+                      }
+                    }
+                  },
+                  "vsx_sync": {
+                    "type": "array",
+                    "description": "Controls which attributes should be synchronized between VSX peers. 'all_attributes_and_dependents': the entire schedule profile, including its entries, should be synchronized.",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "all_attributes_and_dependents"
+                      ]
+                    },
+                    "maxItems": 9223372036854776000
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "QoS.name",
+            "in": "path",
+            "description": "Reference Resource: [QoS](#/QoS)<br>There must be a user-defined name of the schedule profile.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

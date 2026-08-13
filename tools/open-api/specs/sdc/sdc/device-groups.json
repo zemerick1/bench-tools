@@ -1,0 +1,1168 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Device Groups",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.sdcloud.juniperclouds.net/",
+      "variables": {}
+    }
+  ],
+  "security": [
+    {
+      "OauthKeyAuth": []
+    },
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Device Groups",
+      "description": ""
+    }
+  ],
+  "paths": {
+    "/api/v1/device_groups": {
+      "get": {
+        "tags": [
+          "Device Groups"
+        ],
+        "summary": "ListDeviceGroups",
+        "description": "Retrieve a paginated list of device groups with optional filtering and sorting.",
+        "operationId": "ListDeviceGroups",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Starting index for pagination (zero-based). If not provided, the default is 0.",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Maximum number of results to return per page. If not provided, the default is 2000.",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "default": 50
+            }
+          },
+          {
+            "name": "sortby",
+            "in": "query",
+            "description": "Field to sort the results by.\nExample: name(ascending).",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "description": "Specific fields to include in the response (for partial responses). \nExample: fields=uuid && fields=name.",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "description": "Filter conditions to apply to the results. \nExample: filters = ((name contains sometext) and (uuid eq dummy-id)).",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "obj_uuids",
+            "in": "query",
+            "description": "List of specific object UUIDs to retrieve. \nExample:  obj_uuids=uuid1 && obj_uuids=uuid2.",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "When set to true, only returns the total count of matching resources without the actual resources.",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ListDeviceGroupsV1Response"
+                    },
+                    {
+                      "description": "ListDeviceGroupsV1Response represents the response containing a list of device groups.\nIt also includes metadata such as the total count of device groups matching the query.",
+                      "example": {
+                        "items": [
+                          {
+                            "uuid": "string",
+                            "name": "string",
+                            "description": "string",
+                            "devices": [
+                              {
+                                "device_name": "string",
+                                "device_uuid": "string",
+                                "device_status": "string"
+                              }
+                            ]
+                          }
+                        ],
+                        "count": 10
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "items": [
+                    {
+                      "uuid": "string",
+                      "name": "string",
+                      "description": "string",
+                      "devices": [
+                        {
+                          "device_name": "string",
+                          "device_uuid": "string",
+                          "device_status": "string"
+                        }
+                      ]
+                    }
+                  ],
+                  "count": 10
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters. The request could not be understood or was missing required parameters.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required. The request requires valid user authentication credentials.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden. The client does not have access rights to the content.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found. The requested resource could not be found.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded. Too many requests have been made in a given amount of time.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal processing error. An unexpected error occurred on the server.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "Device Groups"
+        ],
+        "summary": "CreateDeviceGroup",
+        "description": "Create a new device group. Validates the device group data and creates a new device group in the system.",
+        "operationId": "CreateDeviceGroup",
+        "parameters": [],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateDeviceGroupV1Request"
+                  },
+                  {
+                    "example": {
+                      "uuid": "string",
+                      "name": "string",
+                      "description": "string",
+                      "devices": [
+                        {
+                          "device_name": "string",
+                          "device_uuid": "string",
+                          "device_status": "string"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "example": {
+                "uuid": "string",
+                "name": "string",
+                "description": "string",
+                "devices": [
+                  {
+                    "device_name": "string",
+                    "device_uuid": "string",
+                    "device_status": "string"
+                  }
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/CreateDeviceGroupV1Response"
+                    },
+                    {
+                      "description": "CreateDeviceGroupV1Response represents the response after creating a device group.\nIt contains the UUID of the created device group and a result message.",
+                      "example": {
+                        "uuid": "string",
+                        "name": "string",
+                        "description": "string",
+                        "devices": [
+                          {
+                            "device_name": "string",
+                            "device_uuid": "string",
+                            "device_status": "string"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "uuid": "string",
+                  "name": "string",
+                  "description": "string",
+                  "devices": [
+                    {
+                      "device_name": "string",
+                      "device_uuid": "string",
+                      "device_status": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters. The request could not be understood or was missing required parameters.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required. The request requires valid user authentication credentials.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden. The client does not have access rights to the content.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found. The requested resource could not be found.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded. Too many requests have been made in a given amount of time.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal processing error. An unexpected error occurred on the server.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/v1/device_groups/{uuid}": {
+      "get": {
+        "tags": [
+          "Device Groups"
+        ],
+        "summary": "GetDeviceGroup",
+        "description": "Retrieve a single device group by its UUID.",
+        "operationId": "GetDeviceGroup",
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "description": "The unique identifier of the device group to retrieve.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/GetDeviceGroupV1Response"
+                    },
+                    {
+                      "description": "GetDeviceGroupV1Response represents the response containing a single device group's information.\nIt includes the essential details of the requested device group.",
+                      "example": {
+                        "uuid": "string",
+                        "name": "string",
+                        "description": "string",
+                        "devices": [
+                          {
+                            "device_name": "string",
+                            "device_uuid": "string",
+                            "device_status": "string"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "uuid": "string",
+                  "name": "string",
+                  "description": "string",
+                  "devices": [
+                    {
+                      "device_name": "string",
+                      "device_uuid": "string",
+                      "device_status": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters. The request could not be understood or was missing required parameters.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required. The request requires valid user authentication credentials.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden. The client does not have access rights to the content.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found. The requested resource could not be found.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded. Too many requests have been made in a given amount of time.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal processing error. An unexpected error occurred on the server.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "Device Groups"
+        ],
+        "summary": "UpdateDeviceGroup",
+        "description": "Update an existing device group. Modifies the device group information including name, description, and associated devices.",
+        "operationId": "UpdateDeviceGroup",
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "description": "The unique identifier for the device group.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/UpdateDeviceGroupV1Request"
+                  },
+                  {
+                    "example": {
+                      "uuid": "string",
+                      "name": "string",
+                      "description": "string",
+                      "devices": [
+                        {
+                          "device_name": "string",
+                          "device_uuid": "string",
+                          "device_status": "string"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "example": {
+                "uuid": "string",
+                "name": "string",
+                "description": "string",
+                "devices": [
+                  {
+                    "device_name": "string",
+                    "device_uuid": "string",
+                    "device_status": "string"
+                  }
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/UpdateDeviceGroupV1Response"
+                    },
+                    {
+                      "description": "UpdateDeviceGroupV1Response represents the response after updating a device group.\nIt contains the UUID of the updated device group and a result message.",
+                      "example": {
+                        "uuid": "string",
+                        "name": "string",
+                        "description": "string",
+                        "devices": [
+                          {
+                            "device_name": "string",
+                            "device_uuid": "string",
+                            "device_status": "string"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "uuid": "string",
+                  "name": "string",
+                  "description": "string",
+                  "devices": [
+                    {
+                      "device_name": "string",
+                      "device_uuid": "string",
+                      "device_status": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters. The request could not be understood or was missing required parameters.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required. The request requires valid user authentication credentials.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden. The client does not have access rights to the content.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found. The requested resource could not be found.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded. Too many requests have been made in a given amount of time.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal processing error. An unexpected error occurred on the server.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "Device Groups"
+        ],
+        "summary": "DeleteDeviceGroup",
+        "description": "Delete one or more device groups by their UUIDs. Removes the specified device groups from the system.",
+        "operationId": "DeleteDeviceGroup",
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "description": "The unique identifier of the device group to delete.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/iamCreateUserRPCResponse"
+                    },
+                    {
+                      "description": "DeleteDeviceGroupsV1Response represents the response after deleting device group.\nIt contains the status and a message about the delete operation.",
+                      "example": {
+                        "uuid": "string"
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "uuid": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters. The request could not be understood or was missing required parameters.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required. The request requires valid user authentication credentials.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden. The client does not have access rights to the content.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found. The requested resource could not be found.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded. Too many requests have been made in a given amount of time.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal processing error. An unexpected error occurred on the server.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/runtimeError"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateDeviceGroupV1Request": {
+        "title": "CreateDeviceGroupV1Request",
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "description": "The unique identifier for the device group.",
+            "readOnly": true
+          },
+          "name": {
+            "pattern": "^[\\-_\\.\\w\\s]+$",
+            "type": "string",
+            "description": "The name of the device group."
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the device group."
+          },
+          "devices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeviceReference"
+            },
+            "description": "List of devices associated with the device group."
+          }
+        },
+        "description": "CreateDeviceGroupV1Request represents a request to create a new device group.\nIt contains the device group details to be created."
+      },
+      "CreateDeviceGroupV1Response": {
+        "title": "CreateDeviceGroupV1Response",
+        "required": [
+          "uuid",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "description": "The unique identifier for the device group.",
+            "readOnly": true
+          },
+          "name": {
+            "pattern": "^[\\-_\\.\\w\\s]+$",
+            "type": "string",
+            "description": "The name of the device group."
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the device group."
+          },
+          "devices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeviceReference"
+            },
+            "description": "List of devices associated with the device group."
+          }
+        },
+        "description": "CreateDeviceGroupV1Response represents the response after creating a device group.\nIt contains the UUID of the created device group and a result message."
+      },
+      "DeviceGroup": {
+        "title": "DeviceGroup",
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "description": "The unique identifier for the device group.",
+            "readOnly": true
+          },
+          "name": {
+            "pattern": "^[\\-_\\.\\w\\s]+$",
+            "type": "string",
+            "description": "The name of the device group."
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the device group."
+          },
+          "devices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeviceReference"
+            },
+            "description": "List of devices associated with the device group."
+          }
+        }
+      },
+      "DeviceReference": {
+        "title": "DeviceReference",
+        "required": [
+          "device_uuid"
+        ],
+        "type": "object",
+        "properties": {
+          "device_name": {
+            "type": "string",
+            "description": "The name of the device. This field is optional; when creating a device group, device_name does not need to be provided in the payload.",
+            "readOnly": true
+          },
+          "device_uuid": {
+            "type": "string",
+            "description": "The unique identifier of the device."
+          },
+          "device_status": {
+            "type": "string",
+            "description": "The status of the device. This field is optional; when creating a device group, device_status does not need to be provided in the payload.\nPossible values:\n  - DISCOVERY_NOT_INITIATED: Discovery process has not started.\n  - ZTP_NOT_INITIATED: Zero Touch Provisioning has not started.\n  - DISCOVERY_FAILED: Device discovery failed.\n  - DEVICE_DETECTED: Device has been detected.\n  - DISCOVERY_IN_PROGRESS: Discovery is currently in progress.\n  - MANAGED: Device is managed by the system.\n  - UNMANAGED: Device is not managed by the system.\n  - MAINTENANCE: Device is in maintenance mode.\n  - SALVAGE: Device is in salvage state.\n  - SYNC_PENDING: Device synchronization is pending.\n  - MISCONFIGURED: Device is misconfigured.",
+            "readOnly": true
+          }
+        },
+        "description": "DeviceReference represents a reference to a device within a device group.\nIt contains minimal identifying information about the device."
+      },
+      "GetDeviceGroupV1Response": {
+        "title": "GetDeviceGroupV1Response",
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "description": "The unique identifier for the device group.",
+            "readOnly": true
+          },
+          "name": {
+            "pattern": "^[\\-_\\.\\w\\s]+$",
+            "type": "string",
+            "description": "The name of the device group."
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the device group."
+          },
+          "devices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeviceReference"
+            },
+            "description": "List of devices associated with the device group."
+          }
+        },
+        "description": "GetDeviceGroupV1Response represents the response containing a single device group's information.\nIt includes the essential details of the requested device group."
+      },
+      "ListDeviceGroupsV1Response": {
+        "title": "ListDeviceGroupsV1Response",
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeviceGroup"
+            },
+            "description": "Items represents list of external-facing device group model"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total count of device groups matching the query.",
+            "format": "int32"
+          }
+        },
+        "description": "ListDeviceGroupsV1Response represents the response containing a list of device groups.\nIt also includes metadata such as the total count of device groups matching the query."
+      },
+      "UpdateDeviceGroupV1Request": {
+        "title": "UpdateDeviceGroupV1Request",
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "description": "The unique identifier for the device group.",
+            "readOnly": true
+          },
+          "name": {
+            "pattern": "^[\\-_\\.\\w\\s]+$",
+            "type": "string",
+            "description": "The name of the device group."
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the device group."
+          },
+          "devices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeviceReference"
+            },
+            "description": "List of devices associated with the device group."
+          }
+        },
+        "description": "UpdateDeviceGroupV1Request represents a request to update an existing device group.\nIt contains the UUID of the device group and the updated device group information."
+      },
+      "UpdateDeviceGroupV1Response": {
+        "title": "UpdateDeviceGroupV1Response",
+        "required": [
+          "uuid",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "description": "The unique identifier for the device group.",
+            "readOnly": true
+          },
+          "name": {
+            "pattern": "^[\\-_\\.\\w\\s]+$",
+            "type": "string",
+            "description": "The name of the device group."
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the device group."
+          },
+          "devices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeviceReference"
+            },
+            "description": "List of devices associated with the device group."
+          }
+        },
+        "description": "UpdateDeviceGroupV1Response represents the response after updating a device group.\nIt contains the UUID of the updated device group and a result message."
+      },
+      "iamCreateUserRPCResponse": {
+        "title": "iamCreateUserRPCResponse",
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string"
+          }
+        },
+        "description": "DeleteDeviceGroupsV1Response represents the response after deleting device group.\nIt contains the status and a message about the delete operation."
+      },
+      "protobufAny": {
+        "title": "protobufAny",
+        "type": "object",
+        "properties": {
+          "typeUrl": {
+            "type": "string",
+            "description": "A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n`path/google.protobuf.Duration`). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme `http`, `https`, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, `https` is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com.\n\nSchemes other than `http`, `https` (or the empty scheme) might be\nused with implementation specific semantics."
+          },
+          "value": {
+            "type": "string",
+            "description": "Must be a valid serialized protocol buffer of the above specified type."
+          }
+        },
+        "description": "`Any` contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(&foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n\n Example 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\n Example 4: Pack and unpack a message in Go\n\n     foo := &pb.Foo{...}\n     any, err := ptypes.MarshalAny(foo)\n     ...\n     foo := &pb.Foo{}\n     if err := ptypes.UnmarshalAny(any, foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\n\nJSON\n====\nThe JSON representation of an `Any` value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field `@type` which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": <string>,\n      \"lastName\": <string>\n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n`value` which holds the custom JSON in addition to the `@type`\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }"
+      },
+      "runtimeError": {
+        "title": "runtimeError",
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/protobufAny"
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "name": "x-api-key",
+        "in": "header"
+      },
+      "OauthKeyAuth": {
+        "type": "apiKey",
+        "name": "x-oauth2-token",
+        "in": "header"
+      }
+    }
+  }
+}

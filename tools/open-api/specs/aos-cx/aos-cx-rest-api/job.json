@@ -1,0 +1,783 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Job",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Job"
+    }
+  ],
+  "paths": {
+    "/system/jobs": {
+      "get": {
+        "tags": [
+          "Job"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "description": {
+                      "type": "string",
+                      "description": "A description about the job. This column value can be empty.",
+                      "maxLength": 128,
+                      "minLength": 1
+                    },
+                    "disable": {
+                      "type": "boolean",
+                      "description": "Disable the job."
+                    },
+                    "failed_run_count": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "The number of times the job has failed since boot.",
+                      "minimum": 0
+                    },
+                    "history": {
+                      "type": "object",
+                      "description": "Job history information.",
+                      "properties": {
+                        "integer": {
+                          "type": "object",
+                          "properties": {
+                            "failure_reason": {
+                              "type": "string",
+                              "description": "Reason for the job failure."
+                            },
+                            "job_history_uri": {
+                              "type": "string",
+                              "description": "File URI of the generated job history file."
+                            },
+                            "run_duration": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Execution duration in seconds corresponding to the job run."
+                            },
+                            "run_status": {
+                              "type": "string",
+                              "description": "Status of the run. `success`     : Job run was successful. `failed`      : Job run failed. `unknown`     : Job run unknown",
+                              "enum": [
+                                "success",
+                                "failed",
+                                "unknown"
+                              ]
+                            },
+                            "run_timestamp": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Time since Epoch when this instance of the job was started."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "job_entries": {
+                      "type": "object",
+                      "description": "Reference Resource: [Job_Entry](#/Job_Entry)<br>List of commands executed under this job.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "description": "Reference resource URI of Job_Entry"
+                        }
+                      }
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Job](#/Job)<br>Job name.",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "origin": {
+                      "type": "string",
+                      "description": "Origin of the Job, i.e., how the Job is provisioned:  `synthesized`: Job has been dynamically synthesized                 by the system.  `static`     : Job is provisioned by the administrator                 via CLI or REST.",
+                      "enum": [
+                        "synthesized",
+                        "static"
+                      ]
+                    },
+                    "run_count": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "The number of times the job has run since boot."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Status of the job `waiting_for_trigger` : waiting for a trigger. `running`             : currently being executed.",
+                      "enum": [
+                        "running",
+                        "waiting_for_trigger"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "origin",
+                  "description",
+                  "history",
+                  "status",
+                  "run_count",
+                  "failed_run_count",
+                  "name",
+                  "disable",
+                  "job_entries"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Job"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "description": {
+                    "type": "string",
+                    "description": "A description about the job. This column value can be empty.",
+                    "maxLength": 128,
+                    "minLength": 1
+                  },
+                  "disable": {
+                    "type": "boolean",
+                    "description": "Disable the job."
+                  },
+                  "job_entries": {
+                    "type": "object",
+                    "description": "Reference Resource: [Job_Entry](#/Job_Entry)<br>List of commands executed under this job.",
+                    "properties": {
+                      "integer": {
+                        "type": "string",
+                        "description": "Reference resource URI of Job_Entry"
+                      }
+                    }
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [Job](#/Job)<br>Job name.",
+                    "maxLength": 64,
+                    "minLength": 1
+                  },
+                  "origin": {
+                    "type": "string",
+                    "description": "Origin of the Job, i.e., how the Job is provisioned:  `synthesized`: Job has been dynamically synthesized                 by the system.  `static`     : Job is provisioned by the administrator                 via CLI or REST.",
+                    "enum": [
+                      "synthesized",
+                      "static"
+                    ]
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/system/jobs/{Job.name}": {
+      "get": {
+        "tags": [
+          "Job"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "description": {
+                      "type": "string",
+                      "description": "A description about the job. This column value can be empty.",
+                      "maxLength": 128,
+                      "minLength": 1
+                    },
+                    "disable": {
+                      "type": "boolean",
+                      "description": "Disable the job."
+                    },
+                    "failed_run_count": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "The number of times the job has failed since boot.",
+                      "minimum": 0
+                    },
+                    "history": {
+                      "type": "object",
+                      "description": "Job history information.",
+                      "properties": {
+                        "integer": {
+                          "type": "object",
+                          "properties": {
+                            "failure_reason": {
+                              "type": "string",
+                              "description": "Reason for the job failure."
+                            },
+                            "job_history_uri": {
+                              "type": "string",
+                              "description": "File URI of the generated job history file."
+                            },
+                            "run_duration": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Execution duration in seconds corresponding to the job run."
+                            },
+                            "run_status": {
+                              "type": "string",
+                              "description": "Status of the run. `success`     : Job run was successful. `failed`      : Job run failed. `unknown`     : Job run unknown",
+                              "enum": [
+                                "success",
+                                "failed",
+                                "unknown"
+                              ]
+                            },
+                            "run_timestamp": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Time since Epoch when this instance of the job was started."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "job_entries": {
+                      "type": "object",
+                      "description": "Reference Resource: [Job_Entry](#/Job_Entry)<br>List of commands executed under this job.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "description": "Reference resource URI of Job_Entry"
+                        }
+                      }
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Job](#/Job)<br>Job name.",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "origin": {
+                      "type": "string",
+                      "description": "Origin of the Job, i.e., how the Job is provisioned:  `synthesized`: Job has been dynamically synthesized                 by the system.  `static`     : Job is provisioned by the administrator                 via CLI or REST.",
+                      "enum": [
+                        "synthesized",
+                        "static"
+                      ]
+                    },
+                    "run_count": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "The number of times the job has run since boot."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Status of the job `waiting_for_trigger` : waiting for a trigger. `running`             : currently being executed.",
+                      "enum": [
+                        "running",
+                        "waiting_for_trigger"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Job.name",
+            "in": "path",
+            "description": "Reference Resource: [Job](#/Job)<br>Job name.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "disable",
+                  "job_entries",
+                  "name",
+                  "description",
+                  "history",
+                  "status",
+                  "run_count",
+                  "failed_run_count",
+                  "origin"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Job"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "description": {
+                    "type": "string",
+                    "description": "A description about the job. This column value can be empty.",
+                    "maxLength": 128,
+                    "minLength": 1
+                  },
+                  "disable": {
+                    "type": "boolean",
+                    "description": "Disable the job."
+                  },
+                  "job_entries": {
+                    "type": "object",
+                    "description": "Reference Resource: [Job_Entry](#/Job_Entry)<br>List of commands executed under this job.",
+                    "properties": {
+                      "integer": {
+                        "type": "string",
+                        "description": "Reference resource URI of Job_Entry"
+                      }
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Job.name",
+            "in": "path",
+            "description": "Reference Resource: [Job](#/Job)<br>Job name.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Job"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Job.name",
+            "in": "path",
+            "description": "Reference Resource: [Job](#/Job)<br>Job name.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Job"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "description": {
+                    "type": "string",
+                    "description": "A description about the job. This column value can be empty.",
+                    "maxLength": 128,
+                    "minLength": 1
+                  },
+                  "disable": {
+                    "type": "boolean",
+                    "description": "Disable the job."
+                  },
+                  "job_entries": {
+                    "type": "object",
+                    "description": "Reference Resource: [Job_Entry](#/Job_Entry)<br>List of commands executed under this job.",
+                    "properties": {
+                      "integer": {
+                        "type": "string",
+                        "description": "Reference resource URI of Job_Entry"
+                      }
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Job.name",
+            "in": "path",
+            "description": "Reference Resource: [Job](#/Job)<br>Job name.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

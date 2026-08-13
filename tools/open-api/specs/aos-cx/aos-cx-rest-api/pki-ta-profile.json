@@ -1,0 +1,798 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "PKI_TA_Profile",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "PKI_TA_Profile"
+    }
+  ],
+  "paths": {
+    "/system/pki_ta_profiles": {
+      "get": {
+        "tags": [
+          "PKI_TA_Profile"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "certificate": {
+                      "type": "string",
+                      "description": "TA certificate associated with this TA profile in PEM format.  This could be a root cert or an intermediate certificate.",
+                      "minLength": 52
+                    },
+                    "certificate_status": {
+                      "type": "string",
+                      "description": "Certificate status: 'valid': certificate has not been found to be malformed              or missing any required fields. 'malformed': certificate doesn't comply to the standard format. 'expired':   certificate is expired. 'unchecked': certificate status is pending.              It might have just been installed or the system just booted.",
+                      "enum": [
+                        "valid",
+                        "malformed",
+                        "expired",
+                        "unchecked"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [PKI_TA_Profile](#/PKI_TA_Profile)<br>Name of the profile. Suffix *-est-taNN is reserved for  TA profiles whose TA certificates are downloaded from  EST servers. User-configured TA profiles are not allowed  to end with that.",
+                      "maxLength": 41,
+                      "minLength": 1
+                    },
+                    "ocsp": {
+                      "type": "object",
+                      "properties": {
+                        "disable_nonce": {
+                          "type": "boolean",
+                          "description": "Disable nonce insertion to OCSP requests."
+                        },
+                        "enforcement_level": {
+                          "type": "string",
+                          "description": "Specifies enforcement level of OCSP checking.",
+                          "enum": [
+                            "strict",
+                            "optional"
+                          ]
+                        },
+                        "primary_responder": {
+                          "type": "string",
+                          "description": "URL of the primary responder to which OCSP requests may  be directed, e.g. 'http://ocsp.somedomain.com'.",
+                          "maxLength": 192
+                        },
+                        "secondary_responder": {
+                          "type": "string",
+                          "description": "URL of the secondary responder to which OCSP requests may  be directed, e.g. 'http://ocsp.somedomain.com'.",
+                          "maxLength": 192
+                        }
+                      }
+                    },
+                    "ocsp_vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [VRF](#/VRF)<br>VRF to be used for reaching out to the OCSP responders. If not specified, 'mgmt' VRF will be used instead."
+                    },
+                    "origin": {
+                      "type": "string",
+                      "description": "Origin of the TA profile, i.e., how profile is provisioned.  `user`: TA profile is provisioned by an user via CLI or REST.  `est` : TA profile is downloaded dynamically from an EST           service.  `activate`: TA profile is downloaded dynamically from Activate",
+                      "enum": [
+                        "est",
+                        "activate",
+                        "user"
+                      ]
+                    },
+                    "revocation_check_mode": {
+                      "type": "string",
+                      "description": "Mode to be used for revocation status checking.",
+                      "enum": [
+                        "OCSP",
+                        "disabled"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "origin",
+                  "name",
+                  "certificate",
+                  "certificate_status",
+                  "revocation_check_mode",
+                  "ocsp",
+                  "ocsp_vrf"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "PKI_TA_Profile"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "certificate": {
+                    "type": "string",
+                    "description": "TA certificate associated with this TA profile in PEM format.  This could be a root cert or an intermediate certificate.",
+                    "minLength": 52
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [PKI_TA_Profile](#/PKI_TA_Profile)<br>Name of the profile. Suffix *-est-taNN is reserved for  TA profiles whose TA certificates are downloaded from  EST servers. User-configured TA profiles are not allowed  to end with that.",
+                    "maxLength": 41,
+                    "minLength": 1
+                  },
+                  "ocsp": {
+                    "type": "object",
+                    "properties": {
+                      "disable_nonce": {
+                        "type": "boolean",
+                        "description": "Disable nonce insertion to OCSP requests."
+                      },
+                      "enforcement_level": {
+                        "type": "string",
+                        "description": "Specifies enforcement level of OCSP checking.",
+                        "enum": [
+                          "strict",
+                          "optional"
+                        ]
+                      },
+                      "primary_responder": {
+                        "type": "string",
+                        "description": "URL of the primary responder to which OCSP requests may  be directed, e.g. 'http://ocsp.somedomain.com'.",
+                        "maxLength": 192
+                      },
+                      "secondary_responder": {
+                        "type": "string",
+                        "description": "URL of the secondary responder to which OCSP requests may  be directed, e.g. 'http://ocsp.somedomain.com'.",
+                        "maxLength": 192
+                      }
+                    }
+                  },
+                  "ocsp_vrf": {
+                    "type": "string",
+                    "description": "Reference Resource: [VRF](#/VRF)<br>VRF to be used for reaching out to the OCSP responders. If not specified, 'mgmt' VRF will be used instead."
+                  },
+                  "origin": {
+                    "type": "string",
+                    "description": "Origin of the TA profile, i.e., how profile is provisioned.  `user`: TA profile is provisioned by an user via CLI or REST.  `est` : TA profile is downloaded dynamically from an EST           service.  `activate`: TA profile is downloaded dynamically from Activate",
+                    "enum": [
+                      "est",
+                      "activate",
+                      "user"
+                    ]
+                  },
+                  "revocation_check_mode": {
+                    "type": "string",
+                    "description": "Mode to be used for revocation status checking.",
+                    "enum": [
+                      "OCSP",
+                      "disabled"
+                    ]
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/system/pki_ta_profiles/{PKI_TA_Profile.name}": {
+      "get": {
+        "tags": [
+          "PKI_TA_Profile"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "certificate": {
+                      "type": "string",
+                      "description": "TA certificate associated with this TA profile in PEM format.  This could be a root cert or an intermediate certificate.",
+                      "minLength": 52
+                    },
+                    "certificate_status": {
+                      "type": "string",
+                      "description": "Certificate status: 'valid': certificate has not been found to be malformed              or missing any required fields. 'malformed': certificate doesn't comply to the standard format. 'expired':   certificate is expired. 'unchecked': certificate status is pending.              It might have just been installed or the system just booted.",
+                      "enum": [
+                        "valid",
+                        "malformed",
+                        "expired",
+                        "unchecked"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [PKI_TA_Profile](#/PKI_TA_Profile)<br>Name of the profile. Suffix *-est-taNN is reserved for  TA profiles whose TA certificates are downloaded from  EST servers. User-configured TA profiles are not allowed  to end with that.",
+                      "maxLength": 41,
+                      "minLength": 1
+                    },
+                    "ocsp": {
+                      "type": "object",
+                      "properties": {
+                        "disable_nonce": {
+                          "type": "boolean",
+                          "description": "Disable nonce insertion to OCSP requests."
+                        },
+                        "enforcement_level": {
+                          "type": "string",
+                          "description": "Specifies enforcement level of OCSP checking.",
+                          "enum": [
+                            "strict",
+                            "optional"
+                          ]
+                        },
+                        "primary_responder": {
+                          "type": "string",
+                          "description": "URL of the primary responder to which OCSP requests may  be directed, e.g. 'http://ocsp.somedomain.com'.",
+                          "maxLength": 192
+                        },
+                        "secondary_responder": {
+                          "type": "string",
+                          "description": "URL of the secondary responder to which OCSP requests may  be directed, e.g. 'http://ocsp.somedomain.com'.",
+                          "maxLength": 192
+                        }
+                      }
+                    },
+                    "ocsp_vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [VRF](#/VRF)<br>VRF to be used for reaching out to the OCSP responders. If not specified, 'mgmt' VRF will be used instead."
+                    },
+                    "origin": {
+                      "type": "string",
+                      "description": "Origin of the TA profile, i.e., how profile is provisioned.  `user`: TA profile is provisioned by an user via CLI or REST.  `est` : TA profile is downloaded dynamically from an EST           service.  `activate`: TA profile is downloaded dynamically from Activate",
+                      "enum": [
+                        "est",
+                        "activate",
+                        "user"
+                      ]
+                    },
+                    "revocation_check_mode": {
+                      "type": "string",
+                      "description": "Mode to be used for revocation status checking.",
+                      "enum": [
+                        "OCSP",
+                        "disabled"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "PKI_TA_Profile.name",
+            "in": "path",
+            "description": "Reference Resource: [PKI_TA_Profile](#/PKI_TA_Profile)<br>Name of the profile. Suffix *-est-taNN is reserved for  TA profiles whose TA certificates are downloaded from  EST servers. User-configured TA profiles are not allowed  to end with that.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "certificate_status",
+                  "revocation_check_mode",
+                  "ocsp",
+                  "ocsp_vrf",
+                  "origin",
+                  "name",
+                  "certificate"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "PKI_TA_Profile"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "ocsp": {
+                    "type": "object",
+                    "properties": {
+                      "disable_nonce": {
+                        "type": "boolean",
+                        "description": "Disable nonce insertion to OCSP requests."
+                      },
+                      "enforcement_level": {
+                        "type": "string",
+                        "description": "Specifies enforcement level of OCSP checking.",
+                        "enum": [
+                          "strict",
+                          "optional"
+                        ]
+                      },
+                      "primary_responder": {
+                        "type": "string",
+                        "description": "URL of the primary responder to which OCSP requests may  be directed, e.g. 'http://ocsp.somedomain.com'.",
+                        "maxLength": 192
+                      },
+                      "secondary_responder": {
+                        "type": "string",
+                        "description": "URL of the secondary responder to which OCSP requests may  be directed, e.g. 'http://ocsp.somedomain.com'.",
+                        "maxLength": 192
+                      }
+                    }
+                  },
+                  "ocsp_vrf": {
+                    "type": "string",
+                    "description": "Reference Resource: [VRF](#/VRF)<br>VRF to be used for reaching out to the OCSP responders. If not specified, 'mgmt' VRF will be used instead."
+                  },
+                  "revocation_check_mode": {
+                    "type": "string",
+                    "description": "Mode to be used for revocation status checking.",
+                    "enum": [
+                      "OCSP",
+                      "disabled"
+                    ]
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "PKI_TA_Profile.name",
+            "in": "path",
+            "description": "Reference Resource: [PKI_TA_Profile](#/PKI_TA_Profile)<br>Name of the profile. Suffix *-est-taNN is reserved for  TA profiles whose TA certificates are downloaded from  EST servers. User-configured TA profiles are not allowed  to end with that.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "PKI_TA_Profile"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "PKI_TA_Profile.name",
+            "in": "path",
+            "description": "Reference Resource: [PKI_TA_Profile](#/PKI_TA_Profile)<br>Name of the profile. Suffix *-est-taNN is reserved for  TA profiles whose TA certificates are downloaded from  EST servers. User-configured TA profiles are not allowed  to end with that.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "PKI_TA_Profile"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "ocsp": {
+                    "type": "object",
+                    "properties": {
+                      "disable_nonce": {
+                        "type": "boolean",
+                        "description": "Disable nonce insertion to OCSP requests."
+                      },
+                      "enforcement_level": {
+                        "type": "string",
+                        "description": "Specifies enforcement level of OCSP checking.",
+                        "enum": [
+                          "strict",
+                          "optional"
+                        ]
+                      },
+                      "primary_responder": {
+                        "type": "string",
+                        "description": "URL of the primary responder to which OCSP requests may  be directed, e.g. 'http://ocsp.somedomain.com'.",
+                        "maxLength": 192
+                      },
+                      "secondary_responder": {
+                        "type": "string",
+                        "description": "URL of the secondary responder to which OCSP requests may  be directed, e.g. 'http://ocsp.somedomain.com'.",
+                        "maxLength": 192
+                      }
+                    }
+                  },
+                  "ocsp_vrf": {
+                    "type": "string",
+                    "description": "Reference Resource: [VRF](#/VRF)<br>VRF to be used for reaching out to the OCSP responders. If not specified, 'mgmt' VRF will be used instead."
+                  },
+                  "revocation_check_mode": {
+                    "type": "string",
+                    "description": "Mode to be used for revocation status checking.",
+                    "enum": [
+                      "OCSP",
+                      "disabled"
+                    ]
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "PKI_TA_Profile.name",
+            "in": "path",
+            "description": "Reference Resource: [PKI_TA_Profile](#/PKI_TA_Profile)<br>Name of the profile. Suffix *-est-taNN is reserved for  TA profiles whose TA certificates are downloaded from  EST servers. User-configured TA profiles are not allowed  to end with that.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

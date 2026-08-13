@@ -1,0 +1,740 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "AAA_Test_Server",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "AAA_Test_Server"
+    }
+  ],
+  "paths": {
+    "/system/aaa_test_servers": {
+      "get": {
+        "tags": [
+          "AAA_Test_Server"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "auth_method_type": {
+                      "type": "string",
+                      "description": "Specifies encoding to be used for the user password for RADIUS based authentication.",
+                      "enum": [
+                        "pap",
+                        "chap"
+                      ]
+                    },
+                    "password": {
+                      "type": "string",
+                      "description": "Specifies the passkey between RADIUS client and RADIUS server for authentication."
+                    },
+                    "persistence": {
+                      "type": "string",
+                      "description": "Persistence of AAA test server run instances, i.e how the  AAA test server run is provisioned: `volatile`     :  AAA test server test run instances will not be                   retained over system reboot.",
+                      "enum": [
+                        "volatile"
+                      ]
+                    },
+                    "radius_server": {
+                      "type": "string",
+                      "description": "Reference Resource: [Radius_Server](#/Radius_Server)<br>Specifies the server to reach out to for this test authentication."
+                    },
+                    "test_id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Reference Resource: [AAA_Test_Server](#/AAA_Test_Server)<br>Specifies the test run ID associated with the test run.",
+                      "minimum": 1
+                    },
+                    "test_server_status": {
+                      "type": "object",
+                      "description": "Reference Resource: [Radius_Server](#/Radius_Server)<br>Per server test status information.",
+                      "properties": {
+                        "URI": {
+                          "type": "string",
+                          "description": "Reference resource URI of AAA_Test_Server_Status"
+                        }
+                      }
+                    },
+                    "test_start_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time (in microseconds) since Epoch, when the test-server run started.",
+                      "minimum": 0
+                    },
+                    "test_status": {
+                      "type": "string",
+                      "description": "State of AAA test server run:  `pending`: AAA test server run pending  `in-progress`: AAA test server run in-progress.  `completed`: AAA test server run completed successfully.",
+                      "enum": [
+                        "pending",
+                        "in-progress",
+                        "completed"
+                      ]
+                    },
+                    "username": {
+                      "type": "string",
+                      "description": "User name of the client.",
+                      "maxLength": 255,
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "test_id",
+                    "username",
+                    "password"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "persistence",
+                  "username",
+                  "password",
+                  "auth_method_type",
+                  "radius_server",
+                  "test_server_status",
+                  "test_id",
+                  "test_start_time",
+                  "test_status"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "AAA_Test_Server"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "auth_method_type": {
+                    "type": "string",
+                    "description": "Specifies encoding to be used for the user password for RADIUS based authentication.",
+                    "enum": [
+                      "pap",
+                      "chap"
+                    ]
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Specifies the passkey between RADIUS client and RADIUS server for authentication."
+                  },
+                  "persistence": {
+                    "type": "string",
+                    "description": "Persistence of AAA test server run instances, i.e how the  AAA test server run is provisioned: `volatile`     :  AAA test server test run instances will not be                   retained over system reboot.",
+                    "enum": [
+                      "volatile"
+                    ]
+                  },
+                  "radius_server": {
+                    "type": "string",
+                    "description": "Reference Resource: [Radius_Server](#/Radius_Server)<br>Specifies the server to reach out to for this test authentication."
+                  },
+                  "test_id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Reference Resource: [AAA_Test_Server](#/AAA_Test_Server)<br>Specifies the test run ID associated with the test run.",
+                    "minimum": 1
+                  },
+                  "username": {
+                    "type": "string",
+                    "description": "User name of the client.",
+                    "maxLength": 255,
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "test_id",
+                  "username",
+                  "password"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/system/aaa_test_servers/{AAA_Test_Server.test_id}": {
+      "get": {
+        "tags": [
+          "AAA_Test_Server"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "auth_method_type": {
+                      "type": "string",
+                      "description": "Specifies encoding to be used for the user password for RADIUS based authentication.",
+                      "enum": [
+                        "pap",
+                        "chap"
+                      ]
+                    },
+                    "password": {
+                      "type": "string",
+                      "description": "Specifies the passkey between RADIUS client and RADIUS server for authentication."
+                    },
+                    "persistence": {
+                      "type": "string",
+                      "description": "Persistence of AAA test server run instances, i.e how the  AAA test server run is provisioned: `volatile`     :  AAA test server test run instances will not be                   retained over system reboot.",
+                      "enum": [
+                        "volatile"
+                      ]
+                    },
+                    "radius_server": {
+                      "type": "string",
+                      "description": "Reference Resource: [Radius_Server](#/Radius_Server)<br>Specifies the server to reach out to for this test authentication."
+                    },
+                    "test_id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Reference Resource: [AAA_Test_Server](#/AAA_Test_Server)<br>Specifies the test run ID associated with the test run.",
+                      "minimum": 1
+                    },
+                    "test_server_status": {
+                      "type": "object",
+                      "description": "Reference Resource: [Radius_Server](#/Radius_Server)<br>Per server test status information.",
+                      "properties": {
+                        "URI": {
+                          "type": "string",
+                          "description": "Reference resource URI of AAA_Test_Server_Status"
+                        }
+                      }
+                    },
+                    "test_start_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time (in microseconds) since Epoch, when the test-server run started.",
+                      "minimum": 0
+                    },
+                    "test_status": {
+                      "type": "string",
+                      "description": "State of AAA test server run:  `pending`: AAA test server run pending  `in-progress`: AAA test server run in-progress.  `completed`: AAA test server run completed successfully.",
+                      "enum": [
+                        "pending",
+                        "in-progress",
+                        "completed"
+                      ]
+                    },
+                    "username": {
+                      "type": "string",
+                      "description": "User name of the client.",
+                      "maxLength": 255,
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "test_id",
+                    "username",
+                    "password"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "AAA_Test_Server.test_id",
+            "in": "path",
+            "description": "Reference Resource: [AAA_Test_Server](#/AAA_Test_Server)<br>Specifies the test run ID associated with the test run.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "test_server_status",
+                  "persistence",
+                  "username",
+                  "password",
+                  "auth_method_type",
+                  "radius_server",
+                  "test_id",
+                  "test_start_time",
+                  "test_status"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "AAA_Test_Server"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "auth_method_type": {
+                    "type": "string",
+                    "description": "Specifies encoding to be used for the user password for RADIUS based authentication.",
+                    "enum": [
+                      "pap",
+                      "chap"
+                    ]
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Specifies the passkey between RADIUS client and RADIUS server for authentication."
+                  },
+                  "radius_server": {
+                    "type": "string",
+                    "description": "Reference Resource: [Radius_Server](#/Radius_Server)<br>Specifies the server to reach out to for this test authentication."
+                  },
+                  "username": {
+                    "type": "string",
+                    "description": "User name of the client.",
+                    "maxLength": 255,
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "username",
+                  "password"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "AAA_Test_Server.test_id",
+            "in": "path",
+            "description": "Reference Resource: [AAA_Test_Server](#/AAA_Test_Server)<br>Specifies the test run ID associated with the test run.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "AAA_Test_Server"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "AAA_Test_Server.test_id",
+            "in": "path",
+            "description": "Reference Resource: [AAA_Test_Server](#/AAA_Test_Server)<br>Specifies the test run ID associated with the test run.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "AAA_Test_Server"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "auth_method_type": {
+                    "type": "string",
+                    "description": "Specifies encoding to be used for the user password for RADIUS based authentication.",
+                    "enum": [
+                      "pap",
+                      "chap"
+                    ]
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Specifies the passkey between RADIUS client and RADIUS server for authentication."
+                  },
+                  "radius_server": {
+                    "type": "string",
+                    "description": "Reference Resource: [Radius_Server](#/Radius_Server)<br>Specifies the server to reach out to for this test authentication."
+                  },
+                  "username": {
+                    "type": "string",
+                    "description": "User name of the client.",
+                    "maxLength": 255,
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "username",
+                  "password"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "AAA_Test_Server.test_id",
+            "in": "path",
+            "description": "Reference Resource: [AAA_Test_Server](#/AAA_Test_Server)<br>Specifies the test run ID associated with the test run.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

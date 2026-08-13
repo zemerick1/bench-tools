@@ -1,0 +1,499 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Diag_Test_Result",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Diag_Test_Result"
+    }
+  ],
+  "paths": {
+    "/system/subsystems/{Subsystem.type},{Subsystem.name}/diag_test_results": {
+      "get": {
+        "tags": [
+          "Diag_Test_Result"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "current_errorcode": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Error code corresponding to the current execution of this test.  On success the error code will be set to *0* where as in case of  failure, it contains the error code corresponding to the failure."
+                    },
+                    "errorcode_history": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Error code obtained from the recent failure of this test."
+                    },
+                    "failure_from_last_boot": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Total number of failures of this test since boot."
+                    },
+                    "failure_from_last_success": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Count of consecutive failures of this test since the last time  the test has passed."
+                    },
+                    "first_run_timestamp": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Epoch time stamp of the first execution of this test since boot."
+                    },
+                    "iteration_count": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Total number of execution of this test since boot."
+                    },
+                    "last_run_timestamp": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Epoch time stamp of the latest execution of this test."
+                    },
+                    "mgmt_module": {
+                      "type": "string",
+                      "description": "Reference Resource: [Diag_Test_Result](#/Diag_Test_Result)<br>Management Module instance in which the test case is executed."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Diag_Test_Result](#/Diag_Test_Result)<br>Test case name.",
+                      "maxLength": 60,
+                      "minLength": 1
+                    },
+                    "subsystem": {
+                      "type": "string",
+                      "description": "Reference Resource: [Diag_Test_Result](#/Diag_Test_Result)<br>Module instance for which the test case is executed."
+                    },
+                    "test_status": {
+                      "type": "string",
+                      "description": "Test case status. `Pass`:    Test is successful. `Fail`:    Test failed. `Skipped`: Test has been skipped as the device was not ready.",
+                      "enum": [
+                        "Pass",
+                        "Fail",
+                        "Skipped"
+                      ]
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Subsystem.type",
+            "in": "path",
+            "description": "Reference Resource: [Subsystem](#/Subsystem)<br>",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "uninitialized",
+                "system",
+                "chassis",
+                "line_card",
+                "mezz_card",
+                "fabric_card",
+                "management_module",
+                "rear_display_card",
+                "fan_tray",
+                "services_card",
+                "io_module"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "Subsystem.name",
+            "in": "path",
+            "description": "Reference Resource: [Subsystem](#/Subsystem)<br>",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "name",
+                  "test_status",
+                  "mgmt_module",
+                  "current_errorcode",
+                  "last_run_timestamp",
+                  "errorcode_history",
+                  "failure_from_last_success",
+                  "failure_from_last_boot",
+                  "iteration_count",
+                  "first_run_timestamp"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/subsystems/{Subsystem.type},{Subsystem.name}/diag_test_results/{Diag_Test_Result.mgmt_module},{Diag_Test_Result.name}": {
+      "get": {
+        "tags": [
+          "Diag_Test_Result"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "current_errorcode": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Error code corresponding to the current execution of this test.  On success the error code will be set to *0* where as in case of  failure, it contains the error code corresponding to the failure."
+                    },
+                    "errorcode_history": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Error code obtained from the recent failure of this test."
+                    },
+                    "failure_from_last_boot": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Total number of failures of this test since boot."
+                    },
+                    "failure_from_last_success": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Count of consecutive failures of this test since the last time  the test has passed."
+                    },
+                    "first_run_timestamp": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Epoch time stamp of the first execution of this test since boot."
+                    },
+                    "iteration_count": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Total number of execution of this test since boot."
+                    },
+                    "last_run_timestamp": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Epoch time stamp of the latest execution of this test."
+                    },
+                    "mgmt_module": {
+                      "type": "string",
+                      "description": "Reference Resource: [Diag_Test_Result](#/Diag_Test_Result)<br>Management Module instance in which the test case is executed."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Diag_Test_Result](#/Diag_Test_Result)<br>Test case name.",
+                      "maxLength": 60,
+                      "minLength": 1
+                    },
+                    "subsystem": {
+                      "type": "string",
+                      "description": "Reference Resource: [Diag_Test_Result](#/Diag_Test_Result)<br>Module instance for which the test case is executed."
+                    },
+                    "test_status": {
+                      "type": "string",
+                      "description": "Test case status. `Pass`:    Test is successful. `Fail`:    Test failed. `Skipped`: Test has been skipped as the device was not ready.",
+                      "enum": [
+                        "Pass",
+                        "Fail",
+                        "Skipped"
+                      ]
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Subsystem.type",
+            "in": "path",
+            "description": "Reference Resource: [Subsystem](#/Subsystem)<br>",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "uninitialized",
+                "system",
+                "chassis",
+                "line_card",
+                "mezz_card",
+                "fabric_card",
+                "management_module",
+                "rear_display_card",
+                "fan_tray",
+                "services_card",
+                "io_module"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "Subsystem.name",
+            "in": "path",
+            "description": "Reference Resource: [Subsystem](#/Subsystem)<br>",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Diag_Test_Result.mgmt_module",
+            "in": "path",
+            "description": "Reference Resource: [Diag_Test_Result](#/Diag_Test_Result)<br>Management Module instance in which the test case is executed.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Diag_Test_Result.name",
+            "in": "path",
+            "description": "Reference Resource: [Diag_Test_Result](#/Diag_Test_Result)<br>Test case name.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "first_run_timestamp",
+                  "errorcode_history",
+                  "failure_from_last_success",
+                  "failure_from_last_boot",
+                  "iteration_count",
+                  "current_errorcode",
+                  "last_run_timestamp",
+                  "name",
+                  "test_status",
+                  "mgmt_module"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

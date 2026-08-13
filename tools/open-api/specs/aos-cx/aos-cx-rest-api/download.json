@@ -1,0 +1,670 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Download",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Download"
+    }
+  ],
+  "paths": {
+    "/system/downloads": {
+      "get": {
+        "tags": [
+          "Download"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "abort_request": {
+                      "type": "boolean",
+                      "description": "The flag to abort the transfer request."
+                    },
+                    "aggregate_statistics": {
+                      "type": "object",
+                      "description": "Key-value pairs for Download transfer status.",
+                      "properties": {
+                        "bytes_transferred": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Amount of bytes received or transmitted including bytes transferred of previous retries",
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "dest_url": {
+                      "type": "string",
+                      "description": "The destination file path for upload and download.",
+                      "maxLength": 2048
+                    },
+                    "digest": {
+                      "type": "object",
+                      "properties": {
+                        "sha256": {
+                          "type": "string",
+                          "description": "The sha256 digest value of the transferred file."
+                        }
+                      }
+                    },
+                    "downloaded_filename": {
+                      "type": "string",
+                      "description": "The name for the downloaded file.",
+                      "maxLength": 4096
+                    },
+                    "failure_reason": {
+                      "type": "object",
+                      "description": "Key-value pairs for Download transfer failure reason.",
+                      "properties": {
+                        "description": {
+                          "type": "string",
+                          "description": "Description of the transaction failure reason."
+                        },
+                        "number": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The transaction failure reason error number.",
+                          "maximum": 4294967295,
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "options": {
+                      "type": "object",
+                      "description": "The key values for Transfer Options.",
+                      "properties": {
+                        "connect_timeout": {
+                          "type": "integer",
+                          "description": "How long to wait while establishing a connection, in seconds.",
+                          "maximum": 900,
+                          "minimum": 0
+                        },
+                        "retry_count": {
+                          "type": "integer",
+                          "description": "The number of times to retry a failed transfer.",
+                          "maximum": 10,
+                          "minimum": 0
+                        },
+                        "speed_timeout": {
+                          "type": "integer",
+                          "description": "The number of seconds to terminate the connection after the transfer rate drops below the minimum threshold.",
+                          "maximum": 900,
+                          "minimum": 0
+                        },
+                        "verify_signature": {
+                          "type": "integer",
+                          "description": "The flag whether to verify the signature of the transferred file.",
+                          "maximum": 1,
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "requestor": {
+                      "type": "string",
+                      "description": "The feature name making the transfer request. The test enum value is only for internal use.",
+                      "enum": [
+                        "hot_patch",
+                        "feature_pack",
+                        "test"
+                      ]
+                    },
+                    "src_url": {
+                      "type": "string",
+                      "description": "The source file path for upload and download.",
+                      "maxLength": 2048
+                    },
+                    "statistics": {
+                      "type": "object",
+                      "description": "Key-value pairs for Download transfer status.",
+                      "properties": {
+                        "bytes_total": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The full size of the file when the transfer completes.",
+                          "minimum": 0
+                        },
+                        "bytes_transferred": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Amount of bytes received or transmitted since the start of the transfer.",
+                          "minimum": 0
+                        },
+                        "finish_time": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time when the current transfer completed or failed. Stored in seconds since the epoch.",
+                          "minimum": 0
+                        },
+                        "percent_complete": {
+                          "type": "integer",
+                          "description": "Percentage of the file transfer that has completed.",
+                          "maximum": 100,
+                          "minimum": 0
+                        },
+                        "retry_num": {
+                          "type": "integer",
+                          "description": "The number of times the transfer has been retried.",
+                          "maximum": 10,
+                          "minimum": 0
+                        },
+                        "start_time": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time when the current transfer attempt began. Stored in seconds since the epoch.",
+                          "minimum": 0
+                        },
+                        "time_elapsed": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Amount seconds which have elapsed since for the current transfer attempt.",
+                          "minimum": 0
+                        },
+                        "transfer_rate": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The number of bytes/second of data being transferred.",
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Provides information about the transfer status.",
+                      "enum": [
+                        "not_started",
+                        "initializing",
+                        "connecting",
+                        "transferring",
+                        "verifying",
+                        "complete",
+                        "retrying",
+                        "failed",
+                        "aborted"
+                      ]
+                    },
+                    "transfer_num": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Reference Resource: [Download](#/Download)<br>The index of the transferred file.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [VRF](#/VRF)<br>VRF to use for the transfer."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "vrf",
+                  "downloaded_filename",
+                  "status",
+                  "src_url",
+                  "dest_url",
+                  "statistics",
+                  "aggregate_statistics",
+                  "failure_reason",
+                  "abort_request",
+                  "options",
+                  "digest",
+                  "transfer_num",
+                  "requestor"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/downloads/{Download.transfer_num}": {
+      "get": {
+        "tags": [
+          "Download"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "abort_request": {
+                      "type": "boolean",
+                      "description": "The flag to abort the transfer request."
+                    },
+                    "aggregate_statistics": {
+                      "type": "object",
+                      "description": "Key-value pairs for Download transfer status.",
+                      "properties": {
+                        "bytes_transferred": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Amount of bytes received or transmitted including bytes transferred of previous retries",
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "dest_url": {
+                      "type": "string",
+                      "description": "The destination file path for upload and download.",
+                      "maxLength": 2048
+                    },
+                    "digest": {
+                      "type": "object",
+                      "properties": {
+                        "sha256": {
+                          "type": "string",
+                          "description": "The sha256 digest value of the transferred file."
+                        }
+                      }
+                    },
+                    "downloaded_filename": {
+                      "type": "string",
+                      "description": "The name for the downloaded file.",
+                      "maxLength": 4096
+                    },
+                    "failure_reason": {
+                      "type": "object",
+                      "description": "Key-value pairs for Download transfer failure reason.",
+                      "properties": {
+                        "description": {
+                          "type": "string",
+                          "description": "Description of the transaction failure reason."
+                        },
+                        "number": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The transaction failure reason error number.",
+                          "maximum": 4294967295,
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "options": {
+                      "type": "object",
+                      "description": "The key values for Transfer Options.",
+                      "properties": {
+                        "connect_timeout": {
+                          "type": "integer",
+                          "description": "How long to wait while establishing a connection, in seconds.",
+                          "maximum": 900,
+                          "minimum": 0
+                        },
+                        "retry_count": {
+                          "type": "integer",
+                          "description": "The number of times to retry a failed transfer.",
+                          "maximum": 10,
+                          "minimum": 0
+                        },
+                        "speed_timeout": {
+                          "type": "integer",
+                          "description": "The number of seconds to terminate the connection after the transfer rate drops below the minimum threshold.",
+                          "maximum": 900,
+                          "minimum": 0
+                        },
+                        "verify_signature": {
+                          "type": "integer",
+                          "description": "The flag whether to verify the signature of the transferred file.",
+                          "maximum": 1,
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "requestor": {
+                      "type": "string",
+                      "description": "The feature name making the transfer request. The test enum value is only for internal use.",
+                      "enum": [
+                        "hot_patch",
+                        "feature_pack",
+                        "test"
+                      ]
+                    },
+                    "src_url": {
+                      "type": "string",
+                      "description": "The source file path for upload and download.",
+                      "maxLength": 2048
+                    },
+                    "statistics": {
+                      "type": "object",
+                      "description": "Key-value pairs for Download transfer status.",
+                      "properties": {
+                        "bytes_total": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The full size of the file when the transfer completes.",
+                          "minimum": 0
+                        },
+                        "bytes_transferred": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Amount of bytes received or transmitted since the start of the transfer.",
+                          "minimum": 0
+                        },
+                        "finish_time": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time when the current transfer completed or failed. Stored in seconds since the epoch.",
+                          "minimum": 0
+                        },
+                        "percent_complete": {
+                          "type": "integer",
+                          "description": "Percentage of the file transfer that has completed.",
+                          "maximum": 100,
+                          "minimum": 0
+                        },
+                        "retry_num": {
+                          "type": "integer",
+                          "description": "The number of times the transfer has been retried.",
+                          "maximum": 10,
+                          "minimum": 0
+                        },
+                        "start_time": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time when the current transfer attempt began. Stored in seconds since the epoch.",
+                          "minimum": 0
+                        },
+                        "time_elapsed": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Amount seconds which have elapsed since for the current transfer attempt.",
+                          "minimum": 0
+                        },
+                        "transfer_rate": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The number of bytes/second of data being transferred.",
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Provides information about the transfer status.",
+                      "enum": [
+                        "not_started",
+                        "initializing",
+                        "connecting",
+                        "transferring",
+                        "verifying",
+                        "complete",
+                        "retrying",
+                        "failed",
+                        "aborted"
+                      ]
+                    },
+                    "transfer_num": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Reference Resource: [Download](#/Download)<br>The index of the transferred file.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [VRF](#/VRF)<br>VRF to use for the transfer."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Download.transfer_num",
+            "in": "path",
+            "description": "Reference Resource: [Download](#/Download)<br>The index of the transferred file.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "transfer_num",
+                  "requestor",
+                  "statistics",
+                  "aggregate_statistics",
+                  "failure_reason",
+                  "abort_request",
+                  "options",
+                  "digest",
+                  "src_url",
+                  "dest_url",
+                  "vrf",
+                  "downloaded_filename",
+                  "status"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

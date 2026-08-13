@@ -1,0 +1,270 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Firmware",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Firmware"
+    }
+  ],
+  "paths": {
+    "/firmware": {
+      "get": {
+        "description": "Get the current firmware version.<br><br>  This URI is not supported by Notifications or NAE.",
+        "summary": "Get the current firmware version.",
+        "tags": [
+          "Firmware"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "booted_image": {
+                      "type": "string"
+                    },
+                    "current_image": {
+                      "type": "string"
+                    },
+                    "default_image": {
+                      "type": "string"
+                    },
+                    "primary_version": {
+                      "type": "string"
+                    },
+                    "secondary_version": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "description": "Upload a new firmware version from remote HTTP server with valid VRF",
+        "summary": "Update firmware from remote HTTP server ",
+        "tags": [
+          "Firmware"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "image",
+            "in": "query",
+            "description": "Image type",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "primary",
+                  "secondary"
+                ]
+              }
+            },
+            "explode": false,
+            "required": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Source location. Full URL i.e., http://{ip|host}[:port]/image-location",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "vrf",
+            "in": "query",
+            "description": "VRF name.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "description": "Upload a new firmware version.",
+        "summary": "Upload a new firmware version.",
+        "tags": [
+          "Firmware"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "fileupload": {
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "image",
+            "in": "query",
+            "description": "Image(s) to overwrite.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "primary",
+                  "secondary"
+                ]
+              }
+            },
+            "explode": false,
+            "required": true
+          }
+        ]
+      }
+    },
+    "/firmware/status": {
+      "get": {
+        "description": "Get the current firmware update status.",
+        "summary": "Get the current firmware update status.",
+        "tags": [
+          "Firmware"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "booted_image": {
+                      "type": "string"
+                    },
+                    "current_image": {
+                      "type": "string"
+                    },
+                    "default_image": {
+                      "type": "string"
+                    },
+                    "primary_version": {
+                      "type": "string"
+                    },
+                    "secondary_version": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  }
+}

@@ -95,6 +95,16 @@ export const tools = [
     status: "available",
     cta: "Plan subnets",
   },
+  {
+    id: "open-api",
+    title: "OpenAPI Docs",
+    description:
+      "Vendor OpenAPI, pre-sliced so Scalar never has to swallow a novel.",
+    href: "./tools/open-api/",
+    icon: "API",
+    status: "available",
+    cta: "Browse specs",
+  },
 ];
 
 /**

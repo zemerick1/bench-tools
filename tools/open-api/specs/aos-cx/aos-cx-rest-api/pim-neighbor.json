@@ -1,0 +1,458 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "PIM_Neighbor",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "PIM_Neighbor"
+    }
+  ],
+  "paths": {
+    "/system/interfaces/{Interface.name}/pim_neighbors": {
+      "get": {
+        "tags": [
+          "PIM_Neighbor"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "address": {
+                      "type": "string",
+                      "description": "Reference Resource: [PIM_Neighbor](#/PIM_Neighbor)<br>IP address of the PIM neighbor.",
+                      "maxLength": 45
+                    },
+                    "address_family": {
+                      "type": "string",
+                      "description": "IP version of the PIM neighbor.",
+                      "enum": [
+                        "ipv4",
+                        "ipv6"
+                      ]
+                    },
+                    "anycast_neighbor": {
+                      "type": "boolean",
+                      "description": "Specifies whether this is a anycast neighbor. In case of anycast neighbor, neighbor's IP address and the interface's primary IP on this router will have the same value."
+                    },
+                    "bidir_capable": {
+                      "type": "boolean",
+                      "description": "Specifies whether this is a PIM-Bidir capable neighbor or not."
+                    },
+                    "dr_priority": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Designated Router Priority (DR Priority) received from the PIM neighbor.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "hold_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Hold Time(in seconds) received from the PIM neighbor."
+                    },
+                    "l3_vni": {
+                      "type": "string",
+                      "description": "Reference Resource: [Virtual_Network_ID](#/Virtual_Network_ID)<br>L3 Virtual Network Identifier on which the PIM Neighbor information  is learned."
+                    },
+                    "port": {
+                      "type": "string",
+                      "description": "Reference Resource: [PIM_Neighbor](#/PIM_Neighbor)<br>The [Port](#/Port) on which the PIM Neighbor information is learned."
+                    },
+                    "rx_timestamps": {
+                      "type": "object",
+                      "description": "Timestamps for the PIM neighbor entry.",
+                      "properties": {
+                        "first_hello_rx_time": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The epoch time at which the first Hello message is received from the PIM neighbor."
+                        },
+                        "last_hello_rx_time": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The epoch time at which the last Hello message is received from the PIM neighbor."
+                        }
+                      }
+                    },
+                    "secondary_addresses": {
+                      "type": "array",
+                      "description": "List of secondary IP Addresses learnt/received from the PIM neighbor.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Interface.name",
+            "in": "path",
+            "description": "Reference Resource: [Port](#/Port)<br>The port name. For non-bonded ports, the port name is the same as the associated interface name. The name must otherwise be unique across all ports and interfaces of the system.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "l3_vni",
+                  "address",
+                  "anycast_neighbor",
+                  "secondary_addresses",
+                  "bidir_capable",
+                  "address_family",
+                  "hold_time",
+                  "rx_timestamps",
+                  "dr_priority"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/interfaces/{Interface.name}/pim_neighbors/{PIM_Neighbor.address}": {
+      "get": {
+        "tags": [
+          "PIM_Neighbor"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "address": {
+                      "type": "string",
+                      "description": "Reference Resource: [PIM_Neighbor](#/PIM_Neighbor)<br>IP address of the PIM neighbor.",
+                      "maxLength": 45
+                    },
+                    "address_family": {
+                      "type": "string",
+                      "description": "IP version of the PIM neighbor.",
+                      "enum": [
+                        "ipv4",
+                        "ipv6"
+                      ]
+                    },
+                    "anycast_neighbor": {
+                      "type": "boolean",
+                      "description": "Specifies whether this is a anycast neighbor. In case of anycast neighbor, neighbor's IP address and the interface's primary IP on this router will have the same value."
+                    },
+                    "bidir_capable": {
+                      "type": "boolean",
+                      "description": "Specifies whether this is a PIM-Bidir capable neighbor or not."
+                    },
+                    "dr_priority": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Designated Router Priority (DR Priority) received from the PIM neighbor.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "hold_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Hold Time(in seconds) received from the PIM neighbor."
+                    },
+                    "l3_vni": {
+                      "type": "string",
+                      "description": "Reference Resource: [Virtual_Network_ID](#/Virtual_Network_ID)<br>L3 Virtual Network Identifier on which the PIM Neighbor information  is learned."
+                    },
+                    "port": {
+                      "type": "string",
+                      "description": "Reference Resource: [PIM_Neighbor](#/PIM_Neighbor)<br>The [Port](#/Port) on which the PIM Neighbor information is learned."
+                    },
+                    "rx_timestamps": {
+                      "type": "object",
+                      "description": "Timestamps for the PIM neighbor entry.",
+                      "properties": {
+                        "first_hello_rx_time": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The epoch time at which the first Hello message is received from the PIM neighbor."
+                        },
+                        "last_hello_rx_time": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The epoch time at which the last Hello message is received from the PIM neighbor."
+                        }
+                      }
+                    },
+                    "secondary_addresses": {
+                      "type": "array",
+                      "description": "List of secondary IP Addresses learnt/received from the PIM neighbor.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Interface.name",
+            "in": "path",
+            "description": "Reference Resource: [Port](#/Port)<br>The port name. For non-bonded ports, the port name is the same as the associated interface name. The name must otherwise be unique across all ports and interfaces of the system.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "PIM_Neighbor.address",
+            "in": "path",
+            "description": "Reference Resource: [PIM_Neighbor](#/PIM_Neighbor)<br>IP address of the PIM neighbor.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "address_family",
+                  "hold_time",
+                  "rx_timestamps",
+                  "dr_priority",
+                  "secondary_addresses",
+                  "bidir_capable",
+                  "address",
+                  "anycast_neighbor",
+                  "l3_vni"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

@@ -1,0 +1,1497 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Orgs Licenses",
+    "version": "2602.1.1"
+  },
+  "servers": [
+    {
+      "description": "Mist Global 01",
+      "url": "https://api.mist.com"
+    },
+    {
+      "description": "Mist Global 02",
+      "url": "https://api.gc1.mist.com"
+    },
+    {
+      "description": "Mist Global 03",
+      "url": "https://api.ac2.mist.com"
+    },
+    {
+      "description": "Mist Global 04",
+      "url": "https://api.gc2.mist.com"
+    },
+    {
+      "description": "Mist Global 05",
+      "url": "https://api.gc4.mist.com"
+    },
+    {
+      "description": "Mist EMEA 01",
+      "url": "https://api.eu.mist.com"
+    },
+    {
+      "description": "Mist EMEA 02",
+      "url": "https://api.gc3.mist.com"
+    },
+    {
+      "description": "Mist EMEA 03",
+      "url": "https://api.ac6.mist.com"
+    },
+    {
+      "description": "Mist EMEA 04",
+      "url": "https://api.gc6.mist.com"
+    },
+    {
+      "description": "Mist APAC 01",
+      "url": "https://api.ac5.mist.com"
+    },
+    {
+      "description": "Mist APAC 02",
+      "url": "https://api.gc5.mist.com"
+    },
+    {
+      "description": "Mist APAC 03",
+      "url": "https://api.gc7.mist.com"
+    }
+  ],
+  "security": [
+    {
+      "apiToken": []
+    },
+    {
+      "basicAuth": []
+    },
+    {
+      "basicAuth": [],
+      "csrfToken": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "Licenses are a type of service or access that customers can purchase for various features or services offered by a company.\n\nSubscriptions can have different statuses, such as active, expired, exceeded, or trial, depending on their validity and usage. The status of a subscription determines whether it is currently active and valid, has expired, has exceeded the allowed usage limit, or is in a trial period.\n\nLicenses can be activated using an activation code, and the activation process confirms the inputted code and activates the subscription.",
+      "name": "Orgs Licenses"
+    }
+  ],
+  "paths": {
+    "/api/v1/orgs/{org_id}/claim": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "post": {
+        "description": "Claim Org licenses / activation codes",
+        "operationId": "claimOrgLicense",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "code": "ZHT3K-H36DT-MG85D-M61AC",
+                    "type": "all"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/claim_activation"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ClaimLicense"
+          },
+          "400": {
+            "description": "Invalid key (or already used)"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "claimOrgLicense",
+        "tags": [
+          "Orgs Licenses"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_id}/claim/status": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "get": {
+        "description": "Get Processing Status for Async Claim",
+        "operationId": "GetOrgLicenseAsyncClaimStatus",
+        "parameters": [
+          {
+            "description": "Request license details",
+            "in": "query",
+            "name": "detail",
+            "schema": {
+              "examples": [
+                true
+              ],
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AsyncLicense"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "GetOrgLicenseAsyncClaimStatus",
+        "tags": [
+          "Orgs Licenses"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_id}/licenses": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "get": {
+        "description": "Get the list of licenses",
+        "operationId": "getOrgLicensesSummary",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/License"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getOrgLicensesSummary",
+        "tags": [
+          "Orgs Licenses"
+        ]
+      },
+      "put": {
+        "description": "Move, Undo Move or Delete Org License to Another Org\nIf the admin has admin privilege against the `org_id` and `dst_org_id`, he can move some of the licenses to another Org. Given that: \n1. the specified license is currently active \n2. there’s enough licenses left in the specified license (by subscription_id) \n3. there will still be enough entitled licenses for the type of license after the amendment",
+        "operationId": "moveOrDeleteOrgLicenseToAnotherOrg",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "annotate": {
+                  "value": {
+                    "notes": "customer notes",
+                    "op": "annotate",
+                    "subscription_id": "SUB-000144"
+                  }
+                },
+                "delete": {
+                  "value": {
+                    "op": "delete",
+                    "subscription_id": "SUB-0000144"
+                  }
+                },
+                "move": {
+                  "value": {
+                    "dst_org_id": "3eff35f7-c218-894e-bca2-24e5325601cc",
+                    "op": "amend",
+                    "quantity": 10,
+                    "subscription_id": "SUB-0000144"
+                  }
+                },
+                "undo_move": {
+                  "value": {
+                    "amendment_id": "2b9116ab-cd1e-e897-6e08-31fccd88e792",
+                    "op": "unamend"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/org_license_action"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "moveOrDeleteOrgLicenseToAnotherOrg",
+        "tags": [
+          "Orgs Licenses"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_id}/licenses/usages": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "get": {
+        "description": "Get Licenses Usage by Sites\nThis shows license usage (i.e. needed) based on the features enabled for the site.",
+        "operationId": "getOrgLicensesBySite",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/LicenseUsageOrg"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getOrgLicensesBySite",
+        "tags": [
+          "Orgs Licenses"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "claim_activation": {
+        "properties": {
+          "async": {
+            "default": false,
+            "description": "Whether to do a async claim process",
+            "type": "boolean"
+          },
+          "code": {
+            "description": "Activation code",
+            "type": "string"
+          },
+          "device_type": {
+            "$ref": "#/components/schemas/device_type_default_ap"
+          },
+          "type": {
+            "$ref": "#/components/schemas/claim_type"
+          }
+        },
+        "required": [
+          "code",
+          "type"
+        ],
+        "type": "object"
+      },
+      "claim_type": {
+        "default": "all",
+        "description": "what to claim. enum: `all`, `inventory`, `license`",
+        "enum": [
+          "all",
+          "inventory",
+          "license"
+        ],
+        "type": "string"
+      },
+      "created_time": {
+        "description": "When the object has been created, in epoch",
+        "format": "double",
+        "readOnly": true,
+        "type": "number"
+      },
+      "device_type_default_ap": {
+        "default": "ap",
+        "description": "enum: `ap`, `gateway`, `switch`",
+        "enum": [
+          "ap",
+          "gateway",
+          "switch"
+        ],
+        "type": "string"
+      },
+      "id": {
+        "description": "Unique ID of the object instance in the Mist Organization",
+        "examples": [
+          "53f10664-3ce8-4c27-b382-0ef66432349f"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "license": {
+        "additionalProperties": false,
+        "description": "License",
+        "properties": {
+          "amendments": {
+            "$ref": "#/components/schemas/license_amendments"
+          },
+          "entitled": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "description": "Property key is license type (e.g. SUB-MAN) and Property value is the number of licenses entitled.",
+            "readOnly": true,
+            "type": "object"
+          },
+          "fully_loaded": {
+            "$ref": "#/components/schemas/license_fully_loaded"
+          },
+          "licenses": {
+            "$ref": "#/components/schemas/licenses"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/license_summary"
+          },
+          "usages": {
+            "$ref": "#/components/schemas/license_usages"
+          }
+        },
+        "type": "object"
+      },
+      "license_amendment": {
+        "additionalProperties": false,
+        "properties": {
+          "created_time": {
+            "$ref": "#/components/schemas/created_time"
+          },
+          "end_time": {
+            "readOnly": true,
+            "type": "integer"
+          },
+          "id": {
+            "$ref": "#/components/schemas/id"
+          },
+          "modified_time": {
+            "$ref": "#/components/schemas/modified_time"
+          },
+          "quantity": {
+            "readOnly": true,
+            "type": "integer"
+          },
+          "start_time": {
+            "readOnly": true,
+            "type": "integer"
+          },
+          "subscription_id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/license_type"
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "license_amendments": {
+        "items": {
+          "$ref": "#/components/schemas/license_amendment"
+        },
+        "readOnly": true,
+        "type": "array",
+        "uniqueItems": true
+      },
+      "license_fully_loaded": {
+        "additionalProperties": {
+          "readOnly": true,
+          "type": "integer"
+        },
+        "description": "Maximum number of licenses that may be required if the service is enabled on all the Organization Devices. Property key is the service name (e.g. \"SUB-MAN\").",
+        "readOnly": true,
+        "type": "object"
+      },
+      "license_sub": {
+        "additionalProperties": false,
+        "properties": {
+          "created_time": {
+            "$ref": "#/components/schemas/created_time"
+          },
+          "end_time": {
+            "description": "End date of the license term",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "id": {
+            "$ref": "#/components/schemas/id"
+          },
+          "modified_time": {
+            "$ref": "#/components/schemas/modified_time"
+          },
+          "order_id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/org_id"
+          },
+          "quantity": {
+            "description": "Number of devices entitled for this license",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "remaining_quantity": {
+            "description": "Number of licenses left in this subscription",
+            "type": "integer"
+          },
+          "start_time": {
+            "description": "Start date of the license term",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "subscription_id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/license_type"
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      },
+      "license_summary": {
+        "additionalProperties": {
+          "type": "integer"
+        },
+        "description": "Number of licenses currently consumed. Property key is license type (e.g. SUB-MAN).",
+        "readOnly": true,
+        "type": "object"
+      },
+      "license_type": {
+        "description": "Type of license. The list of supported license type can be retrieve with the [List License Type](/#operations/listLicenseTypes) API request.",
+        "readOnly": true,
+        "type": "string"
+      },
+      "license_usage_org": {
+        "additionalProperties": false,
+        "properties": {
+          "for_site": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "fully_loaded": {
+            "$ref": "#/components/schemas/license_fully_loaded"
+          },
+          "num_devices": {
+            "readOnly": true,
+            "type": "integer"
+          },
+          "site_id": {
+            "$ref": "#/components/schemas/site_id"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/license_summary"
+          },
+          "usages": {
+            "$ref": "#/components/schemas/license_usages"
+          }
+        },
+        "required": [
+          "num_devices",
+          "site_id",
+          "usages"
+        ],
+        "type": "object"
+      },
+      "license_usages": {
+        "additionalProperties": {
+          "readOnly": true,
+          "type": "integer"
+        },
+        "description": "Number of available licenes. Property key is the service name (e.g. \"SUB-MAN\"). name (e.g. \"SUB-MAN\")",
+        "readOnly": true,
+        "type": "object"
+      },
+      "licenses": {
+        "items": {
+          "$ref": "#/components/schemas/license_sub"
+        },
+        "type": "array"
+      },
+      "modified_time": {
+        "description": "When the object has been modified for the last time, in epoch",
+        "format": "double",
+        "readOnly": true,
+        "type": "number"
+      },
+      "org_id": {
+        "examples": [
+          "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "org_license_action": {
+        "properties": {
+          "amendment_id": {
+            "description": "If `op`==`unamend`, the ID of the operation to cancel",
+            "format": "uuid",
+            "type": "string"
+          },
+          "dst_org_id": {
+            "description": "If `op`==`amend`, the id of the org where the license is moved",
+            "format": "uuid",
+            "type": "string"
+          },
+          "notes": {
+            "description": "If `op`==`annotate`",
+            "type": "string"
+          },
+          "op": {
+            "$ref": "#/components/schemas/org_license_action_operation"
+          },
+          "quantity": {
+            "description": "If `op`==`amend`, the number of licenses to move",
+            "type": "integer"
+          },
+          "subscription_id": {
+            "description": "If `op`==`amend` or `op`==`delete`, the ID of the subscription to use",
+            "type": "string"
+          }
+        },
+        "required": [
+          "op"
+        ],
+        "type": "object"
+      },
+      "org_license_action_operation": {
+        "description": "to move a license, use the `amend` operation. enum: `amend`, `annotate`, `delete`, `unamend`",
+        "enum": [
+          "amend",
+          "annotate",
+          "delete",
+          "unamend"
+        ],
+        "type": "string"
+      },
+      "response_async_license": {
+        "additionalProperties": false,
+        "properties": {
+          "completed": {
+            "$ref": "#/components/schemas/response_async_license_completed"
+          },
+          "details": {
+            "$ref": "#/components/schemas/response_async_license_details"
+          },
+          "failed": {
+            "description": "Current failed number of device",
+            "type": "integer"
+          },
+          "incompleted": {
+            "$ref": "#/components/schemas/response_async_license_incompleted"
+          },
+          "processed": {
+            "description": "Current processed number of device",
+            "type": "integer"
+          },
+          "scheduled_at": {
+            "description": "epoch time of aysnc claim scheduled",
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/response_async_license_status"
+          },
+          "succeed": {
+            "description": "Current succeed number of device",
+            "type": "integer"
+          },
+          "timestamp": {
+            "$ref": "#/components/schemas/timestamp"
+          },
+          "total": {
+            "description": "total number of device included in claim",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "response_async_license_completed": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "response_async_license_detail": {
+        "additionalProperties": false,
+        "description": "detail claim status per device",
+        "properties": {
+          "mac": {
+            "description": "Device MAC Address",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "timestamp": {
+            "$ref": "#/components/schemas/timestamp"
+          }
+        },
+        "type": "object"
+      },
+      "response_async_license_details": {
+        "items": {
+          "$ref": "#/components/schemas/response_async_license_detail"
+        },
+        "type": "array"
+      },
+      "response_async_license_incompleted": {
+        "description": "Current incompleted lists (macs)",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "response_async_license_status": {
+        "description": "processing status of async. enum: `prepared`, `ongoing`, `done`",
+        "enum": [
+          "prepared",
+          "ongoing",
+          "done"
+        ],
+        "type": "string"
+      },
+      "response_claim_license": {
+        "additionalProperties": false,
+        "properties": {
+          "inventory_added": {
+            "$ref": "#/components/schemas/response_claim_license_inventory_added"
+          },
+          "inventory_duplicated": {
+            "$ref": "#/components/schemas/response_claim_license_inventory_duplicated"
+          },
+          "inventory_pending": {
+            "$ref": "#/components/schemas/response_claim_license_inventory_pending"
+          },
+          "license_added": {
+            "$ref": "#/components/schemas/response_claim_license_license_added"
+          },
+          "license_duplicated": {
+            "$ref": "#/components/schemas/response_claim_license_license_duplicated"
+          },
+          "license_error": {
+            "$ref": "#/components/schemas/response_claim_license_license_error"
+          }
+        },
+        "required": [
+          "license_added",
+          "license_duplicated",
+          "license_error",
+          "inventory_added",
+          "inventory_duplicated"
+        ],
+        "type": "object"
+      },
+      "response_claim_license_inventory_added": {
+        "items": {
+          "$ref": "#/components/schemas/response_claim_license_inventory_item"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "response_claim_license_inventory_duplicated": {
+        "items": {
+          "$ref": "#/components/schemas/response_claim_license_inventory_item"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "response_claim_license_inventory_item": {
+        "properties": {
+          "mac": {
+            "type": "string"
+          },
+          "magic": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "serial": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "serial",
+          "model",
+          "type",
+          "magic",
+          "mac"
+        ]
+      },
+      "response_claim_license_inventory_pending": {
+        "description": "for async claim",
+        "items": {
+          "$ref": "#/components/schemas/response_claim_license_inventory_pending_item"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "response_claim_license_inventory_pending_item": {
+        "additionalProperties": false,
+        "properties": {
+          "mac": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_claim_license_license_added": {
+        "items": {
+          "$ref": "#/components/schemas/response_claim_license_license_item"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "response_claim_license_license_duplicated": {
+        "items": {
+          "$ref": "#/components/schemas/response_claim_license_license_item"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "response_claim_license_license_error": {
+        "items": {
+          "$ref": "#/components/schemas/response_claim_license_license_error_item"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "response_claim_license_license_error_item": {
+        "properties": {
+          "order": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "order",
+          "reason"
+        ]
+      },
+      "response_claim_license_license_item": {
+        "properties": {
+          "end": {
+            "type": "integer"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "start": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "start",
+          "end",
+          "quantity"
+        ]
+      },
+      "response_http400": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http401": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Authentication credentials were not provided."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http403": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "You do not have permission to perform this action."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http404": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http429": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "site_id": {
+        "examples": [
+          "441a1214-6928-442a-8e92-e1d34b8ec6a6"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "timestamp": {
+        "description": "Epoch (seconds)",
+        "format": "double",
+        "readOnly": true,
+        "type": "number"
+      },
+      "usage_org_licenses": {
+        "items": {
+          "$ref": "#/components/schemas/license_usage_org"
+        },
+        "type": "array",
+        "uniqueItems": true
+      }
+    },
+    "responses": {
+      "AsyncLicense": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/AsyncLicenseExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_async_license"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/AsyncLicenseExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_async_license"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "ClaimLicense": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Licenses Successfully Claimed And Applied": {
+                "$ref": "#/components/examples/ClaimLicenseLicensesSuccessfullyClaimedAndApplied"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_claim_license"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Licenses Successfully Claimed And Applied": {
+                "$ref": "#/components/examples/ClaimLicenseLicensesSuccessfullyClaimedAndApplied"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_claim_license"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "HTTP400": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          }
+        },
+        "description": "Bad Syntax"
+      },
+      "HTTP401": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          }
+        },
+        "description": "Unauthorized"
+      },
+      "HTTP403": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          }
+        },
+        "description": "Permission Denied"
+      },
+      "HTTP404": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          }
+        },
+        "description": "Not found. The API endpoint doesn’t exist or resource doesn’ t exist"
+      },
+      "HTTP429": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          }
+        },
+        "description": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+      },
+      "License": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/LicenseExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/license"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/LicenseExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/license"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "LicenseUsageOrg": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/LicenseUsageOrgExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/usage_org_licenses"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/LicenseUsageOrgExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/usage_org_licenses"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "OK": {
+        "description": "OK"
+      }
+    },
+    "parameters": {
+      "org_id": {
+        "in": "path",
+        "name": "org_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      }
+    },
+    "examples": {
+      "AsyncLicenseExample": {
+        "value": {
+          "completed": [
+            "000000000022",
+            "000000000011"
+          ],
+          "details": [
+            {
+              "mac": "000000000022",
+              "status": "added",
+              "timestamp": 1709598053
+            }
+          ],
+          "failed": 0,
+          "incompleted": [],
+          "processed": 2,
+          "scheduled_at": 1709598052,
+          "status": "done",
+          "succeed": 2,
+          "timestamp": 1709598053,
+          "total": 2
+        }
+      },
+      "ClaimLicenseLicensesSuccessfullyClaimedAndApplied": {
+        "value": {
+          "inventory_added": [
+            {
+              "mac": "5c5b35000018",
+              "magic": "6JG8EPTFV2A9Z2N",
+              "model": "AP41",
+              "serial": "FXLH2015150025",
+              "type": "ap"
+            }
+          ],
+          "inventory_duplicated": [
+            {
+              "mac": "5c5b35000012",
+              "magic": "DVH4VSNMSZPDXBR",
+              "model": "AP41",
+              "serial": "FXLH2015150027",
+              "type": "ap"
+            }
+          ],
+          "inventory_pending": [
+            {
+              "mac": "5c5b35000012"
+            }
+          ],
+          "license_added": [
+            {
+              "end": 1520380800,
+              "quantity": 180,
+              "start": 1504828800,
+              "type": "SUB-MAN"
+            },
+            {
+              "end": 1520380800,
+              "quantity": 120,
+              "start": 1504828800,
+              "type": "SUB-LOC"
+            }
+          ],
+          "license_duplicated": [
+            {
+              "end": 1520380800,
+              "quantity": 180,
+              "start": 1504828800,
+              "type": "SUB-MAN"
+            }
+          ],
+          "license_error": [
+            {
+              "order": "00000464",
+              "reason": ""
+            }
+          ]
+        }
+      },
+      "HTTP400Example": {
+        "value": {
+          "detail": "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+        }
+      },
+      "HTTP401Example": {
+        "value": {
+          "detail": "Authentication credentials were not provided."
+        }
+      },
+      "HTTP403Example": {
+        "value": {
+          "detail": "You do not have permission to perform this action."
+        }
+      },
+      "HTTP429Example": {
+        "value": {
+          "detail": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+        }
+      },
+      "LicenseExample": {
+        "value": {
+          "amendments": [
+            {
+              "created_time": 1644684842,
+              "end_time": 1744156799,
+              "id": "ff0a14f6-1234-5678-90ab-c8e64d4bc6c6",
+              "modified_time": 1644684842,
+              "quantity": -1,
+              "start_time": 1632873600,
+              "subscription_id": "VNA-000000af",
+              "type": "SUB-VNA"
+            },
+            {
+              "created_time": 1644684842,
+              "end_time": 1744156799,
+              "id": "c1c28812-1234-5678-90ab-dc95680da61e",
+              "modified_time": 1644684842,
+              "quantity": -1,
+              "start_time": 1632873600,
+              "subscription_id": "MAN-000008be",
+              "type": "SUB-MAN"
+            },
+            {
+              "created_time": 1644684842,
+              "end_time": 1744243199,
+              "id": "96c0a41f-1234-5678-90ab-afe74817e9fd",
+              "modified_time": 1644684842,
+              "quantity": -1,
+              "start_time": 1586476800,
+              "subscription_id": "EX24-000000bc",
+              "type": "SUB-EX24"
+            }
+          ],
+          "entitled": {
+            "SUB-ENG": 26,
+            "SUB-EX24": 9,
+            "SUB-MAN": 26,
+            "SUB-VNA": 26
+          },
+          "licenses": [
+            {
+              "created_time": 1555353534,
+              "end_time": 1586822399,
+              "id": "693a41a6-1234-5678-90ab-f53dbd3a31c0",
+              "modified_time": 1555353534,
+              "order_id": "00000000",
+              "org_id": "9777c1a0-1234-5678-90ab-02e208b2d34f",
+              "quantity": 2,
+              "remaining_quantity": 0,
+              "start_time": 1555286400,
+              "subscription_id": "VNA-000000aa",
+              "type": "SUB-VNA"
+            },
+            {
+              "created_time": 1576132516,
+              "end_time": 1586822399,
+              "id": "656607cf-1234-5678-90ab-fc9035614ea5",
+              "modified_time": 1576132516,
+              "order_id": "00000000",
+              "org_id": "9777c1a0-1234-5678-90ab-02e208b2d34f",
+              "quantity": 8,
+              "remaining_quantity": 0,
+              "start_time": 1576022400,
+              "subscription_id": "VNA-000000ab",
+              "type": "SUB-VNA"
+            },
+            {
+              "created_time": 1579204568,
+              "end_time": 1730764800,
+              "id": "db50d0bc-1234-5678-90ab-e439958cb06b",
+              "modified_time": 1579204568,
+              "order_id": "00000000",
+              "org_id": "9777c1a0-1234-5678-90ab-02e208b2d34f",
+              "quantity": 2,
+              "remaining_quantity": 2,
+              "start_time": 1572998400,
+              "subscription_id": "MAN-000000ac",
+              "type": "SUB-MAN"
+            },
+            {
+              "created_time": 1579204568,
+              "end_time": 1730764800,
+              "id": "2ff9e84a-1234-5678-90ab-fb9ec0726e01",
+              "modified_time": 1579204568,
+              "order_id": "00000000",
+              "org_id": "9777c1a0-1234-5678-90ab-02e208b2d34f",
+              "quantity": 2,
+              "remaining_quantity": 2,
+              "start_time": 1572998400,
+              "subscription_id": "ENG-000000ad",
+              "type": "SUB-ENG"
+            },
+            {
+              "created_time": 1579204568,
+              "end_time": 1730764800,
+              "id": "16df7ea6-1234-5678-90ab-78018cd4024d",
+              "modified_time": 1579204568,
+              "order_id": "00000000",
+              "org_id": "9777c1a0-1234-5678-90ab-02e208b2d34f",
+              "quantity": 2,
+              "remaining_quantity": 2,
+              "start_time": 1572998400,
+              "subscription_id": "VNA-000000ae",
+              "type": "SUB-VNA"
+            },
+            {
+              "created_time": 1586237081,
+              "end_time": 1744243199,
+              "id": "1b6f68d5-1234-5678-90ab-70d3e6d18c73",
+              "modified_time": 1586237081,
+              "order_id": "00000000",
+              "org_id": "9777c1a0-1234-5678-90ab-02e208b2d34f",
+              "quantity": 14,
+              "remaining_quantity": 14,
+              "start_time": 1586563200,
+              "subscription_id": "VNA-000000af",
+              "type": "SUB-VNA"
+            },
+            {
+              "created_time": 1586237097,
+              "end_time": 1744243199,
+              "id": "1375c9bf-1234-5678-90ab-9c636708c89e",
+              "modified_time": 1586237097,
+              "order_id": "00000000",
+              "org_id": "9777c1a0-1234-5678-90ab-02e208b2d34f",
+              "quantity": 14,
+              "remaining_quantity": 14,
+              "start_time": 1586563200,
+              "subscription_id": "MAN-000000ba",
+              "type": "SUB-MAN"
+            },
+            {
+              "created_time": 1586237137,
+              "end_time": 1744243199,
+              "id": "5974e979-1234-5678-90ab-438f833ec1c9",
+              "modified_time": 1586237137,
+              "order_id": "00000000",
+              "org_id": "9777c1a0-1234-5678-90ab-02e208b2d34f",
+              "quantity": 14,
+              "remaining_quantity": 14,
+              "start_time": 1586563200,
+              "subscription_id": "ENG-000000bb",
+              "type": "SUB-ENG"
+            },
+            {
+              "created_time": 1629947267,
+              "end_time": 1744243199,
+              "id": "340a9cb3-1234-5678-90ab-b009344dbf3c",
+              "modified_time": 1629947267,
+              "order_id": "00000000",
+              "org_id": "9777c1a0-1234-5678-90ab-02e208b2d34f",
+              "quantity": 10,
+              "remaining_quantity": 9,
+              "start_time": 1586476800,
+              "subscription_id": "EX24-000000bc",
+              "type": "SUB-EX24"
+            },
+            {
+              "created_time": 1632941870,
+              "end_time": 1744156799,
+              "id": "9b599b0f-1234-5678-90ab-406081b58e7f",
+              "modified_time": 1632941870,
+              "order_id": "00000000",
+              "org_id": "9777c1a0-1234-5678-90ab-02e208b2d34f",
+              "quantity": 10,
+              "remaining_quantity": 10,
+              "start_time": 1632873600,
+              "subscription_id": "ENG-000000bd",
+              "type": "SUB-ENG"
+            },
+            {
+              "created_time": 1632941882,
+              "end_time": 1744156799,
+              "id": "d6d8ead3-1234-5678-90ab-98badeac7287",
+              "modified_time": 1632941882,
+              "order_id": "00000000",
+              "org_id": "9777c1a0-1234-5678-90ab-02e208b2d34f",
+              "quantity": 11,
+              "remaining_quantity": 9,
+              "start_time": 1632873600,
+              "subscription_id": "MAN-000008be",
+              "type": "SUB-MAN"
+            }
+          ],
+          "summary": {
+            "SUB-ENG": 18,
+            "SUB-EX24": 3,
+            "SUB-MAN": 22,
+            "SUB-VNA": 20
+          }
+        }
+      },
+      "LicenseUsageOrgExample": {
+        "value": [
+          {
+            "fully_loaded": {
+              "SUB-LOC": 30,
+              "SUB-MAN": 80
+            },
+            "num_devices": 80,
+            "site_id": "4ac1dcf4-9d8b-7211-65c4-057819f0862b",
+            "usages": {
+              "SUB-LOC": 30,
+              "SUB-MAN": 60
+            }
+          }
+        ]
+      }
+    },
+    "securitySchemes": {
+      "apiToken": {
+        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey",
+        "x-scalar-secret-token": "Token YOUR_API_TOKEN"
+      },
+      "basicAuth": {
+        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
+        "scheme": "basic",
+        "type": "http"
+      },
+      "csrfToken": {
+        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "in": "header",
+        "name": "X-CSRFToken",
+        "type": "apiKey"
+      }
+    }
+  }
+}

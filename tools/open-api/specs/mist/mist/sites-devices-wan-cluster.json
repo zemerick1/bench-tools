@@ -1,0 +1,514 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Sites Devices - WAN Cluster",
+    "version": "2602.1.1"
+  },
+  "servers": [
+    {
+      "description": "Mist Global 01",
+      "url": "https://api.mist.com"
+    },
+    {
+      "description": "Mist Global 02",
+      "url": "https://api.gc1.mist.com"
+    },
+    {
+      "description": "Mist Global 03",
+      "url": "https://api.ac2.mist.com"
+    },
+    {
+      "description": "Mist Global 04",
+      "url": "https://api.gc2.mist.com"
+    },
+    {
+      "description": "Mist Global 05",
+      "url": "https://api.gc4.mist.com"
+    },
+    {
+      "description": "Mist EMEA 01",
+      "url": "https://api.eu.mist.com"
+    },
+    {
+      "description": "Mist EMEA 02",
+      "url": "https://api.gc3.mist.com"
+    },
+    {
+      "description": "Mist EMEA 03",
+      "url": "https://api.ac6.mist.com"
+    },
+    {
+      "description": "Mist EMEA 04",
+      "url": "https://api.gc6.mist.com"
+    },
+    {
+      "description": "Mist APAC 01",
+      "url": "https://api.ac5.mist.com"
+    },
+    {
+      "description": "Mist APAC 02",
+      "url": "https://api.gc5.mist.com"
+    },
+    {
+      "description": "Mist APAC 03",
+      "url": "https://api.gc7.mist.com"
+    }
+  ],
+  "security": [
+    {
+      "apiToken": []
+    },
+    {
+      "basicAuth": []
+    },
+    {
+      "basicAuth": [],
+      "csrfToken": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "API Calls specific to manage (form/delete) the SRX/SSR Clusters",
+      "name": "Sites Devices - WAN Cluster"
+    }
+  ],
+  "paths": {
+    "/api/v1/sites/{site_id}/devices/{device_id}/ha": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "get": {
+        "description": "Delete HA Cluster",
+        "operationId": "GetSiteDeviceHaClusterNode",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GatewayCluster"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "GetSiteDeviceHaClusterNode",
+        "tags": [
+          "Sites Devices - WAN Cluster"
+        ]
+      },
+      "post": {
+        "description": "## Create HA Cluster\nBoth nodes has to be in the same site. We expect the user to configure ha_sync / ha_data port in port_configs already\n\n### SRX cabling\n\nsee [Chassis Cluster User Guide for SRX Series Devices](https://www.juniper.net/documentation/us/en/software/junos/chassis-cluster-security-devices/topics/concept/chassis-cluster-srx-series-node-interface-understanding.html) Here’s the recommended cabling.\n\n#### SRX300\n\nFrom ZTP / default state, ge-0/0/0 and ge-0/0/7 (SFP) are default WAN ports and will get DHCP IP. However, ge-0/0/0 becomes OOB/fxp0 after cluster is enabled (i.e. using it for reach Mist is not recommended)\n\n1.  form cluster in UI\n2.  configure ge-0/0/7,ge-1/0/7 for WAN (reth0)\n3.  configure ge-0/0/2,ge-1/0/2 for ha_data\n4.  configure ge-0/0/3- for LAN or additional WAN e.g.\n    \n\n``` json\n{\n    \"port_config\": {\n        \"ge-0/0/2,ge-1/0/2\": {\n            \"usage\": \"ha_data\"\n        },\n        \"ge-0/0/7,ge-1/0/7\": {\n            \"usage\": \"wan\",\n            \"redundant\": true,\n            \"reth_idx\": 0,\n            \"ip_config\": {\"type\": \"dhcp\"}\n        },\n    }\n}\n\n```\n\n1.  connect ge-0/0/1 back to back for ha_control\n2.  connect ge-0/0/2 back to back for ha_data\n3.  connect both ge-0/0/7 to uplink switch to WAN and to reach Mist\n4.  power up both devices\n5.  it takes about 30 minutes for the cluster to form\n    \n\n#### SRX320\n\nFrom ZTP / default state, ge-0/0/0, ge-0/0/7 (SFP) and cl-1/0/0 (LTE) are default WAN ports and will get DHCP IP. However, ge-0/0/0 becomes OOB/fxp0 after cluster is enabled (i.e. using it for reach Mist is not recommended)\n\n##### ZTP via ge-0/0/7\n\nSimilar to SRX300\n\n##### ZTP via cl-1/0/0 (LTE)\n\n1.  form cluster in UI\n2.  configure cl-1/0/0, cl-3/0/0 as WAN (reth0)\n3.  configure ge-0/0/2,ge-3/0/2 for ha_data\n4.  same as above\n    \n\n#### SRX340 / SRX345 / SRX380\n\nSRX340/SRX345 has dedicated OOB/fxp0 ports\n\n1.  form cluster in UI\n2.  configure ge-0/0/0,ge-5/0/0 for WAN (reth0)\n3.  configure ge-0/0/2,ge-5/0/2 for ha_data\n4.  configure ge-0/0/3- for LAN or additional WAN\n5.  connect ge-0/0/0 to uplink switch to WAN and to reach Mist\n6.  connect ge-0/0/1 back-to-back for ha_control\n7.  connect ge-0/0/2 back-to-back for ha_data (fabric); or for SRX380, xe-0/0/16 if 10G SFP+ is used\n8.  connect ge-0/0/3- to LAN or additional WANs\n    \n\n#### SRX550\n\nge-0/0/0 becomes OOB/fxp0 after cluster is enabled, make enable oob_ip_config as dhcp to maintain cloud connectivity\n\n1.  connect ge-0/0/0 to reach Mist (after cluster is fully up, this port becomes OOB/fxp0)\n2.  connect ge-0/0/1 back-to-back for ha_control\n3.  connect ge-0/0/2 back-to-back for ha_data (fabric)\n4.  connect ge-0/0/3 to WAN (after cluster is up, intended to be used for reth0)\n5.  connect ge-0/0/4- to LAN or additional WANs\n    \n\n#### SRX1500\n\nSRX1500 has, additionally, dedicated HA Control port\n\n1.  form cluster in UI\n2.  configure ge-0/0/0,ge-5/0/0 for WAN (reth0)\n3.  configure ge-0/0/1,ge-5/0/1 for ha_data\n4.  configure ge-0/0/2- for LAN or additional WAN\n5.  connect dedicated ha_control back-to-back\n6.  connect ge-0/0/0 to uplink switch to WAN and to reach Mist\n7.  connect ge-0/0/1 back-to-back for ha_data\n8.  connect ge-0/0/2- to LAN or additional WANs\n    \n\n#### SRX4100\n\nSRX4100 has dedicated ha_control and ha_data (fabric) ports\n\n1.  connect dedicated ha_control back-to-back\n2.  connect dedicated ha_data back-to-back\n3.  connect xe-0/0/0 to WAN to reach Mist\n4.  connect xe-0/0/1- to LAN or additional WANs\n    \n\n#### VSRX\n\nWhen standalone, VSRX has fxp0 as first Network Adapter, then ge-0/0/0-N When clustered, VSRX has fxp0, em0, then ge-0/0/0-N\n\n1.  connect net0 (fxp0) to WAN to reach Mist\n2.  connect net1 back-to-back for ha_control\n3.  connect net2 (ge-0/0/0) back-to-back for ha_data (fab0/fab1)\n4.  connect net3 (ge-0/0/1) to WAN, intended to be used for reth0\n5.  connect net4 (ge-0/0/2) to LAN\n    \n\nSRX340/SRX345 has dedicated OOB/fxp0 ports VSRX has fxp0 as first Network Adapter, then ge-0/0/0-N\n\n1.  connect ge-0/0/0 to WAN to reach Mist\n2.  connect ge-0/0/1 back-to-back for ha_control\n3.  connect ge-0/0/2 back-to-back for ha_data (fabric); or for SRX380, xe-0/0/16 if 10G SFP+ is used\n4.  connect ge-0/0/3- to LAN or additional WANs\n    \n\n#### SRX550\n\nge-0/0/0 becomes OOB/fxp0 after cluster is enabled, make enable oob_ip_config as dhcp to maintain cloud connectivity\n\n1.  connect ge-0/0/0 to reach Mist (after cluster is fully up, this port becomes OOB/fxp0)\n2.  connect ge-0/0/1 back-to-back for ha_control\n3.  connect ge-0/0/2 back-to-back for ha_data (fabric)\n4.  connect ge-0/0/3 to WAN (after cluster is up, intended to be used for reth0)\n5.  connect ge-0/0/4- to LAN or additional WANs\n    \n\n#### SRX1500\n\nSRX1500 has, additionally, dedicated HA Control port\n\n1. form cluster in UI\n2. configure ge-0/0/0,ge-7/0/0 for WAN (reth0)\n3. configure ge-0/0/1,ge-7/0/1 for ha_data\n4. configure ge-0/0/2- for LAN or additional WAN\n5. connect dedicated ha_control back-to-back\n6. connect ge-0/0/0 to uplink switch to WAN and to reach Mist\n7. connect ge-0/0/1 back-to-back for ha_data\n8. connect ge-0/0/2- to LAN or additional WANs\n\n    \n#### SRX1600\n\nSRX1600 has, additionally, two dedicated HA Control port\n\n1. form cluster in UI\n2. configure ge-0/0/0,ge-7/0/0 for WAN (reth0)\n3. configure ge-0/0/1,ge-7/0/1 for ha_data\n4. configure ge-0/0/2- for LAN or additional WAN\n5. connect dedicated both ha_control back-to-back\n6. connect ge-0/0/0 to uplink switch to WAN and to reach Mist\n7. connect ge-0/0/1 back-to-back for ha_data\n8. connect ge-0/0/2- to LAN or additional WANs\n\n\n#### SRX4100\n\nSRX4100 has dedicated ha_control and ha_data (fabric) ports\n\n1.  connect dedicated ha_control back-to-back\n2.  connect dedicated ha_data back-to-back\n3.  connect xe-0/0/0 to WAN to reach Mist\n4.  connect xe-0/0/1- to LAN or additional WANs\n\n\n## Replace a Node in a HA Cluster\nUsually Device Replacement is done by Device Replacement API. For a HA cluster, you can also replace a node by another device in the same site.",
+        "operationId": "createSiteDeviceHaCluster",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "nodes": [
+                      {
+                        "mac": "aff827549235"
+                      },
+                      {
+                        "mac": "8396cd006c8c"
+                      }
+                    ]
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/gateway_cluster"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GatewayCluster"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "createSiteDeviceHaCluster",
+        "tags": [
+          "Sites Devices - WAN Cluster"
+        ]
+      },
+      "delete": {
+        "description": "Delete HA Cluster",
+        "operationId": "deleteSiteDeviceHaCluster",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "deleteSiteDeviceHaCluster",
+        "tags": [
+          "Sites Devices - WAN Cluster"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "gateway_cluster": {
+        "properties": {
+          "nodes": {
+            "$ref": "#/components/schemas/gateway_cluster_nodes"
+          }
+        },
+        "required": [
+          "nodes"
+        ],
+        "type": "object"
+      },
+      "gateway_cluster_node": {
+        "additionalProperties": false,
+        "properties": {
+          "mac": {
+            "description": "Gateway MAC Address. Format is `[0-9a-f]{12}` (e.g. \"5684dae9ac8b\")",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mac"
+        ],
+        "type": "object"
+      },
+      "gateway_cluster_nodes": {
+        "description": "When replacing a node, either mac has to remain the same as existing cluster",
+        "items": {
+          "$ref": "#/components/schemas/gateway_cluster_node"
+        },
+        "maxItems": 2,
+        "minItems": 1,
+        "type": "array",
+        "uniqueItems": true
+      },
+      "response_http400": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http401": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Authentication credentials were not provided."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http403": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "You do not have permission to perform this action."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http404": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http429": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "responses": {
+      "GatewayCluster": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Gateway Cluster": {
+                "$ref": "#/components/examples/GatewayClusterGatewayCluster"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/gateway_cluster"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Gateway Cluster": {
+                "$ref": "#/components/examples/GatewayClusterGatewayCluster"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/gateway_cluster"
+            }
+          }
+        },
+        "description": "Ok"
+      },
+      "HTTP400": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          }
+        },
+        "description": "Bad Syntax"
+      },
+      "HTTP401": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          }
+        },
+        "description": "Unauthorized"
+      },
+      "HTTP403": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          }
+        },
+        "description": "Permission Denied"
+      },
+      "HTTP404": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          }
+        },
+        "description": "Not found. The API endpoint doesn’t exist or resource doesn’ t exist"
+      },
+      "HTTP429": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          }
+        },
+        "description": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+      },
+      "OK": {
+        "description": "OK"
+      }
+    },
+    "parameters": {
+      "device_id": {
+        "in": "path",
+        "name": "device_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "site_id": {
+        "in": "path",
+        "name": "site_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      }
+    },
+    "examples": {
+      "GatewayClusterGatewayCluster": {
+        "value": {
+          "nodes": [
+            {
+              "mac": "aff827549235"
+            },
+            {
+              "mac": "8396cd006c8c"
+            }
+          ]
+        }
+      },
+      "HTTP400Example": {
+        "value": {
+          "detail": "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+        }
+      },
+      "HTTP401Example": {
+        "value": {
+          "detail": "Authentication credentials were not provided."
+        }
+      },
+      "HTTP403Example": {
+        "value": {
+          "detail": "You do not have permission to perform this action."
+        }
+      },
+      "HTTP429Example": {
+        "value": {
+          "detail": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+        }
+      }
+    },
+    "securitySchemes": {
+      "apiToken": {
+        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey",
+        "x-scalar-secret-token": "Token YOUR_API_TOKEN"
+      },
+      "basicAuth": {
+        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
+        "scheme": "basic",
+        "type": "http"
+      },
+      "csrfToken": {
+        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "in": "header",
+        "name": "X-CSRFToken",
+        "type": "apiKey"
+      }
+    }
+  }
+}

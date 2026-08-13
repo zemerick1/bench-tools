@@ -1,0 +1,1096 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Authentication",
+    "version": "2602.1.1"
+  },
+  "servers": [
+    {
+      "description": "Mist Global 01",
+      "url": "https://api.mist.com"
+    },
+    {
+      "description": "Mist Global 02",
+      "url": "https://api.gc1.mist.com"
+    },
+    {
+      "description": "Mist Global 03",
+      "url": "https://api.ac2.mist.com"
+    },
+    {
+      "description": "Mist Global 04",
+      "url": "https://api.gc2.mist.com"
+    },
+    {
+      "description": "Mist Global 05",
+      "url": "https://api.gc4.mist.com"
+    },
+    {
+      "description": "Mist EMEA 01",
+      "url": "https://api.eu.mist.com"
+    },
+    {
+      "description": "Mist EMEA 02",
+      "url": "https://api.gc3.mist.com"
+    },
+    {
+      "description": "Mist EMEA 03",
+      "url": "https://api.ac6.mist.com"
+    },
+    {
+      "description": "Mist EMEA 04",
+      "url": "https://api.gc6.mist.com"
+    },
+    {
+      "description": "Mist APAC 01",
+      "url": "https://api.ac5.mist.com"
+    },
+    {
+      "description": "Mist APAC 02",
+      "url": "https://api.gc5.mist.com"
+    },
+    {
+      "description": "Mist APAC 03",
+      "url": "https://api.gc7.mist.com"
+    }
+  ],
+  "security": [
+    {
+      "apiToken": []
+    },
+    {
+      "basicAuth": []
+    },
+    {
+      "basicAuth": [],
+      "csrfToken": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "Login Endpoints when using Login/Password authentication, with or without 2FA.\n\nIf the Login/Password authentication is successful, Mist will add a `csrftoken` cookie that must be added into the later API Requests (please see [csrfToken (Custom Header Signature)]($h/__auth_CsrfToken))",
+      "name": "Admins Login"
+    },
+    {
+      "description": "A Mist account can be linked to OAuth2 providers:\n1. First, login with your Mist account\n2. Obtain the Authorization URL for Linking with [Get Oauth 2 Authorization Url for Login](/#operations/getOauth2AuthorizationUrlForLogin).\nAs OAuth2 flow goes through provider's UI and back with the authorization code, there are two ways to get it:\n  * in JSON response, more usable for developers. Simply don\\'t specify the `forward` parameter when obtaining the authorization URL\n  * as GET parameter, for UI where the user flow can be continued. Specify the landing page/url of your choice \n3. Obtain the authorization code by clicking / going through Authorization URL Link Mist Account against OAuth2 Provider by using the authorization code",
+      "name": "Admins Login - OAuth2"
+    },
+    {
+      "description": "Admin Lookup API Call is mainly used by Web UIs to know if a user must be redirected to an SSO URL for login.",
+      "name": "Admins Lookup"
+    },
+    {
+      "description": "A Mist account can be linked to OAuth2 providers:\n  1. First, login with your Mist account\n  2. Obtain the Authorization URL for Linking\n  3. Obtain the authorization code by clicking / going through Authorization URL\n  4. Link Mist Account against OAuth2 Provider by using the authorization code",
+      "name": "Self OAuth2"
+    }
+  ],
+  "paths": {
+    "/api/v1/login": {
+      "post": {
+        "description": "Log in with email/password.\nWhen 2FA is enabled, there are two ways to login:\n1. login with two_factor token (with Google Authenticator, etc) \n2. login with email/password, generate the token, and use /login/two_factor with the token",
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "with-2FA": {
+                  "value": {
+                    "email": "test@mistsys.com",
+                    "password": "foryoureyesonly",
+                    "two_factor": "123456"
+                  }
+                },
+                "without-2FA": {
+                  "value": {
+                    "email": "test@mistsys.com",
+                    "password": "foryoureyesonly"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/login"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/LoginSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/LoginFailure"
+          }
+        },
+        "summary": "login",
+        "tags": [
+          "Admins Login"
+        ]
+      }
+    },
+    "/api/v1/login/lookup": {
+      "post": {
+        "description": "Login Lookup",
+        "operationId": "lookup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "email": "test@mistsys.com"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/email_string"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/LoginLookup"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "description": "User does not exist"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "lookup",
+        "tags": [
+          "Admins Lookup"
+        ]
+      }
+    },
+    "/api/v1/login/oauth/{provider}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "provider",
+          "required": true,
+          "schema": {
+            "description": "Oauth2 provider name",
+            "examples": [
+              "google"
+            ],
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "description": "Obtain Authorization URL for Login",
+        "operationId": "getOauth2AuthorizationUrlForLogin",
+        "parameters": [
+          {
+            "description": "Callback URL",
+            "in": "query",
+            "name": "forward",
+            "schema": {
+              "examples": [
+                "https://manage.mist.com/oauth/callback.html"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/LoginOauthUrl"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getOauth2AuthorizationUrlForLogin",
+        "tags": [
+          "Admins Login - OAuth2"
+        ]
+      },
+      "post": {
+        "description": "Login via OAuth2",
+        "operationId": "loginOauth2",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "code": "4/S9tegDeLkrYg0L9pWNXV4cgMVbbr3SR9t693A2kSHzw"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/code_string"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "loginOauth2",
+        "tags": [
+          "Admins Login - OAuth2"
+        ]
+      },
+      "delete": {
+        "description": "Unlink OAuth2 Provider",
+        "operationId": "unlinkOauth2Provider",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "unlinkOauth2Provider",
+        "tags": [
+          "Admins Login - OAuth2"
+        ]
+      }
+    },
+    "/api/v1/login/two_factor": {
+      "post": {
+        "description": "Send 2FA Code",
+        "operationId": "twoFactor",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "two_factor": "123456"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/two_factor_string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "description": "two_factor code is incorrect or the user hasn't login yet"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "description": "The user doesn't have 2FA enabled"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "twoFactor",
+        "tags": [
+          "Admins Login"
+        ]
+      }
+    },
+    "/api/v1/self/oauth/{provider}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "provider",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "description": "Obtain Authorization URL for Linking",
+        "operationId": "getOauth2UrlForLinking",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "forward",
+            "schema": {
+              "examples": [
+                "https://manage.mist.com/oauth/callback.html"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SelfOauthUrl"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getOauth2UrlForLinking",
+        "tags": [
+          "Self OAuth2"
+        ]
+      },
+      "post": {
+        "description": "Link Mist account with an OAuth2 Provider",
+        "operationId": "linkOauth2MistAccount",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "code": "4/S9tegDeLkrYg0L9pWNXV4cgMVbbr3SR9t693A2kSHzw"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/code_string"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SelfOauthLinkSuccess"
+          },
+          "400": {
+            "$ref": "#/components/responses/SelfOauthLinkFailure"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "linkOauth2MistAccount",
+        "tags": [
+          "Self OAuth2"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "code_string": {
+        "properties": {
+          "code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "type": "object"
+      },
+      "email_string": {
+        "properties": {
+          "email": {
+            "format": "email",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "type": "object"
+      },
+      "id": {
+        "description": "Unique ID of the object instance in the Mist Organization",
+        "examples": [
+          "53f10664-3ce8-4c27-b382-0ef66432349f"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "login": {
+        "properties": {
+          "email": {
+            "examples": [
+              "test@mistsys.com"
+            ],
+            "type": "string"
+          },
+          "password": {
+            "examples": [
+              "foryoureyesonly"
+            ],
+            "type": "string"
+          },
+          "two_factor": {
+            "examples": [
+              "123456"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ],
+        "type": "object"
+      },
+      "response_http400": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http401": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Authentication credentials were not provided."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http403": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "You do not have permission to perform this action."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http404": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http429": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_login_failure": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "type": "string"
+          },
+          "forward_url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ],
+        "type": "object"
+      },
+      "response_login_lookup": {
+        "additionalProperties": false,
+        "properties": {
+          "sso_url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_login_oauth_url": {
+        "additionalProperties": false,
+        "properties": {
+          "authorization_url": {
+            "type": "string"
+          },
+          "client_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "client_id",
+          "authorization_url"
+        ],
+        "type": "object"
+      },
+      "response_login_success": {
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "two_factor_passed": {
+            "type": "boolean"
+          },
+          "two_factor_required": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "response_self_oauth_link_failure": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "error_description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error",
+          "error_description"
+        ],
+        "type": "object"
+      },
+      "response_self_oauth_link_success": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/components/schemas/id"
+          }
+        },
+        "required": [
+          "action",
+          "id"
+        ],
+        "type": "object"
+      },
+      "response_self_oauth_url": {
+        "additionalProperties": false,
+        "properties": {
+          "authorization_url": {
+            "type": "string"
+          },
+          "linked": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "linked",
+          "authorization_url"
+        ],
+        "type": "object"
+      },
+      "two_factor_string": {
+        "properties": {
+          "two_factor": {
+            "examples": [
+              "123456"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "two_factor"
+        ],
+        "type": "object"
+      }
+    },
+    "responses": {
+      "HTTP400": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          }
+        },
+        "description": "Bad Syntax"
+      },
+      "HTTP401": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          }
+        },
+        "description": "Unauthorized"
+      },
+      "HTTP403": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          }
+        },
+        "description": "Permission Denied"
+      },
+      "HTTP404": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          }
+        },
+        "description": "Not found. The API endpoint doesn’t exist or resource doesn’ t exist"
+      },
+      "HTTP429": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          }
+        },
+        "description": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+      },
+      "LoginFailure": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/LoginFailureExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_login_failure"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/LoginFailureExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_login_failure"
+            }
+          }
+        },
+        "description": "Login Failed"
+      },
+      "LoginLookup": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "SSO_user_exists": {
+                "$ref": "#/components/examples/LoginLookupSSOuserexists"
+              },
+              "local_user_exists": {
+                "$ref": "#/components/examples/LoginLookuplocaluserexists"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_login_lookup"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "SSO_user_exists": {
+                "$ref": "#/components/examples/LoginLookupSSOuserexists"
+              },
+              "local_user_exists": {
+                "$ref": "#/components/examples/LoginLookuplocaluserexists"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_login_lookup"
+            }
+          }
+        },
+        "description": "Account exists"
+      },
+      "LoginOauthUrl": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/LoginOauthUrlExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_login_oauth_url"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/LoginOauthUrlExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_login_oauth_url"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "LoginSuccess": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "2FA-required": {
+                "$ref": "#/components/examples/LoginSuccess2FArequired"
+              },
+              "OK": {
+                "$ref": "#/components/examples/LoginSuccessOK"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_login_success"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "2FA-required": {
+                "$ref": "#/components/examples/LoginSuccess2FArequired"
+              },
+              "OK": {
+                "$ref": "#/components/examples/LoginSuccessOK"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_login_success"
+            }
+          }
+        },
+        "description": "Login Success",
+        "headers": {
+          "Set-Cookie": {
+            "description": "Session Cookie if login/password authentication is successful",
+            "schema": {
+              "examples": [
+                "csrftoken=vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx; expires=Tue, 15-Mar-2016 19:47:20 GMT; Max-Age=31449600; Path=/"
+              ],
+              "type": "string"
+            }
+          }
+        }
+      },
+      "OK": {
+        "description": "OK"
+      },
+      "SelfOauthLinkFailure": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/SelfOauthLinkFailureExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_self_oauth_link_failure"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/SelfOauthLinkFailureExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_self_oauth_link_failure"
+            }
+          }
+        },
+        "description": "Authorization Error"
+      },
+      "SelfOauthLinkSuccess": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/SelfOauthLinkSuccessExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_self_oauth_link_success"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/SelfOauthLinkSuccessExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_self_oauth_link_success"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "SelfOauthUrl": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/SelfOauthUrlExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_self_oauth_url"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/SelfOauthUrlExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_self_oauth_url"
+            }
+          }
+        },
+        "description": "OK"
+      }
+    },
+    "examples": {
+      "HTTP400Example": {
+        "value": {
+          "detail": "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+        }
+      },
+      "HTTP401Example": {
+        "value": {
+          "detail": "Authentication credentials were not provided."
+        }
+      },
+      "HTTP403Example": {
+        "value": {
+          "detail": "You do not have permission to perform this action."
+        }
+      },
+      "HTTP429Example": {
+        "value": {
+          "detail": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+        }
+      },
+      "LoginFailureExample": {
+        "value": {
+          "detail": "sso admin login needs to be initiated by IdP",
+          "forward_url": "https://my.sso/idp_sso_url"
+        }
+      },
+      "LoginLookupSSOuserexists": {
+        "value": {
+          "sso_url": "https://my.sso/idp_sso_url"
+        }
+      },
+      "LoginLookuplocaluserexists": {
+        "value": {}
+      },
+      "LoginOauthUrlExample": {
+        "value": {
+          "authorization_url": "https://accounts.google.com/o/oauth2/v2/auth?.....",
+          "client_id": "173131512-mpbnju32.apps.googleusercontent.com"
+        }
+      },
+      "LoginSuccess2FArequired": {
+        "value": {
+          "email": "test@mistsys.com",
+          "two_factor_passed": false,
+          "two_factor_required": true
+        }
+      },
+      "LoginSuccessOK": {
+        "value": {}
+      },
+      "SelfOauthLinkFailureExample": {
+        "value": {
+          "error": "access_denied",
+          "error_description": "The resource owner or authorization server denied the request."
+        }
+      },
+      "SelfOauthLinkSuccessExample": {
+        "value": {
+          "action": "oauth account linked",
+          "id": "google_user_id"
+        }
+      },
+      "SelfOauthUrlExample": {
+        "value": {
+          "authorization_url": "https://accounts.google.com/o/oauth2/v2/auth?.....",
+          "linked": false
+        }
+      }
+    },
+    "securitySchemes": {
+      "apiToken": {
+        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey",
+        "x-scalar-secret-token": "Token YOUR_API_TOKEN"
+      },
+      "basicAuth": {
+        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
+        "scheme": "basic",
+        "type": "http"
+      },
+      "csrfToken": {
+        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "in": "header",
+        "name": "X-CSRFToken",
+        "type": "apiKey"
+      }
+    }
+  }
+}

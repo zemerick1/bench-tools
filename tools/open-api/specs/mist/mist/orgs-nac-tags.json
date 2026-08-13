@@ -1,0 +1,1140 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Orgs NAC Tags",
+    "version": "2602.1.1"
+  },
+  "servers": [
+    {
+      "description": "Mist Global 01",
+      "url": "https://api.mist.com"
+    },
+    {
+      "description": "Mist Global 02",
+      "url": "https://api.gc1.mist.com"
+    },
+    {
+      "description": "Mist Global 03",
+      "url": "https://api.ac2.mist.com"
+    },
+    {
+      "description": "Mist Global 04",
+      "url": "https://api.gc2.mist.com"
+    },
+    {
+      "description": "Mist Global 05",
+      "url": "https://api.gc4.mist.com"
+    },
+    {
+      "description": "Mist EMEA 01",
+      "url": "https://api.eu.mist.com"
+    },
+    {
+      "description": "Mist EMEA 02",
+      "url": "https://api.gc3.mist.com"
+    },
+    {
+      "description": "Mist EMEA 03",
+      "url": "https://api.ac6.mist.com"
+    },
+    {
+      "description": "Mist EMEA 04",
+      "url": "https://api.gc6.mist.com"
+    },
+    {
+      "description": "Mist APAC 01",
+      "url": "https://api.ac5.mist.com"
+    },
+    {
+      "description": "Mist APAC 02",
+      "url": "https://api.gc5.mist.com"
+    },
+    {
+      "description": "Mist APAC 03",
+      "url": "https://api.gc7.mist.com"
+    }
+  ],
+  "security": [
+    {
+      "apiToken": []
+    },
+    {
+      "basicAuth": []
+    },
+    {
+      "basicAuth": [],
+      "csrfToken": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "NAC Tags are the building blocks to compose nacrules.\nThey can either appear in the \"matching\" / \"not_matching\" sections of a nacrule, in which case they play the role of classifiers, or they could appear in the \"apply_tags\" section of the of a nacrule, in which case they influence the result.\nWhen the \"type\" field of nactag is \"match\", it can be used as the classifier of a nacrule.\n- \"match\" field specifies the attribute name and \"values\" field specifies the list of attribute values to match on.\n- When multiple values are specified, its treated as an OR condition between those values. This behavior can be changed by setting \"match_all\" field to \"true\", in which case it is treated as an AND condition between those values.\n- By default, exact match is performed.\n\nThis behavior can be changed as follows:\n- Adding `-` at the beginning will perform suffix match (ex: -staff will match foo-staff and bar-staff)\n- Adding `-` at the end will perform prefix match (ex: foo- will match foo-staff and foo-interns)\n- Adding `!` at both ends will perform substring match (ex: printer will match hp-printer-bldg1, brother-printer-lab)\n- Adding `!` at the beginning will perform negation of the match (ex: !ssid-guest will match any string that is not ssid-guest)\n- Note: when negation should be used along with suffix/substring operation, ! should always precede \\* (ex: !guest will match any string that is not ending with guest)\n\nWhen the \"type\" field of nactag is NOT \"match\", it can be used as the result of a nacrule. \"type\" field identifies the action to take and the corresponding field would provide any associated parameters to that action. When the \"type\" field of nactag is NOT \"match\" and is any of the result type also supported by usermac table(`vlan`), \"allow_usermac_override\" field can be set to true to allow the override by usermac result",
+      "name": "Orgs NAC Tags"
+    }
+  ],
+  "paths": {
+    "/api/v1/orgs/{org_id}/nactags": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "get": {
+        "description": "Get List of Org NAC Tags",
+        "operationId": "listOrgNacTags",
+        "parameters": [
+          {
+            "description": "Type of NAC Tag. enum: `egress_vlan_names`, `gbp_tag`, `match`, `radius_attrs`, `radius_group`, `radius_vendor_attrs`, `session_timeout`, `username_attr`, `vlan`",
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "$ref": "#/components/schemas/nac_tag_type"
+            }
+          },
+          {
+            "description": "Name of NAC Tag",
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "if `type`==`match`, Type of NAC Tag. enum: `cert_cn`, `cert_eku`, `cert_issuer`, `cert_san`, `cert_serial`, `cert_sub`, `cert_template`, `client_mac`, `edr_status`, `gbp_tag`, `hostname`, `idp_role`, `ingress_vlan`, `mdm_status`, `nas_ip`, `radius_group`, `realm`, `ssid`, `user_name`, `usermac_label`",
+            "in": "query",
+            "name": "match",
+            "schema": {
+              "$ref": "#/components/schemas/nac_tag_match"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/NacTagsArray"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "listOrgNacTags",
+        "tags": [
+          "Orgs NAC Tags"
+        ]
+      },
+      "post": {
+        "description": "Create Org NAC Tag",
+        "operationId": "createOrgNacTag",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/nac_tag"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/NacTag"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "createOrgNacTag",
+        "tags": [
+          "Orgs NAC Tags"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_id}/nactags/{nactag_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        },
+        {
+          "$ref": "#/components/parameters/nactag_id"
+        }
+      ],
+      "get": {
+        "description": "Get Org NAC Tag",
+        "operationId": "getOrgNacTag",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/NacTag"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getOrgNacTag",
+        "tags": [
+          "Orgs NAC Tags"
+        ]
+      },
+      "put": {
+        "description": "Update Org NAC Tag",
+        "operationId": "updateOrgNacTag",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/nac_tag"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/NacTag"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "updateOrgNacTag",
+        "tags": [
+          "Orgs NAC Tags"
+        ]
+      },
+      "delete": {
+        "description": "Delete Org NAC Tag",
+        "operationId": "deleteOrgNacTag",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "deleteOrgNacTag",
+        "tags": [
+          "Orgs NAC Tags"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "created_time": {
+        "description": "When the object has been created, in epoch",
+        "format": "double",
+        "readOnly": true,
+        "type": "number"
+      },
+      "id": {
+        "description": "Unique ID of the object instance in the Mist Organization",
+        "examples": [
+          "53f10664-3ce8-4c27-b382-0ef66432349f"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "modified_time": {
+        "description": "When the object has been modified for the last time, in epoch",
+        "format": "double",
+        "readOnly": true,
+        "type": "number"
+      },
+      "nac_tag": {
+        "properties": {
+          "allow_usermac_override": {
+            "default": false,
+            "description": "Can be set to true to allow the override by usermac result",
+            "type": "boolean"
+          },
+          "created_time": {
+            "$ref": "#/components/schemas/created_time"
+          },
+          "egress_vlan_names": {
+            "$ref": "#/components/schemas/nac_tag_egress_vlan_names"
+          },
+          "gbp_tag": {
+            "$ref": "#/components/schemas/nac_tag_gbp_tag"
+          },
+          "id": {
+            "$ref": "#/components/schemas/id"
+          },
+          "match": {
+            "$ref": "#/components/schemas/nac_tag_match"
+          },
+          "match_all": {
+            "default": false,
+            "description": "This field is applicable only when `type`==`match`\n  * `false`: means it is sufficient to match any of the values (i.e., match-any behavior)\n  * `true`: means all values should be matched (i.e., match-all behavior)\n\n\nCurrently it makes sense to set this field to `true` only if the `match`==`idp_role`, `match`==`usermac_label` and `edr_status`",
+            "type": "boolean"
+          },
+          "modified_time": {
+            "$ref": "#/components/schemas/modified_time"
+          },
+          "nacportal_id": {
+            "$ref": "#/components/schemas/redirect_nacportal_id"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/org_id"
+          },
+          "radius_attrs": {
+            "$ref": "#/components/schemas/nac_tag_radius_attrs"
+          },
+          "radius_group": {
+            "description": "If `type`==`radius_group`",
+            "type": "string"
+          },
+          "radius_vendor_attrs": {
+            "$ref": "#/components/schemas/nac_tag_radius_vendor_attrs"
+          },
+          "session_timeout": {
+            "description": "If `type`==`session_timeout, in seconds",
+            "examples": [
+              86000
+            ],
+            "type": "integer"
+          },
+          "type": {
+            "$ref": "#/components/schemas/nac_tag_type"
+          },
+          "username_attr": {
+            "$ref": "#/components/schemas/nac_tag_username_attr"
+          },
+          "values": {
+            "$ref": "#/components/schemas/nac_tag_values"
+          },
+          "vlan": {
+            "description": "If `type`==`vlan`",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ],
+        "type": "object"
+      },
+      "nac_tag_egress_vlan_names": {
+        "description": "If `type`==`egress_vlan_names`, list of egress vlans to return",
+        "examples": [
+          [
+            "1vlan-30",
+            "1vlan-20",
+            "2-vlan10"
+          ]
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "nac_tag_gbp_tag": {
+        "anyOf": [
+          {
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "description": "If `type`==`gbp_tag`"
+      },
+      "nac_tag_match": {
+        "description": "if `type`==`match`. enum: `cert_cn`, `cert_eku`, `cert_issuer`, `cert_san`, `cert_serial`, `cert_sub`, `cert_template`, `client_mac`, `edr_status`, `gbp_tag`, `hostname`, `idp_role`, `ingress_vlan`, `mdm_status`, `nas_ip`, `radius_group`, `realm`, `ssid`, `user_name`, `usermac_label`",
+        "enum": [
+          "cert_cn",
+          "cert_eku",
+          "cert_issuer",
+          "cert_san",
+          "cert_serial",
+          "cert_sub",
+          "cert_template",
+          "client_mac",
+          "edr_status",
+          "gbp_tag",
+          "hostname",
+          "idp_role",
+          "ingress_vlan",
+          "mdm_status",
+          "nas_ip",
+          "radius_group",
+          "realm",
+          "ssid",
+          "user_name",
+          "usermac_label"
+        ],
+        "minLength": 1,
+        "type": "string"
+      },
+      "nac_tag_radius_attrs": {
+        "description": "If `type`==`radius_attrs`, user can specify a list of one or more standard attributes in the field \"radius_attrs\". \nIt is the responsibility of the user to provide a syntactically correct string, otherwise it may not work as expected.\nNote that it is allowed to have more than one radius_attrs in the result of a given rule.",
+        "examples": [
+          [
+            "Idle-Timeout=600",
+            "Termination-Action=RADIUS-Request"
+          ]
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "nac_tag_radius_vendor_attrs": {
+        "description": "If `type`==`radius_vendor_attrs`, user can specify a list of one or more vendor-specific attributes in the field \"radius_vendor_attrs\". \nIt is the responsibility of the user to provide a syntactically correct string, otherwise it may not work as expected.\nNote that it is allowed to have more than one radius_vendor_attrs in the result of a given rule.",
+        "examples": [
+          [
+            "PaloAlto-Admin-Role=superuser",
+            "PaloAlto-Panorama-Admin-Role=administrator"
+          ]
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "nac_tag_type": {
+        "description": "enum: `egress_vlan_names`, `gbp_tag`, `match`, `radius_attrs`, `radius_group`, `radius_vendor_attrs`, `redirect_nacportal_id`, `session_timeout`, `username_attr`, `vlan`",
+        "enum": [
+          "egress_vlan_names",
+          "gbp_tag",
+          "match",
+          "radius_attrs",
+          "radius_group",
+          "radius_vendor_attrs",
+          "redirect_nacportal_id",
+          "session_timeout",
+          "username_attr",
+          "vlan"
+        ],
+        "minLength": 1,
+        "type": "string"
+      },
+      "nac_tag_username_attr": {
+        "description": "enum: `automatic`, `cn`, `dns`, `email`, `upn`",
+        "enum": [
+          "automatic",
+          "cn",
+          "dns",
+          "email",
+          "upn"
+        ],
+        "type": "string"
+      },
+      "nac_tag_values": {
+        "description": "If `type`==`match`",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "nac_tags": {
+        "items": {
+          "$ref": "#/components/schemas/nac_tag"
+        },
+        "type": "array"
+      },
+      "org_id": {
+        "examples": [
+          "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "redirect_nacportal_id": {
+        "description": "If `type`==`redirect_nacportal_id`, the ID of the NAC portal to redirect to",
+        "examples": [
+          "1e970fec-0a7a-4d73-a472-3ef3b6a456aa"
+        ],
+        "format": "uuid",
+        "type": "string"
+      },
+      "response_http400": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http401": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Authentication credentials were not provided."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http403": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "You do not have permission to perform this action."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http404": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http429": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "responses": {
+      "HTTP400": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          }
+        },
+        "description": "Bad Syntax"
+      },
+      "HTTP401": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          }
+        },
+        "description": "Unauthorized"
+      },
+      "HTTP403": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          }
+        },
+        "description": "Permission Denied"
+      },
+      "HTTP404": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          }
+        },
+        "description": "Not found. The API endpoint doesn’t exist or resource doesn’ t exist"
+      },
+      "HTTP429": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          }
+        },
+        "description": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+      },
+      "NacTag": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Egress Vlan Names": {
+                "$ref": "#/components/examples/NacTagEgressVlanNames"
+              },
+              "Matches Cert CN": {
+                "$ref": "#/components/examples/NacTagMatchesCertCN"
+              },
+              "Matches Cert EKU": {
+                "$ref": "#/components/examples/NacTagMatchesCertEku"
+              },
+              "Matches Cert Issuer": {
+                "$ref": "#/components/examples/NacTagMatchesCertIssuer"
+              },
+              "Matches Cert SAN": {
+                "$ref": "#/components/examples/NacTagMatchesCertSAN"
+              },
+              "Matches Cert Serial": {
+                "$ref": "#/components/examples/NacTagMatchesCertSerial"
+              },
+              "Matches Cert Sub": {
+                "$ref": "#/components/examples/NacTagMatchesCertSub"
+              },
+              "Matches Cert Template": {
+                "$ref": "#/components/examples/NacTagMatchesCertTemplate"
+              },
+              "Matches Client Mac": {
+                "$ref": "#/components/examples/NacTagMatchesClientMac"
+              },
+              "Matches EDR Status": {
+                "$ref": "#/components/examples/NacTagMatchesEdrStatus"
+              },
+              "Matches Hostname": {
+                "$ref": "#/components/examples/NacTagMatchesHostname"
+              },
+              "Matches Radius Group": {
+                "$ref": "#/components/examples/NacTagMatchesRadiusGroup"
+              },
+              "Matches Realm": {
+                "$ref": "#/components/examples/NacTagMatchesRealm"
+              },
+              "Matches Role": {
+                "$ref": "#/components/examples/NacTagMatchesRole"
+              },
+              "Matches Username": {
+                "$ref": "#/components/examples/NacTagMatchesUsername"
+              },
+              "Matches Vlan": {
+                "$ref": "#/components/examples/NacTagMatchesVlan"
+              },
+              "Radius Attrs": {
+                "$ref": "#/components/examples/NacTagRadiusAttrs"
+              },
+              "Radius Vendor Attrs": {
+                "$ref": "#/components/examples/NacTagRadiusVendorAttrs"
+              },
+              "Session Timeout": {
+                "$ref": "#/components/examples/NacTagSessionTimeout"
+              },
+              "Username Attr": {
+                "$ref": "#/components/examples/NacTagUsernameAttr"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/nac_tag"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Egress Vlan Names": {
+                "$ref": "#/components/examples/NacTagEgressVlanNames"
+              },
+              "Matches Cert CN": {
+                "$ref": "#/components/examples/NacTagMatchesCertCN"
+              },
+              "Matches Cert Issuer": {
+                "$ref": "#/components/examples/NacTagMatchesCertIssuer"
+              },
+              "Matches Cert SAN": {
+                "$ref": "#/components/examples/NacTagMatchesCertSAN"
+              },
+              "Matches Cert Serial": {
+                "$ref": "#/components/examples/NacTagMatchesCertSerial"
+              },
+              "Matches Cert Sub": {
+                "$ref": "#/components/examples/NacTagMatchesCertSub"
+              },
+              "Matches Cert Template": {
+                "$ref": "#/components/examples/NacTagMatchesCertTemplate"
+              },
+              "Matches Client Mac": {
+                "$ref": "#/components/examples/NacTagMatchesClientMac"
+              },
+              "Matches Hostname": {
+                "$ref": "#/components/examples/NacTagMatchesHostname"
+              },
+              "Matches Radius Group": {
+                "$ref": "#/components/examples/NacTagMatchesRadiusGroup"
+              },
+              "Matches Realm": {
+                "$ref": "#/components/examples/NacTagMatchesRealm"
+              },
+              "Matches Role": {
+                "$ref": "#/components/examples/NacTagMatchesRole"
+              },
+              "Matches Username": {
+                "$ref": "#/components/examples/NacTagMatchesUsername"
+              },
+              "Matches Vlan": {
+                "$ref": "#/components/examples/NacTagMatchesVlan"
+              },
+              "Radius Attrs": {
+                "$ref": "#/components/examples/NacTagRadiusAttrs"
+              },
+              "Radius Vendor Attrs": {
+                "$ref": "#/components/examples/NacTagRadiusVendorAttrs"
+              },
+              "Session Timeout": {
+                "$ref": "#/components/examples/NacTagSessionTimeout"
+              },
+              "Username Attr": {
+                "$ref": "#/components/examples/NacTagUsernameAttr"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/nac_tag"
+            }
+          }
+        },
+        "description": "Example response"
+      },
+      "NacTagsArray": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/nac_tags"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/nac_tags"
+            }
+          }
+        },
+        "description": "Example response"
+      },
+      "OK": {
+        "description": "OK"
+      }
+    },
+    "parameters": {
+      "limit": {
+        "in": "query",
+        "name": "limit",
+        "required": false,
+        "schema": {
+          "default": 100,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "nactag_id": {
+        "in": "path",
+        "name": "nactag_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "org_id": {
+        "in": "path",
+        "name": "org_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "page": {
+        "in": "query",
+        "name": "page",
+        "required": false,
+        "schema": {
+          "default": 1,
+          "minimum": 1,
+          "type": "integer"
+        }
+      }
+    },
+    "examples": {
+      "HTTP400Example": {
+        "value": {
+          "detail": "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+        }
+      },
+      "HTTP401Example": {
+        "value": {
+          "detail": "Authentication credentials were not provided."
+        }
+      },
+      "HTTP403Example": {
+        "value": {
+          "detail": "You do not have permission to perform this action."
+        }
+      },
+      "HTTP429Example": {
+        "value": {
+          "detail": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+        }
+      },
+      "NacTagEgressVlanNames": {
+        "value": {
+          "egress_vlan_names": [
+            "1vlan-30",
+            "1vlan-20",
+            "2vlan10"
+          ],
+          "name": "trunk_ap",
+          "type": "egress_vlan_names"
+        }
+      },
+      "NacTagMatchesCertCN": {
+        "value": {
+          "match": "cert_cn",
+          "name": "staff",
+          "type": "match",
+          "values": [
+            "john",
+            "staff*"
+          ]
+        }
+      },
+      "NacTagMatchesCertEku": {
+        "value": {
+          "match": "cert_eku",
+          "name": "EKU-Match",
+          "type": "match",
+          "values": [
+            "1.3.6.1.4.1.54321.10.1",
+            "1.3.6.1.4.1.54321.20.2"
+          ]
+        }
+      },
+      "NacTagMatchesCertIssuer": {
+        "value": {
+          "match": "cert_issuer",
+          "name": "issuer1",
+          "type": "match",
+          "values": [
+            "/C=CN/ST=defy/L=defy/O=defy/OU=defy/CN=defy"
+          ]
+        }
+      },
+      "NacTagMatchesCertSAN": {
+        "value": {
+          "match": "cert_san",
+          "name": "san1",
+          "type": "match",
+          "values": [
+            "henry1@defy.com"
+          ]
+        }
+      },
+      "NacTagMatchesCertSerial": {
+        "value": {
+          "match": "cert_serial",
+          "name": "serial1",
+          "type": "match",
+          "values": [
+            "6a524ab782fb468c00c59f51cff00268d95533b8"
+          ]
+        }
+      },
+      "NacTagMatchesCertSub": {
+        "value": {
+          "match": "cert_sub",
+          "name": "subject1",
+          "type": "match",
+          "values": [
+            "/C=CN/ST=defy/O=defy/OU=defy/CN=steve"
+          ]
+        }
+      },
+      "NacTagMatchesCertTemplate": {
+        "value": {
+          "match": "cert_template",
+          "name": "templ1",
+          "type": "match",
+          "values": [
+            "1.3.6.1.4.1.311.21.8.4200806.605933.871088.11229391.9863893.29.13545645.4807979",
+            "1.3.6.1.4.1.311.21.8.3285427.4093958.2707341.9961608.11572555.6.4903431.2258457"
+          ]
+        }
+      },
+      "NacTagMatchesClientMac": {
+        "value": {
+          "match": "client_mac",
+          "name": "cameras",
+          "type": "match",
+          "values": [
+            "010203040506",
+            "abcdef*"
+          ]
+        }
+      },
+      "NacTagMatchesEdrStatus": {
+        "value": {
+          "match": "edr_status",
+          "match_all": false,
+          "name": "edr_health",
+          "type": "match",
+          "values": [
+            "sentinelone_healthy",
+            "sentinelone_infected",
+            "crowdstrike_low",
+            "crowdstrike_medium",
+            "crowdstrike_high",
+            "crowdstrike_critical",
+            "crowdstrike_informational",
+            "unknown"
+          ]
+        }
+      },
+      "NacTagMatchesHostname": {
+        "value": {
+          "match": "hostname",
+          "name": "hostname1",
+          "type": "match",
+          "values": [
+            "CP*",
+            "USR*"
+          ]
+        }
+      },
+      "NacTagMatchesRadiusGroup": {
+        "value": {
+          "name": "VIP_group",
+          "radius_group": "VIP",
+          "type": "radius_group"
+        }
+      },
+      "NacTagMatchesRealm": {
+        "value": {
+          "match": "realm",
+          "name": "defy",
+          "type": "match",
+          "values": [
+            "defy.com"
+          ]
+        }
+      },
+      "NacTagMatchesRole": {
+        "value": {
+          "match": "idp_role",
+          "name": "VIP",
+          "type": "match",
+          "values": [
+            "vip"
+          ]
+        }
+      },
+      "NacTagMatchesUsername": {
+        "value": {
+          "match": "user_name",
+          "name": "admins",
+          "type": "match",
+          "values": [
+            "bob",
+            "steve"
+          ]
+        }
+      },
+      "NacTagMatchesVlan": {
+        "value": {
+          "name": "guest_vlan",
+          "type": "vlan",
+          "vlan": "30"
+        }
+      },
+      "NacTagRadiusAttrs": {
+        "value": {
+          "name": "custom_attrs",
+          "radius_attrs": [
+            "Idle-Timeout=600",
+            "Termination-Action=RADIUS-Request"
+          ],
+          "type": "radius_attrs"
+        }
+      },
+      "NacTagRadiusVendorAttrs": {
+        "value": {
+          "name": "custom_radius_vendor_attrs",
+          "radius_vendor_attrs": [
+            "PaloAlto-Admin-Role=superuser",
+            "PaloAlto-Panorama-Admin-Role=administrator"
+          ],
+          "type": "radius_vendor_attrs"
+        }
+      },
+      "NacTagSessionTimeout": {
+        "value": {
+          "name": "timeout",
+          "session_timeout": 86400,
+          "type": "session_timeout"
+        }
+      },
+      "NacTagUsernameAttr": {
+        "value": {
+          "allow_usermac_override": true,
+          "name": "username_attr",
+          "type": "username_attr",
+          "username_attr": "automatic"
+        }
+      }
+    },
+    "securitySchemes": {
+      "apiToken": {
+        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey",
+        "x-scalar-secret-token": "Token YOUR_API_TOKEN"
+      },
+      "basicAuth": {
+        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
+        "scheme": "basic",
+        "type": "http"
+      },
+      "csrfToken": {
+        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "in": "header",
+        "name": "X-CSRFToken",
+        "type": "apiKey"
+      }
+    }
+  }
+}

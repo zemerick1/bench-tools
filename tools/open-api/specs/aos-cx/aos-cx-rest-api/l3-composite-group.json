@@ -1,0 +1,468 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "L3_Composite_Group",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "L3_Composite_Group"
+    }
+  ],
+  "paths": {
+    "/system/l3_composite_groups": {
+      "get": {
+        "tags": [
+          "L3_Composite_Group"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "active_resolved_members": {
+                      "type": "string",
+                      "description": "Indicates the list of resolved members which should be used: `mpls`:                  Use resolved_mpls_members list. `unresolved`:            There are no active members.",
+                      "enum": [
+                        "mpls",
+                        "unresolved"
+                      ]
+                    },
+                    "data_path_state": {
+                      "type": "string",
+                      "description": "Indicates the state the data path is in: `ecmp`:                    Forward traffic to more than one                             nexthop.                            Balance flows to multiple nexthops.                            If nexthops are on different ports,                            the effect of increasing available                            bandwidth. `l3_dest_ecmp_group`:      Composite Group uses both L3 Dest                            and ECMP Group `l3_dest_tunnel_endpoint`: Composite Group uses both L3 Dest                            and Tunnel Endpoint `single`:                  Forward traffic to the single,                             resolved nexthop. `unresolved`:              Waiting for dependencies to become                            resolved.",
+                      "enum": [
+                        "ecmp",
+                        "l3_dest_ecmp_group",
+                        "l3_dest_tunnel_endpoint",
+                        "single",
+                        "unresolved"
+                      ]
+                    },
+                    "hw_config": {
+                      "type": "object",
+                      "description": "Indicates the hardware IDs which should be used in cases where dp_state is 'ecmp' or 'single'",
+                      "properties": {
+                        "ecmp_id": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "ECMP Group ID assigned by L3RM",
+                          "maximum": 4294967295,
+                          "minimum": 1
+                        },
+                        "l3_destination_id": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "L3 destination index assigned by L3RM",
+                          "maximum": 4294967295,
+                          "minimum": 1
+                        }
+                      }
+                    },
+                    "id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Reference Resource: [L3_Composite_Group](#/L3_Composite_Group)<br>Abstracted value which is generated to identify each of the  Composite Groups.",
+                      "maximum": 4294967295,
+                      "minimum": 1
+                    },
+                    "nexthops": {
+                      "type": "array",
+                      "description": "Reference Resource: [Nexthop](#/Nexthop)<br>The list of Nexthops which will be used in a composite group.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "resolved_mpls_members": {
+                      "type": "array",
+                      "description": "Reference Resource: [Label_Endpoint](#/Label_Endpoint)<br>The list of Label_Endpoints which will be used in a composite group  with 'mpls' active_resolved_members.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "tunnel_endpoint": {
+                      "type": "array",
+                      "description": "Reference Resource: [Tunnel_Endpoint](#/Tunnel_Endpoint)<br>Tunnel Endpoints corresponding to this Composite Group.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Indicates how the l3_composite_group is used: `mpls`:                Used to configure MPLS routes. `protected_dest`:      Used to configure protected nexthop groups. `vxlan`:               Used to configure hosts learned over VxLAN tunnel. `ecmp_dlb`:        Used to configure Dynamic load balanced ECMP Group.",
+                      "enum": [
+                        "mpls",
+                        "protected_dest",
+                        "vxlan",
+                        "ecmp_dlb"
+                      ]
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "data_path_state",
+                  "hw_config",
+                  "id",
+                  "tunnel_endpoint",
+                  "type",
+                  "active_resolved_members",
+                  "nexthops",
+                  "resolved_mpls_members"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/l3_composite_groups/{L3_Composite_Group.id}": {
+      "get": {
+        "tags": [
+          "L3_Composite_Group"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "active_resolved_members": {
+                      "type": "string",
+                      "description": "Indicates the list of resolved members which should be used: `mpls`:                  Use resolved_mpls_members list. `unresolved`:            There are no active members.",
+                      "enum": [
+                        "mpls",
+                        "unresolved"
+                      ]
+                    },
+                    "data_path_state": {
+                      "type": "string",
+                      "description": "Indicates the state the data path is in: `ecmp`:                    Forward traffic to more than one                             nexthop.                            Balance flows to multiple nexthops.                            If nexthops are on different ports,                            the effect of increasing available                            bandwidth. `l3_dest_ecmp_group`:      Composite Group uses both L3 Dest                            and ECMP Group `l3_dest_tunnel_endpoint`: Composite Group uses both L3 Dest                            and Tunnel Endpoint `single`:                  Forward traffic to the single,                             resolved nexthop. `unresolved`:              Waiting for dependencies to become                            resolved.",
+                      "enum": [
+                        "ecmp",
+                        "l3_dest_ecmp_group",
+                        "l3_dest_tunnel_endpoint",
+                        "single",
+                        "unresolved"
+                      ]
+                    },
+                    "hw_config": {
+                      "type": "object",
+                      "description": "Indicates the hardware IDs which should be used in cases where dp_state is 'ecmp' or 'single'",
+                      "properties": {
+                        "ecmp_id": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "ECMP Group ID assigned by L3RM",
+                          "maximum": 4294967295,
+                          "minimum": 1
+                        },
+                        "l3_destination_id": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "L3 destination index assigned by L3RM",
+                          "maximum": 4294967295,
+                          "minimum": 1
+                        }
+                      }
+                    },
+                    "id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Reference Resource: [L3_Composite_Group](#/L3_Composite_Group)<br>Abstracted value which is generated to identify each of the  Composite Groups.",
+                      "maximum": 4294967295,
+                      "minimum": 1
+                    },
+                    "nexthops": {
+                      "type": "array",
+                      "description": "Reference Resource: [Nexthop](#/Nexthop)<br>The list of Nexthops which will be used in a composite group.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "resolved_mpls_members": {
+                      "type": "array",
+                      "description": "Reference Resource: [Label_Endpoint](#/Label_Endpoint)<br>The list of Label_Endpoints which will be used in a composite group  with 'mpls' active_resolved_members.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "tunnel_endpoint": {
+                      "type": "array",
+                      "description": "Reference Resource: [Tunnel_Endpoint](#/Tunnel_Endpoint)<br>Tunnel Endpoints corresponding to this Composite Group.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Indicates how the l3_composite_group is used: `mpls`:                Used to configure MPLS routes. `protected_dest`:      Used to configure protected nexthop groups. `vxlan`:               Used to configure hosts learned over VxLAN tunnel. `ecmp_dlb`:        Used to configure Dynamic load balanced ECMP Group.",
+                      "enum": [
+                        "mpls",
+                        "protected_dest",
+                        "vxlan",
+                        "ecmp_dlb"
+                      ]
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "L3_Composite_Group.id",
+            "in": "path",
+            "description": "Reference Resource: [L3_Composite_Group](#/L3_Composite_Group)<br>Abstracted value which is generated to identify each of the  Composite Groups.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "type",
+                  "active_resolved_members",
+                  "nexthops",
+                  "resolved_mpls_members",
+                  "data_path_state",
+                  "hw_config",
+                  "id",
+                  "tunnel_endpoint"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

@@ -1,0 +1,994 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "BFD_Session",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "BFD_Session"
+    }
+  ],
+  "paths": {
+    "/system/vrfs/{VRF.name}/bfd_sessions": {
+      "get": {
+        "tags": [
+          "BFD_Session"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "bfd_min_rx_interval": {
+                      "type": "integer",
+                      "description": "Minimum RX interval in ms configured for this particular BFD session. If this field is left empty, the system will use the port-specific (if any) or the global system value. If this value is zero, the system does not want to receive any periodic BFD Control packets.",
+                      "maximum": 3600000,
+                      "minimum": 0
+                    },
+                    "bfd_min_tx_interval": {
+                      "type": "integer",
+                      "description": "Minimum TX interval in ms configured for this particular BFD session. If this field is left empty, the system will use the port-specific (if any) or the global system value. The value zero is reserved.",
+                      "maximum": 3600000,
+                      "minimum": 0
+                    },
+                    "diagnostic": {
+                      "type": "object",
+                      "description": "In case of a problem, set to an error message that reports what the local BFD session thinks is wrong. The error messages are defined in section 4.1 of [RFC 5880].",
+                      "properties": {
+                        "local": {
+                          "type": "string",
+                          "description": "The local diagnostic.",
+                          "enum": [
+                            "no_diagnostic",
+                            "control_detection_time_expired",
+                            "echo_function_failed",
+                            "neighbor_signaled_session_down",
+                            "forwarding_plane_reset",
+                            "path_down",
+                            "concatenated_path_down",
+                            "administratively_down",
+                            "reverse_concatenated_path_down",
+                            "unknown"
+                          ]
+                        },
+                        "remote": {
+                          "type": "string",
+                          "description": "The remote diagnostic.",
+                          "enum": [
+                            "no_diagnostic",
+                            "control_detection_time_expired",
+                            "echo_function_failed",
+                            "neighbor_signaled_session_down",
+                            "forwarding_plane_reset",
+                            "path_down",
+                            "concatenated_path_down",
+                            "administratively_down",
+                            "reverse_concatenated_path_down",
+                            "unknown"
+                          ]
+                        }
+                      }
+                    },
+                    "dst_ip": {
+                      "type": "string",
+                      "description": "Reference Resource: [BFD_Session](#/BFD_Session)<br>Destination address of the session.",
+                      "maxLength": 45
+                    },
+                    "dst_mac": {
+                      "type": "string",
+                      "description": "Set to an Ethernet address in the form xx:xx:xx:xx:xx:xx to set the MAC used as destination for transmitted BFD packets. The BFD session will not be operational until this field is populated.",
+                      "maxLength": 17
+                    },
+                    "effective_min_rx_interval": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "BFD session operational min_rx interval as determined after the session negotiation with remote endpoint."
+                    },
+                    "effective_min_tx_interval": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "BFD session operational min_tx interval as determined after the session negotiation with remote endpoint."
+                    },
+                    "egress_phy_port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>The physical port on which BFD packets are transmitted. For route-only ports and LAGs it the same as src_port. For VLANs, it is the actual member port. The BFD session will not be operational until this field is populated."
+                    },
+                    "from": {
+                      "type": "string",
+                      "description": "Reference Resource: [BFD_Session](#/BFD_Session)<br>Protocol that requested the session.",
+                      "enum": [
+                        "bgp",
+                        "hsc",
+                        "ospf",
+                        "ospfv3",
+                        "ospfv3_af",
+                        "pim",
+                        "pimv6",
+                        "static_routes",
+                        "vrrp"
+                      ]
+                    },
+                    "from_instance_id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Reference Resource: [BFD_Session](#/BFD_Session)<br>Instance ID of the protocol that requested the session.",
+                      "minimum": 1
+                    },
+                    "inner_dst_mac": {
+                      "type": "string",
+                      "description": "Set to an Ethernet address in the form xx:xx:xx:xx:xx:xx to set the MAC used as inner destination for transmitted BFD packets in VXLAN sessions. The VXLAN originated BFD session will not be operational until this field is populated.",
+                      "maxLength": 17
+                    },
+                    "ip_address_family": {
+                      "type": "string",
+                      "description": "IP Addresses' family.",
+                      "enum": [
+                        "ipv4",
+                        "ipv6"
+                      ]
+                    },
+                    "local_discriminator": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "BFD session local discriminator value. The BFD session will not be operational until this field is populated."
+                    },
+                    "operating_mode": {
+                      "type": "string",
+                      "description": "Reference Resource: [BFD_Session](#/BFD_Session)<br>'async':          Control packets only 'async_and_echo': Control and (optionally) echo packets 'async_vxlan':    Control packets within a VXLAN tunnel",
+                      "enum": [
+                        "async",
+                        "async_and_echo",
+                        "async_vxlan"
+                      ]
+                    },
+                    "protocol_disabled": {
+                      "type": "boolean",
+                      "description": "The client protocol for this session has administratively disabled BFD. If the BFD session is not shared, BFD will start sending packets with state admin down for at least a detect multiplier time interval."
+                    },
+                    "remote_discriminator": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "BFD session endpoint's discriminator value."
+                    },
+                    "remote_min_echo_rx_interval": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "BFD session remote operational echo min_rx interval as detected by the local endpoint."
+                    },
+                    "remote_min_rx_interval": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "BFD session remote operational min_rx interval as detected by the local endpoint."
+                    },
+                    "remote_min_tx_interval": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "BFD session remote operational min_tx interval as detected by the local endpoint."
+                    },
+                    "remote_multiplier": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "BFD session remote operational multiplier as detected by the local endpoint."
+                    },
+                    "selected_src_ip": {
+                      "type": "string",
+                      "description": "Since BFD sessions can have multiple IPs on the source port, the following selection algorithm is used: * IPv4:  1. Use the primary address if it matches the destination subnet.  2. Use the secondary address if it matches the destination subnet. * IPv6:  1. Use the link-local address if the remote source IP is also a     link-local  2. Use an IP from the non local-link addresses based on the     destination subnet.",
+                      "maxLength": 45
+                    },
+                    "session_id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "BFD session identifier. The BFD session will not be operational until this field is populated."
+                    },
+                    "src_ip": {
+                      "type": "string",
+                      "description": "Source address for transmitted BFD control packets. If not present, the address from the src_port is used.",
+                      "maxLength": 45
+                    },
+                    "src_port": {
+                      "type": "string",
+                      "description": "Reference Resource: [BFD_Session](#/BFD_Session)<br>The source of the BFD session. Might be empty for multi-hop sessions. The BFD session will not be operational until this field is populated."
+                    },
+                    "state": {
+                      "type": "object",
+                      "description": "The state of the session 'admin_down':   the session is being administratively down. 'down':         the session is down or has just been created. 'init':         remote system is communicating, and the local system desires                 to bring the session up, but the remote system does not yet realize it. 'up':           the session is fully healthy and negotiated.",
+                      "properties": {
+                        "async": {
+                          "type": "string",
+                          "description": "The state of the local asynchronous session.",
+                          "enum": [
+                            "admin_down",
+                            "down",
+                            "init",
+                            "up"
+                          ]
+                        },
+                        "echo": {
+                          "type": "string",
+                          "description": "The state of the local echo session.",
+                          "enum": [
+                            "admin_down",
+                            "down",
+                            "init",
+                            "up"
+                          ]
+                        },
+                        "remote": {
+                          "type": "string",
+                          "description": "The state of the remote session -- including asynchronous and echo.",
+                          "enum": [
+                            "admin_down",
+                            "down",
+                            "init",
+                            "up"
+                          ]
+                        },
+                        "session": {
+                          "type": "string",
+                          "description": "The state of the entire local session -- including asynchronous and echo.",
+                          "enum": [
+                            "admin_down",
+                            "down",
+                            "init",
+                            "up"
+                          ]
+                        }
+                      }
+                    },
+                    "statistics": {
+                      "type": "object",
+                      "properties": {
+                        "control_dropped": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of BFD control packets dropped."
+                        },
+                        "control_rx": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of BFD control packets received."
+                        },
+                        "control_tx": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of BFD control packets transmitted."
+                        },
+                        "flap_count": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Counts the number of bfd_status:state flaps since start. A flap is considered as a change of the state value from Up to Down."
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "object",
+                      "description": "The status of the session.",
+                      "properties": {
+                        "capacity": {
+                          "type": "string",
+                          "description": "System resources availability for the session. The BFD session will not be operational until resources are allocated.",
+                          "enum": [
+                            "pending",
+                            "allocated"
+                          ]
+                        },
+                        "hardware_id": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Identifier of the BFD session that was allocated in the hardware."
+                        },
+                        "hw_programming": {
+                          "type": "string",
+                          "description": "Status of the BFD session in hardware.",
+                          "enum": [
+                            "pending",
+                            "programmed",
+                            "error",
+                            "no_resources_available",
+                            "invalid_parameters"
+                          ]
+                        },
+                        "num_retries_performed": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times the retries have been performed to the hardware."
+                        },
+                        "num_retries_requested": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of retries requested for configuring this session in hardware."
+                        },
+                        "safe_to_delete": {
+                          "type": "boolean",
+                          "description": "BFD has performed its finalizing actions (if any) and the session is ready to be deleted."
+                        }
+                      }
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [BFD_Session](#/BFD_Session)<br>The \"VRF\" of the session."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "remote_discriminator",
+                  "remote_min_tx_interval",
+                  "inner_dst_mac",
+                  "remote_min_rx_interval",
+                  "selected_src_ip",
+                  "dst_mac",
+                  "egress_phy_port",
+                  "dst_ip",
+                  "from",
+                  "bfd_min_tx_interval",
+                  "session_id",
+                  "state",
+                  "statistics",
+                  "remote_min_echo_rx_interval",
+                  "effective_min_tx_interval",
+                  "effective_min_rx_interval",
+                  "ip_address_family",
+                  "status",
+                  "bfd_min_rx_interval",
+                  "remote_multiplier",
+                  "local_discriminator",
+                  "src_ip",
+                  "protocol_disabled",
+                  "src_port",
+                  "operating_mode",
+                  "from_instance_id",
+                  "diagnostic"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/vrfs/{VRF.name}/bfd_sessions/{BFD_Session.from},{BFD_Session.from_instance_id},{BFD_Session.operating_mode},{BFD_Session.dst_ip},{BFD_Session.src_port}": {
+      "get": {
+        "tags": [
+          "BFD_Session"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "bfd_min_rx_interval": {
+                      "type": "integer",
+                      "description": "Minimum RX interval in ms configured for this particular BFD session. If this field is left empty, the system will use the port-specific (if any) or the global system value. If this value is zero, the system does not want to receive any periodic BFD Control packets.",
+                      "maximum": 3600000,
+                      "minimum": 0
+                    },
+                    "bfd_min_tx_interval": {
+                      "type": "integer",
+                      "description": "Minimum TX interval in ms configured for this particular BFD session. If this field is left empty, the system will use the port-specific (if any) or the global system value. The value zero is reserved.",
+                      "maximum": 3600000,
+                      "minimum": 0
+                    },
+                    "diagnostic": {
+                      "type": "object",
+                      "description": "In case of a problem, set to an error message that reports what the local BFD session thinks is wrong. The error messages are defined in section 4.1 of [RFC 5880].",
+                      "properties": {
+                        "local": {
+                          "type": "string",
+                          "description": "The local diagnostic.",
+                          "enum": [
+                            "no_diagnostic",
+                            "control_detection_time_expired",
+                            "echo_function_failed",
+                            "neighbor_signaled_session_down",
+                            "forwarding_plane_reset",
+                            "path_down",
+                            "concatenated_path_down",
+                            "administratively_down",
+                            "reverse_concatenated_path_down",
+                            "unknown"
+                          ]
+                        },
+                        "remote": {
+                          "type": "string",
+                          "description": "The remote diagnostic.",
+                          "enum": [
+                            "no_diagnostic",
+                            "control_detection_time_expired",
+                            "echo_function_failed",
+                            "neighbor_signaled_session_down",
+                            "forwarding_plane_reset",
+                            "path_down",
+                            "concatenated_path_down",
+                            "administratively_down",
+                            "reverse_concatenated_path_down",
+                            "unknown"
+                          ]
+                        }
+                      }
+                    },
+                    "dst_ip": {
+                      "type": "string",
+                      "description": "Reference Resource: [BFD_Session](#/BFD_Session)<br>Destination address of the session.",
+                      "maxLength": 45
+                    },
+                    "dst_mac": {
+                      "type": "string",
+                      "description": "Set to an Ethernet address in the form xx:xx:xx:xx:xx:xx to set the MAC used as destination for transmitted BFD packets. The BFD session will not be operational until this field is populated.",
+                      "maxLength": 17
+                    },
+                    "effective_min_rx_interval": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "BFD session operational min_rx interval as determined after the session negotiation with remote endpoint."
+                    },
+                    "effective_min_tx_interval": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "BFD session operational min_tx interval as determined after the session negotiation with remote endpoint."
+                    },
+                    "egress_phy_port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>The physical port on which BFD packets are transmitted. For route-only ports and LAGs it the same as src_port. For VLANs, it is the actual member port. The BFD session will not be operational until this field is populated."
+                    },
+                    "from": {
+                      "type": "string",
+                      "description": "Reference Resource: [BFD_Session](#/BFD_Session)<br>Protocol that requested the session.",
+                      "enum": [
+                        "bgp",
+                        "hsc",
+                        "ospf",
+                        "ospfv3",
+                        "ospfv3_af",
+                        "pim",
+                        "pimv6",
+                        "static_routes",
+                        "vrrp"
+                      ]
+                    },
+                    "from_instance_id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Reference Resource: [BFD_Session](#/BFD_Session)<br>Instance ID of the protocol that requested the session.",
+                      "minimum": 1
+                    },
+                    "inner_dst_mac": {
+                      "type": "string",
+                      "description": "Set to an Ethernet address in the form xx:xx:xx:xx:xx:xx to set the MAC used as inner destination for transmitted BFD packets in VXLAN sessions. The VXLAN originated BFD session will not be operational until this field is populated.",
+                      "maxLength": 17
+                    },
+                    "ip_address_family": {
+                      "type": "string",
+                      "description": "IP Addresses' family.",
+                      "enum": [
+                        "ipv4",
+                        "ipv6"
+                      ]
+                    },
+                    "local_discriminator": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "BFD session local discriminator value. The BFD session will not be operational until this field is populated."
+                    },
+                    "operating_mode": {
+                      "type": "string",
+                      "description": "Reference Resource: [BFD_Session](#/BFD_Session)<br>'async':          Control packets only 'async_and_echo': Control and (optionally) echo packets 'async_vxlan':    Control packets within a VXLAN tunnel",
+                      "enum": [
+                        "async",
+                        "async_and_echo",
+                        "async_vxlan"
+                      ]
+                    },
+                    "protocol_disabled": {
+                      "type": "boolean",
+                      "description": "The client protocol for this session has administratively disabled BFD. If the BFD session is not shared, BFD will start sending packets with state admin down for at least a detect multiplier time interval."
+                    },
+                    "remote_discriminator": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "BFD session endpoint's discriminator value."
+                    },
+                    "remote_min_echo_rx_interval": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "BFD session remote operational echo min_rx interval as detected by the local endpoint."
+                    },
+                    "remote_min_rx_interval": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "BFD session remote operational min_rx interval as detected by the local endpoint."
+                    },
+                    "remote_min_tx_interval": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "BFD session remote operational min_tx interval as detected by the local endpoint."
+                    },
+                    "remote_multiplier": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "BFD session remote operational multiplier as detected by the local endpoint."
+                    },
+                    "selected_src_ip": {
+                      "type": "string",
+                      "description": "Since BFD sessions can have multiple IPs on the source port, the following selection algorithm is used: * IPv4:  1. Use the primary address if it matches the destination subnet.  2. Use the secondary address if it matches the destination subnet. * IPv6:  1. Use the link-local address if the remote source IP is also a     link-local  2. Use an IP from the non local-link addresses based on the     destination subnet.",
+                      "maxLength": 45
+                    },
+                    "session_id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "BFD session identifier. The BFD session will not be operational until this field is populated."
+                    },
+                    "src_ip": {
+                      "type": "string",
+                      "description": "Source address for transmitted BFD control packets. If not present, the address from the src_port is used.",
+                      "maxLength": 45
+                    },
+                    "src_port": {
+                      "type": "string",
+                      "description": "Reference Resource: [BFD_Session](#/BFD_Session)<br>The source of the BFD session. Might be empty for multi-hop sessions. The BFD session will not be operational until this field is populated."
+                    },
+                    "state": {
+                      "type": "object",
+                      "description": "The state of the session 'admin_down':   the session is being administratively down. 'down':         the session is down or has just been created. 'init':         remote system is communicating, and the local system desires                 to bring the session up, but the remote system does not yet realize it. 'up':           the session is fully healthy and negotiated.",
+                      "properties": {
+                        "async": {
+                          "type": "string",
+                          "description": "The state of the local asynchronous session.",
+                          "enum": [
+                            "admin_down",
+                            "down",
+                            "init",
+                            "up"
+                          ]
+                        },
+                        "echo": {
+                          "type": "string",
+                          "description": "The state of the local echo session.",
+                          "enum": [
+                            "admin_down",
+                            "down",
+                            "init",
+                            "up"
+                          ]
+                        },
+                        "remote": {
+                          "type": "string",
+                          "description": "The state of the remote session -- including asynchronous and echo.",
+                          "enum": [
+                            "admin_down",
+                            "down",
+                            "init",
+                            "up"
+                          ]
+                        },
+                        "session": {
+                          "type": "string",
+                          "description": "The state of the entire local session -- including asynchronous and echo.",
+                          "enum": [
+                            "admin_down",
+                            "down",
+                            "init",
+                            "up"
+                          ]
+                        }
+                      }
+                    },
+                    "statistics": {
+                      "type": "object",
+                      "properties": {
+                        "control_dropped": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of BFD control packets dropped."
+                        },
+                        "control_rx": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of BFD control packets received."
+                        },
+                        "control_tx": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of BFD control packets transmitted."
+                        },
+                        "flap_count": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Counts the number of bfd_status:state flaps since start. A flap is considered as a change of the state value from Up to Down."
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "object",
+                      "description": "The status of the session.",
+                      "properties": {
+                        "capacity": {
+                          "type": "string",
+                          "description": "System resources availability for the session. The BFD session will not be operational until resources are allocated.",
+                          "enum": [
+                            "pending",
+                            "allocated"
+                          ]
+                        },
+                        "hardware_id": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Identifier of the BFD session that was allocated in the hardware."
+                        },
+                        "hw_programming": {
+                          "type": "string",
+                          "description": "Status of the BFD session in hardware.",
+                          "enum": [
+                            "pending",
+                            "programmed",
+                            "error",
+                            "no_resources_available",
+                            "invalid_parameters"
+                          ]
+                        },
+                        "num_retries_performed": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of times the retries have been performed to the hardware."
+                        },
+                        "num_retries_requested": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of retries requested for configuring this session in hardware."
+                        },
+                        "safe_to_delete": {
+                          "type": "boolean",
+                          "description": "BFD has performed its finalizing actions (if any) and the session is ready to be deleted."
+                        }
+                      }
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [BFD_Session](#/BFD_Session)<br>The \"VRF\" of the session."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "BFD_Session.from",
+            "in": "path",
+            "description": "Reference Resource: [BFD_Session](#/BFD_Session)<br>Protocol that requested the session.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "bgp",
+                "hsc",
+                "ospf",
+                "ospfv3",
+                "ospfv3_af",
+                "pim",
+                "pimv6",
+                "static_routes",
+                "vrrp"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "BFD_Session.from_instance_id",
+            "in": "path",
+            "description": "Reference Resource: [BFD_Session](#/BFD_Session)<br>Instance ID of the protocol that requested the session.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "BFD_Session.operating_mode",
+            "in": "path",
+            "description": "Reference Resource: [BFD_Session](#/BFD_Session)<br>'async':          Control packets only 'async_and_echo': Control and (optionally) echo packets 'async_vxlan':    Control packets within a VXLAN tunnel",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "async",
+                "async_and_echo",
+                "async_vxlan"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "BFD_Session.dst_ip",
+            "in": "path",
+            "description": "Reference Resource: [BFD_Session](#/BFD_Session)<br>Destination address of the session.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "BFD_Session.src_port",
+            "in": "path",
+            "description": "Reference Resource: [BFD_Session](#/BFD_Session)<br>The source of the BFD session. Might be empty for multi-hop sessions. The BFD session will not be operational until this field is populated.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "session_id",
+                  "state",
+                  "statistics",
+                  "remote_min_echo_rx_interval",
+                  "effective_min_tx_interval",
+                  "effective_min_rx_interval",
+                  "ip_address_family",
+                  "status",
+                  "bfd_min_rx_interval",
+                  "remote_multiplier",
+                  "local_discriminator",
+                  "src_ip",
+                  "protocol_disabled",
+                  "src_port",
+                  "operating_mode",
+                  "from_instance_id",
+                  "diagnostic",
+                  "remote_discriminator",
+                  "remote_min_tx_interval",
+                  "inner_dst_mac",
+                  "remote_min_rx_interval",
+                  "selected_src_ip",
+                  "dst_mac",
+                  "egress_phy_port",
+                  "dst_ip",
+                  "from",
+                  "bfd_min_tx_interval"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

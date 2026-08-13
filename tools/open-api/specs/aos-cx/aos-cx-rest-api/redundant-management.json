@@ -1,0 +1,450 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Redundant_Management",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Redundant_Management"
+    }
+  ],
+  "paths": {
+    "/system/redundant_managements": {
+      "get": {
+        "tags": [
+          "Redundant_Management"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "comm_ip_addr": {
+                      "type": "string",
+                      "description": "Source IP address for the interface port used for communication between management modules. The IP address can be either in the IPv4 format or IPv6 format (uses '[' and ']' around the IP address). The IP address can include the protocol and port number to be used, using ':' separators.   Example: tcp:[0123::4567:89ab:cdef:0123%eth1]:1234",
+                      "maxLength": 45,
+                      "minLength": 1
+                    },
+                    "comm_mac_addr": {
+                      "type": "string",
+                      "description": "Source Ethernet MAC address for the interface port used for communication between management modules.",
+                      "maxLength": 17,
+                      "minLength": 17
+                    },
+                    "hardware_revision": {
+                      "type": "string",
+                      "description": "Hardware revision of the management module is used to ensure  the compatibility with redundant management.",
+                      "minLength": 1
+                    },
+                    "is_local": {
+                      "type": "boolean",
+                      "description": "Indicates which management module this redundant management  module entry belongs to.  `true`: belongs to the local management module `false`: belongs to the remote management module"
+                    },
+                    "mgmt_module": {
+                      "type": "string",
+                      "description": "Reference Resource: [Subsystem](#/Subsystem)<br>Management module entry associated with a given redundant management module entry."
+                    },
+                    "mgmt_role": {
+                      "type": "string",
+                      "description": "Management role assigned to the management module. `Active`:     Active management module `Standby`:    Standby management module, ready to takeover for                Active management module `Unassigned`: Management module has not been assigned a role",
+                      "enum": [
+                        "Unassigned",
+                        "Standby",
+                        "Active"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Redundant_Management](#/Redundant_Management)<br>Name of the management module.  Can be any unique string identifying the management module (e.g. Could include slot number or slot letter)."
+                    },
+                    "remote_present": {
+                      "type": "boolean",
+                      "description": "Status of the physical presence of the destination management module."
+                    },
+                    "schema_version": {
+                      "type": "string",
+                      "description": "Schema version hash value  Example: 5f58627bf48f8158efd4a237cf7ce263a3bc9eea",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "software_revision": {
+                      "type": "string",
+                      "description": "Software revision of the management module is used to ensure  the compatibility with redundant management.",
+                      "minLength": 1
+                    },
+                    "state": {
+                      "type": "string",
+                      "description": "The current state of the management role. Valid values are:  `booting`:       The module is booting or rebooting. `election`:      The election process is taking place. `failover`:      A failover event is occurring. `ready`:         The management role is ready. `syncing`:       A file or data syncing operation is in progress. `issu`:          The module is undergoing an in service system upgrade. `sync_canceled`: The module's image is not compatible with remote MM hardware. `waiting_ready`: The module is waiting to proceed to the ready state. `unknown`:       The role state is currently unknown. ",
+                      "enum": [
+                        "booting",
+                        "election",
+                        "failover",
+                        "ready",
+                        "syncing",
+                        "issu",
+                        "sync_canceled",
+                        "waiting_ready",
+                        "unknown"
+                      ]
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "mgmt_module",
+                  "schema_version",
+                  "name",
+                  "hardware_revision",
+                  "comm_mac_addr",
+                  "comm_ip_addr",
+                  "mgmt_role",
+                  "state",
+                  "software_revision",
+                  "remote_present",
+                  "is_local"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/redundant_managements/{Redundant_Management.name}": {
+      "get": {
+        "tags": [
+          "Redundant_Management"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "comm_ip_addr": {
+                      "type": "string",
+                      "description": "Source IP address for the interface port used for communication between management modules. The IP address can be either in the IPv4 format or IPv6 format (uses '[' and ']' around the IP address). The IP address can include the protocol and port number to be used, using ':' separators.   Example: tcp:[0123::4567:89ab:cdef:0123%eth1]:1234",
+                      "maxLength": 45,
+                      "minLength": 1
+                    },
+                    "comm_mac_addr": {
+                      "type": "string",
+                      "description": "Source Ethernet MAC address for the interface port used for communication between management modules.",
+                      "maxLength": 17,
+                      "minLength": 17
+                    },
+                    "hardware_revision": {
+                      "type": "string",
+                      "description": "Hardware revision of the management module is used to ensure  the compatibility with redundant management.",
+                      "minLength": 1
+                    },
+                    "is_local": {
+                      "type": "boolean",
+                      "description": "Indicates which management module this redundant management  module entry belongs to.  `true`: belongs to the local management module `false`: belongs to the remote management module"
+                    },
+                    "mgmt_module": {
+                      "type": "string",
+                      "description": "Reference Resource: [Subsystem](#/Subsystem)<br>Management module entry associated with a given redundant management module entry."
+                    },
+                    "mgmt_role": {
+                      "type": "string",
+                      "description": "Management role assigned to the management module. `Active`:     Active management module `Standby`:    Standby management module, ready to takeover for                Active management module `Unassigned`: Management module has not been assigned a role",
+                      "enum": [
+                        "Unassigned",
+                        "Standby",
+                        "Active"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Redundant_Management](#/Redundant_Management)<br>Name of the management module.  Can be any unique string identifying the management module (e.g. Could include slot number or slot letter)."
+                    },
+                    "remote_present": {
+                      "type": "boolean",
+                      "description": "Status of the physical presence of the destination management module."
+                    },
+                    "schema_version": {
+                      "type": "string",
+                      "description": "Schema version hash value  Example: 5f58627bf48f8158efd4a237cf7ce263a3bc9eea",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "software_revision": {
+                      "type": "string",
+                      "description": "Software revision of the management module is used to ensure  the compatibility with redundant management.",
+                      "minLength": 1
+                    },
+                    "state": {
+                      "type": "string",
+                      "description": "The current state of the management role. Valid values are:  `booting`:       The module is booting or rebooting. `election`:      The election process is taking place. `failover`:      A failover event is occurring. `ready`:         The management role is ready. `syncing`:       A file or data syncing operation is in progress. `issu`:          The module is undergoing an in service system upgrade. `sync_canceled`: The module's image is not compatible with remote MM hardware. `waiting_ready`: The module is waiting to proceed to the ready state. `unknown`:       The role state is currently unknown. ",
+                      "enum": [
+                        "booting",
+                        "election",
+                        "failover",
+                        "ready",
+                        "syncing",
+                        "issu",
+                        "sync_canceled",
+                        "waiting_ready",
+                        "unknown"
+                      ]
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Redundant_Management.name",
+            "in": "path",
+            "description": "Reference Resource: [Redundant_Management](#/Redundant_Management)<br>Name of the management module.  Can be any unique string identifying the management module (e.g. Could include slot number or slot letter).",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "hardware_revision",
+                  "comm_mac_addr",
+                  "comm_ip_addr",
+                  "mgmt_role",
+                  "state",
+                  "mgmt_module",
+                  "schema_version",
+                  "name",
+                  "software_revision",
+                  "remote_present",
+                  "is_local"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

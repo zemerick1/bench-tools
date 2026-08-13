@@ -1,0 +1,513 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Neighbor",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Neighbor"
+    }
+  ],
+  "paths": {
+    "/system/vrfs/{VRF.name}/neighbors": {
+      "get": {
+        "tags": [
+          "Neighbor"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "address_family": {
+                      "type": "string",
+                      "description": "Address family of the neighbor.",
+                      "enum": [
+                        "ipv4",
+                        "ipv6"
+                      ]
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "description": "Indicates any special attributes this Neighbor entry has."
+                    },
+                    "from": {
+                      "type": "string",
+                      "description": "'dynamic': the neighbor was dynamically learnt. 'static' : the neighbor was statically configured. 'ivrl'   : the neighbor was added by inter VRF leaking. 'ipdb'   : the neighbor was added by ip directed broadcast. 'evpn-vtep' : the neighbor was added by EVPN for remote VTEP MAC-IP binding.",
+                      "enum": [
+                        "dynamic",
+                        "static",
+                        "ivrl",
+                        "ipdb",
+                        "evpn-vtep",
+                        "evpn_l3"
+                      ]
+                    },
+                    "gbp_role_id": {
+                      "type": "integer",
+                      "description": "GBP role-id associated with neighbor entry. Non GBP clients use 0 as their role-id.",
+                      "maximum": 8191,
+                      "minimum": 0
+                    },
+                    "in_use_by_routes": {
+                      "type": "boolean",
+                      "description": "When set to `true`, indicates this IP is used as a nexthop by one or more route entries. "
+                    },
+                    "ip_address": {
+                      "type": "string",
+                      "description": "Reference Resource: [Neighbor](#/Neighbor)<br>The IPv4 address or the IPv6 address of neighbor",
+                      "maxLength": 45
+                    },
+                    "l2_composite_group": {
+                      "type": "string",
+                      "description": "Reference Resource: [L2_Composite_Group](#/L2_Composite_Group)<br>L2 Composite Group corresponding to this Neighbor Entry. A L2 Composite Group is a composition of different types of  l2 egress entities. For a Neighbor Entry, either 'tunnel_endpoint' or 'l2_composite_group'  is populated to indicate how it is programmed in the forwarding plane."
+                    },
+                    "last_updated": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time of the last update in seconds from epoch."
+                    },
+                    "mac": {
+                      "type": "string",
+                      "description": "MAC address learned for this neighbor."
+                    },
+                    "multicast_l3_neighbor_forwarding": {
+                      "type": "string",
+                      "description": "Reference Resource: [Multicast_L3_Neighbor_Forwarding](#/Multicast_L3_Neighbor_Forwarding)<br>Multicast entry being used in case of IP directed broadcast."
+                    },
+                    "phy_port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>Matches 'Port' if 'Port' refers to LAG/non-aggregated physical port, otherwise references the actual VLAN member port."
+                    },
+                    "port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Neighbor](#/Neighbor)<br>Logical port LAG/non-aggregated physical port/L3 VLAN interface etc. at which MAC was learnt."
+                    },
+                    "state": {
+                      "type": "string",
+                      "description": "Current state of the neighbor entry.",
+                      "enum": [
+                        "reachable",
+                        "stale",
+                        "incomplete",
+                        "failed",
+                        "permanent"
+                      ]
+                    },
+                    "tunnel_endpoint": {
+                      "type": "string",
+                      "description": "Reference Resource: [Tunnel_Endpoint](#/Tunnel_Endpoint)<br>In case of multipoint tunnels, like VXLAN, tunnel_endpoint designates specific endpoint where the packets matching this destination IP address should be forwarded to."
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [Neighbor](#/Neighbor)<br>Reference to the VRF table, to which this neighbor belongs."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "l2_composite_group",
+                  "mac",
+                  "port",
+                  "from",
+                  "last_updated",
+                  "multicast_l3_neighbor_forwarding",
+                  "state",
+                  "attributes",
+                  "ip_address",
+                  "gbp_role_id",
+                  "tunnel_endpoint",
+                  "address_family",
+                  "phy_port",
+                  "in_use_by_routes"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/vrfs/{VRF.name}/neighbors/{Neighbor.ip_address},{Neighbor.port}": {
+      "get": {
+        "tags": [
+          "Neighbor"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "address_family": {
+                      "type": "string",
+                      "description": "Address family of the neighbor.",
+                      "enum": [
+                        "ipv4",
+                        "ipv6"
+                      ]
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "description": "Indicates any special attributes this Neighbor entry has."
+                    },
+                    "from": {
+                      "type": "string",
+                      "description": "'dynamic': the neighbor was dynamically learnt. 'static' : the neighbor was statically configured. 'ivrl'   : the neighbor was added by inter VRF leaking. 'ipdb'   : the neighbor was added by ip directed broadcast. 'evpn-vtep' : the neighbor was added by EVPN for remote VTEP MAC-IP binding.",
+                      "enum": [
+                        "dynamic",
+                        "static",
+                        "ivrl",
+                        "ipdb",
+                        "evpn-vtep",
+                        "evpn_l3"
+                      ]
+                    },
+                    "gbp_role_id": {
+                      "type": "integer",
+                      "description": "GBP role-id associated with neighbor entry. Non GBP clients use 0 as their role-id.",
+                      "maximum": 8191,
+                      "minimum": 0
+                    },
+                    "in_use_by_routes": {
+                      "type": "boolean",
+                      "description": "When set to `true`, indicates this IP is used as a nexthop by one or more route entries. "
+                    },
+                    "ip_address": {
+                      "type": "string",
+                      "description": "Reference Resource: [Neighbor](#/Neighbor)<br>The IPv4 address or the IPv6 address of neighbor",
+                      "maxLength": 45
+                    },
+                    "l2_composite_group": {
+                      "type": "string",
+                      "description": "Reference Resource: [L2_Composite_Group](#/L2_Composite_Group)<br>L2 Composite Group corresponding to this Neighbor Entry. A L2 Composite Group is a composition of different types of  l2 egress entities. For a Neighbor Entry, either 'tunnel_endpoint' or 'l2_composite_group'  is populated to indicate how it is programmed in the forwarding plane."
+                    },
+                    "last_updated": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time of the last update in seconds from epoch."
+                    },
+                    "mac": {
+                      "type": "string",
+                      "description": "MAC address learned for this neighbor."
+                    },
+                    "multicast_l3_neighbor_forwarding": {
+                      "type": "string",
+                      "description": "Reference Resource: [Multicast_L3_Neighbor_Forwarding](#/Multicast_L3_Neighbor_Forwarding)<br>Multicast entry being used in case of IP directed broadcast."
+                    },
+                    "phy_port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>Matches 'Port' if 'Port' refers to LAG/non-aggregated physical port, otherwise references the actual VLAN member port."
+                    },
+                    "port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Neighbor](#/Neighbor)<br>Logical port LAG/non-aggregated physical port/L3 VLAN interface etc. at which MAC was learnt."
+                    },
+                    "state": {
+                      "type": "string",
+                      "description": "Current state of the neighbor entry.",
+                      "enum": [
+                        "reachable",
+                        "stale",
+                        "incomplete",
+                        "failed",
+                        "permanent"
+                      ]
+                    },
+                    "tunnel_endpoint": {
+                      "type": "string",
+                      "description": "Reference Resource: [Tunnel_Endpoint](#/Tunnel_Endpoint)<br>In case of multipoint tunnels, like VXLAN, tunnel_endpoint designates specific endpoint where the packets matching this destination IP address should be forwarded to."
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [Neighbor](#/Neighbor)<br>Reference to the VRF table, to which this neighbor belongs."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Neighbor.ip_address",
+            "in": "path",
+            "description": "Reference Resource: [Neighbor](#/Neighbor)<br>The IPv4 address or the IPv6 address of neighbor",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Neighbor.port",
+            "in": "path",
+            "description": "Reference Resource: [Neighbor](#/Neighbor)<br>Logical port LAG/non-aggregated physical port/L3 VLAN interface etc. at which MAC was learnt.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "attributes",
+                  "last_updated",
+                  "multicast_l3_neighbor_forwarding",
+                  "state",
+                  "ip_address",
+                  "gbp_role_id",
+                  "tunnel_endpoint",
+                  "in_use_by_routes",
+                  "address_family",
+                  "phy_port",
+                  "l2_composite_group",
+                  "mac",
+                  "port",
+                  "from"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

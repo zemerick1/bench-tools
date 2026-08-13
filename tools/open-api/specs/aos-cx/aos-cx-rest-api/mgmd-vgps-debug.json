@@ -1,0 +1,469 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "MGMD_VGPS_DEBUG",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "MGMD_VGPS_DEBUG"
+    }
+  ],
+  "paths": {
+    "/system/mgmd_vgps_debugs": {
+      "get": {
+        "tags": [
+          "MGMD_VGPS_DEBUG"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "aggregate_leaves_count": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Count of leaves for the VLAN, group, port, source combination."
+                    },
+                    "aggregate_reports_count": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Count of reports for the VLAN, group, port, source combination."
+                    },
+                    "client_details": {
+                      "type": "object",
+                      "description": "Per client reports and leaves count, summarized per mac for VLAN, group, port, source combination.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "client_ip": {
+                              "type": "string",
+                              "description": "IP address of the multicast client."
+                            },
+                            "leaves_count": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Count of leaves sent by the multicast client for the VLAN, group, port, source combination."
+                            },
+                            "reports_count": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Count of reports sent by the multicast client for the VLAN, group, port, source combination."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "clients_joined_count": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Count of clients joined for the VLAN, group, port, source combination."
+                    },
+                    "group_ip": {
+                      "type": "string",
+                      "description": "Reference Resource: [MGMD_VGPS_DEBUG](#/MGMD_VGPS_DEBUG)<br>Multicast group IP address.",
+                      "maxLength": 49
+                    },
+                    "mgmd_type": {
+                      "type": "string",
+                      "description": "Type represents whether the entry is for IGMP or MLD.",
+                      "enum": [
+                        "igmp",
+                        "mld"
+                      ]
+                    },
+                    "port": {
+                      "type": "string",
+                      "description": "Reference Resource: [MGMD_VGPS_DEBUG](#/MGMD_VGPS_DEBUG)<br>[Port](#/Port) on which the group or group, source entry is created."
+                    },
+                    "source_ip": {
+                      "type": "string",
+                      "description": "Reference Resource: [MGMD_VGPS_DEBUG](#/MGMD_VGPS_DEBUG)<br>Source address from which multicast group traffic is requested to be included or excluded.",
+                      "maxLength": 49
+                    },
+                    "vlan": {
+                      "type": "string",
+                      "description": "Reference Resource: [MGMD_VGPS_DEBUG](#/MGMD_VGPS_DEBUG)<br>[VLAN](#/VLAN) on which the group or group, source entry is created."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "vlan",
+                  "source_ip",
+                  "clients_joined_count",
+                  "aggregate_reports_count",
+                  "aggregate_leaves_count",
+                  "group_ip",
+                  "port",
+                  "mgmd_type",
+                  "client_details"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/mgmd_vgps_debugs/{MGMD_VGPS_DEBUG.vlan},{MGMD_VGPS_DEBUG.group_ip},{MGMD_VGPS_DEBUG.port},{MGMD_VGPS_DEBUG.source_ip}": {
+      "get": {
+        "tags": [
+          "MGMD_VGPS_DEBUG"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "aggregate_leaves_count": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Count of leaves for the VLAN, group, port, source combination."
+                    },
+                    "aggregate_reports_count": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Count of reports for the VLAN, group, port, source combination."
+                    },
+                    "client_details": {
+                      "type": "object",
+                      "description": "Per client reports and leaves count, summarized per mac for VLAN, group, port, source combination.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "client_ip": {
+                              "type": "string",
+                              "description": "IP address of the multicast client."
+                            },
+                            "leaves_count": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Count of leaves sent by the multicast client for the VLAN, group, port, source combination."
+                            },
+                            "reports_count": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Count of reports sent by the multicast client for the VLAN, group, port, source combination."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "clients_joined_count": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Count of clients joined for the VLAN, group, port, source combination."
+                    },
+                    "group_ip": {
+                      "type": "string",
+                      "description": "Reference Resource: [MGMD_VGPS_DEBUG](#/MGMD_VGPS_DEBUG)<br>Multicast group IP address.",
+                      "maxLength": 49
+                    },
+                    "mgmd_type": {
+                      "type": "string",
+                      "description": "Type represents whether the entry is for IGMP or MLD.",
+                      "enum": [
+                        "igmp",
+                        "mld"
+                      ]
+                    },
+                    "port": {
+                      "type": "string",
+                      "description": "Reference Resource: [MGMD_VGPS_DEBUG](#/MGMD_VGPS_DEBUG)<br>[Port](#/Port) on which the group or group, source entry is created."
+                    },
+                    "source_ip": {
+                      "type": "string",
+                      "description": "Reference Resource: [MGMD_VGPS_DEBUG](#/MGMD_VGPS_DEBUG)<br>Source address from which multicast group traffic is requested to be included or excluded.",
+                      "maxLength": 49
+                    },
+                    "vlan": {
+                      "type": "string",
+                      "description": "Reference Resource: [MGMD_VGPS_DEBUG](#/MGMD_VGPS_DEBUG)<br>[VLAN](#/VLAN) on which the group or group, source entry is created."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "MGMD_VGPS_DEBUG.vlan",
+            "in": "path",
+            "description": "Reference Resource: [MGMD_VGPS_DEBUG](#/MGMD_VGPS_DEBUG)<br>[VLAN](#/VLAN) on which the group or group, source entry is created.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "MGMD_VGPS_DEBUG.group_ip",
+            "in": "path",
+            "description": "Reference Resource: [MGMD_VGPS_DEBUG](#/MGMD_VGPS_DEBUG)<br>Multicast group IP address.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "MGMD_VGPS_DEBUG.port",
+            "in": "path",
+            "description": "Reference Resource: [MGMD_VGPS_DEBUG](#/MGMD_VGPS_DEBUG)<br>[Port](#/Port) on which the group or group, source entry is created.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "MGMD_VGPS_DEBUG.source_ip",
+            "in": "path",
+            "description": "Reference Resource: [MGMD_VGPS_DEBUG](#/MGMD_VGPS_DEBUG)<br>Source address from which multicast group traffic is requested to be included or excluded.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "vlan",
+                  "source_ip",
+                  "clients_joined_count",
+                  "aggregate_reports_count",
+                  "aggregate_leaves_count",
+                  "group_ip",
+                  "port",
+                  "mgmd_type",
+                  "client_details"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

@@ -1,0 +1,526 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "CDP_Neighbor",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "CDP_Neighbor"
+    }
+  ],
+  "paths": {
+    "/system/interfaces/{Interface.name}/cdp_neighbors": {
+      "get": {
+        "tags": [
+          "CDP_Neighbor"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "addresses": {
+                      "type": "array",
+                      "description": "IP addresses of the neighbor.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 10
+                    },
+                    "capabilities": {
+                      "type": "array",
+                      "description": "Neighbor networking capability.",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "router",
+                          "transparent",
+                          "source_route_bridge",
+                          "switch",
+                          "host",
+                          "igmp_capable",
+                          "repeater",
+                          "phone",
+                          "remotely_managed_device",
+                          "cvta",
+                          "two_port_mac_relay"
+                        ]
+                      },
+                      "maxItems": 11
+                    },
+                    "cdpversion": {
+                      "type": "integer",
+                      "description": "The CDP version that the neighbor is using.",
+                      "maximum": 2,
+                      "minimum": 1
+                    },
+                    "device_id": {
+                      "type": "string",
+                      "description": "Hostname of the neighbor.",
+                      "maxLength": 256
+                    },
+                    "duplex": {
+                      "type": "string",
+                      "description": "Operating mode of the interface.",
+                      "enum": [
+                        "half",
+                        "full"
+                      ]
+                    },
+                    "interface": {
+                      "type": "string",
+                      "description": "Reference Resource: [CDP_Neighbor](#/CDP_Neighbor)<br>Reference to the interface on which the CDP frames are received."
+                    },
+                    "last_update": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time (in seconds from epoch) of the last CDP update received for this neighbor."
+                    },
+                    "mac_addr": {
+                      "type": "string",
+                      "description": "Reference Resource: [CDP_Neighbor](#/CDP_Neighbor)<br>The MAC address that uniquely identifies the IEEE 802 LAN station associated to the chassis of the neighboring CDP agent. This MAC  address is stored in the canonical format that includes six groups  of two hexadecimal digits separated by colons e.g. 01:23:45:AB:CD:EF"
+                    },
+                    "native_vlan": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Native VLAN of the neighbor port."
+                    },
+                    "neighbor_tlv_info": {
+                      "type": "object",
+                      "description": "Store data of additional TLVs.",
+                      "properties": {
+                        "type_001c": {
+                          "type": "string",
+                          "description": "Store data for CDP TLV(0x001c)."
+                        }
+                      }
+                    },
+                    "platform": {
+                      "type": "string",
+                      "description": "Hardware/model details of the neighbor.",
+                      "maxLength": 256
+                    },
+                    "port_id": {
+                      "type": "string",
+                      "description": "Interface to which neighbor is connected."
+                    },
+                    "software_version": {
+                      "type": "string",
+                      "description": "Software version of the CDP neighbor.",
+                      "maxLength": 1024
+                    },
+                    "voice_vlan_query": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Voice VLAN query value received from the neighbor."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Interface.name",
+            "in": "path",
+            "description": "Reference Resource: [Interface](#/Interface)<br>The interface name. For non-bonded ports, the interface name is the same as the associated port name. The name must otherwise be unique across all ports and interfaces of the system.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "cdpversion",
+                  "port_id",
+                  "capabilities",
+                  "addresses",
+                  "mac_addr",
+                  "platform",
+                  "device_id",
+                  "last_update",
+                  "software_version",
+                  "voice_vlan_query",
+                  "native_vlan",
+                  "duplex",
+                  "neighbor_tlv_info"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/interfaces/{Interface.name}/cdp_neighbors/{CDP_Neighbor.mac_addr}": {
+      "get": {
+        "tags": [
+          "CDP_Neighbor"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "addresses": {
+                      "type": "array",
+                      "description": "IP addresses of the neighbor.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 10
+                    },
+                    "capabilities": {
+                      "type": "array",
+                      "description": "Neighbor networking capability.",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "router",
+                          "transparent",
+                          "source_route_bridge",
+                          "switch",
+                          "host",
+                          "igmp_capable",
+                          "repeater",
+                          "phone",
+                          "remotely_managed_device",
+                          "cvta",
+                          "two_port_mac_relay"
+                        ]
+                      },
+                      "maxItems": 11
+                    },
+                    "cdpversion": {
+                      "type": "integer",
+                      "description": "The CDP version that the neighbor is using.",
+                      "maximum": 2,
+                      "minimum": 1
+                    },
+                    "device_id": {
+                      "type": "string",
+                      "description": "Hostname of the neighbor.",
+                      "maxLength": 256
+                    },
+                    "duplex": {
+                      "type": "string",
+                      "description": "Operating mode of the interface.",
+                      "enum": [
+                        "half",
+                        "full"
+                      ]
+                    },
+                    "interface": {
+                      "type": "string",
+                      "description": "Reference Resource: [CDP_Neighbor](#/CDP_Neighbor)<br>Reference to the interface on which the CDP frames are received."
+                    },
+                    "last_update": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time (in seconds from epoch) of the last CDP update received for this neighbor."
+                    },
+                    "mac_addr": {
+                      "type": "string",
+                      "description": "Reference Resource: [CDP_Neighbor](#/CDP_Neighbor)<br>The MAC address that uniquely identifies the IEEE 802 LAN station associated to the chassis of the neighboring CDP agent. This MAC  address is stored in the canonical format that includes six groups  of two hexadecimal digits separated by colons e.g. 01:23:45:AB:CD:EF"
+                    },
+                    "native_vlan": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Native VLAN of the neighbor port."
+                    },
+                    "neighbor_tlv_info": {
+                      "type": "object",
+                      "description": "Store data of additional TLVs.",
+                      "properties": {
+                        "type_001c": {
+                          "type": "string",
+                          "description": "Store data for CDP TLV(0x001c)."
+                        }
+                      }
+                    },
+                    "platform": {
+                      "type": "string",
+                      "description": "Hardware/model details of the neighbor.",
+                      "maxLength": 256
+                    },
+                    "port_id": {
+                      "type": "string",
+                      "description": "Interface to which neighbor is connected."
+                    },
+                    "software_version": {
+                      "type": "string",
+                      "description": "Software version of the CDP neighbor.",
+                      "maxLength": 1024
+                    },
+                    "voice_vlan_query": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Voice VLAN query value received from the neighbor."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Interface.name",
+            "in": "path",
+            "description": "Reference Resource: [Interface](#/Interface)<br>The interface name. For non-bonded ports, the interface name is the same as the associated port name. The name must otherwise be unique across all ports and interfaces of the system.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "CDP_Neighbor.mac_addr",
+            "in": "path",
+            "description": "Reference Resource: [CDP_Neighbor](#/CDP_Neighbor)<br>The MAC address that uniquely identifies the IEEE 802 LAN station associated to the chassis of the neighboring CDP agent. This MAC  address is stored in the canonical format that includes six groups  of two hexadecimal digits separated by colons e.g. 01:23:45:AB:CD:EF",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "device_id",
+                  "duplex",
+                  "neighbor_tlv_info",
+                  "last_update",
+                  "software_version",
+                  "voice_vlan_query",
+                  "native_vlan",
+                  "cdpversion",
+                  "port_id",
+                  "capabilities",
+                  "addresses",
+                  "mac_addr",
+                  "platform"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

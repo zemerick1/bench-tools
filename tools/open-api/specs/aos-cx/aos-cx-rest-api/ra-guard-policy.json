@@ -1,0 +1,831 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "RA_Guard_Policy",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "RA_Guard_Policy"
+    }
+  ],
+  "paths": {
+    "/system/ra_guard_policies": {
+      "get": {
+        "tags": [
+          "RA_Guard_Policy"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "match_access_list": {
+                      "type": "string",
+                      "description": "Reference Resource: [ACL](#/ACL)<br>Inbound ACL to filter packets received from specific routers sending Router Advertisement packets. If not set, inbound filtering will be disabled."
+                    },
+                    "match_config_flag": {
+                      "type": "object",
+                      "properties": {
+                        "manage_flag": {
+                          "type": "string",
+                          "description": "When set, this enables verification of the 'managed config' flag in RA packets. on: Verify that the flag is set to 'On'. off: verify that the flag is set to 'Off'. If not set, validation of the 'managed config' flag is not done.",
+                          "enum": [
+                            "on",
+                            "off"
+                          ]
+                        },
+                        "other_flag": {
+                          "type": "string",
+                          "description": "When set, this enables verification of the 'other config' flag in RA packets. on: Verify that the flag is set to 'On'. off: verify that the flag is set to 'Off'. If not set, validation of the 'other config' flag is not done.",
+                          "enum": [
+                            "on",
+                            "off"
+                          ]
+                        }
+                      }
+                    },
+                    "match_hop_limit": {
+                      "type": "object",
+                      "properties": {
+                        "enable": {
+                          "type": "boolean",
+                          "description": "Enables hop-limit verification."
+                        },
+                        "maximum": {
+                          "type": "integer",
+                          "description": "When set, the RA/RR packet is discarded if the advertised hop-limit is greater than the specified max-hop limit.",
+                          "maximum": 255,
+                          "minimum": 1
+                        },
+                        "minimum": {
+                          "type": "integer",
+                          "description": "When set, the RA/RR packet is discarded if the advertised hop limit is lesser than the specified min-hop limit.",
+                          "maximum": 255,
+                          "minimum": 1
+                        }
+                      }
+                    },
+                    "match_prefix_list": {
+                      "type": "string",
+                      "description": "Reference Resource: [Prefix_List](#/Prefix_List)<br>List of IPv6 prefixes that are allowed to be processed from Router Advertisement packets. If not set, validation of the 'prefix-list' is not done."
+                    },
+                    "match_router_preference": {
+                      "type": "string",
+                      "description": "When set, router preference value advertised in the RA packet is matched and the packet is discarded if the match conditions are not met. high    Set the maximum router preference to high. low     Set the maximum router preference to low. medium  Set the maximum router preference to medium. If not set, validation of the 'router preference' value is not done.",
+                      "enum": [
+                        "high",
+                        "medium",
+                        "low"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [RA_Guard_Policy](#/RA_Guard_Policy)<br>Name of RA Guard policy.",
+                      "maxLength": 64
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "match_access_list",
+                  "match_prefix_list",
+                  "match_router_preference",
+                  "name",
+                  "match_config_flag",
+                  "match_hop_limit"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "RA_Guard_Policy"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "match_access_list": {
+                    "type": "string",
+                    "description": "Reference Resource: [ACL](#/ACL)<br>Inbound ACL to filter packets received from specific routers sending Router Advertisement packets. If not set, inbound filtering will be disabled."
+                  },
+                  "match_config_flag": {
+                    "type": "object",
+                    "properties": {
+                      "manage_flag": {
+                        "type": "string",
+                        "description": "When set, this enables verification of the 'managed config' flag in RA packets. on: Verify that the flag is set to 'On'. off: verify that the flag is set to 'Off'. If not set, validation of the 'managed config' flag is not done.",
+                        "enum": [
+                          "on",
+                          "off"
+                        ]
+                      },
+                      "other_flag": {
+                        "type": "string",
+                        "description": "When set, this enables verification of the 'other config' flag in RA packets. on: Verify that the flag is set to 'On'. off: verify that the flag is set to 'Off'. If not set, validation of the 'other config' flag is not done.",
+                        "enum": [
+                          "on",
+                          "off"
+                        ]
+                      }
+                    }
+                  },
+                  "match_hop_limit": {
+                    "type": "object",
+                    "properties": {
+                      "enable": {
+                        "type": "boolean",
+                        "description": "Enables hop-limit verification."
+                      },
+                      "maximum": {
+                        "type": "integer",
+                        "description": "When set, the RA/RR packet is discarded if the advertised hop-limit is greater than the specified max-hop limit.",
+                        "maximum": 255,
+                        "minimum": 1
+                      },
+                      "minimum": {
+                        "type": "integer",
+                        "description": "When set, the RA/RR packet is discarded if the advertised hop limit is lesser than the specified min-hop limit.",
+                        "maximum": 255,
+                        "minimum": 1
+                      }
+                    }
+                  },
+                  "match_prefix_list": {
+                    "type": "string",
+                    "description": "Reference Resource: [Prefix_List](#/Prefix_List)<br>List of IPv6 prefixes that are allowed to be processed from Router Advertisement packets. If not set, validation of the 'prefix-list' is not done."
+                  },
+                  "match_router_preference": {
+                    "type": "string",
+                    "description": "When set, router preference value advertised in the RA packet is matched and the packet is discarded if the match conditions are not met. high    Set the maximum router preference to high. low     Set the maximum router preference to low. medium  Set the maximum router preference to medium. If not set, validation of the 'router preference' value is not done.",
+                    "enum": [
+                      "high",
+                      "medium",
+                      "low"
+                    ]
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [RA_Guard_Policy](#/RA_Guard_Policy)<br>Name of RA Guard policy.",
+                    "maxLength": 64
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/system/ra_guard_policies/{RA_Guard_Policy.name}": {
+      "get": {
+        "tags": [
+          "RA_Guard_Policy"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "match_access_list": {
+                      "type": "string",
+                      "description": "Reference Resource: [ACL](#/ACL)<br>Inbound ACL to filter packets received from specific routers sending Router Advertisement packets. If not set, inbound filtering will be disabled."
+                    },
+                    "match_config_flag": {
+                      "type": "object",
+                      "properties": {
+                        "manage_flag": {
+                          "type": "string",
+                          "description": "When set, this enables verification of the 'managed config' flag in RA packets. on: Verify that the flag is set to 'On'. off: verify that the flag is set to 'Off'. If not set, validation of the 'managed config' flag is not done.",
+                          "enum": [
+                            "on",
+                            "off"
+                          ]
+                        },
+                        "other_flag": {
+                          "type": "string",
+                          "description": "When set, this enables verification of the 'other config' flag in RA packets. on: Verify that the flag is set to 'On'. off: verify that the flag is set to 'Off'. If not set, validation of the 'other config' flag is not done.",
+                          "enum": [
+                            "on",
+                            "off"
+                          ]
+                        }
+                      }
+                    },
+                    "match_hop_limit": {
+                      "type": "object",
+                      "properties": {
+                        "enable": {
+                          "type": "boolean",
+                          "description": "Enables hop-limit verification."
+                        },
+                        "maximum": {
+                          "type": "integer",
+                          "description": "When set, the RA/RR packet is discarded if the advertised hop-limit is greater than the specified max-hop limit.",
+                          "maximum": 255,
+                          "minimum": 1
+                        },
+                        "minimum": {
+                          "type": "integer",
+                          "description": "When set, the RA/RR packet is discarded if the advertised hop limit is lesser than the specified min-hop limit.",
+                          "maximum": 255,
+                          "minimum": 1
+                        }
+                      }
+                    },
+                    "match_prefix_list": {
+                      "type": "string",
+                      "description": "Reference Resource: [Prefix_List](#/Prefix_List)<br>List of IPv6 prefixes that are allowed to be processed from Router Advertisement packets. If not set, validation of the 'prefix-list' is not done."
+                    },
+                    "match_router_preference": {
+                      "type": "string",
+                      "description": "When set, router preference value advertised in the RA packet is matched and the packet is discarded if the match conditions are not met. high    Set the maximum router preference to high. low     Set the maximum router preference to low. medium  Set the maximum router preference to medium. If not set, validation of the 'router preference' value is not done.",
+                      "enum": [
+                        "high",
+                        "medium",
+                        "low"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [RA_Guard_Policy](#/RA_Guard_Policy)<br>Name of RA Guard policy.",
+                      "maxLength": 64
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "RA_Guard_Policy.name",
+            "in": "path",
+            "description": "Reference Resource: [RA_Guard_Policy](#/RA_Guard_Policy)<br>Name of RA Guard policy.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "name",
+                  "match_config_flag",
+                  "match_hop_limit",
+                  "match_access_list",
+                  "match_prefix_list",
+                  "match_router_preference"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "RA_Guard_Policy"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "match_access_list": {
+                    "type": "string",
+                    "description": "Reference Resource: [ACL](#/ACL)<br>Inbound ACL to filter packets received from specific routers sending Router Advertisement packets. If not set, inbound filtering will be disabled."
+                  },
+                  "match_config_flag": {
+                    "type": "object",
+                    "properties": {
+                      "manage_flag": {
+                        "type": "string",
+                        "description": "When set, this enables verification of the 'managed config' flag in RA packets. on: Verify that the flag is set to 'On'. off: verify that the flag is set to 'Off'. If not set, validation of the 'managed config' flag is not done.",
+                        "enum": [
+                          "on",
+                          "off"
+                        ]
+                      },
+                      "other_flag": {
+                        "type": "string",
+                        "description": "When set, this enables verification of the 'other config' flag in RA packets. on: Verify that the flag is set to 'On'. off: verify that the flag is set to 'Off'. If not set, validation of the 'other config' flag is not done.",
+                        "enum": [
+                          "on",
+                          "off"
+                        ]
+                      }
+                    }
+                  },
+                  "match_hop_limit": {
+                    "type": "object",
+                    "properties": {
+                      "enable": {
+                        "type": "boolean",
+                        "description": "Enables hop-limit verification."
+                      },
+                      "maximum": {
+                        "type": "integer",
+                        "description": "When set, the RA/RR packet is discarded if the advertised hop-limit is greater than the specified max-hop limit.",
+                        "maximum": 255,
+                        "minimum": 1
+                      },
+                      "minimum": {
+                        "type": "integer",
+                        "description": "When set, the RA/RR packet is discarded if the advertised hop limit is lesser than the specified min-hop limit.",
+                        "maximum": 255,
+                        "minimum": 1
+                      }
+                    }
+                  },
+                  "match_prefix_list": {
+                    "type": "string",
+                    "description": "Reference Resource: [Prefix_List](#/Prefix_List)<br>List of IPv6 prefixes that are allowed to be processed from Router Advertisement packets. If not set, validation of the 'prefix-list' is not done."
+                  },
+                  "match_router_preference": {
+                    "type": "string",
+                    "description": "When set, router preference value advertised in the RA packet is matched and the packet is discarded if the match conditions are not met. high    Set the maximum router preference to high. low     Set the maximum router preference to low. medium  Set the maximum router preference to medium. If not set, validation of the 'router preference' value is not done.",
+                    "enum": [
+                      "high",
+                      "medium",
+                      "low"
+                    ]
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "RA_Guard_Policy.name",
+            "in": "path",
+            "description": "Reference Resource: [RA_Guard_Policy](#/RA_Guard_Policy)<br>Name of RA Guard policy.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "RA_Guard_Policy"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "RA_Guard_Policy.name",
+            "in": "path",
+            "description": "Reference Resource: [RA_Guard_Policy](#/RA_Guard_Policy)<br>Name of RA Guard policy.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "RA_Guard_Policy"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "match_access_list": {
+                    "type": "string",
+                    "description": "Reference Resource: [ACL](#/ACL)<br>Inbound ACL to filter packets received from specific routers sending Router Advertisement packets. If not set, inbound filtering will be disabled."
+                  },
+                  "match_config_flag": {
+                    "type": "object",
+                    "properties": {
+                      "manage_flag": {
+                        "type": "string",
+                        "description": "When set, this enables verification of the 'managed config' flag in RA packets. on: Verify that the flag is set to 'On'. off: verify that the flag is set to 'Off'. If not set, validation of the 'managed config' flag is not done.",
+                        "enum": [
+                          "on",
+                          "off"
+                        ]
+                      },
+                      "other_flag": {
+                        "type": "string",
+                        "description": "When set, this enables verification of the 'other config' flag in RA packets. on: Verify that the flag is set to 'On'. off: verify that the flag is set to 'Off'. If not set, validation of the 'other config' flag is not done.",
+                        "enum": [
+                          "on",
+                          "off"
+                        ]
+                      }
+                    }
+                  },
+                  "match_hop_limit": {
+                    "type": "object",
+                    "properties": {
+                      "enable": {
+                        "type": "boolean",
+                        "description": "Enables hop-limit verification."
+                      },
+                      "maximum": {
+                        "type": "integer",
+                        "description": "When set, the RA/RR packet is discarded if the advertised hop-limit is greater than the specified max-hop limit.",
+                        "maximum": 255,
+                        "minimum": 1
+                      },
+                      "minimum": {
+                        "type": "integer",
+                        "description": "When set, the RA/RR packet is discarded if the advertised hop limit is lesser than the specified min-hop limit.",
+                        "maximum": 255,
+                        "minimum": 1
+                      }
+                    }
+                  },
+                  "match_prefix_list": {
+                    "type": "string",
+                    "description": "Reference Resource: [Prefix_List](#/Prefix_List)<br>List of IPv6 prefixes that are allowed to be processed from Router Advertisement packets. If not set, validation of the 'prefix-list' is not done."
+                  },
+                  "match_router_preference": {
+                    "type": "string",
+                    "description": "When set, router preference value advertised in the RA packet is matched and the packet is discarded if the match conditions are not met. high    Set the maximum router preference to high. low     Set the maximum router preference to low. medium  Set the maximum router preference to medium. If not set, validation of the 'router preference' value is not done.",
+                    "enum": [
+                      "high",
+                      "medium",
+                      "low"
+                    ]
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "RA_Guard_Policy.name",
+            "in": "path",
+            "description": "Reference Resource: [RA_Guard_Policy](#/RA_Guard_Policy)<br>Name of RA Guard policy.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

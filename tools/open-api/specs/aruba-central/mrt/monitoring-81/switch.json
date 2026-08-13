@@ -1,0 +1,3908 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Switch",
+    "version": "1.0.0",
+    "description": "API to retrieve VSX (Virtual Switching Extension) information for switches."
+  },
+  "servers": [
+    {
+      "url": "https://de1.api.central.arubanetworks.com",
+      "description": "eu"
+    },
+    {
+      "url": "https://de2.api.central.arubanetworks.com",
+      "description": "eucentral2"
+    },
+    {
+      "url": "https://de3.api.central.arubanetworks.com",
+      "description": "eucentral3"
+    },
+    {
+      "url": "https://gb1.api.central.arubanetworks.com",
+      "description": "ukwest2"
+    },
+    {
+      "url": "https://us1.api.central.arubanetworks.com",
+      "description": "prod"
+    },
+    {
+      "url": "https://us2.api.central.arubanetworks.com",
+      "description": "central-prod2"
+    },
+    {
+      "url": "https://us4.api.central.arubanetworks.com",
+      "description": "uswest4"
+    },
+    {
+      "url": "https://us5.api.central.arubanetworks.com",
+      "description": "uswest5"
+    },
+    {
+      "url": "https://us6.api.central.arubanetworks.com",
+      "description": "us-east-1"
+    },
+    {
+      "url": "https://ca1.api.central.arubanetworks.com",
+      "description": "starman"
+    },
+    {
+      "url": "https://in1.api.central.arubanetworks.com",
+      "description": "apac"
+    },
+    {
+      "url": "https://jp1.api.central.arubanetworks.com",
+      "description": "apaceast"
+    },
+    {
+      "url": "https://au1.api.central.arubanetworks.com",
+      "description": "apacsouth"
+    },
+    {
+      "url": "https://ae1.api.central.arubanetworks.com",
+      "description": "uaenorth1"
+    },
+    {
+      "url": "https://cn1.api.central.arubanetworks.com.cn",
+      "description": "china-prod"
+    },
+    {
+      "url": "https://internal.api.central.arubanetworks.com",
+      "description": "internal2"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Switch",
+      "description": "Switch Monitoring APIs to get details about Switch and related info"
+    }
+  ],
+  "paths": {
+    "/network-monitoring/v1/stack/{serial-number}/members": {
+      "get": {
+        "tags": [
+          "Switch"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/serial-number"
+          }
+        ],
+        "summary": "Get a list of Stack Members",
+        "description": "This API retrieves current stack member details for the specified stack-id or conductor serial.",
+        "operationId": "listStackMembersV1",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/StackMemberResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SwitchNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-monitoring/v1/switches": {
+      "get": {
+        "tags": [
+          "Switch"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Denotes the maximum number of switches returned in the response.\n",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 1000,
+              "example": 20,
+              "default": 1000
+            }
+          },
+          {
+            "name": "next",
+            "required": false,
+            "in": "query",
+            "description": "Specifies the pagination cursor for the next page of resources.\n\nMinimum value: 1\n",
+            "schema": {
+              "type": "string",
+              "format": "int32",
+              "description": "Specifies the pagination cursor for the next page of resources.",
+              "example": "2"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "description": "OData Version 4.0 filter string (limited functionality). Supports only 'and' conjunction ('or' and 'not' are NOT supported). Supported fields and operators are in the below given table.\n\n| Field | Operators |\n| --------- | -------- |\n| `siteId` | `eq` and `in` |\n| `siteName` | `eq` and `in` |\n| `model` | `eq` and `in` |\n| `status` | `eq` and `in` |\n| `deployment` | `eq` and `in` |\n\n**The operators are implemented as follows:**\n\n* `eq`: Only values exactly matching the given value are returned.\n\n* `in`: Only values present in the given list are returned.\n\n",
+            "example": "siteId eq '12345' and deployment in ('Standalone', 'Stack')",
+            "schema": {
+              "type": "string",
+              "format": "const",
+              "maxLength": 256
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "Comma separated list of sort expressions. Each sort expression is a property name optionally followed by a direction indicator asc (ascending) or desc (descending).\n\nThe first sort expression in the list defines the primary sort order, the second defines the secondary sort order, and so on. If a direction indicator is omitted, then the default direction is ascending.\n\nSupported fields are `siteId`, `model`, `status`, `deployment`, `serialNumber`, and `deviceName`.\n",
+            "schema": {
+              "type": "string",
+              "format": "const",
+              "maxLength": 256,
+              "example": "deviceName,deployment desc"
+            }
+          }
+        ],
+        "summary": "Get a list of Switches",
+        "description": "This API endpoint retrieves a list of switches associated to a customer, based on the query parameters provided. Each switch in the returned list includes comprehensive details like serial number, name, MAC address, siteId, status etc.",
+        "operationId": "getSwitchesV1",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SwitchListResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-monitoring/v1/switches/topn-interface-trends": {
+      "get": {
+        "tags": [
+          "Switch"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/site-id"
+          },
+          {
+            "$ref": "#/components/parameters/trendsFilterswitch"
+          }
+        ],
+        "summary": "Get Top-N Switch interface trends",
+        "description": "Get top N Switches interface trends, rx bytes, tx bytes over a given time period",
+        "operationId": "getTopnSwitchConnectivityTrendsV1",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/TopnInterfaceTrendsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-monitoring/v1/switches/{serial-number}": {
+      "get": {
+        "tags": [
+          "Switch"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/serial-number"
+          }
+        ],
+        "summary": "Get Switch details",
+        "description": "This API retrieves current switch information for the specified serial number or stack id. Conductor serial may also be used instead of a stack id. In the case of stacked switches, logical switch details and trend data are also provided. Member-level information can be obtained using the listStackMember API.",
+        "operationId": "getSwitchV1",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SwitchResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SwitchNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-monitoring/v1/switches/{serial-number}/hardware-categories": {
+      "get": {
+        "tags": [
+          "Switch"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/serial-number"
+          }
+        ],
+        "summary": "Get hardware categories for a Switch",
+        "description": "This API retrieves detailed hardware information associated with the specified serial number or stack id. Conductor serial may also be used instead of a stack id.",
+        "operationId": "listHardwareCategoriesV1",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SwitchHardwareResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SwitchNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-monitoring/v1/switches/{serial-number}/hardware-trends": {
+      "get": {
+        "tags": [
+          "Switch"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/serial-number"
+          },
+          {
+            "$ref": "#/components/parameters/site-id"
+          },
+          {
+            "$ref": "#/components/parameters/trendsFilterswitch"
+          }
+        ],
+        "summary": "Get hardware trends for a Switch",
+        "description": "This API provides hardware trend data for a given site based on a serial number or stack id. When a stack id or conductor serial is provided, the trends are aggregated across for each member of the stack. When a member serial is provided, the trends are aggregated for that specific member. By default, data is aggregated over the last three hours from the current timestamp. Available metrics include CPU utilization, memory utilization, PoE available, PoE consumption, and total power available.",
+        "operationId": "getSwitchHardwareTrendsV1",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HardwareTrendsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SwitchNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-monitoring/v1/switches/{serial-number}/interface-poe": {
+      "get": {
+        "tags": [
+          "Switch"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/serial-number"
+          }
+        ],
+        "summary": "Get interface PoE for a Switch",
+        "description": "This API provides interface poe detail for a serial or stack id for a specific site. Conductor serial may also be used instead of a stack id",
+        "operationId": "getSwitchInterfacePoeV1",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/InterfacePoeResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SwitchNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-monitoring/v1/switches/{serial-number}/interface-trends": {
+      "get": {
+        "tags": [
+          "Switch"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/serial-number"
+          },
+          {
+            "$ref": "#/components/parameters/site-id"
+          },
+          {
+            "$ref": "#/components/parameters/interface-id"
+          },
+          {
+            "$ref": "#/components/parameters/uplink"
+          },
+          {
+            "$ref": "#/components/parameters/trendsFilterswitch"
+          }
+        ],
+        "summary": "Get interface trends for a Switch",
+        "description": "This API provides interface trend data for a given site based on a serial number or stack id. When a stack id or conductor serial is provided, the trends are aggregated across the entire stack. When a member serial is provided, the trends are aggregated for that specific member. Supported metrics include RX bytes, TX bytes, discards, giants, errors, runts, and collisions.",
+        "operationId": "getSwitchConnectivityrendsV1",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/InterfaceTrendsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SwitchNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-monitoring/v1/switches/{serial-number}/interfaces": {
+      "get": {
+        "tags": [
+          "Switch"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/serial-number"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Denotes the number of interfaces that needs to be fetched. Fetches all by default.",
+            "schema": {
+              "$ref": "#/components/schemas/LimitParamswitch"
+            },
+            "example": "100"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "Denotes the offset from where the interfaces need to be fetched or the number of interfaces to skip.",
+            "schema": {
+              "$ref": "#/components/schemas/OffsetParam"
+            },
+            "example": "0"
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "description": "OData Version 4.0 filter string (limited functionality). Supports only 'and' conjunction ('or' and 'not' are NOT supported). Supported fields and operators are in the below given table.\n\n| Field | Operators |\n| --------- | -------- |\n| `name` | `eq` and `in` |\n| `speed` | `eq` and `in` |\n| `status` | `eq` and `in` |\n| `connector` | `eq` and `in` |\n| `duplex` | `eq` and `in` |\n| `lag` | `eq` and `in` |\n| `vlanmode` | `eq` and `in` |\n| `neighbourFamily` | `eq` and `in` |\n| `neighbourFunction` | `eq` and `in` |\n| `poeClass` | `eq` and `in` |\n| `poeStatus` | `eq` and `in` |\n| `operStatus` | `eq` and `in` |\n\n**The operators are implemented as follows:**\n\n* `eq`: Only values exactly matching the given value are returned.\n\n* `in`: Only values present in the given list are returned.\n\n",
+            "schema": {
+              "$ref": "#/components/schemas/Filterswitch"
+            },
+            "example": "speed eq '100000' and duplex in ('Full', 'Half')"
+          },
+          {
+            "$ref": "#/components/parameters/search"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "Comma separated list of sort expressions. Each sort expression is a property name optionally followed by a direction indicator asc (ascending) or desc (descending).\n\nThe first sort expression in the list defines the primary sort order, the second defines the secondary sort order, and so on. If a direction indicator is omitted the default direction is ascending.\n\nSupported fields are port, speed, neighbour, neighbourFamily, nativeVlan, neighbourRole, alias, connector, lag, vlanMode, poeClass, ipv4 and mtu. Default sort by name.\n",
+            "schema": {
+              "$ref": "#/components/schemas/Sortswitch"
+            },
+            "example": "lag ASC"
+          }
+        ],
+        "summary": "Get a list of Switch interfaces",
+        "description": "This API returns a list of interfaces for the specified serial number or stack id. Conductor serial may also be used instead of a stack id",
+        "operationId": "listInterfacesV1",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SwitchInterfaceResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SwitchNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-monitoring/v1/switches/{serial-number}/lag": {
+      "get": {
+        "tags": [
+          "Switch"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/serial-number"
+          }
+        ],
+        "summary": "Get LAG summary for a Switch",
+        "description": "This API provides a summary of link aggregation group (LAG) details for the specified serial number or stack id. Conductor serial may also be used instead of a stack id",
+        "operationId": "getLagSummaryV1",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SwitchLagSummaryResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SwitchNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-monitoring/v1/switches/{serial-number}/vlans": {
+      "get": {
+        "tags": [
+          "Switch"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/serial-number"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Denotes the number of vlans that needs to be fetched. Fetches all by default.",
+            "schema": {
+              "$ref": "#/components/schemas/LimitParamswitch"
+            },
+            "example": "100"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "Denotes the offset from where the vlans need to be fetched or the number of vlans to skip.",
+            "schema": {
+              "$ref": "#/components/schemas/OffsetParam"
+            },
+            "example": "0"
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "description": "OData Version 4.0 filter string (limited functionality). Supports only 'and' conjunction ('or' and 'not' are NOT supported). Supported fields and operators are in the below given table.\n\n| Field | Operators |\n| --------- | -------- |\n| `status` | `eq` and `in` |\n| `voice` | `eq` and `in` |\n| `type` | `eq` and `in` |\n\n**The operators are implemented as follows:**\n\n* `eq`: Only values exactly matching the given value are returned.\n\n* `in`: Only values present in the given list are returned.\n\n",
+            "schema": {
+              "$ref": "#/components/schemas/Filterswitch"
+            },
+            "example": "status in ('Up') and voice in ('Disabled')"
+          },
+          {
+            "$ref": "#/components/parameters/search"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "Comma separated list of sort expressions. Each sort expression is a property name optionally followed by a direction indicator asc (ascending) or desc (descending).\n\nThe first sort expression in the list defines the primary sort order, the second defines the secondary sort order, and so on. If a direction indicator is omitted the default direction is ascending.\n\nSupported fields are name, id, status, type, ipv4. Default sort by id.\n",
+            "schema": {
+              "$ref": "#/components/schemas/Sortswitch"
+            },
+            "example": "status ASC"
+          }
+        ],
+        "summary": "Get a list of Switch VLANs",
+        "description": "This API returns a list of VLANs for the specified serial number or stack id. Conductor serial may also be used instead of a stack id",
+        "operationId": "listVlansV1",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SwitchVlanResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SwitchNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-monitoring/v1/switches/{serial-number}/vsx": {
+      "get": {
+        "tags": [
+          "Switch"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/serial-numbervsx"
+          }
+        ],
+        "summary": "Returns VSX details for a specified switch serial number.",
+        "description": "This API provides Virtual Switching Extension (VSX) configuration and operational details for a specific switch identified by its serial number. If the switch does not support VSX or VSX is not configured, the API returns a 200 response with an empty VSX object (all fields null).",
+        "operationId": "getVsxV1",
+        "responses": {
+          "200": {
+            "description": "Object containing VSX information. If the switch does not support VSX or VSX is not configured, an empty VSX object is returned with all fields set to null.",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/XRateLimitLimit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/XRateLimitRemaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/XRateLimitReset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VsxResponse"
+                },
+                "examples": {
+                  "vsxConfigured": {
+                    "summary": "VSX configured and operational",
+                    "description": "Response when VSX is configured and operational on the switch.",
+                    "value": {
+                      "role": "primary",
+                      "peerRole": "secondary",
+                      "islPort": "1/1/49",
+                      "peerIslPort": "1/1/50",
+                      "keepaliveStatus": "established",
+                      "keepaliveHealth": "healthy",
+                      "keepaliveSourceIp": "192.168.1.1",
+                      "keepalivePeerIp": "192.168.1.2",
+                      "keepalivePort": "7678",
+                      "mac": "aa:bb:cc:dd:ee:ff",
+                      "peerMac": "11:22:33:44:55:66",
+                      "configSyncDisable": false,
+                      "configSyncStateValue": "synchronized",
+                      "configHealth": "ok",
+                      "islMgmtStateValue": "up",
+                      "naeStateValue": "enabled",
+                      "httpsServerStateValue": "running",
+                      "islpDeviceStateValue": "active",
+                      "vsxHealth": {
+                        "health": "ok",
+                        "healthDescription": "All VSX components are healthy"
+                      },
+                      "vsxPeerName": "switch-secondary",
+                      "vsxPeerSerial": "SNSECONDARY123",
+                      "vsxPeerSiteId": "site-456",
+                      "lastSyncTimestamp": "1707919492646"
+                    }
+                  },
+                  "vsxNotConfigured": {
+                    "summary": "VSX not configured or not supported",
+                    "description": "Response when the switch does not support VSX (e.g., 6200F platform) or VSX is not configured on the switch. An empty VSX object is returned with no fields populated.",
+                    "value": {}
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request: invalid or missing serial number",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/XRateLimitLimit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/XRateLimitRemaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/XRateLimitReset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "invalidSerialFormat": {
+                    "summary": "Invalid serial number format",
+                    "description": "Returned when the serial number does not match the expected alphanumeric pattern.",
+                    "value": {
+                      "errorCode": "HPE_GL_ERROR_BAD_REQUEST",
+                      "message": "Invalid serial number format",
+                      "debugId": "75d40213-6776-40ff-a959-89a7514ef7fc",
+                      "httpStatusCode": 400
+                    }
+                  },
+                  "missingSerial": {
+                    "summary": "Missing serial number",
+                    "description": "Returned when the serial number parameter is not provided or is empty.",
+                    "value": {
+                      "errorCode": "HPE_GL_ERROR_BAD_REQUEST",
+                      "message": "Bad request. Invalid values supplied in request.",
+                      "debugId": "a2b3c4d5-6e7f-8a9b-0c1d-2e3f4a5b6c7d",
+                      "httpStatusCode": 400
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized request",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/XRateLimitLimit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/XRateLimitRemaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/XRateLimitReset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "errorCode": "HPE_GL_ERROR_UNAUTHORIZED",
+                  "message": "Invalid or missing access token",
+                  "debugId": "a1b2c3d4-5e6f-7g8h-9i0j-k1l2m3n4o5p6",
+                  "httpStatusCode": 401
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: insufficient permissions",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/XRateLimitLimit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/XRateLimitRemaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/XRateLimitReset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "errorCode": "HPE_GL_ERROR_FORBIDDEN",
+                  "message": "User does not have permission to access this resource",
+                  "debugId": "12345678-90ab-cdef-1234-567890abcdef",
+                  "httpStatusCode": 403
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Switch not found or device offline",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/XRateLimitLimit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/XRateLimitRemaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/XRateLimitReset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "switchNotFound": {
+                    "summary": "Switch not found",
+                    "description": "Returned when no switch with the given serial number is onboarded to the platform.",
+                    "value": {
+                      "errorCode": "HPE_GL_ERROR_RESOURCE_NOT_FOUND",
+                      "message": "Switch with serial number SG9ZKN5018 not found",
+                      "debugId": "fedcba09-8765-4321-1234-567890abcdef",
+                      "httpStatusCode": 404
+                    }
+                  },
+                  "deviceOffline": {
+                    "summary": "Device is offline",
+                    "description": "Returned when the switch exists but is currently disconnected from Central.",
+                    "value": {
+                      "errorCode": "HPE_GL_ERROR_RESOURCE_NOT_FOUND",
+                      "message": "Device is offline",
+                      "debugId": "abcdef01-2345-6789-abcd-ef0123456789",
+                      "httpStatusCode": 404
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/XRateLimitLimit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/XRateLimitRemaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/XRateLimitReset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "errorCode": "HPE_GL_ERROR_RATE_LIMIT_EXCEEDED",
+                  "message": "Rate limit exceeded. Please try again later.",
+                  "debugId": "a1a2a3a4-b5b6-c7c8-d9d0-e1e2e3e4e5e6",
+                  "httpStatusCode": 429
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/XRateLimitLimit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/XRateLimitRemaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/XRateLimitReset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "errorCode": "HPE_GL_ERROR_INTERNAL_ERROR",
+                  "message": "An internal error occurred while processing the request",
+                  "debugId": "99887766-5544-3322-1100-ffeeddccbbaa",
+                  "httpStatusCode": 500
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BadRequestError": {
+        "type": "object",
+        "description": "Bad request error details returned from the server.",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 400,
+            "maximum": 400,
+            "description": "HTTP status code.",
+            "example": 400
+          },
+          "errorCode": {
+            "type": "string",
+            "enum": [
+              "HPE_GL_NETWORK_MONITORING_INVALID_INPUT"
+            ],
+            "maxLength": 128,
+            "description": "Error code",
+            "example": "HPE_GL_NETWORK_MONITORING_INVALID_INPUT"
+          },
+          "message": {
+            "$ref": "#/components/schemas/ErrorMessage"
+          },
+          "debugId": {
+            "$ref": "#/components/schemas/DebugId"
+          }
+        }
+      },
+      "DebugId": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 512,
+        "description": "A unique identifier used for troubleshooting purposes.",
+        "example": "78f002e32e0cefba3d8cc94fa8179342"
+      },
+      "DebugIdswitch": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 512,
+        "description": "A unique identifier used for troubleshooting and debugging purposes.\n",
+        "example": "78f002e32e0cefba3d8cc94fa8179342"
+      },
+      "ErrorMessage": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 512,
+        "description": "Error message indicating the cause of the failure.",
+        "example": "Error Message"
+      },
+      "ErrorMessageswitch": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 512,
+        "description": "Error message indicating the cause of the failure.\n",
+        "example": "Reason for the error"
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "description": "Standard error response structure",
+        "properties": {
+          "errorCode": {
+            "type": "string",
+            "description": "A machine-readable error code",
+            "example": "HPE_GL_ERROR_RESOURCE_NOT_FOUND"
+          },
+          "message": {
+            "type": "string",
+            "description": "A human-readable error message",
+            "example": "Switch with serial number not found"
+          },
+          "debugId": {
+            "type": "string",
+            "description": "A unique identifier for troubleshooting this error",
+            "example": "fedcba09-8765-4321-1234-567890abcdef"
+          },
+          "httpStatusCode": {
+            "type": "integer",
+            "description": "The HTTP status code",
+            "example": 404
+          }
+        },
+        "required": [
+          "errorCode",
+          "message",
+          "debugId",
+          "httpStatusCode"
+        ]
+      },
+      "Filterswitch": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 256
+      },
+      "ForbiddenRequest": {
+        "type": "object",
+        "description": "Forbidden error details returned from the server.",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 403,
+            "maximum": 403,
+            "example": 403,
+            "description": "HTTP status code."
+          },
+          "errorCode": {
+            "type": "string",
+            "description": "* A unique machine-friendly, but human-readable identifier for the error. It has prefix HPE_GL_.* For more details regarding error please refer to error message",
+            "example": "HPE_GL_ERROR_FORBIDDEN",
+            "maxLength": 256
+          },
+          "message": {
+            "$ref": "#/components/schemas/ErrorMessage"
+          },
+          "debugId": {
+            "$ref": "#/components/schemas/DebugId"
+          }
+        }
+      },
+      "HardwareCategory": {
+        "type": "object",
+        "properties": {
+          "health": {
+            "type": "string",
+            "description": "Health of the hardware",
+            "example": "Good"
+          }
+        },
+        "required": [
+          "health"
+        ]
+      },
+      "HardwareCategoryCount": {
+        "type": "object",
+        "properties": {
+          "health": {
+            "type": "string",
+            "description": "Health of the hardware",
+            "example": "Good"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total count of the hardware",
+            "example": "3"
+          },
+          "upCount": {
+            "type": "integer",
+            "description": "Up count of the hardware",
+            "example": "1"
+          },
+          "failedIds": {
+            "type": "array",
+            "description": "List of failed hardwares.",
+            "items": {
+              "$ref": "#/components/schemas/HardwareFailedSummary"
+            }
+          }
+        }
+      },
+      "HardwareFailedSummary": {
+        "type": "object",
+        "properties": {
+          "stackMemberId": {
+            "type": "integer",
+            "description": "Member id of the switch",
+            "example": "Good"
+          },
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Failed ids of the hardware for a switch",
+            "example": [
+              "1",
+              "2"
+            ]
+          }
+        },
+        "required": [
+          "health"
+        ]
+      },
+      "HardwareTrendsResponse": {
+        "type": "object",
+        "description": "Response containing hardware trends related to the switch.",
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "8",
+            "description": "identifier."
+          },
+          "type": {
+            "type": "string",
+            "example": "network-monitoring/switch-monitoring",
+            "description": "Device type of monitoring."
+          },
+          "metric": {
+            "type": "string",
+            "example": "SwitchNetworkHardwareTrends",
+            "description": "Trends name."
+          },
+          "keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "cpuUtilization,memoryUtilization"
+            ],
+            "description": "Trends list."
+          },
+          "switchMetrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SwitchMetrics"
+            },
+            "description": "Samples for the trends."
+          },
+          "units": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Frames,B,Packets"
+            ],
+            "description": "Units for the trends in the keys list."
+          }
+        }
+      },
+      "InterfacePoeResponse": {
+        "allOf": [
+          {
+            "type": "object",
+            "description": "Response containing interface poe for the switch.",
+            "required": [
+              "items",
+              "count"
+            ],
+            "properties": {
+              "items": {
+                "type": "array",
+                "maxItems": 9999,
+                "items": {
+                  "$ref": "#/components/schemas/SwitchInterfacePoE"
+                }
+              },
+              "count": {
+                "type": "integer",
+                "example": 4,
+                "description": "Total number of interface poe."
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/PaginationResponsePropertiesswitch"
+          }
+        ]
+      },
+      "InterfaceTrendsResponse": {
+        "type": "object",
+        "description": "Response containing interface trends related to the switch.",
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "8",
+            "description": "identifier."
+          },
+          "type": {
+            "type": "string",
+            "example": "network-monitoring/switch-monitoring",
+            "description": "Device type of monitoring."
+          },
+          "metric": {
+            "type": "string",
+            "example": "SwitchNetworkInterfaceTrends",
+            "description": "Trends name."
+          },
+          "interfaceId": {
+            "type": "string",
+            "example": "7",
+            "description": "Interface name for which the api called."
+          },
+          "uplink": {
+            "type": "boolean",
+            "example": "false",
+            "description": "To identify uplink interfaces."
+          },
+          "keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "rxBytes,inErrors"
+            ],
+            "description": "Trends list."
+          },
+          "samples": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Sample"
+            },
+            "description": "Samples for the interface trends in the key list."
+          },
+          "units": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Frames,B,Packets"
+            ],
+            "description": "Units for the interface trends in the keys list."
+          }
+        }
+      },
+      "InternalServerError": {
+        "type": "object",
+        "description": "Error details returned from the server.",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 500,
+            "maximum": 500,
+            "example": 500,
+            "description": "HTTP status code."
+          },
+          "errorCode": {
+            "type": "string",
+            "enum": [
+              "HPE_GL_NETWORK_MONITORING_INTERNAL_SERVER_ERROR"
+            ],
+            "format": "const",
+            "maxLength": 128,
+            "description": "* A unique machine-friendly, but human-readable identifier for the error. It has a prefix HPE_GL_.* For more details regarding error, please refer to the error message",
+            "example": "HPE_GL_NETWORK_MONITORING_INTERNAL_SERVER_ERROR"
+          },
+          "message": {
+            "$ref": "#/components/schemas/ErrorMessage"
+          },
+          "debugId": {
+            "$ref": "#/components/schemas/DebugId"
+          }
+        }
+      },
+      "LimitParamswitch": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 0,
+        "maximum": 1000,
+        "default": 1000,
+        "examples": [
+          100
+        ]
+      },
+      "NotFoundError": {
+        "type": "object",
+        "description": "Not Found error details returned from the server.\n",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 404,
+            "maximum": 404,
+            "description": "HTTP status code.\n",
+            "example": 404
+          },
+          "errorCode": {
+            "type": "string",
+            "format": "const",
+            "enum": [
+              "HPE_GL_ERROR_NOT_FOUND"
+            ],
+            "description": "* A unique machine-friendly, but human-readable identifier for the error. It has prefix HPE_GL_.\n* For more details regarding error please refer to error message\n",
+            "example": "HPE_GL_ERROR_NOT_FOUND",
+            "maxLength": 256
+          },
+          "message": {
+            "$ref": "#/components/schemas/ErrorMessageswitch"
+          },
+          "debugId": {
+            "$ref": "#/components/schemas/DebugIdswitch"
+          }
+        }
+      },
+      "OffsetParam": {
+        "type": "integer",
+        "format": "int32",
+        "default": 0,
+        "examples": [
+          0
+        ]
+      },
+      "PaginationResponsePropertiesswitch": {
+        "type": "object",
+        "required": [
+          "count",
+          "total",
+          "offset"
+        ],
+        "description": "Fields appended to a list to facilitate paging.\n",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The number of objects returned in the current list.\n",
+            "example": 1
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The total number of objects contained in the datastore.\n",
+            "example": 1
+          },
+          "offset": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 128,
+            "description": "An offset which could be passed in the next query to fetch the next page.\nSet to null when no more pages remain.\n",
+            "examples": [
+              null
+            ]
+          }
+        }
+      },
+      "Sample": {
+        "type": "object",
+        "description": "Sample list for the trends.",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "float"
+            },
+            "example": [
+              "27.0,36.0"
+            ],
+            "description": "Samples list."
+          },
+          "timestamp": {
+            "type": "number",
+            "example": "1764592073958",
+            "description": "Timestamp for the samples."
+          }
+        }
+      },
+      "Search": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 256
+      },
+      "SerialNumber": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 16,
+        "description": "The device serial number.\n",
+        "example": "AP00000001"
+      },
+      "SerialNumberswitch": {
+        "type": "string",
+        "format": "const",
+        "example": "AP00000001"
+      },
+      "SiteId": {
+        "type": "string",
+        "format": "uuid",
+        "maxLength": 16,
+        "description": "Id of a site where devices are associated.",
+        "example": "24833497"
+      },
+      "SiteIdswitch": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 128,
+        "example": "24833497"
+      },
+      "Sortswitch": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 256
+      },
+      "Stack": {
+        "type": "object",
+        "description": "Details of a stack.",
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "stack-12345",
+            "description": "Unique identifier for the stack."
+          },
+          "type": {
+            "type": "string",
+            "example": "stack-members",
+            "description": "Type of the stack."
+          },
+          "topology": {
+            "type": "string",
+            "example": "Ring",
+            "description": "Topology of the stack."
+          },
+          "stackType": {
+            "type": "string",
+            "example": "Virtual",
+            "description": "Type of the stack configuration."
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StackResponse"
+            },
+            "description": "List of switches that are members of the stack."
+          },
+          "portLinks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StackPortLinks"
+            },
+            "description": "Port links within the stack."
+          }
+        }
+      },
+      "StackMemberResponse": {
+        "type": "object",
+        "description": "Response containing a list of stack members and the total count.",
+        "required": [
+          "items",
+          "count"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Stack"
+            },
+            "description": "List of stack members."
+          },
+          "count": {
+            "type": "integer",
+            "example": 5,
+            "description": "Total number of stack members."
+          }
+        }
+      },
+      "StackPortLinks": {
+        "type": "object",
+        "description": "Details of the stack port links for a switch.",
+        "example": {
+          "serialNumber": "CN31HKZ0CN",
+          "links": [
+            {
+              "name": "GigabitEthernet1/0/1",
+              "index": 1,
+              "alias": "GE1",
+              "status": "Up",
+              "errorReason": null,
+              "description": "Uplink to Core Switch",
+              "adminStatus": "Up",
+              "operStatus": "Up",
+              "mtu": 1500,
+              "speed": 1000,
+              "connector": "RJ45",
+              "duplex": "Full",
+              "lag": null,
+              "vlanMode": "Access",
+              "allowedVlans": [
+                "VLAN10",
+                "VLAN20"
+              ],
+              "allowedVlanIds": [
+                10,
+                20
+              ],
+              "nativeVlan": 1,
+              "poeStatus": "Enabled",
+              "poeClass": "Class4",
+              "portAlignment": "Aligned",
+              "serialNumber": "CN31HKZ0CN",
+              "peerPort": "GigabitEthernet1/0/24",
+              "peerMemberId": 2,
+              "uplink": true,
+              "type": "GigabitEthernet",
+              "portError": [],
+              "module": "1",
+              "neighbour": "CoreSwitch",
+              "neighbourPort": "GigabitEthernet1/0/24",
+              "neighbourFamily": "Aruba",
+              "neighbourFunction": "Core",
+              "neighbourRole": "Core Switch",
+              "neighbourHealth": "Good",
+              "neighbourSerial": "CN32HKZ0DN",
+              "neighbourType": "Switch",
+              "isMultipleNeighbourClients": false,
+              "transceiverType": "SFP",
+              "transceiverSerial": "SFP123456",
+              "transceiverModel": "SFP-1G-LX",
+              "transceiverProductNumber": "J4859C",
+              "transceiverStatus": "Good",
+              "ipv4": "10.1.1.1",
+              "stpInstanceType": "RSTP",
+              "stpInstanceId": 0,
+              "stpPortRole": "Root",
+              "stpPortState": "Forwarding",
+              "stpPortInconsistent": "None"
+            }
+          ]
+        },
+        "required": [
+          "serialNumber",
+          "links"
+        ],
+        "properties": {
+          "serialNumber": {
+            "type": "string",
+            "description": "Serial number of the switch.",
+            "example": "CN31HKZ0CN"
+          },
+          "links": {
+            "type": "array",
+            "description": "List of switch interfaces.",
+            "items": {
+              "$ref": "#/components/schemas/SwitchInterface"
+            }
+          }
+        }
+      },
+      "StackResponse": {
+        "type": "object",
+        "description": "Switch response that contains switch attributes\n",
+        "example": {
+          "id": "CN31HKZ0CN",
+          "type": "switch",
+          "switchLinkType": "BPS",
+          "recommendation": null,
+          "switchType": "pvos",
+          "stpEnable": false,
+          "stpMode": null,
+          "serialNumber": "CN31HKZ0CN",
+          "ipv4": "10.21.78.3",
+          "status": "Offline",
+          "ipv6": null,
+          "macAddress": "ec:50:aa:0d:99:30",
+          "publicIp": "59.144.73.163",
+          "model": "AS-2930F",
+          "stackId": null,
+          "health": "Poor",
+          "healthReasons": {
+            "poorReasons": [
+              "DEVICE_OFFLINE"
+            ],
+            "fairReasons": {},
+            "primaryReason": {
+              "reasonEnum": "None",
+              "typeId": "None",
+              "totalReasons": 0
+            }
+          },
+          "siteId": "749988555",
+          "uptimeInMillis": null,
+          "rebootTs": null,
+          "firmwareVersion": "WC.16.11.0001",
+          "deployment": "Standalone",
+          "firmwareUpdatedTs": null,
+          "firmwareBackupVersion": null,
+          "firmwareStatus": null,
+          "firmwareRecommendedVersion": null,
+          "contact": "",
+          "jNumber": "JL258A",
+          "lastSeenAt": 1707919492646,
+          "managementVlan": null,
+          "nativeVlan": null,
+          "configStatus": "Synchronized",
+          "deviceName": "Aruba-2930F-8G-PoEP-2SFPP",
+          "switchRole": "Standalone",
+          "manufacturer": "Aruba",
+          "location": "",
+          "stackMemberId": 2,
+          "stackMemberStatus": null,
+          "stackMemberPriority": null,
+          "lastConfigChange": 1707907296000,
+          "lastRestartReason": null
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "const",
+            "description": "Serial of the switch.\n",
+            "example": "CN31HKZ0CN"
+          },
+          "type": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 512,
+            "description": "API type.\n",
+            "example": "switch"
+          },
+          "switchLinkType": {
+            "type": "string",
+            "example": "BPS",
+            "description": "Link type for switch"
+          },
+          "recommendation": {
+            "type": "array",
+            "example": [
+              "Update firmware",
+              "Check connection stability"
+            ],
+            "description": "Recommended actions for the switch"
+          },
+          "switchType": {
+            "type": "string",
+            "example": "pvos",
+            "description": "Type of the switch, e.g., pvos or cx"
+          },
+          "stpEnable": {
+            "type": "boolean",
+            "example": true,
+            "description": "Indicates if STP (Spanning Tree Protocol) is enabled"
+          },
+          "stpMode": {
+            "type": "string",
+            "example": "RSTP",
+            "description": "Mode of the Spanning Tree Protocol"
+          },
+          "serialNumber": {
+            "$ref": "#/components/schemas/SerialNumberswitch"
+          },
+          "ipv4": {
+            "type": "string",
+            "example": "10.21.78.3",
+            "description": "The switch IP address in IPv4 format"
+          },
+          "status": {
+            "type": "string",
+            "example": "Online",
+            "description": "The status of the switch"
+          },
+          "ipv6": {
+            "type": "string",
+            "example": "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
+            "description": "The switch IP address in IPv6 format"
+          },
+          "macAddress": {
+            "type": "string",
+            "example": "11:22:33:44:66:60",
+            "description": "The MAC address of the switch"
+          },
+          "publicIp": {
+            "type": "string",
+            "example": "59.144.73.163",
+            "description": "Public IP address of the switch"
+          },
+          "model": {
+            "type": "string",
+            "example": "AS-2930M",
+            "description": "Model of the switch"
+          },
+          "stackId": {
+            "type": "string",
+            "example": "01000c97-5f80e1c0",
+            "description": "Stack ID of the device"
+          },
+          "health": {
+            "type": "string",
+            "example": "Poor",
+            "description": "Health status of the switch"
+          },
+          "healthReasons": {
+            "$ref": "#/components/schemas/SwitchHealthReasons"
+          },
+          "siteId": {
+            "$ref": "#/components/schemas/SiteIdswitch"
+          },
+          "uptimeInMillis": {
+            "$ref": "#/components/schemas/UptimeInMillisswitch"
+          },
+          "rebootTs": {
+            "type": "number",
+            "format": "float",
+            "example": 1627873200,
+            "description": "Timestamp of the last reboot"
+          },
+          "firmwareVersion": {
+            "type": "string",
+            "example": "8.6.0.0",
+            "description": "Current firmware version of the switch"
+          },
+          "deployment": {
+            "type": "string",
+            "example": "Standalone",
+            "description": "Deployment mode of the switch"
+          },
+          "firmwareUpdatedTs": {
+            "type": "number",
+            "format": "float",
+            "example": 1627873200,
+            "description": "Timestamp of the last firmware update"
+          },
+          "firmwareBackupVersion": {
+            "type": "string",
+            "example": "8.5.0.0",
+            "description": "Backup firmware version of the switch"
+          },
+          "firmwareStatus": {
+            "type": "string",
+            "example": "Updated",
+            "description": "Status of the firmware"
+          },
+          "firmwareRecommendedVersion": {
+            "type": "string",
+            "example": "8.6.1.0",
+            "description": "Recommended firmware version for the switch"
+          },
+          "contact": {
+            "type": "string",
+            "example": "admin@company.com",
+            "description": "Contact person or email for the switch"
+          },
+          "jNumber": {
+            "type": "string",
+            "example": "J123456",
+            "description": "Job number or identifier"
+          },
+          "lastSeenAt": {
+            "type": "number",
+            "format": "float",
+            "example": 1627873200,
+            "description": "Timestamp when the switch was last seen online"
+          },
+          "managementVlan": {
+            "type": "integer",
+            "example": 1,
+            "description": "Management VLAN ID"
+          },
+          "nativeVlan": {
+            "type": "integer",
+            "example": 10,
+            "description": "Native VLAN ID"
+          },
+          "configStatus": {
+            "type": "string",
+            "example": "Pending",
+            "description": "Configuration status of the switch"
+          },
+          "deviceName": {
+            "type": "string",
+            "example": "Switch-01",
+            "description": "Name of the switch"
+          },
+          "switchRole": {
+            "type": "string",
+            "example": "Core",
+            "description": "Role of the switch in the network"
+          },
+          "manufacturer": {
+            "type": "string",
+            "example": "Aruba",
+            "description": "Manufacturer of the switch"
+          },
+          "location": {
+            "type": "string",
+            "example": "Data Center 1",
+            "description": "Physical location of the switch"
+          },
+          "stackMemberId": {
+            "type": "integer",
+            "example": 1,
+            "description": "Member ID of the switch in a stack configuration"
+          },
+          "stackMemberStatus": {
+            "type": "string",
+            "example": "Active",
+            "description": "Status of the switch within the stack"
+          },
+          "stackMemberPriority": {
+            "type": "integer",
+            "example": 15,
+            "description": "Priority of the switch within the stack"
+          },
+          "lastConfigChange": {
+            "type": "number",
+            "format": "float",
+            "example": 1627873200,
+            "description": "Timestamp of the last configuration change"
+          },
+          "lastRestartReason": {
+            "type": "string",
+            "example": "Software upgrade",
+            "description": "Reason for the last restart"
+          }
+        }
+      },
+      "SwitchHardware": {
+        "type": "object",
+        "description": "Hardware detail for the switch",
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "CN31HKZ0CN",
+            "description": "Serial of the switch.\n"
+          },
+          "type": {
+            "type": "string",
+            "example": "switch-hardware",
+            "description": "Type of the hardware."
+          },
+          "serialNumber": {
+            "type": "string",
+            "example": "CN31HKZ0CN",
+            "description": "Serial of the switch.\n"
+          },
+          "model": {
+            "type": "string",
+            "example": "AS-2930M",
+            "description": "Model of the switch."
+          },
+          "role": {
+            "type": "string",
+            "example": "Standby",
+            "description": "Role of the switch."
+          },
+          "cpu": {
+            "$ref": "#/components/schemas/HardwareCategory"
+          },
+          "memory": {
+            "$ref": "#/components/schemas/HardwareCategory"
+          },
+          "temperature": {
+            "$ref": "#/components/schemas/HardwareCategory"
+          },
+          "fans": {
+            "$ref": "#/components/schemas/HardwareCategoryCount"
+          },
+          "powerSupplies": {
+            "$ref": "#/components/schemas/HardwareCategoryCount"
+          },
+          "poeSlots": {
+            "$ref": "#/components/schemas/HardwareCategoryCount"
+          },
+          "stackMemberId": {
+            "type": "integer",
+            "example": "2",
+            "description": "Member id of the switch."
+          },
+          "status": {
+            "type": "string",
+            "example": "online",
+            "description": "Status of the switch."
+          }
+        }
+      },
+      "SwitchHardwareResponse": {
+        "type": "object",
+        "description": "Response containing hardware details and the switch count.",
+        "required": [
+          "items",
+          "count"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SwitchHardware"
+            },
+            "description": "List of switch hardware details."
+          },
+          "count": {
+            "type": "integer",
+            "example": 4,
+            "description": "Total number of switches."
+          }
+        }
+      },
+      "SwitchHealthPrimaryReason": {
+        "type": "object",
+        "properties": {
+          "reasonEnum": {
+            "type": "string",
+            "example": "None",
+            "description": "Health Primary Reason Enum."
+          },
+          "typeId": {
+            "type": "string",
+            "example": "None",
+            "description": "Health Primary Reason TypeId."
+          },
+          "totalReasons": {
+            "type": "integer",
+            "example": "1",
+            "description": "Total health reasons."
+          }
+        }
+      },
+      "SwitchHealthReasons": {
+        "type": "object",
+        "properties": {
+          "poorReasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of reasons why the switch health is considered poor",
+            "example": [
+              "High packet loss",
+              "Frequent disconnections"
+            ]
+          },
+          "fairReasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of reasons why the switch health is considered fair",
+            "example": [
+              "Moderate latency",
+              "Occasional errors"
+            ]
+          },
+          "primaryReason": {
+            "$ref": "#/components/schemas/SwitchHealthPrimaryReason"
+          }
+        },
+        "required": [
+          "poorReasons",
+          "fairReasons",
+          "primaryReason"
+        ]
+      },
+      "SwitchInterface": {
+        "type": "object",
+        "description": "Details of a switch interface.",
+        "example": {
+          "id": "GigabitEthernet1/0/1",
+          "name": "GigabitEthernet1/0/1",
+          "index": 1,
+          "alias": "GE1",
+          "status": "Up",
+          "errorReason": null,
+          "description": "Uplink to Core Switch",
+          "adminStatus": "Up",
+          "operStatus": "Up",
+          "mtu": 1500,
+          "speed": 1000,
+          "connector": "RJ45",
+          "duplex": "Full",
+          "lag": null,
+          "vlanMode": "Access",
+          "allowedVlans": [
+            "VLAN10",
+            "VLAN20"
+          ],
+          "allowedVlanIds": [
+            10,
+            20
+          ],
+          "nativeVlan": 1,
+          "poeStatus": "Enabled",
+          "poeClass": "Class4",
+          "portAlignment": "Aligned",
+          "serialNumber": "CN31HKZ0CN",
+          "peerPort": "GigabitEthernet1/0/24",
+          "peerMemberId": 2,
+          "uplink": true,
+          "type": "GigabitEthernet",
+          "portError": [],
+          "module": "1",
+          "neighbour": "CoreSwitch",
+          "neighbourPort": "GigabitEthernet1/0/24",
+          "neighbourFamily": "Aruba",
+          "neighbourFunction": "Core",
+          "neighbourRole": "Core Switch",
+          "neighbourHealth": "Good",
+          "neighbourSerial": "CN32HKZ0DN",
+          "neighbourType": "Switch",
+          "isMultipleNeighbourClients": false,
+          "transceiverType": "SFP",
+          "transceiverSerial": "SFP123456",
+          "transceiverModel": "SFP-1G-LX",
+          "transceiverProductNumber": "J4859C",
+          "transceiverStatus": "Good",
+          "ipv4": "10.1.1.1",
+          "stpInstanceType": "RSTP",
+          "stpInstanceId": 0,
+          "stpPortRole": "Root",
+          "stpPortState": "Forwarding",
+          "stpPortInconsistent": "None"
+        },
+        "required": [
+          "id",
+          "type",
+          "name",
+          "index",
+          "status",
+          "adminStatus",
+          "operStatus"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "7",
+            "description": "Interface name."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the switch interface.",
+            "example": "GigabitEthernet1/0/1"
+          },
+          "index": {
+            "type": "integer",
+            "description": "Index of the switch interface.",
+            "example": 1
+          },
+          "alias": {
+            "type": "string",
+            "description": "Alias name for the interface.",
+            "example": "GE1"
+          },
+          "status": {
+            "type": "string",
+            "description": "Operational status of the interface.",
+            "example": "Up"
+          },
+          "errorReason": {
+            "type": "string",
+            "description": "Reason for any error on the interface.",
+            "example": "None"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the interface.",
+            "example": "Uplink to Core Switch"
+          },
+          "adminStatus": {
+            "type": "string",
+            "description": "Administrative status of the interface.",
+            "example": "Up"
+          },
+          "operStatus": {
+            "type": "string",
+            "description": "Operational status of the interface.",
+            "example": "Up"
+          },
+          "mtu": {
+            "type": "integer",
+            "description": "MTU size of the interface.",
+            "example": 1500
+          },
+          "speed": {
+            "type": "number",
+            "format": "float",
+            "description": "Speed of the interface in Mbps.",
+            "example": 1000
+          },
+          "connector": {
+            "type": "string",
+            "description": "Type of connector used by the interface.",
+            "example": "RJ45"
+          },
+          "duplex": {
+            "type": "string",
+            "description": "Duplex mode of the interface.",
+            "example": "Full"
+          },
+          "lag": {
+            "type": "string",
+            "description": "Link Aggregation Group (LAG) associated with the interface.",
+            "example": "LAG1"
+          },
+          "vlanMode": {
+            "type": "string",
+            "description": "VLAN mode of the interface.",
+            "example": "Access"
+          },
+          "allowedVlans": {
+            "type": "array",
+            "description": "List of allowed VLAN names on the interface.",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "VLAN10",
+              "VLAN20"
+            ]
+          },
+          "allowedVlanIds": {
+            "type": "array",
+            "description": "List of allowed VLAN IDs on the interface.",
+            "items": {
+              "type": "integer"
+            },
+            "example": [
+              10,
+              20
+            ]
+          },
+          "nativeVlan": {
+            "type": "integer",
+            "description": "Native VLAN ID of the interface.",
+            "example": 1
+          },
+          "poeStatus": {
+            "type": "string",
+            "description": "PoE (Power over Ethernet) status of the interface.",
+            "example": "Enabled"
+          },
+          "poeClass": {
+            "type": "string",
+            "description": "PoE class of the interface.",
+            "example": "Class4"
+          },
+          "portAlignment": {
+            "type": "string",
+            "description": "Alignment status of the port.",
+            "example": "Aligned"
+          },
+          "serialNumber": {
+            "type": "string",
+            "description": "Serial number associated with the interface.",
+            "example": "CN31HKZ0CN"
+          },
+          "peerPort": {
+            "type": "string",
+            "description": "Name of the peer port connected to this interface.",
+            "example": "GigabitEthernet1/0/24"
+          },
+          "peerMemberId": {
+            "type": "integer",
+            "description": "Member ID of the peer device.",
+            "example": 2
+          },
+          "uplink": {
+            "type": "boolean",
+            "description": "Indicates if the interface is an uplink port.",
+            "example": true
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of the interface.",
+            "example": "GigabitEthernet"
+          },
+          "portError": {
+            "type": "array",
+            "description": "List of errors associated with the port.",
+            "items": {
+              "type": "string"
+            },
+            "example": []
+          },
+          "module": {
+            "type": "string",
+            "description": "Module number of the interface.",
+            "example": "1"
+          },
+          "neighbour": {
+            "type": "string",
+            "description": "Name of the neighbouring device connected to this interface.",
+            "example": "CoreSwitch"
+          },
+          "neighbourPort": {
+            "type": "string",
+            "description": "Port on the neighbouring device connected to this interface.",
+            "example": "GigabitEthernet1/0/24"
+          },
+          "neighbourFamily": {
+            "type": "string",
+            "description": "Family of the neighbouring device.",
+            "example": "Aruba"
+          },
+          "neighbourFunction": {
+            "type": "string",
+            "description": "Function of the neighbouring device.",
+            "example": "Core"
+          },
+          "neighbourRole": {
+            "type": "string",
+            "description": "Role of the neighbouring device.",
+            "example": "Core Switch"
+          },
+          "neighbourHealth": {
+            "type": "string",
+            "description": "Health status of the neighbouring device.",
+            "example": "Good"
+          },
+          "neighbourSerial": {
+            "type": "string",
+            "description": "Serial number of the neighbouring device.",
+            "example": "CN32HKZ0DN"
+          },
+          "neighbourType": {
+            "type": "string",
+            "description": "Type of the neighbouring device.",
+            "example": "Switch"
+          },
+          "isMultipleNeighbourClients": {
+            "type": "boolean",
+            "description": "Indicates if the port is connected to multiple clients on the neighbouring device.",
+            "example": false
+          },
+          "transceiverType": {
+            "type": "string",
+            "description": "Type of transceiver used in the interface.",
+            "example": "SFP"
+          },
+          "transceiverSerial": {
+            "type": "string",
+            "description": "Serial number of the transceiver.",
+            "example": "SFP123456"
+          },
+          "transceiverModel": {
+            "type": "string",
+            "description": "Model of the transceiver.",
+            "example": "SFP-1G-LX"
+          },
+          "transceiverProductNumber": {
+            "type": "string",
+            "description": "Product number of the transceiver.",
+            "example": "J4859C"
+          },
+          "transceiverStatus": {
+            "type": "string",
+            "description": "Status of the transceiver.",
+            "example": "Good"
+          },
+          "ipv4": {
+            "type": "string",
+            "description": "IPv4 address assigned to the interface.",
+            "example": "10.1.1.1"
+          },
+          "stpInstanceType": {
+            "type": "string",
+            "description": "Type of Spanning Tree Protocol (STP) instance.",
+            "example": "RSTP"
+          },
+          "stpInstanceId": {
+            "type": "integer",
+            "description": "Identifier of the STP instance.",
+            "example": 0
+          },
+          "stpPortRole": {
+            "type": "string",
+            "description": "Role of the port within the STP instance.",
+            "example": "Root"
+          },
+          "stpPortState": {
+            "type": "string",
+            "description": "State of the port within the STP instance.",
+            "example": "Forwarding"
+          },
+          "stpPortInconsistent": {
+            "type": "string",
+            "description": "Indicates if there is any inconsistency in the STP port.",
+            "example": "None"
+          }
+        }
+      },
+      "SwitchInterfacePoE": {
+        "type": "object",
+        "description": "Object containing interface poe for the switch.",
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "1",
+            "description": "identifier."
+          },
+          "type": {
+            "type": "string",
+            "example": "Static",
+            "description": "Type of the response."
+          },
+          "name": {
+            "type": "string",
+            "example": "7",
+            "description": "interface name."
+          },
+          "serialNumber": {
+            "type": "string",
+            "example": "CN31HKZ0CN",
+            "description": "Serial of the switch."
+          },
+          "siteId": {
+            "$ref": "#/components/schemas/SiteIdswitch"
+          },
+          "tenantId": {
+            "type": "string",
+            "example": "0972444909e64fcd945dfd6e8261e26f",
+            "description": "Tenant id."
+          },
+          "powerDrawnInWatts": {
+            "type": "number",
+            "example": "5.0",
+            "format": "float",
+            "description": "Power drawn in watts for the switch."
+          },
+          "powerDeniedCount": {
+            "type": "number",
+            "format": "float",
+            "example": "5.0",
+            "description": "Power denied count for the switch."
+          },
+          "timestamp": {
+            "type": "number",
+            "example": "1764592073958",
+            "description": "Timestamp for the interface poe."
+          }
+        }
+      },
+      "SwitchInterfaceResponse": {
+        "allOf": [
+          {
+            "type": "object",
+            "description": "List of interfaces with their attributes.",
+            "required": [
+              "items"
+            ],
+            "properties": {
+              "items": {
+                "type": "array",
+                "maxItems": 9999,
+                "items": {
+                  "$ref": "#/components/schemas/SwitchInterface"
+                }
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/PaginationResponsePropertiesswitch"
+          }
+        ]
+      },
+      "SwitchLagSummary": {
+        "type": "object",
+        "description": "Lag Summary for the switch",
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "Trk13",
+            "description": "Lag name."
+          },
+          "type": {
+            "type": "string",
+            "example": "ISL",
+            "description": "Type of the switch."
+          },
+          "name": {
+            "type": "string",
+            "example": "Trk13",
+            "description": "Lag name."
+          },
+          "count": {
+            "type": "integer",
+            "example": "2",
+            "description": "Count of the interfaces with lag."
+          },
+          "ports": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "2/1",
+              "1/10"
+            ],
+            "description": "Names of the switch interface."
+          }
+        }
+      },
+      "SwitchLagSummaryResponse": {
+        "type": "object",
+        "description": "Response containing a lag summary and the total count.",
+        "required": [
+          "items",
+          "count"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SwitchLagSummary"
+            },
+            "description": "List of lag summary."
+          },
+          "count": {
+            "type": "integer",
+            "example": 4,
+            "description": "Total number of lags."
+          }
+        }
+      },
+      "SwitchListResponse": {
+        "type": "object",
+        "description": "Switch List response that contains switch attributes\n",
+        "example": {
+          "items": [
+            {
+              "firmwareVersion": "WC.16.11.0021",
+              "ipv4": "10.97.64.183",
+              "ipv6": null,
+              "lastSeenAt": "2025-12-02T08:52:14.738Z",
+              "siteName": "PVOS_MON_Troubleshooting",
+              "switchRole": "Conductor",
+              "deployment": "Stack",
+              "deviceFunction": "None",
+              "type": "network-monitoring/switch-monitoring",
+              "macAddress": "ec:50:aa:0f:5d:14",
+              "publicIp": "61.246.230.194",
+              "id": "CN35HKZ1YX",
+              "deviceName": "Aruba-VSF-2930F",
+              "serialNumber": "CN35HKZ1YX",
+              "model": "AS-2930F",
+              "siteId": "33453933085143040",
+              "partNumber": "JL258A",
+              "status": "OFFLINE",
+              "uptimeInMillis": 0,
+              "stackId": "090064e8-818ee000",
+              "stackMemberId": 2,
+              "switchType": "pvos",
+              "switchTrends": [
+                {
+                  "cpuUtilization": 2,
+                  "memoryUtilization": 31,
+                  "poeAvailable": 136,
+                  "poeConsumption": 0,
+                  "powerConsumption": 0,
+                  "serial": "CN05HKZ1BW",
+                  "switchRole": null,
+                  "systemTemperature": 0,
+                  "totalPowerConsumption": 0,
+                  "upLinkPorts": "1/8",
+                  "usage": 14345
+                }
+              ]
+            }
+          ],
+          "count": 1,
+          "total": 4,
+          "next": "2"
+        },
+        "allOf": [
+          {
+            "type": "object",
+            "required": [
+              "items"
+            ],
+            "properties": {
+              "items": {
+                "type": "array",
+                "maxItems": 100,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "serialNumber",
+                    "macAddress",
+                    "deviceName",
+                    "siteId",
+                    "id",
+                    "type"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "const",
+                      "description": "Serial of the switch.\n",
+                      "example": "CN31HKZ0CN"
+                    },
+                    "type": {
+                      "type": "string",
+                      "format": "const",
+                      "maxLength": 512,
+                      "description": "API type.\n",
+                      "example": "switch"
+                    },
+                    "serialNumber": {
+                      "$ref": "#/components/schemas/SerialNumberswitch"
+                    },
+                    "macAddress": {
+                      "type": "string",
+                      "example": "11:22:33:44:66:60",
+                      "description": "The MAC address of the switch"
+                    },
+                    "deviceName": {
+                      "type": "string",
+                      "example": "Switch-01",
+                      "description": "Name of the switch"
+                    },
+                    "model": {
+                      "type": "string",
+                      "example": "AS-2930M",
+                      "description": "Model of the switch"
+                    },
+                    "deployment": {
+                      "type": "string",
+                      "example": "Standalone",
+                      "description": "Deployment mode of the switch"
+                    },
+                    "stackId": {
+                      "type": "string",
+                      "example": "140064e8-81c15bc0",
+                      "description": "StackId of the switch in the network"
+                    },
+                    "switchType": {
+                      "type": "string",
+                      "example": "140064e8-81c15bc0",
+                      "description": "StackId of the switch in the network"
+                    },
+                    "siteName": {
+                      "type": "string",
+                      "example": "StackTest",
+                      "description": "SiteName"
+                    },
+                    "firmwareVersion": {
+                      "type": "string",
+                      "example": "8.6.0.0",
+                      "description": "Current firmware version of the switch"
+                    },
+                    "deviceFunction": {
+                      "type": "string",
+                      "description": "Device Function (Persona identifier) for the switch.\n",
+                      "example": "Instant"
+                    },
+                    "partNumber": {
+                      "type": "string",
+                      "description": "Part number of the switch\n",
+                      "example": "JX973A"
+                    },
+                    "ipv4": {
+                      "type": "string",
+                      "example": "10.21.78.3",
+                      "description": "The switch IP address in IPv4 format"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "Online",
+                      "description": "The status of the switch"
+                    },
+                    "ipv6": {
+                      "type": "string",
+                      "example": "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
+                      "description": "The switch IP address in IPv6 format"
+                    },
+                    "siteId": {
+                      "$ref": "#/components/schemas/SiteIdswitch"
+                    },
+                    "uptimeInMillis": {
+                      "$ref": "#/components/schemas/UptimeInMillisswitch"
+                    },
+                    "lastSeenAt": {
+                      "type": "number",
+                      "format": "float",
+                      "example": 1627873200,
+                      "description": "Timestamp when the switch was last seen online"
+                    },
+                    "switchTrends": {
+                      "$ref": "#/components/schemas/SwitchTrends"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/SwitchPaginationResponseProperties"
+          }
+        ]
+      },
+      "SwitchMetrics": {
+        "type": "object",
+        "description": "Sample list for the trends.",
+        "properties": {
+          "serialNumber": {
+            "type": "string",
+            "example": "CN31HKZ0CN",
+            "description": "Serial of the switch."
+          },
+          "switchRole": {
+            "type": "string",
+            "example": "Member",
+            "description": "Role of the switch."
+          },
+          "samples": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Sample"
+            },
+            "description": "Samples for the interface trends in the key list."
+          }
+        }
+      },
+      "SwitchPaginationResponseProperties": {
+        "type": "object",
+        "required": [
+          "count",
+          "total",
+          "next"
+        ],
+        "description": "Fields appended to a list to facilitate paging.\n",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The number of objects returned in the current list.\n",
+            "example": 1
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The total number of objects contained in the datastore.\n",
+            "example": 1
+          },
+          "next": {
+            "type": "string",
+            "format": "int32",
+            "description": "Indicate the next page number, null if there are no further pages.",
+            "example": "2"
+          }
+        }
+      },
+      "SwitchResponse": {
+        "type": "object",
+        "description": "Switch response that contains switch attributes\n",
+        "example": {
+          "id": "CN31HKZ0CN",
+          "type": "switch",
+          "switchLinkType": "BPS",
+          "switchType": "pvos",
+          "serialNumber": "CN31HKZ0CN",
+          "ipv4": "10.21.78.4",
+          "status": "Offline",
+          "ipv6": null,
+          "macAddress": "ec:50:aa:0d:99:30",
+          "publicIp": "59.144.73.163",
+          "model": "AS-2930F",
+          "health": "Poor",
+          "healthReasons": {
+            "poorReasons": [
+              "DEVICE_OFFLINE"
+            ],
+            "fairReasons": {}
+          },
+          "siteId": "749988555",
+          "siteName": "PVOS_MON_Troubleshooting",
+          "uptimeInMillis": null,
+          "firmwareVersion": "WC.16.11.0001",
+          "deployment": "Standalone",
+          "contact": "",
+          "jNumber": "JL258A",
+          "lastSeenAt": 1707919492646,
+          "configStatus": "Synchronized",
+          "deviceName": "Aruba-2930F-8G-PoEP-2SFPP",
+          "switchRole": "Standalone",
+          "manufacturer": "Aruba",
+          "lastConfigChange": 1707907296000,
+          "lastRestartReason": null,
+          "switchTrends": [
+            {
+              "serialNumber": "CN09HKW38R",
+              "switchRole": "Conductor",
+              "cpuUtilization": 10,
+              "memoryUtilization": 36,
+              "systemTemperature": 70,
+              "poeAvailable": 370,
+              "powerConsumption": 0,
+              "upLinkPorts": "1/8",
+              "usage": 14345.45
+            }
+          ]
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "const",
+            "description": "Serial of the switch.\n",
+            "example": "CN31HKZ0CN"
+          },
+          "type": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 512,
+            "description": "API type.\n",
+            "example": "switch"
+          },
+          "switchLinkType": {
+            "type": "string",
+            "example": "BPS",
+            "description": "Link type for switch"
+          },
+          "switchType": {
+            "type": "string",
+            "example": "pvos",
+            "description": "Type of the switch, e.g., pvos or cx"
+          },
+          "serialNumber": {
+            "$ref": "#/components/schemas/SerialNumberswitch"
+          },
+          "ipv4": {
+            "type": "string",
+            "example": "10.21.78.3",
+            "description": "The switch IP address in IPv4 format"
+          },
+          "status": {
+            "type": "string",
+            "example": "Online",
+            "description": "The status of the switch"
+          },
+          "ipv6": {
+            "type": "string",
+            "example": "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
+            "description": "The switch IP address in IPv6 format"
+          },
+          "macAddress": {
+            "type": "string",
+            "example": "11:22:33:44:66:60",
+            "description": "The MAC address of the switch"
+          },
+          "publicIp": {
+            "type": "string",
+            "example": "59.144.73.163",
+            "description": "Public IP address of the switch"
+          },
+          "model": {
+            "type": "string",
+            "example": "AS-2930M",
+            "description": "Model of the switch"
+          },
+          "health": {
+            "type": "string",
+            "example": "Poor",
+            "description": "Health status of the switch"
+          },
+          "siteName": {
+            "type": "string",
+            "example": "StackTest",
+            "description": "SiteName"
+          },
+          "healthReasons": {
+            "$ref": "#/components/schemas/SwitchHealthReasons"
+          },
+          "siteId": {
+            "$ref": "#/components/schemas/SiteIdswitch"
+          },
+          "uptimeInMillis": {
+            "$ref": "#/components/schemas/UptimeInMillisswitch"
+          },
+          "firmwareVersion": {
+            "type": "string",
+            "example": "8.6.0.0",
+            "description": "Current firmware version of the switch"
+          },
+          "deployment": {
+            "type": "string",
+            "example": "Standalone",
+            "description": "Deployment mode of the switch"
+          },
+          "jNumber": {
+            "type": "string",
+            "example": "J123456",
+            "description": "Job number or identifier"
+          },
+          "lastSeenAt": {
+            "type": "number",
+            "format": "float",
+            "example": 1627873200,
+            "description": "Timestamp when the switch was last seen online"
+          },
+          "deviceName": {
+            "type": "string",
+            "example": "Switch-01",
+            "description": "Name of the switch"
+          },
+          "switchRole": {
+            "type": "string",
+            "example": "Core",
+            "description": "Role of the switch in the network"
+          },
+          "manufacturer": {
+            "type": "string",
+            "example": "Aruba",
+            "description": "Manufacturer of the switch"
+          },
+          "lastConfigChange": {
+            "type": "number",
+            "format": "float",
+            "example": 1627873200,
+            "description": "Timestamp of the last configuration change"
+          },
+          "lastRestartReason": {
+            "type": "string",
+            "example": "Software upgrade",
+            "description": "Reason for the last restart"
+          },
+          "switchTrends": {
+            "$ref": "#/components/schemas/SwitchTrends"
+          }
+        }
+      },
+      "SwitchTrends": {
+        "type": "object",
+        "properties": {
+          "serialNumber": {
+            "$ref": "#/components/schemas/SerialNumberswitch"
+          },
+          "switchRole": {
+            "type": "string",
+            "example": "Conductor",
+            "description": "Role of the switch."
+          },
+          "cpuUtilization": {
+            "type": "number",
+            "example": "20",
+            "description": "CPU Utilization of the switch."
+          },
+          "memoryUtilization": {
+            "type": "number",
+            "example": "20",
+            "description": "Memory Utilization of the switch."
+          },
+          "poeAvailable": {
+            "type": "number",
+            "example": "136",
+            "description": "Total Poe available."
+          },
+          "poeConsumption": {
+            "type": "number",
+            "example": "20",
+            "description": "Poe drawn."
+          },
+          "powerConsumption": {
+            "type": "number",
+            "example": "300",
+            "description": "Total power available."
+          },
+          "totalPowerConsumption": {
+            "type": "number",
+            "example": "20",
+            "description": "Total power consumed."
+          },
+          "systemTemperature": {
+            "type": "number",
+            "example": "2",
+            "description": "Temperature of the switch."
+          },
+          "upLinkPorts": {
+            "type": "string",
+            "example": "['1/8','2/1']",
+            "description": "Uplink ports for the switch."
+          },
+          "usage": {
+            "type": "number",
+            "example": "8237.78",
+            "description": "Total sum of the inrate and outrate for the switch."
+          }
+        }
+      },
+      "SwitchVlan": {
+        "type": "object",
+        "description": "Vlans list for the switch.",
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "1",
+            "description": "identifier."
+          },
+          "type": {
+            "type": "string",
+            "example": "Static",
+            "description": "Type of the vlan."
+          },
+          "name": {
+            "type": "string",
+            "example": "DEFAULT_VLAN",
+            "description": "vlan name."
+          },
+          "status": {
+            "type": "string",
+            "example": "Up",
+            "description": "vlan status."
+          },
+          "ipv4": {
+            "type": "string",
+            "example": "11.12.82.122/27",
+            "description": "ipv4."
+          },
+          "voice": {
+            "type": "string",
+            "example": "Disabled",
+            "description": "voice."
+          },
+          "interfaces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "1-24"
+            ],
+            "description": "interfaces list."
+          }
+        }
+      },
+      "SwitchVlanResponse": {
+        "allOf": [
+          {
+            "type": "object",
+            "description": "List of vlans with their attributes.",
+            "required": [
+              "items",
+              "count"
+            ],
+            "properties": {
+              "items": {
+                "type": "array",
+                "maxItems": 9999,
+                "items": {
+                  "$ref": "#/components/schemas/SwitchVlan"
+                }
+              },
+              "count": {
+                "type": "integer",
+                "example": 2,
+                "description": "Total number of vlans."
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/PaginationResponsePropertiesswitch"
+          }
+        ]
+      },
+      "TooManyRequest": {
+        "type": "object",
+        "description": "Too many requests error details returned from the server.",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 429,
+            "maximum": 429,
+            "example": 429,
+            "description": "HTTP status code."
+          },
+          "errorCode": {
+            "type": "string",
+            "description": "* A unique machine-friendly, but human-readable identifier for the error. It has prefix HPE_GL_.* For more details regarding error please refer to error message",
+            "example": "HPE_GL_ERROR_TOO_MANY_REQUESTS",
+            "maxLength": 256
+          },
+          "message": {
+            "$ref": "#/components/schemas/ErrorMessage"
+          },
+          "debugId": {
+            "$ref": "#/components/schemas/DebugId"
+          }
+        }
+      },
+      "TopnInterfaceTrends": {
+        "type": "object",
+        "description": "Response containing interface trends related to the switch.",
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "720f147c3de211ef99bca6b05da42930",
+            "description": "tenant id."
+          },
+          "type": {
+            "type": "string",
+            "example": "network-monitoring/switch-monitoring",
+            "description": "Device type of monitoring."
+          },
+          "serial": {
+            "type": "string",
+            "example": "CN95367H9C",
+            "description": "Serial number of switch"
+          },
+          "siteId": {
+            "type": "string",
+            "example": "22966851366752256",
+            "description": "Site-id of the switch"
+          },
+          "name": {
+            "type": "string",
+            "example": "HP2530-24G-PoEP Switch",
+            "description": "Hostname of the switch"
+          },
+          "rxBytes": {
+            "type": "integer",
+            "format": "int64",
+            "example": 788724,
+            "description": "rxbytes of the switch"
+          },
+          "txBytes": {
+            "type": "integer",
+            "format": "int64",
+            "example": 758346,
+            "description": "txBytes of the switch"
+          }
+        }
+      },
+      "TopnInterfaceTrendsResponse": {
+        "type": "object",
+        "description": "Response containing interface trends related to the switches.",
+        "required": [
+          "items",
+          "count"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TopnInterfaceTrends"
+            },
+            "description": "Object containing interface trends related to the switches."
+          },
+          "count": {
+            "type": "integer",
+            "example": 2,
+            "description": "Total number of switches."
+          }
+        }
+      },
+      "Unauthorized": {
+        "type": "object",
+        "description": "Unauthorized error details returned from the server.",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 401,
+            "maximum": 401,
+            "description": "HTTP status code.",
+            "example": 401
+          },
+          "errorCode": {
+            "type": "string",
+            "description": "* A unique machine-friendly, but human-readable identifier for the error. It has prefix HPE_GL_.* For more details regarding error please refer to error message",
+            "example": "HPE_GL_ERROR_UNAUTHORIZED",
+            "maxLength": 256
+          },
+          "message": {
+            "$ref": "#/components/schemas/ErrorMessage"
+          },
+          "debugId": {
+            "$ref": "#/components/schemas/DebugId"
+          }
+        }
+      },
+      "UptimeInMillisswitch": {
+        "type": "number",
+        "format": "float",
+        "example": 1702794777,
+        "minimum": 0,
+        "maximum": 9223372036854776000,
+        "description": "The elapsed time in milliseconds since the last boot.\n"
+      },
+      "VsxHealth": {
+        "type": "object",
+        "description": "Health information for VSX components",
+        "properties": {
+          "health": {
+            "type": "string",
+            "description": "Overall health status",
+            "example": "ok",
+            "enum": [
+              "ok",
+              "warning",
+              "critical",
+              "unknown"
+            ]
+          },
+          "healthDescription": {
+            "type": "string",
+            "description": "Detailed description of the health status",
+            "example": "All VSX components are healthy"
+          }
+        }
+      },
+      "VsxResponse": {
+        "type": "object",
+        "description": "VSX configuration and operational details for a switch",
+        "properties": {
+          "role": {
+            "type": "string",
+            "description": "The role of this device in the VSX pair (primary or secondary)",
+            "example": "primary",
+            "enum": [
+              "primary",
+              "secondary"
+            ]
+          },
+          "peerRole": {
+            "type": "string",
+            "description": "The role of the VSX peer device",
+            "example": "secondary",
+            "enum": [
+              "primary",
+              "secondary"
+            ]
+          },
+          "islPort": {
+            "type": "string",
+            "description": "The Inter-Switch Link port on this device",
+            "example": "1/1/49"
+          },
+          "peerIslPort": {
+            "type": "string",
+            "description": "The Inter-Switch Link port on the peer device",
+            "example": "1/1/50"
+          },
+          "keepaliveStatus": {
+            "type": "string",
+            "description": "The status of the VSX keepalive connection",
+            "example": "established",
+            "enum": [
+              "established",
+              "failed",
+              "not-configured",
+              "unknown"
+            ]
+          },
+          "keepaliveHealth": {
+            "type": "string",
+            "description": "The health status of the keepalive connection",
+            "example": "healthy",
+            "enum": [
+              "healthy",
+              "unhealthy",
+              "unknown"
+            ]
+          },
+          "keepaliveSourceIp": {
+            "type": "string",
+            "description": "The source IP address used for keepalive messages",
+            "example": "192.168.1.1",
+            "pattern": "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$"
+          },
+          "keepalivePeerIp": {
+            "type": "string",
+            "description": "The peer IP address for keepalive messages",
+            "example": "192.168.1.2",
+            "pattern": "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$"
+          },
+          "keepalivePort": {
+            "type": "string",
+            "description": "The port number used for keepalive communication",
+            "example": "7678"
+          },
+          "mac": {
+            "type": "string",
+            "description": "MAC address of this device",
+            "example": "aa:bb:cc:dd:ee:ff",
+            "pattern": "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$"
+          },
+          "peerMac": {
+            "type": "string",
+            "description": "MAC address of the VSX peer device",
+            "example": "11:22:33:44:55:66",
+            "pattern": "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$"
+          },
+          "configSyncDisable": {
+            "type": "boolean",
+            "description": "Indicates if configuration synchronization is disabled. Defaults to false when not reported by the device.",
+            "example": false
+          },
+          "configSyncStateValue": {
+            "type": "string",
+            "description": "State of configuration synchronization",
+            "example": "synchronized",
+            "enum": [
+              "synchronized",
+              "out-of-sync",
+              "in-progress",
+              "failed",
+              "disabled"
+            ]
+          },
+          "configHealth": {
+            "type": "string",
+            "description": "Overall health status of the configuration",
+            "example": "ok",
+            "enum": [
+              "ok",
+              "warning",
+              "error",
+              "unknown"
+            ]
+          },
+          "islMgmtStateValue": {
+            "type": "string",
+            "description": "State of the ISL management connection",
+            "example": "up",
+            "enum": [
+              "up",
+              "down",
+              "unknown"
+            ]
+          },
+          "naeStateValue": {
+            "type": "string",
+            "description": "Network Analytics Engine state",
+            "example": "enabled",
+            "enum": [
+              "enabled",
+              "disabled",
+              "unknown"
+            ]
+          },
+          "httpsServerStateValue": {
+            "type": "string",
+            "description": "HTTPS server state for VSX",
+            "example": "running",
+            "enum": [
+              "running",
+              "stopped",
+              "unknown"
+            ]
+          },
+          "islpDeviceStateValue": {
+            "type": "string",
+            "description": "ISL protocol device state",
+            "example": "active",
+            "enum": [
+              "active",
+              "inactive",
+              "unknown"
+            ]
+          },
+          "vsxHealth": {
+            "$ref": "#/components/schemas/VsxHealth"
+          },
+          "vsxPeerName": {
+            "type": "string",
+            "description": "Hostname or name of the VSX peer device",
+            "example": "switch-secondary"
+          },
+          "vsxPeerSerial": {
+            "type": "string",
+            "description": "Serial number of the VSX peer device",
+            "example": "SNSECONDARY123"
+          },
+          "vsxPeerSiteId": {
+            "type": "string",
+            "description": "Site ID where the VSX peer is located",
+            "example": "site-456"
+          },
+          "lastSyncTimestamp": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Timestamp of the last successful synchronization (epoch milliseconds). This field may be null if VSX synchronization has not occurred yet or if the device does not report this information.",
+            "example": "1707919492646"
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequestError": {
+        "description": "Bad Request",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/X-RateLimit-Limit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/X-RateLimit-Remaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/X-RateLimit-Reset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BadRequestError"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Forbidden: Access is denied.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/X-RateLimit-Limit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/X-RateLimit-Remaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/X-RateLimit-Reset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ForbiddenRequest"
+            }
+          }
+        }
+      },
+      "HardwareTrendsResponse": {
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "description": "Object containing hardware trends related to the switch.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HardwareTrendsResponse"
+            }
+          }
+        }
+      },
+      "InterfacePoeResponse": {
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "description": "Object containing interface poe related to the switch.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/InterfacePoeResponse"
+            }
+          }
+        }
+      },
+      "InterfaceTrendsResponse": {
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "description": "Object containing interface trends related to the switch.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/InterfaceTrendsResponse"
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/X-RateLimit-Limit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/X-RateLimit-Remaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/X-RateLimit-Reset"
+          }
+        },
+        "description": "Internal server error.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/InternalServerError"
+            }
+          }
+        }
+      },
+      "StackMemberResponse": {
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "description": "Object containing the stack member information",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StackMemberResponse"
+            }
+          }
+        }
+      },
+      "SwitchHardwareResponse": {
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "description": "Object containing the switch information",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SwitchHardwareResponse"
+            }
+          }
+        }
+      },
+      "SwitchInterfaceResponse": {
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "description": "Object containing the interfaces information",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SwitchInterfaceResponse"
+            }
+          }
+        }
+      },
+      "SwitchLagSummaryResponse": {
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "description": "Object containing the lag summary information",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SwitchLagSummaryResponse"
+            }
+          }
+        }
+      },
+      "SwitchListResponse": {
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "description": "Object containing list of switches.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SwitchListResponse"
+            }
+          }
+        }
+      },
+      "SwitchNotFoundResponse": {
+        "description": "Device with serial number not found.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/NotFoundError"
+            }
+          }
+        }
+      },
+      "SwitchResponse": {
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "description": "Object containing the switch information",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SwitchResponse"
+            }
+          }
+        }
+      },
+      "SwitchVlanResponse": {
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "description": "Object containing the vlans information.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SwitchVlanResponse"
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "Too Many Requests. Rate limit exceeded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/X-RateLimit-Limit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/X-RateLimit-Remaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/X-RateLimit-Reset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TooManyRequest"
+            }
+          }
+        }
+      },
+      "TopnInterfaceTrendsResponse": {
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "description": "Object containing interface trends related to the switches.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TopnInterfaceTrendsResponse"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized request.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/X-RateLimit-Limit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/X-RateLimit-Remaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/X-RateLimit-Reset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Unauthorized"
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "interface-id": {
+        "name": "interface-id",
+        "in": "query",
+        "required": false,
+        "description": "Interface name of the switch.",
+        "schema": {
+          "type": "string",
+          "example": "7"
+        }
+      },
+      "search": {
+        "name": "search",
+        "in": "query",
+        "required": false,
+        "description": "Partial or full string free text search.",
+        "schema": {
+          "$ref": "#/components/schemas/Search"
+        }
+      },
+      "serial-number": {
+        "name": "serial-number",
+        "in": "path",
+        "required": true,
+        "description": "Serial Number of the switch in case of standalone, StackId or conductor serial in case of stack for which the device related information is requested.",
+        "schema": {
+          "$ref": "#/components/schemas/SerialNumber"
+        },
+        "example": "ABCD1234"
+      },
+      "serial-numbervsx": {
+        "name": "serial-number",
+        "in": "path",
+        "description": "The serial number of the switch",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^[A-Z0-9]+$",
+          "example": "SG9ZKN5018"
+        }
+      },
+      "site-id": {
+        "name": "site-id",
+        "in": "query",
+        "required": false,
+        "description": "ID of the site for which switch-related information is requested.",
+        "schema": {
+          "$ref": "#/components/schemas/SiteId"
+        },
+        "example": "2345678"
+      },
+      "trendsFilterswitch": {
+        "name": "filter",
+        "in": "query",
+        "required": false,
+        "description": "OData Version 4.0 filter string (limited functionality). Supports only 'and' conjunction ('or' and 'not' are NOT supported). By default, aggregation is performed for three hours after the specified timestamp when only the gt operator is used, or up to the specified timestamp when only the lt operator is used. Supported fields, operators and value format are in the below given table.\n\n| Field | Operators | Format |\n| --------- | -------- | -------- |\n| `timestamp` | `gt` and `lt` | **Date-time (RFC 3339 timestamp in UTC+0) string** |\n\n**The operators are implemented as follows:**\n\n* `gt`: Used to indicate the start of the timestamp range.\n\n* `lt`: Used to indicate the end of the timestamp range.\n\n",
+        "example": "timestamp gt 2022-07-30T19:38:16Z and timestamp lt 2022-08-01T20:28:52Z",
+        "schema": {
+          "type": "string",
+          "format": "const",
+          "maxLength": 256
+        }
+      },
+      "uplink": {
+        "name": "uplink",
+        "in": "query",
+        "required": false,
+        "description": "Uplink of the interface indicates true or false.",
+        "schema": {
+          "type": "boolean",
+          "example": true
+        }
+      }
+    },
+    "headers": {
+      "X-RateLimit-Limit": {
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0,
+          "maximum": 9223372036854776000
+        },
+        "description": "Request limit per hour."
+      },
+      "X-RateLimit-Remaining": {
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0,
+          "maximum": 9223372036854776000
+        },
+        "description": "The number of requests left for the time window."
+      },
+      "X-RateLimit-Reset": {
+        "schema": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 20
+        },
+        "description": "The date-time (RFC 3339 timestamp in UTC+0) at which the current rate limit window resets."
+      },
+      "XRateLimitLimit": {
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0,
+          "maximum": 9223372036854776000
+        },
+        "description": "Request limit per hour."
+      },
+      "XRateLimitRemaining": {
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0,
+          "maximum": 9223372036854776000
+        },
+        "description": "The number of requests left for the time window."
+      },
+      "XRateLimitReset": {
+        "schema": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 20
+        },
+        "description": "The date-time (RFC 3339 timestamp in UTC+0) at which the current rate limit window resets."
+      }
+    },
+    "securitySchemes": {
+      "OAuth2": {
+        "type": "oauth2",
+        "description": "OAuth 2.0 authentication with client credentials flow. You can also use your own access token.",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://sso.common.cloud.hpe.com/as/token.oauth2",
+            "scopes": {}
+          }
+        }
+      }
+    }
+  }
+}
