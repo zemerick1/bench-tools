@@ -70,7 +70,9 @@ _RETRY_BACKOFF = 3
 
 _ssl_verify: ssl.SSLContext | bool = True
 
-DEFAULT_SOURCE_DIR = Path(__file__).resolve().parent.parent / "source"
+TOOL_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_SOURCE_DIR = TOOL_ROOT / "source"
+LOCAL_SOURCE_DIR = TOOL_ROOT / "local"
 
 
 def _configure_ssl_verify(*, no_verify: bool = False) -> None:
@@ -281,6 +283,26 @@ def fetch_project(project: dict[str, Any], source_dir: Path) -> list[dict[str, A
     return entries
 
 
+def seed_local_sources(source_dir: Path, local_dir: Path | None = None) -> int:
+    """Copy committed ``local/`` specs into gitignored ``source/``.
+
+    Hub fetches never see Mist / SDC / Axis. CI has no leftover ``source/``,
+    so those platforms only survive a scheduled run if they live here.
+    """
+    root = local_dir or LOCAL_SOURCE_DIR
+    if not root.is_dir():
+        return 0
+    copied = 0
+    for path in sorted(root.rglob("*.json")):
+        rel = path.relative_to(root)
+        dest = source_dir / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(path.read_bytes())
+        copied += 1
+        logger.info("  seeded local/%s", rel.as_posix())
+    return copied
+
+
 def local_source_entry(source_dir: Path, rel: str) -> dict[str, Any]:
     """Index metadata for a spec dropped into source/ by hand."""
     path = source_dir / rel
@@ -334,6 +356,8 @@ def fetch_all_specs(
     files: list[dict[str, Any]] = []
     failures: list[str] = []
 
+    seed_local_sources(source_dir)
+
     for project in PROJECTS:
         if central_only and not project["central"]:
             continue
@@ -354,6 +378,10 @@ def fetch_all_specs(
 
     if not files:
         raise RuntimeError("No OpenAPI specs fetched — refusing to write an empty source tree")
+    if failures:
+        raise RuntimeError(
+            "Fetch failed for: " + ", ".join(failures) + " — refusing a partial source tree"
+        )
 
     return index
 
@@ -420,7 +448,7 @@ def main() -> int:
     if index["failures"]:
         print(f"\n  Failed projects: {', '.join(index['failures'])}")
     print("═" * 60)
-    return 1 if index["failures"] and not index["files"] else 0
+    return 0
 
 
 if __name__ == "__main__":

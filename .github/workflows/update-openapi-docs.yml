@@ -1,0 +1,74 @@
+# Fetch upstream OpenAPI specs, split, validate, and commit published slices.
+# Cloudflare Pages/Workers deploys whatever lands on the branch this job pushes.
+#
+# Does not commit source/ (gitignored). Hand-dropped platforms live in
+# tools/open-api/local/ and are copied into source/ before the hub fetch.
+#
+# If main is protected against GITHUB_TOKEN pushes, add a PAT with contents:write
+# as a repo secret and set checkout token: ${{ secrets.OPENAPI_DOCS_TOKEN }}.
+
+name: Update OpenAPI docs
+
+on:
+  schedule:
+    # Daily 07:17 UTC — off the hour so we are not in the schedule stampede.
+    - cron: "17 7 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main, feature/openapi-docs]
+    paths:
+      - "tools/open-api/scripts/**"
+      - "tools/open-api/local/**"
+      - ".github/workflows/update-openapi-docs.yml"
+
+concurrency:
+  group: update-openapi-docs-${{ github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: tools/open-api/scripts/requirements.txt
+
+      - name: Install pipeline deps
+        run: pip install -r tools/open-api/scripts/requirements.txt
+
+      - name: Unit tests
+        run: python -m unittest tools/open-api/scripts/test_splitter.py -q
+
+      - name: Fetch, split, validate
+        run: python tools/open-api/scripts/build.py
+
+      - name: Refuse an empty published tree
+        run: |
+          count=$(find tools/open-api/specs -name '*.json' | wc -l)
+          echo "published specs: $count"
+          if [ "$count" -lt 50 ]; then
+            echo "Too few published specs ($count) — refusing to commit"
+            exit 1
+          fi
+
+      - name: Commit published slices if they changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- tools/open-api/specs tools/open-api/data/manifest.json
+          if git diff --staged --quiet; then
+            echo "No published-spec changes"
+            exit 0
+          fi
+          git commit -m "Refresh OpenAPI slices from upstream hub."
+          git push origin "HEAD:${GITHUB_REF_NAME}"

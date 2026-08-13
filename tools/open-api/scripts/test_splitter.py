@@ -6,6 +6,7 @@ from __future__ import annotations
 import copy
 import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -14,6 +15,7 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from oasutil import dump_spec, normalize_servers, pointer_escape, redact_example_secrets
+from spec_fetcher import seed_local_sources
 from spec_splitter import assign_group, build_slice, slice_output_path, split_spec
 from spec_validate import validate_spec
 
@@ -77,6 +79,17 @@ class OasUtilTests(unittest.TestCase):
         servers = normalize_servers([{"url": "switch-ip/rest/v10.16"}])
         self.assertEqual(servers[0]["url"], "https://{switchIp}/rest/v10.16")
         self.assertEqual(servers[0]["variables"]["switchIp"]["default"], "192.0.2.1")
+
+    def test_seed_local_sources_copies_tree(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            local = root / "local"
+            source = root / "source"
+            dest = local / "mist" / "mist.json"
+            dest.parent.mkdir(parents=True)
+            dest.write_text('{"openapi":"3.1.0","paths":{}}', encoding="utf-8")
+            self.assertEqual(seed_local_sources(source, local_dir=local), 1)
+            self.assertEqual((source / "mist" / "mist.json").read_text(encoding="utf-8"), dest.read_text(encoding="utf-8"))
 
 
 class SplitterFixtureTests(unittest.TestCase):

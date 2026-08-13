@@ -31,6 +31,7 @@ from spec_fetcher import (
     _configure_ssl_verify,
     fetch_all_specs,
     merge_local_source_files,
+    seed_local_sources,
 )
 from spec_manifest import build_manifest, write_manifest
 from spec_splitter import (
@@ -142,10 +143,16 @@ def run_build(
     source = source_dir or DEFAULT_SOURCE_DIR
     grouping = load_grouping(grouping_path or (SCRIPTS_DIR / "grouping.yaml"))
 
+    seed_local_sources(source)
+
     if not offline:
         _configure_ssl_verify(no_verify=no_verify_ssl)
         logger.info("Fetching OpenAPI specs into %s", source)
-        fetch_all_specs(source, central_only=central_only, apis=apis)
+        try:
+            fetch_all_specs(source, central_only=central_only, apis=apis)
+        except Exception as exc:
+            logger.error("%s", exc)
+            return 1
 
     if not source.exists():
         logger.error("No source directory at %s (fetch first, or drop --offline)", source)
