@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Stats - Assets",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "get": {
-        "description": "Get List of Org Assets Stats",
+        "description": "List BLE asset location and advertisement statistics for the organization over an optional time window, including map coordinates, RSSI, zones, and iBeacon or Eddystone fields.",
         "operationId": "listOrgAssetsStats",
         "parameters": [
           {
@@ -132,10 +128,11 @@
         }
       ],
       "get": {
-        "description": "Count by Distinct Attributes of Org Assets",
+        "description": "Count organization asset statistics grouped by a distinct asset attribute, such as MAC address, site, map, iBeacon UUID, iBeacon major, or iBeacon minor.",
         "operationId": "countOrgAssetsByDistanceField",
         "parameters": [
           {
+            "description": "Field used to group this count response. enum: `ibeacon_major`, `ibeacon_minor`, `ibeacon_uuid`, `mac`, `map_id`, `site_id`",
             "in": "query",
             "name": "distinct",
             "schema": {
@@ -179,10 +176,11 @@
         }
       ],
       "get": {
-        "description": "Search for Org Assets",
+        "description": "Search BLE asset statistics with filters for site, MAC address, asset name, map, iBeacon or Eddystone identifiers, reporting AP MAC address, RSSI, beam, and time range. Supports pagination and sorting.",
         "operationId": "searchOrgAssets",
         "parameters": [
           {
+            "description": "Filter results by site identifier",
             "in": "query",
             "name": "site_id",
             "schema": {
@@ -190,13 +188,18 @@
             }
           },
           {
+            "description": "Filter results by MAC address. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "mac",
             "schema": {
+              "examples": [
+                "5c5b53010101,5c5b53020202"
+              ],
               "type": "string"
             }
           },
           {
+            "description": "Filter asset results by reporting device name",
             "in": "query",
             "name": "device_name",
             "schema": {
@@ -204,13 +207,18 @@
             }
           },
           {
+            "description": "Filter results by name. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "name",
             "schema": {
+              "examples": [
+                "name-a,name-b"
+              ],
               "type": "string"
             }
           },
           {
+            "description": "Filter results by map identifier",
             "in": "query",
             "name": "map_id",
             "schema": {
@@ -218,27 +226,40 @@
             }
           },
           {
+            "description": "Filter asset results by iBeacon UUID. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "ibeacon_uuid",
             "schema": {
+              "examples": [
+                "00000000-0000-0000-0000-000000000001,00000000-0000-0000-0000-000000000002"
+              ],
               "type": "string"
             }
           },
           {
+            "description": "Filter asset results by iBeacon major value. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "ibeacon_major",
             "schema": {
+              "examples": [
+                "59788,902"
+              ],
               "type": "string"
             }
           },
           {
+            "description": "Filter asset results by iBeacon minor value. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "ibeacon_minor",
             "schema": {
+              "examples": [
+                "8385,4432"
+              ],
               "type": "string"
             }
           },
           {
+            "description": "Filter asset results by Eddystone UID namespace",
             "in": "query",
             "name": "eddystone_uid_namespace",
             "schema": {
@@ -246,6 +267,7 @@
             }
           },
           {
+            "description": "Filter asset results by Eddystone UID instance",
             "in": "query",
             "name": "eddystone_uid_instance",
             "schema": {
@@ -253,6 +275,7 @@
             }
           },
           {
+            "description": "Filter asset results by Eddystone URL",
             "in": "query",
             "name": "eddystone_url",
             "schema": {
@@ -260,23 +283,35 @@
             }
           },
           {
+            "description": "Filter asset results by reporting AP MAC address. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "ap_mac",
             "schema": {
+              "examples": [
+                "5c5b53010101,5c5b53020202"
+              ],
               "type": "string"
             }
           },
           {
+            "description": "Filter asset results by beam value. Accepts multiple comma-separated integer values.",
             "in": "query",
             "name": "beam",
             "schema": {
+              "examples": [
+                "2,6"
+              ],
               "type": "integer"
             }
           },
           {
+            "description": "Filter asset results by RSSI value. Accepts multiple comma-separated integer values.",
             "in": "query",
             "name": "rssi",
             "schema": {
+              "examples": [
+                "-69,-74"
+              ],
               "type": "integer"
             }
           },
@@ -330,11 +365,14 @@
     "schemas": {
       "asset_rssi_zone": {
         "additionalProperties": false,
+        "description": "RSSI zone membership for an individual asset statistic",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the RSSI zone"
           },
           "since": {
+            "description": "Timestamp when the asset entered this RSSI zone",
             "type": "number"
           }
         },
@@ -349,11 +387,14 @@
       },
       "asset_zone": {
         "additionalProperties": false,
+        "description": "Map zone membership for an individual asset statistic",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the zone"
           },
           "since": {
+            "description": "Timestamp when the asset entered this zone",
             "type": "number"
           }
         },
@@ -370,8 +411,10 @@
         "additionalProperties": {
           "type": "string"
         },
+        "description": "Count result row with the matching distinct field values",
         "properties": {
           "count": {
+            "description": "Number of matching items for the distinct value or values in this result",
             "type": "integer"
           }
         },
@@ -381,6 +424,7 @@
         "type": "object"
       },
       "count_results": {
+        "description": "List of count result rows",
         "items": {
           "$ref": "#/components/schemas/count_result"
         },
@@ -412,6 +456,7 @@
         ]
       },
       "ibeacon_uuid": {
+        "description": "iBeacon UUID value, or null when no iBeacon UUID is configured",
         "examples": [
           "f3f17139-704a-f03a-2786-0400279e37c3"
         ],
@@ -431,7 +476,7 @@
         "type": "string"
       },
       "last_seen": {
-        "description": "Last seen timestamp",
+        "description": "Timestamp indicating when the entity was last seen",
         "examples": [
           1470417522
         ],
@@ -456,23 +501,30 @@
       },
       "response_count": {
         "additionalProperties": false,
+        "description": "Distinct count response for time-bounded search results",
         "properties": {
           "distinct": {
+            "description": "Field used to group the count results",
             "type": "string"
           },
           "end": {
+            "description": "Search window end timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of distinct count results requested",
             "type": "integer"
           },
           "results": {
-            "$ref": "#/components/schemas/count_results"
+            "$ref": "#/components/schemas/count_results",
+            "description": "Count results grouped by the distinct field"
           },
           "start": {
+            "description": "Search window start timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "total": {
+            "description": "Number of distinct result buckets returned",
             "type": "integer"
           }
         },
@@ -488,8 +540,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -500,8 +554,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -512,8 +568,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -524,8 +582,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -533,8 +593,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -545,23 +607,30 @@
       },
       "response_stats_assets": {
         "additionalProperties": false,
+        "description": "Paginated response for asset statistics search results",
         "properties": {
           "end": {
+            "description": "Epoch timestamp, in seconds, for the end of the asset statistics search window",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of asset statistics records returned in this page",
             "type": "integer"
           },
           "next": {
+            "description": "URL for retrieving the next page of asset statistics results",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/stats_assets"
+            "$ref": "#/components/schemas/stats_assets",
+            "description": "Asset statistics records matching the search filters"
           },
           "start": {
+            "description": "Epoch timestamp, in seconds, for the start of the asset statistics search window",
             "type": "integer"
           },
           "total": {
+            "description": "Number of asset statistics records matching the search filters across all pages",
             "type": "integer"
           }
         },
@@ -576,8 +645,19 @@
       },
       "stats_asset": {
         "additionalProperties": false,
-        "description": "Asset statistics",
+        "description": "BLE asset location and advertisement statistics",
         "properties": {
+          "_ttl": {
+            "description": "Time-to-live in seconds; how long this asset data is valid in cache",
+            "type": "integer"
+          },
+          "battery_percent": {
+            "description": "Estimated battery level (1–100%); currently supported for Aruba/HPE asset tags",
+            "examples": [
+              50
+            ],
+            "type": "integer"
+          },
           "battery_voltage": {
             "description": "Battery voltage, in mV",
             "examples": [
@@ -586,58 +666,92 @@
             "type": "number"
           },
           "beam": {
+            "description": "BLE beam number where the asset was observed",
             "examples": [
               6
             ],
             "type": "integer"
           },
+          "by": {
+            "description": "Observation source type for the asset statistic",
+            "examples": [
+              "asset"
+            ],
+            "type": "string"
+          },
+          "device_id": {
+            "description": "Device ID of the loudest AP",
+            "examples": [
+              "00000000-0000-0000-1000-5c5b35000001"
+            ],
+            "format": "uuid",
+            "readOnly": true,
+            "type": "string"
+          },
           "device_name": {
+            "description": "Display name of the loudest AP observing the asset",
             "examples": [
               "a"
             ],
             "type": "string"
           },
           "duration": {
+            "description": "Length of the current asset observation, in seconds",
             "examples": [
               120
             ],
             "type": "integer"
           },
           "eddystone_uid_instance": {
+            "description": "Eddystone-UID instance value advertised by the asset",
             "examples": [
               "5c5b35000001"
             ],
             "type": "string"
           },
           "eddystone_uid_namespace": {
+            "description": "Eddystone-UID namespace value advertised by the asset",
             "examples": [
               "2818e3868dec25629ede"
             ],
             "type": "string"
           },
           "eddystone_url_url": {
+            "description": "URL value advertised by the asset through Eddystone-URL",
             "examples": [
               "https://www.abc.com"
             ],
             "type": "string"
           },
           "ibeacon_major": {
-            "$ref": "#/components/schemas/ibeacon_major"
+            "$ref": "#/components/schemas/ibeacon_major",
+            "description": "iBeacon major value advertised by the asset"
           },
           "ibeacon_minor": {
-            "$ref": "#/components/schemas/ibeacon_minor"
+            "$ref": "#/components/schemas/ibeacon_minor",
+            "description": "iBeacon minor value advertised by the asset"
           },
           "ibeacon_uuid": {
-            "$ref": "#/components/schemas/ibeacon_uuid"
+            "$ref": "#/components/schemas/ibeacon_uuid",
+            "description": "iBeacon UUID advertised by the asset"
+          },
+          "id": {
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier for the asset statistic"
           },
           "last_seen": {
-            "$ref": "#/components/schemas/last_seen"
+            "$ref": "#/components/schemas/last_seen",
+            "description": "Time when the BLE asset was last observed, in epoch seconds"
           },
           "mac": {
-            "description": "Bluetooth MAC",
+            "description": "Bluetooth MAC address for the asset",
             "examples": [
               "6fa474be7ae5"
             ],
+            "type": "string"
+          },
+          "manufacture": {
+            "description": "Vendor name resolved from the BLE manufacturer company ID",
             "type": "string"
           },
           "map_id": {
@@ -648,30 +762,51 @@
             "format": "uuid",
             "type": "string"
           },
+          "mfg_company_id": {
+            "description": "BLE manufacturer company ID from advertisement",
+            "examples": [
+              935
+            ],
+            "type": "integer"
+          },
+          "mfg_data": {
+            "description": "Manufacturer-specific data (hex encoded)",
+            "examples": [
+              "648520a1020000"
+            ],
+            "type": "string"
+          },
           "name": {
-            "description": "Name / label of the device",
+            "description": "Display label for the BLE asset",
             "examples": [
               "6fa474be7ae5"
             ],
             "type": "string"
           },
           "rssi": {
+            "description": "Signal strength (RSSI) of the loudest AP in dBm",
             "examples": [
               -60
             ],
             "type": "integer"
           },
           "rssizones": {
-            "$ref": "#/components/schemas/asset_rssi_zones"
+            "$ref": "#/components/schemas/asset_rssi_zones",
+            "description": "RSSI zones currently containing this asset"
+          },
+          "service_packets": {
+            "$ref": "#/components/schemas/stats_asset_service_packets",
+            "description": "Service data advertisements observed from this asset"
           },
           "temperature": {
+            "description": "Reported temperature value from the BLE asset",
             "examples": [
               23
             ],
             "type": "number"
           },
           "x": {
-            "description": "X in pixel",
+            "description": "Map X coordinate of the asset location, in pixels",
             "examples": [
               280.19918140310193
             ],
@@ -679,7 +814,7 @@
             "type": "number"
           },
           "y": {
-            "description": "Y in pixel",
+            "description": "Map Y coordinate of the asset location, in pixels",
             "examples": [
               420.2987721046529
             ],
@@ -687,7 +822,8 @@
             "type": "number"
           },
           "zones": {
-            "$ref": "#/components/schemas/asset_zones"
+            "$ref": "#/components/schemas/asset_zones",
+            "description": "Map zones currently containing this asset"
           }
         },
         "required": [
@@ -695,7 +831,51 @@
         ],
         "type": "object"
       },
+      "stats_asset_service_packet": {
+        "additionalProperties": false,
+        "description": "Service data advertisement from a BLE asset",
+        "properties": {
+          "data": {
+            "description": "Service data payload (hex encoded)",
+            "examples": [
+              "640"
+            ],
+            "type": "string"
+          },
+          "last_rx_time": {
+            "description": "Unix timestamp when this service data was last received",
+            "examples": [
+              1645855923
+            ],
+            "type": "integer"
+          },
+          "rx_cnt": {
+            "description": "Total number of times this service data was received",
+            "examples": [
+              213065
+            ],
+            "type": "integer"
+          },
+          "uuid": {
+            "description": "BLE service UUID advertised by the asset service packet",
+            "examples": [
+              "00003e10-0000-1000-8000-00805f9b34fb"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "stats_asset_service_packets": {
+        "description": "List of all service data advertisements (maximum length of 10)",
+        "items": {
+          "$ref": "#/components/schemas/stats_asset_service_packet"
+        },
+        "maxItems": 10,
+        "type": "array"
+      },
       "stats_assets": {
+        "description": "Asset statistics returned by the request",
         "items": {
           "$ref": "#/components/schemas/stats_asset"
         },
@@ -896,10 +1076,9 @@
     },
     "parameters": {
       "duration": {
-        "description": "Duration like 7d, 2w",
+        "description": "Time range duration for the query, using relative units such as `10m`, `7d`, or `2w`",
         "in": "query",
         "name": "duration",
-        "required": false,
         "schema": {
           "default": "1d",
           "examples": [
@@ -909,7 +1088,7 @@
         }
       },
       "end": {
-        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
         "in": "query",
         "name": "end",
         "schema": {
@@ -917,9 +1096,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -939,9 +1118,9 @@
         }
       },
       "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
         "in": "query",
         "name": "page",
-        "required": false,
         "schema": {
           "default": 1,
           "minimum": 1,
@@ -960,7 +1139,6 @@
         "description": "On which field the list should be sorted, -prefix represents DESC order",
         "in": "query",
         "name": "sort",
-        "required": false,
         "schema": {
           "default": "timestamp",
           "examples": [
@@ -970,7 +1148,7 @@
         }
       },
       "start": {
-        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
         "in": "query",
         "name": "start",
         "schema": {
@@ -982,25 +1160,43 @@
       "AssetsArrayStatsExample": {
         "value": [
           {
-            "battery_voltage": 0,
-            "eddystone_uid_instance": "string",
-            "eddystone_uid_namespace": "string",
-            "eddystone_url_url": "string",
-            "ibeacon_major": 1,
-            "ibeacon_minor": 1,
-            "ibeacon_uuid": "1f89bc00-d0af-481b-82fe-a6629259a39f",
-            "last_seen": 0,
-            "mac": "string",
-            "map_id": "09d2b626-2e4e-45ef-a3c4-e6aeb6c83db1",
-            "name": "string",
+            "_ttl": 86400,
+            "battery_voltage": 3370,
+            "by": "asset",
+            "device_id": "00000000-0000-0000-1000-5c5b35000001",
+            "device_name": "BLE Device",
+            "eddystone_uid_instance": "5c5b35000001",
+            "eddystone_uid_namespace": "2818e3868dec25629ede",
+            "eddystone_url_url": "https://www.abc.com",
+            "ibeacon_major": 13,
+            "ibeacon_minor": 138,
+            "ibeacon_uuid": "f3f17139-704a-f03a-2786-0400279e37c3",
+            "id": "845a23bf-bed9-e43c-4c86-6fa474be7ae5",
+            "last_seen": 1480716946,
+            "mac": "4a0222000e31",
+            "manufacture": "Asset Manufacturer Name",
+            "map_id": "63eda950-c6da-11e4-a628-60f81dd250cc",
+            "mfg_company_id": 935,
+            "mfg_data": "648520a1020000",
+            "name": "Asset Name",
+            "rssi": -45,
             "rssizones": [
               {
                 "id": "478f6eca-6276-4993-bfeb-5bcbbbbacf08",
                 "since": 0
               }
             ],
-            "x": 0,
-            "y": 0,
+            "service_packets": [
+              {
+                "data": "640",
+                "last_rx_time": 1645855923,
+                "rx_cnt": 213065,
+                "uuid": "00003e10-0000-1000-8000-00805f9b34fb"
+              }
+            ],
+            "temperature": 23.5,
+            "x": 51.0,
+            "y": 29.0,
             "zones": [
               {
                 "id": "477f6eca-6276-4993-bfeb-5ccbbbbadf08",
@@ -1086,19 +1282,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

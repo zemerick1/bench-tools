@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sites Spectrum Analysis",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -117,6 +113,12 @@
                 "Example": {
                   "value": {
                     "band": "5",
+                    "channels": [
+                      36,
+                      40,
+                      44,
+                      48
+                    ],
                     "device_id": "00000000-0000-0000-1000-5c5b35bd76bb",
                     "duration": 600,
                     "format": "stream"
@@ -209,6 +211,7 @@
   "components": {
     "schemas": {
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -218,8 +221,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -230,8 +235,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -242,8 +249,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -254,8 +263,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -263,8 +274,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -275,28 +288,30 @@
       },
       "response_past_spectrum_analysis": {
         "additionalProperties": false,
+        "description": "Paginated response for past site spectrum analysis records",
         "properties": {
           "end": {
-            "description": "End time of the spectrum analysis in epoch seconds",
+            "description": "Epoch timestamp, in seconds, for the end of the spectrum analysis query window",
             "type": "integer"
           },
           "limit": {
-            "description": "Limit of the number of results returned",
+            "description": "Maximum number of spectrum analysis records returned in this page",
             "type": "integer"
           },
           "page": {
-            "description": "Page number of the results returned",
+            "description": "Current page number returned for the spectrum analysis results",
             "type": "integer"
           },
           "results": {
-            "$ref": "#/components/schemas/response_past_spectrum_analysis_results"
+            "$ref": "#/components/schemas/response_past_spectrum_analysis_results",
+            "description": "Spectrum analysis records for the requested site and time window"
           },
           "start": {
-            "description": "Start time of the spectrum analysis in epoch seconds",
+            "description": "Epoch timestamp, in seconds, for the start of the spectrum analysis query window",
             "type": "integer"
           },
           "total": {
-            "description": "Total number of results available for the given time range",
+            "description": "Number of spectrum analysis records available for the given time range",
             "type": "integer"
           }
         },
@@ -307,14 +322,14 @@
         "description": "Channel usage data for a specific channel",
         "properties": {
           "channel": {
-            "description": "Channel number",
+            "description": "Radio channel measured by this channel usage sample",
             "examples": [
               36
             ],
             "type": "integer"
           },
           "noise": {
-            "description": "Noise level in dBm",
+            "description": "Measured noise floor, in dBm, for the channel",
             "examples": [
               -90.0
             ],
@@ -338,6 +353,7 @@
         "type": "object"
       },
       "response_past_spectrum_analysis_channel_usages": {
+        "description": "Per-channel utilization measurements captured during spectrum analysis",
         "items": {
           "$ref": "#/components/schemas/response_past_spectrum_analysis_channel_usage"
         },
@@ -348,21 +364,21 @@
         "description": "FFT sample data for a specific frequency",
         "properties": {
           "frequency": {
-            "description": "Frequency in MHz",
+            "description": "Sample frequency, in MHz, for this FFT point",
             "examples": [
               2437.0
             ],
             "type": "number"
           },
           "rssi": {
-            "description": "RSSI in dBm",
+            "description": "Received signal strength, in dBm, for this FFT sample",
             "examples": [
               -70.0
             ],
             "type": "number"
           },
           "signal7": {
-            "description": "RSSI in dBm",
+            "description": "Additional signal level, in dBm, reported for this FFT sample",
             "examples": [
               -70.0
             ],
@@ -383,30 +399,38 @@
         "description": "Result of a past spectrum analysis",
         "properties": {
           "band": {
-            "description": "Band on which the spectrum analysis was run (e.g., 24, 5, 6)",
+            "description": "Radio band on which the spectrum analysis was run (for example, 24, 5, or 6)",
             "type": "string"
           },
           "channel_usage": {
-            "$ref": "#/components/schemas/response_past_spectrum_analysis_channel_usages"
+            "$ref": "#/components/schemas/response_past_spectrum_analysis_channel_usages",
+            "description": "Per-channel utilization measurements captured during the analysis"
           },
           "fft_samples": {
-            "$ref": "#/components/schemas/response_past_spectrum_analysis_fft_samples"
+            "$ref": "#/components/schemas/response_past_spectrum_analysis_fft_samples",
+            "description": "FFT signal samples captured during the analysis"
           },
           "mac": {
-            "description": "MAC Address of the AP that ran the spectrum analysis",
+            "description": "AP MAC address for the access point that ran the spectrum analysis",
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization that owns the site where the spectrum analysis was run"
+          },
+          "spectrogram_url": {
+            "description": "URL to the generated spectrogram image for the spectrum analysis",
+            "type": "string"
           },
           "timestamp": {
-            "description": "Timestamp when the spectrum analysis was run in epoch seconds",
+            "description": "Epoch timestamp, in seconds, when the spectrum analysis was run",
             "type": "integer"
           }
         },
         "type": "object"
       },
       "response_past_spectrum_analysis_results": {
+        "description": "Past spectrum analysis records returned for the site",
         "items": {
           "$ref": "#/components/schemas/response_past_spectrum_analysis_result"
         },
@@ -414,10 +438,18 @@
       },
       "response_running_spectrum_analysis": {
         "additionalProperties": false,
+        "description": "Running spectrum analysis session for a site",
         "properties": {
           "band": {
-            "description": "Band on which the spectrum analysis is running (e.g., 24, 5, 6)",
+            "description": "Radio band currently being scanned by spectrum analysis, such as 24, 5, or 6",
             "type": "string"
+          },
+          "channels": {
+            "description": "List of channels being scanned in the spectrum analysis",
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
           },
           "device_id": {
             "description": "Device ID of the AP that is running spectrum analysis",
@@ -425,37 +457,43 @@
             "type": "string"
           },
           "duration": {
-            "description": "Duration of the spectrum analysis in seconds",
+            "description": "Length of the running spectrum analysis session, in seconds",
             "type": "integer"
           },
           "format": {
-            "description": "Format of the spectrum analysis data (e.g., json, stream)",
+            "description": "Output format for the running spectrum analysis data, such as json or stream",
             "type": "string"
           },
           "started_time": {
-            "description": "Time when the spectrum analysis was started",
+            "description": "Timestamp when the spectrum analysis was started",
+            "type": "integer"
+          },
+          "width": {
+            "description": "Channel width used during the spectrum analysis scan, in MHz",
             "type": "integer"
           }
         },
         "type": "object"
       },
       "spectrum_analysis": {
+        "description": "Request parameters for starting AP spectrum analysis at a site",
         "properties": {
           "band": {
-            "$ref": "#/components/schemas/spectrum_analysis_band"
+            "$ref": "#/components/schemas/spectrum_analysis_band",
+            "description": "Radio band to scan during spectrum analysis"
           },
           "channels": {
             "description": "Optional list of channels to scan. If not specified, all supported channels will be scanned",
             "examples": [
               [
-                "36",
-                "40",
-                "44",
-                "48"
+                36,
+                40,
+                44,
+                48
               ]
             ],
             "items": {
-              "type": "string"
+              "type": "integer"
             },
             "type": "array"
           },
@@ -466,13 +504,14 @@
           },
           "duration": {
             "default": 300,
-            "description": "Duration of the spectrum analysis in seconds",
+            "description": "Length of the spectrum analysis run, in seconds",
             "maximum": 600,
             "minimum": 60,
             "type": "integer"
           },
           "format": {
-            "$ref": "#/components/schemas/spectrum_analysis_format"
+            "$ref": "#/components/schemas/spectrum_analysis_format",
+            "description": "Output format for the spectrum analysis results"
           }
         },
         "required": [
@@ -500,8 +539,10 @@
       },
       "websocket_session": {
         "additionalProperties": false,
+        "description": "Response containing the WebSocket session handle for asynchronous command output",
         "properties": {
           "session": {
+            "description": "Identifier used to correlate output on the WebSocket stream",
             "examples": [
               "19e73828-937f-05e6-f709-e29efdb0a82b"
             ],
@@ -698,10 +739,9 @@
     },
     "parameters": {
       "duration": {
-        "description": "Duration like 7d, 2w",
+        "description": "Time range duration for the query, using relative units such as `10m`, `7d`, or `2w`",
         "in": "query",
         "name": "duration",
-        "required": false,
         "schema": {
           "default": "1d",
           "examples": [
@@ -711,7 +751,7 @@
         }
       },
       "end": {
-        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
         "in": "query",
         "name": "end",
         "schema": {
@@ -719,9 +759,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -741,7 +781,7 @@
         }
       },
       "start": {
-        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
         "in": "query",
         "name": "start",
         "schema": {
@@ -804,28 +844,30 @@
       "RunningSpectrumAnalysis": {
         "value": {
           "band": "5",
+          "channels": [
+            36,
+            40,
+            44,
+            48
+          ],
           "device_id": "00000000-0000-0000-1000-5c5b35bd76bb",
           "duration": 600,
           "format": "stream",
-          "started_time": 1435080709
+          "started_time": 1435080709,
+          "width": 20
         }
       }
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

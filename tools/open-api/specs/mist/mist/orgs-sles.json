@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs SLEs",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,10 +76,11 @@
         }
       ],
       "get": {
-        "description": "Get Org Sites SLE",
+        "description": "Return per-site Service-Level Expectation (SLE) scores for Wi-Fi, wired, or WAN service over the requested time window.",
         "operationId": "getOrgSitesSle",
         "parameters": [
           {
+            "description": "Filter insights by SLE name. enum: `wan`, `wifi`, `wired`",
             "in": "query",
             "name": "sle",
             "schema": {
@@ -145,7 +142,7 @@
         }
       ],
       "get": {
-        "description": "Get Org SLEs (all/worst sites, Mx Edges, ...)",
+        "description": "Return organization-level insight data for the selected metric, such as all or worst sites, Mist Edge insights, or other supported insight metrics, over the requested time window.",
         "operationId": "getOrgSle",
         "parameters": [
           {
@@ -200,20 +197,26 @@
     "schemas": {
       "insight_metrics": {
         "additionalProperties": false,
+        "description": "Insight metric response for a requested time range and aggregation interval",
         "properties": {
           "end": {
+            "description": "Window end timestamp for the returned insight metrics",
             "type": "integer"
           },
           "interval": {
+            "description": "Aggregation interval used for the metric results",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of insight metric result items returned",
             "type": "integer"
           },
           "results": {
-            "$ref": "#/components/schemas/insight_metrics_results"
+            "$ref": "#/components/schemas/insight_metrics_results",
+            "description": "Metric result values for the requested insight metric"
           },
           "start": {
+            "description": "Window start timestamp for the returned insight metrics",
             "type": "integer"
           }
         },
@@ -241,7 +244,8 @@
             "additionalProperties": true,
             "type": "object"
           }
-        ]
+        ],
+        "description": "Insight metric result item, returned either as a number or an object depending on the requested metric"
       },
       "org_site_sle_type": {
         "description": "enum: `wan`, `wifi`, `wired`",
@@ -254,23 +258,30 @@
       },
       "org_site_sle_wan_result": {
         "additionalProperties": false,
+        "description": "WAN SLE scores and counts for one site",
         "properties": {
           "application_health": {
+            "description": "Application health SLE score for this site",
             "type": "number"
           },
           "gateway-health": {
+            "description": "Gateway health SLE score for this site",
             "type": "number"
           },
           "num_clients": {
+            "description": "Number of WAN clients included in this site result",
             "type": "number"
           },
           "num_gateways": {
+            "description": "Number of gateways included in this site result",
             "type": "number"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site associated with this WAN SLE result"
           },
           "wan-link-health": {
+            "description": "WAN link health SLE score for this site",
             "type": "number"
           }
         },
@@ -281,6 +292,7 @@
         "type": "object"
       },
       "org_site_sle_wan_results": {
+        "description": "WAN SLE results returned for organization sites",
         "items": {
           "$ref": "#/components/schemas/org_site_sle_wan_result"
         },
@@ -289,26 +301,34 @@
       },
       "org_site_sle_wifi": {
         "additionalProperties": false,
+        "description": "Paginated Wi-Fi SLE results for organization sites",
         "properties": {
           "end": {
+            "description": "Query end timestamp for the returned SLE window",
             "type": "number"
           },
           "interval": {
+            "description": "Aggregation interval, in seconds, used for the SLE query",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of site results returned per page",
             "type": "integer"
           },
           "page": {
+            "description": "Result page number returned by the query",
             "type": "integer"
           },
           "results": {
-            "$ref": "#/components/schemas/org_site_sle_wifi_results"
+            "$ref": "#/components/schemas/org_site_sle_wifi_results",
+            "description": "Wi-Fi SLE results for the current page"
           },
           "start": {
+            "description": "Query start timestamp for the returned SLE window",
             "type": "number"
           },
           "total": {
+            "description": "Number of matching site results available for the query",
             "type": "integer"
           }
         },
@@ -325,38 +345,50 @@
       },
       "org_site_sle_wifi_result": {
         "additionalProperties": false,
+        "description": "Wi-Fi SLE scores and counts for one site",
         "properties": {
           "ap-availability": {
+            "description": "AP availability SLE score for this site",
             "type": "number"
           },
           "ap-health": {
+            "description": "AP health SLE score for this site",
             "type": "number"
           },
           "capacity": {
+            "description": "Wi-Fi capacity SLE score for this site",
             "type": "number"
           },
           "coverage": {
+            "description": "Wi-Fi coverage SLE score for this site",
             "type": "number"
           },
           "num_aps": {
+            "description": "Number of APs included in this site result",
             "type": "number"
           },
           "num_clients": {
+            "description": "Number of Wi-Fi clients included in this site result",
             "type": "number"
           },
           "roaming": {
+            "description": "Wi-Fi roaming SLE score for this site",
             "type": "number"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site associated with this Wi-Fi SLE result"
           },
           "successful-connect": {
+            "description": "Successful connection SLE score for this site",
             "type": "number"
           },
           "throughput": {
+            "description": "Wi-Fi throughput SLE score for this site",
             "type": "number"
           },
           "time-to-connect": {
+            "description": "Client connection-time SLE score for this site",
             "type": "number"
           }
         },
@@ -367,6 +399,7 @@
         "type": "object"
       },
       "org_site_sle_wifi_results": {
+        "description": "Wi-Fi SLE results returned for organization sites",
         "items": {
           "$ref": "#/components/schemas/org_site_sle_wifi_result"
         },
@@ -375,23 +408,30 @@
       },
       "org_site_sle_wired_result": {
         "additionalProperties": false,
+        "description": "Wired SLE scores and counts for one site",
         "properties": {
           "num_clients": {
+            "description": "Number of wired clients included in this site result",
             "type": "number"
           },
           "num_switches": {
+            "description": "Number of switches included in this site result",
             "type": "number"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site associated with this wired SLE result"
           },
           "switch-bandwidth": {
+            "description": "Switch bandwidth SLE score for this site",
             "type": "number"
           },
           "switch-health": {
+            "description": "Switch health SLE score for this site",
             "type": "number"
           },
           "switch-throughput": {
+            "description": "Switch throughput SLE score for this site",
             "type": "number"
           }
         },
@@ -402,6 +442,7 @@
         "type": "object"
       },
       "org_site_sle_wired_results": {
+        "description": "Wired SLE results returned for organization sites",
         "items": {
           "$ref": "#/components/schemas/org_site_sle_wired_result"
         },
@@ -410,26 +451,34 @@
       },
       "org_site_wan_wifi": {
         "additionalProperties": false,
+        "description": "Paginated WAN SLE results for organization sites",
         "properties": {
           "end": {
+            "description": "Query end timestamp for the returned SLE window",
             "type": "number"
           },
           "interval": {
+            "description": "Aggregation interval, in seconds, used for the SLE query",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of site results returned per page",
             "type": "integer"
           },
           "page": {
+            "description": "Result page number returned by the query",
             "type": "integer"
           },
           "results": {
-            "$ref": "#/components/schemas/org_site_sle_wan_results"
+            "$ref": "#/components/schemas/org_site_sle_wan_results",
+            "description": "WAN SLE results for the current page"
           },
           "start": {
+            "description": "Query start timestamp for the returned SLE window",
             "type": "number"
           },
           "total": {
+            "description": "Number of matching site results available for the query",
             "type": "integer"
           }
         },
@@ -446,26 +495,34 @@
       },
       "org_site_wired_wifi": {
         "additionalProperties": false,
+        "description": "Paginated wired SLE results for organization sites",
         "properties": {
           "end": {
+            "description": "Query end timestamp for the returned SLE window",
             "type": "number"
           },
           "interval": {
+            "description": "Aggregation interval, in seconds, used for the SLE query",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of site results returned per page",
             "type": "integer"
           },
           "page": {
+            "description": "Result page number returned by the query",
             "type": "integer"
           },
           "results": {
-            "$ref": "#/components/schemas/org_site_sle_wired_results"
+            "$ref": "#/components/schemas/org_site_sle_wired_results",
+            "description": "Wired SLE results for the current page"
           },
           "start": {
+            "description": "Query start timestamp for the returned SLE window",
             "type": "number"
           },
           "total": {
+            "description": "Number of matching site results available for the query",
             "type": "integer"
           }
         },
@@ -482,8 +539,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -494,8 +553,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -506,8 +567,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -518,8 +581,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -527,8 +592,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -538,6 +605,7 @@
         "type": "object"
       },
       "response_org_site_sle": {
+        "description": "Organization site SLE response for Wi-Fi, wired, or WAN",
         "oneOf": [
           {
             "$ref": "#/components/schemas/org_site_sle_wifi"
@@ -551,6 +619,7 @@
         ]
       },
       "site_id": {
+        "description": "Unique identifier of a Mist site",
         "examples": [
           "441a1214-6928-442a-8e92-e1d34b8ec6a6"
         ],
@@ -740,10 +809,9 @@
     },
     "parameters": {
       "duration": {
-        "description": "Duration like 7d, 2w",
+        "description": "Time range duration for the query, using relative units such as `10m`, `7d`, or `2w`",
         "in": "query",
         "name": "duration",
-        "required": false,
         "schema": {
           "default": "1d",
           "examples": [
@@ -753,7 +821,7 @@
         }
       },
       "end": {
-        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
         "in": "query",
         "name": "end",
         "schema": {
@@ -764,7 +832,6 @@
         "description": "Aggregation works by giving a time range plus interval (e.g. 1d, 1h, 10m) where aggregation function would be applied to.",
         "in": "query",
         "name": "interval",
-        "required": false,
         "schema": {
           "examples": [
             "10m"
@@ -773,9 +840,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -804,9 +871,9 @@
         }
       },
       "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
         "in": "query",
         "name": "page",
-        "required": false,
         "schema": {
           "default": 1,
           "minimum": 1,
@@ -814,7 +881,7 @@
         }
       },
       "start": {
-        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
         "in": "query",
         "name": "start",
         "schema": {
@@ -977,19 +1044,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

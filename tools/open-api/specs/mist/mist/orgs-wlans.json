@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Wlans",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -455,6 +451,7 @@
         "description": "List or Comma separated list of additional VLAN IDs (on the LAN side or from other WLANs) should we be forwarding bonjour queries/responses"
       },
       "additional_vlan_ids_array": {
+        "description": "Additional VLAN IDs represented as an array",
         "items": {
           "$ref": "#/components/schemas/vlan_id_with_variable"
         },
@@ -462,7 +459,7 @@
       },
       "coa_server": {
         "additionalProperties": false,
-        "description": "CoA Server",
+        "description": "RADIUS Change of Authorization (CoA) server settings",
         "properties": {
           "disable_event_timestamp_check": {
             "default": false,
@@ -471,9 +468,11 @@
           },
           "enabled": {
             "default": false,
+            "description": "Whether this RADIUS CoA server is enabled",
             "type": "boolean"
           },
           "ip": {
+            "description": "Server IPv4 address for RADIUS CoA messages",
             "examples": [
               "1.2.3.4"
             ],
@@ -481,9 +480,11 @@
             "type": "string"
           },
           "port": {
-            "$ref": "#/components/schemas/radius_coa_port"
+            "$ref": "#/components/schemas/radius_coa_port",
+            "description": "UDP port used to send RADIUS CoA messages to the server"
           },
           "secret": {
+            "description": "Shared secret used to authenticate RADIUS CoA messages",
             "examples": [
               "testing456"
             ],
@@ -510,11 +511,15 @@
         "type": "number"
       },
       "dot11_band": {
-        "description": "enum: `24`, `5`, `6`",
+        "description": "enum: `24`, `5`, `5-dedicated`, `5-selectable`, `6`, `6-dedicated`, `6-selectable`",
         "enum": [
           "24",
           "5",
-          "6"
+          "5-dedicated",
+          "5-selectable",
+          "6",
+          "6-dedicated",
+          "6-selectable"
         ],
         "type": "string"
       },
@@ -533,7 +538,7 @@
       },
       "dynamic_psk_source": {
         "default": "radius",
-        "description": "enum: `cloud_psks`, `radius`",
+        "description": "Origin used to retrieve per-user PSKs. enum: `cloud_psks`, `radius`",
         "enum": [
           "cloud_psks",
           "radius"
@@ -553,28 +558,35 @@
       },
       "hours": {
         "additionalProperties": false,
-        "description": "Days/Hours of operation filter, the available days (mon, tue, wed, thu, fri, sat, sun)",
+        "description": "Day-of-week operating hour filters using hour ranges such as 09:00-17:00",
         "properties": {
           "fri": {
-            "$ref": "#/components/schemas/hour"
+            "$ref": "#/components/schemas/hour",
+            "description": "Operating hour range for Friday"
           },
           "mon": {
-            "$ref": "#/components/schemas/hour"
+            "$ref": "#/components/schemas/hour",
+            "description": "Operating hour range for Monday"
           },
           "sat": {
-            "$ref": "#/components/schemas/hour"
+            "$ref": "#/components/schemas/hour",
+            "description": "Operating hour range for Saturday"
           },
           "sun": {
-            "$ref": "#/components/schemas/hour"
+            "$ref": "#/components/schemas/hour",
+            "description": "Operating hour range for Sunday"
           },
           "thu": {
-            "$ref": "#/components/schemas/hour"
+            "$ref": "#/components/schemas/hour",
+            "description": "Operating hour range for Thursday"
           },
           "tue": {
-            "$ref": "#/components/schemas/hour"
+            "$ref": "#/components/schemas/hour",
+            "description": "Operating hour range for Tuesday"
           },
           "wed": {
-            "$ref": "#/components/schemas/hour"
+            "$ref": "#/components/schemas/hour",
+            "description": "Operating hour range for Wednesday"
           }
         },
         "type": "object"
@@ -590,13 +602,15 @@
       },
       "image_import": {
         "additionalProperties": false,
+        "description": "Multipart image upload payload",
         "properties": {
           "file": {
             "contentMediaType": "application/octet-stream",
-            "description": "Binary file",
+            "description": "Image file content uploaded as multipart form data",
             "type": "string"
           },
           "json": {
+            "description": "Optional JSON metadata submitted with the image upload",
             "type": "string"
           }
         },
@@ -612,6 +626,7 @@
         "type": "number"
       },
       "msp_id": {
+        "description": "Managed service provider identifier",
         "examples": [
           "b9d42c2e-88ee-41f8-b798-f009ce7fe909"
         ],
@@ -620,6 +635,7 @@
         "type": "string"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -648,44 +664,51 @@
             "type": "string"
           }
         ],
-        "description": "Radius Auth Port, value from 1 to 65535, default is 1813"
+        "description": "RADIUS Auth Port, value from 1 to 65535, default is 1813"
       },
       "radius_acct_server": {
         "additionalProperties": false,
+        "description": "RADIUS accounting server settings",
         "properties": {
           "host": {
-            "description": "IP/ hostname of RADIUS server",
+            "description": "Address or hostname of the RADIUS accounting server",
             "examples": [
               "1.2.3.4"
             ],
             "type": "string"
           },
           "keywrap_enabled": {
+            "description": "Whether RADIUS keywrap is enabled for messages sent to this accounting server",
             "type": "boolean"
           },
           "keywrap_format": {
-            "$ref": "#/components/schemas/radius_keywrap_format"
+            "$ref": "#/components/schemas/radius_keywrap_format",
+            "description": "Encoding format for RADIUS keywrap KEK and MACK values"
           },
           "keywrap_kek": {
+            "description": "RADIUS keywrap key encryption key (KEK)",
             "examples": [
               "1122334455"
             ],
             "type": "string"
           },
           "keywrap_mack": {
+            "description": "RADIUS keywrap message authentication code key (MACK)",
             "examples": [
               "1122334455"
             ],
             "type": "string"
           },
           "port": {
-            "$ref": "#/components/schemas/radius_acct_port"
+            "$ref": "#/components/schemas/radius_acct_port",
+            "description": "UDP port used by the RADIUS accounting server"
           },
           "secret": {
-            "description": "Secret of RADIUS server",
+            "description": "Shared secret used with this RADIUS accounting server",
             "examples": [
               "testing123"
             ],
+            "format": "password",
             "type": "string"
           }
         },
@@ -706,39 +729,44 @@
             "type": "string"
           }
         ],
-        "description": "Radius Auth Port, value from 1 to 65535, default is 1812"
+        "description": "RADIUS Auth Port, value from 1 to 65535, default is 1812"
       },
       "radius_auth_server": {
         "additionalProperties": false,
-        "description": "Authentication Server",
+        "description": "RADIUS authentication server settings",
         "properties": {
           "host": {
-            "description": "IP/ hostname of RADIUS server",
+            "description": "Address or hostname of the RADIUS authentication server",
             "examples": [
               "1.2.3.4"
             ],
             "type": "string"
           },
           "keywrap_enabled": {
+            "description": "Whether RADIUS keywrap is enabled for messages sent to this authentication server",
             "type": "boolean"
           },
           "keywrap_format": {
-            "$ref": "#/components/schemas/radius_keywrap_format"
+            "$ref": "#/components/schemas/radius_keywrap_format",
+            "description": "Encoding format for RADIUS keywrap KEK and MACK values"
           },
           "keywrap_kek": {
+            "description": "RADIUS keywrap key encryption key (KEK)",
             "examples": [
               "1122334455"
             ],
             "type": "string"
           },
           "keywrap_mack": {
+            "description": "RADIUS keywrap message authentication code key (MACK)",
             "examples": [
               "1122334455"
             ],
             "type": "string"
           },
           "port": {
-            "$ref": "#/components/schemas/radius_auth_port"
+            "$ref": "#/components/schemas/radius_auth_port",
+            "description": "UDP port used by the RADIUS authentication server"
           },
           "require_message_authenticator": {
             "default": false,
@@ -746,10 +774,11 @@
             "type": "boolean"
           },
           "secret": {
-            "description": "Secret of RADIUS server",
+            "description": "Shared secret used with this RADIUS authentication server",
             "examples": [
               "testing123"
             ],
+            "format": "password",
             "type": "string"
           }
         },
@@ -770,10 +799,10 @@
             "type": "string"
           }
         ],
-        "description": "Radius CoA Port, value from 1 to 65535, default is 3799"
+        "description": "RADIUS CoA Port, value from 1 to 65535, default is 3799"
       },
       "radius_keywrap_format": {
-        "description": "enum: `ascii`, `hex`",
+        "description": "Encoding format for RADIUS keywrap KEK and MACK values. enum: `ascii`, `hex`",
         "enum": [
           "ascii",
           "hex"
@@ -782,41 +811,47 @@
       },
       "radsec": {
         "additionalProperties": false,
-        "description": "RadSec settings",
+        "description": "RadSec settings for sending RADIUS traffic over TLS",
         "properties": {
           "coa_enabled": {
             "default": false,
+            "description": "Whether RADIUS Change of Authorization (CoA) is enabled for RadSec traffic",
             "type": "boolean"
           },
           "enabled": {
+            "description": "Whether RadSec is enabled",
             "type": "boolean"
           },
           "idle_timeout": {
-            "$ref": "#/components/schemas/radsec_idle_timeout"
+            "$ref": "#/components/schemas/radsec_idle_timeout",
+            "description": "Idle timeout, in seconds, for RadSec connections"
           },
           "mxcluster_ids": {
-            "$ref": "#/components/schemas/radsec_mxcluster_ids"
+            "$ref": "#/components/schemas/radsec_mxcluster_ids",
+            "description": "Mist Edge cluster IDs used as RadSec proxies when the WLAN does not use mxtunnel"
           },
           "proxy_hosts": {
-            "$ref": "#/components/schemas/radsec_proxy_hosts"
+            "$ref": "#/components/schemas/radsec_proxy_hosts",
+            "description": "RadSec proxy hostnames advertised to APs"
           },
           "server_name": {
-            "description": "Name of the server to verify (against the cacerts in Org Setting). Only if not Mist Edge.",
+            "description": "TLS server name to verify against the CA certificates in Org Setting. Only if not Mist Edge.",
             "examples": [
               "radsec.abc.com"
             ],
             "type": "string"
           },
           "servers": {
-            "$ref": "#/components/schemas/radsec_servers"
+            "$ref": "#/components/schemas/radsec_servers",
+            "description": "External RadSec servers. Only if not Mist Edge."
           },
           "use_mxedge": {
-            "description": "use mxedge(s) as RadSec Proxy",
+            "description": "Whether to use organization Mist Edge instances as RadSec proxies",
             "type": "boolean"
           },
           "use_site_mxedge": {
             "default": false,
-            "description": "To use Site mxedges when this WLAN does not use mxtunnel",
+            "description": "Whether to use site Mist Edge instances when this WLAN does not use mxtunnel",
             "type": "boolean"
           }
         },
@@ -832,10 +867,10 @@
             "type": "string"
           }
         ],
-        "description": "Radsec Idle Timeout in seconds. Default is 60"
+        "description": "RadSec idle timeout in seconds. Default is 60"
       },
       "radsec_mxcluster_ids": {
-        "description": "To use Org mxedges when this WLAN does not use mxtunnel, specify their mxcluster_ids. Org mxedge(s) identified by mxcluster_ids",
+        "description": "To use Org Mist Edges when this WLAN does not use mxtunnel, specify their mxcluster_ids. Org Mist Edge(s) identified by mxcluster_ids",
         "items": {
           "examples": [
             "572586b7-f97b-a22b-526c-8b97a3f609c4"
@@ -846,7 +881,7 @@
         "type": "array"
       },
       "radsec_proxy_hosts": {
-        "description": "Default is site.mxedge.radsec.proxy_hosts which must be a superset of all `wlans[*].radsec.proxy_hosts`. When `radsec.proxy_hosts` are not used, tunnel peers (org or site mxedges) are used irrespective of `use_site_mxedge`",
+        "description": "Default is site.mxedge.radsec.proxy_hosts which must be a superset of all `wlans[*].radsec.proxy_hosts`. When `radsec.proxy_hosts` are not used, tunnel peers (org or site Mist Edges) are used irrespective of `use_site_mxedge`",
         "items": {
           "examples": [
             "mxedge1.local"
@@ -857,14 +892,17 @@
       },
       "radsec_server": {
         "additionalProperties": false,
+        "description": "External RadSec server settings",
         "properties": {
           "host": {
+            "description": "Address or hostname of the RadSec server",
             "examples": [
               "1.1.1.1"
             ],
             "type": "string"
           },
           "port": {
+            "description": "TCP port used by the RadSec server",
             "examples": [
               1812
             ],
@@ -876,7 +914,7 @@
         "type": "object"
       },
       "radsec_servers": {
-        "description": "List of RadSec Servers. Only if not Mist Edge.",
+        "description": "External RadSec servers. Only if not Mist Edge.",
         "items": {
           "$ref": "#/components/schemas/radsec_server"
         },
@@ -885,8 +923,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -897,8 +937,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -909,8 +951,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -921,8 +965,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -930,8 +976,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -941,6 +989,7 @@
         "type": "object"
       },
       "site_id": {
+        "description": "Unique identifier of a Mist site",
         "examples": [
           "441a1214-6928-442a-8e92-e1d34b8ec6a6"
         ],
@@ -963,6 +1012,7 @@
         "description": "Optional if `sponsor_enabled`==`true`. How long to remain valid sponsored guest request approve/deny link received in email, in minutes. Value is between 5 and 60."
       },
       "strings": {
+        "description": "Unique string values returned or accepted by this schema",
         "items": {
           "type": "string"
         },
@@ -970,6 +1020,7 @@
         "uniqueItems": true
       },
       "vlan_id_with_variable": {
+        "description": "VLAN ID, either numeric or expressed as a template variable string",
         "oneOf": [
           {
             "type": "string"
@@ -991,7 +1042,7 @@
           },
           "acct_interim_interval": {
             "default": 0,
-            "description": "How frequently should interim accounting be reported, 60-65535. default is 0 (use one specified in Access-Accept request from RADIUS Server). Very frequent messages can affect the performance of the radius server, 600 and up is recommended when enabled",
+            "description": "How frequently should interim accounting be reported, 60-65535. default is 0 (use one specified in Access-Accept request from RADIUS Server). Very frequent messages can affect the performance of the RADIUS server, 600 and up is recommended when enabled",
             "examples": [
               0
             ],
@@ -1000,10 +1051,12 @@
             "type": "integer"
           },
           "acct_servers": {
-            "$ref": "#/components/schemas/wlan_acct_servers"
+            "$ref": "#/components/schemas/wlan_acct_servers",
+            "description": "RADIUS accounting servers used by this WLAN"
           },
           "airwatch": {
-            "$ref": "#/components/schemas/wlan_airwatch"
+            "$ref": "#/components/schemas/wlan_airwatch",
+            "description": "Integration settings for AirWatch device compliance on this WLAN"
           },
           "allow_ipv6_ndp": {
             "default": true,
@@ -1021,16 +1074,20 @@
             "type": "boolean"
           },
           "ap_ids": {
-            "$ref": "#/components/schemas/wlan_ap_ids"
+            "$ref": "#/components/schemas/wlan_ap_ids",
+            "description": "Access point identifiers used when `apply_to`==`aps`"
           },
           "app_limit": {
-            "$ref": "#/components/schemas/wlan_app_limit"
+            "$ref": "#/components/schemas/wlan_app_limit",
+            "description": "Bandwidth limits for applications on this WLAN"
           },
           "app_qos": {
-            "$ref": "#/components/schemas/wlan_app_qos"
+            "$ref": "#/components/schemas/wlan_app_qos",
+            "description": "QoS rules for application traffic on this WLAN"
           },
           "apply_to": {
-            "$ref": "#/components/schemas/wlan_apply_to"
+            "$ref": "#/components/schemas/wlan_apply_to",
+            "description": "Scope that determines where this WLAN is applied"
           },
           "arp_filter": {
             "default": false,
@@ -1038,13 +1095,16 @@
             "type": "boolean"
           },
           "auth": {
-            "$ref": "#/components/schemas/wlan_auth"
+            "$ref": "#/components/schemas/wlan_auth",
+            "description": "Settings that control client authentication for this WLAN"
           },
           "auth_server_selection": {
-            "$ref": "#/components/schemas/wlan_auth_server_selection"
+            "$ref": "#/components/schemas/wlan_auth_server_selection",
+            "description": "RADIUS authentication server selection behavior for this WLAN"
           },
           "auth_servers": {
-            "$ref": "#/components/schemas/wlan_auth_servers"
+            "$ref": "#/components/schemas/wlan_auth_servers",
+            "description": "RADIUS authentication servers used by this WLAN. Required when `auth.type`==`eap`"
           },
           "auth_servers_nas_id": {
             "description": "Optional, up to 48 bytes, will be dynamically generated if not provided. used only for authentication servers",
@@ -1068,7 +1128,7 @@
           },
           "auth_servers_retries": {
             "default": 2,
-            "description": "Radius auth session retries. Following fast timers are set if \"fast_dot1x_timers\" knob is enabled. ‘retries’  are set to value of auth_servers_retries. ‘max-requests’ is also set when setting auth_servers_retries and is set to default value to 3.",
+            "description": "RADIUS auth session retries. Following fast timers are set if \"fast_dot1x_timers\" knob is enabled. ‘retries’ are set to value of auth_servers_retries. ‘max-requests’ is also set when setting auth_servers_retries and is set to default value to 3.",
             "examples": [
               5
             ],
@@ -1076,12 +1136,12 @@
           },
           "auth_servers_timeout": {
             "default": 5,
-            "description": "Radius auth session timeout. Following fast timers are set if \"fast_dot1x_timers\" knob is enabled. ‘quite-period’  and ‘transmit-period’ are set to half the value of auth_servers_timeout. ‘supplicant-timeout’ is also set when setting auth_servers_timeout and is set to default value of 10.",
+            "description": "RADIUS auth session timeout. Following fast timers are set if \"fast_dot1x_timers\" knob is enabled. ‘quite-period’  and ‘transmit-period’ are set to half the value of auth_servers_timeout. ‘supplicant-timeout’ is also set when setting auth_servers_timeout and is set to default value of 10.",
             "type": "integer"
           },
           "band": {
             "deprecated": true,
-            "description": "`band` is deprecated and kept for backward compatibility. Use bands instead",
+            "description": "`band` is deprecated and kept for backward compatibility. Use `bands` instead",
             "type": "string"
           },
           "band_steer": {
@@ -1095,7 +1155,8 @@
             "type": "boolean"
           },
           "bands": {
-            "$ref": "#/components/schemas/wlan_bands"
+            "$ref": "#/components/schemas/wlan_bands",
+            "description": "Radio bands on which this WLAN is broadcast"
           },
           "block_blacklist_clients": {
             "default": false,
@@ -1103,13 +1164,16 @@
             "type": "boolean"
           },
           "bonjour": {
-            "$ref": "#/components/schemas/wlan_bonjour"
+            "$ref": "#/components/schemas/wlan_bonjour",
+            "description": "Service discovery gateway settings for Bonjour traffic on this WLAN"
           },
           "cisco_cwa": {
-            "$ref": "#/components/schemas/wlan_cisco_cwa"
+            "$ref": "#/components/schemas/wlan_cisco_cwa",
+            "description": "Central web authentication settings for Cisco CWA on this WLAN"
           },
           "client_limit_down": {
-            "$ref": "#/components/schemas/wlan_limit"
+            "$ref": "#/components/schemas/wlan_limit",
+            "description": "Downlink bandwidth limit applied per client"
           },
           "client_limit_down_enabled": {
             "default": false,
@@ -1117,7 +1181,8 @@
             "type": "boolean"
           },
           "client_limit_up": {
-            "$ref": "#/components/schemas/wlan_limit"
+            "$ref": "#/components/schemas/wlan_limit",
+            "description": "Uplink bandwidth limit applied per client"
           },
           "client_limit_up_enabled": {
             "default": false,
@@ -1125,10 +1190,12 @@
             "type": "boolean"
           },
           "coa_servers": {
-            "$ref": "#/components/schemas/coa_servers"
+            "$ref": "#/components/schemas/coa_servers",
+            "description": "RADIUS Change of Authorization servers available to this WLAN"
           },
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Time when this WLAN was created, in epoch seconds"
           },
           "disable_11ax": {
             "default": false,
@@ -1143,6 +1210,11 @@
           "disable_ht_vht_rates": {
             "default": false,
             "description": "To disable ht or vht rates",
+            "type": "boolean"
+          },
+          "disable_message_authenticator_check": {
+            "default": false,
+            "description": "whether to disable Message-Authenticator Check, which is used to verify the integrity of RADIUS messages, default is false (i.e. for better security)",
             "type": "boolean"
           },
           "disable_uapsd": {
@@ -1167,6 +1239,7 @@
           },
           "disable_when_mxtunnel_down": {
             "default": false,
+            "description": "Whether to disable this WLAN when the configured Mist tunnel is down",
             "type": "boolean"
           },
           "disable_wmm": {
@@ -1175,17 +1248,26 @@
             "type": "boolean"
           },
           "dns_server_rewrite": {
-            "$ref": "#/components/schemas/wlan_dns_server_rewrite"
+            "$ref": "#/components/schemas/wlan_dns_server_rewrite",
+            "description": "RADIUS group based DNS server rewrite settings for this WLAN"
           },
           "dtim": {
             "default": 2,
+            "description": "Delivery Traffic Indication Message interval for this WLAN",
             "type": "integer"
           },
           "dynamic_psk": {
-            "$ref": "#/components/schemas/wlan_dynamic_psk"
+            "$ref": "#/components/schemas/wlan_dynamic_psk",
+            "description": "Per-user PSK selection settings for this WLAN"
           },
           "dynamic_vlan": {
-            "$ref": "#/components/schemas/wlan_dynamic_vlan"
+            "$ref": "#/components/schemas/wlan_dynamic_vlan",
+            "description": "VLAN assignment settings for 802.1X dynamic VLANs"
+          },
+          "enable_ftm": {
+            "default": false,
+            "description": "Enable FTM (Fine-Time Measurement, 802.11mc); configures the AP as an FTM Responder (target), allowing clients to perform ranging requests against it",
+            "type": "boolean"
           },
           "enable_local_keycaching": {
             "default": false,
@@ -1213,6 +1295,7 @@
             "type": "boolean"
           },
           "for_site": {
+            "description": "Whether this WLAN record is scoped to a site",
             "readOnly": true,
             "type": "boolean"
           },
@@ -1227,16 +1310,20 @@
             "type": "boolean"
           },
           "hotspot20": {
-            "$ref": "#/components/schemas/wlan_hotspot_20"
+            "$ref": "#/components/schemas/wlan_hotspot_20",
+            "description": "Passpoint and Hotspot 2.0 settings for this WLAN"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier for this WLAN"
           },
           "inject_dhcp_option_82": {
-            "$ref": "#/components/schemas/wlan_inject_dhcp_option_82"
+            "$ref": "#/components/schemas/wlan_inject_dhcp_option_82",
+            "description": "DHCP Option 82 insertion settings for this WLAN"
           },
           "interface": {
-            "$ref": "#/components/schemas/wlan_interface"
+            "$ref": "#/components/schemas/wlan_interface",
+            "description": "Network interface or tunnel where this WLAN bridges client traffic"
           },
           "isolation": {
             "default": false,
@@ -1281,13 +1368,16 @@
             "type": "integer"
           },
           "mist_nac": {
-            "$ref": "#/components/schemas/wlan_mist_nac"
+            "$ref": "#/components/schemas/wlan_mist_nac",
+            "description": "Juniper Mist NAC settings used by this WLAN"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Time when this WLAN was last modified, in epoch seconds"
           },
           "msp_id": {
-            "$ref": "#/components/schemas/msp_id"
+            "$ref": "#/components/schemas/msp_id",
+            "description": "Managed service provider identifier associated with this WLAN"
           },
           "mxtunnel_id": {
             "deprecated": true,
@@ -1296,10 +1386,12 @@
             "type": "string"
           },
           "mxtunnel_ids": {
-            "$ref": "#/components/schemas/wlan_mxtunnel_ids"
+            "$ref": "#/components/schemas/wlan_mxtunnel_ids",
+            "description": "Mist Tunnel identifiers used when `interface`==`mxtunnel`"
           },
           "mxtunnel_name": {
-            "$ref": "#/components/schemas/wlan_mxtunnel_name"
+            "$ref": "#/components/schemas/wlan_mxtunnel_name",
+            "description": "Mist Tunnel names used when `interface`==`site_mxedge`"
           },
           "no_static_dns": {
             "default": false,
@@ -1312,16 +1404,20 @@
             "type": "boolean"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Owning organization associated with this WLAN"
           },
           "portal": {
-            "$ref": "#/components/schemas/wlan_portal"
+            "$ref": "#/components/schemas/wlan_portal",
+            "description": "Guest portal settings for this WLAN"
           },
           "portal_allowed_hostnames": {
-            "$ref": "#/components/schemas/wlan_portal_allowed_hostnames"
+            "$ref": "#/components/schemas/wlan_portal_allowed_hostnames",
+            "description": "Guest portal hostnames that clients may reach before authorization"
           },
           "portal_allowed_subnets": {
-            "$ref": "#/components/schemas/wlan_portal_allowed_subnets"
+            "$ref": "#/components/schemas/wlan_portal_allowed_subnets",
+            "description": "Guest portal CIDR subnets that clients may reach before authorization"
           },
           "portal_api_secret": {
             "default": "",
@@ -1335,7 +1431,8 @@
             ]
           },
           "portal_denied_hostnames": {
-            "$ref": "#/components/schemas/wlan_portal_denied_hostnames"
+            "$ref": "#/components/schemas/wlan_portal_denied_hostnames",
+            "description": "Guest portal hostnames denied before authorization, taking precedence over allowed hostnames"
           },
           "portal_image": {
             "default": "",
@@ -1368,13 +1465,16 @@
             ]
           },
           "qos": {
-            "$ref": "#/components/schemas/wlan_qos"
+            "$ref": "#/components/schemas/wlan_qos",
+            "description": "Quality-of-service settings for WLAN client traffic"
           },
           "radsec": {
-            "$ref": "#/components/schemas/radsec"
+            "$ref": "#/components/schemas/radsec",
+            "description": "TLS-secured RADIUS transport settings for this WLAN"
           },
           "rateset": {
-            "$ref": "#/components/schemas/wlan_rateset"
+            "$ref": "#/components/schemas/wlan_rateset",
+            "description": "Data rate settings by RF band for this WLAN"
           },
           "reconnect_clients_when_roaming_mxcluster": {
             "default": false,
@@ -1382,13 +1482,16 @@
             "type": "boolean"
           },
           "roam_mode": {
-            "$ref": "#/components/schemas/wlan_roam_mode"
+            "$ref": "#/components/schemas/wlan_roam_mode",
+            "description": "Fast roaming mode configured for this WLAN"
           },
           "schedule": {
-            "$ref": "#/components/schemas/wlan_schedule"
+            "$ref": "#/components/schemas/wlan_schedule",
+            "description": "Operating schedule controlling when this WLAN is active"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Mist site associated with this WLAN, when site-scoped"
           },
           "sle_excluded": {
             "default": false,
@@ -1404,6 +1507,7 @@
           },
           "template_id": {
             "default": "",
+            "description": "Identifier of the WLAN template associated with this WLAN",
             "format": "uuid",
             "type": [
               "string",
@@ -1431,10 +1535,12 @@
             "type": "boolean"
           },
           "vlan_id": {
-            "$ref": "#/components/schemas/wlan_vlan_id_with_variable"
+            "$ref": "#/components/schemas/wlan_vlan_id_with_variable",
+            "description": "Default VLAN ID, range, or variable used when `vlan_enabled`==`true`"
           },
           "vlan_ids": {
-            "$ref": "#/components/schemas/wlan_vlan_ids"
+            "$ref": "#/components/schemas/wlan_vlan_ids",
+            "description": "Pool of VLAN IDs used when `vlan_enabled`==`true` and `vlan_pooling`==`true`"
           },
           "vlan_pooling": {
             "default": false,
@@ -1442,7 +1548,8 @@
             "type": "boolean"
           },
           "wlan_limit_down": {
-            "$ref": "#/components/schemas/wlan_limit"
+            "$ref": "#/components/schemas/wlan_limit",
+            "description": "Downlink bandwidth limit applied to the whole WLAN"
           },
           "wlan_limit_down_enabled": {
             "default": false,
@@ -1450,7 +1557,8 @@
             "type": "boolean"
           },
           "wlan_limit_up": {
-            "$ref": "#/components/schemas/wlan_limit"
+            "$ref": "#/components/schemas/wlan_limit",
+            "description": "Uplink bandwidth limit applied to the whole WLAN"
           },
           "wlan_limit_up_enabled": {
             "default": false,
@@ -1458,7 +1566,8 @@
             "type": "boolean"
           },
           "wxtag_ids": {
-            "$ref": "#/components/schemas/wlan_wxtag_ids"
+            "$ref": "#/components/schemas/wlan_wxtag_ids",
+            "description": "Identifiers of WxLAN tags used when `apply_to`==`wxtags`"
           },
           "wxtunnel_id": {
             "default": "",
@@ -1491,11 +1600,11 @@
       },
       "wlan_airwatch": {
         "additionalProperties": false,
-        "description": "Airwatch wlan settings",
+        "description": "AirWatch integration settings for the WLAN",
         "properties": {
           "api_key": {
             "default": "",
-            "description": "API Key",
+            "description": "API key used to authenticate to the AirWatch service",
             "examples": [
               "REDACTED"
             ],
@@ -1503,7 +1612,7 @@
           },
           "console_url": {
             "default": "",
-            "description": "Console URL",
+            "description": "Base console URL of the AirWatch deployment",
             "examples": [
               "https://hs1.airwatchportals.com"
             ],
@@ -1511,19 +1620,21 @@
           },
           "enabled": {
             "default": false,
+            "description": "Whether AirWatch integration is enabled for the WLAN",
             "type": "boolean"
           },
           "password": {
             "default": "",
-            "description": "Password",
+            "description": "AirWatch integration account password for this WLAN",
             "examples": [
               "user1"
             ],
+            "format": "password",
             "type": "string"
           },
           "username": {
             "default": "",
-            "description": "Username",
+            "description": "AirWatch integration account username for this WLAN",
             "examples": [
               "test123"
             ],
@@ -1563,6 +1674,7 @@
           },
           "enabled": {
             "default": false,
+            "description": "Whether application bandwidth limits are enabled for this WLAN",
             "type": "boolean"
           },
           "wxtag_ids": {
@@ -1590,6 +1702,7 @@
               "$ref": "#/components/schemas/wlan_app_qos_apps_properties"
             },
             "default": {},
+            "description": "Map of application keys to QoS rewrite settings",
             "examples": [
               {
                 "skype-business-video": {
@@ -1603,19 +1716,23 @@
           },
           "enabled": {
             "default": false,
+            "description": "Whether application QoS rewrite rules are enabled for this WLAN",
             "type": "boolean"
           },
           "others": {
-            "$ref": "#/components/schemas/wlan_app_qos_others"
+            "$ref": "#/components/schemas/wlan_app_qos_others",
+            "description": "Custom traffic QoS rules that are not tied to named applications"
           }
         },
         "type": "object"
       },
       "wlan_app_qos_apps_properties": {
         "additionalProperties": false,
+        "description": "QoS rewrite settings for traffic matching a named application",
         "properties": {
           "dscp": {
-            "$ref": "#/components/schemas/dscp"
+            "$ref": "#/components/schemas/dscp",
+            "description": "Differentiated Services Code Point value applied to matching application traffic"
           },
           "dst_subnet": {
             "description": "Subnet filter is not required but helps AP to only inspect certain traffic (thus reducing AP load)",
@@ -1629,6 +1746,7 @@
         "type": "object"
       },
       "wlan_app_qos_others": {
+        "description": "Custom application QoS rules for traffic matched by subnet, port, and protocol",
         "items": {
           "$ref": "#/components/schemas/wlan_app_qos_others_item"
         },
@@ -1637,29 +1755,35 @@
       },
       "wlan_app_qos_others_item": {
         "additionalProperties": false,
+        "description": "Custom QoS rewrite rule for traffic not matched by a named application",
         "properties": {
           "dscp": {
-            "$ref": "#/components/schemas/dscp"
+            "$ref": "#/components/schemas/dscp",
+            "description": "Differentiated Services Code Point value applied to matching traffic"
           },
           "dst_subnet": {
+            "description": "Destination subnet filter for this custom QoS rule",
             "examples": [
               "10.2.0.0/16"
             ],
             "type": "string"
           },
           "port_ranges": {
+            "description": "TCP or UDP port ranges matched by this custom QoS rule",
             "examples": [
               "80,1024-6553"
             ],
             "type": "string"
           },
           "protocol": {
+            "description": "IP protocol matched by this custom QoS rule",
             "examples": [
               "udp"
             ],
             "type": "string"
           },
           "src_subnet": {
+            "description": "Source subnet filter for this custom QoS rule",
             "examples": [
               "10.2.0.0/16"
             ],
@@ -1679,7 +1803,7 @@
       },
       "wlan_auth": {
         "additionalProperties": false,
-        "description": "Authentication wlan settings",
+        "description": "WLAN client authentication settings",
         "properties": {
           "anticlog_threshold": {
             "default": 16,
@@ -1696,6 +1820,16 @@
             "description": "Whether to trigger EAP reauth when the session ends",
             "type": "boolean"
           },
+          "enable_beacon_protection": {
+            "default": false,
+            "description": "Enable Beacon Protection; default is false for better compatibility",
+            "type": "boolean"
+          },
+          "enable_gcmp256": {
+            "default": false,
+            "description": "Enable GCMP-256 encryption suite; default is false for better compatibility",
+            "type": "boolean"
+          },
           "enable_mac_auth": {
             "default": false,
             "description": "Whether to enable MAC Auth, uses the same auth_servers",
@@ -1703,13 +1837,14 @@
           },
           "key_idx": {
             "default": 1,
-            "description": "When `type`==`wep`",
+            "description": "When `type`==`wep`, index of the WEP key used as the default transmit key",
             "maximum": 4,
             "minimum": 1,
             "type": "integer"
           },
           "keys": {
-            "$ref": "#/components/schemas/wlan_auth_keys"
+            "$ref": "#/components/schemas/wlan_auth_keys",
+            "description": "When `type`==`wep`, WEP keys configured for this WLAN"
           },
           "multi_psk_only": {
             "default": false,
@@ -1717,10 +1852,12 @@
             "type": "boolean"
           },
           "owe": {
-            "$ref": "#/components/schemas/wlan_auth_owe"
+            "$ref": "#/components/schemas/wlan_auth_owe",
+            "description": "When `type`==`open`, Opportunistic Wireless Encryption mode for this WLAN"
           },
           "pairwise": {
-            "$ref": "#/components/schemas/wlan_auth_pairwise"
+            "$ref": "#/components/schemas/wlan_auth_pairwise",
+            "description": "When `type`==`psk` or `type`==`eap`, pairwise cipher suites allowed for this WLAN"
           },
           "private_wlan": {
             "default": false,
@@ -1741,7 +1878,8 @@
             ]
           },
           "type": {
-            "$ref": "#/components/schemas/wlan_auth_type"
+            "$ref": "#/components/schemas/wlan_auth_type",
+            "description": "Authentication mode used by this WLAN"
           },
           "wep_as_secondary_auth": {
             "default": false,
@@ -1844,7 +1982,7 @@
           "5",
           "6"
         ],
-        "description": "List of radios that the wlan should apply to.",
+        "description": "List of radios that the wlan should apply to. enum: `24`, `5`, `5-dedicated`, `5-selectable`, `6`, `6-dedicated`, `6-selectable`",
         "items": {
           "$ref": "#/components/schemas/dot11_band"
         },
@@ -1855,7 +1993,8 @@
         "description": "Bonjour gateway wlan settings",
         "properties": {
           "additional_vlan_ids": {
-            "$ref": "#/components/schemas/additional_vlan_ids"
+            "$ref": "#/components/schemas/additional_vlan_ids",
+            "description": "VLAN IDs, beyond the client VLAN, where Bonjour queries and responses are forwarded"
           },
           "enabled": {
             "default": false,
@@ -1884,6 +2023,7 @@
       },
       "wlan_bonjour_service_properties": {
         "additionalProperties": false,
+        "description": "Bonjour service discovery settings for one advertised service",
         "properties": {
           "disable_local": {
             "default": false,
@@ -1891,10 +2031,12 @@
             "type": "boolean"
           },
           "radius_groups": {
-            "$ref": "#/components/schemas/wlan_bonjour_service_properties_radius_groups"
+            "$ref": "#/components/schemas/wlan_bonjour_service_properties_radius_groups",
+            "description": "RADIUS groups allowed to discover this Bonjour service, when restricted"
           },
           "scope": {
-            "$ref": "#/components/schemas/wlan_bonjour_service_properties_scope"
+            "$ref": "#/components/schemas/wlan_bonjour_service_properties_scope",
+            "description": "Discovery scope for this Bonjour service on the WLAN"
           }
         },
         "type": "object"
@@ -1921,16 +2063,20 @@
         "description": "Cisco CWA (central web authentication) required RADIUS with COA in order to work. See CWA: https://www.cisco.com/c/en/us/support/docs/security/identity-services-engine/115732-central-web-auth-00.html",
         "properties": {
           "allowed_hostnames": {
-            "$ref": "#/components/schemas/wlan_cisco_cwa_allowed_hostnames"
+            "$ref": "#/components/schemas/wlan_cisco_cwa_allowed_hostnames",
+            "description": "Hostnames allowed for Cisco CWA client access before authorization"
           },
           "allowed_subnets": {
-            "$ref": "#/components/schemas/wlan_cisco_cwa_allowed_subnets"
+            "$ref": "#/components/schemas/wlan_cisco_cwa_allowed_subnets",
+            "description": "CIDR subnets allowed for Cisco CWA client access before authorization"
           },
           "blocked_subnets": {
-            "$ref": "#/components/schemas/wlan_cisco_cwa_blocked_subnets"
+            "$ref": "#/components/schemas/wlan_cisco_cwa_blocked_subnets",
+            "description": "CIDR subnets blocked for Cisco CWA client access"
           },
           "enabled": {
             "default": false,
+            "description": "Whether Cisco CWA is enabled for this WLAN",
             "type": "boolean"
           }
         },
@@ -1947,7 +2093,7 @@
         "type": "array"
       },
       "wlan_cisco_cwa_allowed_subnets": {
-        "description": "List of CIDRs",
+        "description": "CIDR subnets allowed for Cisco CWA client access before authorization",
         "items": {
           "examples": [
             "63.5.3.0/24"
@@ -2001,7 +2147,8 @@
             ]
           },
           "legacy": {
-            "$ref": "#/components/schemas/wlan_datarates_legacy"
+            "$ref": "#/components/schemas/wlan_datarates_legacy",
+            "description": "If `template`==`custom`, legacy 802.11 data rates allowed on this WLAN"
           },
           "min_rssi": {
             "default": 0,
@@ -2012,7 +2159,8 @@
             "type": "integer"
           },
           "template": {
-            "$ref": "#/components/schemas/wlan_datarates_template"
+            "$ref": "#/components/schemas/wlan_datarates_template",
+            "description": "Data rate template used to derive WLAN rate settings"
           },
           "vht": {
             "description": "If `template`==`custom`. MCS bitmasks for 4 streams (16-bit for each stream, MCS0 is least significant bit), e.g. 03ff 01ff 00ff limits VHT rates to MCS 0-9 for 1 stream, MCS 0-8 for 2 streams, and MCS 0-7 for 3 streams.",
@@ -2097,6 +2245,7 @@
         "properties": {
           "enabled": {
             "default": false,
+            "description": "Whether DNS server rewrite by RADIUS group is enabled for this WLAN",
             "type": "boolean"
           },
           "radius_groups": {
@@ -2120,7 +2269,7 @@
       },
       "wlan_dynamic_psk": {
         "additionalProperties": false,
-        "description": "For dynamic PSK where we get per_user PSK from Radius. dynamic_psk allows PSK to be selected at runtime depending on context (wlan/site/user/...) thus following configurations are assumed (currently)\n  * PSK will come from RADIUS server\n  * AP sends client MAC as username and password (i.e. `enable_mac_auth` is assumed)\n  * AP sends BSSID:SSID as Caller-Station-ID\n  * `auth_servers` is required\n  * PSK will come from cloud WLC if source is cloud_psks\n  * default_psk will be used if cloud WLC is not available\n  * `multi_psk_only` and `psk` is ignored\n  * `pairwise` can only be wpa2-ccmp (for now, wpa3 support on the roadmap)",
+        "description": "For dynamic PSK where we get per_user PSK from RADIUS. dynamic_psk allows PSK to be selected at runtime depending on context (wlan/site/user/...) thus following configurations are assumed (currently)\n  * PSK will come from RADIUS server\n  * AP sends client MAC as username and password (i.e. `enable_mac_auth` is assumed)\n  * AP sends BSSID:SSID as Caller-Station-ID\n  * `auth_servers` is required\n  * PSK will come from cloud WLC if source is cloud_psks\n  * default_psk will be used if cloud WLC is not available\n  * `multi_psk_only` and `psk` is ignored\n  * `pairwise` can only be wpa2-ccmp (for now, wpa3 support on the roadmap)",
         "properties": {
           "default_psk": {
             "description": "Default PSK to use if cloud WLC is not available, 8-63 characters",
@@ -2132,10 +2281,12 @@
             "type": "string"
           },
           "default_vlan_id": {
-            "$ref": "#/components/schemas/vlan_id_with_variable"
+            "$ref": "#/components/schemas/vlan_id_with_variable",
+            "description": "Default VLAN ID used when dynamic PSK lookup does not return a VLAN"
           },
           "enabled": {
             "default": false,
+            "description": "Whether dynamic PSK is enabled for this WLAN",
             "type": "boolean"
           },
           "force_lookup": {
@@ -2143,8 +2294,13 @@
             "description": "When 11r is enabled, we'll try to use the cached PMK, this can be disabled. `false` means auto",
             "type": "boolean"
           },
+          "local_vlan_ids": {
+            "$ref": "#/components/schemas/wlan_dynamic_vlan_local_vlan_ids",
+            "description": "VLANs to be bridged locally when forwarding to mxtunnel or site mxedge"
+          },
           "source": {
-            "$ref": "#/components/schemas/dynamic_psk_source"
+            "$ref": "#/components/schemas/dynamic_psk_source",
+            "description": "Origin used to retrieve per-user PSKs"
           }
         },
         "type": [
@@ -2154,13 +2310,15 @@
       },
       "wlan_dynamic_vlan": {
         "additionalProperties": false,
-        "description": "For 802.1x",
+        "description": "Dynamic VLAN assignment settings for 802.1X WLAN authentication",
         "properties": {
           "default_vlan_id": {
-            "$ref": "#/components/schemas/wlan_dynamic_vlan_default_vlan_id_deprecated"
+            "$ref": "#/components/schemas/wlan_dynamic_vlan_default_vlan_id_deprecated",
+            "description": "Deprecated default VLAN ID used when no RADIUS VLAN match is returned. Please use `default_vlan_ids` instead, which can support VLAN pools."
           },
           "default_vlan_ids": {
-            "$ref": "#/components/schemas/wlan_dynamic_vlan_default_vlan_ids"
+            "$ref": "#/components/schemas/wlan_dynamic_vlan_default_vlan_ids",
+            "description": "Fallback VLAN IDs, ranges, or variables used when no RADIUS VLAN match is returned"
           },
           "enabled": {
             "default": false,
@@ -2168,16 +2326,18 @@
             "type": "boolean"
           },
           "local_vlan_ids": {
-            "$ref": "#/components/schemas/wlan_dynamic_vlan_local_vlan_ids"
+            "$ref": "#/components/schemas/wlan_dynamic_vlan_local_vlan_ids",
+            "description": "VLAN IDs that should be locally bridged for dynamic VLAN assignment"
           },
           "type": {
-            "$ref": "#/components/schemas/wlan_dynamic_vlan_type"
+            "$ref": "#/components/schemas/wlan_dynamic_vlan_type",
+            "description": "Dynamic VLAN mapping method used for RADIUS-provided VLAN attributes"
           },
           "vlans": {
             "additionalProperties": {
               "type": "string"
             },
-            "description": "Map between vlan_id (as string) to airespace interface names (comma-separated) or null for standard mapping\n  * if `dynamic_vlan.type`==`standard`, property key is the Vlan ID and property value is \\\"\\\"\n  * if `dynamic_vlan.type`==`airespace-interface-name`, property key is the Vlan ID and property value is the Airespace Interface Name",
+            "description": "Map between vlan_id (as string) to airespace interface names (comma-separated) or null for standard mapping\n  * if `dynamic_vlan.type`==`standard`, property key is the VLAN ID and property value is \\\"\\\"\n  * if `dynamic_vlan.type`==`airespace-interface-name`, property key is the VLAN ID and property value is the Airespace Interface Name",
             "examples": [
               {
                 "131": "default",
@@ -2248,6 +2408,7 @@
         "type": "string"
       },
       "wlan_hotspot20_domain_name": {
+        "description": "Domain names advertised to Hotspot 2.0 clients",
         "examples": [
           [
             "mist.com"
@@ -2292,6 +2453,7 @@
         "type": "string"
       },
       "wlan_hotspot20_rcoi": {
+        "description": "Roaming Consortium Organization Identifiers advertised for Hotspot 2.0",
         "examples": [
           [
             "5A03BA0000"
@@ -2304,23 +2466,27 @@
       },
       "wlan_hotspot_20": {
         "additionalProperties": false,
-        "description": "Hostspot 2.0 wlan settings",
+        "description": "Hotspot 2.0 WLAN settings",
         "properties": {
           "domain_name": {
-            "$ref": "#/components/schemas/wlan_hotspot20_domain_name"
+            "$ref": "#/components/schemas/wlan_hotspot20_domain_name",
+            "description": "Advertised domain names for Hotspot 2.0 clients"
           },
           "enabled": {
             "description": "Whether to enable hotspot 2.0 config",
             "type": "boolean"
           },
           "nai_realms": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "NAI realms advertised for Hotspot 2.0 authentication"
           },
           "operators": {
-            "$ref": "#/components/schemas/wlan_hotspot20_operators"
+            "$ref": "#/components/schemas/wlan_hotspot20_operators",
+            "description": "Operator profiles supported by this Hotspot 2.0 configuration"
           },
           "rcoi": {
-            "$ref": "#/components/schemas/wlan_hotspot20_rcoi"
+            "$ref": "#/components/schemas/wlan_hotspot20_rcoi",
+            "description": "Roaming Consortium Organization Identifiers advertised for Hotspot 2.0"
           },
           "venue_name": {
             "description": "Venue name, default is site name",
@@ -2334,6 +2500,7 @@
       },
       "wlan_inject_dhcp_option_82": {
         "additionalProperties": false,
+        "description": "DHCP Option 82 injection settings for a WLAN",
         "properties": {
           "circuit_id": {
             "description": "Information to set in the `circuit_id` field of the DHCP Option 82. It is possible to use static string or the following variables (e.g. `{{SSID}}:{{AP_MAC}}`):\n  * {{AP_MAC}}\n  * {{AP_MAC_DASHED}}\n  * {{AP_MODEL}}\n  * {{AP_NAME}}\n  * {{SITE_NAME}}\n  * {{SSID}}",
@@ -2383,10 +2550,11 @@
       },
       "wlan_mist_nac": {
         "additionalProperties": false,
+        "description": "Mist NAC RADIUS settings for a WLAN",
         "properties": {
           "acct_interim_interval": {
             "default": 0,
-            "description": "How frequently should interim accounting be reported, 60-65535. default is 0 (use one specified in Access-Accept request from Server). Very frequent messages can affect the performance of the radius server, 600 and up is recommended when enabled.",
+            "description": "How frequently should interim accounting be reported, 60-65535. default is 0 (use one specified in Access-Accept request from Server). Very frequent messages can affect the performance of the RADIUS server, 600 and up is recommended when enabled.",
             "examples": [
               60
             ],
@@ -2396,7 +2564,7 @@
           },
           "auth_servers_retries": {
             "default": 2,
-            "description": "Radius auth session retries. Following fast timers are set if `fast_dot1x_timers` knob is enabled. \"retries\" are set to value of `auth_servers_timeout`. \"max-requests\" is also set when setting `auth_servers_retries` is set to default value to 3.",
+            "description": "RADIUS auth session retries. Following fast timers are set if `fast_dot1x_timers` knob is enabled. \"retries\" are set to value of `auth_servers_timeout`. \"max-requests\" is also set when setting `auth_servers_retries` is set to default value to 3.",
             "examples": [
               3
             ],
@@ -2406,7 +2574,7 @@
           },
           "auth_servers_timeout": {
             "default": 5,
-            "description": "Radius auth session timeout. Following fast timers are set if `fast_dot1x_timers` knob is enabled. \"quite-period\" and \"transmit-period\" are set to half the value of `auth_servers_timeout`. \"supplicant-timeout\" is also set when setting `auth_servers_timeout` is set to default value of 10.",
+            "description": "RADIUS auth session timeout. Following fast timers are set if `fast_dot1x_timers` knob is enabled. \"quite-period\" and \"transmit-period\" are set to half the value of `auth_servers_timeout`. \"supplicant-timeout\" is also set when setting `auth_servers_timeout` is set to default value of 10.",
             "examples": [
               5
             ],
@@ -2473,7 +2641,7 @@
         "type": "array"
       },
       "wlan_mxtunnel_name": {
-        "description": "When `interface`=`site_mxedge`, name of the mxtunnel that in mxtunnels under Site Setting",
+        "description": "When `interface`=`site_mxedge`, name of the Mist Tunnel defined under `site_setting.mxtunnel.additional_mxtunnels`",
         "items": {
           "default": "default",
           "examples": [
@@ -2485,7 +2653,7 @@
       },
       "wlan_portal": {
         "additionalProperties": false,
-        "description": "Portal wlan settings",
+        "description": "Guest portal settings for the WLAN",
         "properties": {
           "allow_wlan_id_roam": {
             "default": false,
@@ -2503,13 +2671,15 @@
           "amazon_client_secret": {
             "default": "",
             "description": "Optional if `amazon_enabled`==`true`. Amazon OAuth2 client secret. If amazon_client_id was provided, provide a corresponding value. Else leave blank.",
+            "format": "password",
             "type": [
               "string",
               "null"
             ]
           },
           "amazon_email_domains": {
-            "$ref": "#/components/schemas/wlan_portal_amazon_email_domains"
+            "$ref": "#/components/schemas/wlan_portal_amazon_email_domains",
+            "description": "Optional if `amazon_enabled`==`true`. Email domains allowed for Amazon-authenticated guest users. If null or empty, any authenticated Amazon email domain is allowed."
           },
           "amazon_enabled": {
             "default": false,
@@ -2525,7 +2695,8 @@
             ]
           },
           "auth": {
-            "$ref": "#/components/schemas/wlan_portal_auth"
+            "$ref": "#/components/schemas/wlan_portal_auth",
+            "description": "Guest portal login scheme used by the WLAN"
           },
           "azure_client_id": {
             "default": "",
@@ -2538,6 +2709,7 @@
           "azure_client_secret": {
             "default": "",
             "description": "Required if `azure_enabled`==`true`. Azure active directory app client secret",
+            "format": "password",
             "type": [
               "string",
               "null"
@@ -2566,21 +2738,22 @@
           },
           "broadnet_password": {
             "default": "",
-            "description": "Required if `sms_provider`==`broadnet`",
+            "description": "Required if `sms_provider`==`broadnet`. Password for the Broadnet SMS provider account",
             "examples": [
               "password"
             ],
+            "format": "password",
             "type": "string"
           },
           "broadnet_sid": {
-            "description": "Required if `sms_provider`==`broadnet`",
+            "description": "Required if `sms_provider`==`broadnet`. SID for the Broadnet SMS provider account",
             "examples": [
               "MIST"
             ],
             "type": "string"
           },
           "broadnet_user_id": {
-            "description": "Required if `sms_provider`==`broadnet`",
+            "description": "Required if `sms_provider`==`broadnet`. User ID for the Broadnet SMS provider account",
             "examples": [
               "juniper"
             ],
@@ -2592,7 +2765,7 @@
             "type": "boolean"
           },
           "clickatell_api_key": {
-            "description": "Required if `sms_provider`==`clickatell`",
+            "description": "Required if `sms_provider`==`clickatell`. API key for the Clickatell SMS provider account",
             "type": "string"
           },
           "cross_site": {
@@ -2634,13 +2807,15 @@
           "facebook_client_secret": {
             "default": "",
             "description": "Required if `facebook_enabled`==`true`. Facebook OAuth2 app secret. If facebook_client_id was provided, provide a corresponding value. Else leave blank.",
+            "format": "password",
             "type": [
               "string",
               "null"
             ]
           },
           "facebook_email_domains": {
-            "$ref": "#/components/schemas/wlan_portal_facebook_email_domains"
+            "$ref": "#/components/schemas/wlan_portal_facebook_email_domains",
+            "description": "Optional if `facebook_enabled`==`true`. Email domains allowed for Facebook-authenticated guest users. If null or empty, any authenticated Facebook email domain is allowed."
           },
           "facebook_enabled": {
             "default": false,
@@ -2682,13 +2857,15 @@
           "google_client_secret": {
             "default": "",
             "description": "Optional if `google_enabled`==`true`. Google OAuth2 app secret. If google_client_id was provided, provide a corresponding value. Else leave blank.",
+            "format": "password",
             "type": [
               "string",
               "null"
             ]
           },
           "google_email_domains": {
-            "$ref": "#/components/schemas/wlan_portal_google_email_domains"
+            "$ref": "#/components/schemas/wlan_portal_google_email_domains",
+            "description": "Optional if `google_enabled`==`true`. Email domains allowed for Google-authenticated guest users. If null or empty, any authenticated Google email domain is allowed."
           },
           "google_enabled": {
             "default": false,
@@ -2704,11 +2881,12 @@
             ]
           },
           "gupshup_password": {
-            "description": "Required if `sms_provider`==`gupshup`",
+            "description": "Required if `sms_provider`==`gupshup`. Password for the Gupshup SMS provider account",
+            "format": "password",
             "type": "string"
           },
           "gupshup_userid": {
-            "description": "Required if `sms_provider`==`gupshup`",
+            "description": "Required if `sms_provider`==`gupshup`. User ID for the Gupshup SMS provider account",
             "type": "string"
           },
           "microsoft_client_id": {
@@ -2722,13 +2900,15 @@
           "microsoft_client_secret": {
             "default": "",
             "description": "Optional if `microsoft_enabled`==`true`. Microsoft 365 OAuth2 client secret. If microsoft_client_id was provided, provide a corresponding value. Else leave blank.",
+            "format": "password",
             "type": [
               "string",
               "null"
             ]
           },
           "microsoft_email_domains": {
-            "$ref": "#/components/schemas/wlan_portal_microsoft_email_domains"
+            "$ref": "#/components/schemas/wlan_portal_microsoft_email_domains",
+            "description": "Optional if `microsoft_enabled`==`true`. Email domains allowed for Microsoft 365-authenticated guest users. If null or empty, any authenticated Microsoft 365 email domain is allowed."
           },
           "microsoft_enabled": {
             "default": false,
@@ -2758,7 +2938,7 @@
           },
           "password": {
             "default": "",
-            "description": "Required if `passphrase_enabled`==`true`.",
+            "description": "Required if `passphrase_enabled`==`true`. Passphrase guests must enter when passphrase authentication is enabled",
             "examples": [
               "let me in"
             ],
@@ -2779,18 +2959,20 @@
           },
           "privacy": {
             "default": false,
+            "description": "Whether to show the privacy policy in the WLAN guest portal",
             "type": "boolean"
           },
           "puzzel_password": {
-            "description": "Required if `sms_provider`==`puzzel`",
+            "description": "Required if `sms_provider`==`puzzel`. Password for the Puzzel SMS provider account",
+            "format": "password",
             "type": "string"
           },
           "puzzel_service_id": {
-            "description": "Required if `sms_provider`==`puzzel`",
+            "description": "Required if `sms_provider`==`puzzel`. Service ID for the Puzzel SMS provider account",
             "type": "string"
           },
           "puzzel_username": {
-            "description": "Required if `sms_provider`==`puzzel`",
+            "description": "Required if `sms_provider`==`puzzel`. Username for the Puzzel SMS provider account",
             "type": "string"
           },
           "smsMessageFormat": {
@@ -2812,7 +2994,8 @@
             ]
           },
           "sms_provider": {
-            "$ref": "#/components/schemas/wlan_portal_sms_provider"
+            "$ref": "#/components/schemas/wlan_portal_sms_provider",
+            "description": "Optional if `sms_enabled`==`true`. SMS provider used to deliver guest portal access codes"
           },
           "smsglobal_api_key": {
             "description": "Required if `sms_provider`==`smsglobal`, Client API Key",
@@ -2820,6 +3003,11 @@
           },
           "smsglobal_api_secret": {
             "description": "Required if `sms_provider`==`smsglobal`, Client secret",
+            "format": "password",
+            "type": "string"
+          },
+          "smsglobal_sender": {
+            "description": "Optional sender's number or sender ID for SMSGlobal. If not provided, uses the default number associated with the account",
             "type": "string"
           },
           "sponsor_auto_approve": {
@@ -2828,7 +3016,8 @@
             "type": "boolean"
           },
           "sponsor_email_domains": {
-            "$ref": "#/components/schemas/wlan_portal_sponsor_email_domains"
+            "$ref": "#/components/schemas/wlan_portal_sponsor_email_domains",
+            "description": "Email domains allowed for sponsor email addresses. Required if `sponsor_enabled` is `true` and `sponsors` is empty."
           },
           "sponsor_enabled": {
             "default": false,
@@ -2844,7 +3033,8 @@
             ]
           },
           "sponsor_link_validity_duration": {
-            "$ref": "#/components/schemas/sponsor_link_validity_duration"
+            "$ref": "#/components/schemas/sponsor_link_validity_duration",
+            "description": "Optional if `sponsor_enabled`==`true`. Validity duration, in minutes, for approve or deny links in sponsor emails. Valid values are 5 to 60."
           },
           "sponsor_notify_all": {
             "default": false,
@@ -2857,7 +3047,8 @@
             "type": "boolean"
           },
           "sponsors": {
-            "$ref": "#/components/schemas/wlan_portal_sponsors"
+            "$ref": "#/components/schemas/wlan_portal_sponsors",
+            "description": "Allowed sponsor email addresses and display names. Required if `sponsor_enabled` is `true` and `sponsor_email_domains` is empty."
           },
           "sso_default_role": {
             "default": "",
@@ -2866,7 +3057,7 @@
           },
           "sso_forced_role": {
             "default": "",
-            "description": "Optional if `wlan_portal_auth`==`sso`",
+            "description": "Optional if `wlan_portal_auth`==`sso`. Role assigned to authenticated users when guest SSO is used",
             "type": "string"
           },
           "sso_idp_cert": {
@@ -2875,7 +3066,8 @@
             "type": "string"
           },
           "sso_idp_sign_algo": {
-            "$ref": "#/components/schemas/wlan_portal_idp_sign_algo"
+            "$ref": "#/components/schemas/wlan_portal_idp_sign_algo",
+            "description": "Optional if `wlan_portal_auth`==`sso`. Signing algorithm used for SAML assertions from the identity provider"
           },
           "sso_idp_sso_url": {
             "default": "",
@@ -2888,7 +3080,8 @@
             "type": "string"
           },
           "sso_nameid_format": {
-            "$ref": "#/components/schemas/wlan_portal_sso_nameid_format"
+            "$ref": "#/components/schemas/wlan_portal_sso_nameid_format",
+            "description": "Optional if `wlan_portal_auth`==`sso`. SAML NameID format expected from the identity provider"
           },
           "telstra_client_id": {
             "description": "Required if `sms_provider`==`telstra`, Client ID provided by Telstra",
@@ -2896,6 +3089,7 @@
           },
           "telstra_client_secret": {
             "description": "Required if `sms_provider`==`telstra`, Client secret provided by Telstra",
+            "format": "password",
             "type": "string"
           },
           "twilio_auth_token": {
@@ -2903,6 +3097,7 @@
             "examples": [
               "REDACTED"
             ],
+            "format": "password",
             "type": [
               "string",
               "null"
@@ -2947,7 +3142,7 @@
       },
       "wlan_portal_allowed_subnets": {
         "default": [],
-        "description": "List of CIDRs",
+        "description": "Guest portal CIDR subnets that clients may reach before authorization",
         "examples": [
           [
             "63.5.3.0/24"
@@ -3086,6 +3281,7 @@
         ]
       },
       "wlan_portal_sponsors_list": {
+        "description": "Allowed sponsor email addresses for guest portal sponsor approval",
         "items": {
           "type": "string"
         },
@@ -3095,6 +3291,7 @@
         "additionalProperties": {
           "type": "string"
         },
+        "description": "Allowed guest portal sponsors keyed by email address with sponsor names as values",
         "examples": [
           {
             "sponsor1@company.com": "FirstName1 LastName1",
@@ -3113,26 +3310,31 @@
         "type": "string"
       },
       "wlan_portal_template": {
+        "description": "Guest portal template payload for a WLAN",
         "properties": {
           "portal_template": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting"
+            "$ref": "#/components/schemas/wlan_portal_template_setting",
+            "description": "Template settings that define guest portal text, layout, and localization"
           }
         },
         "type": "object"
       },
       "wlan_portal_template_setting": {
         "additionalProperties": false,
-        "description": "Portal template wlan settings",
+        "description": "Portal template settings for the WLAN guest portal",
         "properties": {
           "accessCodeAlternateEmail": {
             "default": "Use alternate email address",
+            "description": "Link text for using an alternate email address during access-code login",
             "type": "string"
           },
           "alignment": {
-            "$ref": "#/components/schemas/portal_template_alignment"
+            "$ref": "#/components/schemas/portal_template_alignment",
+            "description": "Text and content alignment used by the guest portal template"
           },
           "ar": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Arabic"
           },
           "authButtonAmazon": {
             "default": "Sign in with Amazon",
@@ -3181,6 +3383,7 @@
           },
           "authLabel": {
             "default": "Connect to Wi-Fi with",
+            "description": "Heading text displayed above portal authentication options",
             "type": "string"
           },
           "backLink": {
@@ -3188,19 +3391,22 @@
             "type": "string"
           },
           "ca-ES": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Catalan in Spain"
           },
           "color": {
             "default": "#1074bc",
-            "description": "Portal main color",
+            "description": "Primary color used by the portal template",
             "type": "string"
           },
           "colorDark": {
             "default": "#0b5183",
+            "description": "Darker accent color used by the portal template",
             "type": "string"
           },
           "colorLight": {
             "default": "#3589c6",
+            "description": "Lighter accent color used by the portal template",
             "type": "string"
           },
           "company": {
@@ -3215,20 +3421,24 @@
           },
           "companyLabel": {
             "default": "Company",
-            "description": "Label of company field",
+            "description": "Label displayed for the company input field",
             "type": "string"
           },
           "cs-CZ": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Czech in Czechia"
           },
           "da-DK": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Danish in Denmark"
           },
           "de-DE": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for German in Germany"
           },
           "el-GR": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Greek in Greece"
           },
           "email": {
             "default": false,
@@ -3247,26 +3457,32 @@
           },
           "emailCodeCancel": {
             "default": "I did not receive the code",
+            "description": "Link text for requesting help when the email access code was not received",
             "type": "string"
           },
           "emailCodeError": {
             "default": "Please provide valid alternate email",
+            "description": "Error message shown when the alternate email address for access-code delivery is invalid",
             "type": "string"
           },
           "emailCodeFieldLabel": {
             "default": "Access Code",
+            "description": "Label for the email access-code input field",
             "type": "string"
           },
           "emailCodeMessage": {
             "default": "Enter the access number that was sent to your email address.",
+            "description": "Instructional text shown before entering the email access code",
             "type": "string"
           },
           "emailCodeSubmit": {
             "default": "Sign In",
+            "description": "Button label for submitting the email access code",
             "type": "string"
           },
           "emailCodeTitle": {
             "default": "Access Code",
+            "description": "Title shown on the email access-code entry page",
             "type": "string"
           },
           "emailError": {
@@ -3276,15 +3492,17 @@
           },
           "emailFieldLabel": {
             "default": "Enter your email address",
+            "description": "Label for the email address input field",
             "type": "string"
           },
           "emailLabel": {
             "default": "Email",
-            "description": "Label of email field",
+            "description": "Label displayed for the email input field",
             "type": "string"
           },
           "emailMessage": {
             "default": "We will email you an authentication code which you can use to connect to the Wi-Fi network.",
+            "description": "Instructional text explaining email access-code delivery",
             "type": "string"
           },
           "emailSubmit": {
@@ -3298,16 +3516,20 @@
             "type": "string"
           },
           "en-GB": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for English in the United Kingdom"
           },
           "en-US": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for English in the United States"
           },
           "es-ES": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Spanish in Spain"
           },
           "fi-FI": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Finnish in Finland"
           },
           "field1": {
             "default": false,
@@ -3321,11 +3543,11 @@
           },
           "field1Label": {
             "default": "Custom Field 1",
-            "description": "Label of field1",
+            "description": "Label for custom field 1 input",
             "type": "string"
           },
           "field1Required": {
-            "description": "Whether field1 is required field",
+            "description": "Whether custom field 1 must be provided when the field is shown",
             "type": "boolean"
           },
           "field2": {
@@ -3340,11 +3562,11 @@
           },
           "field2Label": {
             "default": "Custom Field 2",
-            "description": "Label of field2",
+            "description": "Label for custom field 2 input",
             "type": "string"
           },
           "field2Required": {
-            "description": "Whether field2 is required field",
+            "description": "Whether custom field 2 must be provided when the field is shown",
             "type": "boolean"
           },
           "field3": {
@@ -3359,11 +3581,11 @@
           },
           "field3Label": {
             "default": "Custom Field 3",
-            "description": "Label of field3",
+            "description": "Label for custom field 3 input",
             "type": "string"
           },
           "field3Required": {
-            "description": "Whether field3 is required field",
+            "description": "Whether custom field 3 must be provided when the field is shown",
             "type": "boolean"
           },
           "field4": {
@@ -3378,39 +3600,48 @@
           },
           "field4Label": {
             "default": "Custom Field 4",
-            "description": "Label of field4",
+            "description": "Label for custom field 4 input",
             "type": "string"
           },
           "field4Required": {
-            "description": "Whether field4 is required field",
+            "description": "Whether custom field 4 must be provided when the field is shown",
             "type": "boolean"
           },
           "fr-FR": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for French in France"
           },
           "he-IL": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Hebrew in Israel"
           },
           "hi-IN": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Hindi in India"
           },
           "hr-HR": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Croatian in Croatia"
           },
           "hu-HU": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Hungarian in Hungary"
           },
           "id-ID": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Indonesian in Indonesia"
           },
           "it-IT": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Italian in Italy"
           },
           "ja-JP": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Japanese in Japan"
           },
           "ko-KR": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Korean in Korea"
           },
           "logo": {
             "default": null,
@@ -3458,18 +3689,21 @@
           },
           "marketingPolicyOptInText": {
             "default": "Marketing policy content",
-            "description": "marketing policy text",
+            "description": "Text of the marketing policy opt-in content",
             "type": "string"
           },
           "message": {
             "default": "Sign in to get online",
+            "description": "Main message displayed on the guest portal sign-in page",
             "type": "string"
           },
           "ms-MY": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Malay in Malaysia"
           },
           "multiAuth": {
             "default": false,
+            "description": "Whether the portal presents multiple authentication methods",
             "type": "boolean"
           },
           "name": {
@@ -3484,14 +3718,16 @@
           },
           "nameLabel": {
             "default": "Name",
-            "description": "Label of name field",
+            "description": "Label displayed for the name input field",
             "type": "string"
           },
           "nb-NO": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Norwegian Bokmal in Norway"
           },
           "nl-NL": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Dutch in the Netherlands"
           },
           "optOutDefault": {
             "default": true,
@@ -3510,6 +3746,7 @@
           },
           "pageTitle": {
             "default": "Welcome",
+            "description": "Browser or page title shown for the guest portal",
             "type": "string"
           },
           "passphraseCancel": {
@@ -3524,11 +3761,12 @@
           },
           "passphraseLabel": {
             "default": "Passphrase",
-            "description": "Passphrase",
+            "description": "Label for the passphrase input field",
             "type": "string"
           },
           "passphraseMessage": {
             "default": "Enter the secret passphrase to access the Wi-Fi network.",
+            "description": "Instructional text shown on the passphrase sign-in page",
             "type": "string"
           },
           "passphraseSubmit": {
@@ -3542,7 +3780,8 @@
             "type": "string"
           },
           "pl-PL": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Polish in Poland"
           },
           "poweredBy": {
             "default": true,
@@ -3575,25 +3814,30 @@
             "type": "string"
           },
           "pt-BR": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Portuguese in Brazil"
           },
           "pt-PT": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Portuguese in Portugal"
           },
           "requiredFieldLabel": {
             "default": "required",
-            "description": "Label to denote required field",
+            "description": "Text used to mark a form field as required",
             "type": "string"
           },
           "responsiveLayout": {
             "default": true,
+            "description": "Whether the portal template uses a responsive layout",
             "type": "boolean"
           },
           "ro-RO": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Romanian in Romania"
           },
           "ru-RU": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Russian in Russia"
           },
           "signInLabel": {
             "default": "Sign In",
@@ -3601,14 +3845,17 @@
             "type": "string"
           },
           "sk-SK": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Slovak in Slovakia"
           },
           "smsCarrierDefault": {
             "default": "Please Select",
+            "description": "Default option text shown in the SMS carrier selector",
             "type": "string"
           },
           "smsCarrierError": {
             "default": "Please select a mobile carrier",
+            "description": "Error message shown when no mobile carrier is selected",
             "type": "string"
           },
           "smsCarrierFieldLabel": {
@@ -3628,10 +3875,12 @@
           },
           "smsCodeFieldLabel": {
             "default": "Confirmation Code",
+            "description": "Label for the SMS confirmation-code input field",
             "type": "string"
           },
           "smsCodeMessage": {
             "default": "Enter the access number that was sent to your mobile number.",
+            "description": "Instructional text shown before entering the SMS access code",
             "type": "string"
           },
           "smsCodeSubmit": {
@@ -3641,14 +3890,17 @@
           },
           "smsCodeTitle": {
             "default": "Access Code",
+            "description": "Title shown on the SMS access-code entry page",
             "type": "string"
           },
           "smsCountryFieldLabel": {
             "default": "Country Code",
+            "description": "Label for the SMS country-code input field",
             "type": "string"
           },
           "smsCountryFormat": {
             "default": "+1",
+            "description": "Example country code format shown for SMS authentication",
             "type": "string"
           },
           "smsHaveAccessCode": {
@@ -3658,6 +3910,7 @@
           },
           "smsIsTwilio": {
             "default": false,
+            "description": "Whether the SMS portal flow uses Twilio-specific behavior",
             "type": "boolean"
           },
           "smsMessageFormat": {
@@ -3671,6 +3924,7 @@
           },
           "smsNumberError": {
             "default": "Invalid Mobile Number",
+            "description": "Error message shown when the mobile number is invalid",
             "type": "string"
           },
           "smsNumberFieldLabel": {
@@ -3680,10 +3934,12 @@
           },
           "smsNumberFormat": {
             "default": "2125551212 (digits only)",
+            "description": "Example mobile number format shown for SMS authentication",
             "type": "string"
           },
           "smsNumberMessage": {
             "default": "We will send an access code to your mobile number which you can use to connect to the Wi-Fi network. Message and data rates may apply.",
+            "description": "Instructional text explaining SMS access-code delivery",
             "type": "string"
           },
           "smsNumberSubmit": {
@@ -3698,6 +3954,7 @@
           },
           "smsUsernameFormat": {
             "default": "username",
+            "description": "Example username format shown for SMS authentication",
             "type": "string"
           },
           "smsValidityDuration": {
@@ -3708,10 +3965,12 @@
           },
           "sponsorBackLink": {
             "default": "Go back and edit request form",
+            "description": "Link text for returning to edit the sponsor request form",
             "type": "string"
           },
           "sponsorCancel": {
             "default": "Cancel",
+            "description": "Button label for canceling sponsor authentication",
             "type": "string"
           },
           "sponsorEmail": {
@@ -3721,6 +3980,7 @@
           },
           "sponsorEmailError": {
             "default": "Please provide valid sponsor email",
+            "description": "Error message shown when the sponsor email address is invalid",
             "type": "string"
           },
           "sponsorEmailTemplate": {
@@ -3730,14 +3990,17 @@
           },
           "sponsorInfoApproved": {
             "default": "Your request was approved by",
+            "description": "Status message prefix shown when a sponsor approves the request",
             "type": "string"
           },
           "sponsorInfoDenied": {
             "default": "Your request was denied by",
+            "description": "Status message prefix shown when a sponsor denies the request",
             "type": "string"
           },
           "sponsorInfoPending": {
             "default": "Your notification has been sent to",
+            "description": "Status message prefix shown after a sponsor notification is sent",
             "type": "string"
           },
           "sponsorName": {
@@ -3747,10 +4010,12 @@
           },
           "sponsorNameError": {
             "default": "Please provide sponsor name",
+            "description": "Error message shown when the sponsor name is missing",
             "type": "string"
           },
           "sponsorNotePending": {
             "default": "Please wait for them to acknowledge.",
+            "description": "Additional status text shown while sponsor approval is pending",
             "type": "string"
           },
           "sponsorRequestAccess": {
@@ -3780,20 +4045,25 @@
           },
           "sponsorsError": {
             "default": "Please select a sponsor",
+            "description": "Error message shown when no sponsor is selected",
             "type": "string"
           },
           "sponsorsFieldLabel": {
             "default": "Sponsors",
+            "description": "Label for the sponsor selection field",
             "type": "string"
           },
           "sv-SE": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Swedish in Sweden"
           },
           "th-TH": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Thai in Thailand"
           },
           "tos": {
             "default": true,
+            "description": "Whether the portal requires Terms of Service acceptance",
             "type": "boolean"
           },
           "tosAcceptLabel": {
@@ -3817,19 +4087,24 @@
             "type": "string"
           },
           "tr-TR": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Turkish in Turkey"
           },
           "uk-UA": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Ukrainian in Ukraine"
           },
           "vi-VN": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Vietnamese in Vietnam"
           },
           "zh-Hans": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Simplified Chinese"
           },
           "zh-Hant": {
-            "$ref": "#/components/schemas/wlan_portal_template_setting_locale"
+            "$ref": "#/components/schemas/wlan_portal_template_setting_locale",
+            "description": "Localized portal template strings for Traditional Chinese"
           }
         },
         "required": [
@@ -3839,6 +4114,7 @@
       },
       "wlan_portal_template_setting_locale": {
         "additionalProperties": false,
+        "description": "Localized portal template strings for a specific language",
         "properties": {
           "authButtonAmazon": {
             "description": "Label for Amazon auth button",
@@ -3877,6 +4153,7 @@
             "type": "string"
           },
           "authLabel": {
+            "description": "Localized heading text displayed above portal authentication options",
             "type": "string"
           },
           "backLink": {
@@ -3888,7 +4165,7 @@
             "type": "string"
           },
           "companyLabel": {
-            "description": "Label of company field",
+            "description": "Localized label displayed for the company input field",
             "type": "string"
           },
           "emailAccessDomainError": {
@@ -3900,21 +4177,27 @@
             "type": "string"
           },
           "emailCodeCancel": {
+            "description": "Localized link text for requesting help when the email access code was not received",
             "type": "string"
           },
           "emailCodeError": {
+            "description": "Localized error message shown when the alternate email address for access-code delivery is invalid",
             "type": "string"
           },
           "emailCodeFieldLabel": {
+            "description": "Localized label for the email access-code input field",
             "type": "string"
           },
           "emailCodeMessage": {
+            "description": "Localized instructional text shown before entering the email access code",
             "type": "string"
           },
           "emailCodeSubmit": {
+            "description": "Localized button label for submitting the email access code",
             "type": "string"
           },
           "emailCodeTitle": {
+            "description": "Localized title shown on the email access-code entry page",
             "type": "string"
           },
           "emailError": {
@@ -3922,13 +4205,15 @@
             "type": "string"
           },
           "emailFieldLabel": {
+            "description": "Localized label for the email address input field",
             "type": "string"
           },
           "emailLabel": {
-            "description": "Label of email field",
+            "description": "Localized label displayed for the email input field",
             "type": "string"
           },
           "emailMessage": {
+            "description": "Localized instructional text explaining email access-code delivery",
             "type": "string"
           },
           "emailSubmit": {
@@ -3944,7 +4229,7 @@
             "type": "string"
           },
           "field1Label": {
-            "description": "Label of field1",
+            "description": "Localized label for custom field 1 input",
             "type": "string"
           },
           "field2Error": {
@@ -3952,7 +4237,7 @@
             "type": "string"
           },
           "field2Label": {
-            "description": "Label of field2",
+            "description": "Localized label for custom field 2 input",
             "type": "string"
           },
           "field3Error": {
@@ -3960,7 +4245,7 @@
             "type": "string"
           },
           "field3Label": {
-            "description": "Label of field3",
+            "description": "Localized label for custom field 3 input",
             "type": "string"
           },
           "field4Error": {
@@ -3968,7 +4253,7 @@
             "type": "string"
           },
           "field4Label": {
-            "description": "Label of field4",
+            "description": "Localized label for custom field 4 input",
             "type": "string"
           },
           "marketingPolicyLink": {
@@ -3984,10 +4269,11 @@
             "type": "string"
           },
           "marketingPolicyOptInText": {
-            "description": "marketing policy text",
+            "description": "Localized text of the marketing policy opt-in content",
             "type": "string"
           },
           "message": {
+            "description": "Localized main message displayed on the guest portal sign-in page",
             "type": "string"
           },
           "nameError": {
@@ -3995,7 +4281,7 @@
             "type": "string"
           },
           "nameLabel": {
-            "description": "Label of name field",
+            "description": "Localized label displayed for the name input field",
             "type": "string"
           },
           "optoutLabel": {
@@ -4003,6 +4289,7 @@
             "type": "string"
           },
           "pageTitle": {
+            "description": "Localized browser or page title shown for the guest portal",
             "type": "string"
           },
           "passphraseCancel": {
@@ -4014,10 +4301,11 @@
             "type": "string"
           },
           "passphraseLabel": {
-            "description": "Passphrase",
+            "description": "Localized label for the passphrase input field",
             "type": "string"
           },
           "passphraseMessage": {
+            "description": "Localized instructional text shown on the passphrase sign-in page",
             "type": "string"
           },
           "passphraseSubmit": {
@@ -4045,7 +4333,7 @@
             "type": "string"
           },
           "requiredFieldLabel": {
-            "description": "Label to denote required field",
+            "description": "Localized text used to mark a form field as required",
             "type": "string"
           },
           "signInLabel": {
@@ -4053,9 +4341,11 @@
             "type": "string"
           },
           "smsCarrierDefault": {
+            "description": "Localized default option text shown in the SMS carrier selector",
             "type": "string"
           },
           "smsCarrierError": {
+            "description": "Localized error message shown when no mobile carrier is selected",
             "type": "string"
           },
           "smsCarrierFieldLabel": {
@@ -4071,9 +4361,11 @@
             "type": "string"
           },
           "smsCodeFieldLabel": {
+            "description": "Localized label for the SMS confirmation-code input field",
             "type": "string"
           },
           "smsCodeMessage": {
+            "description": "Localized instructional text shown before entering the SMS access code",
             "type": "string"
           },
           "smsCodeSubmit": {
@@ -4081,12 +4373,15 @@
             "type": "string"
           },
           "smsCodeTitle": {
+            "description": "Localized title shown on the SMS access-code entry page",
             "type": "string"
           },
           "smsCountryFieldLabel": {
+            "description": "Localized label for the SMS country-code input field",
             "type": "string"
           },
           "smsCountryFormat": {
+            "description": "Localized example country code format shown for SMS authentication",
             "type": "string"
           },
           "smsHaveAccessCode": {
@@ -4102,6 +4397,7 @@
             "type": "string"
           },
           "smsNumberError": {
+            "description": "Localized error message shown when the mobile number is invalid",
             "type": "string"
           },
           "smsNumberFieldLabel": {
@@ -4109,9 +4405,11 @@
             "type": "string"
           },
           "smsNumberFormat": {
+            "description": "Localized example mobile number format shown for SMS authentication",
             "type": "string"
           },
           "smsNumberMessage": {
+            "description": "Localized instructional text explaining SMS access-code delivery",
             "type": "string"
           },
           "smsNumberSubmit": {
@@ -4123,12 +4421,15 @@
             "type": "string"
           },
           "smsUsernameFormat": {
+            "description": "Localized example username format shown for SMS authentication",
             "type": "string"
           },
           "sponsorBackLink": {
+            "description": "Localized link text for returning to edit the sponsor request form",
             "type": "string"
           },
           "sponsorCancel": {
+            "description": "Localized button label for canceling sponsor authentication",
             "type": "string"
           },
           "sponsorEmail": {
@@ -4136,15 +4437,19 @@
             "type": "string"
           },
           "sponsorEmailError": {
+            "description": "Localized error message shown when the sponsor email address is invalid",
             "type": "string"
           },
           "sponsorInfoApproved": {
+            "description": "Localized status message prefix shown when a sponsor approves the request",
             "type": "string"
           },
           "sponsorInfoDenied": {
+            "description": "Localized status message prefix shown when a sponsor denies the request",
             "type": "string"
           },
           "sponsorInfoPending": {
+            "description": "Localized status message prefix shown after a sponsor notification is sent",
             "type": "string"
           },
           "sponsorName": {
@@ -4152,9 +4457,11 @@
             "type": "string"
           },
           "sponsorNameError": {
+            "description": "Localized error message shown when the sponsor name is missing",
             "type": "string"
           },
           "sponsorNotePending": {
+            "description": "Localized additional status text shown while sponsor approval is pending",
             "type": "string"
           },
           "sponsorRequestAccess": {
@@ -4178,9 +4485,11 @@
             "type": "string"
           },
           "sponsorsError": {
+            "description": "Localized error message shown when no sponsor is selected",
             "type": "string"
           },
           "sponsorsFieldLabel": {
+            "description": "Localized label for the sponsor selection field",
             "type": "string"
           },
           "tosAcceptLabel": {
@@ -4204,9 +4513,11 @@
       },
       "wlan_qos": {
         "additionalProperties": false,
+        "description": "QoS override settings for WLAN client traffic",
         "properties": {
           "class": {
-            "$ref": "#/components/schemas/wlan_qos_class"
+            "$ref": "#/components/schemas/wlan_qos_class",
+            "description": "QoS traffic class applied when WLAN QoS override is enabled"
           },
           "overwrite": {
             "default": false,
@@ -4256,15 +4567,18 @@
         "properties": {
           "enabled": {
             "default": false,
+            "description": "Whether the WLAN operating schedule is enabled",
             "type": "boolean"
           },
           "hours": {
-            "$ref": "#/components/schemas/hours"
+            "$ref": "#/components/schemas/hours",
+            "description": "Time ranges when the WLAN is scheduled to operate"
           }
         },
         "type": "object"
       },
       "wlan_vlan_id_with_variable": {
+        "description": "WLAN VLAN ID, either numeric, a variable string, or null",
         "oneOf": [
           {
             "type": "string"
@@ -4280,6 +4594,7 @@
         ]
       },
       "wlan_vlan_ids": {
+        "description": "WLAN VLAN pool IDs represented as either a comma-separated string or a list",
         "oneOf": [
           {
             "$ref": "#/components/schemas/wlan_vlan_ids_string"
@@ -4311,7 +4626,7 @@
         "type": "string"
       },
       "wlan_wxtag_ids": {
-        "description": "List of wxtag_ids",
+        "description": "Identifiers of WxLAN tags used when `apply_to`==`wxtags`",
         "items": {
           "format": "uuid",
           "type": "string"
@@ -4322,6 +4637,7 @@
         ]
       },
       "wlans": {
+        "description": "WLAN records returned by a list response",
         "items": {
           "$ref": "#/components/schemas/wlan"
         },
@@ -4515,9 +4831,9 @@
     },
     "parameters": {
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -4537,9 +4853,9 @@
         }
       },
       "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
         "in": "query",
         "name": "page",
-        "required": false,
         "schema": {
           "default": 1,
           "minimum": 1,
@@ -4748,19 +5064,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

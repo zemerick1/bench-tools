@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sites RRM",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -73,6 +69,58 @@
     }
   ],
   "paths": {
+    "/api/v1/sites/{site_id}/rrm/channel_scores/band/{band}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "description": "802.11 Band",
+          "in": "path",
+          "name": "band",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/dot11_band"
+          }
+        }
+      ],
+      "get": {
+        "description": "Get Site Channel Scores",
+        "operationId": "getSiteChannelScores",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/start"
+          },
+          {
+            "$ref": "#/components/parameters/end"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ChannelScores"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getSiteChannelScores",
+        "tags": [
+          "Sites RRM"
+        ]
+      }
+    },
     "/api/v1/sites/{site_id}/rrm/current": {
       "parameters": [
         {
@@ -272,11 +320,15 @@
         "type": "number"
       },
       "dot11_band": {
-        "description": "enum: `24`, `5`, `6`",
+        "description": "enum: `24`, `5`, `5-dedicated`, `5-selectable`, `6`, `6-dedicated`, `6-selectable`",
         "enum": [
           "24",
           "5",
-          "6"
+          "5-dedicated",
+          "5-selectable",
+          "6",
+          "6-dedicated",
+          "6-selectable"
         ],
         "type": "string"
       },
@@ -352,6 +404,7 @@
         "type": "number"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -407,21 +460,26 @@
       },
       "response_events_rrm": {
         "additionalProperties": false,
+        "description": "Paginated response for RRM event results",
         "properties": {
           "end": {
+            "description": "Epoch timestamp for the end of the RRM event search window",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of RRM event records returned in this page",
             "type": "integer"
           },
           "next": {
-            "description": "Link to query next set of results. value is null if no next page exists.",
+            "description": "Pagination cursor or URL for retrieving the next page of RRM event records; null when no next page exists",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/response_events_rrm_results"
+            "$ref": "#/components/schemas/response_events_rrm_results",
+            "description": "RRM event records matching the search filters"
           },
           "start": {
+            "description": "Epoch timestamp for the start of the RRM event search window",
             "type": "integer"
           }
         },
@@ -434,6 +492,7 @@
         "type": "object"
       },
       "response_events_rrm_results": {
+        "description": "RRM event records returned by a search response",
         "items": {
           "$ref": "#/components/schemas/rrm_event"
         },
@@ -442,8 +501,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -454,8 +515,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -466,8 +529,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -478,8 +543,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -487,8 +554,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -497,11 +566,35 @@
         },
         "type": "object"
       },
-      "response_rrm_consideration": {
+      "response_rrm_channel_scores": {
         "additionalProperties": false,
+        "description": "Response containing RRM channel score records",
         "properties": {
           "results": {
-            "$ref": "#/components/schemas/response_rrm_consideration_results"
+            "$ref": "#/components/schemas/response_rrm_channel_scores_results",
+            "description": "Per-channel RRM score records for the requested band"
+          }
+        },
+        "required": [
+          "results"
+        ],
+        "type": "object"
+      },
+      "response_rrm_channel_scores_results": {
+        "description": "RRM channel score records returned for a band",
+        "items": {
+          "$ref": "#/components/schemas/rrm_channel_score"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "response_rrm_consideration": {
+        "additionalProperties": false,
+        "description": "Response containing current RRM considerations for an AP radio band",
+        "properties": {
+          "results": {
+            "$ref": "#/components/schemas/response_rrm_consideration_results",
+            "description": "Channel consideration metrics used by RRM for the AP radio band"
           }
         },
         "required": [
@@ -510,6 +603,7 @@
         "type": "object"
       },
       "response_rrm_consideration_results": {
+        "description": "RRM channel consideration records returned for an AP radio band",
         "items": {
           "$ref": "#/components/schemas/rrm_consideration"
         },
@@ -518,11 +612,14 @@
       },
       "response_rrm_neighbors": {
         "additionalProperties": false,
+        "description": "Paginated response for current RRM neighbor observations",
         "properties": {
           "end": {
+            "description": "Epoch timestamp, in seconds, for the end of the RRM neighbor observation window",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of RRM neighbor records returned in this page",
             "type": "integer"
           },
           "next": {
@@ -530,9 +627,11 @@
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/response_rrm_neighbors_results"
+            "$ref": "#/components/schemas/response_rrm_neighbors_results",
+            "description": "RRM neighbor records observed for the requested site and band"
           },
           "start": {
+            "description": "Epoch timestamp, in seconds, for the start of the RRM neighbor observation window",
             "type": "integer"
           }
         },
@@ -545,6 +644,7 @@
         "type": "object"
       },
       "response_rrm_neighbors_results": {
+        "description": "RRM neighbor records returned for the requested site and band",
         "items": {
           "$ref": "#/components/schemas/rrm_neighbors"
         },
@@ -552,45 +652,61 @@
         "uniqueItems": true
       },
       "rf_template": {
-        "description": "RF Template",
+        "description": "RF template used by the current RRM calculation",
         "properties": {
           "ant_gain_24": {
+            "description": "External antenna gain for the 2.4 GHz radio",
             "type": "integer"
           },
           "ant_gain_5": {
+            "description": "External antenna gain for the 5 GHz radio",
             "type": "integer"
           },
           "ant_gain_6": {
+            "description": "External antenna gain for the 6 GHz radio",
             "type": "integer"
           },
           "band_24": {
-            "$ref": "#/components/schemas/rftemplate_radio_band24"
+            "$ref": "#/components/schemas/rftemplate_radio_band24",
+            "description": "2.4 GHz radio settings in this RF template"
           },
           "band_24_usage": {
-            "$ref": "#/components/schemas/radio_band_24_usage"
+            "$ref": "#/components/schemas/radio_band_24_usage",
+            "description": "Radio usage mode for the 2.4 GHz-capable radio in this RF template"
           },
           "band_5": {
-            "$ref": "#/components/schemas/rftemplate_radio_band5"
+            "$ref": "#/components/schemas/rftemplate_radio_band5",
+            "description": "5 GHz radio settings in this RF template"
           },
           "band_5_on_24_radio": {
-            "$ref": "#/components/schemas/rftemplate_radio_band5"
+            "$ref": "#/components/schemas/rftemplate_radio_band5",
+            "description": "5 GHz settings used when the 2.4 GHz radio operates in 5 GHz mode"
           },
           "band_6": {
-            "$ref": "#/components/schemas/rftemplate_radio_band6"
+            "$ref": "#/components/schemas/rftemplate_radio_band6",
+            "description": "6 GHz radio settings in this RF template"
           },
           "country_code": {
             "description": "Optional, country code to use. If specified, this gets applied to all sites using the RF Template",
             "type": "string"
           },
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Timestamp when the RF template was created"
+          },
+          "enable_unii_4": {
+            "default": false,
+            "description": "Whether U-NII-4 channels (169, 173, 177) are enabled",
+            "type": "boolean"
           },
           "for_site": {
+            "description": "Whether the RF template is scoped to a site rather than the organization",
             "readOnly": true,
             "type": "boolean"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the RF template"
           },
           "model_specific": {
             "additionalProperties": {
@@ -600,14 +716,16 @@
             "type": "object"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Timestamp when the RF template was last modified"
           },
           "name": {
             "description": "The name of the RF template",
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization that owns this RF template"
           },
           "scanning_enabled": {
             "description": "Whether scanning radio is enabled",
@@ -621,33 +739,42 @@
       },
       "rf_template_model_specific_property": {
         "additionalProperties": false,
+        "description": "AP model-specific RF overrides for an RF template",
         "properties": {
           "ant_gain_24": {
             "default": 0,
+            "description": "Model-specific external antenna gain for the 2.4 GHz radio",
             "type": "integer"
           },
           "ant_gain_5": {
             "default": 0,
+            "description": "Model-specific external antenna gain for the 5 GHz radio",
             "type": "integer"
           },
           "ant_gain_6": {
             "default": 0,
+            "description": "Model-specific external antenna gain for the 6 GHz radio",
             "type": "integer"
           },
           "band_24": {
-            "$ref": "#/components/schemas/rftemplate_radio_band24"
+            "$ref": "#/components/schemas/rftemplate_radio_band24",
+            "description": "Model-specific 2.4 GHz radio settings that override RF template defaults"
           },
           "band_24_usage": {
-            "$ref": "#/components/schemas/radio_band_24_usage"
+            "$ref": "#/components/schemas/radio_band_24_usage",
+            "description": "Model-specific radio usage mode for the 2.4 GHz-capable radio"
           },
           "band_5": {
-            "$ref": "#/components/schemas/rftemplate_radio_band5"
+            "$ref": "#/components/schemas/rftemplate_radio_band5",
+            "description": "Model-specific 5 GHz radio settings that override RF template defaults"
           },
           "band_5_on_24_radio": {
-            "$ref": "#/components/schemas/rftemplate_radio_band5"
+            "$ref": "#/components/schemas/rftemplate_radio_band5",
+            "description": "Model-specific 5 GHz settings used when the 2.4 GHz radio operates in 5 GHz mode"
           },
           "band_6": {
-            "$ref": "#/components/schemas/rftemplate_radio_band6"
+            "$ref": "#/components/schemas/rftemplate_radio_band6",
+            "description": "Model-specific 6 GHz radio settings that override RF template defaults"
           }
         },
         "type": "object"
@@ -658,10 +785,12 @@
         "properties": {
           "allow_rrm_disable": {
             "default": false,
+            "description": "Whether RRM may disable the 2.4 GHz radio when optimizing RF settings",
             "type": "boolean"
           },
           "ant_gain": {
             "default": 0,
+            "description": "External antenna gain for the 2.4 GHz radio",
             "maximum": 10,
             "minimum": 0,
             "type": [
@@ -670,13 +799,16 @@
             ]
           },
           "antenna_mode": {
-            "$ref": "#/components/schemas/radio_band_antenna_mode"
+            "$ref": "#/components/schemas/radio_band_antenna_mode",
+            "description": "Radio chain mode for the 2.4 GHz radio"
           },
           "bandwidth": {
-            "$ref": "#/components/schemas/dot11_bandwidth24"
+            "$ref": "#/components/schemas/dot11_bandwidth24",
+            "description": "Channel width configured for the 2.4 GHz radio"
           },
           "channels": {
-            "$ref": "#/components/schemas/radio_band_channels"
+            "$ref": "#/components/schemas/radio_band_channels",
+            "description": "Allowed channel list for the 2.4 GHz radio; null or an empty array uses automatic selection"
           },
           "disabled": {
             "default": false,
@@ -685,20 +817,19 @@
           },
           "power": {
             "default": null,
-            "description": "tx power of the radio, null or 0 means auto, when power_min=power_max=power=0 to indicate power=0",
+            "description": "Radio Tx power, in dBm. Can be an integer 0-25 for static power configuration, or `null` or unset for auto power mode",
             "examples": [
               3
             ],
             "maximum": 25,
-            "minimum": 3,
+            "minimum": 0,
             "type": [
               "integer",
               "null"
             ]
           },
           "power_max": {
-            "default": 17,
-            "description": "When power=0, max tx power to use, HW-specific values will be used if not set",
+            "description": "When power=null/unset, max tx power to use, HW-specific values will be used if not set",
             "maximum": 18,
             "minimum": 3,
             "type": [
@@ -707,8 +838,7 @@
             ]
           },
           "power_min": {
-            "default": 8,
-            "description": "When power=0, min tx power to use, HW-specific values will be used if not set",
+            "description": "When power=null/unset, min tx power to use, HW-specific values will be used if not set",
             "maximum": 18,
             "minimum": 3,
             "type": [
@@ -717,7 +847,8 @@
             ]
           },
           "preamble": {
-            "$ref": "#/components/schemas/radio_band_preamble"
+            "$ref": "#/components/schemas/radio_band_preamble",
+            "description": "802.11 preamble mode used by the 2.4 GHz radio"
           }
         },
         "type": "object"
@@ -728,10 +859,12 @@
         "properties": {
           "allow_rrm_disable": {
             "default": false,
+            "description": "Whether RRM may disable the 5 GHz radio when optimizing RF settings",
             "type": "boolean"
           },
           "ant_gain": {
             "default": 0,
+            "description": "External antenna gain for the 5 GHz radio",
             "maximum": 10,
             "minimum": 0,
             "type": [
@@ -740,13 +873,16 @@
             ]
           },
           "antenna_mode": {
-            "$ref": "#/components/schemas/radio_band_antenna_mode"
+            "$ref": "#/components/schemas/radio_band_antenna_mode",
+            "description": "Radio chain mode for the 5 GHz radio"
           },
           "bandwidth": {
-            "$ref": "#/components/schemas/dot11_bandwidth5"
+            "$ref": "#/components/schemas/dot11_bandwidth5",
+            "description": "Channel width configured for the 5 GHz radio"
           },
           "channels": {
-            "$ref": "#/components/schemas/radio_band_channels"
+            "$ref": "#/components/schemas/radio_band_channels",
+            "description": "Allowed channel list for the 5 GHz radio; null or an empty array uses automatic selection"
           },
           "disabled": {
             "default": false,
@@ -755,20 +891,19 @@
           },
           "power": {
             "default": null,
-            "description": "Tx power of the radio. For Devices, 0 means auto. -1 / -2 / -3 / …: treated as 0 / -1 / -2 / …",
+            "description": "Radio Tx power, in dBm. Can be an integer 0-25 for static power configuration, or `null` or unset for auto power mode",
             "examples": [
               6
             ],
             "maximum": 25,
-            "minimum": 5,
+            "minimum": 0,
             "type": [
               "integer",
               "null"
             ]
           },
           "power_max": {
-            "default": 17,
-            "description": "When power=0, max tx power to use, HW-specific values will be used if not set",
+            "description": "When power=null/unset, max tx power to use, HW-specific values will be used if not set",
             "maximum": 17,
             "minimum": 5,
             "type": [
@@ -777,8 +912,7 @@
             ]
           },
           "power_min": {
-            "default": 8,
-            "description": "When power=0, min tx power to use, HW-specific values will be used if not set",
+            "description": "When power=null/unset, min tx power to use, HW-specific values will be used if not set",
             "maximum": 17,
             "minimum": 5,
             "type": [
@@ -787,7 +921,8 @@
             ]
           },
           "preamble": {
-            "$ref": "#/components/schemas/radio_band_preamble"
+            "$ref": "#/components/schemas/radio_band_preamble",
+            "description": "802.11 preamble mode used by the 5 GHz radio"
           }
         },
         "type": "object"
@@ -798,10 +933,12 @@
         "properties": {
           "allow_rrm_disable": {
             "default": false,
+            "description": "Whether RRM may disable the 6 GHz radio when optimizing RF settings",
             "type": "boolean"
           },
           "ant_gain": {
             "default": 0,
+            "description": "External antenna gain for the 6 GHz radio",
             "maximum": 10,
             "minimum": 0,
             "type": [
@@ -810,13 +947,16 @@
             ]
           },
           "antenna_mode": {
-            "$ref": "#/components/schemas/radio_band_antenna_mode"
+            "$ref": "#/components/schemas/radio_band_antenna_mode",
+            "description": "Radio chain mode for the 6 GHz radio"
           },
           "bandwidth": {
-            "$ref": "#/components/schemas/dot11_bandwidth6"
+            "$ref": "#/components/schemas/dot11_bandwidth6",
+            "description": "Channel width configured for the 6 GHz radio"
           },
           "channels": {
-            "$ref": "#/components/schemas/radio_band_channels"
+            "$ref": "#/components/schemas/radio_band_channels",
+            "description": "Allowed channel list for the 6 GHz radio; null or an empty array uses automatic selection"
           },
           "disabled": {
             "default": false,
@@ -825,21 +965,20 @@
           },
           "power": {
             "default": null,
-            "description": "Tx power of the radio. For Devices, 0 means auto. -1 / -2 / -3 / …: treated as 0 / -1 / -2 / …",
+            "description": "Radio Tx power, in dBm. Can be an integer 0-25 for static power configuration, or `null` or unset for auto power mode",
             "examples": [
               7
             ],
             "maximum": 25,
-            "minimum": 5,
+            "minimum": 0,
             "type": [
               "integer",
               "null"
             ]
           },
           "power_max": {
-            "default": 18,
-            "description": "When power=0, max tx power to use, HW-specific values will be used if not set",
-            "maximum": 18,
+            "description": "When power=null/unset, max tx power to use, HW-specific values will be used if not set",
+            "maximum": 17,
             "minimum": 5,
             "type": [
               "integer",
@@ -847,8 +986,7 @@
             ]
           },
           "power_min": {
-            "default": 8,
-            "description": "When power=0, min tx power to use, HW-specific values will be used if not set",
+            "description": "When power=null/unset, min tx power to use, HW-specific values will be used if not set",
             "maximum": 18,
             "minimum": 5,
             "type": [
@@ -857,7 +995,8 @@
             ]
           },
           "preamble": {
-            "$ref": "#/components/schemas/radio_band_preamble"
+            "$ref": "#/components/schemas/radio_band_preamble",
+            "description": "802.11 preamble mode used by the 6 GHz radio"
           },
           "standard_power": {
             "default": false,
@@ -869,53 +1008,61 @@
       },
       "rrm": {
         "additionalProperties": false,
-        "description": "RRM",
+        "description": "Current RRM channel-planning state for a site",
         "properties": {
           "band_24": {
             "additionalProperties": {
               "$ref": "#/components/schemas/rrm_band"
             },
-            "description": "proposal on band 2.4G, key is ap_id, value is the proposal",
+            "description": "RRM proposed channel, power, and usage settings for 2.4 GHz radios; property key is AP ID",
             "type": "object"
           },
           "band_24_metric": {
-            "$ref": "#/components/schemas/rrm_band_metric"
+            "$ref": "#/components/schemas/rrm_band_metric",
+            "description": "Aggregate RRM metrics for the 2.4 GHz band"
           },
           "band_5": {
             "additionalProperties": {
               "$ref": "#/components/schemas/rrm_band"
             },
-            "description": "proposal on band 5G, key is ap_id, value is the proposal",
+            "description": "RRM proposed channel, power, and usage settings for 5 GHz radios; property key is AP ID",
             "type": "object"
           },
           "band_5_metric": {
-            "$ref": "#/components/schemas/rrm_band_metric"
+            "$ref": "#/components/schemas/rrm_band_metric",
+            "description": "Aggregate RRM metrics for the 5 GHz band"
           },
           "band_6": {
             "additionalProperties": {
               "$ref": "#/components/schemas/rrm_band"
             },
-            "description": "proposal on band 6G, key is ap_id, value is the proposal",
+            "description": "RRM proposed channel, power, and usage settings for 6 GHz radios; property key is AP ID",
             "type": "object"
           },
           "band_6_metric": {
-            "$ref": "#/components/schemas/rrm_band_metric"
+            "$ref": "#/components/schemas/rrm_band_metric",
+            "description": "Aggregate RRM metrics for the 6 GHz band"
           },
           "rftemplate": {
-            "$ref": "#/components/schemas/rf_template"
+            "$ref": "#/components/schemas/rf_template",
+            "description": "RF template used by the current RRM calculation"
           },
           "rftemplate_id": {
+            "description": "RF template identifier used by the current RRM calculation",
             "format": "uuid",
             "type": "string"
           },
           "rftemplate_name": {
+            "description": "RF template name used by the current RRM calculation",
             "type": "string"
           },
           "status": {
-            "$ref": "#/components/schemas/rrm_status"
+            "$ref": "#/components/schemas/rrm_status",
+            "description": "Current RRM calculation status"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Time when the current RRM data was generated"
           }
         },
         "required": [
@@ -933,36 +1080,39 @@
       },
       "rrm_band": {
         "additionalProperties": false,
+        "description": "RRM proposed and current radio settings for an AP band",
         "properties": {
           "bandwidth": {
-            "$ref": "#/components/schemas/dot11_bandwidth"
+            "$ref": "#/components/schemas/dot11_bandwidth",
+            "description": "Proposed channel width for the radio band, in MHz"
           },
           "channel": {
-            "description": "proposed channel",
+            "description": "Proposed RF channel for the radio band",
             "type": "integer"
           },
           "curr_bandwidth": {
-            "$ref": "#/components/schemas/dot11_bandwidth"
+            "$ref": "#/components/schemas/dot11_bandwidth",
+            "description": "Current channel width for the radio band, in MHz"
           },
           "curr_channel": {
-            "description": "Current channel",
+            "description": "Current RF channel for the radio band",
             "type": "integer"
           },
           "curr_power": {
-            "description": "Current tx power",
+            "description": "Current transmit power for the radio band",
             "type": "integer"
           },
           "curr_usage": {
-            "description": "Current radio band",
+            "description": "Current radio usage band for the AP radio",
             "minLength": 1,
             "type": "string"
           },
           "power": {
-            "description": "proposed tx power",
+            "description": "Proposed transmit power for the radio band",
             "type": "integer"
           },
           "usage": {
-            "description": "proposed radio band",
+            "description": "Proposed radio usage band for the AP radio",
             "minLength": 1,
             "type": "string"
           }
@@ -971,6 +1121,7 @@
       },
       "rrm_band_metric": {
         "additionalProperties": false,
+        "description": "Aggregate RRM metrics for a radio band",
         "properties": {
           "avg_aps_per_channel": {
             "description": "Average number of APs per channel",
@@ -1008,10 +1159,12 @@
             "type": "object"
           },
           "naps_by_channel": {
-            "$ref": "#/components/schemas/rrm_band_metric_naps_by_channel"
+            "$ref": "#/components/schemas/rrm_band_metric_naps_by_channel",
+            "description": "Number of APs grouped by channel for this band"
           },
           "naps_by_power": {
-            "$ref": "#/components/schemas/rrm_band_metric_naps_by_power"
+            "$ref": "#/components/schemas/rrm_band_metric_naps_by_power",
+            "description": "Number of APs grouped by transmit power for this band"
           },
           "neighbors": {
             "description": "Average number of neighbors",
@@ -1032,8 +1185,10 @@
       },
       "rrm_band_metric_interference": {
         "additionalProperties": false,
+        "description": "Interference metrics observed for one channel",
         "properties": {
           "radar": {
+            "description": "Interference value attributed to radar on the channel",
             "type": "number"
           }
         },
@@ -1053,13 +1208,65 @@
         "description": "Property key is the power level, value is number of APs on that power level",
         "type": "object"
       },
-      "rrm_consideration": {
+      "rrm_channel_score": {
         "additionalProperties": false,
+        "description": "RRM utilization score for a channel",
         "properties": {
           "channel": {
+            "description": "RF channel number represented by this score record",
+            "type": "integer"
+          },
+          "util_score": {
+            "description": "Utilization score for the channel, 0-1, lower means cleaner RF",
+            "type": "number"
+          },
+          "util_score_noise_floor": {
+            "description": "Score contribution from noise, 0-1, lower means cleaner RF",
+            "type": "number"
+          },
+          "util_score_non_wifi": {
+            "description": "Score contribution from non-wifi utilization, 0-1, lower means cleaner RF",
+            "type": "number"
+          },
+          "util_score_other": {
+            "description": "Score contribution from RxOtherBss utilization (wifi packets destined for other radios), 0-1, lower means cleaner RF",
+            "type": "number"
+          },
+          "util_score_radar": {
+            "description": "Score contribution from radar detections, 0-1, lower means cleaner RF",
+            "type": "number"
+          },
+          "util_score_undecodable_wifi": {
+            "description": "Score contribution from undecodable wifi utilization (wifi packets which can't be decoded), 0-1, lower means cleaner RF",
+            "type": "number"
+          },
+          "util_score_unknown_wifi": {
+            "description": "Score contribution from unknown wifi utilization (wifi packets of unknown type), 0-1, lower means cleaner RF",
+            "type": "number"
+          }
+        },
+        "required": [
+          "channel",
+          "util_score",
+          "util_score_noise_floor",
+          "util_score_non_wifi",
+          "util_score_other",
+          "util_score_radar",
+          "util_score_undecodable_wifi",
+          "util_score_unknown_wifi"
+        ],
+        "type": "object"
+      },
+      "rrm_consideration": {
+        "additionalProperties": false,
+        "description": "RRM consideration metrics for one candidate channel",
+        "properties": {
+          "channel": {
+            "description": "Candidate RF channel evaluated by RRM",
             "type": "integer"
           },
           "noise": {
+            "description": "Observed noise floor for the candidate channel, in dBm",
             "type": "number"
           },
           "other_rssi": {
@@ -1098,51 +1305,62 @@
       },
       "rrm_event": {
         "additionalProperties": false,
+        "description": "RRM event record for radio setting changes or RF conditions",
         "properties": {
-          "ap_id": {
-            "format": "uuid",
+          "ap": {
+            "description": "MAC address of the AP associated with the RRM event",
+            "examples": [
+              "5c5b350e0001"
+            ],
             "type": "string"
           },
           "band": {
-            "$ref": "#/components/schemas/dot11_band"
+            "$ref": "#/components/schemas/dot11_band",
+            "description": "Radio band affected by the RRM event"
           },
           "bandwidth": {
-            "$ref": "#/components/schemas/dot11_bandwidth"
+            "$ref": "#/components/schemas/dot11_bandwidth",
+            "description": "Channel width after the RRM event, in MHz"
           },
           "channel": {
-            "description": "Channel for the band from rrm",
+            "description": "RF channel after the RRM event",
             "type": "integer"
           },
           "event": {
-            "$ref": "#/components/schemas/rrm_event_type"
+            "$ref": "#/components/schemas/rrm_event_type",
+            "description": "RRM event type that caused or records the change"
           },
           "power": {
-            "description": "Tx power of the radio",
+            "description": "Transmit power after the RRM event",
             "type": "integer"
           },
           "pre_bandwidth": {
-            "$ref": "#/components/schemas/rrm_event_pre_bandwidth"
+            "$ref": "#/components/schemas/rrm_event_pre_bandwidth",
+            "description": "Channel width before the RRM event, in MHz"
           },
           "pre_channel": {
-            "description": "(previously) channel for the band, 0 means no previously available",
+            "description": "RF channel before the RRM event; 0 means no previous value was available",
             "type": "integer"
           },
           "pre_power": {
-            "description": "(previously) tx power of the radio, 0 means no previously available",
+            "description": "Transmit power before the RRM event; 0 means no previous value was available",
             "type": "number"
           },
           "pre_usage": {
+            "description": "Radio usage band before the RRM event",
             "type": "string"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Time when the RRM event occurred"
           },
           "usage": {
+            "description": "Radio usage band after the RRM event",
             "type": "string"
           }
         },
         "required": [
-          "ap_id",
+          "ap",
           "band",
           "bandwidth",
           "channel",
@@ -1184,29 +1402,35 @@
       },
       "rrm_neighbors": {
         "additionalProperties": false,
+        "description": "RRM neighbor observations for one AP",
         "properties": {
           "mac": {
+            "description": "AP MAC address whose neighbors are reported",
             "examples": [
               "5c5b35000001"
             ],
             "type": "string"
           },
           "neighbors": {
-            "$ref": "#/components/schemas/rrm_neighbors_neighbors"
+            "$ref": "#/components/schemas/rrm_neighbors_neighbors",
+            "description": "Neighbor AP observations heard by this AP"
           }
         },
         "type": "object"
       },
       "rrm_neighbors_neighbor": {
         "additionalProperties": false,
+        "description": "Neighbor AP observed by RRM",
         "properties": {
           "mac": {
+            "description": "Neighbor AP MAC address observed by RRM",
             "examples": [
               "5c5b35000311"
             ],
             "type": "string"
           },
           "rssi": {
+            "description": "Observed RSSI for the neighbor AP, in dBm",
             "examples": [
               -66
             ],
@@ -1216,6 +1440,7 @@
         "type": "object"
       },
       "rrm_neighbors_neighbors": {
+        "description": "Neighbor AP observations heard by an AP",
         "items": {
           "$ref": "#/components/schemas/rrm_neighbors_neighbor"
         },
@@ -1231,13 +1456,38 @@
         "type": "string"
       },
       "timestamp": {
-        "description": "Epoch (seconds)",
+        "description": "Epoch timestamp, in seconds",
         "format": "double",
         "readOnly": true,
         "type": "number"
       }
     },
     "responses": {
+      "ChannelScores": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/ChannelScoresExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_rrm_channel_scores"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/ChannelScoresExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_rrm_channel_scores"
+            }
+          }
+        },
+        "description": "OK"
+      },
       "HTTP400": {
         "content": {
           "application/json": {
@@ -1468,7 +1718,7 @@
         }
       },
       "dot11_band": {
-        "description": "802.11 Band",
+        "description": "802.11 band used to filter radio results. enum: `24`, `5`, `5-dedicated`, `5-selectable`, `6`, `6-dedicated`, `6-selectable`",
         "in": "query",
         "name": "band",
         "schema": {
@@ -1476,10 +1726,9 @@
         }
       },
       "duration": {
-        "description": "Duration like 7d, 2w",
+        "description": "Time range duration for the query, using relative units such as `10m`, `7d`, or `2w`",
         "in": "query",
         "name": "duration",
-        "required": false,
         "schema": {
           "default": "1d",
           "examples": [
@@ -1489,7 +1738,7 @@
         }
       },
       "end": {
-        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
         "in": "query",
         "name": "end",
         "schema": {
@@ -1497,9 +1746,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -1507,9 +1756,9 @@
         }
       },
       "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
         "in": "query",
         "name": "page",
-        "required": false,
         "schema": {
           "default": 1,
           "minimum": 1,
@@ -1529,7 +1778,7 @@
         }
       },
       "start": {
-        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
         "in": "query",
         "name": "start",
         "schema": {
@@ -1538,6 +1787,22 @@
       }
     },
     "examples": {
+      "ChannelScoresExample": {
+        "value": {
+          "results": [
+            {
+              "channel": 36,
+              "util_score": 0.009,
+              "util_score_noise_floor": 0.001,
+              "util_score_non_wifi": 0.003,
+              "util_score_other": 0.002,
+              "util_score_radar": 0.0,
+              "util_score_undecodable_wifi": 0.004,
+              "util_score_unknown_wifi": 0.0
+            }
+          ]
+        }
+      },
       "HTTP400Example": {
         "value": {
           "detail": "JSON parse error - Expecting value: line 5 column 8 (char 56)"
@@ -1581,7 +1846,7 @@
           "next": "/api/v1/sites/dca0a44b-324c-11e6-a776-0243ad110007/events/rrm?start=1428939600&end=1428949600&limit=200&token=001a0010000000120010000005005880ec18000004776c616e007fffffeb067ab8e29c1d659b6a7c8cf698bf81490003",
           "results": [
             {
-              "ap_id": "00000000-0000-0000-1000-5c5b359e4fe0",
+              "ap": "5c5b359e4fe0",
               "band": "24",
               "bandwidth": 20,
               "channel": 6,
@@ -1741,19 +2006,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

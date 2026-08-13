@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Devices",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "get": {
-        "description": "Get List of Org Devices",
+        "description": "List devices in the organization, including APs, switches and gateways managed or monitored by Mist.",
         "operationId": "listOrgDevices",
         "responses": {
           "200": {
@@ -115,10 +111,11 @@
         }
       ],
       "get": {
-        "description": "Count by Distinct Attributes of Org Devices",
+        "description": "Count organization device records, optionally grouped by `distinct` and filtered by device identifiers, model, LLDP attributes, Mist Edge, tunnel status, device type, and time range.",
         "operationId": "countOrgDevices",
         "parameters": [
           {
+            "description": "Field used to group this count response. enum: `hostname`, `ip`, `lldp_mgmt_addr`, `lldp_port_id`, `lldp_system_desc`, `lldp_system_name`, `mac`, `model`, `mxedge_id`, `mxtunnel_status`, `site_id`, `version`",
             "in": "query",
             "name": "distinct",
             "schema": {
@@ -137,7 +134,7 @@
             }
           },
           {
-            "description": "Site id",
+            "description": "Filter results by site identifier",
             "in": "query",
             "name": "site_id",
             "schema": {
@@ -149,11 +146,12 @@
             }
           },
           {
-            "description": "Device model",
+            "description": "Filter results by device model. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "model",
             "schema": {
               "examples": [
+                "AP45,AP47D",
                 "MR84"
               ],
               "type": "string"
@@ -172,7 +170,7 @@
             }
           },
           {
-            "description": "AP mac",
+            "description": "Filter results by MAC address",
             "in": "query",
             "name": "mac",
             "schema": {
@@ -183,7 +181,7 @@
             }
           },
           {
-            "description": "Version",
+            "description": "Filter results by software version",
             "in": "query",
             "name": "version",
             "schema": {
@@ -217,7 +215,7 @@
             }
           },
           {
-            "description": "LLDP system name",
+            "description": "Filter results by LLDP system name",
             "in": "query",
             "name": "lldp_system_name",
             "schema": {
@@ -228,7 +226,7 @@
             }
           },
           {
-            "description": "LLDP system description",
+            "description": "Filter results by LLDP system description",
             "in": "query",
             "name": "lldp_system_desc",
             "schema": {
@@ -239,7 +237,7 @@
             }
           },
           {
-            "description": "LLDP port id",
+            "description": "Filter results by LLDP port identifier",
             "in": "query",
             "name": "lldp_port_id",
             "schema": {
@@ -250,7 +248,7 @@
             }
           },
           {
-            "description": "LLDP management ip address",
+            "description": "LLDP management IP address",
             "in": "query",
             "name": "lldp_mgmt_addr",
             "schema": {
@@ -261,6 +259,7 @@
             }
           },
           {
+            "description": "Filter results by type. enum: `ap`, `gateway`, `switch`",
             "in": "query",
             "name": "type",
             "schema": {
@@ -313,10 +312,11 @@
         }
       ],
       "get": {
-        "description": "Count by Distinct Attributes of Org Devices Events",
+        "description": "Count device event records across the organization, optionally grouped by `distinct` and filtered by site, AP, firmware, model, event text, event type, and time range.",
         "operationId": "countOrgDeviceEvents",
         "parameters": [
           {
+            "description": "Field used to group this count response. enum: `ap`, `apfw`, `model`, `org_id`, `site_id`, `status`, `text`, `timestamp`, `type`",
             "in": "query",
             "name": "distinct",
             "schema": {
@@ -324,7 +324,7 @@
             }
           },
           {
-            "description": "Site id",
+            "description": "Filter results by site identifier",
             "in": "query",
             "name": "site_id",
             "schema": {
@@ -336,7 +336,7 @@
             }
           },
           {
-            "description": "AP mac",
+            "description": "Filter results by AP MAC address",
             "in": "query",
             "name": "ap",
             "schema": {
@@ -347,7 +347,7 @@
             }
           },
           {
-            "description": "AP Firmware",
+            "description": "Filter results by AP firmware version",
             "in": "query",
             "name": "apfw",
             "schema": {
@@ -358,7 +358,7 @@
             }
           },
           {
-            "description": "Device model",
+            "description": "Filter results by device model",
             "in": "query",
             "name": "model",
             "schema": {
@@ -369,7 +369,7 @@
             }
           },
           {
-            "description": "Event message",
+            "description": "Filter results by event message text",
             "in": "query",
             "name": "text",
             "schema": {
@@ -380,18 +380,18 @@
             }
           },
           {
-            "description": "Event time",
+            "$ref": "#/components/parameters/device_event_type"
+          },
+          {
+            "description": "Keyword to include events from additional indices (e.g. ext_tunnel for ext tunnel events)",
             "in": "query",
-            "name": "timestamp",
+            "name": "includes",
             "schema": {
               "examples": [
-                "1703003296"
+                "ext_tunnel"
               ],
               "type": "string"
             }
-          },
-          {
-            "$ref": "#/components/parameters/device_event_type"
           },
           {
             "$ref": "#/components/parameters/start"
@@ -439,32 +439,36 @@
         }
       ],
       "get": {
-        "description": "Search Org Devices Events",
+        "description": "Search device event records across the organization with filters for MAC address, model, device type, event text, event type, additional event indices, and time range.",
         "operationId": "searchOrgDeviceEvents",
         "parameters": [
           {
-            "description": "Device mac",
+            "description": "Filter results by MAC address. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "mac",
             "schema": {
               "examples": [
+                "5c5b53010101,5c5b53020202",
                 "5c5b53010101"
               ],
               "type": "string"
             }
           },
           {
-            "description": "Device model",
+            "description": "Filter results by device model. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "model",
             "schema": {
               "examples": [
+                "EX4100-48MP,AP17",
                 "AP43"
               ],
               "type": "string"
             }
           },
           {
+            "description": "Filter results by device type. Accepts multiple comma-separated values.",
+            "example": "switch,ap",
             "in": "query",
             "name": "device_type",
             "schema": {
@@ -472,7 +476,7 @@
             }
           },
           {
-            "description": "Event message",
+            "description": "Filter results by event message text",
             "in": "query",
             "name": "text",
             "schema": {
@@ -483,18 +487,15 @@
             }
           },
           {
-            "description": "Event time",
+            "description": "See [List Device Events Definitions](/#operations/listDeviceEventsDefinitions). Accepts multiple comma-separated values.",
             "in": "query",
-            "name": "timestamp",
+            "name": "type",
             "schema": {
               "examples": [
-                "1703003296"
+                "SW_PORT_DOWN,AP_CONFIGURED"
               ],
               "type": "string"
             }
-          },
-          {
-            "$ref": "#/components/parameters/device_event_type"
           },
           {
             "description": "Return last/recent event for passed in field",
@@ -508,7 +509,7 @@
             }
           },
           {
-            "description": "Keyword to include events from additional indices (e.g. ext_tunnel for prisma events)",
+            "description": "Keyword to include events from additional indices (e.g. ext_tunnel for ext tunnel events)",
             "in": "query",
             "name": "includes",
             "schema": {
@@ -570,10 +571,11 @@
         }
       ],
       "get": {
-        "description": "Counts the number of entries in device config history for distinct field with given filters",
+        "description": "Count device config history records across the organization, optionally grouped by `distinct` and filtered by device type and time range.",
         "operationId": "countOrgDeviceLastConfigs",
         "parameters": [
           {
+            "description": "Filter results by type. enum: `ap`, `gateway`, `switch`",
             "in": "query",
             "name": "type",
             "schema": {
@@ -581,6 +583,7 @@
             }
           },
           {
+            "description": "Field used to group this count response. enum: `mac`, `name`, `site_id`, `version`",
             "in": "query",
             "name": "distinct",
             "schema": {
@@ -633,10 +636,11 @@
         }
       ],
       "get": {
-        "description": "Search Device Last Configs",
+        "description": "Search device config history records across the organization with filters for device type, MAC address, name, software version, certificate-expiry duration, and time range.",
         "operationId": "searchOrgDeviceLastConfigs",
         "parameters": [
           {
+            "description": "Filter results by device type. enum: `ap`, `gateway`, `switch`, `mxedge`",
             "in": "query",
             "name": "device_type",
             "schema": {
@@ -644,33 +648,36 @@
             }
           },
           {
-            "description": "Device MAC address",
+            "description": "Filter results by MAC address. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "mac",
             "schema": {
               "examples": [
+                "5c5b53010101,5c5b53020202",
                 "5c5b53010101"
               ],
               "type": "string"
             }
           },
           {
-            "description": "Devices Name",
+            "description": "Filter results by name. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "name",
             "schema": {
               "examples": [
+                "name-a,name-b",
                 "My AP"
               ],
               "type": "string"
             }
           },
           {
-            "description": "Device Version",
+            "description": "Filter results by software version. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "version",
             "schema": {
               "examples": [
+                "apfw-0.15.34615-noro-0a3c,apfw-0.15.34436-noro-d810",
                 "10.0.0"
               ],
               "type": "string"
@@ -739,7 +746,7 @@
         }
       ],
       "get": {
-        "description": "For some scenarios like E911 or security systems, the BSSIDs are required to identify which AP the client is connecting to. Then the location of the AP can be used as the approximate location of the client.\n\nEach radio MAC can have 16 BSSIDs (enumerate the last octet from 0-F)",
+        "description": "For some scenarios like E911 or security systems, the BSSIDs are required to identify which AP the client is connecting to. Then the location of the AP can be used as the approximate location of the client.\n\nEach radio MAC can have up to 16 BSSIDs. These are derived by incrementing the least significant hexadecimal digit (last nibble) of the MAC address from 0 to F, while keeping the remaining bits unchanged.",
         "operationId": "listOrgApsMacs",
         "parameters": [
           {
@@ -782,179 +789,182 @@
         }
       ],
       "get": {
-        "description": "Search Org Devices",
+        "description": "Search organization devices with filters for AP radio attributes, gateway HA attributes, switch EVPN attributes, LLDP data, MAC address, IP address, model, software version, site, Mist Edge, and time range. Set `stats=true` to include device stats in the response.",
         "operationId": "searchOrgDevices",
         "parameters": [
           {
-            "description": "If `type`==`ap`, Bandwidth of band_24",
-            "in": "query",
-            "name": "band_24_bandwidth",
-            "schema": {
-              "examples": [
-                20
-              ],
-              "type": "integer"
-            }
-          },
-          {
-            "description": "If `type`==`ap`, Channel of band_24",
+            "description": "When `type`==`ap`, Channel of band_24. Accepts multiple comma-separated integer values.",
             "in": "query",
             "name": "band_24_channel",
             "schema": {
               "examples": [
-                6
+                "1,64"
               ],
               "type": "integer"
             }
           },
           {
-            "description": "If `type`==`ap`, Power of band_24",
-            "in": "query",
-            "name": "band_24_power",
-            "schema": {
-              "examples": [
-                8
-              ],
-              "type": "integer"
-            }
-          },
-          {
-            "description": "If `type`==`ap`, Bandwidth of band_5",
-            "in": "query",
-            "name": "band_5_bandwidth",
-            "schema": {
-              "examples": [
-                20
-              ],
-              "type": "integer"
-            }
-          },
-          {
-            "description": "If `type`==`ap`, Channel of band_5",
+            "description": "When `type`==`ap`, Channel of band_5. Accepts multiple comma-separated integer values.",
             "in": "query",
             "name": "band_5_channel",
             "schema": {
               "examples": [
-                50
+                "153,108"
               ],
               "type": "integer"
             }
           },
           {
-            "description": "If `type`==`ap`, Power of band_5",
-            "in": "query",
-            "name": "band_5_power",
-            "schema": {
-              "examples": [
-                8
-              ],
-              "type": "integer"
-            }
-          },
-          {
-            "description": "If `type`==`ap`, Bandwidth of band_6",
-            "in": "query",
-            "name": "band_6_bandwidth",
-            "schema": {
-              "examples": [
-                20
-              ],
-              "type": "integer"
-            }
-          },
-          {
-            "description": "If `type`==`ap`, Channel of band_6",
+            "description": "When `type`==`ap`, Channel of band_6. Accepts multiple comma-separated integer values.",
             "in": "query",
             "name": "band_6_channel",
             "schema": {
               "examples": [
-                100
+                "197,221"
               ],
               "type": "integer"
             }
           },
           {
-            "description": "If `type`==`ap`, Power of band_6",
+            "description": "When `type`==`ap`, Bandwidth of band_24. Accepts multiple comma-separated integer values.",
+            "in": "query",
+            "name": "band_24_bandwidth",
+            "schema": {
+              "examples": [
+                "0,20"
+              ],
+              "type": "integer"
+            }
+          },
+          {
+            "description": "When `type`==`ap`, Bandwidth of band_5. Accepts multiple comma-separated integer values.",
+            "in": "query",
+            "name": "band_5_bandwidth",
+            "schema": {
+              "examples": [
+                "20,40"
+              ],
+              "type": "integer"
+            }
+          },
+          {
+            "description": "When `type`==`ap`, Bandwidth of band_6. Accepts multiple comma-separated integer values.",
+            "in": "query",
+            "name": "band_6_bandwidth",
+            "schema": {
+              "examples": [
+                "80,40"
+              ],
+              "type": "integer"
+            }
+          },
+          {
+            "description": "When `type`==`ap`, Power of band_24. Accepts multiple comma-separated integer values.",
+            "in": "query",
+            "name": "band_24_power",
+            "schema": {
+              "examples": [
+                "0,17"
+              ],
+              "type": "integer"
+            }
+          },
+          {
+            "description": "When `type`==`ap`, Power of band_5. Accepts multiple comma-separated integer values.",
+            "in": "query",
+            "name": "band_5_power",
+            "schema": {
+              "examples": [
+                "17,11"
+              ],
+              "type": "integer"
+            }
+          },
+          {
+            "description": "When `type`==`ap`, Power of band_6. Accepts multiple comma-separated integer values.",
             "in": "query",
             "name": "band_6_power",
             "schema": {
               "examples": [
-                8
+                "14,12"
               ],
               "type": "integer"
             }
           },
           {
-            "description": "If `type`==`switch` or `type`==`gateway`, max cpu usage",
-            "in": "query",
-            "name": "cpu",
-            "schema": {
-              "examples": [
-                "50"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "If `type`==`gateway`, true / false",
+            "description": "When `type`==`gateway`, true / false",
             "in": "query",
             "name": "clustered",
             "schema": {
-              "examples": [
-                "true"
-              ],
-              "type": "string"
+              "type": "boolean"
             }
           },
           {
-            "description": "If `type`==`ap`, Port speed of eth0",
+            "description": "When `type`==`ap`, Port speed of eth0. Accepts multiple comma-separated integer values.",
             "in": "query",
             "name": "eth0_port_speed",
             "schema": {
               "examples": [
+                "100,1000",
+                100,
                 1000
               ],
               "type": "integer"
             }
           },
           {
-            "description": "If `type`==`switch`, EVPN topology id",
+            "description": "When `type`==`switch`, EVPN topology id",
             "in": "query",
             "name": "evpntopo_id",
             "schema": {
-              "examples": [
-                "7dae216d-7c98-a51b-e068-dd7d477b7216"
-              ],
+              "format": "uuid",
               "type": "string"
             }
           },
           {
-            "description": "External IP Address",
+            "description": "Partial / full Device external ip. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `1.2.3.*` and `*.2.3.*` match `1.2.3.4`). Suffix-only wildcards (e.g. `*.2.3.4`) are not supported. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "ext_ip",
             "schema": {
               "examples": [
-                "83.42.53.1"
+                "1.2.3.4,1.2.3.*",
+                "1.2.3.4",
+                "1.2.3.*",
+                "*2.3.*"
               ],
               "type": "string"
             }
           },
           {
-            "description": "Partial / full hostname",
+            "description": "Partial / full Device hostname. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `my-london*` and `*london*` match `my-london-1`). Suffix-only wildcards (e.g. `*london-1`) are not supported. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "hostname",
             "schema": {
               "examples": [
-                "my-hostname"
+                "my-london-1,my-london*",
+                "my-london-1",
+                "my-london*",
+                "*london*"
               ],
               "type": "string"
             }
           },
           {
-            "$ref": "#/components/parameters/ip"
+            "description": "Partial / full Device IP address. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `10.100.10.*` and `*100.10.*` match `10.100.10.54`). Suffix-only wildcards (e.g. `*.54`) are not supported. Accepts multiple comma-separated values.",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "examples": [
+                "10.100.10.54,10.100.10.*",
+                "10.100.10.54",
+                "10.100.10.*",
+                "*100.10.*"
+              ],
+              "type": "string"
+            }
           },
           {
-            "description": "If `type`==`switch` or `type`==`gateway`, last configuration status",
+            "description": "When `type`==`switch` or `type`==`gateway`, last configuration status",
             "in": "query",
             "name": "last_config_status",
             "schema": {
@@ -965,128 +975,102 @@
             }
           },
           {
-            "description": "If `type`==`switch` or `type`==`gateway`, last hostname",
+            "description": "Last hostname of the device. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "last_hostname",
             "schema": {
               "examples": [
-                "my-last-hostname"
+                "ap-01,ap-02"
               ],
               "type": "string"
             }
           },
           {
-            "description": "If `type`==`ap`, LLDP management ip address",
+            "description": "When `type`==`ap`, LLDP management IP address. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "lldp_mgmt_addr",
             "schema": {
               "examples": [
-                "10.4.2.3"
+                "192.0.2.10,192.0.2.11"
               ],
               "type": "string"
             }
           },
           {
-            "description": "If `type`==`ap`, LLDP port id",
+            "description": "When `type`==`ap`, LLDP port id. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `ge-0/0/*` and `*-0/0/*` match `ge-0/0/30`). Suffix-only wildcards (e.g. `*switch-01`) are not supported. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "lldp_port_id",
             "schema": {
               "examples": [
-                "ge-0/0/1"
+                "00000000-0000-0000-0000-000000000001,00000000-0000-0000-0000-000000000002"
               ],
               "type": "string"
             }
           },
           {
-            "description": "If `type`==`ap`, LLDP Allocated Power",
-            "in": "query",
-            "name": "lldp_power_allocated",
-            "schema": {
-              "examples": [
-                15
-              ],
-              "type": "integer"
-            }
+            "$ref": "#/components/parameters/partial_filter_lldp_system_desc"
           },
           {
-            "description": "If `type`==`ap`, LLDP Negotiated Power",
-            "in": "query",
-            "name": "lldp_power_draw",
-            "schema": {
-              "examples": [
-                12
-              ],
-              "type": "integer"
-            }
-          },
-          {
-            "description": "If `type`==`ap`, LLDP system description",
-            "in": "query",
-            "name": "lldp_system_desc",
-            "schema": {
-              "examples": [
-                "my-lldp-system-description"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "If `type`==`ap`, LLDP system name",
+            "description": "When `type`==`ap`, LLDP system name. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `my-switch*` and `*switch*` match `my-switch-01`). Suffix-only wildcards (e.g. `*switch-01`) are not supported. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "lldp_system_name",
             "schema": {
               "examples": [
-                "my-lldp-system"
+                "richmond-hill-switch,Phoenix_Switch"
               ],
               "type": "string"
             }
           },
           {
-            "description": "Device mac",
+            "description": "Partial / full Device MAC address. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `001122*` and `*1122*` match `001122334455`). Suffix-only wildcards (e.g. `*4455`) are not supported. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "mac",
             "schema": {
               "examples": [
-                "5c5b53010101"
+                "aabbccddeeff,aabbcc*",
+                "aabbccddeeff",
+                "aabbcc*",
+                "*bbcc*"
               ],
               "type": "string"
             }
           },
           {
-            "description": "Device model",
+            "description": "Partial / full Device model. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `AP4*` and `*P4*` match `AP43`). Suffix-only wildcards (e.g. `*43`) are not supported. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "model",
             "schema": {
               "examples": [
-                "AP43"
+                "AP43,AP4*",
+                "AP43",
+                "AP4*",
+                "*P4*"
               ],
               "type": "string"
             }
           },
           {
-            "description": "If `type`==`ap`, Mist Edge id, if AP is connecting to a Mist Edge",
+            "description": "When `type`==`ap`, Mist Edge id, if AP is connecting to a Mist Edge. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "mxedge_id",
             "schema": {
               "examples": [
-                "7dae216d-7c98-a51b-e068-dd7d477b7216"
+                "00000000-0000-0000-0000-000000000001,00000000-0000-0000-0000-000000000002"
               ],
+              "format": "uuid",
               "type": "string"
             }
           },
           {
-            "description": "If `type`==`ap`, Comma separated list of Mist Edge ids, if AP is connecting to a Mist Edge",
+            "description": "When `type`==`ap`, Comma separated list of Mist Edge id, if AP is connecting to a Mist Edge",
             "in": "query",
             "name": "mxedge_ids",
             "schema": {
-              "examples": [
-                "7dae216d-7c98-a51b-e068-dd7d477b7216,7dae216d-7c98-a51b-e068-dd7d477b7217"
-              ],
               "type": "string"
             }
           },
           {
-            "description": "If `type`==`ap`, MxTunnel status, up / down",
+            "description": "When `type`==`ap`, Mist Tunnel status used to filter results. enum: `down`, `up`",
             "in": "query",
             "name": "mxtunnel_status",
             "schema": {
@@ -1094,51 +1078,47 @@
             }
           },
           {
-            "description": "If `type`==`gateway`, `node0` / `node1`",
+            "description": "When `type`==`gateway`. enum: `node0`, `node1`",
             "in": "query",
             "name": "node",
             "schema": {
-              "examples": [
-                "node0"
-              ],
-              "type": "string"
+              "$ref": "#/components/schemas/ha_cluster_node_enum"
             }
           },
           {
-            "description": "If `type`==`gateway`, mac for node0",
+            "description": "When `type`==`gateway`, node0 MAC address",
             "in": "query",
             "name": "node0_mac",
             "schema": {
-              "examples": [
-                "5c5b350e0001"
-              ],
               "type": "string"
             }
           },
           {
-            "description": "If `type`==`gateway`, mac for node1",
+            "description": "When `type`==`gateway`, node1 MAC address",
             "in": "query",
             "name": "node1_mac",
             "schema": {
-              "examples": [
-                "5c5b350e0002"
-              ],
               "type": "string"
             }
           },
           {
-            "description": "If `type`==`ap`, Power_constrained",
+            "description": "When `type`==`ap`, whether the AP is power constrained.",
             "in": "query",
             "name": "power_constrained",
             "schema": {
-              "examples": [
-                true
-              ],
               "type": "boolean"
             }
           },
           {
-            "description": "Site id",
+            "description": "When `type`==`switch` or `type`==`gateway`, Key-value pairs where the key\nis the RADIUS server address and the value contains authentication statistics:\n  * <server_address> (string): IP address of the RADIUS server as the key\n  * `auth_accepts` (long): Number of accepted authentication requests\n  * `auth_rejects` (long): Number of rejected authentication requests\n  * `auth_timeouts` (long): Number of authentication timeouts\n  * `auth_server_status` (string): Status of the server. Possible values: `up`, `down`, `unreachable`",
+            "in": "query",
+            "name": "radius_stats",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter results by site identifier",
             "in": "query",
             "name": "site_id",
             "schema": {
@@ -1149,29 +1129,35 @@
             }
           },
           {
-            "description": "If `type`==`gateway`,version of 128T agent",
+            "description": "Whether to return device stats",
             "in": "query",
-            "name": "t128agent_version",
+            "name": "stats",
             "schema": {
-              "examples": [
-                "1.2.3"
-              ],
-              "type": "string"
+              "default": false,
+              "type": "boolean"
             }
           },
           {
-            "description": "Version",
+            "description": "When `type`==`gateway` (SSR only), version of 128T agent",
             "in": "query",
-            "name": "version",
+            "name": "t128agent_version",
             "schema": {
-              "examples": [
-                "10.0.0"
-              ],
               "type": "string"
             }
           },
           {
             "$ref": "#/components/parameters/device_type"
+          },
+          {
+            "description": "Filter results by software version. Accepts multiple comma-separated values.",
+            "in": "query",
+            "name": "version",
+            "schema": {
+              "examples": [
+                "0.15.34615,0.14.29967"
+              ],
+              "type": "string"
+            }
           },
           {
             "$ref": "#/components/parameters/limit"
@@ -1225,7 +1211,7 @@
         }
       ],
       "get": {
-        "description": "Get Org Devices Summary",
+        "description": "Return aggregate organization device counts by device category and assignment state.",
         "operationId": "listOrgDevicesSummary",
         "responses": {
           "200": {
@@ -1264,7 +1250,7 @@
         "operationId": "getOrgJuniperDevicesCommand",
         "parameters": [
           {
-            "description": "Site_id would be used for proxy config check of the site and automatic site assignment",
+            "description": "Filter results by site identifier",
             "in": "query",
             "name": "site_id",
             "schema": {
@@ -1303,6 +1289,7 @@
     "schemas": {
       "ap_radio_mac": {
         "additionalProperties": false,
+        "description": "Access point MAC address and its related radio MAC addresses",
         "examples": [
           {
             "mac": "5c5b350001a0",
@@ -1314,6 +1301,7 @@
         ],
         "properties": {
           "mac": {
+            "description": "Access point MAC address for this radio MAC mapping",
             "examples": [
               "5c5b350001a0"
             ],
@@ -1321,7 +1309,8 @@
             "type": "string"
           },
           "radio_macs": {
-            "$ref": "#/components/schemas/ap_radio_mac_radio_macs"
+            "$ref": "#/components/schemas/ap_radio_mac_radio_macs",
+            "description": "List of radio MAC addresses associated with this access point"
           }
         },
         "required": [
@@ -1331,6 +1320,7 @@
         "type": "object"
       },
       "ap_radio_mac_radio_macs": {
+        "description": "Radio MAC addresses associated with an access point",
         "examples": [
           [
             "5c5b350001a0",
@@ -1343,6 +1333,7 @@
         "type": "array"
       },
       "ap_radio_macs": {
+        "description": "Access point radio MAC records supplied in an import payload",
         "items": {
           "$ref": "#/components/schemas/ap_radio_mac"
         },
@@ -1352,37 +1343,42 @@
       },
       "ap_search": {
         "additionalProperties": false,
+        "description": "Access point record returned by device search endpoints",
         "properties": {
           "band_24_bandwidth": {
-            "description": "Bandwidth of band_24",
+            "description": "Current channel bandwidth on the AP 2.4 GHz radio",
             "type": "string"
           },
           "band_24_channel": {
-            "description": "Channel of band_24",
+            "description": "Current channel on the AP 2.4 GHz radio",
             "type": "integer"
           },
           "band_24_power": {
+            "description": "Current transmit power on the AP 2.4 GHz radio",
             "type": "integer"
           },
           "band_5_bandwidth": {
-            "description": "Bandwidth of band_5",
+            "description": "Current channel bandwidth on the AP 5 GHz radio",
             "type": "string"
           },
           "band_5_channel": {
-            "description": "Channel of band_5",
+            "description": "Current channel on the AP 5 GHz radio",
             "type": "integer"
           },
           "band_5_power": {
+            "description": "Current transmit power on the AP 5 GHz radio",
             "type": "integer"
           },
           "band_6_bandwidth": {
+            "description": "Current channel bandwidth on the AP 6 GHz radio",
             "type": "string"
           },
           "band_6_channel": {
-            "description": "Channel of band_6",
+            "description": "Current channel on the AP 6 GHz radio",
             "type": "integer"
           },
           "band_6_power": {
+            "description": "Current transmit power on the AP 6 GHz radio",
             "type": "integer"
           },
           "eth0_port_speed": {
@@ -1390,51 +1386,59 @@
             "type": "integer"
           },
           "ext_ip": {
+            "description": "External IP address observed for AP management traffic",
             "type": "string"
           },
           "hostname": {
-            "$ref": "#/components/schemas/ap_search_hostnames"
+            "$ref": "#/components/schemas/ap_search_hostnames",
+            "description": "Observed hostnames detected for the AP in search results"
           },
           "inactive_wired_vlans": {
-            "$ref": "#/components/schemas/ap_search_inactive_wired_vlans"
+            "$ref": "#/components/schemas/ap_search_inactive_wired_vlans",
+            "description": "Inactive wired VLAN IDs reported for this AP"
           },
           "ip": {
-            "description": "IP Address",
+            "description": "Management IP address currently assigned to the AP",
             "type": "string"
           },
           "last_hostname": {
+            "description": "Most recent hostname detected for the AP",
             "type": "string"
           },
           "lldp_mgmt_addr": {
-            "description": "LLDP management ip address",
+            "description": "LLDP management IP address advertised by the upstream neighbor",
             "type": "string"
           },
           "lldp_port_desc": {
+            "description": "LLDP port description advertised by the upstream neighbor",
             "type": "string"
           },
           "lldp_port_id": {
-            "description": "LLDP port id",
+            "description": "LLDP port identifier advertised by the upstream neighbor",
             "type": "string"
           },
           "lldp_power_allocated": {
+            "description": "Power allocated to the AP by LLDP, in mW",
             "type": "integer"
           },
           "lldp_power_draw": {
+            "description": "Power drawn by the AP as reported through LLDP, in mW",
             "type": "integer"
           },
           "lldp_system_desc": {
-            "description": "LLDP system description",
+            "description": "LLDP system description advertised by the upstream neighbor",
             "type": "string"
           },
           "lldp_system_name": {
-            "description": "LLDP system name",
+            "description": "LLDP system name advertised by the upstream neighbor",
             "type": "string"
           },
           "mac": {
-            "description": "Device model",
+            "description": "Access point MAC address used to identify the AP in search results",
             "type": "string"
           },
           "model": {
+            "description": "AP hardware model for this search result",
             "type": "string"
           },
           "mxedge_id": {
@@ -1446,36 +1450,44 @@
             "type": "string"
           },
           "mxtunnel_status": {
-            "description": "MxTunnel status",
+            "description": "Current MxTunnel connection status of the AP",
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization that owns this AP search result"
           },
           "power_constrained": {
+            "description": "Whether the AP is operating with insufficient power",
             "type": "boolean"
           },
           "power_opmode": {
+            "description": "Operating mode reported when AP power is constrained",
             "type": "string"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site that contains this AP search result"
           },
           "sku": {
+            "description": "Hardware SKU for the AP model",
             "type": "string"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Time associated with this AP search result"
           },
           "uptime": {
+            "description": "Device uptime for the AP, in seconds",
             "type": "integer"
           },
           "version": {
-            "description": "Version",
+            "description": "Software version currently running on the AP",
             "type": "string"
           },
           "wlans": {
-            "$ref": "#/components/schemas/ap_search_wlans"
+            "$ref": "#/components/schemas/ap_search_wlans",
+            "description": "Wireless LAN summaries applied to the AP in this search result"
           }
         },
         "required": [
@@ -1487,13 +1499,14 @@
         "type": "object"
       },
       "ap_search_hostnames": {
-        "description": "Partial / full hostname",
+        "description": "List of hostnames detected for the AP",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
       "ap_search_inactive_wired_vlans": {
+        "description": "Inactive wired VLAN IDs reported for an AP",
         "items": {
           "type": "integer"
         },
@@ -1501,25 +1514,29 @@
       },
       "ap_search_wlan": {
         "additionalProperties": false,
+        "description": "WLAN summary included in an AP search result",
         "properties": {
           "id": {
+            "description": "WLAN identifier included in the AP search result",
             "format": "uuid",
             "type": "string"
           },
           "ssid": {
+            "description": "Wireless network SSID shown for this WLAN",
             "type": "string"
           }
         },
         "type": "object"
       },
       "ap_search_wlans": {
+        "description": "WLAN summaries included in an AP search result",
         "items": {
           "$ref": "#/components/schemas/ap_search_wlan"
         },
         "type": "array"
       },
       "count_org_devices_mxtunnel_status": {
-        "description": "enum: `down`, `up`",
+        "description": "Mist Tunnel status value used when counting organization devices. enum: `down`, `up`",
         "enum": [
           "down",
           "up"
@@ -1530,8 +1547,10 @@
         "additionalProperties": {
           "type": "string"
         },
+        "description": "Count result row with the matching distinct field values",
         "properties": {
           "count": {
+            "description": "Number of matching items for the distinct value or values in this result",
             "type": "integer"
           }
         },
@@ -1541,6 +1560,7 @@
         "type": "object"
       },
       "count_results": {
+        "description": "List of count result rows",
         "items": {
           "$ref": "#/components/schemas/count_result"
         },
@@ -1549,103 +1569,146 @@
       },
       "device_event": {
         "additionalProperties": false,
+        "description": "Device event payload returned by search and webhook APIs",
         "properties": {
           "ap": {
-            "description": "(will be deprecated soon; please use mac instead) ap mac",
+            "deprecated": true,
+            "description": "Deprecated AP MAC address field; use `mac` instead",
             "type": "string"
           },
           "ap_name": {
-            "description": "(will be deprecated soon; please use device_name instead) ap name",
+            "deprecated": true,
+            "description": "Deprecated AP name field; use `device_name` instead",
             "type": "string"
           },
           "apfw": {
+            "description": "AP firmware version associated with the device event",
             "type": "string"
           },
           "audit_id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Audit log identifier associated with the device event"
           },
           "bandwidth": {
+            "description": "Channel bandwidth associated with a radio event, in MHz",
             "type": "integer"
           },
           "channel": {
+            "description": "RF channel associated with the device event",
             "type": "integer"
           },
           "chassis_mac": {
+            "description": "Chassis MAC address associated with the device event",
             "type": "string"
           },
           "count": {
+            "description": "Event count reported in the device event payload",
             "type": "integer"
           },
           "device_name": {
-            "description": "Device name",
+            "description": "Name of the device associated with the event",
             "type": "string"
           },
           "device_type": {
-            "$ref": "#/components/schemas/device_type"
+            "$ref": "#/components/schemas/device_type",
+            "description": "Device type associated with the event"
           },
           "ev_type": {
-            "$ref": "#/components/schemas/webhook_device_events_event_ev_type"
+            "$ref": "#/components/schemas/webhook_device_events_event_ev_type",
+            "description": "Advisory severity for the device event"
           },
           "ext_ip": {
+            "description": "External IP address reported for the device event",
+            "type": "string"
+          },
+          "job_id": {
+            "description": "Job identifier associated with a tunnel provisioning event (present when `includes`==`ext_tunnel`)",
+            "format": "uuid",
             "type": "string"
           },
           "mac": {
-            "description": "Device mac",
+            "description": "Device MAC address associated with the event",
             "type": "string"
           },
           "model": {
+            "description": "Device model associated with the event",
             "type": "string"
           },
           "node": {
+            "description": "Cluster node identifier associated with the device event",
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization identifier associated with the device event"
           },
           "port_id": {
+            "description": "Port identifier associated with the device event",
             "type": "string"
           },
           "power": {
+            "description": "Transmit power associated with a radio event",
             "type": "integer"
           },
           "pre_bandwidth": {
+            "description": "Previous channel bandwidth before an RRM change, in MHz",
             "type": "integer"
           },
           "pre_channel": {
+            "description": "Previous RF channel before an RRM change",
             "type": "integer"
           },
           "pre_power": {
+            "description": "Previous transmit power before an RRM change",
             "type": "integer"
           },
           "pre_usage": {
+            "description": "Previous radio usage band before an RRM change",
             "type": "integer"
           },
           "reason": {
-            "description": "(optional) event reason",
+            "description": "Optional reason text reported for the device event",
             "type": "string"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site identifier associated with the device event"
           },
           "site_name": {
-            "description": "Site name",
+            "description": "Name of the site associated with the event",
+            "type": "string"
+          },
+          "status": {
+            "description": "Tunnel provisioning status for ext_tunnel events (e.g. `PROVISION_IN_PROGRESS`)",
+            "type": "string"
+          },
+          "template_id": {
+            "description": "Gateway template identifier associated with a tunnel provisioning event (present when `includes`==`ext_tunnel`)",
+            "format": "uuid",
             "type": "string"
           },
           "text": {
-            "description": "(optional) event description",
+            "description": "Optional human-readable text for the device event",
             "type": "string"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Time when the device event occurred"
+          },
+          "tunnel_name": {
+            "description": "Tunnel name associated with a tunnel provisioning event (present when `includes`==`ext_tunnel`)",
+            "type": "string"
           },
           "type": {
-            "description": "Event type",
+            "description": "Device event type key",
             "type": "string"
           },
           "usage": {
+            "description": "Current radio usage band for an RRM event",
             "type": "integer"
           },
           "version": {
+            "description": "Firmware or software version associated with the device event",
             "type": "string"
           }
         },
@@ -1657,6 +1720,7 @@
         "type": "object"
       },
       "device_events": {
+        "description": "List of device event payloads",
         "items": {
           "$ref": "#/components/schemas/device_event"
         },
@@ -1664,7 +1728,7 @@
         "uniqueItems": true
       },
       "device_search_radius_filter_status": {
-        "description": "Status of the device search radius filter. enum: `up`, `down`, `unreachable`",
+        "description": "Status of the device search RADIUS filter. enum: `up`, `down`, `unreachable`",
         "enum": [
           "up",
           "down",
@@ -1674,6 +1738,7 @@
       },
       "device_search_radius_stat": {
         "additionalProperties": false,
+        "description": "RADIUS authentication counters and server status for a device search result",
         "properties": {
           "auth_accepts": {
             "description": "Number of accepted authentication requests",
@@ -1684,7 +1749,8 @@
             "type": "integer"
           },
           "auth_server_status": {
-            "$ref": "#/components/schemas/device_search_radius_filter_status"
+            "$ref": "#/components/schemas/device_search_radius_filter_status",
+            "description": "RADIUS authentication server status for this server in device search results"
           },
           "auth_timeouts": {
             "description": "Number of authentication timeouts",
@@ -1697,7 +1763,7 @@
         "additionalProperties": {
           "$ref": "#/components/schemas/device_search_radius_stat"
         },
-        "description": "Property key is the RADIUS server IP Address",
+        "description": "Property key is the RADIUS server IP address",
         "type": "object"
       },
       "device_type": {
@@ -1735,99 +1801,120 @@
       },
       "device_type_with_all": {
         "default": "ap",
-        "description": "enum: `all`, `ap`, `gateway`, `switch`",
-        "enum": [
-          "all",
-          "ap",
-          "gateway",
-          "switch"
-        ],
+        "description": "ap, switch, gateway, router, all, default is ap. Supports comma-separated values for multiple types (e.g., type=switch,gateway)",
         "type": "string"
       },
       "gateway_search": {
         "additionalProperties": false,
+        "description": "Gateway record returned by device search endpoints",
         "properties": {
           "clustered": {
+            "description": "Whether the gateway is part of a gateway cluster",
             "type": "boolean"
           },
           "evpn_missing_links": {
+            "description": "Whether EVPN topology links are missing for this gateway",
             "type": "boolean"
           },
           "evpntopo_id": {
+            "description": "EVPN topology ID associated with this gateway",
             "type": "string"
           },
           "ext_ip": {
+            "description": "External IP address observed for gateway management traffic",
             "type": "string"
           },
           "hostname": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Observed hostnames detected for the gateway in search results"
           },
           "ip": {
+            "description": "Management IP address currently reported for the gateway",
             "type": "string"
           },
           "last_config_status": {
+            "description": "Most recent configuration status reported for the gateway",
             "type": "string"
           },
           "last_hostname": {
+            "description": "Most recent hostname detected for the gateway",
             "type": "string"
           },
           "last_trouble_code": {
+            "description": "Most recent trouble code reported for the gateway",
             "type": "string"
           },
           "last_trouble_timestamp": {
+            "description": "Timestamp when the most recent gateway trouble code was reported",
             "type": "integer"
           },
           "mac": {
+            "description": "Gateway MAC address reported in search results",
             "type": "string"
           },
           "managed": {
             "deprecated": true,
+            "description": "Whether the gateway is managed by Mist. Deprecated in favor of `mist_configured`",
             "type": "boolean"
           },
           "mist_configured": {
-            "description": "whether the device can be configured by Mist or not. This deprecates `managed` (for adopted device) and `disable_auto_config` for claimed device)",
+            "description": "Whether the gateway can be configured by Mist. Replaces `managed` for adopted devices and `disable_auto_config` for claimed devices",
             "type": "boolean"
           },
           "model": {
+            "description": "Gateway model reported for this search result",
             "type": "string"
           },
           "node": {
+            "description": "Gateway cluster node associated with this search result",
             "type": "string"
           },
           "node0_mac": {
+            "description": "Cluster node0 MAC address reported for an HA gateway",
             "type": "string"
           },
           "node1_mac": {
+            "description": "Cluster node1 MAC address reported for an HA gateway",
             "type": "string"
           },
           "num_members": {
+            "description": "Number of members in the gateway cluster",
             "type": "integer"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization that owns this gateway search result"
           },
           "role": {
+            "description": "Gateway cluster role reported for this search result",
             "type": "string"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site that contains this gateway search result"
           },
           "t128agent_version": {
+            "description": "Session Smart Router agent version reported by the gateway",
             "type": "string"
           },
           "time_drifted": {
+            "description": "Whether the gateway clock has drifted from the expected time",
             "type": "boolean"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Time associated with this gateway search result"
           },
           "type": {
-            "$ref": "#/components/schemas/device_type_gateway"
+            "$ref": "#/components/schemas/device_type_gateway",
+            "description": "Device type for this gateway search result"
           },
           "uptime": {
+            "description": "Device uptime for the gateway, in seconds",
             "type": "integer"
           },
           "version": {
+            "description": "Software version currently running on the gateway",
             "type": "string"
           }
         },
@@ -1835,6 +1922,14 @@
           "type"
         ],
         "type": "object"
+      },
+      "ha_cluster_node_enum": {
+        "description": "HA cluster node selector. enum: `node0`, `node1`",
+        "enum": [
+          "node0",
+          "node1"
+        ],
+        "type": "string"
       },
       "id": {
         "description": "Unique ID of the object instance in the Mist Organization",
@@ -1858,11 +1953,14 @@
       },
       "org_device": {
         "additionalProperties": false,
+        "description": "Organization device identifier returned by the devices list",
         "properties": {
           "mac": {
+            "description": "Organization device MAC address",
             "type": "string"
           },
           "name": {
+            "description": "Display name of the organization device",
             "type": "string"
           }
         },
@@ -1873,6 +1971,7 @@
         "type": "object"
       },
       "org_devices": {
+        "description": "List of organization device identifiers",
         "items": {
           "$ref": "#/components/schemas/org_device"
         },
@@ -1924,6 +2023,7 @@
         "type": "string"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -1933,23 +2033,30 @@
       },
       "response_config_history_search": {
         "additionalProperties": false,
+        "description": "Paginated device config history search response",
         "properties": {
           "end": {
+            "description": "Search window end timestamp for config history, in epoch seconds",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of config history entries requested",
             "type": "integer"
           },
           "next": {
+            "description": "URL for the next page of config history results",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/response_config_history_search_results"
+            "$ref": "#/components/schemas/response_config_history_search_results",
+            "description": "Device config history entries returned for this page"
           },
           "start": {
+            "description": "Search window start timestamp for config history, in epoch seconds",
             "type": "integer"
           },
           "total": {
+            "description": "Number of config history entries matching the search",
             "type": "integer"
           }
         },
@@ -1964,39 +2071,51 @@
       },
       "response_config_history_search_item": {
         "additionalProperties": false,
+        "description": "Device config history entry",
         "properties": {
           "channel_24": {
+            "description": "2.4 GHz channel configured in this history entry",
             "type": "integer"
           },
           "channel_5": {
+            "description": "5 GHz channel configured in this history entry",
             "type": "integer"
           },
           "radio_macs": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Radio MAC addresses included in this config history entry"
           },
           "radios": {
-            "$ref": "#/components/schemas/response_config_history_search_item_radios"
+            "$ref": "#/components/schemas/response_config_history_search_item_radios",
+            "description": "Radio configuration details included in this history entry"
           },
           "secpolicy_violated": {
+            "description": "Whether the device configuration violated a security policy",
             "type": "boolean"
           },
           "ssids": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "WLAN SSIDs included in this config history entry"
           },
           "ssids_24": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "2.4 GHz WLAN SSIDs included in this config history entry"
           },
           "ssids_5": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "5 GHz WLAN SSIDs included in this config history entry"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Epoch timestamp when this config history entry was recorded"
           },
           "version": {
+            "description": "Configuration version associated with this history entry",
             "type": "string"
           },
           "wlans": {
-            "$ref": "#/components/schemas/response_config_history_search_item_wlans"
+            "$ref": "#/components/schemas/response_config_history_search_item_wlans",
+            "description": "WLAN configuration details included in this history entry"
           }
         },
         "required": [
@@ -2010,11 +2129,14 @@
       },
       "response_config_history_search_item_radio": {
         "additionalProperties": false,
+        "description": "Radio config history detail",
         "properties": {
           "band": {
+            "description": "Radio band for this config history detail",
             "type": "string"
           },
           "channel": {
+            "description": "Configured channel for this radio",
             "type": "integer"
           }
         },
@@ -2025,6 +2147,7 @@
         "type": "object"
       },
       "response_config_history_search_item_radios": {
+        "description": "Radio config history details",
         "items": {
           "$ref": "#/components/schemas/response_config_history_search_item_radio"
         },
@@ -2033,21 +2156,27 @@
       },
       "response_config_history_search_item_wlan": {
         "additionalProperties": false,
+        "description": "WLAN config history detail",
         "properties": {
           "auth": {
+            "description": "Configured authentication method for this WLAN",
             "type": "string"
           },
           "bands": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Radio bands where this WLAN was configured"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the WLAN configuration"
           },
           "ssid": {
+            "description": "WLAN SSID for this config history detail",
             "type": "string"
           },
           "vlan_ids": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "VLAN IDs configured for this WLAN"
           }
         },
         "required": [
@@ -2058,6 +2187,7 @@
         "type": "object"
       },
       "response_config_history_search_item_wlans": {
+        "description": "WLAN config history details",
         "items": {
           "$ref": "#/components/schemas/response_config_history_search_item_wlan"
         },
@@ -2065,6 +2195,7 @@
         "uniqueItems": true
       },
       "response_config_history_search_results": {
+        "description": "Device config history entries returned by a search response",
         "items": {
           "$ref": "#/components/schemas/response_config_history_search_item"
         },
@@ -2073,23 +2204,30 @@
       },
       "response_count": {
         "additionalProperties": false,
+        "description": "Distinct count response for time-bounded search results",
         "properties": {
           "distinct": {
+            "description": "Field used to group the count results",
             "type": "string"
           },
           "end": {
+            "description": "Search window end timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of distinct count results requested",
             "type": "integer"
           },
           "results": {
-            "$ref": "#/components/schemas/count_results"
+            "$ref": "#/components/schemas/count_results",
+            "description": "Count results grouped by the distinct field"
           },
           "start": {
+            "description": "Search window start timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "total": {
+            "description": "Number of distinct result buckets returned",
             "type": "integer"
           }
         },
@@ -2105,8 +2243,10 @@
       },
       "response_device_config_cmd": {
         "additionalProperties": false,
+        "description": "Device configuration command response",
         "properties": {
           "cmd": {
+            "description": "Configuration command returned for the device",
             "type": "string"
           }
         },
@@ -2117,23 +2257,30 @@
       },
       "response_device_events_search": {
         "additionalProperties": false,
+        "description": "Paginated response for device or system event search results",
         "properties": {
           "end": {
+            "description": "Epoch timestamp for the end of the event search window",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of event records returned in this page",
             "type": "integer"
           },
           "next": {
+            "description": "Pagination cursor or URL for retrieving the next page of event records",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/device_events"
+            "$ref": "#/components/schemas/device_events",
+            "description": "Device or system event records matching the search filters"
           },
           "start": {
+            "description": "Epoch timestamp for the start of the event search window",
             "type": "integer"
           },
           "total": {
+            "description": "Number of event records matching the search filters across all pages",
             "type": "integer"
           }
         },
@@ -2148,23 +2295,30 @@
       },
       "response_device_search": {
         "additionalProperties": false,
+        "description": "Paginated response for organization or site device search results",
         "properties": {
           "end": {
+            "description": "Epoch timestamp for the end of the device search window",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of device records returned in this page",
             "type": "integer"
           },
           "next": {
+            "description": "Pagination cursor or URL for retrieving the next page of device records",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/response_device_search_results"
+            "$ref": "#/components/schemas/response_device_search_results",
+            "description": "AP, switch, or gateway records matching the device search filters"
           },
           "start": {
+            "description": "Epoch timestamp for the start of the device search window",
             "type": "integer"
           },
           "total": {
+            "description": "Number of device records matching the search filters across all pages",
             "type": "integer"
           }
         },
@@ -2178,6 +2332,7 @@
         "type": "object"
       },
       "response_device_search_results": {
+        "description": "Device search records for APs, switches, or gateways",
         "items": {
           "$ref": "#/components/schemas/response_device_search_results_items"
         },
@@ -2185,6 +2340,7 @@
         "uniqueItems": true
       },
       "response_device_search_results_items": {
+        "description": "Device search record for an AP, switch, or gateway",
         "oneOf": [
           {
             "$ref": "#/components/schemas/ap_search"
@@ -2199,8 +2355,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -2211,8 +2369,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -2223,8 +2383,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -2235,8 +2397,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -2244,8 +2408,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -2256,9 +2422,11 @@
       },
       "response_org_devices": {
         "additionalProperties": false,
+        "description": "Response containing organization device records",
         "properties": {
           "results": {
-            "$ref": "#/components/schemas/org_devices"
+            "$ref": "#/components/schemas/org_devices",
+            "description": "Device records returned by the organization device list operation"
           }
         },
         "required": [
@@ -2268,32 +2436,40 @@
       },
       "response_org_devices_summary": {
         "additionalProperties": false,
+        "description": "Organization device count summary",
         "properties": {
           "num_aps": {
+            "description": "Number of APs in the organization",
             "readOnly": true,
             "type": "integer"
           },
           "num_gateways": {
+            "description": "Number of gateways in the organization",
             "readOnly": true,
             "type": "integer"
           },
           "num_mxedges": {
+            "description": "Number of Mist Edges in the organization",
             "readOnly": true,
             "type": "integer"
           },
           "num_switches": {
+            "description": "Number of switches in the organization",
             "readOnly": true,
             "type": "integer"
           },
           "num_unassigned_aps": {
+            "description": "Number of APs in organization inventory that are not assigned to a site",
             "readOnly": true,
             "type": "integer"
           },
           "num_unassigned_gateways": {
+            "description": "Number of gateways in organization inventory that are not assigned to a site",
             "readOnly": true,
             "type": "integer"
           },
           "num_unassigned_switches": {
+            "description": "Number of switches in organization inventory that are not assigned to a site",
             "readOnly": true,
             "type": "integer"
           }
@@ -2301,7 +2477,7 @@
         "type": "object"
       },
       "search_org_devices_mxtunnel_status": {
-        "description": "enum: `down`, `up`",
+        "description": "Mist Tunnel status filter for organization device search. enum: `down`, `up`",
         "enum": [
           "down",
           "up"
@@ -2309,6 +2485,7 @@
         "type": "string"
       },
       "site_id": {
+        "description": "Unique identifier of a Mist site",
         "examples": [
           "441a1214-6928-442a-8e92-e1d34b8ec6a6"
         ],
@@ -2317,6 +2494,7 @@
         "type": "string"
       },
       "strings": {
+        "description": "Unique string values returned or accepted by this schema",
         "items": {
           "type": "string"
         },
@@ -2325,42 +2503,55 @@
       },
       "switch_search": {
         "additionalProperties": false,
+        "description": "Switch record returned by device search endpoints",
         "properties": {
           "clustered": {
+            "description": "Whether the switch is part of a virtual chassis or cluster",
             "type": "boolean"
           },
           "evpn_missing_links": {
+            "description": "Whether EVPN topology links are missing for this switch",
             "type": "boolean"
           },
           "evpntopo_id": {
+            "description": "EVPN topology ID associated with this switch",
             "type": "string"
           },
           "ext_ip": {
+            "description": "External IP address observed for switch management traffic",
             "type": "string"
           },
           "hostname": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Observed hostnames detected for the switch in search results"
           },
           "ip": {
+            "description": "Management IP address currently reported for the switch",
             "type": "string"
           },
           "last_config_status": {
+            "description": "Most recent configuration status reported for the switch",
             "type": "string"
           },
           "last_hostname": {
+            "description": "Most recent hostname detected for the switch",
             "type": "string"
           },
           "last_trouble_code": {
+            "description": "Most recent trouble code reported for the switch",
             "type": "string"
           },
           "last_trouble_timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Time when the most recent switch trouble code was reported"
           },
           "mac": {
+            "description": "Switch MAC address reported in search results",
             "type": "string"
           },
           "managed": {
             "deprecated": true,
+            "description": "Whether the switch is managed by Mist. Deprecated in favor of `mist_configured`",
             "type": "boolean"
           },
           "mist_configured": {
@@ -2368,36 +2559,47 @@
             "type": "boolean"
           },
           "model": {
+            "description": "Switch model reported for this search result",
             "type": "string"
           },
           "num_members": {
+            "description": "Number of members in the switch virtual chassis, when applicable",
             "type": "integer"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization that owns this switch search result"
           },
           "radius_stats": {
-            "$ref": "#/components/schemas/device_search_radius_stats"
+            "$ref": "#/components/schemas/device_search_radius_stats",
+            "description": "RADIUS statistics for this switch keyed by server IP address"
           },
           "role": {
+            "description": "Switch role reported for this search result",
             "type": "string"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site that contains this switch search result"
           },
           "time_drifted": {
+            "description": "Whether the switch clock has drifted from the expected time",
             "type": "boolean"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Time associated with this switch search result"
           },
           "type": {
-            "$ref": "#/components/schemas/device_type_switch"
+            "$ref": "#/components/schemas/device_type_switch",
+            "description": "Device type for this switch search result"
           },
           "uptime": {
+            "description": "Device uptime for the switch, in seconds",
             "type": "integer"
           },
           "version": {
+            "description": "Software version currently running on the switch",
             "type": "string"
           }
         },
@@ -2407,7 +2609,7 @@
         "type": "object"
       },
       "timestamp": {
-        "description": "Epoch (seconds)",
+        "description": "Epoch timestamp, in seconds",
         "format": "double",
         "readOnly": true,
         "type": "number"
@@ -2760,7 +2962,7 @@
         }
       },
       "device_type": {
-        "description": "Type of device. enum: `ap`, `gateway`, `switch`",
+        "description": "Device type used to filter results. enum: `ap`, `gateway`, `switch`",
         "in": "query",
         "name": "type",
         "schema": {
@@ -2768,10 +2970,9 @@
         }
       },
       "duration": {
-        "description": "Duration like 7d, 2w",
+        "description": "Time range duration for the query, using relative units such as `10m`, `7d`, or `2w`",
         "in": "query",
         "name": "duration",
-        "required": false,
         "schema": {
           "default": "1d",
           "examples": [
@@ -2781,7 +2982,7 @@
         }
       },
       "end": {
-        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
         "in": "query",
         "name": "end",
         "schema": {
@@ -2789,9 +2990,9 @@
         }
       },
       "ip": {
+        "description": "Filter results by IPv4 address",
         "in": "query",
         "name": "ip",
-        "required": false,
         "schema": {
           "examples": [
             "192.168.1.1"
@@ -2801,9 +3002,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -2823,13 +3024,21 @@
         }
       },
       "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
         "in": "query",
         "name": "page",
-        "required": false,
         "schema": {
           "default": 1,
           "minimum": 1,
           "type": "integer"
+        }
+      },
+      "partial_filter_lldp_system_desc": {
+        "description": "When `type`==`ap`, LLDP system description. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `Juniper Networks*` and `*Networks*` match `Juniper Networks, Inc.`). Suffix-only wildcards (e.g. `*switch-01`) are not supported",
+        "in": "query",
+        "name": "lldp_system_desc",
+        "schema": {
+          "type": "string"
         }
       },
       "search_after": {
@@ -2844,7 +3053,6 @@
         "description": "On which field the list should be sorted, -prefix represents DESC order",
         "in": "query",
         "name": "sort",
-        "required": false,
         "schema": {
           "default": "timestamp",
           "examples": [
@@ -2854,7 +3062,7 @@
         }
       },
       "start": {
-        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
         "in": "query",
         "name": "start",
         "schema": {
@@ -2959,6 +3167,18 @@
               "text": "Succeeding DNS query from 172.29.101.134 to 172.29.101.7 for \"portal.mistsys.com\" on vlan 1, id 60224",
               "timestamp": 1547235620.89,
               "type": "CLIENT_DNS_OK"
+            },
+            {
+              "device_type": "gateway",
+              "job_id": "c2096de9-0ca4-4a8b-b500-d37cbe0f0baf",
+              "mac": "d007ca6c6ac0",
+              "org_id": "86f0c649-06b1-4337-b3d4-25eeb887f732",
+              "site_id": "9f8d28eb-77c7-44c7-a85b-4426bf291679",
+              "status": "PROVISION_IN_PROGRESS",
+              "template_id": "660e8400-e29b-41d4-a716-446655440001",
+              "timestamp": 1748987445.959,
+              "tunnel_name": "zs1",
+              "type": "NOTICE"
             }
           ],
           "start": 0,
@@ -3159,19 +3379,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

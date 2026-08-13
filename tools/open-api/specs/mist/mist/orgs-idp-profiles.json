@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs IDP Profiles",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "get": {
-        "description": "Get the list of Org IDP Profiles",
+        "description": "List organization Intrusion Detection and Prevention (IDP) profiles, including their base profile and signature overwrite rules.",
         "operationId": "listOrgIdpProfiles",
         "parameters": [
           {
@@ -116,7 +112,7 @@
         ]
       },
       "post": {
-        "description": "Create Org IDP Profile",
+        "description": "Create an organization Intrusion Detection and Prevention (IDP) profile with a built-in base profile and optional signature overwrite rules.",
         "operationId": "createOrgIdpProfile",
         "requestBody": {
           "content": {
@@ -187,7 +183,7 @@
         }
       ],
       "get": {
-        "description": "Get Org IDP Profile",
+        "description": "Retrieve the base profile and signature overwrite rules for a specific organization IDP profile.",
         "operationId": "getOrgIdpProfile",
         "responses": {
           "200": {
@@ -215,7 +211,7 @@
         ]
       },
       "put": {
-        "description": "Update Org IDP Profile",
+        "description": "Update an organization IDP profile, including its base profile and signature overwrite rules.",
         "operationId": "updateOrgIdpProfile",
         "requestBody": {
           "content": {
@@ -276,7 +272,7 @@
         ]
       },
       "delete": {
-        "description": "Delete Org IDP Profile",
+        "description": "Delete an organization Intrusion Detection and Prevention (IDP) profile by profile ID.",
         "operationId": "deleteOrgIdpProfile",
         "responses": {
           "200": {
@@ -323,37 +319,45 @@
         "type": "string"
       },
       "idp_profile": {
+        "description": "Organization IDP profile with a base profile and targeted overwrite rules",
         "properties": {
           "base_profile": {
-            "$ref": "#/components/schemas/idp_profile_base_profile"
+            "$ref": "#/components/schemas/idp_profile_base_profile",
+            "description": "Built-in IDP baseline profile inherited before applying overwrites"
           },
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Timestamp when the IDP profile was created"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the IDP profile"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Timestamp when the IDP profile was last modified"
           },
           "name": {
+            "description": "Display name of the IDP profile",
             "examples": [
               "relaxed"
             ],
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Owning organization for the IDP profile"
           },
           "overwrites": {
-            "$ref": "#/components/schemas/idp_profile_overwrites"
+            "$ref": "#/components/schemas/idp_profile_overwrites",
+            "description": "IDP signature override rules applied on top of the base profile"
           }
         },
         "type": "object"
       },
       "idp_profile_action": {
         "default": "alert",
-        "description": "enum:\n  * alert (default)\n  * drop: silently dropping packets\n  * close: notify client/server to close connection",
+        "description": "IDP profile action. enum: `alert`, `close`, `drop`. `alert` is the default, `drop` silently drops packets, and `close` asks the client/server to close the connection",
         "enum": [
           "alert",
           "close",
@@ -378,20 +382,25 @@
       },
       "idp_profile_matching": {
         "additionalProperties": false,
+        "description": "Criteria that select IDP signatures for an overwrite rule",
         "properties": {
           "attack_name": {
-            "$ref": "#/components/schemas/idp_profile_matching_attack_name"
+            "$ref": "#/components/schemas/idp_profile_matching_attack_name",
+            "description": "Signature names matched by the IDP profile overwrite"
           },
           "dst_subnet": {
-            "$ref": "#/components/schemas/idp_profile_matching_dst_subnet"
+            "$ref": "#/components/schemas/idp_profile_matching_dst_subnet",
+            "description": "Destination subnets matched by the IDP profile overwrite"
           },
           "severity": {
-            "$ref": "#/components/schemas/idp_profile_matching_severity"
+            "$ref": "#/components/schemas/idp_profile_matching_severity",
+            "description": "Threat levels matched by the IDP profile overwrite"
           }
         },
         "type": "object"
       },
       "idp_profile_matching_attack_name": {
+        "description": "IDP attack signature names matched by an overwrite rule",
         "items": {
           "examples": [
             "HTTP:INVALID:HDR-FIELD"
@@ -401,6 +410,7 @@
         "type": "array"
       },
       "idp_profile_matching_dst_subnet": {
+        "description": "Destination CIDR subnets matched by an IDP profile overwrite",
         "items": {
           "examples": [
             "63.1.2.0/24"
@@ -410,6 +420,7 @@
         "type": "array"
       },
       "idp_profile_matching_severity": {
+        "description": "Severity levels matched by an IDP profile overwrite",
         "items": {
           "$ref": "#/components/schemas/idp_profile_matching_severity_value"
         },
@@ -430,26 +441,32 @@
       },
       "idp_profile_overwrite": {
         "additionalProperties": false,
+        "description": "Override rule that changes the IDP action for matching signatures",
         "properties": {
           "action": {
-            "$ref": "#/components/schemas/idp_profile_action"
+            "$ref": "#/components/schemas/idp_profile_action",
+            "description": "Enforcement action applied when this overwrite rule matches"
           },
           "matching": {
-            "$ref": "#/components/schemas/idp_profile_matching"
+            "$ref": "#/components/schemas/idp_profile_matching",
+            "description": "Criteria that select signatures for this overwrite rule"
           },
           "name": {
+            "description": "Display name for this IDP profile overwrite rule",
             "type": "string"
           }
         },
         "type": "object"
       },
       "idp_profile_overwrites": {
+        "description": "IDP profile overwrite rules applied to the base profile",
         "items": {
           "$ref": "#/components/schemas/idp_profile_overwrite"
         },
         "type": "array"
       },
       "idp_profiles": {
+        "description": "IDP profile records returned for an organization",
         "items": {
           "$ref": "#/components/schemas/idp_profile"
         },
@@ -462,6 +479,7 @@
         "type": "number"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -471,8 +489,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -483,8 +503,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -495,8 +517,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -507,8 +531,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -516,8 +542,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -711,9 +739,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -733,9 +761,9 @@
         }
       },
       "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
         "in": "query",
         "name": "page",
-        "required": false,
         "schema": {
           "default": 1,
           "minimum": 1,
@@ -819,19 +847,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs User MACs",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,16 +59,12 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
   "tags": [
     {
-      "description": "NAC User MACs (Endpoints) provide a database of endpoints identified by their MAC addresses. They can be used assign each endpoint with various attributes, such as name, VLAN, role and client label. Once an endpoint is labeled, the label name can be used to create [NAC Tags]($h/Orgs%20NAC%20Tags/_overview) as match criteria.\n\n[NAC Tags]($h/Orgs%20NAC%20Tags/_overview) can be used to create Tags regrouping one or multiple endpoint MAC Addresses, but the use of the User MACs provides additional features:\n* possibility to assign specific attributes, like a Name, a Radius Group, a VLAN ID, ...\n* possibility to assign one or multiple Tags (Labels) to a User MAC\n* improved management for large list of MAC Addresses",
+      "description": "NAC User MACs (Endpoints) provide a database of endpoints identified by their MAC addresses. They can be used assign each endpoint with various attributes, such as name, VLAN, role and client label. Once an endpoint is labeled, the label name can be used to create [NAC Tags]($h/Orgs%20NAC%20Tags/_overview) as match criteria.\n\n[NAC Tags]($h/Orgs%20NAC%20Tags/_overview) can be used to create Tags regrouping one or multiple endpoint MAC addresses, but the use of the User MACs provides additional features:\n* possibility to assign specific attributes, like a Name, a RADIUS Group, a VLAN ID, ...\n* possibility to assign one or multiple Tags (Labels) to a User MAC\n* improved management for large list of MAC addresses",
       "name": "Orgs User MACs"
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "put": {
-        "description": "Update Multiple Org User MACs",
+        "description": "Update Multiple Org User MACs. Accepts a JSON array of user MAC objects where `id` is required for each entry.",
         "operationId": "updateOrgMultipleUserMacs",
         "requestBody": {
           "content": {
@@ -261,20 +257,20 @@
         }
       ],
       "post": {
-        "description": "Import Org User MACs\n\n### CSV Import example\n```csv \nmac,labels,vlan,notes,name,radius_group\n921b638445cd,\"bldg1,flor1\",vlan-100\n721b638445ef,\"bldg2,flor2\",vlan-101,Canon Printers\n721b638445ee,\"bldg3,flor3\",vlan-102,Printer2,VIP\n921b638445ce,\"bldg4,flor4\",vlan-103\n921b638445cf,\"bldg5,flor5\",vlan-104\n````",
+        "description": "Import Org User MACs. Accepts JSON or CSV upload.\n\n**JSON — Array form** (asynchronous by default):\n```json\n[\n  {\"mac\": \"921b638445cd\", \"labels\": [\"label1\"], \"vlan\": \"vlan-1\"},\n  {\"mac\": \"721b638445ef\", \"labels\": [\"label2\", \"label3\"], \"notes\": \"mac address refers to Canon printers\"}\n]\n```\n\n**CSV upload**: multipart/form-data with `file` field.\n\n### CSV file format\n```csv\nmac,labels,vlan,notes,name,radius_group\n921b638445cd,\"bldg1,flor1\",vlan-100\n721b638445ef,\"bldg2,flor2\",vlan-101,Canon Printers\n721b638445ee,\"bldg3,flor3\",vlan-102,Printer2,VIP\n921b638445ce,\"bldg4,flor4\",vlan-103\n921b638445cf,\"bldg5,flor5\",vlan-104\n```",
         "operationId": "importOrgUserMacs",
         "requestBody": {
           "content": {
             "application/json": {
               "examples": {
-                "Example": {
+                "ArrayForm": {
                   "value": [
                     {
                       "labels": [
                         "label1"
                       ],
                       "mac": "921b638445cd",
-                      "vlan": "30"
+                      "vlan": "vlan-1"
                     },
                     {
                       "labels": [
@@ -300,7 +296,7 @@
                     },
                     {
                       "mac": "921b638445cf",
-                      "vlan": "100"
+                      "vlan": "vlan-100"
                     }
                   ]
                 }
@@ -311,7 +307,17 @@
             },
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/binary_stream"
+                "properties": {
+                  "file": {
+                    "description": "CSV file containing user MAC entries to import",
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "type": "object"
               }
             }
           }
@@ -353,12 +359,7 @@
         "operationId": "searchOrgUserMacs",
         "parameters": [
           {
-            "description": "Partial/full MAC address",
-            "in": "query",
-            "name": "mac",
-            "schema": {
-              "type": "string"
-            }
+            "$ref": "#/components/parameters/partial_filter_mac_usermac"
           },
           {
             "description": "Optional, array of strings of labels",
@@ -510,21 +511,8 @@
   },
   "components": {
     "schemas": {
-      "binary_stream": {
-        "additionalProperties": false,
-        "properties": {
-          "file": {
-            "contentMediaType": "application/octet-stream",
-            "description": "File to upload",
-            "type": "string"
-          }
-        },
-        "required": [
-          "file"
-        ],
-        "type": "object"
-      },
       "count_usermac_distinct": {
+        "description": "Fields that can be used to group user MAC count results. enum: `mac`, `name`, `labels`, `org_id`",
         "enum": [
           "mac",
           "name",
@@ -547,8 +535,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -559,8 +549,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -571,8 +563,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -583,8 +577,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -592,8 +588,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -603,12 +601,23 @@
         "type": "object"
       },
       "search_org_user_macs_labels": {
+        "description": "Labels associated with org user MAC search results",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
+      "site_id": {
+        "description": "Unique identifier of a Mist site",
+        "examples": [
+          "441a1214-6928-442a-8e92-e1d34b8ec6a6"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
       "strings": {
+        "description": "Unique string values returned or accepted by this schema",
         "items": {
           "type": "string"
         },
@@ -616,39 +625,53 @@
         "uniqueItems": true
       },
       "user_mac": {
+        "description": "Organization user MAC entry",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier for this user MAC entry"
           },
           "labels": {
-            "$ref": "#/components/schemas/user_mac_labels"
+            "$ref": "#/components/schemas/user_mac_labels",
+            "description": "Applied labels for this user MAC entry"
           },
           "mac": {
-            "description": "Only non-local-admin MAC is accepted",
+            "description": "Client MAC address for this entry. Only non-local-admin MAC addresses are accepted",
             "examples": [
               "5684dae9ac8b"
             ],
             "type": "string"
           },
           "name": {
+            "description": "Display name for this user MAC entry",
             "examples": [
               "Printer2"
             ],
             "type": "string"
           },
           "notes": {
+            "description": "Free-form notes about this user MAC entry",
             "examples": [
-              "mac address refers to Canon printers"
+              "MAC address refers to Canon printers"
             ],
             "type": "string"
           },
           "radius_group": {
+            "description": "RADIUS group associated with this user MAC entry",
             "examples": [
               "VIP"
             ],
             "type": "string"
           },
+          "site_ids": {
+            "description": "Optional list of site IDs this user MAC entry is scoped to",
+            "items": {
+              "$ref": "#/components/schemas/site_id"
+            },
+            "type": "array"
+          },
           "vlan": {
+            "description": "Network VLAN value associated with this user MAC entry",
             "examples": [
               "30"
             ],
@@ -662,20 +685,29 @@
       },
       "user_mac_import": {
         "additionalProperties": false,
+        "description": "Result of importing user MAC entries",
         "properties": {
           "added": {
-            "$ref": "#/components/schemas/user_mac_import_added"
+            "$ref": "#/components/schemas/user_mac_import_added",
+            "description": "MAC addresses added by the import"
+          },
+          "detail": {
+            "description": "Status message returned for asynchronous imports",
+            "type": "string"
           },
           "errors": {
-            "$ref": "#/components/schemas/user_mac_import_errors"
+            "$ref": "#/components/schemas/user_mac_import_errors",
+            "description": "Import error messages for user MAC entries"
           },
           "updated": {
-            "$ref": "#/components/schemas/user_mac_import_updated"
+            "$ref": "#/components/schemas/user_mac_import_updated",
+            "description": "MAC addresses updated by the import"
           }
         },
         "type": "object"
       },
       "user_mac_import_added": {
+        "description": "MAC addresses added during a user MAC import",
         "examples": [
           [
             "921b638445cd"
@@ -687,6 +719,7 @@
         "type": "array"
       },
       "user_mac_import_errors": {
+        "description": "Error messages returned during a user MAC import",
         "examples": [
           [
             "921b638445ce - mac invalid",
@@ -699,6 +732,7 @@
         "type": "array"
       },
       "user_mac_import_updated": {
+        "description": "MAC addresses updated during a user MAC import",
         "examples": [
           [
             "721b638445ef",
@@ -711,6 +745,7 @@
         "type": "array"
       },
       "user_mac_labels": {
+        "description": "Labels applied to a user MAC entry",
         "examples": [
           [
             "byod",
@@ -723,6 +758,7 @@
         "type": "array"
       },
       "user_macs": {
+        "description": "List of user MAC entries",
         "items": {
           "$ref": "#/components/schemas/user_mac"
         },
@@ -733,26 +769,26 @@
         "description": "User MACs count response",
         "properties": {
           "end": {
-            "description": "End timestamp",
+            "description": "Query end timestamp for user MAC counts",
             "type": "integer"
           },
           "limit": {
-            "description": "Number of results to return",
+            "description": "Maximum number of distinct count results to return",
             "type": "integer"
           },
           "results": {
-            "description": "List of user MAC entries",
+            "description": "User MAC entries returned by the count query",
             "items": {
               "$ref": "#/components/schemas/user_mac"
             },
             "type": "array"
           },
           "start": {
-            "description": "Start timestamp",
+            "description": "Query start timestamp for user MAC counts",
             "type": "integer"
           },
           "total": {
-            "description": "Total number of results",
+            "description": "Overall number of user MAC count results",
             "type": "integer"
           }
         },
@@ -760,25 +796,35 @@
       },
       "user_macs_update": {
         "additionalProperties": false,
+        "description": "Result of a bulk user MAC update",
         "properties": {
+          "detail": {
+            "description": "Status message returned for asynchronous batch updates",
+            "type": "string"
+          },
           "errors": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Update errors reported for user MAC entries"
           },
           "updated": {
-            "$ref": "#/components/schemas/uuids"
+            "$ref": "#/components/schemas/uuids",
+            "description": "User MAC entry IDs updated by the request"
           }
         },
         "type": "object"
       },
       "usermacs_id": {
+        "description": "Request body for deleting multiple user MAC entries",
         "properties": {
           "usermac_ids": {
-            "$ref": "#/components/schemas/uuids"
+            "$ref": "#/components/schemas/uuids",
+            "description": "User MAC entry IDs to delete"
           }
         },
         "type": "object"
       },
       "uuids": {
+        "description": "UUID string values used as identifiers",
         "items": {
           "format": "uuid",
           "type": "string"
@@ -934,7 +980,10 @@
         "content": {
           "application/json": {
             "examples": {
-              "Example": {
+              "Async": {
+                "$ref": "#/components/examples/UserMacImportAsyncExample"
+              },
+              "Sync": {
                 "$ref": "#/components/examples/UserMacImportExample"
               }
             },
@@ -944,7 +993,10 @@
           },
           "application/vnd.api+json": {
             "examples": {
-              "Example": {
+              "Async": {
+                "$ref": "#/components/examples/UserMacImportAsyncExample"
+              },
+              "Sync": {
                 "$ref": "#/components/examples/UserMacImportExample"
               }
             },
@@ -983,11 +1035,21 @@
       "UserMacsCount": {
         "content": {
           "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/UserMacsCountExample"
+              }
+            },
             "schema": {
               "$ref": "#/components/schemas/user_macs_count"
             }
           },
           "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/UserMacsCountExample"
+              }
+            },
             "schema": {
               "$ref": "#/components/schemas/user_macs_count"
             }
@@ -999,7 +1061,10 @@
         "content": {
           "application/json": {
             "examples": {
-              "Example": {
+              "Async": {
+                "$ref": "#/components/examples/UserMacsUpdateAsyncExample"
+              },
+              "Sync": {
                 "$ref": "#/components/examples/UserMacsUpdateExample"
               }
             },
@@ -1009,7 +1074,10 @@
           },
           "application/vnd.api+json": {
             "examples": {
-              "Example": {
+              "Async": {
+                "$ref": "#/components/examples/UserMacsUpdateAsyncExample"
+              },
+              "Sync": {
                 "$ref": "#/components/examples/UserMacsUpdateExample"
               }
             },
@@ -1023,7 +1091,7 @@
     },
     "parameters": {
       "end": {
-        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
         "in": "query",
         "name": "end",
         "schema": {
@@ -1031,9 +1099,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -1053,20 +1121,32 @@
         }
       },
       "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
         "in": "query",
         "name": "page",
-        "required": false,
         "schema": {
           "default": 1,
           "minimum": 1,
           "type": "integer"
         }
       },
+      "partial_filter_mac_usermac": {
+        "description": "Partial / full Client MAC address. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `aabbcc*` and `*bbcc*` match `aabbccddeeff`). Suffix-only wildcards (e.g. `*bccddeeff`) are not supported",
+        "in": "query",
+        "name": "mac",
+        "schema": {
+          "examples": [
+            "aabbccddeeff",
+            "aabbcc*",
+            "*bbcc*"
+          ],
+          "type": "string"
+        }
+      },
       "sort": {
         "description": "On which field the list should be sorted, -prefix represents DESC order",
         "in": "query",
         "name": "sort",
-        "required": false,
         "schema": {
           "default": "timestamp",
           "examples": [
@@ -1076,7 +1156,7 @@
         }
       },
       "start": {
-        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
         "in": "query",
         "name": "start",
         "schema": {
@@ -1125,8 +1205,17 @@
             "bld4"
           ],
           "mac": "921b638445cd",
-          "notes": "mac address refers to Canon printers",
+          "notes": "MAC address refers to Canon printers",
+          "site_ids": [
+            "4ac1dcf4-9d8b-7211-65c4-057819f0862b",
+            "52f4347e-3e4b-186c-21ca-ad5b70eb23d6"
+          ],
           "vlan": "30"
+        }
+      },
+      "UserMacImportAsyncExample": {
+        "value": {
+          "detail": "import in progress"
         }
       },
       "UserMacImportExample": {
@@ -1153,10 +1242,57 @@
               "bld4"
             ],
             "mac": "921b638445cd",
-            "notes": "mac address refers to Canon printers",
+            "notes": "MAC address refers to Canon printers",
+            "site_ids": [
+              "4ac1dcf4-9d8b-7211-65c4-057819f0862b",
+              "52f4347e-3e4b-186c-21ca-ad5b70eb23d6"
+            ],
             "vlan": "30"
           }
         ]
+      },
+      "UserMacsCountExample": {
+        "value": {
+          "end": 1723651268,
+          "limit": 10,
+          "results": [
+            {
+              "id": "111cafd2-ba1b-5169-bfcb-9cdf1d473ddb",
+              "labels": [
+                "flor1",
+                "bld4"
+              ],
+              "mac": "921b638445cd",
+              "name": "Printer2",
+              "notes": "mac address refers to Canon printers",
+              "radius_group": "VIP",
+              "site_ids": [
+                "4ac1dcf4-9d8b-7211-65c4-057819f0862b",
+                "52f4347e-3e4b-186c-21ca-ad5b70eb23d6"
+              ],
+              "vlan": "30"
+            },
+            {
+              "id": "abecafd2-ba1b-5169-bfcb-9cdf1d473123",
+              "labels": [
+                "blgd-cupe",
+                "old"
+              ],
+              "mac": "921b638445ce",
+              "name": "os mac",
+              "notes": "mac devices",
+              "radius_group": "rg-1",
+              "vlan": "vlan-2"
+            }
+          ],
+          "start": 1723651267,
+          "total": 2
+        }
+      },
+      "UserMacsUpdateAsyncExample": {
+        "value": {
+          "detail": "batch update in progress"
+        }
       },
       "UserMacsUpdateExample": {
         "value": {
@@ -1172,19 +1308,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

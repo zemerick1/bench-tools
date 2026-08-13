@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Utilities LAN",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -349,7 +345,7 @@
         }
       ],
       "post": {
-        "description": "TDR can be performed from the Switch. The output will be available through websocket. As there can be multiple command issued against the same Switch at the same time and the output all goes through the same websocket stream, session is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n##### Example output from ws stream\n```json\n{\n    \"event\": \"data\",\n    \"channel\": \"/sites/4ac1dcf4-9d8b-7211-65c4-057819f0862b/devices/00000000-0000-0000-1000-5c5b350e0060/cmd\",\n    \"data\": {\n        \"session\": \"session_id\",\n        \"raw\": \"Interface TDR detail:\\nTest status : Test successfully executed  ge-0/0/0\\n\"\n    }\n}\n```",
+        "description": "TDR can be performed from the Switch. The output will be available through websocket. As there can be multiple commands issued against the same Switch at the same time and the output all goes through the same websocket stream, session is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n##### Example output from ws stream\n```json\n{\n    \"event\": \"data\",\n    \"channel\": \"/sites/4ac1dcf4-9d8b-7211-65c4-057819f0862b/devices/00000000-0000-0000-1000-5c5b350e0060/cmd\",\n    \"data\": {\n        \"session\": \"session_id\",\n        \"raw\": \"Interface TDR detail:\\nTest status : Test successfully executed  ge-0/0/0\\n\"\n    }\n}\n```",
         "operationId": "cableTestFromSwitch",
         "requestBody": {
           "content": {
@@ -419,7 +415,7 @@
             "$ref": "#/components/responses/OK"
           },
           "400": {
-            "description": "Port not specified"
+            "description": "Ports not specified"
           },
           "401": {
             "$ref": "#/components/responses/HTTP401"
@@ -458,7 +454,9 @@
               "examples": {
                 "Example": {
                   "value": {
-                    "port_id": "ge-0/0/0"
+                    "ports": [
+                      "ge-0/0/0"
+                    ]
                   }
                 }
               },
@@ -604,6 +602,117 @@
         ]
       }
     },
+    "/api/v1/sites/{site_id}/devices/{device_id}/flow_records/search": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "get": {
+        "description": "Search network flow records for a specific device within a site.\nNote: Only supported for switch devices. The device must be manageable. The `device_mac` is automatically scoped to the device in the URL path and cannot be overridden by query parameter.",
+        "operationId": "searchSiteDeviceFlowRecords",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/start"
+          },
+          {
+            "$ref": "#/components/parameters/end"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/sort"
+          },
+          {
+            "description": "Source IP address",
+            "in": "query",
+            "name": "src_ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Destination IP address",
+            "in": "query",
+            "name": "dst_ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Source port",
+            "in": "query",
+            "name": "src_port",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Destination port",
+            "in": "query",
+            "name": "dst_port",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Protocol (e.g. `tcp`, `udp`, `icmp`)",
+            "in": "query",
+            "name": "protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Flow state",
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Flow direction",
+            "in": "query",
+            "name": "direction",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/search_after"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DeviceFlowRecordsSearch"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "searchSiteDeviceFlowRecords",
+        "tags": [
+          "Utilities LAN"
+        ]
+      }
+    },
     "/api/v1/sites/{site_id}/devices/{device_id}/poll_stats": {
       "parameters": [
         {
@@ -690,6 +799,54 @@
           }
         },
         "summary": "restoreSiteDeviceBackupVersion",
+        "tags": [
+          "Utilities LAN"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/show_arp": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Get ARP Table from the Device.\n\nThe output will be available through websocket. As there can be multiple commands issued against the same device at the same time and the output all goes through the same websocket stream, `session` is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n",
+        "operationId": "showSiteDeviceArpTable",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/utils_show_arp"
+              }
+            }
+          },
+          "description": "All attributes are optional"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/WebsocketSession"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "showSiteDeviceArpTable",
         "tags": [
           "Utilities LAN"
         ]
@@ -943,20 +1100,33 @@
   "components": {
     "schemas": {
       "clear_dot1x_session": {
+        "description": "Request body for clearing dot1x sessions on switch ports",
         "properties": {
-          "port_id": {
-            "description": "ID of the port where the dot1x session must be cleared. If not provided, the sessions on all the port will be cleared.",
-            "examples": [
-              "ge-0/0/0"
-            ],
-            "type": "string"
+          "ports": {
+            "$ref": "#/components/schemas/clear_dot1x_session_ports",
+            "description": "Port IDs whose dot1x sessions should be cleared"
           }
         },
         "type": "object"
       },
+      "clear_dot1x_session_ports": {
+        "description": "List of port IDs where the dot1x session must be cleared. Use `all` to clear sessions on all ports.",
+        "examples": [
+          [
+            "ge-0/0/0",
+            "ge-0/0/1"
+          ]
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
       "devices_ids": {
+        "description": "Request body containing device identifiers",
         "properties": {
           "device_ids": {
+            "description": "Device identifiers to operate on in the request",
             "items": {
               "format": "uuid",
               "type": "string"
@@ -969,22 +1139,179 @@
         ],
         "type": "object"
       },
+      "flow_record": {
+        "additionalProperties": false,
+        "description": "Network flow record reported by a switch device",
+        "properties": {
+          "device_mac": {
+            "description": "MAC address of the device",
+            "type": "string"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/flow_record_direction"
+          },
+          "dst_ip": {
+            "description": "Destination IP address",
+            "type": "string"
+          },
+          "dst_port": {
+            "description": "Destination port number",
+            "type": "integer"
+          },
+          "duration": {
+            "description": "Flow duration in seconds",
+            "format": "int64",
+            "type": "integer"
+          },
+          "end_time": {
+            "description": "Flow end time in epoch seconds",
+            "format": "int64",
+            "type": "integer"
+          },
+          "flow_id": {
+            "description": "Unique flow identifier",
+            "format": "int64",
+            "type": "integer"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/org_id",
+            "description": "UUID of the org"
+          },
+          "protocol": {
+            "description": "Protocol (e.g. `tcp`, `udp`, `icmp`)",
+            "type": "string"
+          },
+          "sampling_percentage": {
+            "description": "Percentage of packets sampled (e.g. `0.1` means 0.1% of packets are captured via sFlow; `100.0` means all packets are captured via FBT)",
+            "format": "float",
+            "type": "number"
+          },
+          "site_id": {
+            "$ref": "#/components/schemas/site_id",
+            "description": "UUID of the site"
+          },
+          "src_ip": {
+            "description": "Source IP address",
+            "type": "string"
+          },
+          "src_port": {
+            "description": "Source port number",
+            "type": "integer"
+          },
+          "start_time": {
+            "description": "Flow start time in epoch seconds",
+            "format": "int64",
+            "type": "integer"
+          },
+          "state": {
+            "$ref": "#/components/schemas/flow_record_state"
+          },
+          "timestamp": {
+            "description": "Epoch time (in seconds) when the flow record was last updated or completed",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total_bytes": {
+            "description": "Total number of bytes in the flow",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total_pkts": {
+            "description": "Total number of packets in the flow",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "flow_record_direction": {
+        "description": "Flow direction. enum: `egress`, `ingress`",
+        "enum": [
+          "egress",
+          "ingress"
+        ],
+        "type": "string"
+      },
+      "flow_record_state": {
+        "description": "Flow state. enum: `active`, `aged-out`",
+        "enum": [
+          "active",
+          "aged-out"
+        ],
+        "type": "string"
+      },
+      "ha_cluster_node_enum": {
+        "description": "HA cluster node selector. enum: `node0`, `node1`",
+        "enum": [
+          "node0",
+          "node1"
+        ],
+        "type": "string"
+      },
+      "org_id": {
+        "description": "Unique identifier of a Mist organization",
+        "examples": [
+          "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
       "response_device_bios_upgrade": {
         "additionalProperties": false,
+        "description": "Device BIOS upgrade status response",
         "properties": {
           "status": {
+            "description": "Current BIOS upgrade status for the device",
             "type": "string"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Epoch timestamp when the BIOS upgrade status was reported"
+          }
+        },
+        "type": "object"
+      },
+      "response_device_flow_records_search": {
+        "additionalProperties": false,
+        "description": "Paginated response for device flow record search results",
+        "properties": {
+          "end": {
+            "description": "Epoch timestamp, in seconds, for the end of the flow record search window",
+            "type": "integer"
+          },
+          "limit": {
+            "description": "Maximum number of flow records returned in this page",
+            "type": "integer"
+          },
+          "results": {
+            "description": "Flow records matching the search filters",
+            "items": {
+              "$ref": "#/components/schemas/flow_record"
+            },
+            "type": "array"
+          },
+          "search_after": {
+            "description": "Cursor token for retrieving the next page of flow records",
+            "type": "string"
+          },
+          "start": {
+            "description": "Epoch timestamp, in seconds, for the start of the flow record search window",
+            "type": "integer"
+          },
+          "total": {
+            "description": "Number of flow records matching the search filters",
+            "type": "integer"
           }
         },
         "type": "object"
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -995,8 +1322,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -1007,8 +1336,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -1019,8 +1350,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -1028,8 +1361,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -1040,20 +1375,24 @@
       },
       "response_wired_coa": {
         "additionalProperties": false,
+        "description": "Response returned after triggering wired client CoA reauthentication",
         "properties": {
           "device_mac": {
+            "description": "MAC address of the switch or gateway hosting the wired client session",
             "examples": [
               "5c5b35000002"
             ],
             "type": "string"
           },
           "port_id": {
+            "description": "Interface identifier for the wired client session",
             "examples": [
               "ge-0/0/0"
             ],
             "type": "string"
           },
           "session": {
+            "description": "RADIUS session identifier used for the CoA request",
             "examples": [
               "0a2a11b8-4b30-40d8-a6d1-e91ea540d86f"
             ],
@@ -1063,21 +1402,31 @@
         },
         "type": "object"
       },
+      "site_id": {
+        "description": "Unique identifier of a Mist site",
+        "examples": [
+          "441a1214-6928-442a-8e92-e1d34b8ec6a6"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
       "timestamp": {
-        "description": "Epoch (seconds)",
+        "description": "Epoch timestamp, in seconds",
         "format": "double",
         "readOnly": true,
         "type": "number"
       },
       "upgrade_bios": {
+        "description": "BIOS upgrade request for a single device",
         "properties": {
           "reboot": {
             "default": false,
-            "description": "Reboot device immediately after upgrade is completed",
+            "description": "Whether to restart the device immediately after the upgrade completes",
             "type": "boolean"
           },
           "version": {
-            "description": "Specific bios version",
+            "description": "BIOS version to install on the device",
             "examples": [
               "CDEN_P_EX1_00.20.01.00"
             ],
@@ -1087,20 +1436,23 @@
         "type": "object"
       },
       "upgrade_bios_multi": {
+        "description": "BIOS upgrade request for multiple devices",
         "properties": {
           "device_ids": {
-            "$ref": "#/components/schemas/upgrade_bios_multi_device_ids"
+            "$ref": "#/components/schemas/upgrade_bios_multi_device_ids",
+            "description": "Specific device IDs to include in the BIOS upgrade"
           },
           "models": {
-            "$ref": "#/components/schemas/upgrade_bios_multi_models"
+            "$ref": "#/components/schemas/upgrade_bios_multi_models",
+            "description": "Device models to include in the BIOS upgrade"
           },
           "reboot": {
             "default": false,
-            "description": "Reboot device immediately after upgrade is completed",
+            "description": "Whether to restart the selected devices immediately after the upgrade completes",
             "type": "boolean"
           },
           "version": {
-            "description": "Specific bios version",
+            "description": "BIOS version to install on the selected devices",
             "examples": [
               "CDEN_P_EX1_00.15.01.00"
             ],
@@ -1110,7 +1462,7 @@
         "type": "object"
       },
       "upgrade_bios_multi_device_ids": {
-        "description": "List of device id to upgrade bios",
+        "description": "Device IDs selected for a multi-device BIOS upgrade",
         "items": {
           "examples": [
             "00000000-0000-0000-1000-5c5b35584a6f"
@@ -1121,7 +1473,7 @@
         "type": "array"
       },
       "upgrade_bios_multi_models": {
-        "description": "List of device model to upgrade bios",
+        "description": "Device models selected for a multi-device BIOS upgrade",
         "items": {
           "examples": [
             "EX4400-48T"
@@ -1131,14 +1483,15 @@
         "type": "array"
       },
       "upgrade_fpga": {
+        "description": "FPGA upgrade request for a single device",
         "properties": {
           "reboot": {
             "default": false,
-            "description": "Reboot device immediately after upgrade is completed",
+            "description": "Whether to restart the device immediately after the upgrade completes",
             "type": "boolean"
           },
           "version": {
-            "description": "Specific fpga version",
+            "description": "FPGA version to install on the device",
             "examples": [
               "REV37"
             ],
@@ -1148,20 +1501,23 @@
         "type": "object"
       },
       "upgrade_fpga_multi": {
+        "description": "FPGA upgrade request for multiple devices",
         "properties": {
           "device_ids": {
-            "$ref": "#/components/schemas/upgrade_fpga_multi_device_ids"
+            "$ref": "#/components/schemas/upgrade_fpga_multi_device_ids",
+            "description": "Specific device IDs to include in the FPGA upgrade"
           },
           "models": {
-            "$ref": "#/components/schemas/upgrade_fpga_multi_models"
+            "$ref": "#/components/schemas/upgrade_fpga_multi_models",
+            "description": "Device models to include in the FPGA upgrade"
           },
           "reboot": {
             "default": false,
-            "description": "Reboot device immediately after upgrade is completed",
+            "description": "Whether to restart the selected devices immediately after the upgrade completes",
             "type": "boolean"
           },
           "version": {
-            "description": "Specific FPGA version",
+            "description": "FPGA version to install on the selected devices",
             "examples": [
               "REV37"
             ],
@@ -1171,7 +1527,7 @@
         "type": "object"
       },
       "upgrade_fpga_multi_device_ids": {
-        "description": "List of device id to upgrade bios",
+        "description": "Device IDs selected for a multi-device FPGA upgrade",
         "items": {
           "examples": [
             "00000000-0000-0000-1000-5c5b35584a6f"
@@ -1182,7 +1538,7 @@
         "type": "array"
       },
       "upgrade_fpga_multi_models": {
-        "description": "List of device model to upgrade bios",
+        "description": "Device models selected for a multi-device FPGA upgrade",
         "items": {
           "examples": [
             "EX4400-48T"
@@ -1192,6 +1548,7 @@
         "type": "array"
       },
       "utils_cable_tests": {
+        "description": "Request body for running a switch cable test on a port",
         "properties": {
           "port": {
             "description": "The port to run the cable test",
@@ -1204,33 +1561,90 @@
         "type": "object"
       },
       "utils_clear_bpdu": {
-        "properties": {
-          "port": {
-            "description": "Port on which to clear the detected BPDU error, or `all` for all ports",
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "utils_clear_macs": {
+        "description": "Request to clear detected BPDU errors on switch ports",
         "properties": {
           "ports": {
-            "$ref": "#/components/schemas/utils_clear_macs_ports"
+            "$ref": "#/components/schemas/utils_clear_bpdu_ports",
+            "description": "Switch ports on which to clear detected BPDU errors"
           }
         },
         "type": "object"
       },
-      "utils_clear_macs_ports": {
-        "description": "List of ports on which to clear mac addresses. must include logical unit number",
+      "utils_clear_bpdu_ports": {
+        "description": "List of ports on which to clear the detected BPDU error, or `all` for all ports",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
+      "utils_clear_macs": {
+        "description": "Request to clear learned MAC addresses from device ports",
+        "properties": {
+          "ports": {
+            "$ref": "#/components/schemas/utils_clear_macs_ports",
+            "description": "Switch ports on which to clear learned MAC addresses"
+          }
+        },
+        "type": "object"
+      },
+      "utils_clear_macs_ports": {
+        "description": "Device ports on which to clear learned MAC addresses. Must include logical unit number",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "utils_show_arp": {
+        "description": "ARP table lookup request for device command output",
+        "properties": {
+          "duration": {
+            "default": 0,
+            "description": "Refresh duration in seconds; set only when `interval` is nonzero",
+            "maximum": 300,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "interval": {
+            "default": 0,
+            "description": "Refresh interval in seconds for repeated command output",
+            "maximum": 10,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "ip": {
+            "description": "Address filter for the ARP table lookup",
+            "examples": [
+              "192.168.30.7"
+            ],
+            "type": "string"
+          },
+          "node": {
+            "$ref": "#/components/schemas/ha_cluster_node_enum",
+            "description": "HA cluster node to run the command on, required for Gateways"
+          },
+          "port_id": {
+            "description": "Device port identifier filter for the ARP table lookup",
+            "examples": [
+              "ge-0/0/0.0"
+            ],
+            "type": "string"
+          },
+          "vrf": {
+            "description": "Routing instance or VRF filter for the ARP table lookup",
+            "examples": [
+              "guest"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "websocket_session": {
         "additionalProperties": false,
+        "description": "Response containing the WebSocket session handle for asynchronous command output",
         "properties": {
           "session": {
+            "description": "Identifier used to correlate output on the WebSocket stream",
             "examples": [
               "19e73828-937f-05e6-f709-e29efdb0a82b"
             ],
@@ -1264,6 +1678,31 @@
             },
             "schema": {
               "$ref": "#/components/schemas/response_device_bios_upgrade"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "DeviceFlowRecordsSearch": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/DeviceFlowRecordsSearchExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_device_flow_records_search"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/DeviceFlowRecordsSearchExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_device_flow_records_search"
             }
           }
         },
@@ -1453,6 +1892,24 @@
           "type": "string"
         }
       },
+      "end": {
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
+        "in": "query",
+        "name": "end",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "limit": {
+        "description": "Maximum number of results to return per page",
+        "in": "query",
+        "name": "limit",
+        "schema": {
+          "default": 100,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
       "org_id": {
         "in": "path",
         "name": "org_id",
@@ -1462,6 +1919,14 @@
             "000000ab-00ab-00ab-00ab-0000000000ab"
           ],
           "format": "uuid",
+          "type": "string"
+        }
+      },
+      "search_after": {
+        "description": "Pagination cursor for retrieving subsequent pages of results. This value is automatically populated by Mist in the `next` URL from the previous response and should not be manually constructed.",
+        "in": "query",
+        "name": "search_after",
+        "schema": {
           "type": "string"
         }
       },
@@ -1476,6 +1941,26 @@
           "format": "uuid",
           "type": "string"
         }
+      },
+      "sort": {
+        "description": "On which field the list should be sorted, -prefix represents DESC order",
+        "in": "query",
+        "name": "sort",
+        "schema": {
+          "default": "timestamp",
+          "examples": [
+            "-site_id"
+          ],
+          "type": "string"
+        }
+      },
+      "start": {
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
+        "in": "query",
+        "name": "start",
+        "schema": {
+          "type": "string"
+        }
       }
     },
     "examples": {
@@ -1483,6 +1968,36 @@
         "value": {
           "status": "inprogress",
           "timestamp": 1428949501
+        }
+      },
+      "DeviceFlowRecordsSearchExample": {
+        "value": {
+          "end": 1775003600,
+          "limit": 1000,
+          "results": [
+            {
+              "device_mac": "5c5b350e020a",
+              "direction": "ingress",
+              "dst_ip": "8.8.8.8",
+              "dst_port": 443,
+              "duration": 60,
+              "end_time": 1775000060,
+              "flow_id": 12345,
+              "org_id": "2818e386-8dec-2562-9ede-5b8a0fbbdc71",
+              "protocol": "tcp",
+              "sampling_percentage": 0.1,
+              "site_id": "4ac1dcf4-9d8b-7211-65c4-057819f0862b",
+              "src_ip": "10.0.0.1",
+              "src_port": 54321,
+              "start_time": 1775000000,
+              "state": "aged-out",
+              "timestamp": 1775000060,
+              "total_bytes": 150000,
+              "total_pkts": 100
+            }
+          ],
+          "start": 1775000000,
+          "total": 1
         }
       },
       "HTTP400Example": {
@@ -1515,19 +2030,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

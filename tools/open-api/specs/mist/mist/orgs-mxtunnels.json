@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs MxTunnels",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "get": {
-        "description": "Get List of Org MxTunnels",
+        "description": "List organization Mist Tunnel configurations used to carry AP user VLANs to Mist Edge clusters.",
         "operationId": "listOrgMxTunnels",
         "parameters": [
           {
@@ -116,7 +112,7 @@
         ]
       },
       "post": {
-        "description": "Create MxTunnel",
+        "description": "Create an organization Mist Tunnel configuration, including hosting Mist Edge clusters, VLANs, heartbeat settings, and optional IPsec settings.",
         "operationId": "createOrgMxTunnel",
         "requestBody": {
           "content": {
@@ -192,7 +188,7 @@
         }
       ],
       "get": {
-        "description": "Get Org MxTunnel Details",
+        "description": "Retrieve configuration details for a specific organization Mist Tunnel, including cluster, VLAN, heartbeat, IPsec, and preemption settings.",
         "operationId": "getOrgMxTunnel",
         "responses": {
           "200": {
@@ -220,7 +216,7 @@
         ]
       },
       "put": {
-        "description": "Update Org MxTunnel",
+        "description": "Update an organization Mist Tunnel configuration, including cluster membership, VLANs, heartbeat settings, IPsec, and preemption behavior.",
         "operationId": "updateOrgMxTunnel",
         "requestBody": {
           "content": {
@@ -258,7 +254,7 @@
         ]
       },
       "delete": {
-        "description": "Delete Org MxTunnel",
+        "description": "Delete an organization Mist Tunnel configuration by Mist Tunnel ID.",
         "operationId": "deleteOrgMxTunnel",
         "responses": {
           "200": {
@@ -291,18 +287,20 @@
     "schemas": {
       "auto_preemption": {
         "additionalProperties": false,
-        "description": "Schedule to preempt ap’s which are not connected to preferred peer",
+        "description": "Schedule to preempt AP tunnels that are not connected to their preferred peer",
         "properties": {
           "day_of_week": {
-            "$ref": "#/components/schemas/day_of_week"
+            "$ref": "#/components/schemas/day_of_week",
+            "description": "Scheduled weekday for auto preemption"
           },
           "enabled": {
             "default": false,
-            "description": "Whether auto preemption should happen",
+            "description": "Whether auto preemption is enabled",
             "type": "boolean"
           },
           "time_of_day": {
-            "$ref": "#/components/schemas/time_of_day"
+            "$ref": "#/components/schemas/time_of_day",
+            "description": "Scheduled time of day for auto preemption"
           }
         },
         "type": "object"
@@ -343,18 +341,22 @@
         "type": "number"
       },
       "mxtunnel": {
-        "description": "MxTunnel",
+        "description": "Mist Tunnel configuration for tunneling AP user VLANs to Mist Edge clusters",
         "properties": {
           "anchor_mxtunnel_ids": {
-            "$ref": "#/components/schemas/mxtunnel_anchor_mxtunnel_ids"
+            "$ref": "#/components/schemas/mxtunnel_anchor_mxtunnel_ids",
+            "description": "IDs of anchor Mist Tunnels used for edge-to-edge tunnel formation"
           },
           "auto_preemption": {
-            "$ref": "#/components/schemas/auto_preemption"
+            "$ref": "#/components/schemas/auto_preemption",
+            "description": "Preemption behavior for restoring preferred tunnel peers after failover"
           },
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Timestamp when the Mist Tunnel was created"
           },
           "for_site": {
+            "description": "Whether this Mist Tunnel is scoped to a site",
             "readOnly": true,
             "type": "boolean"
           },
@@ -370,6 +372,7 @@
           },
           "hello_retries": {
             "default": 7,
+            "description": "Number of missed hello heartbeats before an AP tries another tunnel peer",
             "maximum": 30,
             "minimum": 2,
             "type": [
@@ -378,13 +381,16 @@
             ]
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the Mist Tunnel"
           },
           "ipsec": {
-            "$ref": "#/components/schemas/mxtunnel_ipsec"
+            "$ref": "#/components/schemas/mxtunnel_ipsec",
+            "description": "Security settings for IPsec support on this Mist Tunnel"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Timestamp when the Mist Tunnel was last modified"
           },
           "mtu": {
             "default": 0,
@@ -394,25 +400,31 @@
             "type": "integer"
           },
           "mxcluster_ids": {
-            "$ref": "#/components/schemas/mxtunnel_mxcluster_ids"
+            "$ref": "#/components/schemas/mxtunnel_mxcluster_ids",
+            "description": "Mist Edge cluster IDs that host this Mist Tunnel"
           },
           "name": {
+            "description": "Display name of the Mist Tunnel",
             "type": [
               "string",
               "null"
             ]
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Identifier of the org that owns the Mist Tunnel"
           },
           "protocol": {
-            "$ref": "#/components/schemas/mxtunnel_protocol"
+            "$ref": "#/components/schemas/mxtunnel_protocol",
+            "description": "Encapsulation protocol used for the Mist Tunnel"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Identifier of the site when the Mist Tunnel is site-scoped"
           },
           "vlan_ids": {
-            "$ref": "#/components/schemas/mxtunnel_vlan_ids"
+            "$ref": "#/components/schemas/mxtunnel_vlan_ids",
+            "description": "List of VLAN IDs carried by this Mist Tunnel"
           }
         },
         "type": "object"
@@ -430,29 +442,37 @@
       },
       "mxtunnel_ipsec": {
         "additionalProperties": false,
+        "description": "IPsec settings for a Mist Tunnel",
         "properties": {
           "dns_servers": {
-            "$ref": "#/components/schemas/mxtunnel_ipsec_dns_servers"
+            "$ref": "#/components/schemas/mxtunnel_ipsec_dns_servers",
+            "description": "Name server addresses advertised for IPsec tunnel clients"
           },
           "dns_suffix": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Search suffixes advertised for IPsec tunnel clients"
           },
           "enabled": {
+            "description": "Whether IPsec support is enabled for this Mist Tunnel",
             "type": "boolean"
           },
           "extra_routes": {
-            "$ref": "#/components/schemas/mxtunnel_ipsec_extra_routes"
+            "$ref": "#/components/schemas/mxtunnel_ipsec_extra_routes",
+            "description": "Additional routes advertised for the IPsec tunnel"
           },
           "split_tunnel": {
+            "description": "Whether split tunneling is enabled for IPsec clients",
             "type": "boolean"
           },
           "use_mxedge": {
+            "description": "Whether IPsec termination uses Mist Edge",
             "type": "boolean"
           }
         },
         "type": "object"
       },
       "mxtunnel_ipsec_dns_servers": {
+        "description": "Name server addresses advertised for IPsec tunnel clients",
         "items": {
           "type": "string"
         },
@@ -463,11 +483,14 @@
       },
       "mxtunnel_ipsec_extra_route": {
         "additionalProperties": false,
+        "description": "Extra route advertised for an IPsec tunnel",
         "properties": {
           "dest": {
+            "description": "Route destination CIDR for the IPsec extra route",
             "type": "string"
           },
           "next_hop": {
+            "description": "Route next-hop IPv4 address for the IPsec extra route",
             "format": "ipv4",
             "type": "string"
           }
@@ -475,13 +498,14 @@
         "type": "object"
       },
       "mxtunnel_ipsec_extra_routes": {
+        "description": "Additional routes advertised for IPsec tunnel clients",
         "items": {
           "$ref": "#/components/schemas/mxtunnel_ipsec_extra_route"
         },
         "type": "array"
       },
       "mxtunnel_mxcluster_ids": {
-        "description": "List of mxclusters to deploy this tunnel to",
+        "description": "Mist Edge cluster IDs that host this Mist Tunnel",
         "items": {
           "format": "uuid",
           "type": "string"
@@ -490,7 +514,7 @@
       },
       "mxtunnel_protocol": {
         "default": "udp",
-        "description": "enum: `ip`, `udp`",
+        "description": "Encapsulation protocol used for Mist Tunnel traffic. enum: `ip`, `udp`",
         "enum": [
           "ip",
           "udp"
@@ -498,19 +522,21 @@
         "type": "string"
       },
       "mxtunnel_vlan_ids": {
-        "description": "List of vlan_ids that will be used",
+        "description": "List of VLAN IDs carried by this Mist Tunnel",
         "items": {
           "type": "integer"
         },
         "type": "array"
       },
       "mxtunnels": {
+        "description": "List of Mist Tunnel configurations",
         "items": {
           "$ref": "#/components/schemas/mxtunnel"
         },
         "type": "array"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -520,8 +546,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -532,8 +560,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -544,8 +574,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -556,8 +588,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -565,8 +599,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -576,6 +612,7 @@
         "type": "object"
       },
       "site_id": {
+        "description": "Unique identifier of a Mist site",
         "examples": [
           "441a1214-6928-442a-8e92-e1d34b8ec6a6"
         ],
@@ -584,6 +621,7 @@
         "type": "string"
       },
       "strings": {
+        "description": "Unique string values returned or accepted by this schema",
         "items": {
           "type": "string"
         },
@@ -771,9 +809,9 @@
     },
     "parameters": {
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -805,9 +843,9 @@
         }
       },
       "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
         "in": "query",
         "name": "page",
-        "required": false,
         "schema": {
           "default": 1,
           "minimum": 1,
@@ -902,19 +940,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

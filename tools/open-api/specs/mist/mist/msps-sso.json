@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "MSPs SSO",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "get": {
-        "description": "List MSP SSO Configs",
+        "description": "List SSO identity provider configurations defined for this MSP.",
         "operationId": "listMspSsos",
         "responses": {
           "200": {
@@ -108,7 +104,7 @@
         ]
       },
       "post": {
-        "description": "Create MSP SSO profile",
+        "description": "Create an MSP SSO identity provider configuration, including provider settings and role-handling behavior.",
         "operationId": "createMspSso",
         "requestBody": {
           "content": {
@@ -156,7 +152,7 @@
         }
       ],
       "get": {
-        "description": "Get MSP SSO Config",
+        "description": "Return one MSP SSO identity provider configuration, including provider settings and generated SSO URLs.",
         "operationId": "getMspSso",
         "responses": {
           "200": {
@@ -184,7 +180,7 @@
         ]
       },
       "put": {
-        "description": "Update MSP SSO config",
+        "description": "Update an MSP SSO identity provider configuration, such as IdP URLs, certificates, issuer, NameID format, and unmatched-role handling.",
         "operationId": "updateMspSso",
         "requestBody": {
           "content": {
@@ -236,7 +232,7 @@
         ]
       },
       "delete": {
-        "description": "Delete MSP SSO Config",
+        "description": "Delete an MSP SSO identity provider configuration so it can no longer be used for administrator login.",
         "operationId": "deleteMspSso",
         "responses": {
           "200": {
@@ -264,6 +260,71 @@
         ]
       }
     },
+    "/api/v1/msps/{msp_id}/ssos/{sso_id}/delete_admins": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/msp_id"
+        },
+        {
+          "$ref": "#/components/parameters/sso_id"
+        }
+      ],
+      "post": {
+        "description": "Remove SSO-linked MSP administrator accounts by email for this SSO profile.",
+        "operationId": "deleteMspSsoAdmins",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "emails": [
+                      "john@abc.com",
+                      "may@abc.com"
+                    ]
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/sso_delete_admins"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/sso_delete_admins_response"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "deleteMspSsoAdmins",
+        "tags": [
+          "MSPs SSO"
+        ]
+      }
+    },
     "/api/v1/msps/{msp_id}/ssos/{sso_id}/failures": {
       "parameters": [
         {
@@ -274,7 +335,7 @@
         }
       ],
       "get": {
-        "description": "Get List of MSP SSO Latest Failures",
+        "description": "List recent authentication failures for this MSP SSO configuration, including failure details and captured SAML assertion data when available.",
         "operationId": "listMspSsoLatestFailures",
         "responses": {
           "200": {
@@ -312,7 +373,7 @@
         }
       ],
       "get": {
-        "description": "Get MSP SAML Metadata",
+        "description": "Return generated SAML service provider metadata for this MSP SSO configuration as JSON.",
         "operationId": "getMspSamlMetadata",
         "responses": {
           "200": {
@@ -350,7 +411,7 @@
         }
       ],
       "get": {
-        "description": "Download MSP SAML Metadata\n\nExample of metadata.xml:\n```xml\n<?xml version=\"1.0\" encoding=\"UTF-8\"?><md:EntityDescriptor xmlns:md=\"urn:oasis:names:tc:SAML:2.0:metadata\" entityID=\"https://api.mist.com/api/v1/saml/5hdF5g/login\" validUntil=\"2027-10-12T21:59:01Z\" xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">\n  <md:SPSSODescriptor AuthnRequestsSigned=\"false\" WantAssertionsSigned=\"true\" protocolSupportEnumeration=\"urn:oasis:names:tc:SAML:2.0:protocol\">\n      <md:SingleLogoutService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"https://api.mist.com/api/v1/saml/5hdF5g/logout\" />\n      <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat>\n      <md:AssertionConsumerService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"https://api.mist.com/api/v1/saml/5hdF5g/login\" index=\"0\" isDefault=\"true\"/>\n      <md:AttributeConsumingService index=\"0\">\n          <md:ServiceName xml:lang=\"en-US\">Mist</md:ServiceName>\n          <md:RequestedAttribute Name=\"Role\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:basic\" isRequired=\"true\"/>\n          <md:RequestedAttribute Name=\"FirstName\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:basic\" isRequired=\"false\"/>\n          <md:RequestedAttribute Name=\"LastName\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:basic\" isRequired=\"false\"/>\n      </md:AttributeConsumingService>\n  </md:SPSSODescriptor>\n</md:EntityDescriptor>\n```",
+        "description": "Download generated SAML service provider metadata XML for this MSP SSO configuration.\n\nExample of metadata.xml:\n```xml\n<?xml version=\"1.0\" encoding=\"UTF-8\"?><md:EntityDescriptor xmlns:md=\"urn:oasis:names:tc:SAML:2.0:metadata\" entityID=\"https://api.mist.com/api/v1/saml/5hdF5g/login\" validUntil=\"2027-10-12T21:59:01Z\" xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">\n  <md:SPSSODescriptor AuthnRequestsSigned=\"false\" WantAssertionsSigned=\"true\" protocolSupportEnumeration=\"urn:oasis:names:tc:SAML:2.0:protocol\">\n      <md:SingleLogoutService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"https://api.mist.com/api/v1/saml/5hdF5g/logout\" />\n      <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat>\n      <md:AssertionConsumerService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"https://api.mist.com/api/v1/saml/5hdF5g/login\" index=\"0\" isDefault=\"true\"/>\n      <md:AttributeConsumingService index=\"0\">\n          <md:ServiceName xml:lang=\"en-US\">Mist</md:ServiceName>\n          <md:RequestedAttribute Name=\"Role\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:basic\" isRequired=\"true\"/>\n          <md:RequestedAttribute Name=\"FirstName\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:basic\" isRequired=\"false\"/>\n          <md:RequestedAttribute Name=\"LastName\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:basic\" isRequired=\"false\"/>\n      </md:AttributeConsumingService>\n  </md:SPSSODescriptor>\n</md:EntityDescriptor>\n```",
         "operationId": "downloadMspSamlMetadata",
         "responses": {
           "200": {
@@ -403,6 +464,7 @@
         "type": "number"
       },
       "msp_id": {
+        "description": "Managed service provider identifier",
         "examples": [
           "b9d42c2e-88ee-41f8-b798-f009ce7fe909"
         ],
@@ -439,6 +501,7 @@
         "type": "string"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -448,8 +511,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -460,8 +525,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -472,8 +539,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -484,8 +553,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -493,8 +564,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -505,9 +578,11 @@
       },
       "response_sso_failure_search": {
         "additionalProperties": false,
+        "description": "Response containing recent SSO authentication failure records",
         "properties": {
           "results": {
-            "$ref": "#/components/schemas/response_sso_failure_search_results"
+            "$ref": "#/components/schemas/response_sso_failure_search_results",
+            "description": "SSO authentication failure records returned by the request"
           }
         },
         "required": [
@@ -517,15 +592,19 @@
       },
       "response_sso_failure_search_item": {
         "additionalProperties": false,
+        "description": "SSO authentication failure record",
         "properties": {
           "detail": {
+            "description": "Failure details reported for the SSO authentication attempt",
             "type": "string"
           },
           "saml_assertion_xml": {
+            "description": "SAML assertion XML captured for the failed SSO authentication attempt",
             "type": "string"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Epoch timestamp, in seconds, when the SSO authentication failure occurred"
           }
         },
         "required": [
@@ -536,6 +615,7 @@
         "type": "object"
       },
       "response_sso_failure_search_results": {
+        "description": "SSO authentication failure records returned by the request",
         "items": {
           "$ref": "#/components/schemas/response_sso_failure_search_item"
         },
@@ -544,9 +624,10 @@
       },
       "saml_metadata": {
         "additionalProperties": false,
+        "description": "Read-only SAML and SCIM metadata generated for an SSO configuration",
         "properties": {
           "acs_url": {
-            "description": "If `idp_type`==`saml`",
+            "description": "If `idp_type`==`saml`, Assertion Consumer Service URL that receives SAML responses for this Mist SSO configuration",
             "examples": [
               "https://api.mist.com/api/v1/saml/llDfa13f/login"
             ],
@@ -554,7 +635,7 @@
             "type": "string"
           },
           "entity_id": {
-            "description": "If `idp_type`==`saml`",
+            "description": "If `idp_type`==`saml`, service provider entity ID for this Mist SSO configuration",
             "examples": [
               "https://api.mist.com/api/v1/saml/llDfa13f/login"
             ],
@@ -562,7 +643,7 @@
             "type": "string"
           },
           "logout_url": {
-            "description": "If `idp_type`==`saml`",
+            "description": "If `idp_type`==`saml`, Single Logout URL used by the identity provider to end the Mist SSO session",
             "examples": [
               "https://api.mist.com/api/v1/saml/llDfa13f/logout"
             ],
@@ -570,7 +651,7 @@
             "type": "string"
           },
           "metadata": {
-            "description": "If `idp_type`==`saml`",
+            "description": "If `idp_type`==`saml`, service provider metadata XML for configuring the identity provider",
             "examples": [
               "<?xml version=\"1.0\" encoding=\"UTF-8\"?><md:EntityDescriptor xmlns:md=\"urn:oasis:names:tc:SAML:2.0:metadata\" entityID=\"https://api.mist.com/api/v1/saml/llDfa13f/login\" validUntil=\"2027-10-12T21:59:01Z\" xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><md:SPSSODescriptor AuthnRequestsSigned=\"false\" WantAssertionsSigned=\"true\" protocolSupportEnumeration=\"urn:oasis:names:tc:SAML:2.0:protocol\"><md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat><md:AssertionConsumerService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"https://api.mist.com/api/v1/saml/llDfa13f/login\" index=\"0\" isDefault=\"true\"/></md:SPSSODescriptor></md:EntityDescriptor>"
             ],
@@ -578,7 +659,7 @@
             "type": "string"
           },
           "scim_base_url": {
-            "description": "If `idp_type`==`oauth` and `scim_enabled`==`true`",
+            "description": "If `idp_type`==`oauth` and `scim_enabled`==`true`, SCIM base URL that the identity provider uses to send provisioning requests to Mist",
             "examples": [
               "https://scim.nac-staging.mistsys.com/S_41b2525a-e8b8-4809-8168-f1d8dcbe9735/azure/4d72b1dc-7503-4717-81ea-80d0125b886e"
             ],
@@ -588,6 +669,7 @@
         "type": "object"
       },
       "site_id": {
+        "description": "Unique identifier of a Mist site",
         "examples": [
           "441a1214-6928-442a-8e92-e1d34b8ec6a6"
         ],
@@ -596,10 +678,11 @@
         "type": "string"
       },
       "sso": {
-        "description": "SSO",
+        "description": "Single sign-on identity provider configuration",
         "properties": {
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Time when this SSO configuration was created, in epoch seconds"
           },
           "custom_logout_url": {
             "description": "If `idp_type`==`saml`, a URL we will redirect the user after user logout from Mist (for some IdP which supports a custom logout URL that is different from SP-initiated SLO process)",
@@ -619,21 +702,24 @@
             "type": "string"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier for this SSO configuration"
           },
           "idp_cert": {
             "description": "If `idp_type`==`saml`. IDP Cert (used to verify the signed response)",
             "type": "string"
           },
           "idp_sign_algo": {
-            "$ref": "#/components/schemas/sso_idp_sign_algo"
+            "$ref": "#/components/schemas/sso_idp_sign_algo",
+            "description": "SAML assertion signing algorithm. Required if `idp_type`==`saml`"
           },
           "idp_sso_url": {
             "description": "Required if `idp_type`==`saml`, IDP Single-Sign-On URL",
             "type": "string"
           },
           "idp_type": {
-            "$ref": "#/components/schemas/sso_idp_type"
+            "$ref": "#/components/schemas/sso_idp_type",
+            "description": "Identity provider type for this SSO configuration"
           },
           "ignore_unmatched_roles": {
             "description": "If `idp_type`==`saml`, ignore any unmatched roles provided in assertion. By default, an assertion is treated as invalid for any unmatched role",
@@ -665,7 +751,8 @@
             "type": "string"
           },
           "ldap_cacerts": {
-            "$ref": "#/components/schemas/sso_ldap_ca_certs"
+            "$ref": "#/components/schemas/sso_ldap_ca_certs",
+            "description": "CA certificates used to validate LDAP or LDAPS server certificates. Required if `idp_type`==`ldap`"
           },
           "ldap_client_cert": {
             "description": "If `idp_type`==`ldap`, LDAPS Client certificate",
@@ -683,12 +770,12 @@
           },
           "ldap_group_attr": {
             "default": "memberOf",
-            "description": "If `ldap_type`==`custom`",
+            "description": "Group attribute used to resolve LDAP memberships. If `ldap_type`==`custom`",
             "type": "string"
           },
           "ldap_group_dn": {
             "default": "base_dn",
-            "description": "If `ldap_type`==`custom`",
+            "description": "Group search base used for custom LDAP group lookup. If `ldap_type`==`custom`",
             "type": "string"
           },
           "ldap_resolve_groups": {
@@ -697,10 +784,12 @@
             "type": "boolean"
           },
           "ldap_server_hosts": {
-            "$ref": "#/components/schemas/sso_ldap_server_hosts"
+            "$ref": "#/components/schemas/sso_ldap_server_hosts",
+            "description": "Server hostnames or IP addresses for LDAP or LDAPS when `idp_type`==`ldap`"
           },
           "ldap_type": {
-            "$ref": "#/components/schemas/sso_ldap_type"
+            "$ref": "#/components/schemas/sso_ldap_type",
+            "description": "Provider template for LDAP SSO when `idp_type`==`ldap`"
           },
           "ldap_user_filter": {
             "description": "Required if `ldap_type`==`custom`, LDAP filter that will identify the type of user",
@@ -717,20 +806,24 @@
             "type": "string"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Time when this SSO configuration was last modified, in epoch seconds"
           },
           "msp_id": {
-            "$ref": "#/components/schemas/msp_id"
+            "$ref": "#/components/schemas/msp_id",
+            "description": "Owning MSP identifier for this SSO configuration, when MSP-scoped"
           },
           "mxedge_proxy": {
-            "$ref": "#/components/schemas/sso_mxedge_proxy"
+            "$ref": "#/components/schemas/sso_mxedge_proxy",
+            "description": "Mist Edge proxy settings used when `idp_type`==`mxedge_proxy`"
           },
           "name": {
-            "description": "Name",
+            "description": "Display name of the SSO configuration",
             "type": "string"
           },
           "nameid_format": {
-            "$ref": "#/components/schemas/sso_nameid_format"
+            "$ref": "#/components/schemas/sso_nameid_format",
+            "description": "SAML NameID format used when `idp_type`==`saml`"
           },
           "oauth_cc_client_id": {
             "description": "Required if `idp_type`==`oauth`, Client Credentials",
@@ -744,17 +837,20 @@
             "examples": [
               "REDACTED"
             ],
+            "format": "password",
             "type": "string"
           },
           "oauth_discovery_url": {
-            "description": "If `idp_type`==`oauth`",
+            "description": "OAuth discovery document URL used when `idp_type`==`oauth`",
             "type": "string"
           },
           "oauth_ping_identity_region": {
-            "$ref": "#/components/schemas/oauth_ping_identity_region"
+            "$ref": "#/components/schemas/oauth_ping_identity_region",
+            "description": "Ping Identity region for OAuth SSO when `oauth_type`==`ping_identity`"
           },
           "oauth_provider_domain": {
-            "$ref": "#/components/schemas/oauth_provider_domain"
+            "$ref": "#/components/schemas/oauth_provider_domain",
+            "description": "Provider domain for Okta OAuth SSO when `oauth_type`==`okta`"
           },
           "oauth_ropc_client_id": {
             "description": "If `idp_type`==`oauth`, ropc = Resource Owner Password Credentials",
@@ -768,6 +864,7 @@
             "examples": [
               "REDACTED"
             ],
+            "format": "password",
             "type": "string"
           },
           "oauth_tenant_id": {
@@ -778,13 +875,32 @@
             "type": "string"
           },
           "oauth_type": {
-            "$ref": "#/components/schemas/sso_oauth_type"
+            "$ref": "#/components/schemas/sso_oauth_type",
+            "description": "Provider type for OAuth SSO when `idp_type`==`oauth`"
           },
-          "openroaming": {
-            "$ref": "#/components/schemas/sso_openroaming"
+          "openroaming_ssids": {
+            "$ref": "#/components/schemas/sso_openroaming_ssids",
+            "description": "SSIDs that support OpenRoaming, used when `idp_type`==`openroaming`"
+          },
+          "openroaming_wba_client_cert": {
+            "description": "Optional WBA-issued client certificate for OpenRoaming. If not provided, the default WBA-issued certificate for Juniper will be used.",
+            "examples": [
+              "-----BEGIN CERTIFICATE-----\\nMIIFZjCCA06gAwIBAgIIP61/1qm/uDowDQYJKoZIhvcNAQELBQE\\n-----END CERTIFICATE-----"
+            ],
+            "format": "password",
+            "type": "string"
+          },
+          "openroaming_wba_client_key": {
+            "description": "Optional WBA-issued client private key for OpenRoaming. If not provided, the default WBA-issued key for Juniper will be used.",
+            "examples": [
+              "REDACTED"
+            ],
+            "format": "password",
+            "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Owning organization identifier for this SSO configuration"
           },
           "role_attr_extraction": {
             "description": "If `idp_type`==`saml`, custom role attribute parsing scheme. Supported Role Parsing Schemes <table><tr><th>Name</th><th>Scheme</th></tr><tr><td>`cn`</td><td><ul><li>The expected role attribute format in SAML Assertion is \"CN=cn,OU=ou1,OU=ou2,…\"</li><li>CN (the key) is case-insensitive and exactly 1 CN is expected (or the entire entry will be ignored)</li></ul>E.g. if role attribute is \"CN=cn,OU=ou1,OU=ou2\" then parsed role value is \"cn\"</td></tr></table>",
@@ -806,15 +922,55 @@
             "examples": [
               "REDACTED"
             ],
+            "format": "password",
             "type": "string"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Associated site identifier for this SSO configuration, when site-scoped"
           }
         },
         "required": [
           "name"
         ],
+        "type": "object"
+      },
+      "sso_delete_admins": {
+        "additionalProperties": false,
+        "description": "Request body listing SSO admin email addresses to delete",
+        "properties": {
+          "emails": {
+            "description": "List of admin email addresses to delete",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "emails"
+        ],
+        "type": "object"
+      },
+      "sso_delete_admins_response": {
+        "additionalProperties": false,
+        "description": "Result of deleting SSO admin accounts",
+        "properties": {
+          "deleted": {
+            "description": "List of email addresses that were successfully deleted",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "errors": {
+            "description": "List of error messages for emails that could not be deleted",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
         "type": "object"
       },
       "sso_idp_sign_algo": {
@@ -853,7 +1009,7 @@
         "type": "array"
       },
       "sso_ldap_server_hosts": {
-        "description": "If `idp_type`==`ldap`, list of LDAP/LDAPS server IP Addresses or Hostnames",
+        "description": "If `idp_type`==`ldap`, list of LDAP/LDAPS server IP addresses or Hostnames",
         "examples": [
           [
             "hostname",
@@ -878,15 +1034,18 @@
       },
       "sso_mxedge_proxy": {
         "additionalProperties": false,
-        "description": "If `idp_type`==`mxedge_proxy`, this requires `mist_nac` to be enabled on the mxcluster",
+        "description": "Mist Edge proxy settings for NAC SSO. If `idp_type`==`mxedge_proxy`, this requires `mist_nac` to be enabled on the mxcluster",
         "properties": {
           "acct_servers": {
-            "$ref": "#/components/schemas/sso_mxedge_proxy_acct_servers"
+            "$ref": "#/components/schemas/sso_mxedge_proxy_acct_servers",
+            "description": "RADIUS accounting servers used by the Mist Edge SSO proxy"
           },
           "auth_servers": {
-            "$ref": "#/components/schemas/sso_mxedge_proxy_auth_servers"
+            "$ref": "#/components/schemas/sso_mxedge_proxy_auth_servers",
+            "description": "RADIUS authentication servers used by the Mist Edge SSO proxy"
           },
           "mxcluster_id": {
+            "description": "Mist Edge cluster identifier that provides the SSO proxy",
             "examples": [
               "572586b7-f97b-a22b-526c-8b97a3f609c4"
             ],
@@ -894,22 +1053,26 @@
             "type": "string"
           },
           "operator_name": {
-            "description": "Operator name as Radius attribute while proxying",
+            "description": "Operator name as RADIUS attribute while proxying",
             "type": "string"
           },
           "proxy_hosts": {
-            "$ref": "#/components/schemas/sso_mxedge_proxy_proxy_hosts"
+            "$ref": "#/components/schemas/sso_mxedge_proxy_proxy_hosts",
+            "description": "Public hostnames or IP addresses that clients use to reach the Mist Edge SSO proxy"
           },
           "ssids": {
-            "$ref": "#/components/schemas/sso_mxedge_proxy_ssids"
+            "$ref": "#/components/schemas/sso_mxedge_proxy_ssids",
+            "description": "Eduroam SSIDs handled by the Mist Edge SSO proxy"
           }
         },
         "type": "object"
       },
       "sso_mxedge_proxy_acct_server": {
         "additionalProperties": false,
+        "description": "RADIUS accounting server for the Mist Edge SSO proxy",
         "properties": {
           "host": {
+            "description": "RADIUS accounting server hostname or IP address",
             "examples": [
               "1.2.3.4"
             ],
@@ -917,18 +1080,22 @@
           },
           "port": {
             "default": 1813,
+            "description": "UDP port for RADIUS accounting requests",
             "type": "integer"
           },
           "secret": {
+            "description": "Shared secret used with the RADIUS accounting server",
             "examples": [
               "testing123"
             ],
+            "format": "password",
             "type": "string"
           }
         },
         "type": "object"
       },
       "sso_mxedge_proxy_acct_servers": {
+        "description": "RADIUS accounting servers used by the Mist Edge SSO proxy",
         "items": {
           "$ref": "#/components/schemas/sso_mxedge_proxy_acct_server"
         },
@@ -936,8 +1103,10 @@
       },
       "sso_mxedge_proxy_auth_server": {
         "additionalProperties": false,
+        "description": "RADIUS authentication server for the Mist Edge SSO proxy",
         "properties": {
           "host": {
+            "description": "RADIUS authentication server hostname or IP address",
             "examples": [
               "1.2.3.4"
             ],
@@ -945,6 +1114,7 @@
           },
           "port": {
             "default": 1812,
+            "description": "UDP port for RADIUS authentication requests",
             "type": "integer"
           },
           "require_message_authenticator": {
@@ -954,13 +1124,15 @@
           },
           "retry": {
             "default": 2,
-            "description": "Authentication request retry",
+            "description": "Number of retry attempts for RADIUS authentication requests",
             "type": "integer"
           },
           "secret": {
+            "description": "Shared secret used with the RADIUS authentication server",
             "examples": [
               "testing123"
             ],
+            "format": "password",
             "type": "string"
           },
           "timeout": {
@@ -972,13 +1144,14 @@
         "type": "object"
       },
       "sso_mxedge_proxy_auth_servers": {
+        "description": "RADIUS authentication servers used by the Mist Edge SSO proxy",
         "items": {
           "$ref": "#/components/schemas/sso_mxedge_proxy_auth_server"
         },
         "type": "array"
       },
       "sso_mxedge_proxy_proxy_hosts": {
-        "description": "Public hostname/IPs",
+        "description": "Public hostnames or IP addresses for the Mist Edge SSO proxy",
         "examples": [
           [
             "mxedge1.corp.com",
@@ -991,7 +1164,7 @@
         "type": "array"
       },
       "sso_mxedge_proxy_ssids": {
-        "description": "SSIDs that support eduroam",
+        "description": "Eduroam SSID names handled by the Mist Edge SSO proxy",
         "examples": [
           [
             "eduroam_test, eduroam_main"
@@ -1023,28 +1196,8 @@
         ],
         "type": "string"
       },
-      "sso_openroaming": {
-        "additionalProperties": false,
-        "description": "if `idp_type`==`openroaming`",
-        "properties": {
-          "ssids": {
-            "$ref": "#/components/schemas/sso_openroaming_ssids"
-          },
-          "wba_cert": {
-            "description": "Optional WBA-issued certificate. If not provided, the default WBA-issued certificate for Juniper will be used.",
-            "examples": [
-              "-----BEGIN CERTIFICATE-----\\nMIIFZjCCA06gAwIBAgIIP61/1qm/uDowDQYJKoZIhvcNAQELBQE\\n-----END CERTIFICATE-----"
-            ],
-            "type": "string"
-          }
-        },
-        "required": [
-          "ssids"
-        ],
-        "type": "object"
-      },
       "sso_openroaming_ssids": {
-        "description": "SSIDs that support OpenRoaming",
+        "description": "Network SSID names enabled for OpenRoaming SSO",
         "examples": [
           [
             "ssid_name1",
@@ -1057,13 +1210,14 @@
         "type": "array"
       },
       "ssos": {
+        "description": "List of SSO configurations",
         "items": {
           "$ref": "#/components/schemas/sso"
         },
         "type": "array"
       },
       "timestamp": {
-        "description": "Epoch (seconds)",
+        "description": "Epoch timestamp, in seconds",
         "format": "double",
         "readOnly": true,
         "type": "number"
@@ -1421,19 +1575,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

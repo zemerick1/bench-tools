@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Installer",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "get": {
-        "description": "Get List of alarm templates",
+        "description": "Return alarm templates available to installer workflows in the organization.",
         "operationId": "listInstallerAlarmTemplates",
         "responses": {
           "200": {
@@ -115,10 +111,11 @@
         }
       ],
       "get": {
-        "description": "Get List of Device Profiles",
+        "description": "Return device profiles that installers can use when provisioning recently claimed devices, optionally filtered by device type.",
         "operationId": "listInstallerDeviceProfiles",
         "parameters": [
           {
+            "description": "Filter results by type. enum: `ap`, `gateway`, `switch`",
             "in": "query",
             "name": "type",
             "schema": {
@@ -159,11 +156,11 @@
         }
       ],
       "get": {
-        "description": "Get List of recently claimed devices",
+        "description": "Return recently claimed devices visible to installer workflows, with optional filters for model, site name, or site identifier.",
         "operationId": "listInstallerListOfRecentlyClaimedDevices",
         "parameters": [
           {
-            "description": "Device Model",
+            "description": "Filter results by device model",
             "in": "query",
             "name": "model",
             "schema": {
@@ -174,7 +171,7 @@
             }
           },
           {
-            "description": "Site Name",
+            "description": "Filter results by site name",
             "in": "query",
             "name": "site_name",
             "schema": {
@@ -185,7 +182,7 @@
             }
           },
           {
-            "description": "Site ID",
+            "description": "Filter results by site identifier",
             "in": "query",
             "name": "site_id",
             "schema": {
@@ -229,7 +226,7 @@
         ]
       },
       "post": {
-        "description": "This mirrors `POST /api/v1/orgs/{org_id}/inventory` (see Inventory API)",
+        "description": "Claim devices into the organization inventory by activation code through the installer workflow.",
         "operationId": "claimInstallerDevices",
         "requestBody": {
           "content": {
@@ -285,7 +282,7 @@
         }
       ],
       "put": {
-        "description": "Provision or Replace a device \n\nIf replacing_mac is in the request payload, other attributes are ignored, we attempt to replace existing device (with mac replacing_mac) with the inventory device being configured. The replacement device must be in the inventory but not assigned, and the replacing_mac device must be assigned to a site, and satisfy grace period requirements. The Device replaced will become unassigned.",
+        "description": "Provision or replace an installer-managed device. \n\nIf replacing_mac is in the request payload, other attributes are ignored, we attempt to replace existing device (with MAC address `replacing_mac`) with the inventory device being configured. The replacement device must be in the inventory but not assigned, and the replacing_mac device must be assigned to a site, and satisfy grace period requirements. The Device replaced will become unassigned.",
         "operationId": "provisionInstallerDevices",
         "requestBody": {
           "content": {
@@ -337,7 +334,7 @@
         ]
       },
       "delete": {
-        "description": "Unassign recently claimed devices",
+        "description": "Unassign a recently claimed device from its current site so it can be provisioned again through the installer workflow.",
         "operationId": "unassignInstallerRecentlyClaimedDevice",
         "responses": {
           "200": {
@@ -375,7 +372,7 @@
         }
       ],
       "post": {
-        "description": "Locate a Device by blinking it’s LED, it’s a persisted state that has to be stopped by calling Stop Locating API",
+        "description": "Start locating an installer-managed device by blinking its LED. The locate state persists until [Stop Locating Installer Device](/#operations/stopInstallerLocateDevice) is called.",
         "operationId": "startInstallerLocateDevice",
         "responses": {
           "200": {
@@ -413,7 +410,7 @@
         }
       ],
       "post": {
-        "description": "Stop it",
+        "description": "Stop the locate LED state for an installer-managed device.",
         "operationId": "stopInstallerLocateDevice",
         "responses": {
           "200": {
@@ -454,7 +451,7 @@
         }
       ],
       "post": {
-        "description": "Add image",
+        "description": "Upload an image associated with an installer-managed device using `multipart/form-data`.",
         "operationId": "addInstallerDeviceImage",
         "requestBody": {
           "content": {
@@ -492,7 +489,7 @@
         ]
       },
       "delete": {
-        "description": "Delete image",
+        "description": "Remove a previously uploaded image associated with an installer-managed device, such as an installation photo or device placement image.",
         "operationId": "deleteInstallerDeviceImage",
         "responses": {
           "200": {
@@ -526,7 +523,7 @@
           "$ref": "#/components/parameters/org_id"
         },
         {
-          "description": "FPC0 MAC Address",
+          "description": "FPC0 MAC address",
           "in": "path",
           "name": "fpc0_mac",
           "required": true,
@@ -539,7 +536,7 @@
         }
       ],
       "get": {
-        "description": "Get VC Status\n\nThe API returns a combined view of the VC status which includes topology and stats",
+        "description": "Return Virtual Chassis status for an installer-managed switch, including topology and member statistics.\n\nThe response is a combined view of the Virtual Chassis state.",
         "operationId": "getInstallerDeviceVirtualChassis",
         "responses": {
           "200": {
@@ -781,7 +778,7 @@
         }
       ],
       "get": {
-        "description": "Get List of RF Templates",
+        "description": "Return RF template names available to installer workflows for site creation or updates.",
         "operationId": "listInstallerRfTemplatesNames",
         "responses": {
           "200": {
@@ -816,7 +813,7 @@
         }
       ],
       "get": {
-        "description": "Get List of Site Groups",
+        "description": "Return site groups that installers can assign when creating or updating sites.",
         "operationId": "listInstallerSiteGroups",
         "responses": {
           "200": {
@@ -851,7 +848,7 @@
         }
       ],
       "get": {
-        "description": "Get List of Sites",
+        "description": "Return sites visible to installer workflows for device assignment and map operations.",
         "operationId": "listInstallerSites",
         "responses": {
           "200": {
@@ -889,7 +886,7 @@
         }
       ],
       "put": {
-        "description": "Often the Installers are asked to assign Devices to Sites. The Sites can either be pre-created or created/modified by the Installer. If this is an update, the same grace period also applies.",
+        "description": "Use `site_name` to create a site when it does not exist, or to update installer-editable fields on an existing site. Installers use these sites for device assignment, and grace-period rules also apply when updating an existing site.",
         "operationId": "createOrUpdateInstallerSites",
         "requestBody": {
           "content": {
@@ -956,7 +953,7 @@
         }
       ],
       "get": {
-        "description": "Get List of Maps",
+        "description": "Return maps for an installer-managed site, used for floorplan selection and AP placement during provisioning.",
         "operationId": "listInstallerMaps",
         "responses": {
           "200": {
@@ -994,7 +991,7 @@
         }
       ],
       "post": {
-        "description": "Import data from files is a multipart POST which has an file, an optional json, and an optional csv, to create floorplan, assign & place ap if name or mac matches",
+        "description": "Import a site floorplan and optional placement data from multipart files. The request can include an image file, optional JSON, and optional CSV data to create the map and assign or place APs when names or MAC addresses match.",
         "operationId": "importInstallerMap",
         "requestBody": {
           "content": {
@@ -1044,7 +1041,7 @@
         }
       ],
       "put": {
-        "description": "Update map",
+        "description": "Modify map or floorplan metadata for an installer-managed site, including dimensions, orientation, and placement-related settings.",
         "operationId": "updateInstallerMap",
         "requestBody": {
           "content": {
@@ -1082,7 +1079,7 @@
         ]
       },
       "post": {
-        "description": "Create a MAP",
+        "description": "Define a map or floorplan for an installer-managed site, including metadata used for AP placement and site visualization.",
         "operationId": "createInstallerMap",
         "requestBody": {
           "content": {
@@ -1199,7 +1196,7 @@
         ]
       },
       "delete": {
-        "description": "Delete Map",
+        "description": "Remove a map or floorplan from an installer-managed site. This removes the map used for AP placement, but does not delete the site.",
         "operationId": "deleteInstallerMap",
         "responses": {
           "200": {
@@ -1234,7 +1231,7 @@
         }
       ],
       "get": {
-        "description": "After installation is considered complete (APs are placed on maps, all powered up), you can trigger an optimize operation where RRM will kick in (and maybe other things in the future) before it’s automatically scheduled.",
+        "description": "Trigger RF optimization after installation is complete, such as after APs have been placed on maps and powered on. This starts RRM before the next automatic optimization schedule.",
         "operationId": "optimizeInstallerRrm",
         "responses": {
           "200": {
@@ -1282,6 +1279,7 @@
       },
       "cpu_stat": {
         "additionalProperties": false,
+        "description": "CPU utilization breakdown for a device",
         "properties": {
           "idle": {
             "description": "Percentage of CPU time that is idle",
@@ -1300,7 +1298,8 @@
             ]
           },
           "load_avg": {
-            "$ref": "#/components/schemas/cpu_stat_load_avg"
+            "$ref": "#/components/schemas/cpu_stat_load_avg",
+            "description": "Load averages for the last 1, 5, and 15 minutes"
           },
           "system": {
             "description": "Percentage of CPU time being used by system processes",
@@ -1311,7 +1310,7 @@
             ]
           },
           "usage": {
-            "description": "CPU usage",
+            "description": "Overall CPU usage percentage",
             "readOnly": true,
             "type": [
               "number",
@@ -1363,26 +1362,35 @@
       },
       "installer_device": {
         "additionalProperties": false,
+        "description": "Recently claimed device visible to installer workflows",
         "properties": {
+          "ble_stat": {
+            "$ref": "#/components/schemas/installer_device_ble_stat",
+            "description": "BLE beacon statistics reported by the device"
+          },
           "connected": {
+            "description": "Whether the device is currently connected to Mist",
             "examples": [
               true
             ],
             "type": "boolean"
           },
           "deviceprofile_name": {
+            "description": "Device profile name associated with this installer device",
             "examples": [
               "SJ1"
             ],
             "type": "string"
           },
           "ext_ip": {
+            "description": "External IP address observed for device management traffic",
             "examples": [
               "12.34.56.78"
             ],
             "type": "string"
           },
           "height": {
+            "description": "Mounting height recorded for map placement",
             "examples": [
               2.7
             ],
@@ -1390,21 +1398,25 @@
             "type": "number"
           },
           "ip": {
+            "description": "Management IP address currently reported for the device",
             "examples": [
               "192.168.1.111"
             ],
             "type": "string"
           },
           "last_seen": {
-            "$ref": "#/components/schemas/last_seen"
+            "$ref": "#/components/schemas/last_seen",
+            "description": "Timestamp when the device was last seen by Mist"
           },
           "mac": {
+            "description": "Device MAC address shown to installers",
             "examples": [
               "5c5b35000018"
             ],
             "type": "string"
           },
           "map_id": {
+            "description": "Map where the installer placed this device",
             "examples": [
               "845a23bf-bed9-e43c-4c86-6fa474be7ae5"
             ],
@@ -1412,42 +1424,49 @@
             "type": "string"
           },
           "model": {
+            "description": "Device model reported for this installer device",
             "examples": [
               "AP41"
             ],
             "type": "string"
           },
           "name": {
+            "description": "Device name configured through the installer workflow",
             "examples": [
               "hallway"
             ],
             "type": "string"
           },
           "orientation": {
+            "description": "Device orientation in degrees from 0 to 359, where 0 is up and 90 is right",
             "examples": [
               90
             ],
             "type": "integer"
           },
           "serial": {
+            "description": "Device serial number reported to installer workflows",
             "examples": [
               "FXLH2015150025"
             ],
             "type": "string"
           },
           "site_name": {
+            "description": "Site name associated with this installer device",
             "examples": [
               "SJ1"
             ],
             "type": "string"
           },
           "uptime": {
+            "description": "Device uptime, in seconds",
             "examples": [
               12345
             ],
             "type": "integer"
           },
           "vc_mac": {
+            "description": "Virtual Chassis MAC address when this device is part of a VC",
             "examples": [
               null
             ],
@@ -1457,12 +1476,14 @@
             ]
           },
           "version": {
+            "description": "Software version currently running on the device",
             "examples": [
               "0.10.24362"
             ],
             "type": "string"
           },
           "x": {
+            "description": "Horizontal map position of the device, in pixels",
             "examples": [
               150
             ],
@@ -1470,6 +1491,7 @@
             "type": "number"
           },
           "y": {
+            "description": "Vertical map position of the device, in pixels",
             "examples": [
               300
             ],
@@ -1479,26 +1501,59 @@
         },
         "type": "object"
       },
+      "installer_device_ble_stat": {
+        "additionalProperties": false,
+        "description": "BLE statistics for the device",
+        "properties": {
+          "major": {
+            "description": "iBeacon major value reported by the device",
+            "examples": [
+              12345
+            ],
+            "type": "integer"
+          },
+          "minors": {
+            "description": "iBeacon minor values reported by the device",
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "uuid": {
+            "description": "iBeacon UUID advertised by the device",
+            "examples": [
+              "ada72f8f-1643-e5c6-94db-f2a5636f1a64"
+            ],
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "installer_devices": {
+        "description": "Recently claimed devices available to installer workflows",
         "items": {
           "$ref": "#/components/schemas/installer_device"
         },
         "type": "array"
       },
       "installer_provision_device": {
-        "description": "Provision Device",
+        "description": "Installer payload for provisioning or replacing a device",
         "properties": {
           "deviceprofile_name": {
+            "description": "Profile name applied to the device during installer provisioning",
             "examples": [
               "SJ1"
             ],
             "type": "string"
           },
           "for_site": {
+            "description": "Whether this installer provisioning request is scoped to a site",
             "readOnly": true,
             "type": "boolean"
           },
           "height": {
+            "description": "Mounting height recorded for map placement",
             "examples": [
               2.7
             ],
@@ -1506,6 +1561,7 @@
             "type": "number"
           },
           "map_id": {
+            "description": "Identifier of the map where the device should be placed",
             "examples": [
               "845a23bf-bed9-e43c-4c86-6fa474be7ae5"
             ],
@@ -1513,19 +1569,21 @@
             "type": "string"
           },
           "name": {
+            "description": "Device name to set during installer provisioning",
             "examples": [
               "SJ1-AP1"
             ],
             "type": "string"
           },
           "orientation": {
+            "description": "Device orientation in degrees from 0 to 359, where 0 is up and 90 is right",
             "examples": [
               90
             ],
             "type": "integer"
           },
           "replacing_mac": {
-            "description": "Onlif this is to replace an existing device",
+            "description": "Only if replacing an existing device; MAC address of the device being replaced",
             "examples": [
               "5c5b3500003"
             ],
@@ -1536,6 +1594,7 @@
             "type": "string"
           },
           "site_id": {
+            "description": "Identifier of the destination site for installer provisioning",
             "examples": [
               "72771e6a-6f5e-4de4-a5b9-1266c4197811"
             ],
@@ -1543,12 +1602,14 @@
             "type": "string"
           },
           "site_name": {
+            "description": "Destination site name for installer provisioning",
             "examples": [
               "SJ1"
             ],
             "type": "string"
           },
           "x": {
+            "description": "Horizontal map position for the device, in pixels",
             "examples": [
               150
             ],
@@ -1556,6 +1617,7 @@
             "type": "number"
           },
           "y": {
+            "description": "Vertical map position for the device, in pixels",
             "examples": [
               300
             ],
@@ -1569,41 +1631,50 @@
         "type": "object"
       },
       "installer_site": {
+        "description": "Site definition available to installer workflows",
         "properties": {
           "address": {
+            "description": "Street or postal address for the installer site",
             "examples": [
               "1601 S. Deanza Blvd., Cupertino, CA, 95014"
             ],
             "type": "string"
           },
           "country_code": {
+            "description": "ISO country code for the installer site",
             "examples": [
               "US"
             ],
             "type": "string"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the installer site"
           },
           "latlng": {
-            "$ref": "#/components/schemas/lat_lng"
+            "$ref": "#/components/schemas/lat_lng",
+            "description": "Geographic coordinates of the installer site"
           },
           "name": {
+            "description": "Display name of the installer site",
             "examples": [
               "Mist Office"
             ],
             "type": "string"
           },
           "rftemplate_name": {
+            "description": "RF template name applied to the installer site",
             "examples": [
               "rftemplate1"
             ],
             "type": "string"
           },
           "sitegroup_names": {
-            "$ref": "#/components/schemas/installer_site_sitegroup_names"
+            "$ref": "#/components/schemas/installer_site_sitegroup_names",
+            "description": "Names of site groups associated with the installer site"
           },
           "timezone": {
+            "description": "Time zone configured for the installer site",
             "examples": [
               "America/Los_Angeles"
             ],
@@ -1619,6 +1690,7 @@
         "type": "object"
       },
       "installer_site_sitegroup_names": {
+        "description": "Site group names associated with an installer site",
         "examples": [
           [
             "sg1",
@@ -1631,12 +1703,14 @@
         "type": "array"
       },
       "installer_sites": {
+        "description": "Sites available to installer workflows",
         "items": {
           "$ref": "#/components/schemas/installer_site"
         },
         "type": "array"
       },
       "installers": {
+        "description": "Installer access entries returned by list responses",
         "items": {
           "$ref": "#/components/schemas/installers_item"
         },
@@ -1644,11 +1718,14 @@
       },
       "installers_item": {
         "additionalProperties": false,
+        "description": "Installer access entry with scope and role details",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the installer access entry"
           },
           "name": {
+            "description": "Display name of the installer access entry",
             "examples": [
               "Entry #1"
             ],
@@ -1658,7 +1735,7 @@
         "type": "object"
       },
       "last_seen": {
-        "description": "Last seen timestamp",
+        "description": "Timestamp indicating when the entity was last seen",
         "examples": [
           1470417522
         ],
@@ -1671,8 +1748,10 @@
       },
       "lat_lng": {
         "additionalProperties": false,
+        "description": "Geographic latitude and longitude coordinate pair",
         "properties": {
           "lat": {
+            "description": "Geographic latitude in decimal degrees",
             "examples": [
               37.295833
             ],
@@ -1680,6 +1759,7 @@
             "type": "number"
           },
           "lng": {
+            "description": "Geographic longitude in decimal degrees",
             "examples": [
               -122.032946
             ],
@@ -1695,12 +1775,14 @@
       },
       "latlng_br": {
         "additionalProperties": false,
-        "description": "When type=google, latitude / longitude of the bottom-right corner",
+        "description": "When `type`==`google`, latitude and longitude of the bottom-right corner",
         "properties": {
           "lat": {
+            "description": "Bottom-right latitude for the Google map bounds",
             "type": "string"
           },
           "lng": {
+            "description": "Bottom-right longitude for the Google map bounds",
             "type": "string"
           }
         },
@@ -1708,22 +1790,25 @@
       },
       "latlng_tl": {
         "additionalProperties": false,
-        "description": "When type=google, latitude / longitude of the top-left corner",
+        "description": "When `type`==`google`, latitude and longitude of the top-left corner",
         "properties": {
           "lat": {
+            "description": "Top-left latitude for the Google map bounds",
             "type": "string"
           },
           "lng": {
+            "description": "Top-left longitude for the Google map bounds",
             "type": "string"
           }
         },
         "type": "object"
       },
       "map": {
-        "description": "Map",
+        "description": "Map or floorplan metadata for a site or organization",
         "properties": {
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Timestamp when the map was created"
           },
           "flags": {
             "additionalProperties": {
@@ -1740,54 +1825,60 @@
             "type": "object"
           },
           "for_site": {
+            "description": "Whether this map belongs to a site scope",
             "readOnly": true,
             "type": "boolean"
           },
           "geofences": {
-            "$ref": "#/components/schemas/map_geofences"
+            "$ref": "#/components/schemas/map_geofences",
+            "description": "Location boundary definitions configured on this map"
+          },
+          "group_idx": {
+            "description": "Optional floor or group ordering index for this map",
+            "examples": [
+              1
+            ],
+            "type": "integer"
+          },
+          "group_name": {
+            "description": "Optional floor or group display name for this map",
+            "examples": [
+              "East Wing"
+            ],
+            "type": "string"
           },
           "height": {
-            "description": "When type=image, height of the image map",
+            "description": "When `type`==`image`, height of the map image in pixels",
             "examples": [
               1500
             ],
             "type": "integer"
           },
           "height_m": {
+            "description": "Physical height of the map in meters",
             "format": "double",
             "type": "number"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the map"
           },
           "latlng_br": {
-            "$ref": "#/components/schemas/latlng_br"
+            "$ref": "#/components/schemas/latlng_br",
+            "description": "When `type`==`google`, bottom-right map bounds coordinate"
           },
           "latlng_tl": {
-            "$ref": "#/components/schemas/latlng_tl"
+            "$ref": "#/components/schemas/latlng_tl",
+            "description": "When `type`==`google`, top-left map bounds coordinate"
           },
           "locked": {
             "default": false,
             "description": "Whether this map is considered locked down",
             "type": "boolean"
           },
-          "mapstack_floor": {
-            "description": "maps stack, optional",
-            "examples": [
-              1
-            ],
-            "type": "integer"
-          },
-          "mapstack_id": {
-            "description": "maps stack, optional",
-            "examples": [
-              "424ef025-a5c0-9a8f-62a8-e6fcbb6a0fc2"
-            ],
-            "format": "uuid",
-            "type": "string"
-          },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Timestamp when the map was last modified"
           },
           "name": {
             "description": "The name of the map",
@@ -1797,14 +1888,16 @@
             "type": "string"
           },
           "occupancy_limit": {
+            "description": "Maximum occupancy configured for this map",
             "type": "integer"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization associated with this map"
           },
           "orientation": {
             "default": 0,
-            "description": "Orientation of the map, 0 means up is north, 90 means up is west",
+            "description": "Map orientation in degrees; 0 means up is north, 90 means up is west",
             "examples": [
               30
             ],
@@ -1827,20 +1920,22 @@
             "type": "integer"
           },
           "ppm": {
-            "description": "When type=image, pixels per meter",
+            "description": "When `type`==`image`, pixels per meter for the map image",
             "examples": [
               40.94
             ],
             "type": "number"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site associated with this map, when scoped to a site"
           },
           "sitesurvey_path": {
-            "$ref": "#/components/schemas/map_sitesurvey_path"
+            "$ref": "#/components/schemas/map_sitesurvey_path",
+            "description": "Site survey path geometry for this map"
           },
           "thumbnail_url": {
-            "description": "When type=image, the url for the thumbnail image / preview",
+            "description": "When `type`==`image`, URL for the thumbnail image or preview",
             "examples": [
               "https://url/to/image.png"
             ],
@@ -1848,10 +1943,11 @@
             "type": "string"
           },
           "type": {
-            "$ref": "#/components/schemas/map_type"
+            "$ref": "#/components/schemas/map_type",
+            "description": "Map type, such as `image` or `google`"
           },
           "url": {
-            "description": "When type=image, the url",
+            "description": "When `type`==`image`, URL for the map image",
             "examples": [
               "https://url/to/image.png"
             ],
@@ -1859,25 +1955,30 @@
             "type": "string"
           },
           "view": {
-            "$ref": "#/components/schemas/map_view"
+            "$ref": "#/components/schemas/map_view",
+            "description": "If `type`==`google`, map tile view to display"
           },
           "wall_path": {
-            "$ref": "#/components/schemas/map_wall_path"
+            "$ref": "#/components/schemas/map_wall_path",
+            "description": "Wall path geometry for this map"
           },
           "wayfinding": {
-            "$ref": "#/components/schemas/map_wayfinding"
+            "$ref": "#/components/schemas/map_wayfinding",
+            "description": "Navigation pathfinding settings for this map"
           },
           "wayfinding_path": {
-            "$ref": "#/components/schemas/map_wayfinding_path"
+            "$ref": "#/components/schemas/map_wayfinding_path",
+            "description": "Wayfinding path geometry for this map"
           },
           "width": {
-            "description": "When type=image, width of the image map",
+            "description": "When `type`==`image`, width of the map image in pixels",
             "examples": [
               1250
             ],
             "type": "integer"
           },
           "width_m": {
+            "description": "Physical width of the map in meters",
             "format": "double",
             "type": "number"
           }
@@ -1886,32 +1987,35 @@
       },
       "map_geofence": {
         "additionalProperties": false,
+        "description": "Geofence drawn on a map",
         "properties": {
           "name": {
-            "description": "Name of the geofence",
+            "description": "Display name for the map geofence",
             "examples": [
               "example"
             ],
             "type": "string"
           },
           "vertices": {
-            "$ref": "#/components/schemas/map_geofence_vertices"
+            "$ref": "#/components/schemas/map_geofence_vertices",
+            "description": "Polygon points that define the geofence boundary"
           }
         },
         "type": "object"
       },
       "map_geofence_vertice": {
         "additionalProperties": false,
+        "description": "Vertex coordinate for a map geofence polygon",
         "properties": {
           "X": {
-            "description": "X coordinate",
+            "description": "Geofence vertex X coordinate in map units",
             "examples": [
               700
             ],
             "type": "number"
           },
           "Y": {
-            "description": "Y coordinate",
+            "description": "Geofence vertex Y coordinate in map units",
             "examples": [
               100
             ],
@@ -1936,21 +2040,26 @@
       },
       "map_import_json": {
         "additionalProperties": false,
+        "description": "Options for importing map data from Ekahau or iBwave JSON",
         "properties": {
           "import_all_floorplans": {
             "default": false,
+            "description": "Whether to import all floorplans from the uploaded map JSON",
             "type": "boolean"
           },
           "import_height": {
             "default": true,
+            "description": "Whether to import height metadata from the uploaded map JSON",
             "type": "boolean"
           },
           "import_orientation": {
             "default": true,
+            "description": "Whether to import orientation metadata from the uploaded map JSON",
             "type": "boolean"
           },
           "vendor_name": {
-            "$ref": "#/components/schemas/map_import_json_vendor_name"
+            "$ref": "#/components/schemas/map_import_json_vendor_name",
+            "description": "Map import vendor for the uploaded JSON"
           }
         },
         "required": [
@@ -1959,7 +2068,7 @@
         "type": "object"
       },
       "map_import_json_vendor_name": {
-        "description": "enum: `ekahau`, `ibwave`",
+        "description": "Map import vendor for the uploaded JSON. enum: `ekahau`, `ibwave`",
         "enum": [
           "ekahau",
           "ibwave"
@@ -1971,12 +2080,13 @@
       },
       "map_node": {
         "additionalProperties": false,
-        "description": "Nodes on maps",
+        "description": "Node in a map path graph",
         "properties": {
           "edges": {
             "additionalProperties": {
               "type": "string"
             },
+            "description": "Adjacent node IDs and path weights for this map node",
             "examples": [
               {
                 "N1": "1"
@@ -1985,13 +2095,15 @@
             "type": "object"
           },
           "name": {
+            "description": "Map node identifier or display name",
             "examples": [
               "N1"
             ],
             "type": "string"
           },
           "position": {
-            "$ref": "#/components/schemas/map_node_position"
+            "$ref": "#/components/schemas/map_node_position",
+            "description": "Coordinates of this map node"
           }
         },
         "required": [
@@ -2001,8 +2113,10 @@
       },
       "map_node_position": {
         "additionalProperties": false,
+        "description": "Position of a map path node",
         "properties": {
           "x": {
+            "description": "Horizontal coordinate of the map node",
             "examples": [
               746
             ],
@@ -2010,6 +2124,7 @@
             "type": "number"
           },
           "y": {
+            "description": "Vertical coordinate of the map node",
             "examples": [
               104
             ],
@@ -2025,6 +2140,7 @@
       },
       "map_site_import_file": {
         "additionalProperties": false,
+        "description": "Multipart payload for importing map files at site scope",
         "properties": {
           "auto_deviceprofile_assignment": {
             "description": "Whether to auto assign device to deviceprofile by name",
@@ -2035,22 +2151,23 @@
           },
           "csv": {
             "contentMediaType": "application/octet-stream",
-            "description": "CSV file for ap name mapping, optional",
+            "description": "Optional AP name-mapping CSV file",
             "type": "string"
           },
           "file": {
             "contentMediaType": "application/octet-stream",
-            "description": "Ekahau or ibwave file",
+            "description": "Ekahau or iBwave floorplan file to import",
             "type": "string"
           },
           "json": {
-            "$ref": "#/components/schemas/map_import_json"
+            "$ref": "#/components/schemas/map_import_json",
+            "description": "Import options for the site map file"
           }
         },
         "type": "object"
       },
       "map_sitesurvey_path": {
-        "description": "Sitesurvey_path",
+        "description": "Site survey path definitions for a map",
         "items": {
           "$ref": "#/components/schemas/map_sitesurvey_path_items"
         },
@@ -2059,29 +2176,35 @@
       },
       "map_sitesurvey_path_items": {
         "additionalProperties": false,
+        "description": "Site survey path definition on a map",
         "properties": {
           "coordinate": {
+            "description": "Site survey path coordinate space",
             "examples": [
               "actual"
             ],
             "type": "string"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the site survey path"
           },
           "name": {
+            "description": "Display name of the site survey path",
             "examples": [
               "Default"
             ],
             "type": "string"
           },
           "nodes": {
-            "$ref": "#/components/schemas/map_sitesurvey_path_items_nodes"
+            "$ref": "#/components/schemas/map_sitesurvey_path_items_nodes",
+            "description": "Path nodes included in the site survey path"
           }
         },
         "type": "object"
       },
       "map_sitesurvey_path_items_nodes": {
+        "description": "Map nodes included in a site survey path",
         "items": {
           "$ref": "#/components/schemas/map_node"
         },
@@ -2090,7 +2213,7 @@
       },
       "map_type": {
         "default": "image",
-        "description": "enum: `google`, `image`",
+        "description": "Map type, such as `image` or `google`. enum: `google`, `image`",
         "enum": [
           "google",
           "image"
@@ -2118,18 +2241,21 @@
         "description": "JSON blob for wall definition (same format as wayfinding_path)",
         "properties": {
           "coordinate": {
+            "description": "Wall path coordinate space",
             "examples": [
               "actual"
             ],
             "type": "string"
           },
           "nodes": {
-            "$ref": "#/components/schemas/map_wall_path_nodes"
+            "$ref": "#/components/schemas/map_wall_path_nodes",
+            "description": "Path nodes that define the wall geometry"
           }
         },
         "type": "object"
       },
       "map_wall_path_nodes": {
+        "description": "Map nodes included in a wall path",
         "items": {
           "$ref": "#/components/schemas/map_node"
         },
@@ -2141,9 +2267,11 @@
         "description": "Properties related to wayfinding",
         "properties": {
           "micello": {
-            "$ref": "#/components/schemas/map_wayfinding_micello"
+            "$ref": "#/components/schemas/map_wayfinding_micello",
+            "description": "External Micello wayfinding integration settings for this map"
           },
           "snap_to_path": {
+            "description": "Whether wayfinding should snap routes to configured paths",
             "type": "boolean"
           }
         },
@@ -2151,20 +2279,24 @@
       },
       "map_wayfinding_micello": {
         "additionalProperties": false,
+        "description": "Micello wayfinding integration settings",
         "properties": {
           "account_key": {
+            "description": "Micello account key used for wayfinding",
             "examples": [
               "adasdf"
             ],
             "type": "string"
           },
           "default_level_id": {
+            "description": "Default Micello floor or level identifier for wayfinding",
             "examples": [
               5
             ],
             "type": "integer"
           },
           "map_id": {
+            "description": "Micello map identifier used for wayfinding",
             "examples": [
               "c660f81dd250c"
             ],
@@ -2178,18 +2310,21 @@
         "description": "JSON blob for wayfinding (using Dijkstra’s algorithm)",
         "properties": {
           "coordinate": {
+            "description": "Wayfinding path coordinate space",
             "examples": [
               "actual"
             ],
             "type": "string"
           },
           "nodes": {
-            "$ref": "#/components/schemas/map_wayfinding_path_nodes"
+            "$ref": "#/components/schemas/map_wayfinding_path_nodes",
+            "description": "Path nodes used for wayfinding routes"
           }
         },
         "type": "object"
       },
       "map_wayfinding_path_nodes": {
+        "description": "Map nodes included in a wayfinding path",
         "items": {
           "$ref": "#/components/schemas/map_node"
         },
@@ -2197,6 +2332,7 @@
         "type": "array"
       },
       "maps": {
+        "description": "Maps or floorplans returned by the API",
         "items": {
           "$ref": "#/components/schemas/map"
         },
@@ -2204,9 +2340,10 @@
       },
       "memory_stat": {
         "additionalProperties": false,
-        "description": "Memory usage stat (for virtual chassis, memory usage of master RE)",
+        "description": "Memory utilization statistics for a device; in a virtual chassis, this reports the master Routing Engine",
         "properties": {
           "usage": {
+            "description": "Current memory utilization percentage for the device or master Routing Engine",
             "type": "number"
           }
         },
@@ -2230,29 +2367,35 @@
       },
       "module_stat_item_errors_items": {
         "additionalProperties": false,
+        "description": "Error condition reported for a device module",
         "properties": {
           "feature": {
+            "description": "Affected feature associated with this module error condition",
             "examples": [
               "Mist-Management"
             ],
             "type": "string"
           },
           "minimum_version": {
+            "description": "Minimum software version associated with this module error",
             "examples": [
               "128T-6.0.0-1"
             ],
             "type": "string"
           },
           "reason": {
+            "description": "Human-readable reason for the module error condition",
             "type": "string"
           },
           "since": {
+            "description": "Epoch timestamp when the module error condition began",
             "examples": [
               1657497600
             ],
             "type": "integer"
           },
           "type": {
+            "description": "Module error type code reported by the device",
             "examples": [
               "FW_UPGRADE_REQUIRED_BY_FEATURE"
             ],
@@ -2266,6 +2409,7 @@
         "type": "object"
       },
       "module_stat_item_fans": {
+        "description": "Cooling fan status records for a device module",
         "items": {
           "$ref": "#/components/schemas/module_stat_item_fans_items"
         },
@@ -2274,23 +2418,28 @@
       },
       "module_stat_item_fans_items": {
         "additionalProperties": false,
+        "description": "Cooling fan telemetry for a device module",
         "properties": {
           "airflow": {
+            "description": "Direction of airflow reported for the fan",
             "examples": [
               "out"
             ],
             "type": "string"
           },
           "name": {
+            "description": "Fan label reported by the device",
             "examples": [
               "Fan 0"
             ],
             "type": "string"
           },
           "rpm": {
+            "description": "Current fan speed in revolutions per minute",
             "type": "integer"
           },
           "status": {
+            "description": "Operational status reported for the fan",
             "examples": [
               "ok"
             ],
@@ -2300,6 +2449,7 @@
         "type": "object"
       },
       "module_stat_item_pics": {
+        "description": "Physical Interface Card summaries for a device module",
         "items": {
           "$ref": "#/components/schemas/module_stat_item_pics_item"
         },
@@ -2307,20 +2457,25 @@
       },
       "module_stat_item_pics_item": {
         "additionalProperties": false,
+        "description": "Physical Interface Card summary for a device module",
         "properties": {
           "index": {
+            "description": "PIC index within the device module",
             "type": "integer"
           },
           "model_number": {
+            "description": "Model number reported for the PIC",
             "type": "string"
           },
           "port_groups": {
-            "$ref": "#/components/schemas/module_stat_item_pics_item_port_groups"
+            "$ref": "#/components/schemas/module_stat_item_pics_item_port_groups",
+            "description": "Port groups provided by this PIC"
           }
         },
         "type": "object"
       },
       "module_stat_item_pics_item_port_groups": {
+        "description": "Port group summaries for a PIC",
         "items": {
           "$ref": "#/components/schemas/module_stat_item_pics_item_port_groups_item"
         },
@@ -2328,11 +2483,14 @@
       },
       "module_stat_item_pics_item_port_groups_item": {
         "additionalProperties": false,
+        "description": "Port group summary for a PIC",
         "properties": {
           "count": {
+            "description": "Number of ports in this PIC port group",
             "type": "integer"
           },
           "type": {
+            "description": "Port media or interface type for this PIC port group",
             "type": "string"
           }
         },
@@ -2340,26 +2498,31 @@
       },
       "module_stat_item_poe": {
         "additionalProperties": false,
+        "description": "Power over Ethernet telemetry for a device module",
         "properties": {
           "max_power": {
+            "description": "Total PoE power budget available to the module, in watts",
             "examples": [
               250
             ],
             "type": "number"
           },
           "power_draw": {
+            "description": "Current PoE power draw on the module, in watts",
             "examples": [
               120.3
             ],
             "type": "number"
           },
           "status": {
+            "description": "Operational status of PoE on the module",
             "type": "string"
           }
         },
         "type": "object"
       },
       "module_stat_item_psus": {
+        "description": "Power supply status records for a device module",
         "items": {
           "$ref": "#/components/schemas/module_stat_item_psus_item"
         },
@@ -2368,14 +2531,17 @@
       },
       "module_stat_item_psus_item": {
         "additionalProperties": false,
+        "description": "Power supply status for a device module",
         "properties": {
           "name": {
+            "description": "Power supply label reported by the device",
             "examples": [
               "Power Supply 0"
             ],
             "type": "string"
           },
           "status": {
+            "description": "Operational status reported for the power supply",
             "examples": [
               "ok"
             ],
@@ -2385,6 +2551,7 @@
         "type": "object"
       },
       "module_stat_item_temperatures": {
+        "description": "Temperature sensor readings for a device module",
         "items": {
           "$ref": "#/components/schemas/module_stat_item_temperatures_item"
         },
@@ -2393,20 +2560,24 @@
       },
       "module_stat_item_temperatures_item": {
         "additionalProperties": false,
+        "description": "Temperature sensor reading for a device module",
         "properties": {
           "celsius": {
+            "description": "Temperature reading for the sensor, in degrees Celsius",
             "examples": [
               45
             ],
             "type": "number"
           },
           "name": {
+            "description": "Temperature sensor label reported by the device",
             "examples": [
               "CPU"
             ],
             "type": "string"
           },
           "status": {
+            "description": "Operational status reported for the temperature sensor",
             "examples": [
               "ok"
             ],
@@ -2416,6 +2587,7 @@
         "type": "object"
       },
       "module_stat_item_vc_links": {
+        "description": "Virtual chassis link records for a device module",
         "items": {
           "$ref": "#/components/schemas/module_stat_item_vc_links_item"
         },
@@ -2424,20 +2596,24 @@
       },
       "module_stat_item_vc_links_item": {
         "additionalProperties": false,
+        "description": "Virtual chassis link endpoint for a device module",
         "properties": {
           "neighbor_module_idx": {
+            "description": "Index of the neighboring module connected through this virtual chassis link",
             "examples": [
               1
             ],
             "type": "integer"
           },
           "neighbor_port_id": {
+            "description": "Port identifier on the neighboring module for this virtual chassis link",
             "examples": [
               "vcp-255/1/0"
             ],
             "type": "string"
           },
           "port_id": {
+            "description": "Local port identifier for this virtual chassis link",
             "examples": [
               "vcp-255/1/0"
             ],
@@ -2447,6 +2623,7 @@
         "type": "object"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -2456,8 +2633,10 @@
       },
       "response_detail_string": {
         "additionalProperties": false,
+        "description": "Response containing a human-readable detail message",
         "properties": {
           "detail": {
+            "description": "Human-readable detail message returned by the API",
             "type": "string"
           }
         },
@@ -2465,8 +2644,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -2477,8 +2658,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -2489,8 +2672,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -2501,8 +2686,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -2510,8 +2697,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -2522,29 +2711,37 @@
       },
       "response_inventory": {
         "additionalProperties": false,
+        "description": "Result of adding device claim codes to organization inventory",
         "properties": {
           "added": {
-            "$ref": "#/components/schemas/response_inventory_added"
+            "$ref": "#/components/schemas/response_inventory_added",
+            "description": "Claim codes accepted into organization inventory"
           },
           "duplicated": {
-            "$ref": "#/components/schemas/response_inventory_duplicated"
+            "$ref": "#/components/schemas/response_inventory_duplicated",
+            "description": "Claim codes already present in organization inventory"
           },
           "error": {
-            "$ref": "#/components/schemas/response_inventory_error"
+            "$ref": "#/components/schemas/response_inventory_error",
+            "description": "Claim codes rejected by the inventory add operation"
           },
           "inventory_added": {
-            "$ref": "#/components/schemas/response_inventory_inventory_added"
+            "$ref": "#/components/schemas/response_inventory_inventory_added",
+            "description": "Detailed inventory records added by the claim operation"
           },
           "inventory_duplicated": {
-            "$ref": "#/components/schemas/response_inventory_inventory_duplicated"
+            "$ref": "#/components/schemas/response_inventory_inventory_duplicated",
+            "description": "Detailed inventory records already present during the claim operation"
           },
           "reason": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Error reasons for claim codes that could not be added"
           }
         },
         "type": "object"
       },
       "response_inventory_added": {
+        "description": "Claim codes accepted into organization inventory",
         "items": {
           "examples": [
             "6JG8E-PTFV2-A9Z2N"
@@ -2554,6 +2751,7 @@
         "type": "array"
       },
       "response_inventory_duplicated": {
+        "description": "Claim codes already present in organization inventory",
         "items": {
           "examples": [
             "DVH4V-SNMSZ-PDXBR"
@@ -2563,6 +2761,7 @@
         "type": "array"
       },
       "response_inventory_error": {
+        "description": "Claim codes rejected by the inventory add operation",
         "items": {
           "examples": [
             "PO1025335ohoh"
@@ -2572,6 +2771,7 @@
         "type": "array"
       },
       "response_inventory_inventory_added": {
+        "description": "Detailed inventory records added by the claim operation",
         "items": {
           "$ref": "#/components/schemas/response_inventory_inventory_added_items"
         },
@@ -2581,32 +2781,38 @@
       },
       "response_inventory_inventory_added_items": {
         "additionalProperties": false,
+        "description": "Inventory device added by the claim operation",
         "properties": {
           "mac": {
+            "description": "Device MAC address for the claimed inventory item",
             "examples": [
               "5c5b35000018"
             ],
             "type": "string"
           },
           "magic": {
+            "description": "Activation code or claim code associated with the inventory item",
             "examples": [
               "6JG8EPTFV2A9Z2N"
             ],
             "type": "string"
           },
           "model": {
+            "description": "Device model for the claimed inventory item",
             "examples": [
               "AP41"
             ],
             "type": "string"
           },
           "serial": {
+            "description": "Device serial number for the claimed inventory item",
             "examples": [
               "FXLH2015150025"
             ],
             "type": "string"
           },
           "type": {
+            "description": "Device type for the claimed inventory item",
             "examples": [
               "ap"
             ],
@@ -2623,6 +2829,7 @@
         "type": "object"
       },
       "response_inventory_inventory_duplicated": {
+        "description": "Detailed inventory records already present during the claim operation",
         "items": {
           "$ref": "#/components/schemas/response_inventory_inventory_duplicated_items"
         },
@@ -2631,32 +2838,38 @@
       },
       "response_inventory_inventory_duplicated_items": {
         "additionalProperties": false,
+        "description": "Inventory device already present during the claim operation",
         "properties": {
           "mac": {
+            "description": "Device MAC address for the duplicate inventory item",
             "examples": [
               "5c5b35000012"
             ],
             "type": "string"
           },
           "magic": {
+            "description": "Activation code or claim code associated with the duplicate inventory item",
             "examples": [
               "DVH4VSNMSZPDXBR"
             ],
             "type": "string"
           },
           "model": {
+            "description": "Device model for the duplicate inventory item",
             "examples": [
               "AP41"
             ],
             "type": "string"
           },
           "serial": {
+            "description": "Device serial number for the duplicate inventory item",
             "examples": [
               "FXLH2015150027"
             ],
             "type": "string"
           },
           "type": {
+            "description": "Device type for the duplicate inventory item",
             "examples": [
               "ap"
             ],
@@ -2674,22 +2887,28 @@
       },
       "response_map_import": {
         "additionalProperties": false,
+        "description": "Result of importing map files and matching AP placements",
         "properties": {
           "aps": {
-            "$ref": "#/components/schemas/response_map_import_aps"
+            "$ref": "#/components/schemas/response_map_import_aps",
+            "description": "AP placement results produced by the map import"
           },
           "floorplans": {
-            "$ref": "#/components/schemas/response_map_import_floorplans"
+            "$ref": "#/components/schemas/response_map_import_floorplans",
+            "description": "Floorplan import results produced by the map import"
           },
           "for_site": {
+            "description": "Whether this map import response is scoped to a site",
             "readOnly": true,
             "type": "boolean"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site associated with the map import result"
           },
           "summary": {
-            "$ref": "#/components/schemas/response_map_import_summary"
+            "$ref": "#/components/schemas/response_map_import_summary",
+            "description": "Counts summarizing assignments made during the map import"
           }
         },
         "required": [
@@ -2702,29 +2921,37 @@
       },
       "response_map_import_ap": {
         "additionalProperties": false,
+        "description": "AP placement result from a map import",
         "properties": {
           "action": {
-            "$ref": "#/components/schemas/response_map_import_ap_action"
+            "$ref": "#/components/schemas/response_map_import_ap_action",
+            "description": "Import action applied to this AP"
           },
           "floorplan_id": {
+            "description": "Floorplan identifier where the AP placement was imported",
             "format": "uuid",
             "type": "string"
           },
           "height": {
+            "description": "Mounting height for the AP on the imported floorplan",
             "format": "double",
             "type": "number"
           },
           "mac": {
+            "description": "AP MAC address matched from the import file",
             "type": "string"
           },
           "map_id": {
+            "description": "Map identifier associated with the imported AP placement",
             "format": "uuid",
             "type": "string"
           },
           "orientation": {
+            "description": "AP orientation in degrees on the imported floorplan",
             "type": "integer"
           },
           "reason": {
+            "description": "Explanation of why the AP import action was not completed, when provided",
             "type": "string"
           }
         },
@@ -2749,6 +2976,7 @@
         "type": "string"
       },
       "response_map_import_aps": {
+        "description": "AP placement results produced by the map import",
         "items": {
           "$ref": "#/components/schemas/response_map_import_ap"
         },
@@ -2757,21 +2985,27 @@
       },
       "response_map_import_floorplan": {
         "additionalProperties": false,
+        "description": "Floorplan result from a map import",
         "properties": {
           "action": {
+            "description": "Import action applied to this floorplan",
             "type": "string"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Floorplan identifier returned by the import"
           },
           "map_id": {
+            "description": "Map identifier associated with the imported floorplan",
             "format": "uuid",
             "type": "string"
           },
           "name": {
+            "description": "Floorplan name imported from the map file",
             "type": "string"
           },
           "reason": {
+            "description": "Explanation of why the floorplan import action was not completed, when provided",
             "type": "string"
           }
         },
@@ -2784,6 +3018,7 @@
         "type": "object"
       },
       "response_map_import_floorplans": {
+        "description": "Floorplan import results produced by the map import",
         "items": {
           "$ref": "#/components/schemas/response_map_import_floorplan"
         },
@@ -2792,14 +3027,18 @@
       },
       "response_map_import_summary": {
         "additionalProperties": false,
+        "description": "Counts summarizing assignments made during the map import",
         "properties": {
           "num_ap_assigned": {
+            "description": "Number of AP placements assigned during the map import",
             "type": "integer"
           },
           "num_inv_assigned": {
+            "description": "Number of inventory records assigned to the site during the map import",
             "type": "integer"
           },
           "num_map_assigned": {
+            "description": "Number of map floorplans assigned during the map import",
             "type": "integer"
           }
         },
@@ -2812,53 +3051,66 @@
       },
       "response_virtual_chassis_config": {
         "additionalProperties": false,
+        "description": "Combined virtual chassis status, topology, and member statistics",
         "properties": {
           "config_type": {
+            "description": "Provisioning mode of the virtual chassis configuration",
             "readOnly": true,
             "type": "string"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique value identifying the virtual chassis device record"
           },
           "locating": {
+            "description": "Whether locate mode is active for the virtual chassis device",
             "readOnly": true,
             "type": "boolean"
           },
           "mac": {
+            "description": "Device MAC address for the virtual chassis device record",
             "type": "string"
           },
           "members": {
-            "$ref": "#/components/schemas/stats_switch_module_stat"
+            "$ref": "#/components/schemas/stats_switch_module_stat",
+            "description": "Virtual chassis member module statistics and topology details"
           },
           "model": {
+            "description": "Switch model for the virtual chassis device record",
             "readOnly": true,
             "type": "string"
           },
           "num_routing_engines": {
-            "description": "routing-engine count",
+            "description": "Number of routing engines in the virtual chassis",
             "examples": [
               1
             ],
             "type": "integer"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization identifier for the virtual chassis device"
           },
           "serial": {
+            "description": "Device serial number reported for the virtual chassis",
             "readOnly": true,
             "type": "string"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Identifier of the site containing the virtual chassis"
           },
           "status": {
+            "description": "Connection status of the virtual chassis device",
             "readOnly": true,
             "type": "string"
           },
           "type": {
+            "description": "Device type for the virtual chassis record",
             "type": "string"
           },
           "vc_mac": {
+            "description": "Virtual Chassis MAC address used to identify the VC device",
             "readOnly": true,
             "type": "string"
           }
@@ -2866,6 +3118,7 @@
         "type": "object"
       },
       "site_id": {
+        "description": "Unique identifier of a Mist site",
         "examples": [
           "441a1214-6928-442a-8e92-e1d34b8ec6a6"
         ],
@@ -2874,6 +3127,7 @@
         "type": "string"
       },
       "stats_switch_module_stat": {
+        "description": "Hardware module statistics reported by a switch",
         "items": {
           "$ref": "#/components/schemas/stats_switch_module_stat_item"
         },
@@ -2883,8 +3137,10 @@
       },
       "stats_switch_module_stat_item": {
         "additionalProperties": false,
+        "description": "Hardware module status and firmware inventory for a switch",
         "properties": {
           "backup_version": {
+            "description": "Backup software version stored on the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -2892,6 +3148,7 @@
             ]
           },
           "bios_version": {
+            "description": "BIOS firmware version reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -2899,9 +3156,11 @@
             ]
           },
           "boot_partition": {
+            "description": "Active boot partition used by the switch module",
             "type": "string"
           },
           "cpld_version": {
+            "description": "CPLD firmware version reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -2909,19 +3168,24 @@
             ]
           },
           "cpu_stat": {
-            "$ref": "#/components/schemas/cpu_stat"
+            "$ref": "#/components/schemas/cpu_stat",
+            "description": "Processor utilization statistics for the switch module"
           },
           "errors": {
-            "$ref": "#/components/schemas/module_stat_item_errors"
+            "$ref": "#/components/schemas/module_stat_item_errors",
+            "description": "Hardware error records reported for the switch module"
           },
           "fans": {
-            "$ref": "#/components/schemas/module_stat_item_fans"
+            "$ref": "#/components/schemas/module_stat_item_fans",
+            "description": "Cooling fan status records for the switch module"
           },
           "fpc_idx": {
+            "description": "FPC index identifying this switch module",
             "readOnly": true,
             "type": "integer"
           },
           "fpga_version": {
+            "description": "FPGA firmware version reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -2929,21 +3193,26 @@
             ]
           },
           "last_seen": {
-            "$ref": "#/components/schemas/last_seen"
+            "$ref": "#/components/schemas/last_seen",
+            "description": "Time when Mist last observed this switch module, in epoch seconds"
           },
           "locating": {
+            "description": "Whether the switch module locator indicator is active",
             "type": "boolean"
           },
           "mac": {
+            "description": "Switch module MAC address reported by Mist",
             "examples": [
               "fc3342123456"
             ],
             "type": "string"
           },
           "memory_stat": {
-            "$ref": "#/components/schemas/memory_stat"
+            "$ref": "#/components/schemas/memory_stat",
+            "description": "Utilization statistics for switch module memory"
           },
           "model": {
+            "description": "Switch module model name reported by Mist",
             "examples": [
               "EX4300-48P"
             ],
@@ -2954,6 +3223,7 @@
             ]
           },
           "optics_cpld_version": {
+            "description": "Optics CPLD firmware version reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -2961,6 +3231,7 @@
             ]
           },
           "pending_version": {
+            "description": "Pending software version staged for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -2968,12 +3239,15 @@
             ]
           },
           "pics": {
-            "$ref": "#/components/schemas/module_stat_item_pics"
+            "$ref": "#/components/schemas/module_stat_item_pics",
+            "description": "Physical Interface Card status records for the switch module"
           },
           "poe": {
-            "$ref": "#/components/schemas/module_stat_item_poe"
+            "$ref": "#/components/schemas/module_stat_item_poe",
+            "description": "Power over Ethernet telemetry for the switch module"
           },
           "poe_version": {
+            "description": "PoE controller firmware version reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -2981,6 +3255,7 @@
             ]
           },
           "power_cpld_version": {
+            "description": "Power CPLD firmware version reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -2988,9 +3263,11 @@
             ]
           },
           "psus": {
-            "$ref": "#/components/schemas/module_stat_item_psus"
+            "$ref": "#/components/schemas/module_stat_item_psus",
+            "description": "Power supply status records for the switch module"
           },
           "re_fpga_version": {
+            "description": "Routing Engine FPGA firmware version reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -2998,6 +3275,7 @@
             ]
           },
           "recovery_version": {
+            "description": "Recovery software version stored on the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -3005,6 +3283,7 @@
             ]
           },
           "serial": {
+            "description": "Switch module serial number reported by Mist",
             "examples": [
               "PX8716230021"
             ],
@@ -3015,6 +3294,7 @@
             ]
           },
           "status": {
+            "description": "Connection status reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -3022,9 +3302,11 @@
             ]
           },
           "temperatures": {
-            "$ref": "#/components/schemas/module_stat_item_temperatures"
+            "$ref": "#/components/schemas/module_stat_item_temperatures",
+            "description": "Temperature sensor readings for the switch module"
           },
           "tmc_fpga_version": {
+            "description": "TMC FPGA firmware version reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -3032,6 +3314,7 @@
             ]
           },
           "type": {
+            "description": "Module type reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -3039,6 +3322,7 @@
             ]
           },
           "uboot_version": {
+            "description": "U-Boot firmware version reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -3046,6 +3330,7 @@
             ]
           },
           "uptime": {
+            "description": "Elapsed time since the switch module last booted, in seconds",
             "readOnly": true,
             "type": [
               "integer",
@@ -3053,9 +3338,11 @@
             ]
           },
           "vc_links": {
-            "$ref": "#/components/schemas/module_stat_item_vc_links"
+            "$ref": "#/components/schemas/module_stat_item_vc_links",
+            "description": "Virtual chassis link records for the switch module"
           },
           "vc_mode": {
+            "description": "Virtual chassis mode reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -3074,6 +3361,7 @@
             ]
           },
           "vc_state": {
+            "description": "Virtual chassis state reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -3081,6 +3369,7 @@
             ]
           },
           "version": {
+            "description": "Software version running on the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -3091,6 +3380,7 @@
         "type": "object"
       },
       "strings": {
+        "description": "Unique string values returned or accepted by this schema",
         "items": {
           "type": "string"
         },
@@ -3098,18 +3388,20 @@
         "uniqueItems": true
       },
       "virtual_chassis_config": {
-        "description": "Virtual Chassis",
+        "description": "Virtual Chassis creation or configuration request",
         "properties": {
           "locating": {
+            "description": "Whether the Virtual Chassis is currently in locate mode",
             "readOnly": true,
             "type": "boolean"
           },
           "members": {
-            "$ref": "#/components/schemas/virtual_chassis_config_members"
+            "$ref": "#/components/schemas/virtual_chassis_config_members",
+            "description": "Virtual Chassis members and their expected roles and VC ports"
           },
           "preprovisioned": {
             "default": false,
-            "description": "To create the Virtual Chassis in Pre-Provisioned mode",
+            "description": "Whether to create the Virtual Chassis in pre-provisioned mode",
             "type": "boolean"
           }
         },
@@ -3117,24 +3409,28 @@
       },
       "virtual_chassis_config_member": {
         "additionalProperties": false,
+        "description": "Virtual Chassis member configuration",
         "properties": {
           "locating": {
+            "description": "Whether this Virtual Chassis member is currently in locate mode",
             "readOnly": true,
             "type": "boolean"
           },
           "mac": {
-            "description": "fpc0, same as the mac of device_id",
+            "description": "Member MAC address; for FPC0 this matches the device MAC address",
             "type": "string"
           },
           "member_id": {
-            "description": "For preprovisionned virtual chassis",
+            "description": "Member ID used for a pre-provisioned Virtual Chassis",
             "type": "integer"
           },
           "vc_ports": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Port names to use as Virtual Chassis ports on this member"
           },
           "vc_role": {
-            "$ref": "#/components/schemas/virtual_chassis_config_member_vc_role"
+            "$ref": "#/components/schemas/virtual_chassis_config_member_vc_role",
+            "description": "Role of this member in the Virtual Chassis"
           }
         },
         "required": [
@@ -3153,6 +3449,7 @@
         "type": "string"
       },
       "virtual_chassis_config_members": {
+        "description": "Virtual Chassis member configurations",
         "items": {
           "$ref": "#/components/schemas/virtual_chassis_config_member"
         },
@@ -3160,24 +3457,27 @@
       },
       "virtual_chassis_member_update": {
         "additionalProperties": false,
+        "description": "Member update for a Virtual Chassis add, remove, or preprovision operation",
         "properties": {
           "mac": {
-            "description": "Required if `op`==`add` or `op`==`preprovision`.",
+            "description": "Required if `op`==`add` or `op`==`preprovision`; MAC address of the member to add or preprovision",
             "type": "string"
           },
           "member": {
-            "description": "Required if `op`==`remove`",
+            "description": "Required if `op`==`remove`; member ID to remove from the Virtual Chassis",
             "type": "integer"
           },
           "member_id": {
-            "description": "Required if `op`==`preprovision`. Optional if `op`==`add`",
+            "description": "Required if `op`==`preprovision`. Optional if `op`==`add`; target member ID for the Virtual Chassis member",
             "type": "integer"
           },
           "vc_ports": {
-            "$ref": "#/components/schemas/virtual_chassis_member_update_vc_ports"
+            "$ref": "#/components/schemas/virtual_chassis_member_update_vc_ports",
+            "description": "Required if `op`==`add` or `op`==`preprovision`; port names to use as Virtual Chassis ports"
           },
           "vc_role": {
-            "$ref": "#/components/schemas/virtual_chassis_member_update_vc_role"
+            "$ref": "#/components/schemas/virtual_chassis_member_update_vc_role",
+            "description": "Required if `op`==`add` or `op`==`preprovision`; role of the member in the Virtual Chassis"
           }
         },
         "type": "object"
@@ -3199,26 +3499,34 @@
         "type": "string"
       },
       "virtual_chassis_update": {
-        "description": "Virtual Chassis",
+        "description": "Virtual Chassis member update request",
         "properties": {
           "member": {
-            "description": "Only if `op`==`renumber`",
+            "description": "Only if `op`==`renumber`; existing member ID to renumber",
             "type": "integer"
           },
           "members": {
-            "$ref": "#/components/schemas/virtual_chassis_update_members"
+            "$ref": "#/components/schemas/virtual_chassis_update_members",
+            "description": "Member updates for add, remove, or preprovision operations"
           },
           "new-member": {
-            "description": "Only if `op`==`renumber`",
+            "description": "Only if `op`==`renumber`; new member ID to assign",
             "type": "integer"
           },
           "op": {
-            "$ref": "#/components/schemas/virtual_chassis_update_op"
+            "$ref": "#/components/schemas/virtual_chassis_update_op",
+            "description": "Action to perform on the Virtual Chassis"
+          },
+          "remove_inventory": {
+            "default": false,
+            "description": "Only if `op`==`preprovision`. When removing members from a pre-provisioned VC, set to `true` to delete the inventory records for removed members (e.g. for RMA). Members being removed must be in \"not-present\" state.",
+            "type": "boolean"
           }
         },
         "type": "object"
       },
       "virtual_chassis_update_members": {
+        "description": "Member updates for a Virtual Chassis operation",
         "items": {
           "$ref": "#/components/schemas/virtual_chassis_member_update"
         },
@@ -3734,9 +4042,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -3768,9 +4076,9 @@
         }
       },
       "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
         "in": "query",
         "name": "page",
-        "required": false,
         "schema": {
           "default": 1,
           "minimum": 1,
@@ -4337,19 +4645,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

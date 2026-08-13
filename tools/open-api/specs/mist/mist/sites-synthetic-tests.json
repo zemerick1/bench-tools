@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sites Synthetic Tests",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -83,7 +79,7 @@
         }
       ],
       "post": {
-        "description": "Ping test from the AP to confirm ‘reachability’ of the Radius server. Utilize Juniper EX switch(to which an AP is connected to) radius test capabilities to get details on the Radius Server ‘availability’ .",
+        "description": "Ping test from the AP to confirm 'reachability' of the RADIUS server. \n\nUtilize Juniper EX switch(to which an AP is connected to) radius test capabilities to get details on the RADIUS Server 'availability'.\n\n\n\n#### Subscribe to Device Command outputs\n\n`WS /api-ws/v1/stream`\n\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n\n#### Example output from ws stream\n\n```json\n{\n  \"event\": \"data\",\n  \"channel\": \"/sites/d6fb4f96-3ba4-4cf5-8af2-a8d7b85087ac/devices/00000000-0000-0000-1000-2093390b3580/cmd\",\n  \"data\": \"{\\\"event\\\": \\\"data\\\", \\\"channel\\\": \\\"/sites/d6fb4f96-3ba4-4cf5-8af2-a8d7b85087ac/devices/2093390b3580/cmd\\\", \\\"data\\\": {\\\"session\\\": \\\"6043daff-884e-48bc-aa9a-810d268aceb1\\\", \\\"raw\\\": \\\"    Reason : fail\\\"}}\"\n}\n{\n  \"event\": \"data\",\n  \"channel\": \"/sites/d6fb4f96-3ba4-4cf5-8af2-a8d7b85087ac/devices/00000000-0000-0000-1000-2093390b3580/cmd\",\n  \"data\": \"{\\\"event\\\": \\\"data\\\", \\\"channel\\\": \\\"/sites/d6fb4f96-3ba4-4cf5-8af2-a8d7b85087ac/devices/2093390b3580/cmd\\\", \\\"data\\\": {\\\"session\\\": \\\"6043daff-884e-48bc-aa9a-810d268aceb1\\\", \\\"raw\\\": \\\"    Test complete. Exiting\\\"}}\"\n}\n```",
         "operationId": "startSiteSwitchRadiusSyntheticTest",
         "requestBody": {
           "content": {
@@ -266,7 +262,7 @@
         "operationId": "searchSiteSyntheticTest",
         "parameters": [
           {
-            "description": "Device MAC Address",
+            "description": "Filter results by MAC address",
             "in": "query",
             "name": "mac",
             "schema": {
@@ -277,7 +273,7 @@
             }
           },
           {
-            "description": "Port_id used to run the test (for SSR only)",
+            "description": "Filter results by port identifier",
             "in": "query",
             "name": "port_id",
             "schema": {
@@ -288,7 +284,7 @@
             }
           },
           {
-            "description": "VLAN ID",
+            "description": "Filter results by VLAN ID",
             "in": "query",
             "name": "vlan_id",
             "schema": {
@@ -310,7 +306,7 @@
             }
           },
           {
-            "description": "Test failure reason",
+            "description": "Filter results by reason",
             "in": "query",
             "name": "reason",
             "schema": {
@@ -321,7 +317,7 @@
             }
           },
           {
-            "description": "Synthetic test type",
+            "description": "Synthetic test type used to filter results. enum: `arp`, `curl`, `dhcp`, `dhcp6`, `dns`, `lan_connectivity`, `radius`, `speedtest`",
             "in": "query",
             "name": "type",
             "schema": {
@@ -329,7 +325,7 @@
             }
           },
           {
-            "description": "Connectivity protocol",
+            "description": "Connectivity protocol used to filter synthetic test results. enum: `ping`, `traceroute`",
             "in": "query",
             "name": "protocol",
             "schema": {
@@ -337,7 +333,7 @@
             }
           },
           {
-            "description": "Tenant network in which lan_connectivity test was run",
+            "description": "Filter results by tenant network",
             "in": "query",
             "name": "tenant",
             "schema": {
@@ -409,8 +405,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -421,8 +419,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -433,8 +433,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -445,8 +447,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -454,8 +458,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -466,17 +472,21 @@
       },
       "response_synthetictest": {
         "additionalProperties": false,
+        "description": "Result returned after a site synthetic test is queued",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique value for the queued synthetic test request"
           },
           "message": {
+            "description": "Human-readable queuing result returned by the API",
             "examples": [
               "Successfully queued synthetic test for the site."
             ],
             "type": "string"
           },
           "status": {
+            "description": "Queue status for the synthetic test request",
             "examples": [
               "success"
             ],
@@ -487,23 +497,30 @@
       },
       "response_synthetictest_search": {
         "additionalProperties": false,
+        "description": "Paginated response for site synthetic test search results",
         "properties": {
           "end": {
+            "description": "Epoch timestamp, in seconds, for the end of the synthetic test search window",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of synthetic test results returned in this page",
             "type": "integer"
           },
           "next": {
+            "description": "URL for retrieving the next page of synthetic test results",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/response_synthetictest_search_results"
+            "$ref": "#/components/schemas/response_synthetictest_search_results",
+            "description": "Synthetic test result records matching the search filters"
           },
           "start": {
+            "description": "Epoch timestamp, in seconds, for the start of the synthetic test search window",
             "type": "integer"
           },
           "total": {
+            "description": "Number of synthetic test results matching the search filters across all pages",
             "type": "integer"
           }
         },
@@ -517,14 +534,17 @@
         "type": "object"
       },
       "response_synthetictest_search_results": {
+        "description": "Synthetic test result records returned by search",
         "items": {
           "$ref": "#/components/schemas/synthetictest_info"
         },
         "type": "array"
       },
       "synthetictest": {
+        "description": "Request body for triggering a site synthetic test",
         "properties": {
           "email": {
+            "description": "Contact email address supplied when triggering the site synthetic test",
             "examples": [
               "test@mist.com"
             ],
@@ -535,50 +555,52 @@
         "type": "object"
       },
       "synthetictest_device": {
+        "description": "Request body for triggering a synthetic test on a device",
         "properties": {
           "host": {
-            "description": "If `type`==`lan_connectivity`",
+            "description": "If `type`==`lan_connectivity`. Hostname or IP address to probe for LAN connectivity testing",
             "examples": [
               "www.example.com"
             ],
             "type": "string"
           },
           "hostname": {
-            "description": "If `type`==`dns`",
+            "description": "If `type`==`dns`. Hostname to resolve during the DNS synthetic test",
             "examples": [
               "google.com\""
             ],
             "type": "string"
           },
           "ip": {
-            "description": "If `type`==`arp`",
+            "description": "If `type`==`arp`. IP address to resolve through ARP during the synthetic test",
             "examples": [
               "192.168.3.5"
             ],
             "type": "string"
           },
           "password": {
-            "description": "If `type`==`radius`",
+            "description": "If `type`==`radius`. Password used for RADIUS authentication testing",
             "examples": [
               "test123"
             ],
+            "format": "password",
             "type": "string"
           },
           "ping_count": {
             "default": 10,
-            "description": "If `type`==`lan_connectivity`",
+            "description": "If `type`==`lan_connectivity`. Number of ping probes to send during the LAN connectivity test",
             "maximum": 60,
             "minimum": 10,
             "type": "integer"
           },
           "ping_details": {
             "default": false,
-            "description": "If `type`==`lan_connectivity`",
+            "description": "If `type`==`lan_connectivity`. Whether to include per-ping results in the LAN connectivity test output",
             "type": "boolean"
           },
           "ping_size": {
             "default": 56,
-            "description": "If `type`==`lan_connectivity`",
+            "description": "If `type`==`lan_connectivity`. Payload size, in bytes, for each ping probe",
             "maximum": 65535,
             "minimum": 56,
             "type": "integer"
@@ -591,7 +613,8 @@
             "type": "string"
           },
           "protocol": {
-            "$ref": "#/components/schemas/synthetictest_device_protocol"
+            "$ref": "#/components/schemas/synthetictest_device_protocol",
+            "description": "If `type`==`lan_connectivity`. Protocol or protocol combination used for the connectivity test"
           },
           "tenant": {
             "description": "If `type`==`curl` or `type`==`lan_connectivity`",
@@ -602,7 +625,7 @@
           },
           "timeout": {
             "default": 60,
-            "description": "If `type`==`curl`",
+            "description": "If `type`==`curl`. Timeout, in seconds, for the HTTP request",
             "examples": [
               60
             ],
@@ -618,24 +641,26 @@
             "type": "integer"
           },
           "type": {
-            "$ref": "#/components/schemas/synthetictest_type"
+            "$ref": "#/components/schemas/synthetictest_type",
+            "description": "Synthetic test type to run against the target"
           },
           "url": {
-            "description": "If `type`==`curl`",
+            "description": "If `type`==`curl`. URL requested during the HTTP synthetic test",
             "examples": [
               "https://www.example.com"
             ],
             "type": "string"
           },
           "username": {
-            "description": "If `type`==`radius`",
+            "description": "If `type`==`radius`. Username used for RADIUS authentication testing",
             "examples": [
               "user"
             ],
             "type": "string"
           },
           "vlan_id": {
-            "$ref": "#/components/schemas/synthetictest_device_vlan_id"
+            "$ref": "#/components/schemas/synthetictest_device_vlan_id",
+            "description": "Required for AP. VLAN ID used by the synthetic test when the target device is an AP"
           }
         },
         "required": [
@@ -645,7 +670,7 @@
       },
       "synthetictest_device_protocol": {
         "default": "ping+traceroute",
-        "description": "if `type`==`lan_connectivity`. enum: `ping`, `traceroute`, `ping+traceroute`",
+        "description": "If `type`==`lan_connectivity`. Protocol or protocol combination used by the LAN connectivity test. enum: `ping`, `traceroute`, `ping+traceroute`",
         "enum": [
           "ping",
           "ping+traceroute",
@@ -654,7 +679,7 @@
         "type": "string"
       },
       "synthetictest_device_vlan_id": {
-        "description": "Required for AP",
+        "description": "Required for AP. VLAN ID used by the synthetic test when the target device is an AP",
         "oneOf": [
           {
             "type": "string"
@@ -668,71 +693,86 @@
       },
       "synthetictest_info": {
         "additionalProperties": false,
+        "description": "Synthetic test status or result record",
         "properties": {
           "by": {
+            "description": "Actor that triggered the synthetic test",
             "examples": [
               "user"
             ],
             "type": "string"
           },
           "device_type": {
-            "$ref": "#/components/schemas/device_type"
+            "$ref": "#/components/schemas/device_type",
+            "description": "Device category that ran the synthetic test"
           },
           "failed": {
+            "description": "Whether the synthetic test failed",
             "examples": [
               false
             ],
             "type": "boolean"
           },
           "latency": {
+            "description": "Measured latency for the synthetic test, in milliseconds",
             "examples": [
               40
             ],
             "type": "integer"
           },
           "mac": {
+            "description": "Device MAC address that ran the synthetic test",
             "type": "string"
           },
           "port_id": {
+            "description": "Interface identifier used to run the synthetic test",
             "examples": [
               "ge-0/0/2"
             ],
             "type": "string"
           },
           "reason": {
+            "description": "Failure reason reported for the synthetic test, when available",
             "examples": [
               "interface not ready to perform test"
             ],
             "type": "string"
           },
           "rx_mbps": {
+            "description": "Receive throughput measured by the synthetic speed test, in Mbps",
             "examples": [
               322
             ],
             "type": "integer"
           },
           "start_time": {
+            "description": "Epoch timestamp, in seconds, when the synthetic test started",
             "examples": [
               1675718807
             ],
             "type": "integer"
           },
           "status": {
+            "description": "Current execution status of the synthetic test",
             "type": "string"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Time when the synthetic test result was recorded"
           },
           "tx_mbps": {
+            "description": "Transmit throughput measured by the synthetic speed test, in Mbps",
             "examples": [
               199
             ],
             "type": "integer"
           },
           "type": {
-            "$ref": "#/components/schemas/synthetictest_type"
+            "$ref": "#/components/schemas/synthetictest_type",
+            "description": "Synthetic test type for this result"
           },
           "vlan_id": {
+            "description": "Identifier of the VLAN used by the synthetic test",
             "examples": [
               20
             ],
@@ -742,7 +782,7 @@
         "type": "object"
       },
       "synthetictest_protocol": {
-        "description": "enum: `ping`, `traceroute`",
+        "description": "Protocol used by a synthetic test probe. enum: `ping`, `traceroute`",
         "enum": [
           "ping",
           "traceroute"
@@ -750,9 +790,11 @@
         "type": "string"
       },
       "synthetictest_radius_server": {
+        "description": "Request body for testing RADIUS server availability from a switch",
         "properties": {
           "password": {
             "description": "Specify the password associated with the username",
+            "format": "password",
             "type": "string"
           },
           "profile": {
@@ -786,15 +828,17 @@
         "type": "string"
       },
       "timestamp": {
-        "description": "Epoch (seconds)",
+        "description": "Epoch timestamp, in seconds",
         "format": "double",
         "readOnly": true,
         "type": "number"
       },
       "websocket_session": {
         "additionalProperties": false,
+        "description": "Response containing the WebSocket session handle for asynchronous command output",
         "properties": {
           "session": {
+            "description": "Identifier used to correlate output on the WebSocket stream",
             "examples": [
               "19e73828-937f-05e6-f709-e29efdb0a82b"
             ],
@@ -1028,10 +1072,9 @@
         }
       },
       "duration": {
-        "description": "Duration like 7d, 2w",
+        "description": "Time range duration for the query, using relative units such as `10m`, `7d`, or `2w`",
         "in": "query",
         "name": "duration",
-        "required": false,
         "schema": {
           "default": "1d",
           "examples": [
@@ -1041,7 +1084,7 @@
         }
       },
       "end": {
-        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
         "in": "query",
         "name": "end",
         "schema": {
@@ -1049,9 +1092,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -1079,7 +1122,7 @@
         }
       },
       "start": {
-        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
         "in": "query",
         "name": "start",
         "schema": {
@@ -1166,19 +1209,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

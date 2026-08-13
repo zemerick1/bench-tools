@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Linked Applications",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -89,7 +85,7 @@
         }
       ],
       "get": {
-        "description": "Get Org Level OAuth Application Linked Status",
+        "description": "Return linked-account status for the specified organization OAuth application and the authorization URL used to start account linking.",
         "operationId": "getOrgOauthAppLinkedStatus",
         "parameters": [
           {
@@ -128,7 +124,7 @@
         ]
       },
       "post": {
-        "description": "Add Jamf, VMware Authorization With Mist Portal",
+        "description": "Add a linked account for the specified OAuth application using the app-specific account configuration payload.",
         "operationId": "addOrgOauthAppAccounts",
         "requestBody": {
           "content": {
@@ -184,7 +180,7 @@
         }
       ],
       "put": {
-        "description": "Update Zoom, Teams, Intune Authorization.\n\nRequest Payload, These Field And Values Will Be Specific To Each Of The Third Party Apps Accounts.",
+        "description": "Update app-specific settings for a linked OAuth application account, such as Zoom or Teams guest redaction settings or a Zoom daily API request quota.",
         "operationId": "updateOrgOauthAppAccount",
         "requestBody": {
           "content": {
@@ -229,7 +225,7 @@
         ]
       },
       "delete": {
-        "description": "Delete Org Level OAuth Application Authorization With Mist Portal",
+        "description": "Remove a linked account authorization for the specified OAuth application and account ID.",
         "operationId": "deleteOrgOauthAppAuthorization",
         "responses": {
           "200": {
@@ -321,6 +317,7 @@
       },
       "account_mobicontrol_config": {
         "additionalProperties": false,
+        "description": "MobiControl account credentials used for OAuth application linking",
         "properties": {
           "client_id": {
             "description": "Customer account Client ID",
@@ -336,10 +333,11 @@
           },
           "password": {
             "description": "Customer account password instance URL",
+            "format": "password",
             "type": "string"
           },
           "username": {
-            "description": "Customer account username",
+            "description": "Login username used to authenticate to the MobiControl account",
             "type": "string"
           }
         },
@@ -353,6 +351,7 @@
         "type": "object"
       },
       "account_oauth_add": {
+        "description": "Account configuration payload for adding a supported OAuth-linked application",
         "oneOf": [
           {
             "$ref": "#/components/schemas/account_jamf_config"
@@ -406,15 +405,19 @@
       },
       "account_oauth_info": {
         "additionalProperties": false,
+        "description": "OAuth-linked application account status and authorization details",
         "properties": {
           "accounts": {
-            "$ref": "#/components/schemas/account_oauth_info_accounts"
+            "$ref": "#/components/schemas/account_oauth_info_accounts",
+            "description": "Linked third-party application accounts for this OAuth application"
           },
           "authorization_url": {
+            "description": "OAuth authorization URL to open when linking an account",
             "readOnly": true,
             "type": "string"
           },
           "linked": {
+            "description": "Whether at least one account is linked for this OAuth application",
             "readOnly": true,
             "type": "boolean"
           }
@@ -483,7 +486,8 @@
             "type": "string"
           },
           "errors": {
-            "$ref": "#/components/schemas/oauth_account_errors"
+            "$ref": "#/components/schemas/oauth_account_errors",
+            "description": "Problems reported during OAuth token refresh or account data sync"
           },
           "instance_url": {
             "description": "Customer account instance URL",
@@ -522,6 +526,7 @@
             "type": "string"
           },
           "linked_timestamp": {
+            "description": "Timestamp when this third-party account was linked",
             "examples": [
               1665465339000
             ],
@@ -537,7 +542,7 @@
             "type": "integer"
           },
           "name": {
-            "description": "Name of the company whose account mist has subscribed to",
+            "description": "Display name of the linked third-party account or company",
             "examples": [
               "Test Compay1 Ltd"
             ],
@@ -546,6 +551,7 @@
           },
           "password": {
             "description": "Customer account password instance URL",
+            "format": "password",
             "readOnly": true,
             "type": "string"
           },
@@ -558,7 +564,8 @@
             "type": "string"
           },
           "regions": {
-            "$ref": "#/components/schemas/account_oauth_info_account_regions"
+            "$ref": "#/components/schemas/account_oauth_info_account_regions",
+            "description": "Prisma Access regions with allocated bandwidth for this linked account"
           },
           "service_account_name": {
             "description": "For Prisma accounts only",
@@ -569,7 +576,8 @@
             "type": "string"
           },
           "service_connections": {
-            "$ref": "#/components/schemas/account_oauth_info_account_service_connections"
+            "$ref": "#/components/schemas/account_oauth_info_account_service_connections",
+            "description": "Prisma Access service connections configured for this linked account"
           },
           "smartgroup_name": {
             "description": "Smart group membership for determining compliance status",
@@ -588,7 +596,7 @@
             "type": "string"
           },
           "username": {
-            "description": "Customer account username",
+            "description": "Login name configured for the linked third-party account",
             "readOnly": true,
             "type": "string"
           },
@@ -609,6 +617,7 @@
             "examples": [
               "password_1234"
             ],
+            "format": "password",
             "type": "string"
           },
           "webhook_secret": {
@@ -616,6 +625,7 @@
             "examples": [
               "secret-value"
             ],
+            "format": "password",
             "type": "string"
           },
           "webhook_token": {
@@ -654,6 +664,7 @@
       },
       "account_oauth_info_account_region": {
         "additionalProperties": false,
+        "description": "Prisma Access region bandwidth allocation for a linked OAuth account",
         "properties": {
           "aggregate_region": {
             "description": "Bandwidth Aggregate region for this region",
@@ -689,9 +700,10 @@
       },
       "account_oauth_info_account_service_connection": {
         "additionalProperties": false,
+        "description": "Prisma Access service connection region for a linked OAuth account",
         "properties": {
           "region": {
-            "description": "Region of the service connection",
+            "description": "Prisma Access region where this service connection is provisioned",
             "examples": [
               "us-southwest"
             ],
@@ -718,7 +730,7 @@
         "description": "OAuth linked CrowdStrike apps account details",
         "properties": {
           "auto_probe_subnet": {
-            "description": "Required If `enable_probe`==`true`. This field will accept an IPv4 cidr and an IP address will be picked from this range to be used as tunnel probe source ip address and as well as BGP neighbour IP address. The subnet should be big enough for num_devices * num_tunnel * 2",
+            "description": "Required If `enable_probe`==`true`. This field will accept an IPv4 cidr and an IP address will be picked from this range to be used as tunnel probe source IP address and as well as BGP neighbour IP address. The subnet should be big enough for num_devices * num_tunnel * 2",
             "examples": [
               "11.0.0.0/8"
             ],
@@ -754,7 +766,7 @@
         "description": "OAuth linked CrowdStrike apps account details",
         "properties": {
           "api_token": {
-            "description": "Customer account api_token",
+            "description": "Access token used to authenticate to the SentinelOne account",
             "type": "string"
           },
           "instance_url": {
@@ -770,6 +782,7 @@
       },
       "account_vmware_config": {
         "additionalProperties": false,
+        "description": "VMware account credentials and webhook settings for OAuth application linking",
         "properties": {
           "client_id": {
             "description": "Customer account Client ID",
@@ -820,7 +833,7 @@
             "type": "string"
           },
           "zdx_org_id": {
-            "description": "ZDX organization id",
+            "description": "Organization identifier assigned to the ZDX account",
             "examples": [
               "123456"
             ],
@@ -835,6 +848,7 @@
         "type": "object"
       },
       "oauth_account_errors": {
+        "description": "Read-only OAuth account error messages",
         "examples": [
           [
             "OAuth token refresh failed, please re-link your account",
@@ -865,8 +879,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -877,8 +893,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -889,8 +907,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -901,8 +921,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -910,8 +932,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -1367,19 +1391,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

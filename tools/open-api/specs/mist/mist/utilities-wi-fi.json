@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Utilities Wi-Fi",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -573,6 +569,7 @@
                   "value": {
                     "smsglobal_api_key": "123456",
                     "smsglobal_api_secret": "abcdef",
+                    "smsglobal_sender": "61400000002",
                     "to": "+911122334455"
                   }
                 }
@@ -711,9 +708,11 @@
   "components": {
     "schemas": {
       "mac_addresses": {
+        "description": "Request containing one or more MAC addresses",
         "properties": {
           "macs": {
-            "$ref": "#/components/schemas/mac_addresses_macs"
+            "$ref": "#/components/schemas/mac_addresses_macs",
+            "description": "List of MAC addresses included in the request"
           }
         },
         "required": [
@@ -722,6 +721,7 @@
         "type": "object"
       },
       "mac_addresses_macs": {
+        "description": "Unique MAC addresses included in a request",
         "examples": [
           [
             "683b679ac024"
@@ -736,8 +736,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -748,8 +750,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -760,8 +764,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -772,8 +778,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -781,8 +789,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -792,6 +802,7 @@
         "type": "object"
       },
       "strings": {
+        "description": "Unique string values returned or accepted by this schema",
         "items": {
           "type": "string"
         },
@@ -799,18 +810,27 @@
         "uniqueItems": true
       },
       "test_sms_global": {
+        "description": "Request body for validating SMSGlobal SMS gateway credentials",
         "properties": {
           "smsglobal_api_key": {
-            "description": "SMSGlobal api key",
+            "description": "SMSGlobal API key used to send the test SMS",
             "examples": [
               "123456"
             ],
             "type": "string"
           },
           "smsglobal_api_secret": {
-            "description": "SMSGlobal api secret",
+            "description": "SMSGlobal API secret used to send the test SMS",
             "examples": [
               "abcdef"
+            ],
+            "format": "password",
+            "type": "string"
+          },
+          "smsglobal_sender": {
+            "description": "Optional sender's number or sender ID. If not provided, uses the default number associated with the account",
+            "examples": [
+              "61400000002"
             ],
             "type": "string"
           },
@@ -830,19 +850,21 @@
         "type": "object"
       },
       "test_telstra": {
+        "description": "Request body for validating Telstra SMS gateway credentials",
         "properties": {
           "telstra_client_id": {
-            "description": "Telstra client id",
+            "description": "Telstra client identifier used to send the test SMS",
             "examples": [
               "123456"
             ],
             "type": "string"
           },
           "telstra_client_secret": {
-            "description": "Telstra client secret",
+            "description": "Telstra client secret used to send the test SMS",
             "examples": [
               "abcdef"
             ],
+            "format": "password",
             "type": "string"
           },
           "to": {
@@ -861,6 +883,7 @@
         "type": "object"
       },
       "test_twilio": {
+        "description": "Request body for validating Twilio SMS gateway credentials",
         "properties": {
           "from": {
             "description": "One of the numbers you have in your Twilio account",
@@ -877,14 +900,14 @@
             "type": "string"
           },
           "twilio_auth_token": {
-            "description": "Auth Token associated with twilio account",
+            "description": "Twilio Auth Token used to send the test SMS",
             "examples": [
               "REDACTED"
             ],
             "type": "string"
           },
           "twilio_sid": {
-            "description": "Twilio Account SID",
+            "description": "Twilio account SID used to send the test SMS",
             "examples": [
               "REDACTED"
             ],
@@ -900,13 +923,15 @@
         "type": "object"
       },
       "utils_reset_radio_config": {
+        "description": "Request to reset AP radio settings to RRM-managed values",
         "properties": {
           "bands": {
-            "$ref": "#/components/schemas/utils_reset_radio_config_bands"
+            "$ref": "#/components/schemas/utils_reset_radio_config_bands",
+            "description": "Radio bands to reset to RRM management"
           },
           "force": {
             "default": false,
-            "description": "Whether to reset those with radio disabled. default is false (i.e. if user intentionally disables a radio, honor it)",
+            "description": "Whether to reset radios that are currently disabled; default `false` honors radios intentionally disabled by the user",
             "type": "boolean"
           }
         },
@@ -916,23 +941,26 @@
         "type": "object"
       },
       "utils_reset_radio_config_bands": {
-        "description": "List of bands",
+        "description": "Radio bands to reset, such as `24`, `5`, or `6`",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
       "utils_rrm_optimize": {
+        "description": "Request to optimize RRM for selected AP radio bands",
         "properties": {
           "bands": {
-            "$ref": "#/components/schemas/utils_rrm_optimize_bands"
+            "$ref": "#/components/schemas/utils_rrm_optimize_bands",
+            "description": "Radio bands to include in the RRM optimization"
           },
           "macs": {
-            "$ref": "#/components/schemas/utils_rrm_optimize_macs"
+            "$ref": "#/components/schemas/utils_rrm_optimize_macs",
+            "description": "AP MAC addresses to target for optimization; omitted or empty targets all APs"
           },
           "txpower_only": {
             "default": false,
-            "description": "Only changing TX Power (will not disconnect clients)",
+            "description": "When true, adjust only transmit power so clients are not disconnected",
             "type": "boolean"
           }
         },
@@ -942,14 +970,14 @@
         "type": "object"
       },
       "utils_rrm_optimize_bands": {
-        "description": "List of bands",
+        "description": "Radio bands to include in the RRM optimization",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
       "utils_rrm_optimize_macs": {
-        "description": "Targeting AP (neighbor APs may get changed, too), default is empty for ALL APs",
+        "description": "AP MAC addresses to target for optimization. Neighboring APs may also change; omitted or empty targets all APs",
         "items": {
           "examples": [
             "5c5b35000001"
@@ -959,9 +987,11 @@
         "type": "array"
       },
       "utils_zeroize_fips": {
+        "description": "Request body for confirming FIPS AP zeroize operations",
         "properties": {
           "password": {
-            "description": "FIPS zeroize password",
+            "description": "Confirmation password for the FIPS zeroize operation",
+            "format": "password",
             "type": "string"
           }
         },
@@ -1165,19 +1195,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

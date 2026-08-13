@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sites Devices - Wireless",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -163,17 +159,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": {
-                  "type": "integer"
-                },
-                "description": "Property key is the IoT port name (e.g. A0)",
-                "examples": [
-                  {
-                    "A1": 1,
-                    "DO": 0
-                  }
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/device_iot_config"
               }
             }
           },
@@ -204,11 +190,229 @@
           "Sites Devices - Wireless"
         ]
       }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/zigbee_event_trail": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Start a Zigbee event trail session on an AP. Returns a `session` that the UI can use to stream results.",
+        "operationId": "startSiteDeviceZigbeeEventTrail",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ZigbeeTrail"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "startSiteDeviceZigbeeEventTrail",
+        "tags": [
+          "Sites Devices - Wireless"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/zigbee_join": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Allow Zigbee end devices to join the network for a configurable duration. After the duration expires, new joins will be blocked (unless `allow_join`==`always` is configured on the device).\n\n#### Subscribe to Zigbee Join Events\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/zigbee_join\"\n}\n```\n##### Example output from ws stream\n```json\n{\n    \"event\": \"data\",\n    \"channel\": \"/sites/4ac1dcf4-9d8b-7211-65c4-057819f0862b/devices/00000000-0000-0000-1000-5c5b350e0060/cmd\",\n    \"data\": {\n        \"session\": \"19e73828-937f-05e6-f709-e29efdb0a82b\",\n        \"zigbee_mac\": \"fd05eb86c04ac04a\",\n        \"event_type\": \"associated\",\n        \"detail\": {\n            \"lqi\": 180\n        }\n    }\n}\n```",
+        "operationId": "enableSiteDeviceZigbeeJoin",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "duration": 600
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/utils_zigbee_join"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ZigbeeJoin"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "enableSiteDeviceZigbeeJoin",
+        "tags": [
+          "Sites Devices - Wireless"
+        ]
+      },
+      "delete": {
+        "description": "Stop allowing new Zigbee end devices to join the network through the specified AP.",
+        "operationId": "stopSiteDeviceZigbeeJoin",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "stopSiteDeviceZigbeeJoin",
+        "tags": [
+          "Sites Devices - Wireless"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/zigbee_kick": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Kick one or more Zigbee clients from a Zigbee-enabled AP. The AP must be connected.",
+        "operationId": "kickSiteDeviceZigbeeClients",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "macs": [
+                      "00177a01060cae9f",
+                      "00177a01060caea1"
+                    ]
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/utils_zigbee_kick"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "kickSiteDeviceZigbeeClients",
+        "tags": [
+          "Sites Devices - Wireless"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/zigbee_packet_trail": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Start a Zigbee packet trail session on an AP. Returns a `session` that the UI can use to stream results.",
+        "operationId": "startSiteDeviceZigbeePacketTrail",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ZigbeeTrail"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "startSiteDeviceZigbeePacketTrail",
+        "tags": [
+          "Sites Devices - Wireless"
+        ]
+      }
     }
   },
   "components": {
     "schemas": {
       "ap_channel_band24_channel": {
+        "description": "Supported 2.4 GHz channel numbers for a channel-width group",
         "items": {
           "examples": [
             1
@@ -255,6 +459,7 @@
         "type": "object"
       },
       "ap_channel_band5_channel": {
+        "description": "Supported 5 GHz channel numbers for a channel-width group",
         "items": {
           "examples": [
             36
@@ -399,6 +604,7 @@
         "type": "object"
       },
       "ap_channel_band6_channel": {
+        "description": "Supported 6 GHz channel numbers for a channel-width group",
         "items": {
           "examples": [
             1
@@ -672,46 +878,73 @@
         ],
         "type": "object"
       },
+      "device_iot_config": {
+        "additionalProperties": {
+          "type": "integer"
+        },
+        "description": "Property key is the IoT port name (e.g. \"A1\"), value is the output state (0 or 1).",
+        "examples": [
+          {
+            "A1": 1,
+            "DO": 0
+          }
+        ],
+        "type": "object"
+      },
       "response_device_radio_channels": {
         "additionalProperties": false,
+        "description": "Country and regulatory-domain channel capabilities for AP radios",
         "properties": {
           "band24_40mhz_allowed": {
+            "description": "Whether 40 MHz channels are allowed on the 2.4 GHz band",
             "type": "boolean"
           },
           "band24_channels": {
-            "$ref": "#/components/schemas/ap_channel_band24_channels"
+            "$ref": "#/components/schemas/ap_channel_band24_channels",
+            "description": "Allowed 2.4 GHz channels for this country or regulatory domain"
           },
           "band24_enabled": {
+            "description": "Whether the 2.4 GHz band is enabled for this country or regulatory domain",
             "type": "boolean"
           },
           "band5_channels": {
-            "$ref": "#/components/schemas/ap_channel_band5_channels"
+            "$ref": "#/components/schemas/ap_channel_band5_channels",
+            "description": "Allowed 5 GHz channels for this country or regulatory domain"
           },
           "band5_enabled": {
+            "description": "Whether the 5 GHz band is enabled for this country or regulatory domain",
             "type": "boolean"
           },
           "band6_channels": {
-            "$ref": "#/components/schemas/ap_channel_band6_channels"
+            "$ref": "#/components/schemas/ap_channel_band6_channels",
+            "description": "Allowed 6 GHz channels for this country or regulatory domain"
           },
           "band6_enabled": {
+            "description": "Whether the 6 GHz band is enabled for this country or regulatory domain",
             "type": "boolean"
           },
           "certified": {
+            "description": "Whether AP operation is certified for this country or regulatory domain",
             "type": "boolean"
           },
           "code": {
+            "description": "Country code in ISO 3166-1 numeric format",
             "type": "integer"
           },
           "dfs_ok": {
+            "description": "Whether DFS channels are allowed in this country or regulatory domain",
             "type": "boolean"
           },
           "key": {
+            "description": "Two-character ISO 3166-1 country code",
             "type": "string"
           },
           "name": {
+            "description": "Country or regulatory-domain display name",
             "type": "string"
           },
           "uses": {
+            "description": "Regulatory ruleset used for AP channel validation",
             "type": "string"
           }
         },
@@ -732,8 +965,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -744,8 +979,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -756,8 +993,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -768,8 +1007,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -777,11 +1018,81 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "utils_zigbee_join": {
+        "additionalProperties": false,
+        "description": "Request body for temporarily allowing Zigbee end-device joins",
+        "properties": {
+          "duration": {
+            "default": 600,
+            "description": "Number of seconds to permit new Zigbee end-device joins; range is 60-600",
+            "maximum": 600,
+            "minimum": 60,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "utils_zigbee_kick": {
+        "additionalProperties": false,
+        "description": "Request body for kicking one or more Zigbee clients from an AP",
+        "properties": {
+          "macs": {
+            "description": "One or more Zigbee EUI-64 (8-byte) MACs. Accepts colon-separated (`00:17:7a:01:06:0c:ae:9f`) or plain hex (`00177a01060cae9f`). Must be non-empty.",
+            "examples": [
+              [
+                "00177a01060cae9f",
+                "00177a01060caea1"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "macs"
+        ],
+        "type": "object"
+      },
+      "zigbee_join_response": {
+        "additionalProperties": false,
+        "description": "Response containing the session identifier for a Zigbee join operation",
+        "properties": {
+          "session_id": {
+            "description": "Session ID for the Zigbee join operation",
+            "examples": [
+              "19e73828-937f-05e6-f709-e29efdb0a82b"
+            ],
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "zigbee_trail_response": {
+        "additionalProperties": false,
+        "description": "Response containing the session identifier for a Zigbee event or packet trail operation",
+        "properties": {
+          "session": {
+            "description": "Session ID the UI can use to stream trail results",
+            "examples": [
+              "7a5f7796-83ee-11e5-95c6-1258369c38a9"
+            ],
+            "format": "uuid",
             "type": "string"
           }
         },
@@ -798,11 +1109,7 @@
               }
             },
             "schema": {
-              "additionalProperties": {
-                "type": "integer"
-              },
-              "description": "Property key is the IoT port name (e.g. \"A1\")",
-              "type": "object"
+              "$ref": "#/components/schemas/device_iot_config"
             }
           },
           "application/vnd.api+json": {
@@ -812,11 +1119,7 @@
               }
             },
             "schema": {
-              "additionalProperties": {
-                "type": "integer"
-              },
-              "description": "Property key is the IoT port name (e.g. \"A1\")",
-              "type": "object"
+              "$ref": "#/components/schemas/device_iot_config"
             }
           }
         },
@@ -961,6 +1264,59 @@
           }
         },
         "description": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+      },
+      "OK": {
+        "description": "OK"
+      },
+      "ZigbeeJoin": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/ZigbeeJoinExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/zigbee_join_response"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/ZigbeeJoinExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/zigbee_join_response"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "ZigbeeTrail": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/ZigbeeTrailExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/zigbee_trail_response"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/ZigbeeTrailExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/zigbee_trail_response"
+            }
+          }
+        },
+        "description": "OK"
       }
     },
     "parameters": {
@@ -1182,23 +1538,28 @@
         "value": {
           "detail": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
         }
+      },
+      "ZigbeeJoinExample": {
+        "value": {
+          "session_id": "19e73828-937f-05e6-f709-e29efdb0a82b"
+        }
+      },
+      "ZigbeeTrailExample": {
+        "value": {
+          "session": "7a5f7796-83ee-11e5-95c6-1258369c38a9"
+        }
       }
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

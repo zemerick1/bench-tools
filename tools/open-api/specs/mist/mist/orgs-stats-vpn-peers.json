@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Stats - VPN Peers",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -84,6 +80,7 @@
         "operationId": "countOrgPeerPathStats",
         "parameters": [
           {
+            "description": "Field used to group this count response",
             "in": "query",
             "name": "distinct",
             "schema": {
@@ -140,13 +137,18 @@
         "operationId": "searchOrgPeerPathStats",
         "parameters": [
           {
+            "description": "Filter results by MAC address. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "mac",
             "schema": {
+              "examples": [
+                "5c5b53010101,5c5b53020202"
+              ],
               "type": "string"
             }
           },
           {
+            "description": "Filter results by site identifier",
             "in": "query",
             "name": "site_id",
             "schema": {
@@ -154,7 +156,13 @@
             }
           },
           {
-            "$ref": "#/components/parameters/vpn_type"
+            "description": "VPN implementation type used to filter the results. enum: `ipsec`, `svr`. Accepts multiple comma-separated values.",
+            "example": "svr,ipsec",
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string"
+            }
           },
           {
             "$ref": "#/components/parameters/limit"
@@ -208,8 +216,10 @@
         "additionalProperties": {
           "type": "string"
         },
+        "description": "Count result row with the matching distinct field values",
         "properties": {
           "count": {
+            "description": "Number of matching items for the distinct value or values in this result",
             "type": "integer"
           }
         },
@@ -219,6 +229,7 @@
         "type": "object"
       },
       "count_results": {
+        "description": "List of count result rows",
         "items": {
           "$ref": "#/components/schemas/count_result"
         },
@@ -226,7 +237,7 @@
         "uniqueItems": true
       },
       "last_seen": {
-        "description": "Last seen timestamp",
+        "description": "Timestamp indicating when the entity was last seen",
         "examples": [
           1470417522
         ],
@@ -238,6 +249,7 @@
         ]
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -247,23 +259,30 @@
       },
       "response_count": {
         "additionalProperties": false,
+        "description": "Distinct count response for time-bounded search results",
         "properties": {
           "distinct": {
+            "description": "Field used to group the count results",
             "type": "string"
           },
           "end": {
+            "description": "Search window end timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of distinct count results requested",
             "type": "integer"
           },
           "results": {
-            "$ref": "#/components/schemas/count_results"
+            "$ref": "#/components/schemas/count_results",
+            "description": "Count results grouped by the distinct field"
           },
           "start": {
+            "description": "Search window start timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "total": {
+            "description": "Number of distinct result buckets returned",
             "type": "integer"
           }
         },
@@ -279,8 +298,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -291,8 +312,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -303,8 +326,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -315,8 +340,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -324,8 +351,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -335,6 +364,7 @@
         "type": "object"
       },
       "site_id": {
+        "description": "Unique identifier of a Mist site",
         "examples": [
           "441a1214-6928-442a-8e92-e1d34b8ec6a6"
         ],
@@ -344,21 +374,23 @@
       },
       "vpn_peer_stat": {
         "additionalProperties": false,
+        "description": "VPN peer path statistics returned by organization VPN peer searches",
         "properties": {
           "is_active": {
-            "description": "Redundancy status of the associated interface",
+            "description": "Whether this VPN peer path is the active redundant path",
             "type": "boolean"
           },
           "jitter": {
-            "description": "Jitter in milliseconds",
+            "description": "Last sampled VPN peer jitter, in milliseconds",
             "minimum": 0,
             "type": "number"
           },
           "last_seen": {
-            "$ref": "#/components/schemas/last_seen"
+            "$ref": "#/components/schemas/last_seen",
+            "description": "Time when this VPN peer was last observed, in epoch seconds"
           },
           "latency": {
-            "description": "Latency in milliseconds",
+            "description": "Last sampled VPN peer latency, in milliseconds",
             "minimum": 0,
             "type": "number"
           },
@@ -369,7 +401,7 @@
             "type": "number"
           },
           "mac": {
-            "description": "Router mac address",
+            "description": "Local router MAC address for the VPN link",
             "minLength": 1,
             "type": "string"
           },
@@ -380,49 +412,57 @@
             "type": "number"
           },
           "mtu": {
+            "description": "Maximum transmission unit for the VPN peer path, in bytes",
             "type": "integer"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization identifier for the VPN peer statistic"
           },
           "peer_mac": {
-            "description": "Peer router mac address",
+            "description": "Peer router MAC address for the VPN link",
             "minLength": 1,
             "type": "string"
           },
           "peer_port_id": {
-            "description": "Peer router device interface",
+            "description": "Peer router interface identifier for the VPN link",
             "minLength": 1,
             "type": "string"
           },
           "peer_router_name": {
+            "description": "Peer router name reported for the VPN link",
             "minLength": 1,
             "type": "string"
           },
           "peer_site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site identifier for the peer side of the VPN link"
           },
           "port_id": {
-            "description": "Router device interface",
+            "description": "Local router interface identifier for the VPN link",
             "minLength": 1,
             "type": "string"
           },
           "router_name": {
+            "description": "Local router name reported for the VPN link",
             "minLength": 1,
             "type": "string"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site identifier for the local side of the VPN link"
           },
           "type": {
-            "description": "`ipsec`for SRX, `svr` for 128T",
+            "description": "VPN implementation type for the peer, such as `ipsec` for SRX or `svr` for SSR",
             "minLength": 1,
             "type": "string"
           },
           "up": {
+            "description": "Whether the VPN peer is currently up",
             "type": "boolean"
           },
           "uptime": {
+            "description": "Gateway-reported VPN peer uptime value, in seconds",
             "type": "integer"
           }
         },
@@ -430,23 +470,30 @@
       },
       "vpn_peer_stat_search": {
         "additionalProperties": false,
+        "description": "Search response containing VPN peer path statistics",
         "properties": {
           "end": {
+            "description": "Search window end timestamp, in epoch seconds",
             "type": "number"
           },
           "limit": {
+            "description": "Maximum number of VPN peer statistics returned",
             "type": "integer"
           },
           "next": {
+            "description": "URL for the next page of VPN peer statistics, when more results are available",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/vpn_peer_stat_search_results"
+            "$ref": "#/components/schemas/vpn_peer_stat_search_results",
+            "description": "VPN peer statistic rows returned by the search"
           },
           "start": {
+            "description": "Search window start timestamp, in epoch seconds",
             "type": "number"
           },
           "total": {
+            "description": "Number of VPN peer statistics matching the search",
             "type": "integer"
           }
         },
@@ -460,18 +507,12 @@
         "type": "object"
       },
       "vpn_peer_stat_search_results": {
+        "description": "VPN peer statistic rows returned by a search response",
         "items": {
           "$ref": "#/components/schemas/vpn_peer_stat"
         },
         "type": "array",
         "uniqueItems": true
-      },
-      "vpn_type": {
-        "enum": [
-          "ipsec",
-          "svr"
-        ],
-        "type": "string"
       }
     },
     "responses": {
@@ -643,10 +684,9 @@
     },
     "parameters": {
       "duration": {
-        "description": "Duration like 7d, 2w",
+        "description": "Time range duration for the query, using relative units such as `10m`, `7d`, or `2w`",
         "in": "query",
         "name": "duration",
-        "required": false,
         "schema": {
           "default": "1d",
           "examples": [
@@ -656,7 +696,7 @@
         }
       },
       "end": {
-        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
         "in": "query",
         "name": "end",
         "schema": {
@@ -664,9 +704,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -697,7 +737,6 @@
         "description": "On which field the list should be sorted, -prefix represents DESC order",
         "in": "query",
         "name": "sort",
-        "required": false,
         "schema": {
           "default": "timestamp",
           "examples": [
@@ -707,19 +746,11 @@
         }
       },
       "start": {
-        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
         "in": "query",
         "name": "start",
         "schema": {
           "type": "string"
-        }
-      },
-      "vpn_type": {
-        "in": "query",
-        "name": "type",
-        "required": false,
-        "schema": {
-          "$ref": "#/components/schemas/vpn_type"
         }
       }
     },
@@ -805,19 +836,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

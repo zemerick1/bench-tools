@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Utilities Upgrade",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "get": {
-        "description": "Get List of Org multiple devices upgrades",
+        "description": "List organization-level device upgrade jobs, including the site-level upgrade jobs created under each organization upgrade.",
         "operationId": "listOrgDeviceUpgrades",
         "responses": {
           "200": {
@@ -108,7 +104,7 @@
         ]
       },
       "post": {
-        "description": "Upgrade Multiple Sites (Only supported for Access Points upgrades)",
+        "description": "Start an organization-level device upgrade job across selected sites. The request selects device type, sites, models, firmware versions, and upgrade strategy; AP-specific and Junos-specific options apply only where supported.",
         "operationId": "upgradeOrgDevices",
         "requestBody": {
           "content": {
@@ -155,7 +151,7 @@
         }
       ],
       "get": {
-        "description": "Get Multiple Devices Upgrade",
+        "description": "Retrieve details for an organization-level device upgrade job, including per-site upgrade status and device targets.",
         "operationId": "getOrgDeviceUpgrade",
         "responses": {
           "200": {
@@ -193,7 +189,7 @@
         }
       ],
       "post": {
-        "description": "Best effort to cancel an upgrade. Devices which are already upgraded wont be touched",
+        "description": "Cancel an organization-level device upgrade job on a best-effort basis. Devices that have already completed the upgrade are not changed.",
         "operationId": "cancelOrgDeviceUpgrade",
         "responses": {
           "200": {
@@ -228,10 +224,11 @@
         }
       ],
       "get": {
-        "description": "Get List of Available Device Versions",
+        "description": "List available firmware versions for organization devices, optionally filtered by device type and model.",
         "operationId": "listOrgAvailableDeviceVersions",
         "parameters": [
           {
+            "description": "Filter results by type. enum: `ap`, `gateway`, `switch`",
             "in": "query",
             "name": "type",
             "schema": {
@@ -239,11 +236,12 @@
             }
           },
           {
-            "description": "Fetch version for device model, use/combine with `type` as needed (for switch and gateway devices)",
+            "description": "Fetch version for device model, use/combine with `type` as needed (for switch and gateway devices). Accepts multiple comma-separated values.",
             "in": "query",
             "name": "model",
             "schema": {
               "examples": [
+                "AP27,AP27E",
                 "AP43"
               ],
               "type": "string"
@@ -286,7 +284,7 @@
         }
       ],
       "post": {
-        "description": "Upgrade",
+        "description": "Start a software upgrade for a JSI-connected device identified by MAC address using the requested target version.",
         "operationId": "upgradeOrgJsiDevice",
         "requestBody": {
           "content": {
@@ -337,7 +335,7 @@
         }
       ],
       "get": {
-        "description": "Get List of Org Mist Edge Upgrades",
+        "description": "List Mist Edge upgrade requests for the organization, including status, rollout strategy, target versions, and per-status target counts.",
         "operationId": "listOrgMxEdgeUpgrades",
         "responses": {
           "200": {
@@ -365,7 +363,7 @@
         ]
       },
       "post": {
-        "description": "Upgrade Mist Edges",
+        "description": "Schedule a Mist Edge upgrade for selected Mist Edges, using service target versions or an optional Linux distro upgrade with rollout strategy and canary settings.",
         "operationId": "upgradeOrgMxEdges",
         "requestBody": {
           "content": {
@@ -470,7 +468,7 @@
         }
       ],
       "get": {
-        "description": "Get Mist Edge Upgrade",
+        "description": "Retrieve status, rollout strategy, target versions, and target counts for a specific Mist Edge upgrade request.",
         "operationId": "getOrgMxEdgeUpgrade",
         "responses": {
           "200": {
@@ -496,6 +494,82 @@
         "tags": [
           "Utilities Upgrade"
         ]
+      },
+      "put": {
+        "description": "Update a queued Mist Edge upgrade request, such as target versions, rollout strategy, start time, or target Mist Edge IDs. Only upgrades in `queued` state can be updated.",
+        "operationId": "updateOrgMxEdgeUpgrade",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mxedge_upgrade_multi"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MxEdgeUpgrade"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "updateOrgMxEdgeUpgrade",
+        "tags": [
+          "Utilities Upgrade"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_id}/mxedges/upgrade/{upgrade_id}/cancel": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        },
+        {
+          "$ref": "#/components/parameters/upgrade_id"
+        }
+      ],
+      "post": {
+        "description": "Cancel a Mist Edge upgrade request on a best-effort basis. Mist Edges that have already been upgraded are not changed.",
+        "operationId": "cancelOrgMxEdgeUpgrade",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "cancelOrgMxEdgeUpgrade",
+        "tags": [
+          "Utilities Upgrade"
+        ]
       }
     },
     "/api/v1/orgs/{org_id}/ssr/upgrade": {
@@ -505,7 +579,7 @@
         }
       ],
       "get": {
-        "description": "Get List of Org SSR Upgrades",
+        "description": "List SSR firmware upgrade jobs for the organization, including status, rollout strategy, target versions, release channel, and device counts.",
         "operationId": "listOrgSsrUpgrades",
         "responses": {
           "200": {
@@ -533,7 +607,7 @@
         ]
       },
       "post": {
-        "description": "Upgrade Org SSRs",
+        "description": "Create an SSR firmware upgrade job for selected devices, with firmware version or channel, rollout strategy, and optional download or reboot timing.",
         "operationId": "upgradeOrgSsrs",
         "requestBody": {
           "content": {
@@ -593,7 +667,7 @@
         }
       ],
       "get": {
-        "description": "Get Specific Org SSR Upgrade",
+        "description": "Return detailed status for an SSR firmware upgrade job, including target device IDs grouped by upgrade status.",
         "operationId": "getOrgSsrUpgrade",
         "responses": {
           "200": {
@@ -621,7 +695,7 @@
         ]
       },
       "post": {
-        "description": "Best effort to cancel an upgrade. Devices which are already upgraded wont be touched↵\n",
+        "description": "Cancel an SSR firmware upgrade job on a best-effort basis. Devices that have already upgraded are not changed.",
         "operationId": "cancelOrgSsrUpgrade",
         "responses": {
           "200": {
@@ -656,7 +730,7 @@
         }
       ],
       "get": {
-        "description": "Get available version for SSR",
+        "description": "List SSR firmware versions available for upgrade, optionally filtered by release channel and one or more SSR MAC addresses.",
         "operationId": "listOrgAvailableSsrVersions",
         "parameters": [
           {
@@ -704,10 +778,11 @@
         }
       ],
       "get": {
-        "description": "Get all upgrades for site",
+        "description": "List device upgrade operations for a site, optionally filtered by upgrade status. Use [List Org Device Upgrades](/#operations/listOrgDeviceUpgrades) to retrieve device upgrade operations across the organization.",
         "operationId": "listSiteDeviceUpgrades",
         "parameters": [
           {
+            "description": "Filter results by status. enum: `cancelled`, `completed`, `created`, `downloaded`, `downloading`, `failed`, `queued`, `upgrading`",
             "in": "query",
             "name": "status",
             "schema": {
@@ -862,10 +937,11 @@
         }
       ],
       "get": {
-        "description": "Get List of Available Device Versions",
+        "description": "List firmware versions available for devices in a site, optionally filtered by device type and model. Use [List Org Available Device Versions](/#operations/listOrgAvailableDeviceVersions) to retrieve available device versions across the organization.",
         "operationId": "listSiteAvailableDeviceVersions",
         "parameters": [
           {
+            "description": "Filter results by type. enum: `ap`, `gateway`, `switch`",
             "in": "query",
             "name": "type",
             "schema": {
@@ -956,6 +1032,250 @@
           }
         },
         "summary": "upgradeDevice",
+        "tags": [
+          "Utilities Upgrade"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/mxedges/upgrade": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        }
+      ],
+      "get": {
+        "description": "List Mist Edge upgrade operations for a site. Use [List Org Mist Edge Upgrades](/#operations/listOrgMxEdgeUpgrades) to retrieve Mist Edge upgrade operations across the organization.",
+        "operationId": "listSiteMxEdgeUpgrades",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MxEdgeUpgradesArray"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "listSiteMxEdgeUpgrades",
+        "tags": [
+          "Utilities Upgrade"
+        ]
+      },
+      "post": {
+        "description": "Upgrade Mist Edges in a Site.\n\nSee [Org Mist Edges](/#tag/Utilities-Upgrade/operation/upgradeOrgMxEdges) for package upgrades\n\nSee [Org Mist Edges Distro](/#tag/Utilities-Upgrade/operation/upgradeOrgMxEdges) for distro upgrades",
+        "operationId": "upgradeSiteMxEdges",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Upgrade_MxEdge": {
+                  "value": {
+                    "allow_downgrades": {
+                      "mxagent": false,
+                      "tunterm": true
+                    },
+                    "canary_phases": [
+                      5,
+                      25,
+                      50,
+                      100
+                    ],
+                    "channel": "stable",
+                    "max_failure_percentage": 5,
+                    "max_failures": [
+                      1,
+                      1,
+                      5,
+                      5
+                    ],
+                    "mxedge_ids": [
+                      "387804a7-3474-85ce-15a2-f9a9684c9c90"
+                    ],
+                    "start_time": 1624399840,
+                    "strategy": "serial",
+                    "versions": {
+                      "mxagent": "latest",
+                      "radsecproxy": "<version>",
+                      "tunterm": "default"
+                    }
+                  }
+                },
+                "Upgrade_MxEdge_Distro": {
+                  "value": {
+                    "canary_phases": [
+                      5,
+                      25,
+                      50,
+                      100
+                    ],
+                    "distro": "buster",
+                    "max_failure_percentage": 5,
+                    "max_failures": [
+                      1,
+                      1,
+                      5,
+                      5
+                    ],
+                    "mxedge_ids": [
+                      "387804a7-3474-85ce-15a2-f9a9684c9c90"
+                    ],
+                    "start_time": 1624399840,
+                    "strategy": "serial"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/mxedge_upgrade_multi"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "upgradeSiteMxEdges",
+        "tags": [
+          "Utilities Upgrade"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/mxedges/upgrade/{upgrade_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/upgrade_id"
+        }
+      ],
+      "get": {
+        "description": "Get Mist Edge Upgrade",
+        "operationId": "getSiteMxEdgeUpgrade",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MxEdgeUpgrade"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getSiteMxEdgeUpgrade",
+        "tags": [
+          "Utilities Upgrade"
+        ]
+      },
+      "put": {
+        "description": "Update Mist Edge Upgrade. Only upgrades in `queued` state can be updated.",
+        "operationId": "updateSiteMxEdgeUpgrade",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mxedge_upgrade_multi"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MxEdgeUpgrade"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "updateSiteMxEdgeUpgrade",
+        "tags": [
+          "Utilities Upgrade"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/mxedges/upgrade/{upgrade_id}/cancel": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/upgrade_id"
+        }
+      ],
+      "post": {
+        "description": "Cancel Mist Edge Upgrade. Best effort to cancel an upgrade. MxEdges which are already upgraded won't be touched.",
+        "operationId": "cancelSiteMxEdgeUpgrade",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "cancelSiteMxEdgeUpgrade",
         "tags": [
           "Utilities Upgrade"
         ]
@@ -1077,6 +1397,7 @@
         "type": "string"
       },
       "device_upgrade": {
+        "description": "Device firmware upgrade request options",
         "properties": {
           "reboot": {
             "default": false,
@@ -1108,6 +1429,7 @@
         "type": "object"
       },
       "device_version": {
+        "description": "Available firmware versions for device models",
         "items": {
           "$ref": "#/components/schemas/device_version_item"
         },
@@ -1116,17 +1438,18 @@
       },
       "device_version_item": {
         "additionalProperties": false,
+        "description": "Available firmware version for a specific device model and release tag",
         "properties": {
           "model": {
             "description": "Device model (as seen in the device stats)",
             "type": "string"
           },
           "tag": {
-            "description": "Annotation, stable / beta / alpha. Or it can be empty or nothing which is likely a dev build",
+            "description": "Annotation, suggested / alpha. Or it can be empty or nothing which is likely a dev build",
             "type": "string"
           },
           "version": {
-            "description": "Firmware version",
+            "description": "Available firmware version for this device model",
             "type": "string"
           }
         },
@@ -1156,18 +1479,22 @@
         "type": "string"
       },
       "mxedge_upgrade_multi": {
+        "description": "Request to schedule upgrades for one or more Mist Edges",
         "properties": {
           "allow_downgrades": {
-            "$ref": "#/components/schemas/mxedge_upgrade_multi_allow_downgrades"
+            "$ref": "#/components/schemas/mxedge_upgrade_multi_allow_downgrades",
+            "description": "Per-service downgrade permission settings for this upgrade"
           },
           "canary_phases": {
-            "$ref": "#/components/schemas/upgrade_device_canary_phases"
+            "$ref": "#/components/schemas/upgrade_device_canary_phases",
+            "description": "Canary phase percentages for phased Mist Edge upgrades"
           },
           "channel": {
-            "$ref": "#/components/schemas/mxedge_upgrade_channel"
+            "$ref": "#/components/schemas/mxedge_upgrade_channel",
+            "description": "Upgrade channel to use for qualified versions"
           },
           "distro": {
-            "description": "Distro upgrade, optional, to specific codename (e.g. bullseye) with highest qualified versions",
+            "description": "Linux distribution codename for an optional distro upgrade, such as bullseye or `next` to upgrade to the next distro version. Uses highest qualified versions",
             "type": "string"
           },
           "max_failure_percentage": {
@@ -1176,17 +1503,20 @@
             "type": "integer"
           },
           "mxedge_ids": {
-            "$ref": "#/components/schemas/mxedge_upgrade_multi_mxedge_ids"
+            "$ref": "#/components/schemas/mxedge_upgrade_multi_mxedge_ids",
+            "description": "Mist Edge IDs included in the upgrade request"
           },
           "start_time": {
             "description": "Upgrade start time in epoch seconds, default is now",
             "type": "integer"
           },
           "strategy": {
-            "$ref": "#/components/schemas/mxedge_upgrade_strategy"
+            "$ref": "#/components/schemas/mxedge_upgrade_strategy",
+            "description": "Upgrade rollout strategy for the selected Mist Edges"
           },
           "versions": {
-            "$ref": "#/components/schemas/mxedge_upgrade_version"
+            "$ref": "#/components/schemas/mxedge_upgrade_version",
+            "description": "Per-service target versions for the upgrade request"
           }
         },
         "required": [
@@ -1200,29 +1530,34 @@
         "properties": {
           "mxagent": {
             "default": false,
+            "description": "Whether downgrades are allowed for the mxagent service",
             "type": "boolean"
           },
           "mxdas": {
             "default": false,
+            "description": "Whether downgrades are allowed for the mxdas service",
             "type": "boolean"
           },
           "mxocproxy": {
             "default": false,
+            "description": "Whether downgrades are allowed for the mxocproxy service",
             "type": "boolean"
           },
           "radsecproxy": {
             "default": false,
+            "description": "Whether downgrades are allowed for the radsecproxy service",
             "type": "boolean"
           },
           "tunterm": {
             "default": false,
+            "description": "Whether downgrades are allowed for the tunterm service",
             "type": "boolean"
           }
         },
         "type": "object"
       },
       "mxedge_upgrade_multi_mxedge_ids": {
-        "description": "List of mxedge IDs to upgrade. If not specified, it means all the org mxedges.",
+        "description": "List of Mist Edge IDs to upgrade. If not specified, it means all the org Mist Edges.",
         "items": {
           "format": "uuid",
           "type": "string"
@@ -1231,17 +1566,22 @@
       },
       "mxedge_upgrade_response_counts": {
         "additionalProperties": false,
+        "description": "Counts of Mist Edge upgrades by current status",
         "properties": {
           "failed": {
+            "description": "Number of Mist Edge upgrades that failed",
             "type": "integer"
           },
           "queued": {
+            "description": "Number of Mist Edge upgrades waiting to run",
             "type": "integer"
           },
           "success": {
+            "description": "Number of Mist Edge upgrades completed successfully",
             "type": "integer"
           },
           "upgrading": {
+            "description": "Number of Mist Edge upgrades currently in progress",
             "type": "integer"
           }
         },
@@ -1269,22 +1609,27 @@
         "properties": {
           "mxagent": {
             "default": "current",
+            "description": "Target version for the mxagent service",
             "type": "string"
           },
           "mxdas": {
             "default": "current",
+            "description": "Target version for the mxdas service",
             "type": "string"
           },
           "mxocproxy": {
             "default": "current",
+            "description": "Target version for the mxocproxy service",
             "type": "string"
           },
           "radsecproxy": {
             "default": "current",
+            "description": "Target version for the radsecproxy service",
             "type": "string"
           },
           "tunterm": {
             "default": "current",
+            "description": "Target version for the tunterm service",
             "type": "string"
           }
         },
@@ -1296,12 +1641,15 @@
       },
       "response_device_upgrade": {
         "additionalProperties": false,
+        "description": "Single-device upgrade status response",
         "properties": {
           "status": {
-            "$ref": "#/components/schemas/upgrade_info_status"
+            "$ref": "#/components/schemas/upgrade_info_status",
+            "description": "Current status of the requested device upgrade"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Epoch timestamp when the device upgrade status was reported"
           }
         },
         "required": [
@@ -1312,8 +1660,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -1324,8 +1674,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -1336,8 +1688,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -1348,8 +1702,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -1357,8 +1713,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -1369,27 +1727,34 @@
       },
       "response_mxedge_upgrade": {
         "additionalProperties": false,
+        "description": "Mist Edge upgrade details response",
         "properties": {
           "channel": {
+            "description": "Upgrade channel used to select Mist Edge package versions",
             "minLength": 1,
             "type": "string"
           },
           "counts": {
-            "$ref": "#/components/schemas/mxedge_upgrade_response_counts"
+            "$ref": "#/components/schemas/mxedge_upgrade_response_counts",
+            "description": "Per-status counts of Mist Edge targets in this upgrade"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Upgrade identifier for this Mist Edge upgrade request"
           },
           "status": {
+            "description": "Current status of the Mist Edge upgrade",
             "minLength": 1,
             "type": "string"
           },
           "strategy": {
+            "description": "Rollout strategy used for the Mist Edge upgrade",
             "minLength": 1,
             "type": "string"
           },
           "versions": {
             "additionalProperties": true,
+            "description": "Per-service target versions for this Mist Edge upgrade",
             "type": "object"
           }
         },
@@ -1404,6 +1769,7 @@
         "type": "object"
       },
       "response_mxedge_upgrades": {
+        "description": "Mist Edge upgrade records returned by list upgrade operations",
         "items": {
           "$ref": "#/components/schemas/response_mxedge_upgrade"
         },
@@ -1411,9 +1777,11 @@
       },
       "response_site_device_upgrade": {
         "additionalProperties": false,
+        "description": "Site device upgrade job details",
         "properties": {
           "canary_phases": {
-            "$ref": "#/components/schemas/response_site_device_upgrade_canary_phases"
+            "$ref": "#/components/schemas/response_site_device_upgrade_canary_phases",
+            "description": "Canary deployment phase percentages configured for the upgrade"
           },
           "current_phase": {
             "description": "Current canary or rrm phase in progress",
@@ -1429,14 +1797,16 @@
             "type": "boolean"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier for the site device upgrade job"
           },
           "max_failure_percentage": {
             "description": "Percentage of failures allowed",
             "type": "integer"
           },
           "max_failures": {
-            "$ref": "#/components/schemas/upgrade_devices_max_failures"
+            "$ref": "#/components/schemas/upgrade_devices_max_failures",
+            "description": "Per-phase failure thresholds configured for a canary upgrade"
           },
           "p2p_cluster_size": {
             "default": 10,
@@ -1457,10 +1827,12 @@
             "type": "integer"
           },
           "status": {
-            "$ref": "#/components/schemas/upgrade_device_status"
+            "$ref": "#/components/schemas/upgrade_device_status",
+            "description": "Current status of the site device upgrade job"
           },
           "strategy": {
-            "$ref": "#/components/schemas/upgrade_device_strategy"
+            "$ref": "#/components/schemas/upgrade_device_strategy",
+            "description": "Device upgrade strategy used by this job"
           },
           "target_version": {
             "description": "Version to upgrade to",
@@ -1468,10 +1840,12 @@
             "type": "string"
           },
           "targets": {
-            "$ref": "#/components/schemas/upgrade_devices_targets"
+            "$ref": "#/components/schemas/upgrade_devices_targets",
+            "description": "Device targets grouped by upgrade and download status"
           },
           "upgrade_plan": {
-            "$ref": "#/components/schemas/upgrade_devices_plans"
+            "$ref": "#/components/schemas/upgrade_devices_plans",
+            "description": "Phase-to-device upgrade plan for non-big-bang strategies"
           }
         },
         "required": [
@@ -1493,6 +1867,7 @@
         "type": "array"
       },
       "response_site_device_upgrades": {
+        "description": "Site device upgrade jobs returned by list operations",
         "items": {
           "$ref": "#/components/schemas/response_site_device_upgrades_item"
         },
@@ -1500,9 +1875,11 @@
       },
       "response_site_device_upgrades_item": {
         "additionalProperties": false,
+        "description": "Site device upgrade job summary",
         "properties": {
           "counts": {
-            "$ref": "#/components/schemas/upgrade_site_devices_counts"
+            "$ref": "#/components/schemas/upgrade_site_devices_counts",
+            "description": "Device counts grouped by upgrade status for this job"
           },
           "current_phase": {
             "description": "Current canary or rrm phase in progress",
@@ -1517,14 +1894,16 @@
             "type": "boolean"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier for the site device upgrade job"
           },
           "max_failure_percentage": {
             "description": "Percentage of failures allowed",
             "type": "integer"
           },
           "max_failures": {
-            "$ref": "#/components/schemas/upgrade_devices_max_failures"
+            "$ref": "#/components/schemas/upgrade_devices_max_failures",
+            "description": "Per-phase failure thresholds configured for a canary upgrade"
           },
           "reboot_at": {
             "description": "reboot start time in epoch",
@@ -1535,10 +1914,12 @@
             "type": "integer"
           },
           "status": {
-            "$ref": "#/components/schemas/upgrade_device_status"
+            "$ref": "#/components/schemas/upgrade_device_status",
+            "description": "Current status of the site device upgrade job"
           },
           "strategy": {
-            "$ref": "#/components/schemas/upgrade_device_strategy"
+            "$ref": "#/components/schemas/upgrade_device_strategy",
+            "description": "Device upgrade strategy used by this job"
           },
           "target_version": {
             "description": "Version to upgrade to",
@@ -1558,25 +1939,37 @@
       },
       "response_ssr_upgrade": {
         "additionalProperties": false,
+        "description": "SSR firmware upgrade job summary",
         "properties": {
           "channel": {
+            "description": "Firmware release channel used for the SSR upgrade",
             "minLength": 1,
             "type": "string"
           },
           "counts": {
-            "$ref": "#/components/schemas/response_ssr_upgrade_counts"
+            "$ref": "#/components/schemas/response_ssr_upgrade_counts",
+            "description": "Device counts grouped by SSR upgrade status"
           },
           "device_type": {
+            "description": "Type of devices targeted by the SSR upgrade",
             "type": "string"
           },
+          "force": {
+            "default": false,
+            "description": "Whether the upgrade was forced even when the requested version matched the running version",
+            "type": "boolean"
+          },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier for the SSR upgrade job"
           },
           "status": {
+            "description": "Current status of the SSR upgrade job",
             "minLength": 1,
             "type": "string"
           },
           "strategy": {
+            "description": "Upgrade strategy used by the SSR upgrade job",
             "minLength": 1,
             "type": "string"
           },
@@ -1584,6 +1977,7 @@
             "additionalProperties": {
               "type": "string"
             },
+            "description": "SSR firmware versions included in the upgrade job",
             "type": "object"
           }
         },
@@ -1600,17 +1994,22 @@
       },
       "response_ssr_upgrade_counts": {
         "additionalProperties": false,
+        "description": "Device counts grouped by SSR upgrade status",
         "properties": {
           "failed": {
+            "description": "Number of SSR devices that failed the upgrade",
             "type": "integer"
           },
           "queued": {
+            "description": "Number of SSR devices queued for upgrade",
             "type": "integer"
           },
           "success": {
+            "description": "Number of SSR devices successfully upgraded",
             "type": "integer"
           },
           "upgrading": {
+            "description": "Number of SSR devices currently upgrading",
             "type": "integer"
           }
         },
@@ -1624,26 +2023,43 @@
       },
       "response_ssr_upgrade_status": {
         "additionalProperties": false,
+        "description": "Detailed status for an SSR firmware upgrade job",
         "properties": {
           "channel": {
+            "description": "Firmware release channel used for the SSR upgrade",
             "minLength": 1,
             "type": "string"
           },
           "device_type": {
+            "description": "Type of devices targeted by the SSR upgrade",
             "type": "string"
           },
+          "force": {
+            "default": false,
+            "description": "Whether the upgrade was forced even when the requested version matched the running version",
+            "type": "boolean"
+          },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier for the SSR upgrade job"
           },
           "status": {
+            "description": "Current status of the SSR upgrade job",
+            "minLength": 1,
+            "type": "string"
+          },
+          "strategy": {
+            "description": "Upgrade strategy used by the SSR upgrade job",
             "minLength": 1,
             "type": "string"
           },
           "targets": {
-            "$ref": "#/components/schemas/response_ssr_upgrade_status_targets"
+            "$ref": "#/components/schemas/response_ssr_upgrade_status_targets",
+            "description": "SSR device IDs grouped by upgrade status"
           },
           "versions": {
             "additionalProperties": true,
+            "description": "SSR firmware versions included in the upgrade job",
             "type": "object"
           }
         },
@@ -1658,18 +2074,23 @@
       },
       "response_ssr_upgrade_status_targets": {
         "additionalProperties": false,
+        "description": "SSR device IDs grouped by upgrade status",
         "properties": {
           "failed": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "SSR device IDs that failed the upgrade"
           },
           "queued": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "SSR device IDs queued for upgrade"
           },
           "success": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "SSR device IDs successfully upgraded"
           },
           "upgrading": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "SSR device IDs currently upgrading"
           }
         },
         "required": [
@@ -1681,6 +2102,7 @@
         "type": "object"
       },
       "response_ssr_upgrades": {
+        "description": "SSR firmware upgrade jobs returned by list operations",
         "items": {
           "$ref": "#/components/schemas/response_ssr_upgrade"
         },
@@ -1688,8 +2110,10 @@
       },
       "response_upgrade_id": {
         "additionalProperties": false,
+        "description": "Response containing an upgrade job identifier",
         "properties": {
           "upgrade_id": {
+            "description": "Unique value identifying the queued upgrade job",
             "examples": [
               "4316c116-0acb-4c43-8f06-6723154e741e"
             ],
@@ -1704,6 +2128,7 @@
       },
       "response_upgrade_org_devices": {
         "additionalProperties": false,
+        "description": "Organization AP upgrade job details",
         "properties": {
           "enable_p2p": {
             "description": "Whether to allow local AP-to-AP FW upgrade",
@@ -1714,25 +2139,29 @@
             "type": "boolean"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique value identifying the organization upgrade job"
           },
           "strategy": {
-            "$ref": "#/components/schemas/upgrade_device_strategy"
+            "$ref": "#/components/schemas/upgrade_device_strategy",
+            "description": "Execution strategy used for the organization upgrade job"
           },
           "target_version": {
-            "description": "Version to upgrade to",
+            "description": "Firmware version targeted by the organization AP upgrade",
             "examples": [
               "0.14.29411"
             ],
             "type": "string"
           },
           "upgrades": {
-            "$ref": "#/components/schemas/upgrade_org_devices_upgrade_infos"
+            "$ref": "#/components/schemas/upgrade_org_devices_upgrade_infos",
+            "description": "Per-site upgrade jobs created for the organization upgrade"
           }
         },
         "type": "object"
       },
       "site_id": {
+        "description": "Unique identifier of a Mist site",
         "examples": [
           "441a1214-6928-442a-8e92-e1d34b8ec6a6"
         ],
@@ -1741,9 +2170,16 @@
         "type": "string"
       },
       "ssr_upgrade": {
+        "description": "Request to upgrade a single SSR device",
         "properties": {
           "channel": {
-            "$ref": "#/components/schemas/ssr_upgrade_channel"
+            "$ref": "#/components/schemas/ssr_upgrade_channel",
+            "description": "Firmware release channel to use for the SSR upgrade"
+          },
+          "force": {
+            "default": false,
+            "description": "When true, forces the upgrade even when the requested version matches the currently running version; default is false",
+            "type": "boolean"
           },
           "reboot_at": {
             "description": "Reboot start time in epoch seconds, default is start_time, -1 disables reboot",
@@ -1776,12 +2212,20 @@
         "type": "string"
       },
       "ssr_upgrade_multi": {
+        "description": "Request to upgrade multiple SSR devices",
         "properties": {
           "channel": {
-            "$ref": "#/components/schemas/ssr_upgrade_channel"
+            "$ref": "#/components/schemas/ssr_upgrade_channel",
+            "description": "Firmware release channel to use for the SSR upgrade"
           },
           "device_ids": {
-            "$ref": "#/components/schemas/ssr_upgrade_multi_device_ids"
+            "$ref": "#/components/schemas/ssr_upgrade_multi_device_ids",
+            "description": "List of 128T device IDs to upgrade; currently only one 128T device is allowed"
+          },
+          "force": {
+            "default": false,
+            "description": "When true, forces the upgrade even when the requested version matches the currently running version; default is false",
+            "type": "boolean"
           },
           "reboot_at": {
             "description": "Reboot start time in epoch seconds, default is start_time, -1 disables reboot",
@@ -1792,7 +2236,8 @@
             "type": "integer"
           },
           "strategy": {
-            "$ref": "#/components/schemas/ssr_upgrade_strategy"
+            "$ref": "#/components/schemas/ssr_upgrade_strategy",
+            "description": "Upgrade rollout strategy for the targeted SSR devices"
           },
           "version": {
             "description": "128T firmware version to upgrade (e.g. 5.3.0-93)",
@@ -1806,7 +2251,7 @@
         "type": "object"
       },
       "ssr_upgrade_multi_device_ids": {
-        "description": "List of 128T device IDs to upgrade",
+        "description": "List of 128T device IDs to upgrade; currently only one 128T device is allowed",
         "items": {
           "format": "uuid",
           "type": "string"
@@ -1824,19 +2269,24 @@
       },
       "ssr_version": {
         "additionalProperties": false,
+        "description": "SSR firmware version available for upgrade",
         "properties": {
           "default": {
+            "description": "Whether this is the default SSR firmware version for its channel",
             "readOnly": true,
             "type": "boolean"
           },
           "package": {
+            "description": "Firmware package name for this SSR version",
             "readOnly": true,
             "type": "string"
           },
           "tags": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Metadata labels associated with this SSR firmware version"
           },
           "version": {
+            "description": "Firmware version string available for SSR upgrades",
             "readOnly": true,
             "type": "string"
           }
@@ -1858,6 +2308,7 @@
         "type": "string"
       },
       "ssr_versions": {
+        "description": "SSR firmware versions available for upgrade",
         "items": {
           "$ref": "#/components/schemas/ssr_version"
         },
@@ -1865,6 +2316,7 @@
         "uniqueItems": true
       },
       "strings": {
+        "description": "Unique string values returned or accepted by this schema",
         "items": {
           "type": "string"
         },
@@ -1872,7 +2324,7 @@
         "uniqueItems": true
       },
       "timestamp": {
-        "description": "Epoch (seconds)",
+        "description": "Epoch timestamp, in seconds",
         "format": "double",
         "readOnly": true,
         "type": "number"
@@ -1919,6 +2371,7 @@
         "additionalProperties": {
           "type": "string"
         },
+        "description": "Device selection rule keyed by match criterion, with string values to match",
         "type": "object"
       },
       "upgrade_device_rules": {
@@ -1979,7 +2432,7 @@
         "type": "array"
       },
       "upgrade_devices_plan": {
-        "description": "List of Devices MAC Addresses part of the phase",
+        "description": "List of Devices MAC addresses part of the phase",
         "items": {
           "type": "string"
         },
@@ -1994,100 +2447,110 @@
       },
       "upgrade_devices_targets": {
         "additionalProperties": false,
+        "description": "Read-only device target lists grouped by upgrade status",
         "properties": {
           "download_requested": {
-            "$ref": "#/components/schemas/upgrade_devices_targets_download_requested"
+            "$ref": "#/components/schemas/upgrade_devices_targets_download_requested",
+            "description": "Device MAC addresses for devices requested to download firmware"
           },
           "downloaded": {
-            "$ref": "#/components/schemas/upgrade_devices_targets_downloaded"
+            "$ref": "#/components/schemas/upgrade_devices_targets_downloaded",
+            "description": "Device MAC addresses for devices that have downloaded firmware"
           },
           "downloading": {
-            "$ref": "#/components/schemas/upgrade_devices_targets_downloading"
+            "$ref": "#/components/schemas/upgrade_devices_targets_downloading",
+            "description": "Device MAC addresses for devices currently downloading firmware"
           },
           "failed": {
-            "$ref": "#/components/schemas/upgrade_devices_targets_failed"
+            "$ref": "#/components/schemas/upgrade_devices_targets_failed",
+            "description": "Device MAC addresses for devices that failed to upgrade"
           },
           "reboot_in_progress": {
-            "$ref": "#/components/schemas/upgrade_devices_targets_reboot_in_progress"
+            "$ref": "#/components/schemas/upgrade_devices_targets_reboot_in_progress",
+            "description": "Device MAC addresses for devices currently rebooting"
           },
           "rebooted": {
-            "$ref": "#/components/schemas/upgrade_devices_targets_rebooted"
+            "$ref": "#/components/schemas/upgrade_devices_targets_rebooted",
+            "description": "Device MAC addresses for devices that rebooted successfully"
           },
           "scheduled": {
-            "$ref": "#/components/schemas/upgrade_devices_targets_scheduled"
+            "$ref": "#/components/schemas/upgrade_devices_targets_scheduled",
+            "description": "Device MAC addresses for devices scheduled for upgrade by the cloud"
           },
           "skipped": {
-            "$ref": "#/components/schemas/upgrade_devices_targets_skipped"
+            "$ref": "#/components/schemas/upgrade_devices_targets_skipped",
+            "description": "Device MAC addresses for devices skipped because the requested version matched the running version"
           },
           "total": {
             "description": "Count of devices part of this upgrade",
             "type": "integer"
           },
           "upgraded": {
-            "$ref": "#/components/schemas/upgrade_devices_targets_upgraded"
+            "$ref": "#/components/schemas/upgrade_devices_targets_upgraded",
+            "description": "Device MAC addresses for devices that upgraded successfully"
           }
         },
         "readOnly": true,
         "type": "object"
       },
       "upgrade_devices_targets_download_requested": {
-        "description": "List of devices MAC Addresses which cloud has requested to download firmware",
+        "description": "List of device MAC addresses that the cloud requested to download firmware",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
       "upgrade_devices_targets_downloaded": {
-        "description": "List of devices MAC Addresses which have the firmware downloaded",
+        "description": "List of device MAC addresses that have downloaded the firmware",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
       "upgrade_devices_targets_downloading": {
-        "description": "List of devices MAC Addresses which are currently downloading the firmware",
+        "description": "List of device MAC addresses that are currently downloading the firmware",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
       "upgrade_devices_targets_failed": {
-        "description": "List of devices MAC Addresses which have failed to upgrade",
+        "description": "List of device MAC addresses that failed to upgrade",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
       "upgrade_devices_targets_reboot_in_progress": {
-        "description": "List of devices MAC Addresses which are rebooting",
+        "description": "List of device MAC addresses for devices that are rebooting",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
       "upgrade_devices_targets_rebooted": {
-        "description": "List of devices MAC Addresses which have rebooted successfully",
+        "description": "List of device MAC addresses that rebooted successfully",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
       "upgrade_devices_targets_scheduled": {
-        "description": "List of devices MAC Addresses which cloud has scheduled an upgrade for",
+        "description": "List of device MAC addresses that the cloud scheduled an upgrade for",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
       "upgrade_devices_targets_skipped": {
-        "description": "List of devices MAC Addresses which skipped upgrade since requested version was same as running version. Use force to always upgrade",
+        "description": "List of device MAC addresses that skipped upgrade because requested version was same as running version. Use force to always upgrade",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
       "upgrade_devices_targets_upgraded": {
-        "description": "Count of devices which have upgraded successfully",
+        "description": "List of device MAC addresses that upgraded successfully",
         "items": {
           "type": "string"
         },
@@ -2105,60 +2568,72 @@
         "type": "string"
       },
       "upgrade_org_devices": {
+        "description": "Organization-wide device upgrade request",
         "properties": {
           "all_sites": {
             "default": false,
-            "description": "If `true`, will upgrade all sites in this org",
+            "description": "If `true`, will upgrade all sites in this org; overrides `site_ids`",
             "type": "boolean"
           },
           "canary_phases": {
-            "$ref": "#/components/schemas/upgrade_device_canary_phases"
+            "$ref": "#/components/schemas/upgrade_device_canary_phases",
+            "description": "Only if `strategy`==`canary`. Canary phase percentages for the organization upgrade"
           },
           "device_type": {
-            "$ref": "#/components/schemas/device_type"
+            "$ref": "#/components/schemas/device_type",
+            "description": "Device family selected for the organization upgrade"
           },
           "download_strategy": {
-            "$ref": "#/components/schemas/upgrade_org_devices_download_strategy"
+            "$ref": "#/components/schemas/upgrade_org_devices_download_strategy",
+            "description": "Firmware download orchestration strategy for the organization upgrade"
+          },
+          "enable_p2p": {
+            "description": "For APs only. Whether to allow local AP-to-AP firmware upgrade",
+            "type": "boolean"
           },
           "max_failure_percentage": {
-            "$ref": "#/components/schemas/upgrade_devices_max_failure_percentage"
+            "$ref": "#/components/schemas/upgrade_devices_max_failure_percentage",
+            "description": "If `strategy`!=`big_bang`. Allowed failure percentage across the organization upgrade"
           },
           "max_failures": {
-            "$ref": "#/components/schemas/upgrade_devices_max_failures"
+            "$ref": "#/components/schemas/upgrade_devices_max_failures",
+            "description": "If `strategy`==`canary`. Per-phase failure limits for the organization upgrade"
           },
           "models": {
-            "$ref": "#/components/schemas/upgrade_org_devices_models"
+            "$ref": "#/components/schemas/upgrade_org_devices_models",
+            "description": "Device models selected for the organization upgrade"
           },
           "p2p_cluster_size": {
             "default": 10,
-            "description": "For APs only and if `enable_p2p`==`true`.",
+            "description": "For APs only. Size to split devices for peer-to-peer download batches; default 10",
             "examples": [
-              0
+              10
             ],
             "minimum": 0,
             "type": "integer"
           },
           "p2p_parallelism": {
-            "description": "For APs only and if `enable_p2p`==`true`. Number of parallel p2p download batches to create",
+            "description": "For APs only. Number of parallel peer-to-peer download batches to create. If not set, automatically determined based on device count (<=50 uses 1, 51-100 uses 3, >100 uses 10)",
             "type": "integer"
           },
           "reboot_at": {
             "deprecated": true,
-            "description": "For Switches and Gateways only and if `reboot`==`true`. Reboot start time in epoch seconds, default is `start_time`",
+            "description": "Reboot start time in epoch seconds, default is `start_time`; deprecated, use `reboot_datetime` instead",
             "examples": [
               1624399840
             ],
             "type": "integer"
           },
           "reboot_datetime": {
-            "description": "Process start date and time, ISO8601 format. Exclude timezone component if site local timezone needs to be used",
+            "description": "Reboot start time in ISO 8601 format; default is `start_datetime`. Exclude timezone component to use site local timezone",
             "examples": [
               "2024-06-13 15:00:00-07:00"
             ],
             "type": "string"
           },
           "reboot_strategy": {
-            "$ref": "#/components/schemas/upgrade_device_strategy"
+            "$ref": "#/components/schemas/upgrade_device_strategy",
+            "description": "Device reboot orchestration strategy for selected devices"
           },
           "rrm_first_batch_percentage": {
             "description": "For APs only and if `strategy`==`rrm`. Percentage of APs that need to be present in the first RRM batch",
@@ -2175,20 +2650,24 @@
             "type": "integer"
           },
           "rrm_mesh_upgrade": {
-            "$ref": "#/components/schemas/upgrade_device_rrm_mesh_upgrade"
+            "$ref": "#/components/schemas/upgrade_device_rrm_mesh_upgrade",
+            "description": "For APs only and if `strategy`==`rrm`. Mesh AP upgrade order for the organization upgrade"
           },
           "rrm_node_order": {
-            "$ref": "#/components/schemas/upgrade_device_rrm_node_order"
+            "$ref": "#/components/schemas/upgrade_device_rrm_node_order",
+            "description": "For APs only and if `strategy`==`rrm`. AP ordering direction for RRM upgrade batches"
           },
           "rrm_slow_ramp": {
             "description": "For APs only and if `strategy`==`rrm`. True will make rrm batch sizes slowly ramp up",
             "type": "boolean"
           },
           "rules": {
-            "$ref": "#/components/schemas/upgrade_device_rules"
+            "$ref": "#/components/schemas/upgrade_device_rules",
+            "description": "Selection rules used to choose devices for this organization upgrade"
           },
           "site_ids": {
-            "$ref": "#/components/schemas/upgrade_org_devices_site_ids"
+            "$ref": "#/components/schemas/upgrade_org_devices_site_ids",
+            "description": "Identifiers of sites used to limit the organization upgrade"
           },
           "snapshot": {
             "default": false,
@@ -2196,7 +2675,7 @@
             "type": "boolean"
           },
           "start_datetime": {
-            "description": "Process start date and time, ISO8601 format",
+            "description": "Firmware download start time in ISO 8601 format; default is now. Exclude timezone component to use site local timezone",
             "examples": [
               "2024-06-13 15:00:00-07:00"
             ],
@@ -2204,17 +2683,25 @@
           },
           "start_time": {
             "deprecated": true,
-            "description": "Upgrade start time in epoch seconds, default is now",
+            "description": "Firmware download start time in epoch seconds, default is now; deprecated, use `start_datetime` instead",
             "examples": [
               1624399840
             ],
             "type": "integer"
           },
           "strategy": {
-            "$ref": "#/components/schemas/upgrade_device_strategy"
+            "$ref": "#/components/schemas/upgrade_device_strategy",
+            "deprecated": true,
+            "description": "Deprecated; use `download_strategy` and `reboot_strategy` instead. `big_bang` (upgrade all at once, no orchestration), `serial` (one at a time), `canary`, or `rrm` (AP only); default is big_bang"
+          },
+          "version": {
+            "deprecated": true,
+            "description": "Deprecated; use `versions` instead. Specific firmware version, `suggested`, or `alpha`; default is latest",
+            "type": "string"
           },
           "versions": {
-            "$ref": "#/components/schemas/upgrade_org_devices_versions"
+            "$ref": "#/components/schemas/upgrade_org_devices_versions",
+            "description": "Target firmware versions for this organization upgrade"
           }
         },
         "type": "object"
@@ -2231,23 +2718,29 @@
       },
       "upgrade_org_devices_item": {
         "additionalProperties": false,
+        "description": "Organization device upgrade job returned by upgrade APIs",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier for the organization upgrade job"
           },
           "site_upgrades": {
-            "$ref": "#/components/schemas/upgrade_org_devices_item_site_upgrades"
+            "$ref": "#/components/schemas/upgrade_org_devices_item_site_upgrades",
+            "description": "Per-site upgrade jobs created by this organization upgrade"
           }
         },
         "type": "object"
       },
       "upgrade_org_devices_item_site_upgrade": {
         "additionalProperties": false,
+        "description": "Site upgrade mapping returned for an organization upgrade",
         "properties": {
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Identifier of the site that received this upgrade job"
           },
           "upgrade_id": {
+            "description": "Identifier of the site-level upgrade job",
             "examples": [
               "ebbdbd0b-1bcf-4e55-8a6a-3416049a52b1"
             ],
@@ -2258,12 +2751,14 @@
         "type": "object"
       },
       "upgrade_org_devices_item_site_upgrades": {
+        "description": "Site-level upgrade jobs created for an organization upgrade",
         "items": {
           "$ref": "#/components/schemas/upgrade_org_devices_item_site_upgrade"
         },
         "type": "array"
       },
       "upgrade_org_devices_list": {
+        "description": "Organization device upgrade jobs returned by a list response",
         "items": {
           "$ref": "#/components/schemas/upgrade_org_devices_item"
         },
@@ -2286,38 +2781,47 @@
       },
       "upgrade_org_devices_upgrade": {
         "additionalProperties": false,
+        "description": "Upgrade entry for a single site within an organization upgrade job",
         "properties": {
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Identifier of the site for this upgrade entry"
           },
           "upgrade": {
-            "$ref": "#/components/schemas/upgrade_org_devices_upgrade_info"
+            "$ref": "#/components/schemas/upgrade_org_devices_upgrade_info",
+            "description": "Site-level job details for this upgrade entry"
           }
         },
         "type": "object"
       },
       "upgrade_org_devices_upgrade_info": {
         "additionalProperties": false,
+        "description": "Site-level upgrade job details within an organization upgrade",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique value identifying the site-level upgrade job"
           },
           "start_time": {
+            "description": "Epoch timestamp, in seconds, when the site-level upgrade starts",
             "examples": [
               1717658765
             ],
             "type": "integer"
           },
           "status": {
-            "$ref": "#/components/schemas/upgrade_device_status"
+            "$ref": "#/components/schemas/upgrade_device_status",
+            "description": "Current status of the site-level upgrade job"
           },
           "targets": {
-            "$ref": "#/components/schemas/upgrade_devices_targets"
+            "$ref": "#/components/schemas/upgrade_devices_targets",
+            "description": "Device targets grouped by upgrade state"
           }
         },
         "type": "object"
       },
       "upgrade_org_devices_upgrade_infos": {
+        "description": "Per-site upgrade entries created for an organization device upgrade",
         "items": {
           "$ref": "#/components/schemas/upgrade_org_devices_upgrade"
         },
@@ -2325,30 +2829,34 @@
       },
       "upgrade_org_devices_version": {
         "additionalProperties": false,
+        "description": "Target firmware version entry for an organization upgrade request",
         "properties": {
           "firmware_type": {
-            "$ref": "#/components/schemas/upgrade_org_devices_version_firmware_type"
+            "$ref": "#/components/schemas/upgrade_org_devices_version_firmware_type",
+            "description": "Firmware family this version entry applies to"
           },
           "force": {
             "default": false,
-            "description": "If `firmware_type`==`ap`, set to `true` if upgrade is needed when target version <= running version",
+            "description": "Set to `true` to force upgrade. For `device_type`==`ap`, applies when target version <= running version. For `device_type`==`gateway` with `firmware_type`==`ssr`, applies only when target version == running version; default false",
             "type": "boolean"
           },
           "model_version": {
-            "$ref": "#/components/schemas/upgrade_org_devices_version_model_version"
+            "$ref": "#/components/schemas/upgrade_org_devices_version_model_version",
+            "description": "Map of device model to firmware version; overrides `version` for the specified models"
           },
           "version": {
-            "description": "version of the firmware to deploy",
+            "description": "Firmware version to deploy for this entry",
             "type": "string"
           }
         },
         "type": "object"
       },
       "upgrade_org_devices_version_firmware_type": {
-        "description": "enum: `ap`, `junos`",
+        "description": "Firmware family this version entry applies to. enum: `ap`, `junos`, `ssr`",
         "enum": [
           "ap",
-          "junos"
+          "junos",
+          "ssr"
         ],
         "type": "string"
       },
@@ -2360,18 +2868,22 @@
         "type": "object"
       },
       "upgrade_org_devices_versions": {
+        "description": "Target firmware version entries for an organization upgrade request",
         "items": {
           "$ref": "#/components/schemas/upgrade_org_devices_version"
         },
         "type": "array"
       },
       "upgrade_site_devices": {
+        "description": "Site device upgrade request",
         "properties": {
           "canary_phases": {
-            "$ref": "#/components/schemas/upgrade_device_canary_phases"
+            "$ref": "#/components/schemas/upgrade_device_canary_phases",
+            "description": "Only if `strategy`==`canary`. Canary phase percentages for the site upgrade"
           },
           "device_ids": {
-            "$ref": "#/components/schemas/upgrade_site_devices_device_ids"
+            "$ref": "#/components/schemas/upgrade_site_devices_device_ids",
+            "description": "Specific device IDs selected for the site upgrade"
           },
           "enable_p2p": {
             "description": "For APs only. Whether to allow local AP-to-AP FW upgrade",
@@ -2383,25 +2895,28 @@
             "type": "boolean"
           },
           "max_failure_percentage": {
-            "$ref": "#/components/schemas/upgrade_devices_max_failure_percentage"
+            "$ref": "#/components/schemas/upgrade_devices_max_failure_percentage",
+            "description": "If `strategy`!=`big_bang`. Allowed failure percentage across the site upgrade"
           },
           "max_failures": {
-            "$ref": "#/components/schemas/upgrade_devices_max_failures"
+            "$ref": "#/components/schemas/upgrade_devices_max_failures",
+            "description": "If `strategy`==`canary`. Per-phase failure limits for the site upgrade"
           },
           "models": {
-            "$ref": "#/components/schemas/upgrade_device_models"
+            "$ref": "#/components/schemas/upgrade_device_models",
+            "description": "Device models selected for the site upgrade"
           },
           "p2p_cluster_size": {
             "default": 10,
-            "description": "For APs only and if `enable_p2p`==`true`.",
+            "description": "For APs only and if `enable_p2p`==`true`. Size to split devices for peer-to-peer download batches; default 10",
             "examples": [
-              0
+              10
             ],
             "minimum": 0,
             "type": "integer"
           },
           "p2p_parallelism": {
-            "description": "For APs only and if `enable_p2p`==`true`. Number of parallel p2p download batches to create",
+            "description": "For APs only and if `enable_p2p`==`true`. Number of parallel peer-to-peer download batches to create. If not set, automatically determined based on device count (<=50 uses 1, 51-100 uses 3, >100 uses 10)",
             "type": "integer"
           },
           "reboot": {
@@ -2431,17 +2946,20 @@
             "type": "integer"
           },
           "rrm_mesh_upgrade": {
-            "$ref": "#/components/schemas/upgrade_device_rrm_mesh_upgrade"
+            "$ref": "#/components/schemas/upgrade_device_rrm_mesh_upgrade",
+            "description": "For APs only and if `strategy`==`rrm`. Mesh AP upgrade order for the site upgrade"
           },
           "rrm_node_order": {
-            "$ref": "#/components/schemas/upgrade_device_rrm_node_order"
+            "$ref": "#/components/schemas/upgrade_device_rrm_node_order",
+            "description": "For APs only and if `strategy`==`rrm`. AP ordering direction for RRM upgrade batches"
           },
           "rrm_slow_ramp": {
             "description": "For APs only and if `strategy`==`rrm`. True will make rrm batch sizes slowly ramp up",
             "type": "boolean"
           },
           "rules": {
-            "$ref": "#/components/schemas/upgrade_device_rules"
+            "$ref": "#/components/schemas/upgrade_device_rules",
+            "description": "Selection rules used to choose devices for this site upgrade"
           },
           "snapshot": {
             "default": false,
@@ -2456,7 +2974,8 @@
             "type": "integer"
           },
           "strategy": {
-            "$ref": "#/components/schemas/upgrade_device_strategy"
+            "$ref": "#/components/schemas/upgrade_device_strategy",
+            "description": "Upgrade orchestration strategy for selected devices"
           },
           "version": {
             "description": "Specific version / stable, default is to use the latest available version",
@@ -2470,6 +2989,7 @@
       },
       "upgrade_site_devices_counts": {
         "additionalProperties": false,
+        "description": "Device counts grouped by status for a site upgrade job",
         "properties": {
           "download_requested": {
             "description": "Count of devices which cloud has requested to download firmware",
@@ -2512,7 +3032,7 @@
         "type": "object"
       },
       "upgrade_site_devices_device_ids": {
-        "description": "id's of devices which will be selected for upgrade",
+        "description": "Device IDs selected for a site device upgrade",
         "items": {
           "format": "uuid",
           "type": "string"
@@ -2520,8 +3040,10 @@
         "type": "array"
       },
       "version_string": {
+        "description": "JSI device upgrade target version request",
         "properties": {
           "version": {
+            "description": "Target software version for the JSI device upgrade",
             "type": "string"
           }
         },
@@ -3003,7 +3525,7 @@
         }
       },
       "ssr_version_channel": {
-        "description": "SSR version channel",
+        "description": "SSR release channel used to filter available versions. enum: `alpha`, `beta`, `stable`",
         "in": "query",
         "name": "channel",
         "schema": {
@@ -3028,7 +3550,7 @@
         "value": [
           {
             "model": "AP41",
-            "tag": "stable",
+            "tag": "suggested",
             "version": "v0.1.543"
           },
           {
@@ -3243,19 +3765,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

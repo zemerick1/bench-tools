@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Marvis Invites",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "get": {
-        "description": "List Org Marvis Client Invites",
+        "description": "List Marvis Client onboarding invite profiles for the organization, including enrollment URLs and enabled telemetry, location, and synthetic-test capabilities.",
         "operationId": "listOrgMarvisClientInvites",
         "responses": {
           "200": {
@@ -108,7 +104,7 @@
         ]
       },
       "post": {
-        "description": "Create Org Marvis Client Invite",
+        "description": "Create a Marvis Client onboarding invite profile for the organization, defining the enabled telemetry, location, and synthetic-test capabilities.",
         "operationId": "createOrgMarvisClientInvite",
         "requestBody": {
           "content": {
@@ -116,7 +112,16 @@
               "examples": {
                 "Example": {
                   "value": {
-                    "name": "string"
+                    "location": {
+                      "enabled": true
+                    },
+                    "name": "Handhelds",
+                    "synthetic_test": {
+                      "enabled": true
+                    },
+                    "telemetry": {
+                      "enabled": true
+                    }
                   }
                 }
               },
@@ -162,7 +167,7 @@
         }
       ],
       "get": {
-        "description": "Get Org Marvis Client Invite",
+        "description": "Retrieve a Marvis Client onboarding invite profile, including enrollment URL and enabled client capabilities.",
         "operationId": "getOrgMarvisClientInvite",
         "responses": {
           "200": {
@@ -190,7 +195,7 @@
         ]
       },
       "put": {
-        "description": "Update Org Marvis Client Invite",
+        "description": "Update a Marvis Client onboarding invite profile, including enabled telemetry, location, and synthetic-test capabilities.",
         "operationId": "updateOrgMarvisClientInvite",
         "requestBody": {
           "content": {
@@ -198,7 +203,16 @@
               "examples": {
                 "Example": {
                   "value": {
-                    "name": "string"
+                    "location": {
+                      "enabled": true
+                    },
+                    "name": "Handhelds",
+                    "synthetic_test": {
+                      "enabled": true
+                    },
+                    "telemetry": {
+                      "enabled": true
+                    }
                   }
                 }
               },
@@ -234,7 +248,7 @@
         ]
       },
       "delete": {
-        "description": "Delete Org Marvis Client Invite",
+        "description": "Delete a Marvis Client onboarding invite profile by ID.",
         "operationId": "deleteOrgMarvisClientInvite",
         "responses": {
           "200": {
@@ -275,33 +289,82 @@
         "type": "string"
       },
       "marvis_client": {
+        "description": "Marvis Client configuration profile",
         "properties": {
           "disabled": {
             "default": false,
+            "description": "Whether this Marvis Client profile is disabled",
             "type": "boolean"
           },
+          "enrollment_url": {
+            "description": "In MDM, add `--enrollment_url <enrollment_url>` to the install command",
+            "examples": [
+              "marvisclient://api.mist.com/path/to/url"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the Marvis Client profile"
+          },
+          "location": {
+            "$ref": "#/components/schemas/marvis_client_location",
+            "description": "Client location collection settings for Marvis Client"
           },
           "name": {
+            "description": "Display name for the Marvis Client profile",
             "examples": [
               "Handhelds"
             ],
             "type": "string"
           },
-          "provision_url": {
-            "description": "In MDM, add `--provision_url <provision_url>` to the install command",
-            "examples": [
-              "https://api.mist.com/path/to/url"
-            ],
-            "format": "url",
-            "readOnly": true,
-            "type": "string"
+          "synthetic_test": {
+            "$ref": "#/components/schemas/marvis_client_synthetic_test",
+            "description": "Synthetic test settings for Marvis Client"
+          },
+          "telemetry": {
+            "$ref": "#/components/schemas/marvis_client_telemetry",
+            "description": "Client telemetry collection settings for Marvis Client"
+          }
+        },
+        "type": "object"
+      },
+      "marvis_client_location": {
+        "additionalProperties": false,
+        "description": "Location collection settings for Marvis Client",
+        "properties": {
+          "enabled": {
+            "description": "Whether location collection is enabled for Marvis Client",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "marvis_client_synthetic_test": {
+        "additionalProperties": false,
+        "description": "Synthetic test settings for Marvis Client",
+        "properties": {
+          "enabled": {
+            "description": "Whether synthetic testing is enabled for Marvis Client",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "marvis_client_telemetry": {
+        "additionalProperties": false,
+        "description": "Note: some stats are not collected when it's not connected to Mist infrastructure",
+        "properties": {
+          "enabled": {
+            "description": "Whether telemetry collection is enabled for Marvis Client",
+            "type": "boolean"
           }
         },
         "type": "object"
       },
       "marvis_clients": {
+        "description": "Marvis Client profiles returned by the API",
         "items": {
           "$ref": "#/components/schemas/marvis_client"
         },
@@ -309,8 +372,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -321,8 +386,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -333,8 +400,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -345,8 +414,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -354,8 +425,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -584,6 +657,7 @@
       },
       "MarvisClientExample": {
         "value": {
+          "enrollment_url": "marvisclient://api.mist.com/path/to/url",
           "id": "3a14098f-b995-7552-b0a4-b8ee39b337a6",
           "name": "Handhelds"
         }
@@ -591,6 +665,7 @@
       "MarvisClientsArrayExample": {
         "value": [
           {
+            "enrollment_url": "marvisclient://api.mist.com/path/to/url",
             "id": "3a14098f-b995-7552-b0a4-b8ee39b337a6",
             "name": "Handhelds"
           }
@@ -599,19 +674,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sites Devices - Wired - Virtual Chassis",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -219,6 +215,24 @@
                       }
                     ],
                     "op": "preprovision"
+                  }
+                },
+                "remove-preprovision-members-and-clean-up-inventory": {
+                  "value": {
+                    "members": [
+                      {
+                        "mac": "aff827549235",
+                        "member_id": 0,
+                        "vc_role": "master"
+                      },
+                      {
+                        "mac": "8396cd006c8c",
+                        "member_id": 1,
+                        "vc_role": "linecard"
+                      }
+                    ],
+                    "op": "preprovision",
+                    "remove_inventory": true
                   }
                 },
                 "removing-two-switches-from-VC": {
@@ -535,12 +549,15 @@
     "schemas": {
       "config_vc_port_member": {
         "additionalProperties": false,
+        "description": "Virtual Chassis member and port list for a VC port operation",
         "properties": {
           "member": {
+            "description": "Virtual Chassis member ID whose VC ports are being configured",
             "type": "number"
           },
           "vc_ports": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Port names to configure as Virtual Chassis ports on the member"
           }
         },
         "required": [
@@ -550,6 +567,7 @@
       },
       "cpu_stat": {
         "additionalProperties": false,
+        "description": "CPU utilization breakdown for a device",
         "properties": {
           "idle": {
             "description": "Percentage of CPU time that is idle",
@@ -568,7 +586,8 @@
             ]
           },
           "load_avg": {
-            "$ref": "#/components/schemas/cpu_stat_load_avg"
+            "$ref": "#/components/schemas/cpu_stat_load_avg",
+            "description": "Load averages for the last 1, 5, and 15 minutes"
           },
           "system": {
             "description": "Percentage of CPU time being used by system processes",
@@ -579,7 +598,7 @@
             ]
           },
           "usage": {
-            "description": "CPU usage",
+            "description": "Overall CPU usage percentage",
             "readOnly": true,
             "type": [
               "number",
@@ -614,7 +633,7 @@
         "type": "string"
       },
       "last_seen": {
-        "description": "Last seen timestamp",
+        "description": "Timestamp indicating when the entity was last seen",
         "examples": [
           1470417522
         ],
@@ -627,9 +646,10 @@
       },
       "memory_stat": {
         "additionalProperties": false,
-        "description": "Memory usage stat (for virtual chassis, memory usage of master RE)",
+        "description": "Memory utilization statistics for a device; in a virtual chassis, this reports the master Routing Engine",
         "properties": {
           "usage": {
+            "description": "Current memory utilization percentage for the device or master Routing Engine",
             "type": "number"
           }
         },
@@ -647,29 +667,35 @@
       },
       "module_stat_item_errors_items": {
         "additionalProperties": false,
+        "description": "Error condition reported for a device module",
         "properties": {
           "feature": {
+            "description": "Affected feature associated with this module error condition",
             "examples": [
               "Mist-Management"
             ],
             "type": "string"
           },
           "minimum_version": {
+            "description": "Minimum software version associated with this module error",
             "examples": [
               "128T-6.0.0-1"
             ],
             "type": "string"
           },
           "reason": {
+            "description": "Human-readable reason for the module error condition",
             "type": "string"
           },
           "since": {
+            "description": "Epoch timestamp when the module error condition began",
             "examples": [
               1657497600
             ],
             "type": "integer"
           },
           "type": {
+            "description": "Module error type code reported by the device",
             "examples": [
               "FW_UPGRADE_REQUIRED_BY_FEATURE"
             ],
@@ -683,6 +709,7 @@
         "type": "object"
       },
       "module_stat_item_fans": {
+        "description": "Cooling fan status records for a device module",
         "items": {
           "$ref": "#/components/schemas/module_stat_item_fans_items"
         },
@@ -691,23 +718,28 @@
       },
       "module_stat_item_fans_items": {
         "additionalProperties": false,
+        "description": "Cooling fan telemetry for a device module",
         "properties": {
           "airflow": {
+            "description": "Direction of airflow reported for the fan",
             "examples": [
               "out"
             ],
             "type": "string"
           },
           "name": {
+            "description": "Fan label reported by the device",
             "examples": [
               "Fan 0"
             ],
             "type": "string"
           },
           "rpm": {
+            "description": "Current fan speed in revolutions per minute",
             "type": "integer"
           },
           "status": {
+            "description": "Operational status reported for the fan",
             "examples": [
               "ok"
             ],
@@ -717,6 +749,7 @@
         "type": "object"
       },
       "module_stat_item_pics": {
+        "description": "Physical Interface Card summaries for a device module",
         "items": {
           "$ref": "#/components/schemas/module_stat_item_pics_item"
         },
@@ -724,20 +757,25 @@
       },
       "module_stat_item_pics_item": {
         "additionalProperties": false,
+        "description": "Physical Interface Card summary for a device module",
         "properties": {
           "index": {
+            "description": "PIC index within the device module",
             "type": "integer"
           },
           "model_number": {
+            "description": "Model number reported for the PIC",
             "type": "string"
           },
           "port_groups": {
-            "$ref": "#/components/schemas/module_stat_item_pics_item_port_groups"
+            "$ref": "#/components/schemas/module_stat_item_pics_item_port_groups",
+            "description": "Port groups provided by this PIC"
           }
         },
         "type": "object"
       },
       "module_stat_item_pics_item_port_groups": {
+        "description": "Port group summaries for a PIC",
         "items": {
           "$ref": "#/components/schemas/module_stat_item_pics_item_port_groups_item"
         },
@@ -745,11 +783,14 @@
       },
       "module_stat_item_pics_item_port_groups_item": {
         "additionalProperties": false,
+        "description": "Port group summary for a PIC",
         "properties": {
           "count": {
+            "description": "Number of ports in this PIC port group",
             "type": "integer"
           },
           "type": {
+            "description": "Port media or interface type for this PIC port group",
             "type": "string"
           }
         },
@@ -757,26 +798,31 @@
       },
       "module_stat_item_poe": {
         "additionalProperties": false,
+        "description": "Power over Ethernet telemetry for a device module",
         "properties": {
           "max_power": {
+            "description": "Total PoE power budget available to the module, in watts",
             "examples": [
               250
             ],
             "type": "number"
           },
           "power_draw": {
+            "description": "Current PoE power draw on the module, in watts",
             "examples": [
               120.3
             ],
             "type": "number"
           },
           "status": {
+            "description": "Operational status of PoE on the module",
             "type": "string"
           }
         },
         "type": "object"
       },
       "module_stat_item_psus": {
+        "description": "Power supply status records for a device module",
         "items": {
           "$ref": "#/components/schemas/module_stat_item_psus_item"
         },
@@ -785,14 +831,17 @@
       },
       "module_stat_item_psus_item": {
         "additionalProperties": false,
+        "description": "Power supply status for a device module",
         "properties": {
           "name": {
+            "description": "Power supply label reported by the device",
             "examples": [
               "Power Supply 0"
             ],
             "type": "string"
           },
           "status": {
+            "description": "Operational status reported for the power supply",
             "examples": [
               "ok"
             ],
@@ -802,6 +851,7 @@
         "type": "object"
       },
       "module_stat_item_temperatures": {
+        "description": "Temperature sensor readings for a device module",
         "items": {
           "$ref": "#/components/schemas/module_stat_item_temperatures_item"
         },
@@ -810,20 +860,24 @@
       },
       "module_stat_item_temperatures_item": {
         "additionalProperties": false,
+        "description": "Temperature sensor reading for a device module",
         "properties": {
           "celsius": {
+            "description": "Temperature reading for the sensor, in degrees Celsius",
             "examples": [
               45
             ],
             "type": "number"
           },
           "name": {
+            "description": "Temperature sensor label reported by the device",
             "examples": [
               "CPU"
             ],
             "type": "string"
           },
           "status": {
+            "description": "Operational status reported for the temperature sensor",
             "examples": [
               "ok"
             ],
@@ -833,6 +887,7 @@
         "type": "object"
       },
       "module_stat_item_vc_links": {
+        "description": "Virtual chassis link records for a device module",
         "items": {
           "$ref": "#/components/schemas/module_stat_item_vc_links_item"
         },
@@ -841,20 +896,24 @@
       },
       "module_stat_item_vc_links_item": {
         "additionalProperties": false,
+        "description": "Virtual chassis link endpoint for a device module",
         "properties": {
           "neighbor_module_idx": {
+            "description": "Index of the neighboring module connected through this virtual chassis link",
             "examples": [
               1
             ],
             "type": "integer"
           },
           "neighbor_port_id": {
+            "description": "Port identifier on the neighboring module for this virtual chassis link",
             "examples": [
               "vcp-255/1/0"
             ],
             "type": "string"
           },
           "port_id": {
+            "description": "Local port identifier for this virtual chassis link",
             "examples": [
               "vcp-255/1/0"
             ],
@@ -864,6 +923,7 @@
         "type": "object"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -873,8 +933,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -885,8 +947,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -897,8 +961,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -909,8 +975,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -918,8 +986,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -930,53 +1000,66 @@
       },
       "response_virtual_chassis_config": {
         "additionalProperties": false,
+        "description": "Combined virtual chassis status, topology, and member statistics",
         "properties": {
           "config_type": {
+            "description": "Provisioning mode of the virtual chassis configuration",
             "readOnly": true,
             "type": "string"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique value identifying the virtual chassis device record"
           },
           "locating": {
+            "description": "Whether locate mode is active for the virtual chassis device",
             "readOnly": true,
             "type": "boolean"
           },
           "mac": {
+            "description": "Device MAC address for the virtual chassis device record",
             "type": "string"
           },
           "members": {
-            "$ref": "#/components/schemas/stats_switch_module_stat"
+            "$ref": "#/components/schemas/stats_switch_module_stat",
+            "description": "Virtual chassis member module statistics and topology details"
           },
           "model": {
+            "description": "Switch model for the virtual chassis device record",
             "readOnly": true,
             "type": "string"
           },
           "num_routing_engines": {
-            "description": "routing-engine count",
+            "description": "Number of routing engines in the virtual chassis",
             "examples": [
               1
             ],
             "type": "integer"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization identifier for the virtual chassis device"
           },
           "serial": {
+            "description": "Device serial number reported for the virtual chassis",
             "readOnly": true,
             "type": "string"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Identifier of the site containing the virtual chassis"
           },
           "status": {
+            "description": "Connection status of the virtual chassis device",
             "readOnly": true,
             "type": "string"
           },
           "type": {
+            "description": "Device type for the virtual chassis record",
             "type": "string"
           },
           "vc_mac": {
+            "description": "Virtual Chassis MAC address used to identify the VC device",
             "readOnly": true,
             "type": "string"
           }
@@ -984,6 +1067,7 @@
         "type": "object"
       },
       "site_id": {
+        "description": "Unique identifier of a Mist site",
         "examples": [
           "441a1214-6928-442a-8e92-e1d34b8ec6a6"
         ],
@@ -992,6 +1076,7 @@
         "type": "string"
       },
       "stats_switch_module_stat": {
+        "description": "Hardware module statistics reported by a switch",
         "items": {
           "$ref": "#/components/schemas/stats_switch_module_stat_item"
         },
@@ -1001,8 +1086,10 @@
       },
       "stats_switch_module_stat_item": {
         "additionalProperties": false,
+        "description": "Hardware module status and firmware inventory for a switch",
         "properties": {
           "backup_version": {
+            "description": "Backup software version stored on the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -1010,6 +1097,7 @@
             ]
           },
           "bios_version": {
+            "description": "BIOS firmware version reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -1017,9 +1105,11 @@
             ]
           },
           "boot_partition": {
+            "description": "Active boot partition used by the switch module",
             "type": "string"
           },
           "cpld_version": {
+            "description": "CPLD firmware version reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -1027,19 +1117,24 @@
             ]
           },
           "cpu_stat": {
-            "$ref": "#/components/schemas/cpu_stat"
+            "$ref": "#/components/schemas/cpu_stat",
+            "description": "Processor utilization statistics for the switch module"
           },
           "errors": {
-            "$ref": "#/components/schemas/module_stat_item_errors"
+            "$ref": "#/components/schemas/module_stat_item_errors",
+            "description": "Hardware error records reported for the switch module"
           },
           "fans": {
-            "$ref": "#/components/schemas/module_stat_item_fans"
+            "$ref": "#/components/schemas/module_stat_item_fans",
+            "description": "Cooling fan status records for the switch module"
           },
           "fpc_idx": {
+            "description": "FPC index identifying this switch module",
             "readOnly": true,
             "type": "integer"
           },
           "fpga_version": {
+            "description": "FPGA firmware version reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -1047,21 +1142,26 @@
             ]
           },
           "last_seen": {
-            "$ref": "#/components/schemas/last_seen"
+            "$ref": "#/components/schemas/last_seen",
+            "description": "Time when Mist last observed this switch module, in epoch seconds"
           },
           "locating": {
+            "description": "Whether the switch module locator indicator is active",
             "type": "boolean"
           },
           "mac": {
+            "description": "Switch module MAC address reported by Mist",
             "examples": [
               "fc3342123456"
             ],
             "type": "string"
           },
           "memory_stat": {
-            "$ref": "#/components/schemas/memory_stat"
+            "$ref": "#/components/schemas/memory_stat",
+            "description": "Utilization statistics for switch module memory"
           },
           "model": {
+            "description": "Switch module model name reported by Mist",
             "examples": [
               "EX4300-48P"
             ],
@@ -1072,6 +1172,7 @@
             ]
           },
           "optics_cpld_version": {
+            "description": "Optics CPLD firmware version reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -1079,6 +1180,7 @@
             ]
           },
           "pending_version": {
+            "description": "Pending software version staged for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -1086,12 +1188,15 @@
             ]
           },
           "pics": {
-            "$ref": "#/components/schemas/module_stat_item_pics"
+            "$ref": "#/components/schemas/module_stat_item_pics",
+            "description": "Physical Interface Card status records for the switch module"
           },
           "poe": {
-            "$ref": "#/components/schemas/module_stat_item_poe"
+            "$ref": "#/components/schemas/module_stat_item_poe",
+            "description": "Power over Ethernet telemetry for the switch module"
           },
           "poe_version": {
+            "description": "PoE controller firmware version reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -1099,6 +1204,7 @@
             ]
           },
           "power_cpld_version": {
+            "description": "Power CPLD firmware version reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -1106,9 +1212,11 @@
             ]
           },
           "psus": {
-            "$ref": "#/components/schemas/module_stat_item_psus"
+            "$ref": "#/components/schemas/module_stat_item_psus",
+            "description": "Power supply status records for the switch module"
           },
           "re_fpga_version": {
+            "description": "Routing Engine FPGA firmware version reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -1116,6 +1224,7 @@
             ]
           },
           "recovery_version": {
+            "description": "Recovery software version stored on the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -1123,6 +1232,7 @@
             ]
           },
           "serial": {
+            "description": "Switch module serial number reported by Mist",
             "examples": [
               "PX8716230021"
             ],
@@ -1133,6 +1243,7 @@
             ]
           },
           "status": {
+            "description": "Connection status reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -1140,9 +1251,11 @@
             ]
           },
           "temperatures": {
-            "$ref": "#/components/schemas/module_stat_item_temperatures"
+            "$ref": "#/components/schemas/module_stat_item_temperatures",
+            "description": "Temperature sensor readings for the switch module"
           },
           "tmc_fpga_version": {
+            "description": "TMC FPGA firmware version reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -1150,6 +1263,7 @@
             ]
           },
           "type": {
+            "description": "Module type reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -1157,6 +1271,7 @@
             ]
           },
           "uboot_version": {
+            "description": "U-Boot firmware version reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -1164,6 +1279,7 @@
             ]
           },
           "uptime": {
+            "description": "Elapsed time since the switch module last booted, in seconds",
             "readOnly": true,
             "type": [
               "integer",
@@ -1171,9 +1287,11 @@
             ]
           },
           "vc_links": {
-            "$ref": "#/components/schemas/module_stat_item_vc_links"
+            "$ref": "#/components/schemas/module_stat_item_vc_links",
+            "description": "Virtual chassis link records for the switch module"
           },
           "vc_mode": {
+            "description": "Virtual chassis mode reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -1192,6 +1310,7 @@
             ]
           },
           "vc_state": {
+            "description": "Virtual chassis state reported for the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -1199,6 +1318,7 @@
             ]
           },
           "version": {
+            "description": "Software version running on the switch module",
             "readOnly": true,
             "type": [
               "string",
@@ -1209,6 +1329,7 @@
         "type": "object"
       },
       "strings": {
+        "description": "Unique string values returned or accepted by this schema",
         "items": {
           "type": "string"
         },
@@ -1216,9 +1337,11 @@
         "uniqueItems": true
       },
       "vc_port": {
+        "description": "Request to change the Virtual Chassis port mode on a switch",
         "properties": {
           "mode": {
-            "$ref": "#/components/schemas/vc_port_mode"
+            "$ref": "#/components/schemas/vc_port_mode",
+            "description": "Virtual Chassis port mode to apply"
           }
         },
         "type": "object"
@@ -1233,18 +1356,20 @@
         "type": "string"
       },
       "virtual_chassis_config": {
-        "description": "Virtual Chassis",
+        "description": "Virtual Chassis creation or configuration request",
         "properties": {
           "locating": {
+            "description": "Whether the Virtual Chassis is currently in locate mode",
             "readOnly": true,
             "type": "boolean"
           },
           "members": {
-            "$ref": "#/components/schemas/virtual_chassis_config_members"
+            "$ref": "#/components/schemas/virtual_chassis_config_members",
+            "description": "Virtual Chassis members and their expected roles and VC ports"
           },
           "preprovisioned": {
             "default": false,
-            "description": "To create the Virtual Chassis in Pre-Provisioned mode",
+            "description": "Whether to create the Virtual Chassis in pre-provisioned mode",
             "type": "boolean"
           }
         },
@@ -1252,24 +1377,28 @@
       },
       "virtual_chassis_config_member": {
         "additionalProperties": false,
+        "description": "Virtual Chassis member configuration",
         "properties": {
           "locating": {
+            "description": "Whether this Virtual Chassis member is currently in locate mode",
             "readOnly": true,
             "type": "boolean"
           },
           "mac": {
-            "description": "fpc0, same as the mac of device_id",
+            "description": "Member MAC address; for FPC0 this matches the device MAC address",
             "type": "string"
           },
           "member_id": {
-            "description": "For preprovisionned virtual chassis",
+            "description": "Member ID used for a pre-provisioned Virtual Chassis",
             "type": "integer"
           },
           "vc_ports": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Port names to use as Virtual Chassis ports on this member"
           },
           "vc_role": {
-            "$ref": "#/components/schemas/virtual_chassis_config_member_vc_role"
+            "$ref": "#/components/schemas/virtual_chassis_config_member_vc_role",
+            "description": "Role of this member in the Virtual Chassis"
           }
         },
         "required": [
@@ -1288,6 +1417,7 @@
         "type": "string"
       },
       "virtual_chassis_config_members": {
+        "description": "Virtual Chassis member configurations",
         "items": {
           "$ref": "#/components/schemas/virtual_chassis_config_member"
         },
@@ -1295,24 +1425,27 @@
       },
       "virtual_chassis_member_update": {
         "additionalProperties": false,
+        "description": "Member update for a Virtual Chassis add, remove, or preprovision operation",
         "properties": {
           "mac": {
-            "description": "Required if `op`==`add` or `op`==`preprovision`.",
+            "description": "Required if `op`==`add` or `op`==`preprovision`; MAC address of the member to add or preprovision",
             "type": "string"
           },
           "member": {
-            "description": "Required if `op`==`remove`",
+            "description": "Required if `op`==`remove`; member ID to remove from the Virtual Chassis",
             "type": "integer"
           },
           "member_id": {
-            "description": "Required if `op`==`preprovision`. Optional if `op`==`add`",
+            "description": "Required if `op`==`preprovision`. Optional if `op`==`add`; target member ID for the Virtual Chassis member",
             "type": "integer"
           },
           "vc_ports": {
-            "$ref": "#/components/schemas/virtual_chassis_member_update_vc_ports"
+            "$ref": "#/components/schemas/virtual_chassis_member_update_vc_ports",
+            "description": "Required if `op`==`add` or `op`==`preprovision`; port names to use as Virtual Chassis ports"
           },
           "vc_role": {
-            "$ref": "#/components/schemas/virtual_chassis_member_update_vc_role"
+            "$ref": "#/components/schemas/virtual_chassis_member_update_vc_role",
+            "description": "Required if `op`==`add` or `op`==`preprovision`; role of the member in the Virtual Chassis"
           }
         },
         "type": "object"
@@ -1334,12 +1467,15 @@
         "type": "string"
       },
       "virtual_chassis_port": {
+        "description": "Request to set or delete Virtual Chassis ports on members",
         "properties": {
           "members": {
-            "$ref": "#/components/schemas/virtual_chassis_port_members"
+            "$ref": "#/components/schemas/virtual_chassis_port_members",
+            "description": "Virtual Chassis members and ports affected by the operation"
           },
           "op": {
-            "$ref": "#/components/schemas/virtual_chassis_port_operation"
+            "$ref": "#/components/schemas/virtual_chassis_port_operation",
+            "description": "Action to perform on the specified Virtual Chassis ports"
           }
         },
         "required": [
@@ -1349,6 +1485,7 @@
         "type": "object"
       },
       "virtual_chassis_port_members": {
+        "description": "Virtual Chassis member port selections for a port operation",
         "items": {
           "$ref": "#/components/schemas/config_vc_port_member"
         },
@@ -1356,7 +1493,7 @@
         "uniqueItems": true
       },
       "virtual_chassis_port_operation": {
-        "description": "enum: `delete`, `set`",
+        "description": "Action to perform on the specified Virtual Chassis ports. enum: `delete`, `set`",
         "enum": [
           "delete",
           "set"
@@ -1365,26 +1502,34 @@
         "type": "string"
       },
       "virtual_chassis_update": {
-        "description": "Virtual Chassis",
+        "description": "Virtual Chassis member update request",
         "properties": {
           "member": {
-            "description": "Only if `op`==`renumber`",
+            "description": "Only if `op`==`renumber`; existing member ID to renumber",
             "type": "integer"
           },
           "members": {
-            "$ref": "#/components/schemas/virtual_chassis_update_members"
+            "$ref": "#/components/schemas/virtual_chassis_update_members",
+            "description": "Member updates for add, remove, or preprovision operations"
           },
           "new-member": {
-            "description": "Only if `op`==`renumber`",
+            "description": "Only if `op`==`renumber`; new member ID to assign",
             "type": "integer"
           },
           "op": {
-            "$ref": "#/components/schemas/virtual_chassis_update_op"
+            "$ref": "#/components/schemas/virtual_chassis_update_op",
+            "description": "Action to perform on the Virtual Chassis"
+          },
+          "remove_inventory": {
+            "default": false,
+            "description": "Only if `op`==`preprovision`. When removing members from a pre-provisioned VC, set to `true` to delete the inventory records for removed members (e.g. for RMA). Members being removed must be in \"not-present\" state.",
+            "type": "boolean"
           }
         },
         "type": "object"
       },
       "virtual_chassis_update_members": {
+        "description": "Member updates for a Virtual Chassis operation",
         "items": {
           "$ref": "#/components/schemas/virtual_chassis_member_update"
         },
@@ -1807,19 +1952,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

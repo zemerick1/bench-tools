@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs SCEP",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -79,7 +75,7 @@
         }
       ],
       "get": {
-        "description": "Get Mist SCEP Org setting",
+        "description": "Return Mist SCEP settings for the organization, including enabled and suspended status, configured certificate providers, and generated enrollment or webhook URLs.",
         "operationId": "getOrgMistScep",
         "responses": {
           "200": {
@@ -107,7 +103,7 @@
         ]
       },
       "put": {
-        "description": "Update Mist SCEP Org setting",
+        "description": "Update Mist SCEP settings for the organization, including enabled state, suspension state, and certificate providers.",
         "operationId": "updateOrgMistScep",
         "requestBody": {
           "content": {
@@ -151,7 +147,7 @@
         ]
       },
       "delete": {
-        "description": "Disable Mist SCEP Org setting",
+        "description": "Disable Mist SCEP for the organization and return the updated read-only SCEP settings.",
         "operationId": "disableOrgMistScep",
         "responses": {
           "200": {
@@ -186,19 +182,27 @@
         }
       ],
       "get": {
-        "description": "Get Issued Client Certificates",
+        "description": "List Mist SCEP client certificates issued for the organization. Results can be filtered by common name, certificate provider, serial number, device ID, or time range.",
         "operationId": "listOrgIssuedClientCertificates",
         "parameters": [
           {
-            "description": "sso_name_id obtained from NAC Portal",
+            "description": "Filter by certificate common name (e.g. user UPN or device identifier)",
             "in": "query",
-            "name": "sso_name_id",
+            "name": "common_name",
             "schema": {
               "type": "string"
             }
           },
           {
-            "description": "Serial Number of the certificate",
+            "description": "Filter by MDM or certificate provider that issued the certificate. Accepts multiple comma-separated values.",
+            "in": "query",
+            "name": "cert_provider",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by certificate serial number. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "serial_number",
             "schema": {
@@ -206,12 +210,34 @@
             }
           },
           {
-            "description": "Device ID",
+            "description": "Filter by device identifier associated with the certificate. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "device_id",
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "description": "Filter by certificate expiry time, in epoch seconds",
+            "in": "query",
+            "name": "expire_time",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Filter by certificate issuance time, in epoch seconds",
+            "in": "query",
+            "name": "created_time",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/page"
           }
         ],
         "responses": {
@@ -247,7 +273,7 @@
         }
       ],
       "post": {
-        "description": "Revoke Issued Client Certificates",
+        "description": "Revoke issued Mist SCEP client certificates by certificate serial number.",
         "operationId": "revokeOrgIssuedClientCertificates",
         "requestBody": {
           "content": {
@@ -297,6 +323,7 @@
   "components": {
     "schemas": {
       "client_cert_serial_numbers": {
+        "description": "Client certificate serial numbers targeted by a certificate operation",
         "examples": [
           {
             "serial_numbers": [
@@ -306,12 +333,14 @@
         ],
         "properties": {
           "serial_numbers": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Certificate serial numbers to revoke"
           }
         },
         "type": "object"
       },
       "device_id": {
+        "description": "Read-only UUID identifier for a device",
         "examples": [
           "00000000-0000-0000-1000-d8695a0f9e61"
         ],
@@ -321,37 +350,36 @@
       },
       "issued_client_certificate": {
         "additionalProperties": false,
+        "description": "Issued Mist SCEP client certificate metadata",
         "properties": {
           "cert_provider": {
+            "description": "Certificate provider that issued this client certificate",
             "examples": [
               "byod"
             ],
             "type": "string"
           },
           "common_name": {
+            "description": "Subject common name encoded in the issued client certificate",
             "examples": [
               "john@corp.com"
             ],
             "type": "string"
           },
           "created_time": {
-            "description": "When the certificate has been created",
-            "examples": [
-              "2025-08-18 10:10:30.949165+00:00"
-            ],
-            "type": "string"
+            "description": "Certificate issuance time, in epoch seconds",
+            "type": "integer"
           },
           "device_id": {
-            "$ref": "#/components/schemas/device_id"
+            "$ref": "#/components/schemas/device_id",
+            "description": "Device associated with the issued client certificate"
           },
           "expire_time": {
-            "description": "When the certificate will expire",
-            "examples": [
-              "2026-08-18 10:06:00+00:00"
-            ],
-            "type": "string"
+            "description": "Certificate expiry time, in epoch seconds",
+            "type": "integer"
           },
           "serial_number": {
+            "description": "Certificate serial number used for lookup or revocation",
             "examples": [
               "91984382552102771A2B3C4E5F224719956718003374658"
             ],
@@ -361,6 +389,7 @@
         "type": "object"
       },
       "issued_client_certificates": {
+        "description": "Issued client certificates returned by a SCEP certificate query",
         "items": {
           "$ref": "#/components/schemas/issued_client_certificate"
         },
@@ -368,17 +397,29 @@
       },
       "issued_client_certificates_results": {
         "additionalProperties": false,
+        "description": "Issued client certificate search results wrapper",
         "properties": {
+          "limit": {
+            "description": "Maximum number of results requested",
+            "type": "integer"
+          },
+          "page": {
+            "description": "Current page number",
+            "type": "integer"
+          },
           "results": {
-            "$ref": "#/components/schemas/issued_client_certificates"
+            "$ref": "#/components/schemas/issued_client_certificates",
+            "description": "List of issued client certificates returned by the query"
           }
         },
         "type": "object"
       },
       "org_setting_scep": {
+        "description": "Mist SCEP settings for certificate enrollment",
         "properties": {
           "cert_providers": {
-            "$ref": "#/components/schemas/org_setting_scep_cert_providers"
+            "$ref": "#/components/schemas/org_setting_scep_cert_providers",
+            "description": "Certificate providers enabled for Mist SCEP"
           },
           "enable": {
             "description": "Whether SCEP is enabled for this org",
@@ -410,15 +451,19 @@
       },
       "org_setting_scep_response": {
         "additionalProperties": false,
+        "description": "Read-only Mist SCEP settings returned for the organization",
         "properties": {
           "cert_providers": {
-            "$ref": "#/components/schemas/org_setting_scep_cert_providers"
+            "$ref": "#/components/schemas/org_setting_scep_cert_providers",
+            "description": "Certificate providers configured for Mist SCEP"
           },
           "enabled": {
+            "description": "Whether Mist SCEP is enabled for this organization",
             "readOnly": true,
             "type": "boolean"
           },
           "intune_scep_url": {
+            "description": "Intune SCEP enrollment URL for this organization",
             "examples": [
               "https://scep.mistsys.com/api/v1/incoming/intune/:org_id/scep"
             ],
@@ -426,6 +471,7 @@
             "type": "string"
           },
           "jamf_access_token": {
+            "description": "Access token used by Jamf to call Mist SCEP",
             "examples": [
               "REDACTED"
             ],
@@ -433,6 +479,7 @@
             "type": "string"
           },
           "jamf_scep_url": {
+            "description": "Jamf SCEP enrollment URL for this organization",
             "examples": [
               "https://scep.mistsys.com/api/v1/incoming/intune/:org_id/scep"
             ],
@@ -440,6 +487,7 @@
             "type": "string"
           },
           "jamf_webhook_url": {
+            "description": "Jamf webhook URL for SCEP status callbacks",
             "examples": [
               "https://scep.mistsys.com/api/v1/webhook/jamf/:org_id/scep"
             ],
@@ -456,8 +504,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -468,8 +518,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -480,8 +532,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -492,8 +546,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -501,8 +557,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -512,6 +570,7 @@
         "type": "object"
       },
       "strings": {
+        "description": "Unique string values returned or accepted by this schema",
         "items": {
           "type": "string"
         },
@@ -690,6 +749,16 @@
       }
     },
     "parameters": {
+      "limit": {
+        "description": "Maximum number of results to return per page",
+        "in": "query",
+        "name": "limit",
+        "schema": {
+          "default": 100,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
       "org_id": {
         "in": "path",
         "name": "org_id",
@@ -700,6 +769,16 @@
           ],
           "format": "uuid",
           "type": "string"
+        }
+      },
+      "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
+        "in": "query",
+        "name": "page",
+        "schema": {
+          "default": 1,
+          "minimum": 1,
+          "type": "integer"
         }
       }
     },
@@ -726,13 +805,16 @@
       },
       "IssuedClientCertificatesExample": {
         "value": {
+          "limit": 100,
+          "page": 1,
           "results": [
             {
+              "cert_provider": "jamf",
               "common_name": "john@corp.com",
-              "created_time": "2025-08-18 10:10:30.949165+00:00",
+              "created_time": 1431382121,
               "device_id": "b069b358-4c97-5319-1f8c-7c5ca64d6ab1",
-              "expire_time": "2026-08-18 10:06:00+00:00",
-              "serial_number": "91984382552102771A2B3C4E5F224719956718003374658"
+              "expire_time": 1718921115,
+              "serial_number": "13 00 13 03 23 EE D5 84 01"
             }
           ]
         }
@@ -754,19 +836,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Constants Events",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -75,7 +71,7 @@
   "paths": {
     "/api/v1/const/alarm_defs": {
       "get": {
-        "description": "Get List of brief definitions of all the supported alarm types. The example field contains an example payload as you would receive in the alarm webhook output.\nHA cluster node names will be specified in the `node` field, if applicable.",
+        "description": "Return alarm type definitions used by alarm search results, alarm templates, and the `alarm` webhook topic. The `example` field shows representative webhook payload content.\nHA cluster node names are returned in the `node` field, when applicable.",
         "operationId": "listAlarmDefinitions",
         "responses": {
           "200": {
@@ -105,7 +101,7 @@
     },
     "/api/v1/const/client_events": {
       "get": {
-        "description": "Get List of List of available Client Events",
+        "description": "Return client event definitions used by client event search and count APIs, including event keys and metadata.",
         "operationId": "listClientEventsDefinitions",
         "responses": {
           "200": {
@@ -135,7 +131,7 @@
     },
     "/api/v1/const/device_events": {
       "get": {
-        "description": "Get list of available Device Events",
+        "description": "Return device event definitions used by device event search and count APIs and the `device-events` webhook topic, including event keys and metadata.",
         "operationId": "listDeviceEventsDefinitions",
         "responses": {
           "200": {
@@ -165,7 +161,7 @@
     },
     "/api/v1/const/mxedge_events": {
       "get": {
-        "description": "Get List of available MX Edge Events",
+        "description": "Return Mist Edge event definitions used by Mist Edge event search and count APIs, and `mexedge-events` webhook topic.",
         "operationId": "listMxEdgeEventsDefinitions",
         "responses": {
           "200": {
@@ -195,7 +191,7 @@
     },
     "/api/v1/const/nac_events": {
       "get": {
-        "description": "Get List of List of available NAC Client Events",
+        "description": "Return NAC client event definitions used by NAC client event search and count APIs, and `nac-events` webhook topic.",
         "operationId": "listNacEventsDefinitions",
         "responses": {
           "200": {
@@ -225,7 +221,7 @@
     },
     "/api/v1/const/otherdevice_events": {
       "get": {
-        "description": "Supported Events Type",
+        "description": "Return event definitions for other or third-party devices managed or monitored by Mist.",
         "operationId": "listOtherDeviceEventsDefinitions",
         "responses": {
           "200": {
@@ -255,7 +251,7 @@
     },
     "/api/v1/const/system_events": {
       "get": {
-        "description": "Get List of List of available System Events",
+        "description": "Return system event definitions used by system event search APIs.",
         "operationId": "listSystemEventsDefinitions",
         "responses": {
           "200": {
@@ -288,6 +284,7 @@
     "schemas": {
       "const_alarm_definition": {
         "additionalProperties": false,
+        "description": "Alarm type definition returned by the constants API",
         "properties": {
           "display": {
             "description": "Description of the alarm type",
@@ -298,6 +295,7 @@
           },
           "example": {
             "additionalProperties": true,
+            "description": "Sample alarm payload returned for this alarm type",
             "examples": [
               {
                 "aps": [
@@ -320,17 +318,18 @@
             "type": "object"
           },
           "fields": {
-            "$ref": "#/components/schemas/const_alarm_definition_fields"
+            "$ref": "#/components/schemas/const_alarm_definition_fields",
+            "description": "Alarm payload fields available for this alarm type"
           },
           "group": {
-            "description": "Group to which the alarm belongs",
+            "description": "Alarm group to which this definition belongs",
             "examples": [
               "infrastructure"
             ],
             "type": "string"
           },
           "key": {
-            "description": "Key name of the alarm type",
+            "description": "Alarm type key used in event and alarm payloads",
             "examples": [
               "device_down"
             ],
@@ -341,7 +340,7 @@
             "type": "string"
           },
           "severity": {
-            "description": "Severity of the alarm",
+            "description": "Alarm severity level for this definition",
             "examples": [
               "warn"
             ],
@@ -371,6 +370,7 @@
         "type": "array"
       },
       "const_alarm_definitions": {
+        "description": "Alarm type definitions returned by the constants API",
         "items": {
           "$ref": "#/components/schemas/const_alarm_definition"
         },
@@ -378,21 +378,27 @@
       },
       "const_event": {
         "additionalProperties": false,
+        "description": "Device event definition returned by the constants API",
         "properties": {
           "description": {
+            "description": "Narrative description of the device event type",
             "type": "string"
           },
           "display": {
+            "description": "Human-readable label for the device event type",
             "type": "string"
           },
           "example": {
             "additionalProperties": true,
+            "description": "Sample device event payload for this event type",
             "type": "object"
           },
           "group": {
+            "description": "Device event group for this definition",
             "type": "string"
           },
           "key": {
+            "description": "Machine-readable device event key",
             "type": "string"
           }
         },
@@ -403,6 +409,7 @@
         "type": "object"
       },
       "const_events": {
+        "description": "Event type definitions returned by the constants API",
         "items": {
           "$ref": "#/components/schemas/const_event"
         },
@@ -410,98 +417,117 @@
       },
       "const_nac_event": {
         "additionalProperties": false,
+        "description": "NAC event example payload returned by the constants API",
         "properties": {
           "ap": {
+            "description": "Access point MAC address associated with the NAC event",
             "examples": [
               "5c5b355008c0"
             ],
             "type": "string"
           },
           "bssid": {
+            "description": "Wireless BSSID associated with the NAC event",
             "examples": [
               "5c5b35548892"
             ],
             "type": "string"
           },
           "cert_cn": {
+            "description": "Certificate common name presented during NAC authentication",
             "examples": [
               "suriyas"
             ],
             "type": "string"
           },
           "cert_expiry": {
+            "description": "Certificate expiration timestamp presented during NAC authentication",
             "examples": [
               1711557441
             ],
             "type": "integer"
           },
           "cert_issuer": {
+            "description": "Certificate issuer presented during NAC authentication",
             "examples": [
               "/DC=net/DC=jnpr/CN=Juniper Networks Issuing AWS1 CA"
             ],
             "type": "string"
           },
           "cert_san_upn": {
-            "$ref": "#/components/schemas/const_nac_events_cert_san_upn"
+            "$ref": "#/components/schemas/const_nac_events_cert_san_upn",
+            "description": "Certificate SAN UPN values presented during NAC authentication"
           },
           "cert_serial": {
+            "description": "Certificate serial number presented during NAC authentication",
             "examples": [
               "1300103d29e56ef083797bedc2000100103d29"
             ],
             "type": "string"
           },
           "cert_subject": {
+            "description": "Certificate subject presented during NAC authentication",
             "examples": [
               "/CN=suriyas/emailAddress=suriyas@juniper.net"
             ],
             "type": "string"
           },
           "eap_type": {
+            "description": "EAP method used for the NAC authentication",
             "examples": [
               "EAP-TLS"
             ],
             "type": "string"
           },
           "nas_vendor": {
+            "description": "Network access server vendor reported for the NAC event",
             "examples": [
               "Mist"
             ],
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization identifier associated with the NAC event"
           },
           "random_mac": {
+            "description": "Whether the client used a randomized MAC address in the NAC event",
             "examples": [
               true
             ],
             "type": "boolean"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site identifier associated with the NAC event"
           },
           "ssid": {
+            "description": "Wireless SSID associated with the NAC event",
             "examples": [
               "REDACTED"
             ],
             "type": "string"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Time when the NAC event occurred"
           },
           "type": {
+            "description": "NAC event type key",
             "examples": [
               "NAC_CLIENT_CERT_CHECK_SUCCESS"
             ],
             "type": "string"
           },
           "username": {
+            "description": "User identity associated with the NAC event",
             "examples": [
               "suriyas@juniper.net"
             ],
             "type": "string"
           },
           "wcid": {
+            "description": "Wireless client identifier associated with the NAC event",
             "examples": [
               "b43637b0-f0d9-0a1d-1ec2-73c394a9f679"
             ],
@@ -512,12 +538,14 @@
         "type": "object"
       },
       "const_nac_events": {
+        "description": "NAC event example payloads returned by the constants API",
         "items": {
           "$ref": "#/components/schemas/const_nac_event"
         },
         "type": "array"
       },
       "const_nac_events_cert_san_upn": {
+        "description": "Certificate Subject Alternative Name UPN values",
         "examples": [
           [
             "suriyas@juniper.net"
@@ -529,6 +557,7 @@
         "type": "array"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -538,8 +567,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -550,8 +581,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -562,8 +595,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -574,8 +609,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -583,8 +620,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -594,6 +633,7 @@
         "type": "object"
       },
       "site_id": {
+        "description": "Unique identifier of a Mist site",
         "examples": [
           "441a1214-6928-442a-8e92-e1d34b8ec6a6"
         ],
@@ -602,7 +642,7 @@
         "type": "string"
       },
       "timestamp": {
-        "description": "Epoch (seconds)",
+        "description": "Epoch timestamp, in seconds",
         "format": "double",
         "readOnly": true,
         "type": "number"
@@ -1053,19 +1093,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Clients - Wireless",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,10 +76,11 @@
         }
       ],
       "get": {
-        "description": "Count by Distinct Attributes of Org Wireless Clients",
+        "description": "Count wireless client records across the organization, optionally grouped by `distinct` and filtered by client identity, AP, SSID, VLAN, IP, and time range.",
         "operationId": "countOrgWirelessClients",
         "parameters": [
           {
+            "description": "Field used to group this count response. enum: `ap`, `device`, `hostname`, `ip`, `mac`, `model`, `os`, `ssid`, `vlan`",
             "in": "query",
             "name": "distinct",
             "schema": {
@@ -91,29 +88,35 @@
             }
           },
           {
-            "description": "Partial / full MAC address",
+            "description": "Partial / full Client MAC address. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `aabbcc*` and `*bbcc*` match `aabbccddeeff`). Suffix-only wildcards (e.g. `*bccddeeff`) are not supported. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "mac",
             "schema": {
               "examples": [
-                "5c5b53010101"
+                "aabbccddeeff,aabbcc*",
+                "aabbccddeeff",
+                "aabbcc*",
+                "*bbcc*"
               ],
               "type": "string"
             }
           },
           {
-            "description": "Partial / full hostname",
+            "description": "Partial / full Client hostname. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `everest*` and `*rest*` match `my-everest-client`). Suffix-only wildcards (e.g. `*everest`) are not supported. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "hostname",
             "schema": {
               "examples": [
-                "my-hostname"
+                "my-everest-client,my-everest*",
+                "my-everest-client",
+                "my-everest*",
+                "*everest*"
               ],
               "type": "string"
             }
           },
           {
-            "description": "Device type, e.g. Mac, Nvidia, iPhone",
+            "description": "Filter results by device type",
             "in": "query",
             "name": "device",
             "schema": {
@@ -124,7 +127,7 @@
             }
           },
           {
-            "description": "OS, e.g. Sierra, Yosemite, Windows 10",
+            "description": "Filter results by operating system",
             "in": "query",
             "name": "os",
             "schema": {
@@ -135,7 +138,7 @@
             }
           },
           {
-            "description": "Model, e.g. \"MBP 15 late 2013\", 6, 6s, \"8+ GSM\"",
+            "description": "Filter results by device model",
             "in": "query",
             "name": "model",
             "schema": {
@@ -146,7 +149,7 @@
             }
           },
           {
-            "description": "AP mac where the client has connected to",
+            "description": "Filter results by AP MAC address",
             "in": "query",
             "name": "ap",
             "schema": {
@@ -157,7 +160,7 @@
             }
           },
           {
-            "description": "VLAN",
+            "description": "Filter results by VLAN ID",
             "in": "query",
             "name": "vlan",
             "schema": {
@@ -168,7 +171,7 @@
             }
           },
           {
-            "description": "SSID",
+            "description": "Filter results by SSID",
             "in": "query",
             "name": "ssid",
             "schema": {
@@ -227,10 +230,11 @@
         }
       ],
       "get": {
-        "description": "Count by Distinct Attributes of Client-Events",
+        "description": "Count wireless client event records across the organization, optionally grouped by event attributes and filtered by event type, WLAN, radio, site, and time range.",
         "operationId": "countOrgWirelessClientEvents",
         "parameters": [
           {
+            "description": "Field used to group this count response. enum: `band`, `channel`, `proto`, `ssid`, `type`, `wlan_id`",
             "example": "type",
             "in": "query",
             "name": "distinct",
@@ -239,10 +243,18 @@
             }
           },
           {
-            "$ref": "#/components/parameters/client_event_type"
+            "description": "See [List Device Events Definitions](/#operations/listDeviceEventsDefinitions). Accepts multiple comma-separated values.",
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "examples": [
+                "MARVIS_EVENT_CLIENT_AUTH_FAILURE,CLIENT_DEAUTHENTICATION"
+              ],
+              "type": "string"
+            }
           },
           {
-            "description": "For assoc/disassoc events",
+            "description": "Reason code filter for association and disassociation events",
             "in": "query",
             "name": "reason_code",
             "schema": {
@@ -250,7 +262,7 @@
             }
           },
           {
-            "description": "SSID Name",
+            "description": "Filter results by SSID",
             "in": "query",
             "name": "ssid",
             "schema": {
@@ -258,7 +270,7 @@
             }
           },
           {
-            "description": "AP MAC",
+            "description": "Filter results by AP MAC address",
             "in": "query",
             "name": "ap",
             "schema": {
@@ -272,7 +284,7 @@
             "$ref": "#/components/parameters/dot11_band"
           },
           {
-            "description": "WLAN ID",
+            "description": "Filter results by WLAN identifier",
             "in": "query",
             "name": "wlan_id",
             "schema": {
@@ -280,7 +292,7 @@
             }
           },
           {
-            "description": "Site ID",
+            "description": "Filter results by site identifier",
             "in": "query",
             "name": "site_id",
             "schema": {
@@ -337,61 +349,85 @@
         }
       ],
       "get": {
-        "description": "Get Org Clients Events",
+        "description": "Search wireless client event records across the organization with filters for event type, reason code, SSID, AP, key management, protocol, band, WLAN, NAC rule, and time range.",
         "operationId": "searchOrgWirelessClientEvents",
         "parameters": [
           {
-            "$ref": "#/components/parameters/client_event_type"
+            "description": "See [List Device Events Definitions](/#operations/listDeviceEventsDefinitions). Accepts multiple comma-separated values.",
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "examples": [
+                "CLIENT_IP_ASSIGNED,CLIENT_DEAUTHENTICATION"
+              ],
+              "type": "string"
+            }
           },
           {
-            "description": "For assoc/disassoc events",
+            "description": "Reason code filter for association and disassociation events. Accepts multiple comma-separated integer values.",
             "in": "query",
             "name": "reason_code",
             "schema": {
               "examples": [
+                "0,14",
                 7
               ],
-              "type": "integer"
+              "type": "string"
             }
           },
           {
-            "description": "SSID Name",
+            "description": "Filter results by SSID. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "ssid",
             "schema": {
               "examples": [
+                "Corp,Guest",
                 "MySSID"
               ],
               "type": "string"
             }
           },
           {
-            "description": "AP MAC",
+            "description": "Filter results by AP MAC address. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "ap",
             "schema": {
               "examples": [
+                "5c5b53010101,5c5b53020202",
                 "5c5b53010101"
               ],
               "type": "string"
             }
           },
           {
-            "description": "Key Management Protocol, e.g. WPA2-PSK, WPA3-SAE, WPA2-Enterprise",
+            "description": "Key management protocol used to filter client events. enum: `WPA2-PSK`, `WPA2-PSK/CCMP`, `WPA2-PSK-FT`, `WPA2-PSK-SHA256`, `WPA3-EAP-SHA256`, `WPA3-EAP-SHA256/CCMP`, `WPA3-EAP-FT/GCMP256`, `WPA3-SAE-FT`, `WPA3-SAE-PSK`. Accepts multiple comma-separated values.",
+            "example": "WPA2-PSK,WPA2-PSK/CCMP",
             "in": "query",
             "name": "key_mgmt",
             "schema": {
-              "$ref": "#/components/schemas/client_key_mgmt"
+              "type": "string"
             }
           },
           {
-            "$ref": "#/components/parameters/dot11_proto"
+            "description": "802.11 protocol used to filter results. enum: `a`, `ac`, `ax`, `b`, `be`, `g`, `n`. Accepts multiple comma-separated values.",
+            "example": "ax,ac",
+            "in": "query",
+            "name": "proto",
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "$ref": "#/components/parameters/dot11_band"
+            "description": "802.11 band used to filter radio results. enum: `24`, `5`, `5-dedicated`, `5-selectable`, `6`, `6-dedicated`, `6-selectable`. Accepts multiple comma-separated values.",
+            "example": "6,5",
+            "in": "query",
+            "name": "band",
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "description": "WLAN_id",
+            "description": "Filter results by WLAN identifier",
             "in": "query",
             "name": "wlan_id",
             "schema": {
@@ -403,11 +439,12 @@
             }
           },
           {
-            "description": "Nacrule_id",
+            "description": "Filter results by NAC rule identifier. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "nacrule_id",
             "schema": {
               "examples": [
+                "00000000-0000-0000-0000-000000000001,00000000-0000-0000-0000-000000000002",
                 "7dae216d-7c98-a51b-e068-dd7d477b7216"
               ],
               "format": "uuid",
@@ -466,11 +503,11 @@
         }
       ],
       "get": {
-        "description": "Search Org Wireless Clients",
+        "description": "Search wireless client records across the organization with filters for site, AP, band, device identity, hostname, IP, MAC address, username, SSID, PPSK, VLAN, and time range.",
         "operationId": "searchOrgWirelessClients",
         "parameters": [
           {
-            "description": "Site ID",
+            "description": "Filter results by site identifier",
             "in": "query",
             "name": "site_id",
             "schema": {
@@ -482,9 +519,9 @@
             }
           },
           {
-            "description": "Partial / full MAC address",
+            "description": "Filter results by AP MAC address",
             "in": "query",
-            "name": "mac",
+            "name": "ap",
             "schema": {
               "examples": [
                 "5c5b53010101"
@@ -493,32 +530,19 @@
             }
           },
           {
-            "$ref": "#/components/parameters/ip"
-          },
-          {
-            "description": "Partial / full hostname",
-            "in": "query",
-            "name": "hostname",
-            "schema": {
-              "examples": [
-                "my-hostname"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "Radio band. enum: `24`, `5`, `6`",
+            "description": "Comma separated list of Radio band (e.g. `24,5`). enum: `24`, `5`, `6`",
             "in": "query",
             "name": "band",
             "schema": {
               "examples": [
+                "5,6",
                 "5"
               ],
               "type": "string"
             }
           },
           {
-            "description": "Device type, e.g. Mac, Nvidia, iPhone",
+            "description": "Comma separated list of Device type (e.g. `Mac,iPhone`). Case sensitive",
             "in": "query",
             "name": "device",
             "schema": {
@@ -529,12 +553,43 @@
             }
           },
           {
-            "description": "Only available for clients running the Marvis Client app, os, e.g. Sierra, Yosemite, Windows 10",
+            "description": "Partial / full Client hostname. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `everest*` and `*rest*` match `my-everest-client`). Suffix-only wildcards (e.g. `*everest`) are not supported. Accepts multiple comma-separated values.",
             "in": "query",
-            "name": "os",
+            "name": "hostname",
             "schema": {
               "examples": [
-                "Windows 10"
+                "my-everest-client,my-everest*",
+                "my-everest-client",
+                "my-everest*",
+                "*everest*"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Partial / full Client IP address. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `10.100.10.*` and `*100.10.*` match `10.100.10.54`). Suffix-only wildcards (e.g. `*.54`) are not supported. Accepts multiple comma-separated values.",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "examples": [
+                "10.100.10.54,10.100.10.*",
+                "10.100.10.54",
+                "10.100.10.*",
+                "*100.10.*"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Partial / full Client MAC address. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `aabbcc*` and `*bbcc*` match `aabbccddeeff`). Suffix-only wildcards (e.g. `*bccddeeff`) are not supported. Accepts multiple comma-separated values.",
+            "in": "query",
+            "name": "mac",
+            "schema": {
+              "examples": [
+                "aabbccddeeff,aabbcc*",
+                "aabbccddeeff",
+                "aabbcc*",
+                "*bbcc*"
               ],
               "type": "string"
             }
@@ -551,12 +606,12 @@
             }
           },
           {
-            "description": "AP mac where the client has connected to",
+            "description": "Only available for clients running the Marvis Client app, os, e.g. Sierra, Yosemite, Windows 10",
             "in": "query",
-            "name": "ap",
+            "name": "os",
             "schema": {
               "examples": [
-                "5c5b53010101"
+                "Windows 10"
               ],
               "type": "string"
             }
@@ -576,29 +631,7 @@
             }
           },
           {
-            "description": "Only available for clients using 802.1X authentication, partial / full username",
-            "in": "query",
-            "name": "username",
-            "schema": {
-              "examples": [
-                "john.doe"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "VLAN",
-            "in": "query",
-            "name": "vlan",
-            "schema": {
-              "examples": [
-                "10"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "SSID",
+            "description": "Filter results by SSID",
             "in": "query",
             "name": "ssid",
             "schema": {
@@ -609,12 +642,37 @@
             }
           },
           {
-            "description": "Partial / full MAC address, hostname, username, psk_name or ip",
+            "description": "Partial / full MAC address, hostname, username, psk_name or ip. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `everest*` and `*rest*` match `my-everest-client`). Suffix-only wildcards (e.g. `*everest`) are not supported",
             "in": "query",
             "name": "text",
             "schema": {
               "examples": [
                 "5c5b530"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Partial / full username. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `johndoe*` and `*mycorp*` match `johndoe@mycorp.com`). Suffix-only wildcards (e.g. `*mycorp.com`) are not supported. Accepts multiple comma-separated values.",
+            "in": "query",
+            "name": "username",
+            "schema": {
+              "examples": [
+                "johndoe,johnd*",
+                "johndoe",
+                "johnd*",
+                "*ohnd*"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter results by VLAN ID",
+            "in": "query",
+            "name": "vlan",
+            "schema": {
+              "examples": [
+                "10"
               ],
               "type": "string"
             }
@@ -671,10 +729,11 @@
         }
       ],
       "get": {
-        "description": "Count by Distinct Attributes of Org Wireless Clients Sessions",
+        "description": "Count historical wireless client sessions across the organization, optionally grouped by `distinct` and filtered by AP, band, client attributes, SSID, WLAN, and time range.",
         "operationId": "countOrgWirelessClientsSessions",
         "parameters": [
           {
+            "description": "Field used to group this count response. enum: `ap`, `device`, `hostname`, `ip`, `model`, `os`, `ssid`, `vlan`",
             "in": "query",
             "name": "distinct",
             "schema": {
@@ -682,7 +741,7 @@
             }
           },
           {
-            "description": "AP MAC",
+            "description": "Filter results by AP MAC address",
             "in": "query",
             "name": "ap",
             "schema": {
@@ -707,7 +766,7 @@
             }
           },
           {
-            "description": "E.g. \"Apple\"",
+            "description": "Filter results by client manufacturer, e.g. \"Apple\"",
             "in": "query",
             "name": "client_manufacture",
             "schema": {
@@ -718,7 +777,7 @@
             }
           },
           {
-            "description": "E.g. \"8+\", \"XS\"",
+            "description": "Filter results by client model, e.g. \"8+\", \"XS\"",
             "in": "query",
             "name": "client_model",
             "schema": {
@@ -740,7 +799,7 @@
             }
           },
           {
-            "description": "SSID",
+            "description": "Filter results by SSID",
             "in": "query",
             "name": "ssid",
             "schema": {
@@ -751,7 +810,7 @@
             }
           },
           {
-            "description": "WLAN_id",
+            "description": "Filter results by WLAN identifier",
             "in": "query",
             "name": "wlan_id",
             "schema": {
@@ -808,11 +867,11 @@
         }
       ],
       "get": {
-        "description": "Search Org Wireless Clients Sessions",
+        "description": "Search historical wireless client sessions across the organization with filters for AP, band, client family, manufacturer, model, OS, username, SSID, WLAN, PPSK, and time range.",
         "operationId": "searchOrgWirelessClientSessions",
         "parameters": [
           {
-            "description": "AP MAC",
+            "description": "Filter results by AP MAC address",
             "in": "query",
             "name": "ap",
             "schema": {
@@ -823,76 +882,88 @@
             }
           },
           {
-            "$ref": "#/components/parameters/dot11_band"
+            "description": "802.11 band used to filter radio results. enum: `24`, `5`, `5-dedicated`, `5-selectable`, `6`, `6-dedicated`, `6-selectable`. Accepts multiple comma-separated values.",
+            "example": "5,6",
+            "in": "query",
+            "name": "band",
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "description": "E.g. \"Mac\", \"iPhone\", \"Apple watch\"",
+            "description": "E.g. \"Mac\", \"iPhone\", \"Apple watch\". Accepts multiple comma-separated values.",
             "in": "query",
             "name": "client_family",
             "schema": {
               "examples": [
+                "Phone/Tablet/Wearable,Monitoring Device",
                 "iPhone"
               ],
               "type": "string"
             }
           },
           {
-            "description": "E.g. \"Apple\"",
+            "description": "Filter results by client manufacturer, e.g. \"Apple\". Accepts multiple comma-separated values.",
             "in": "query",
             "name": "client_manufacture",
             "schema": {
               "examples": [
+                "Hewlett Packard Enterprise,Unknown",
                 "Apple"
               ],
               "type": "string"
             }
           },
           {
-            "description": "E.g. \"8+\", \"XS\"",
+            "description": "Filter results by client model, e.g. \"8+\", \"XS\". Accepts multiple comma-separated values.",
             "in": "query",
             "name": "client_model",
             "schema": {
               "examples": [
+                "iPhone 8,Aruba S0U52A",
                 "iPhone 8"
               ],
               "type": "string"
             }
           },
           {
-            "description": "Username",
+            "description": "Filter results by client username. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "client_username",
             "schema": {
               "examples": [
+                "john.doe,jane.doe",
                 "john.doe"
               ],
               "type": "string"
             }
           },
           {
-            "description": "E.g. \"Mojave\", \"Windows 10\", \"Linux\"",
+            "description": "E.g. \"Mojave\", \"Windows 10\", \"Linux\". Accepts multiple comma-separated values.",
             "in": "query",
             "name": "client_os",
             "schema": {
               "examples": [
+                "iOS 16.7.16,Unknown",
                 "Windows 10"
               ],
               "type": "string"
             }
           },
           {
-            "description": "SSID",
+            "description": "Filter results by SSID. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "ssid",
             "schema": {
               "examples": [
+                "Corp,Guest",
                 "MySSID"
               ],
               "type": "string"
             }
           },
           {
-            "description": "WLAN_id",
+            "description": "Filter results by WLAN identifier",
             "in": "query",
             "name": "wlan_id",
             "schema": {
@@ -907,11 +978,12 @@
             "$ref": "#/components/parameters/psk_id_query"
           },
           {
-            "description": "PSK Name",
+            "description": "Filter results by PSK name. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "psk_name",
             "schema": {
               "examples": [
+                "psk-a,psk-b",
                 "MyPPSK"
               ],
               "type": "string"
@@ -966,7 +1038,7 @@
   "components": {
     "schemas": {
       "client_key_mgmt": {
-        "description": "Key management protocol used for the latest authentication. enum: `WPA2-PSK`, `WPA2-PSK-FT`, `WPA2-PSK-SHA256`, `WPA3-EAP-SHA256`, `WPA3-SAE-FT`, `WPA3-SAE-PSK`",
+        "description": "Key management protocol used for the latest authentication. enum: `WPA2-PSK`, `WPA2-PSK/CCMP`, `WPA2-PSK-FT`, `WPA2-PSK-SHA256`, `WPA3-EAP-SHA256`, `WPA3-EAP-SHA256/CCMP`, `WPA3-EAP-FT/GCMP256`, `WPA3-SAE-FT`, `WPA3-SAE-PSK`",
         "enum": [
           "WPA2-PSK",
           "WPA2-PSK/CCMP",
@@ -985,24 +1057,29 @@
       },
       "client_wireless": {
         "additionalProperties": false,
+        "description": "Wireless client record observed during a client search or stats query",
         "properties": {
           "ap": {
-            "$ref": "#/components/schemas/client_wireless_ap"
+            "$ref": "#/components/schemas/client_wireless_ap",
+            "description": "Observed AP MAC addresses for the wireless client during the query duration"
           },
           "app_version": {
-            "$ref": "#/components/schemas/client_wireless_app_version"
+            "$ref": "#/components/schemas/client_wireless_app_version",
+            "description": "Marvis Client application versions reported by the wireless client during the query duration"
           },
           "band": {
-            "description": "Wi-Fi Radio band",
+            "description": "Wi-Fi radio band used by the wireless client",
             "examples": [
               "5"
             ],
             "type": "string"
           },
           "device": {
-            "$ref": "#/components/schemas/client_wireless_device"
+            "$ref": "#/components/schemas/client_wireless_device",
+            "description": "Detected device types for the wireless client during the query duration"
           },
           "ftc": {
+            "description": "Whether fast transition information is reported for the wireless client",
             "type": "boolean"
           },
           "hardware": {
@@ -1013,16 +1090,20 @@
             "type": "string"
           },
           "hostname": {
-            "$ref": "#/components/schemas/client_wireless_hostname"
+            "$ref": "#/components/schemas/client_wireless_hostname",
+            "description": "Detected hostnames for the wireless client during the query duration"
           },
           "ip": {
-            "$ref": "#/components/schemas/client_wireless_ip"
+            "$ref": "#/components/schemas/client_wireless_ip",
+            "description": "Detected IP addresses for the wireless client during the query duration"
           },
           "last_ap": {
-            "$ref": "#/components/schemas/last_ap"
+            "$ref": "#/components/schemas/last_ap",
+            "description": "Most recent AP MAC address used by the wireless client"
           },
           "last_device": {
-            "$ref": "#/components/schemas/last_device"
+            "$ref": "#/components/schemas/last_device",
+            "description": "Most recent device type detected for the wireless client"
           },
           "last_firmware": {
             "description": "Only when client has the Marvis Client app running. Same as \"firmware\"",
@@ -1039,7 +1120,8 @@
             "type": "string"
           },
           "last_ip": {
-            "$ref": "#/components/schemas/last_client_ip"
+            "$ref": "#/components/schemas/last_client_ip",
+            "description": "Most recent IP address detected for the wireless client"
           },
           "last_model": {
             "description": "Only when client has the Marvis Client app running. latest client hardware model we detected for the client",
@@ -1078,13 +1160,16 @@
             "type": "string"
           },
           "last_ssid": {
-            "$ref": "#/components/schemas/last_username"
+            "$ref": "#/components/schemas/last_username",
+            "description": "Most recent SSID used by the wireless client"
           },
           "last_username": {
+            "description": "Most recent username associated with the wireless client",
             "type": "string"
           },
           "last_vlan": {
-            "$ref": "#/components/schemas/last_vlan"
+            "$ref": "#/components/schemas/last_vlan",
+            "description": "Most recent VLAN associated with the wireless client"
           },
           "last_wlan_id": {
             "description": "ID of the latest SSID (WLAN) the client is/was connected to",
@@ -1095,7 +1180,7 @@
             "type": "string"
           },
           "mac": {
-            "description": "Client MAC Address",
+            "description": "Client MAC address for the wireless client",
             "examples": [
               "bcd074000000"
             ],
@@ -1116,33 +1201,39 @@
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Owning organization identifier for the wireless client"
           },
           "os": {
-            "$ref": "#/components/schemas/client_wireless_os"
+            "$ref": "#/components/schemas/client_wireless_os",
+            "description": "Operating systems detected for the wireless client during the query duration"
           },
           "os_version": {
-            "$ref": "#/components/schemas/client_wireless_os_version"
+            "$ref": "#/components/schemas/client_wireless_os_version",
+            "description": "Operating system versions detected for the wireless client during the query duration"
           },
           "protocol": {
-            "description": "802.11 amendment",
+            "description": "802.11 protocol amendment used by the wireless client",
             "examples": [
               "ax"
             ],
             "type": "string"
           },
           "psk_id": {
-            "$ref": "#/components/schemas/client_wireless_psk_id"
+            "$ref": "#/components/schemas/client_wireless_psk_id",
+            "description": "PPSK identifiers used by the wireless client during the query duration"
           },
           "psk_name": {
-            "$ref": "#/components/schemas/client_wireless_psk_name"
+            "$ref": "#/components/schemas/client_wireless_psk_name",
+            "description": "PPSK names used by the wireless client during the query duration"
           },
           "random_mac": {
-            "description": "Whether the client is using randomized MAC Address or not",
+            "description": "Whether the wireless client uses a randomized MAC address",
             "type": "boolean"
           },
           "sdk_version": {
-            "$ref": "#/components/schemas/client_wireless_sdk_version"
+            "$ref": "#/components/schemas/client_wireless_sdk_version",
+            "description": "Marvis Client SDK versions reported by the wireless client during the query duration"
           },
           "site_id": {
             "description": "Mist Site ID where the client is connected",
@@ -1153,28 +1244,34 @@
             "type": "string"
           },
           "site_ids": {
-            "$ref": "#/components/schemas/client_wireless_site_ids"
+            "$ref": "#/components/schemas/client_wireless_site_ids",
+            "description": "Site identifiers where the wireless client was observed during the query duration"
           },
           "ssid": {
-            "$ref": "#/components/schemas/client_wireless_ssid"
+            "$ref": "#/components/schemas/client_wireless_ssid",
+            "description": "Wireless network SSIDs used by the client during the query duration"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Time when the wireless client record was observed"
           },
           "username": {
-            "$ref": "#/components/schemas/client_wireless_username"
+            "$ref": "#/components/schemas/client_wireless_username",
+            "description": "User identities associated with the wireless client during the query duration"
           },
           "vlan": {
-            "$ref": "#/components/schemas/client_wireless_vlan"
+            "$ref": "#/components/schemas/client_wireless_vlan",
+            "description": "Network VLANs associated with the wireless client during the query duration"
           },
           "wlan_id": {
-            "$ref": "#/components/schemas/client_wireless_wlan_id"
+            "$ref": "#/components/schemas/client_wireless_wlan_id",
+            "description": "WLAN identifiers used by the wireless client during the query duration"
           }
         },
         "type": "object"
       },
       "client_wireless_ap": {
-        "description": "List of AP MAC Addresses the client was connected to",
+        "description": "List of AP MAC addresses the client was connected to",
         "examples": [
           [
             "a83a79a947ee",
@@ -1224,7 +1321,7 @@
         "type": "array"
       },
       "client_wireless_ip": {
-        "description": "List if the ip addresses detected for this client",
+        "description": "List if the IP addresses detected for this client",
         "examples": [
           [
             "10.5.23.43",
@@ -1363,8 +1460,10 @@
         "additionalProperties": {
           "type": "string"
         },
+        "description": "Count result row with the matching distinct field values",
         "properties": {
           "count": {
+            "description": "Number of matching items for the distinct value or values in this result",
             "type": "integer"
           }
         },
@@ -1374,6 +1473,7 @@
         "type": "object"
       },
       "count_results": {
+        "description": "List of count result rows",
         "items": {
           "$ref": "#/components/schemas/count_result"
         },
@@ -1381,11 +1481,15 @@
         "uniqueItems": true
       },
       "dot11_band": {
-        "description": "enum: `24`, `5`, `6`",
+        "description": "enum: `24`, `5`, `5-dedicated`, `5-selectable`, `6`, `6-dedicated`, `6-selectable`",
         "enum": [
           "24",
           "5",
-          "6"
+          "5-dedicated",
+          "5-selectable",
+          "6",
+          "6-dedicated",
+          "6-selectable"
         ],
         "type": "string"
       },
@@ -1404,44 +1508,54 @@
       },
       "events_client": {
         "additionalProperties": false,
-        "description": "Client events",
+        "description": "Wireless client event returned by client event search APIs",
         "properties": {
           "ap": {
+            "description": "Access point MAC address associated with the wireless client event",
             "type": "string"
           },
           "band": {
-            "$ref": "#/components/schemas/dot11_band"
+            "$ref": "#/components/schemas/dot11_band",
+            "description": "Radio band used for the wireless client event"
           },
           "bssid": {
+            "description": "Wireless BSSID involved in the client event",
             "type": "string"
           },
           "channel": {
+            "description": "Radio channel used for the wireless client event",
             "type": "integer"
           },
           "key_mgmt": {
-            "$ref": "#/components/schemas/client_key_mgmt"
+            "$ref": "#/components/schemas/client_key_mgmt",
+            "description": "Key management protocol used by the client session"
           },
           "proto": {
-            "$ref": "#/components/schemas/dot11_proto"
+            "$ref": "#/components/schemas/dot11_proto",
+            "description": "802.11 protocol used by the client session"
           },
           "ssid": {
+            "description": "Wireless network SSID involved in the client event",
             "type": "string"
           },
           "text": {
+            "description": "Human-readable message for the client event",
             "type": "string"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Time when the client event occurred"
           },
           "type": {
             "description": "Event type, e.g. MARVIS_EVENT_CLIENT_FBT_FAILURE",
             "type": "string"
           },
           "type_code": {
-            "description": "For assoc/disassoc events",
+            "description": "Reason code for association or disassociation client events",
             "type": "integer"
           },
           "wlan_id": {
+            "description": "Wireless LAN identifier associated with the client event",
             "format": "uuid",
             "type": "string"
           }
@@ -1460,7 +1574,7 @@
         "type": "string"
       },
       "last_client_ip": {
-        "description": "The last known IP Address for the client",
+        "description": "The last known IP address for the client",
         "examples": [
           "10.100.0.157"
         ],
@@ -1519,6 +1633,7 @@
         "type": "string"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -1528,23 +1643,30 @@
       },
       "response_client_search": {
         "additionalProperties": false,
+        "description": "Paginated wireless client search response",
         "properties": {
           "end": {
+            "description": "Search window end timestamp for wireless clients, in epoch seconds",
             "type": "number"
           },
           "limit": {
+            "description": "Maximum number of wireless client results requested",
             "type": "integer"
           },
           "next": {
+            "description": "URL for the next page of wireless client results",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/response_client_search_results"
+            "$ref": "#/components/schemas/response_client_search_results",
+            "description": "Wireless client records returned for this page"
           },
           "start": {
+            "description": "Search window start timestamp for wireless clients, in epoch seconds",
             "type": "number"
           },
           "total": {
+            "description": "Number of wireless client records matching the search",
             "type": "integer"
           }
         },
@@ -1558,6 +1680,7 @@
         "type": "object"
       },
       "response_client_search_results": {
+        "description": "Wireless client records returned by a search response",
         "items": {
           "$ref": "#/components/schemas/client_wireless"
         },
@@ -1566,23 +1689,30 @@
       },
       "response_count": {
         "additionalProperties": false,
+        "description": "Distinct count response for time-bounded search results",
         "properties": {
           "distinct": {
+            "description": "Field used to group the count results",
             "type": "string"
           },
           "end": {
+            "description": "Search window end timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of distinct count results requested",
             "type": "integer"
           },
           "results": {
-            "$ref": "#/components/schemas/count_results"
+            "$ref": "#/components/schemas/count_results",
+            "description": "Count results grouped by the distinct field"
           },
           "start": {
+            "description": "Search window start timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "total": {
+            "description": "Number of distinct result buckets returned",
             "type": "integer"
           }
         },
@@ -1598,23 +1728,30 @@
       },
       "response_events_search": {
         "additionalProperties": false,
+        "description": "Paginated response for wireless client event search results",
         "properties": {
           "end": {
+            "description": "Epoch timestamp for the end of the wireless client event search window",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of wireless client event records returned in this page",
             "type": "integer"
           },
           "next": {
+            "description": "Pagination cursor or URL for retrieving the next page of wireless client event records",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/response_events_search_results"
+            "$ref": "#/components/schemas/response_events_search_results",
+            "description": "Wireless client event records matching the search filters"
           },
           "start": {
+            "description": "Epoch timestamp for the start of the wireless client event search window",
             "type": "integer"
           },
           "total": {
+            "description": "Number of wireless client event records matching the search filters across all pages",
             "type": "integer"
           }
         },
@@ -1628,6 +1765,7 @@
         "type": "object"
       },
       "response_events_search_results": {
+        "description": "Wireless client event records returned by a search response",
         "items": {
           "$ref": "#/components/schemas/events_client"
         },
@@ -1636,8 +1774,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -1648,8 +1788,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -1660,8 +1802,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -1672,8 +1816,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -1681,8 +1827,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -1693,23 +1841,30 @@
       },
       "search_wireless_client_session": {
         "additionalProperties": false,
+        "description": "Paginated response for wireless client session searches",
         "properties": {
           "end": {
+            "description": "Upper bound timestamp of the wireless client session search window, in epoch seconds",
             "type": "number"
           },
           "limit": {
+            "description": "Maximum number of wireless client session records returned by this page",
             "type": "integer"
           },
           "next": {
+            "description": "URL for the next page of wireless client session records, when more results are available",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/search_wireless_client_session_results"
+            "$ref": "#/components/schemas/search_wireless_client_session_results",
+            "description": "Wireless client session records returned by the search response"
           },
           "start": {
+            "description": "Lower bound timestamp of the wireless client session search window, in epoch seconds",
             "type": "number"
           },
           "total": {
+            "description": "Count of wireless client session records matching the search",
             "type": "integer"
           }
         },
@@ -1723,6 +1878,7 @@
         "type": "object"
       },
       "search_wireless_client_session_results": {
+        "description": "Wireless client session records returned by a search response",
         "items": {
           "$ref": "#/components/schemas/wireless_client_session"
         },
@@ -1742,6 +1898,7 @@
         "type": "string"
       },
       "site_id": {
+        "description": "Unique identifier of a Mist site",
         "examples": [
           "441a1214-6928-442a-8e92-e1d34b8ec6a6"
         ],
@@ -1750,23 +1907,27 @@
         "type": "string"
       },
       "timestamp": {
-        "description": "Epoch (seconds)",
+        "description": "Epoch timestamp, in seconds",
         "format": "double",
         "readOnly": true,
         "type": "number"
       },
       "wireless_client_session": {
         "additionalProperties": false,
+        "description": "Wireless client session record returned by a session search",
         "properties": {
           "ap": {
+            "description": "MAC address of the access point associated with the client session",
             "readOnly": true,
             "type": "string"
           },
           "band": {
+            "description": "Radio band used by the client session",
             "readOnly": true,
             "type": "string"
           },
           "client_manufacture": {
+            "description": "Manufacturer reported for the client device, when available",
             "readOnly": true,
             "type": [
               "string",
@@ -1774,42 +1935,53 @@
             ]
           },
           "connect": {
+            "description": "Time when the client session connected, in epoch seconds",
             "readOnly": true,
             "type": "integer"
           },
           "disconnect": {
+            "description": "Time when the client session disconnected, in epoch seconds",
             "readOnly": true,
             "type": "integer"
           },
           "duration": {
+            "description": "Length of the client session, in seconds",
             "readOnly": true,
             "type": "number"
           },
           "for_site": {
+            "description": "Whether this client session record is scoped to a site",
             "readOnly": true,
             "type": "boolean"
           },
           "mac": {
+            "description": "Client MAC address for the session",
             "readOnly": true,
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization associated with the client session"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site associated with the client session"
           },
           "ssid": {
+            "description": "WLAN SSID used by the client session",
             "readOnly": true,
             "type": "string"
           },
           "tags": {
-            "$ref": "#/components/schemas/wireless_client_session_tags"
+            "$ref": "#/components/schemas/wireless_client_session_tags",
+            "description": "Event or classification tags attached to the client session"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Time when the client session record was observed, in epoch seconds"
           },
           "wlan_id": {
+            "description": "Identifier of the WLAN associated with the client session",
             "format": "uuid",
             "readOnly": true,
             "type": "string"
@@ -1831,6 +2003,7 @@
         "type": "object"
       },
       "wireless_client_session_tags": {
+        "description": "Tags attached to a wireless client session",
         "items": {
           "type": "string"
         },
@@ -2056,16 +2229,8 @@
       }
     },
     "parameters": {
-      "client_event_type": {
-        "description": "See [List Device Events Definitions](/#operations/listDeviceEventsDefinitions)",
-        "in": "query",
-        "name": "type",
-        "schema": {
-          "type": "string"
-        }
-      },
       "dot11_band": {
-        "description": "802.11 Band",
+        "description": "802.11 band used to filter radio results. enum: `24`, `5`, `5-dedicated`, `5-selectable`, `6`, `6-dedicated`, `6-selectable`",
         "in": "query",
         "name": "band",
         "schema": {
@@ -2073,7 +2238,7 @@
         }
       },
       "dot11_proto": {
-        "description": "a / b / g / n / ac / ax",
+        "description": "802.11 protocol used to filter results. enum: `a`, `ac`, `ax`, `b`, `be`, `g`, `n`",
         "in": "query",
         "name": "proto",
         "schema": {
@@ -2081,10 +2246,9 @@
         }
       },
       "duration": {
-        "description": "Duration like 7d, 2w",
+        "description": "Time range duration for the query, using relative units such as `10m`, `7d`, or `2w`",
         "in": "query",
         "name": "duration",
-        "required": false,
         "schema": {
           "default": "1d",
           "examples": [
@@ -2094,7 +2258,7 @@
         }
       },
       "end": {
-        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
         "in": "query",
         "name": "end",
         "schema": {
@@ -2102,9 +2266,9 @@
         }
       },
       "ip": {
+        "description": "Filter results by IPv4 address",
         "in": "query",
         "name": "ip",
-        "required": false,
         "schema": {
           "examples": [
             "192.168.1.1"
@@ -2114,9 +2278,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -2136,10 +2300,9 @@
         }
       },
       "psk_id_query": {
-        "description": "PSK ID",
+        "description": "PSK identifier used to filter the results",
         "in": "query",
         "name": "psk_id",
-        "required": false,
         "schema": {
           "examples": [
             "000000ab-00ab-00ab-00ab-0000000000ab"
@@ -2159,7 +2322,6 @@
         "description": "On which field the list should be sorted, -prefix represents DESC order",
         "in": "query",
         "name": "sort",
-        "required": false,
         "schema": {
           "default": "timestamp",
           "examples": [
@@ -2169,7 +2331,7 @@
         }
       },
       "start": {
-        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
         "in": "query",
         "name": "start",
         "schema": {
@@ -2348,19 +2510,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

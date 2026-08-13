@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "MSPs Orgs",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "get": {
-        "description": "Get List of MSP Orgs",
+        "description": "List organizations managed by this MSP account, including MSP ownership and organization-group membership metadata.",
         "operationId": "listMspOrgs",
         "responses": {
           "200": {
@@ -108,7 +104,7 @@
         ]
       },
       "put": {
-        "description": "Assign or Unassign Orgs to an MSP account",
+        "description": "Assign existing organizations to this MSP account or unassign organizations from it by providing the desired operation and org IDs.",
         "operationId": "manageMspOrgs",
         "requestBody": {
           "content": {
@@ -156,7 +152,7 @@
         ]
       },
       "post": {
-        "description": "Create an Org under MSP",
+        "description": "Create an organization under this MSP, optionally assigning it to organization groups and setting organization-level defaults.",
         "operationId": "createMspOrg",
         "requestBody": {
           "content": {
@@ -214,14 +210,14 @@
         }
       ],
       "get": {
-        "description": "Search Org in MSP",
+        "description": "Search organizations under this MSP using organization identifiers, names, subscription state, trial state, usage types, and time-based filters.",
         "operationId": "searchMspOrgs",
         "parameters": [
           {
             "$ref": "#/components/parameters/name"
           },
           {
-            "description": "Org id",
+            "description": "Filter results by organization identifier",
             "in": "query",
             "name": "org_id",
             "schema": {
@@ -314,7 +310,7 @@
         }
       ],
       "get": {
-        "description": "Get MSP Org Details",
+        "description": "Return details for one organization managed by this MSP, including MSP ownership, organization groups, support access, and session settings.",
         "operationId": "getMspOrg",
         "responses": {
           "200": {
@@ -342,7 +338,7 @@
         ]
       },
       "put": {
-        "description": "Update MSP Org",
+        "description": "Update organization settings for an organization managed by this MSP.",
         "operationId": "updateMspOrg",
         "requestBody": {
           "content": {
@@ -379,7 +375,7 @@
         ]
       },
       "delete": {
-        "description": "Delete MSP Org",
+        "description": "Delete an organization managed by this MSP. Use the MSP organization assignment endpoint when only assigning or unassigning organizations from the MSP account.",
         "operationId": "deleteMspOrg",
         "responses": {
           "200": {
@@ -414,7 +410,7 @@
         }
       ],
       "get": {
-        "description": "Get List of MSP Orgs Stats",
+        "description": "List organization statistics for organizations managed by this MSP, including device, inventory, site, and SLE summary fields.",
         "operationId": "listMspOrgStats",
         "parameters": [
           {
@@ -475,6 +471,7 @@
         "type": "number"
       },
       "msp_id": {
+        "description": "Managed service provider identifier",
         "examples": [
           "b9d42c2e-88ee-41f8-b798-f009ce7fe909"
         ],
@@ -483,12 +480,15 @@
         "type": "string"
       },
       "msp_org_change": {
+        "description": "Request to assign or unassign orgs for an MSP account",
         "properties": {
           "op": {
-            "$ref": "#/components/schemas/msp_org_change_operation"
+            "$ref": "#/components/schemas/msp_org_change_operation",
+            "description": "Assignment operation to apply to the listed org IDs"
           },
           "org_ids": {
-            "$ref": "#/components/schemas/msp_org_change_org_ids"
+            "$ref": "#/components/schemas/msp_org_change_org_ids",
+            "description": "List of org IDs to assign to or unassign from the MSP account"
           }
         },
         "required": [
@@ -498,7 +498,7 @@
         "type": "object"
       },
       "msp_org_change_operation": {
-        "description": "enum: `assign`, `unassign`",
+        "description": "Assignment operation to apply to the listed org IDs. enum: `assign`, `unassign`",
         "enum": [
           "assign",
           "unassign"
@@ -506,15 +506,17 @@
         "type": "string"
       },
       "msp_org_change_org_ids": {
-        "description": "List of org_id",
+        "description": "List of org IDs to assign to or unassign from an MSP account",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
       "org": {
+        "description": "Mist organization containing sites, devices, users, and organization-level settings",
         "properties": {
           "alarmtemplate_id": {
+            "description": "Org-level alarm template ID used as the default for sites",
             "format": "uuid",
             "type": [
               "string",
@@ -523,19 +525,24 @@
           },
           "allow_mist": {
             "default": true,
+            "description": "Whether Mist support access is allowed for this organization",
             "type": "boolean"
           },
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Epoch timestamp when the organization was created"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the organization"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Epoch timestamp when the organization was last modified"
           },
           "msp_id": {
-            "$ref": "#/components/schemas/msp_id"
+            "$ref": "#/components/schemas/msp_id",
+            "description": "Managed service provider account that owns this organization, when applicable"
           },
           "msp_logo_url": {
             "description": "logo uploaded by the MSP with advanced tier, only present if provided",
@@ -555,16 +562,19 @@
             "type": "string"
           },
           "name": {
+            "description": "Display name of the organization",
             "examples": [
               "Org"
             ],
             "type": "string"
           },
           "orggroup_ids": {
-            "$ref": "#/components/schemas/orggroup_ids"
+            "$ref": "#/components/schemas/orggroup_ids",
+            "description": "Organization group IDs that include this organization"
           },
           "session_expiry": {
             "default": 1440,
+            "description": "Admin session lifetime for the organization, in minutes",
             "format": "int32",
             "maximum": 20160,
             "minimum": 10,
@@ -577,6 +587,7 @@
         "type": "object"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -585,12 +596,14 @@
         "type": "string"
       },
       "org_list": {
+        "description": "Organization records returned by a list response",
         "items": {
           "$ref": "#/components/schemas/org"
         },
         "type": "array"
       },
       "orggroup_ids": {
+        "description": "List of organization group identifiers",
         "items": {
           "format": "uuid",
           "type": "string"
@@ -599,8 +612,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -611,8 +626,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -623,8 +640,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -635,8 +654,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -644,8 +665,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -656,26 +679,33 @@
       },
       "response_org_search": {
         "additionalProperties": false,
+        "description": "Paginated response for MSP organization search results",
         "properties": {
           "end": {
+            "description": "Epoch timestamp, in seconds, for the end of the organization search window",
             "readOnly": true,
             "type": "number"
           },
           "limit": {
+            "description": "Maximum number of organization records returned in this page",
             "readOnly": true,
             "type": "integer"
           },
           "next": {
+            "description": "URL for retrieving the next page of organization search results",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/response_org_search_results"
+            "$ref": "#/components/schemas/response_org_search_results",
+            "description": "Organization records matching the MSP search filters"
           },
           "start": {
+            "description": "Epoch timestamp, in seconds, for the start of the organization search window",
             "readOnly": true,
             "type": "number"
           },
           "total": {
+            "description": "Number of organization records matching the search filters across all pages",
             "readOnly": true,
             "type": "integer"
           }
@@ -691,63 +721,78 @@
       },
       "response_org_search_item": {
         "additionalProperties": false,
+        "description": "Organization record returned by MSP organization search",
         "properties": {
           "msp_id": {
-            "$ref": "#/components/schemas/msp_id"
+            "$ref": "#/components/schemas/msp_id",
+            "description": "MSP that owns or manages this organization"
           },
           "name": {
-            "description": "org name",
+            "description": "Display name of the organization",
             "readOnly": true,
             "type": "string"
           },
           "num_aps": {
+            "description": "Number of APs in the organization",
             "readOnly": true,
             "type": "integer"
           },
           "num_gateways": {
+            "description": "Number of gateways in the organization",
             "readOnly": true,
             "type": "integer"
           },
           "num_sites": {
+            "description": "Number of sites in the organization",
             "readOnly": true,
             "type": "integer"
           },
           "num_switches": {
+            "description": "Number of switches in the organization",
             "readOnly": true,
             "type": "integer"
           },
           "num_unassigned_aps": {
+            "description": "Number of APs in organization inventory that are not assigned to a site",
             "readOnly": true,
             "type": "integer"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization identifier for this search result"
           },
           "sub_ana_entitled": {
+            "description": "Number of SUB-ANA subscriptions entitled for the organization",
             "readOnly": true,
             "type": "integer"
           },
           "sub_ana_required": {
+            "description": "Number of SUB-ANA subscriptions required by the organization",
             "readOnly": true,
             "type": "integer"
           },
           "sub_ast_entitled": {
+            "description": "Number of SUB-AST subscriptions entitled for the organization",
             "readOnly": true,
             "type": "integer"
           },
           "sub_ast_required": {
+            "description": "Number of SUB-AST subscriptions required by the organization",
             "readOnly": true,
             "type": "integer"
           },
           "sub_eng_entitled": {
+            "description": "Number of SUB-ENG subscriptions entitled for the organization",
             "readOnly": true,
             "type": "integer"
           },
           "sub_eng_required": {
+            "description": "Number of SUB-ENG subscriptions required by the organization",
             "readOnly": true,
             "type": "integer"
           },
           "sub_ex12_required": {
+            "description": "Number of SUB-EX12 subscriptions required by the organization",
             "readOnly": true,
             "type": "integer"
           },
@@ -757,27 +802,33 @@
             "type": "boolean"
           },
           "sub_man_entitled": {
+            "description": "Number of SUB-MAN subscriptions entitled for the organization",
             "readOnly": true,
             "type": "integer"
           },
           "sub_man_required": {
+            "description": "Number of SUB-MAN subscriptions required by the organization",
             "readOnly": true,
             "type": "integer"
           },
           "sub_me_entitled": {
+            "description": "Number of SUB-ME subscriptions entitled for the organization",
             "readOnly": true,
             "type": "integer"
           },
           "sub_vna_entitled": {
+            "description": "Number of SUB-VNA subscriptions entitled for the organization",
             "readOnly": true,
             "type": "integer"
           },
           "sub_vna_required": {
+            "description": "Number of SUB-VNA subscriptions required by the organization",
             "readOnly": true,
             "type": "integer"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Epoch timestamp, in seconds, when the organization search data was sampled"
           },
           "trial_enabled": {
             "description": "If this org is under trial period",
@@ -785,13 +836,14 @@
             "type": "boolean"
           },
           "usage_types": {
-            "$ref": "#/components/schemas/response_org_search_item_usage_types"
+            "$ref": "#/components/schemas/response_org_search_item_usage_types",
+            "description": "Subscription usage types enabled for the organization"
           }
         },
         "type": "object"
       },
       "response_org_search_item_usage_types": {
-        "description": "a list of types that enabled by usage",
+        "description": "Subscription usage type codes enabled for an organization",
         "items": {
           "type": "string"
         },
@@ -799,6 +851,7 @@
         "type": "array"
       },
       "response_org_search_results": {
+        "description": "Organization records returned by MSP organization search",
         "items": {
           "$ref": "#/components/schemas/response_org_search_item"
         },
@@ -807,54 +860,69 @@
       },
       "stats_org": {
         "additionalProperties": false,
-        "description": "Org statistics",
+        "description": "Organization statistics summary returned by the org stats endpoint",
         "properties": {
           "alarmtemplate_id": {
+            "description": "Organization-level alarm template identifier used as the default for sites",
             "format": "uuid",
             "type": "string"
           },
           "allow_mist": {
+            "description": "Whether Mist support access is allowed for this organization",
             "type": "boolean"
           },
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Time when the organization was created, in epoch seconds"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the organization"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Time when the organization was last modified, in epoch seconds"
           },
           "msp_id": {
-            "$ref": "#/components/schemas/msp_id"
+            "$ref": "#/components/schemas/msp_id",
+            "description": "Managed service provider identifier associated with the organization"
           },
           "name": {
+            "description": "Display name of the organization",
             "type": "string"
           },
           "num_devices": {
+            "description": "Total number of devices in the organization",
             "type": "integer"
           },
           "num_devices_connected": {
+            "description": "Number of organization devices currently connected to Mist",
             "type": "integer"
           },
           "num_devices_disconnected": {
+            "description": "Number of organization devices currently disconnected from Mist",
             "type": "integer"
           },
           "num_inventory": {
+            "description": "Number of devices in the organization's inventory",
             "type": "integer"
           },
           "num_sites": {
+            "description": "Number of sites in the organization",
             "type": "integer"
           },
           "orggroup_ids": {
-            "$ref": "#/components/schemas/stats_org_orggroup_ids"
+            "$ref": "#/components/schemas/stats_org_orggroup_ids",
+            "description": "Organization group identifiers that include this organization"
           },
           "session_expiry": {
+            "description": "Admin session lifetime for the organization, in minutes",
             "format": "int64",
             "type": "integer"
           },
           "sle": {
-            "$ref": "#/components/schemas/stats_org_sles"
+            "$ref": "#/components/schemas/stats_org_sles",
+            "description": "Service level expectation summaries for the organization"
           }
         },
         "required": [
@@ -877,6 +945,7 @@
         "type": "object"
       },
       "stats_org_orggroup_ids": {
+        "description": "Organization group identifiers associated with an organization stats record",
         "items": {
           "format": "uuid",
           "type": "string"
@@ -885,12 +954,15 @@
       },
       "stats_org_sle": {
         "additionalProperties": false,
+        "description": "Organization SLE summary for a service path",
         "properties": {
           "path": {
+            "description": "SLE path represented by this organization summary",
             "type": "string"
           },
           "user_minutes": {
-            "$ref": "#/components/schemas/stats_org_sle_user_minutes"
+            "$ref": "#/components/schemas/stats_org_sle_user_minutes",
+            "description": "User-minute totals for this SLE path"
           }
         },
         "required": [
@@ -900,11 +972,14 @@
       },
       "stats_org_sle_user_minutes": {
         "additionalProperties": false,
+        "description": "User-minute totals for an organization SLE summary",
         "properties": {
           "ok": {
+            "description": "User minutes that met the SLE target",
             "type": "number"
           },
           "total": {
+            "description": "Observed total user minutes for the SLE path",
             "type": "number"
           }
         },
@@ -915,6 +990,7 @@
         "type": "object"
       },
       "stats_org_sles": {
+        "description": "Service level expectation summaries for an organization",
         "items": {
           "$ref": "#/components/schemas/stats_org_sle"
         },
@@ -922,12 +998,14 @@
         "uniqueItems": true
       },
       "stats_orgs": {
+        "description": "Organization statistics summaries returned by stats APIs",
         "items": {
           "$ref": "#/components/schemas/stats_org"
         },
         "type": "array"
       },
       "strings": {
+        "description": "Unique string values returned or accepted by this schema",
         "items": {
           "type": "string"
         },
@@ -935,7 +1013,7 @@
         "uniqueItems": true
       },
       "timestamp": {
-        "description": "Epoch (seconds)",
+        "description": "Epoch timestamp, in seconds",
         "format": "double",
         "readOnly": true,
         "type": "number"
@@ -1153,7 +1231,7 @@
     },
     "parameters": {
       "end": {
-        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
         "in": "query",
         "name": "end",
         "schema": {
@@ -1161,9 +1239,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -1183,9 +1261,9 @@
         }
       },
       "name": {
+        "description": "Filter results by name",
         "in": "query",
         "name": "name",
-        "required": false,
         "schema": {
           "type": "string"
         }
@@ -1203,9 +1281,9 @@
         }
       },
       "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
         "in": "query",
         "name": "page",
-        "required": false,
         "schema": {
           "default": 1,
           "minimum": 1,
@@ -1224,7 +1302,6 @@
         "description": "On which field the list should be sorted, -prefix represents DESC order",
         "in": "query",
         "name": "sort",
-        "required": false,
         "schema": {
           "default": "timestamp",
           "examples": [
@@ -1234,7 +1311,7 @@
         }
       },
       "start": {
-        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
         "in": "query",
         "name": "start",
         "schema": {
@@ -1344,19 +1421,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"
