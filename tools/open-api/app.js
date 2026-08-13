@@ -8,6 +8,8 @@
   const PLATFORM = document.getElementById("oas-platform");
   const SWITCH_WRAP = document.getElementById("oas-switch-wrap");
   const SWITCH_IP = document.getElementById("oas-switch-ip");
+  const OFFICIAL = document.getElementById("oas-official");
+  const OFFICIAL_LINK = document.getElementById("oas-official-link");
   const EMPTY = document.getElementById("oas-empty");
   const VIEWER = document.getElementById("oas-viewer");
 
@@ -23,6 +25,44 @@
   const VARIANT_LABEL = { mrt: "MRT", config: "Config" };
   const SWITCH_IP_KEY = "bench-tools.oas.aos-cx.switchIp";
   const DEFAULT_SWITCH_IP = "192.0.2.1";
+  const PREFERRED_SCHEME = {
+    mist: "apiToken",
+    axis: "OAuthBearerToken",
+    clearpass: "BearerAuth",
+    uxi: "HTTPBearer",
+    sdc: "ApiKeyAuth",
+    "aruba-central": "OAuth2",
+  };
+  const OFFICIAL_DOCS = {
+    "aruba-central": {
+      label: "Central developer hub",
+      href: "https://developer.arubanetworks.com/new-central",
+    },
+    clearpass: {
+      label: "ClearPass developer hub",
+      href: "https://developer.arubanetworks.com/cppm",
+    },
+    "aos-cx": {
+      label: "AOS-CX developer hub",
+      href: "https://developer.arubanetworks.com/aoscx",
+    },
+    uxi: {
+      label: "UXI developer hub",
+      href: "https://developer.arubanetworks.com/uxi",
+    },
+    mist: {
+      label: "Mist API getting started",
+      href: "https://www.juniper.net/documentation/us/en/software/mist/api/http/getting-started/how-to-get-started",
+    },
+    sdc: {
+      label: "SD Cloud API getting started",
+      href: "https://www.juniper.net/documentation/us/en/software/sd-cloud/api/http/getting-started/how-to-get-started",
+    },
+    axis: {
+      label: "Axis Security API",
+      href: "https://docs.axissecurity.com/docs/configuring-api",
+    },
+  };
 
   /** @type {ReturnType<typeof Scalar.createApiReference> | null} */
   let scalarApp = null;
@@ -115,9 +155,14 @@
     }
     const variantRank = (value) =>
       value === "mrt" ? 0 : value === "config" ? 1 : 2;
+    const isAuth = (group) =>
+      group.category === "Authentication" || group.id === "authentication";
     const isUncategorized = (id) =>
       id === "uncategorized" || String(id).startsWith("uncategorized");
     rows.sort((a, b) => {
+      const aa = isAuth(a.group);
+      const ab = isAuth(b.group);
+      if (aa !== ab) return aa ? -1 : 1;
       const ua = isUncategorized(a.group.id);
       const ub = isUncategorized(b.group.id);
       if (ua !== ub) return ua ? 1 : -1;
@@ -200,6 +245,20 @@
     }
   }
 
+  function syncOfficialDocs(platform) {
+    const docs = OFFICIAL_DOCS[platform];
+    if (!OFFICIAL || !OFFICIAL_LINK) return;
+    if (!docs) {
+      OFFICIAL.hidden = true;
+      OFFICIAL_LINK.removeAttribute("href");
+      OFFICIAL_LINK.textContent = "";
+      return;
+    }
+    OFFICIAL.hidden = false;
+    OFFICIAL_LINK.href = docs.href;
+    OFFICIAL_LINK.textContent = docs.label;
+  }
+
   function renderNav() {
     if (!manifest || !NAV) return;
     const query = (FILTER?.value || "").trim().toLowerCase();
@@ -244,17 +303,41 @@
       persistAuth: false,
       hideDarkModeToggle: true,
       hideClientButton: true,
+      hideTestRequestButton: false,
       defaultOpenFirstTag: true,
       forceDarkModeState: prefersDark() ? "dark" : "light",
       agent: { disabled: true },
       layout: "classic",
       defaultHttpClient: { targetKey: "python", clientKey: "requests" },
       hiddenClients: { python: ["python3"] },
+      // Used for spec load *and* Test Request. Allow same-origin JSON only.
+      customFetch: (input, init) => {
+        const raw = input instanceof Request ? input.url : String(input);
+        let parsed;
+        try {
+          parsed = new URL(raw, window.location.href);
+        } catch {
+          return Promise.reject(new Error("Live requests are disabled on this site."));
+        }
+        if (parsed.origin === window.location.origin) {
+          return window.fetch(input, init);
+        }
+        return Promise.reject(new Error("Live requests are disabled on this site."));
+      },
       customCss: `
         .scalar-app { min-height: 0 !important; height: auto !important; }
         .scalar-container { min-height: 0 !important; }
+        /* Test Request: keep the form + snippet, drop the response/send column. */
+        .scalar-client [aria-label="Response"],
+        .scalar-client .response-heading {
+          display: none !important;
+        }
       `,
     };
+    const preferred = PREFERRED_SCHEME[api?.id];
+    if (preferred) {
+      config.authentication = { preferredSecurityScheme: preferred };
+    }
     if (api?.id === "aos-cx") {
       const host = normalizeHost(SWITCH_IP?.value || readSwitchIp());
       config.servers = [
@@ -309,6 +392,7 @@
     activePlatform = row.api.id;
     if (PLATFORM) PLATFORM.value = activePlatform;
     if (SWITCH_WRAP) SWITCH_WRAP.hidden = activePlatform !== "aos-cx";
+    syncOfficialDocs(activePlatform);
     if (EMPTY) EMPTY.hidden = true;
     if (VIEWER) VIEWER.hidden = false;
     renderNav();
@@ -343,9 +427,14 @@
     activePlatform = platform;
     if (PLATFORM && platform) PLATFORM.value = platform;
     if (SWITCH_WRAP) SWITCH_WRAP.hidden = platform !== "aos-cx";
+    syncOfficialDocs(platform);
 
     let key = params.spec;
     if (key && platformFromKey(key) !== platform) key = "";
+    if (key && !allGroups().some((row) => row.key === key) && key.endsWith("/uncategorized")) {
+      const renamed = `${key.slice(0, -"/uncategorized".length)}/authentication`;
+      if (allGroups().some((row) => row.key === renamed)) key = renamed;
+    }
     if (!key) {
       const first = firstGroup(platform);
       if (first) {

@@ -14,7 +14,7 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from oasutil import dump_spec, normalize_servers, pointer_escape, redact_example_secrets
-from spec_splitter import build_slice, slice_output_path, split_spec
+from spec_splitter import assign_group, build_slice, slice_output_path, split_spec
 from spec_validate import validate_spec
 
 
@@ -59,6 +59,19 @@ class OasUtilTests(unittest.TestCase):
         self.assertEqual(redacted["twilio_sid"], "REDACTED")
         self.assertEqual(redacted["oauth_cc_client_secret"]["examples"], ["REDACTED"])
         self.assertEqual(redacted["name"], "keep-me")
+
+    def test_redact_keeps_refs_and_scalar_placeholders(self) -> None:
+        payload = {
+            "token": {"$ref": "#/components/schemas/Token"},
+            "apiToken": {
+                "x-scalar-secret-token": "Token YOUR_API_TOKEN",
+                "description": "API Token value format is Token {apitoken}",
+            },
+        }
+        redacted = redact_example_secrets(payload)
+        self.assertEqual(redacted["token"]["$ref"], "#/components/schemas/Token")
+        self.assertEqual(redacted["apiToken"]["x-scalar-secret-token"], "Token YOUR_API_TOKEN")
+        self.assertIn("Token {apitoken}", redacted["apiToken"]["description"])
 
     def test_switch_ip_server_normalized(self) -> None:
         servers = normalize_servers([{"url": "switch-ip/rest/v10.16"}])
@@ -213,6 +226,38 @@ class SplitterFixtureTests(unittest.TestCase):
         }
         results = split_spec(spec, api="fix", source_stem="core")
         self.assertEqual([item.group_id for item in results], ["uncategorized"])
+
+    def test_token_path_becomes_authentication(self) -> None:
+        spec = _base()
+        spec["paths"] = {
+            "/as/token.oauth2": {
+                "post": {
+                    "summary": "Generate Access Token",
+                    "responses": {"200": {"description": "ok"}},
+                }
+            },
+            "/login": {
+                "post": {
+                    "tags": ["Login"],
+                    "responses": {"200": {"description": "ok"}},
+                }
+            },
+            "/login-audit": {
+                "get": {
+                    "tags": ["LoginAudit"],
+                    "responses": {"200": {"description": "ok"}},
+                }
+            },
+        }
+        results = {item.group_id: item for item in split_spec(spec, api="fix", source_stem="core")}
+        self.assertEqual(set(results), {"authentication", "loginaudit"})
+        self.assertEqual(results["authentication"].category, "Authentication")
+        self.assertEqual(results["authentication"].operation_count, 2)
+        self.assertEqual(
+            results["authentication"].spec["paths"]["/as/token.oauth2"]["post"]["tags"],
+            ["Authentication"],
+        )
+        self.assertNotIn("authentication", [assign_group("/pets", "get", {"tags": ["Pets"]}, {})[0]])
 
     def test_json_pointer_escaping(self) -> None:
         spec = _base()
@@ -441,6 +486,10 @@ class SplitterFixtureTests(unittest.TestCase):
             slice_spec["servers"][0]["url"], "https://admin-api.axissecurity.com"
         )
         self.assertIn("OAuthBearerToken", slice_spec["securityDefinitions"])
+        axis_scheme = slice_spec["securityDefinitions"]["OAuthBearerToken"]
+        self.assertEqual(axis_scheme["type"], "apiKey")
+        self.assertEqual(axis_scheme["name"], "Authorization")
+        self.assertEqual(axis_scheme["x-scalar-secret-token"], "Bearer YOUR_JWT")
         self.assertEqual(result.unresolved, [])
         self.assertTrue(validate_spec(slice_spec).ok)
 
@@ -468,6 +517,101 @@ class SplitterFixtureTests(unittest.TestCase):
         self.assertNotIn("contact", info)
         self.assertNotIn("license", info)
         self.assertNotIn("x-logo", info)
+
+    def test_mist_token_scheme_rewritten(self) -> None:
+        spec = _base()
+        spec["security"] = [{"apiToken": []}]
+        spec["components"]["securitySchemes"] = {
+            "apiToken": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "Authorization",
+                "description": "Format: API Token value format is `Token {apitoken}`",
+            }
+        }
+        spec["paths"] = {
+            "/x": {"get": {"tags": ["Pets"], "responses": {"200": {"description": "ok"}}}}
+        }
+        slice_spec = split_spec(spec, api="mist", source_stem="mist")[0].spec
+        scheme = slice_spec["components"]["securitySchemes"]["apiToken"]
+        self.assertEqual(scheme["type"], "apiKey")
+        self.assertEqual(scheme["name"], "Authorization")
+        self.assertEqual(scheme["x-scalar-secret-token"], "Token YOUR_API_TOKEN")
+        dumped = json.loads(dump_spec(slice_spec))
+        self.assertEqual(
+            dumped["components"]["securitySchemes"]["apiToken"]["x-scalar-secret-token"],
+            "Token YOUR_API_TOKEN",
+        )
+
+    def test_uxi_injects_missing_http_bearer(self) -> None:
+        spec = _base()
+        spec.pop("security", None)
+        spec["components"]["securitySchemes"] = {}
+        spec["paths"] = {
+            "/sensors": {
+                "get": {
+                    "tags": ["Pets"],
+                    "security": [{"HTTPBearer": []}],
+                    "responses": {"200": {"description": "ok"}},
+                }
+            }
+        }
+        slice_spec = split_spec(spec, api="uxi", source_stem="uxi")[0].spec
+        scheme = slice_spec["components"]["securitySchemes"]["HTTPBearer"]
+        self.assertEqual(scheme["type"], "http")
+        self.assertEqual(scheme["scheme"], "bearer")
+        self.assertEqual(slice_spec["paths"]["/sensors"]["get"]["security"], [{"HTTPBearer": []}])
+
+    def test_clearpass_strips_empty_op_security(self) -> None:
+        spec = _base()
+        spec.pop("security", None)
+        spec["components"]["securitySchemes"] = {}
+        spec["paths"] = {
+            "/oauth": {
+                "post": {
+                    "tags": ["Pets"],
+                    "security": [],
+                    "responses": {"200": {"description": "ok"}},
+                }
+            },
+            "/api-client": {
+                "get": {
+                    "tags": ["Pets"],
+                    "security": [],
+                    "responses": {"200": {"description": "ok"}},
+                }
+            },
+        }
+        results = {item.group_id: item.spec for item in split_spec(spec, api="clearpass", source_stem="api")}
+        oauth = results["authentication"]
+        client = results["pets"]
+        self.assertEqual(
+            oauth["components"]["securitySchemes"]["BearerAuth"]["scheme"],
+            "bearer",
+        )
+        self.assertEqual(oauth["security"], [{"BearerAuth": []}])
+        self.assertEqual(oauth["paths"]["/oauth"]["post"]["security"], [])
+        self.assertNotIn("security", client["paths"]["/api-client"]["get"])
+
+    def test_dangling_security_dropped(self) -> None:
+        spec = _base()
+        spec["security"] = [{"AccessToken": []}]
+        spec["components"]["securitySchemes"] = {
+            "OAuth2": {"type": "oauth2", "flows": {"clientCredentials": {"tokenUrl": "https://sso.example", "scopes": {}}}}
+        }
+        spec["paths"] = {
+            "/x": {
+                "get": {
+                    "tags": ["Pets"],
+                    "security": [{"OAuth2": []}],
+                    "responses": {"200": {"description": "ok"}},
+                }
+            }
+        }
+        slice_spec = split_spec(spec, api="aruba-central", source_stem="cfg")[0].spec
+        self.assertEqual(slice_spec["security"], [{"OAuth2": []}])
+        self.assertIn("OAuth2", slice_spec["components"]["securitySchemes"])
+        self.assertNotIn("AccessToken", slice_spec["components"]["securitySchemes"])
 
     def test_servers_and_info_copied(self) -> None:
         spec = _base()

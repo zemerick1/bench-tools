@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import re
 from collections import defaultdict
 from copy import deepcopy
 from dataclasses import dataclass, field
@@ -22,6 +23,7 @@ from pathlib import Path
 from typing import Any
 
 from oasutil import (
+    HTTP_METHODS,
     SWAGGER2_ROOT_BUCKETS,
     collect_ref_strings,
     dump_spec,
@@ -33,7 +35,7 @@ from oasutil import (
     security_scheme_names,
     slugify,
 )
-from spec_indexer import operation_tags
+from spec_indexer import looks_like_api_auth, operation_tags
 
 logger = logging.getLogger(__name__)
 
@@ -121,6 +123,12 @@ def _apply_overlay(
             continue
         if "path_prefix" in match and not path.startswith(str(match["path_prefix"])):
             continue
+        if "path_re" in match:
+            try:
+                if not re.search(str(match["path_re"]), path):
+                    continue
+            except re.error:
+                continue
         if "operation_id" in match and operation_id != match["operation_id"]:
             continue
         if "method" in match and method != str(match["method"]).lower():
@@ -143,6 +151,8 @@ def assign_group(
     overlay = _apply_overlay(primary, path, method, operation, grouping)
     if overlay:
         return (*overlay, tags)
+    if looks_like_api_auth(path):
+        return "authentication", "Authentication", "Authentication", tags
     if primary:
         return slugify(primary), primary, None, tags
     return "uncategorized", "Uncategorized", None, tags
@@ -223,6 +233,216 @@ def _tag_objects(names: set[str], spec: dict[str, Any]) -> list[dict[str, Any]]:
     for name in sorted(names):
         objects.append(by_name.get(name) or {"name": name})
     return objects
+
+
+# Scalar 1.64 only prefixes HTTP Basic/Bearer. ``scheme: Token`` is dropped
+# from snippets, and apiKey values are copied onto the header as-is. Prefill
+# the header value when the API wants ``Authorization: Token <key>``.
+_TOKEN_PREFIX_HINTS = ("token {", "token <", "`token ", "'token ", '"token ')
+
+# Injected when the source spec names a bearer scheme but never defines it.
+# Matches central-mind sandbox.py auth_scheme values.
+_AUTH_INJECT: dict[str, dict[str, Any]] = {
+    "clearpass": {
+        "name": "BearerAuth",
+        "description": "ClearPass REST API. Authorization: Bearer <access_token>",
+        "strip_empty_op_security": True,
+        "public_paths": frozenset({"/oauth"}),
+    },
+    "uxi": {
+        "name": "HTTPBearer",
+        "description": "UXI REST API. Authorization: Bearer <access_token>",
+    },
+}
+
+
+def _scheme_text(name: str, scheme: dict[str, Any]) -> str:
+    return " ".join(
+        str(part)
+        for part in (name, scheme.get("scheme"), scheme.get("description"), scheme.get("name"))
+        if part
+    ).lower()
+
+
+def _apikey_authorization(scheme: dict[str, Any], prefix: str, placeholder: str) -> dict[str, Any]:
+    """Keep apiKey + bake ``Prefix YOUR_…`` into the snippet header value."""
+    out = dict(scheme)
+    out["type"] = "apiKey"
+    out.setdefault("in", "header")
+    out["name"] = "Authorization"
+    out["x-scalar-secret-token"] = f"{prefix} {placeholder}"
+    if not out.get("description"):
+        out["description"] = f"Authorization: {prefix} <token>"
+    return out
+
+
+def _rewrite_auth_scheme(
+    name: str,
+    scheme: dict[str, Any],
+    *,
+    swagger2: bool,
+) -> dict[str, Any]:
+    """Make snippet headers match how each API actually authenticates."""
+    if not isinstance(scheme, dict):
+        return scheme
+
+    # Scalar ignores non-basic/bearer HTTP schemes — convert Token back.
+    if scheme.get("type") == "http":
+        if str(scheme.get("scheme") or "").lower() == "token":
+            return _apikey_authorization(scheme, "Token", "YOUR_API_TOKEN")
+        return scheme
+
+    if scheme.get("type") != "apiKey":
+        return scheme
+    if str(scheme.get("name") or "").lower() != "authorization":
+        return scheme
+
+    text = _scheme_text(name, scheme)
+    if any(hint in text for hint in _TOKEN_PREFIX_HINTS):
+        return _apikey_authorization(scheme, "Token", "YOUR_API_TOKEN")
+    if "bearer" in text or "jwt" in text:
+        if swagger2:
+            return _apikey_authorization(scheme, "Bearer", "YOUR_JWT")
+        return {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+            "description": scheme.get("description") or "Authorization: Bearer <token>",
+        }
+    return scheme
+
+
+def _scheme_maps(doc: dict[str, Any]) -> list[dict[str, Any]]:
+    maps: list[dict[str, Any]] = []
+    components = doc.get("components")
+    if isinstance(components, dict) and isinstance(components.get("securitySchemes"), dict):
+        maps.append(components["securitySchemes"])
+    if isinstance(doc.get("securityDefinitions"), dict):
+        maps.append(doc["securityDefinitions"])
+    return maps
+
+
+def _iter_slice_operations(doc: dict[str, Any]):
+    paths = doc.get("paths")
+    if not isinstance(paths, dict):
+        return
+    methods = set(HTTP_METHODS)
+    for path, item in paths.items():
+        if not isinstance(item, dict):
+            continue
+        for method, operation in item.items():
+            if method.lower() not in methods or not isinstance(operation, dict):
+                continue
+            yield str(path), method, operation
+
+
+def _referenced_scheme_names(doc: dict[str, Any]) -> set[str]:
+    names: set[str] = set()
+    for requirement in doc.get("security") or []:
+        if isinstance(requirement, dict):
+            names.update(str(key) for key in requirement)
+    for _path, _method, operation in _iter_slice_operations(doc):
+        requirements = operation.get("security")
+        if not isinstance(requirements, list):
+            continue
+        for requirement in requirements:
+            if isinstance(requirement, dict):
+                names.update(str(key) for key in requirement)
+    return names
+
+
+def _ensure_http_bearer(doc: dict[str, Any], name: str, description: str) -> None:
+    if _is_swagger2(doc):
+        bucket = doc.setdefault("securityDefinitions", {})
+        if name not in bucket:
+            bucket[name] = {
+                "type": "apiKey",
+                "in": "header",
+                "name": "Authorization",
+                "description": description,
+                "x-scalar-secret-token": "Bearer YOUR_JWT",
+            }
+        return
+    schemes = doc.setdefault("components", {}).setdefault("securitySchemes", {})
+    if name not in schemes:
+        schemes[name] = {
+            "type": "http",
+            "scheme": "bearer",
+            "description": description,
+        }
+
+
+def _strip_empty_op_security(doc: dict[str, Any], public_paths: set[str]) -> None:
+    """Empty ``security: []`` means no auth and overrides document security."""
+    for path, _method, operation in _iter_slice_operations(doc):
+        if operation.get("security") != []:
+            continue
+        if path in public_paths:
+            continue
+        del operation["security"]
+
+
+def _available_scheme_names(doc: dict[str, Any]) -> set[str]:
+    names: set[str] = set()
+    for bucket in _scheme_maps(doc):
+        names.update(bucket)
+    return names
+
+
+def _scheme_is_preferred(scheme: Any) -> bool:
+    if not isinstance(scheme, dict):
+        return False
+    if scheme.get("type") == "oauth2":
+        return True
+    if str(scheme.get("scheme") or "").lower() in {"bearer", "token"}:
+        return True
+    return bool(scheme.get("x-scalar-secret-token"))
+
+
+def _apply_auth_fixes(doc: dict[str, Any], *, api: str) -> None:
+    """Fix scheme shapes and drop security entries that name missing schemes."""
+    swagger2 = _is_swagger2(doc)
+    for bucket in _scheme_maps(doc):
+        for name, scheme in list(bucket.items()):
+            if isinstance(scheme, dict):
+                bucket[name] = _rewrite_auth_scheme(name, scheme, swagger2=swagger2)
+
+    profile = _AUTH_INJECT.get(api)
+    if profile:
+        _ensure_http_bearer(doc, str(profile["name"]), str(profile["description"]))
+        if profile.get("strip_empty_op_security"):
+            _strip_empty_op_security(doc, set(profile.get("public_paths") or ()))
+        if not doc.get("security"):
+            doc["security"] = [{str(profile["name"]): []}]
+
+    available = _available_scheme_names(doc)
+    for name in _referenced_scheme_names(doc) - available:
+        if "bearer" in name.lower():
+            _ensure_http_bearer(doc, name, "Authorization: Bearer <token>")
+
+    available = _available_scheme_names(doc)
+    security = doc.get("security")
+    if isinstance(security, list):
+        kept = [
+            req
+            for req in security
+            if isinstance(req, dict) and req and set(req).issubset(available)
+        ]
+        if kept:
+            doc["security"] = kept
+        elif available:
+            preferred = next(
+                (
+                    name
+                    for bucket in _scheme_maps(doc)
+                    for name, scheme in bucket.items()
+                    if _scheme_is_preferred(scheme)
+                ),
+                next(iter(available)),
+            )
+            doc["security"] = [{preferred: []}]
+        else:
+            doc.pop("security", None)
 
 
 def _record_for(op: Operation) -> dict[str, str]:
@@ -405,6 +625,7 @@ def _finalize_slice(
     max_bytes: int,
 ) -> SliceResult:
     document, unresolved = build_slice(spec, operations, title_suffix=group_title)
+    _apply_auth_fixes(document, api=api)
     encoded = dump_spec(document)
     size = len(encoded.encode("utf-8"))
     warnings: list[str] = []
@@ -554,6 +775,10 @@ def split_spec(
 
     for path, method, operation, path_item in iter_operations(spec):
         group_id, group_title, category, tags = assign_group(path, method, operation, grouping)
+        if not tags and group_title != "Uncategorized":
+            operation = deepcopy(operation)
+            operation["tags"] = [group_title]
+            tags = (group_title,)
         grouped[group_id].append(
             Operation(
                 path=path,

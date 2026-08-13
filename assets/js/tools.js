@@ -99,7 +99,7 @@ export const tools = [
     id: "open-api",
     title: "OpenAPI Docs",
     description:
-      "Aruba Central (and friends) OpenAPI, split so Scalar never swallows the 17 MB master spec.",
+      "Vendor OpenAPI, pre-sliced so Scalar never has to swallow a novel.",
     href: "./tools/open-api/",
     icon: "API",
     status: "available",

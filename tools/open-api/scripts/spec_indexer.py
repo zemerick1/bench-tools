@@ -78,6 +78,17 @@ THEME_PATTERNS: dict[str, list[str]] = {
 }
 
 
+# Paths that *obtain* an API session or token — not 802.1X / SSO config / audit.
+_API_AUTH_PATH_RE = re.compile(
+    r"(?i)(?:^|/)(?:as/token(?:\.|$|/)|oauth(?:$|/)|login(?:$|/)|certificate[_-]?login(?:$|/))"
+)
+
+
+def looks_like_api_auth(path: str) -> bool:
+    """True for login / OAuth / token endpoints used to call the API."""
+    return bool(_API_AUTH_PATH_RE.search(path or ""))
+
+
 def operation_tags(operation: dict[str, Any]) -> list[str]:
     tags = operation.get("tags") or []
     return [tag for tag in tags if isinstance(tag, str) and tag.strip()]

@@ -283,6 +283,10 @@ def normalize_servers(servers: Any) -> list[dict[str, Any]]:
     return normalized
 
 
+_EXAMPLE_KEYS = frozenset({"example", "examples", "value"})
+_PLACEHOLDER_RE = re.compile(r"^(Token|Bearer)\s+YOUR_[A-Z0-9_]+$", re.I)
+
+
 def redact_example_secrets(
     node: Any,
     parent_key: str = "",
@@ -291,15 +295,21 @@ def redact_example_secrets(
 ) -> Any:
     """Replace example-looking secrets so GitHub push protection does not fire.
 
-    Mist (and similar) OAS files ship sample Twilio SIDs / OAuth client
-    secrets. They are not live credentials, but secret scanning still
-    blocks the commit. Secret-ness is inherited so ``examples: ["…"]``
-    under ``oauth_cc_client_secret`` is redacted too.
+    Only touches ``example`` / ``examples`` / ``value`` subtrees (and
+    known secret *values*). Never rewrites ``$ref`` pointers, Scalar
+    auth placeholders, or ``x-scalar-*`` extensions.
     """
+    in_example = parent_key in _EXAMPLE_KEYS
     secret = secret_context or bool(_SECRET_KEY_RE.search(parent_key or ""))
     if isinstance(node, dict):
         return {
-            key: redact_example_secrets(value, str(key), secret_context=secret)
+            key: redact_example_secrets(
+                value,
+                str(key),
+                secret_context=secret
+                if (in_example or str(key) in _EXAMPLE_KEYS)
+                else False,
+            )
             for key, value in node.items()
         }
     if isinstance(node, list):
@@ -308,7 +318,11 @@ def redact_example_secrets(
             for item in node
         ]
     if isinstance(node, str) and len(node) >= 16:
-        if secret or _SECRET_VALUE_RE.match(node):
+        if node.startswith("#/"):
+            return node
+        if parent_key.startswith("x-scalar-") or _PLACEHOLDER_RE.match(node):
+            return node
+        if _SECRET_VALUE_RE.match(node) or secret:
             return "REDACTED"
     return node
 
