@@ -60,6 +60,17 @@ PROJECTS: list[dict[str, Any]] = [
     {"slug": "aoscx", "api": "aos-cx", "variant": None, "label": "AOS-CX", "central": False},
 ]
 
+# Direct OpenAPI URLs (not on the HPE ReadMe hub). Same source/ layout as hub files.
+REMOTE_SPECS: list[dict[str, Any]] = [
+    {
+        "api": "mist",
+        "label": "Mist",
+        "url": "https://raw.githubusercontent.com/mistsys/mist_openapi/refs/heads/master/mist.openapi.json",
+        "filename": "mist.json",
+        "central": False,
+    },
+]
+
 _SSR_PROPS_RE = re.compile(r'<script id="ssr-props"[^>]*>(.*?)</script>', re.DOTALL)
 _README_REGISTRY = "https://dash.readme.com/api/v1/api-registry"
 
@@ -283,10 +294,56 @@ def fetch_project(project: dict[str, Any], source_dir: Path) -> list[dict[str, A
     return entries
 
 
+def fetch_remote_spec(remote: dict[str, Any], source_dir: Path) -> list[dict[str, Any]]:
+    """Download one OpenAPI document from a raw URL into source/."""
+    label = remote["label"]
+    url = remote["url"]
+    logger.info("── %s (url) ──", label)
+    try:
+        raw = _http_get(url)
+        spec = json.loads(raw)
+    except Exception as exc:
+        logger.error("  ✗ %s: %s", label, exc)
+        return []
+    if not _looks_like_oas(spec):
+        logger.error("  ✗ %s: URL did not return a valid OpenAPI document", label)
+        return []
+
+    file_slug = Path(remote["filename"]).stem
+    relpath = _relpath_for(remote, file_slug)
+    dest = source_dir / relpath
+    _write_json(dest, spec)
+    info = spec.get("info") or {}
+    size = dest.stat().st_size
+    logger.info(
+        "  ✓ Wrote %s — %d paths (%.2f MB)",
+        relpath,
+        len(spec.get("paths") or {}),
+        size / (1024 * 1024),
+    )
+    return [
+        {
+            "path": relpath,
+            "api": remote["api"],
+            "variant": remote.get("variant"),
+            "source_stem": file_slug,
+            "slug": "",
+            "label": label,
+            "filename": remote["filename"],
+            "uuid": "",
+            "title": info.get("title") or label,
+            "version": info.get("version") or "",
+            "paths": len(spec.get("paths") or {}),
+            "bytes": size,
+            "url": url,
+        }
+    ]
+
+
 def seed_local_sources(source_dir: Path, local_dir: Path | None = None) -> int:
     """Copy committed ``local/`` specs into gitignored ``source/``.
 
-    Hub fetches never see Mist / SDC / Axis. CI has no leftover ``source/``,
+    Hub fetches never see SDC / Axis. CI has no leftover ``source/``,
     so those platforms only survive a scheduled run if they live here.
     """
     root = local_dir or LOCAL_SOURCE_DIR
@@ -332,7 +389,7 @@ def local_source_entry(source_dir: Path, rel: str) -> dict[str, Any]:
 
 
 def merge_local_source_files(source_dir: Path, files: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Keep hand-dropped specs (mist/axis/sdc, …) when rewriting index.json."""
+    """Keep hand-dropped specs (axis/sdc, …) when rewriting index.json."""
     known = {entry.get("path") for entry in files}
     for path in sorted(source_dir.rglob("*.json")):
         if path.name == "index.json" or path.name.endswith(".meta.json"):
@@ -368,6 +425,16 @@ def fetch_all_specs(
             failures.append(project["slug"])
         files.extend(entries)
 
+    for remote in REMOTE_SPECS:
+        if central_only:
+            continue
+        if wanted_apis and remote["api"] not in wanted_apis:
+            continue
+        entries = fetch_remote_spec(remote, source_dir)
+        if not entries:
+            failures.append(remote["api"])
+        files.extend(entries)
+
     files = merge_local_source_files(source_dir, files)
     index = {
         "fetchedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -401,7 +468,7 @@ def main() -> int:
         "--api",
         action="append",
         dest="apis",
-        help="Limit to this api id (repeatable): aruba-central, clearpass, aos-cx, uxi.",
+        help="Limit to this api id (repeatable): aruba-central, clearpass, aos-cx, uxi, mist.",
     )
     parser.add_argument(
         "--source-dir",

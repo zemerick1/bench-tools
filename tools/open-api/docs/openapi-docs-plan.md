@@ -353,7 +353,9 @@ Setup Python 3.12 + pip install -r tools/open-api/scripts/requirements.txt
    |
 Unit tests (test_splitter.py)
    |
-Seed tools/open-api/local/ → source/     (Mist / SDC / Axis)
+Seed tools/open-api/local/ → source/     (SDC / Axis)
+   |
+Fetch Mist from mistsys/mist_openapi
    |
 Fetch hub specs into source/             (not committed)
    |
