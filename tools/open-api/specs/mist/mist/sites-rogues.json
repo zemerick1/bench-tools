@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sites Rogues",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -191,6 +187,7 @@
         "operationId": "countSiteRogueEvents",
         "parameters": [
           {
+            "description": "Field used to group this count response. enum: `ap`, `bssid`, `ssid`, `type`",
             "in": "query",
             "name": "distinct",
             "schema": {
@@ -201,7 +198,7 @@
             "$ref": "#/components/parameters/rogue_type"
           },
           {
-            "description": "SSID of the network detected as threat",
+            "description": "Filter results by SSID",
             "in": "query",
             "name": "ssid",
             "schema": {
@@ -209,7 +206,7 @@
             }
           },
           {
-            "description": "BSSID of the network detected as threat",
+            "description": "Filter results by BSSID",
             "in": "query",
             "name": "bssid",
             "schema": {
@@ -225,7 +222,7 @@
             }
           },
           {
-            "description": "Channel over which ap_mac heard ssid/bssid pair",
+            "description": "Filter results by channel",
             "in": "query",
             "name": "channel",
             "schema": {
@@ -293,7 +290,7 @@
             "$ref": "#/components/parameters/rogue_type"
           },
           {
-            "description": "SSID of the network detected as threat",
+            "description": "Filter results by SSID",
             "in": "query",
             "name": "ssid",
             "schema": {
@@ -301,7 +298,7 @@
             }
           },
           {
-            "description": "BSSID of the network detected as threat",
+            "description": "Filter results by BSSID",
             "in": "query",
             "name": "bssid",
             "schema": {
@@ -317,7 +314,7 @@
             }
           },
           {
-            "description": "Channel over which ap_mac heard ssid/bssid pair",
+            "description": "Filter results by channel",
             "in": "query",
             "name": "channel",
             "schema": {
@@ -422,8 +419,10 @@
         "additionalProperties": {
           "type": "string"
         },
+        "description": "Count result row with the matching distinct field values",
         "properties": {
           "count": {
+            "description": "Number of matching items for the distinct value or values in this result",
             "type": "integer"
           }
         },
@@ -433,6 +432,7 @@
         "type": "object"
       },
       "count_results": {
+        "description": "List of count result rows",
         "items": {
           "$ref": "#/components/schemas/count_result"
         },
@@ -441,25 +441,31 @@
       },
       "events_rogue": {
         "additionalProperties": false,
-        "description": "Rogue events",
+        "description": "Rogue wireless network event detected by a site AP",
         "properties": {
           "ap": {
+            "description": "Access point MAC address that detected the rogue BSSID",
             "type": "string"
           },
           "bssid": {
+            "description": "Rogue BSSID observed by the AP",
             "type": "string"
           },
           "channel": {
+            "description": "Radio channel where the rogue BSSID was observed",
             "type": "integer"
           },
           "rssi": {
+            "description": "Received signal strength of the rogue BSSID, in dBm",
             "type": "integer"
           },
           "ssid": {
+            "description": "Wireless network SSID advertised by the rogue BSSID",
             "type": "string"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Time when the rogue event was observed"
           }
         },
         "required": [
@@ -474,21 +480,22 @@
       },
       "insight_rogue_ap": {
         "additionalProperties": false,
+        "description": "Rogue or neighbor AP observation returned by site insights",
         "properties": {
           "ap_mac": {
-            "description": "MAC of the device that had strongest signal strength for ssid/bssid pair",
+            "description": "Reporting AP MAC address with the strongest signal for the SSID/BSSID pair",
             "type": "string"
           },
           "avg_rssi": {
-            "description": "Average signal strength of ap_mac for ssid/bssid pair",
+            "description": "Average RSSI for the SSID/BSSID pair as heard by the reporting AP",
             "type": "number"
           },
           "bssid": {
-            "description": "BSSID of the network detected as threat",
+            "description": "Rogue or neighbor BSSID detected as a threat",
             "type": "string"
           },
           "channel": {
-            "description": "Channel over which ap_mac heard ssid/bssid pair",
+            "description": "Radio channel where the reporting AP heard the SSID/BSSID pair",
             "type": "string"
           },
           "delta_x": {
@@ -500,15 +507,15 @@
             "type": "number"
           },
           "num_aps": {
-            "description": "Num of aps that heard the ssid/bssid pair",
+            "description": "Number of APs that heard the SSID/BSSID pair",
             "type": "integer"
           },
           "seen_on_lan": {
-            "description": "Whether the reporting AP see a wireless client (on LAN) connecting to it",
+            "description": "Whether the reporting AP sees a LAN-side client associated with the BSSID",
             "type": "boolean"
           },
           "ssid": {
-            "description": "SSID of the network detected as threat",
+            "description": "Wireless SSID detected for the rogue or neighbor BSSID",
             "type": "string"
           },
           "times_heard": {
@@ -527,26 +534,34 @@
       },
       "insight_rogue_client": {
         "additionalProperties": false,
+        "description": "Rogue client observation returned by site insights",
         "properties": {
           "annotation": {
+            "description": "Rogue client annotation or classification",
             "type": "string"
           },
           "ap_mac": {
+            "description": "Reporting AP MAC address that observed the rogue client",
             "type": "string"
           },
           "avg_rssi": {
+            "description": "Average RSSI for the rogue client as heard by reporting APs",
             "type": "number"
           },
           "band": {
+            "description": "Radio band on which the rogue client was observed",
             "type": "string"
           },
           "bssid": {
+            "description": "Rogue BSSID associated with the client",
             "type": "string"
           },
           "client_mac": {
+            "description": "Observed client MAC address on the rogue BSSID",
             "type": "string"
           },
           "num_aps": {
+            "description": "Number of APs that observed the rogue client",
             "type": "integer"
           }
         },
@@ -563,23 +578,30 @@
       },
       "response_count": {
         "additionalProperties": false,
+        "description": "Distinct count response for time-bounded search results",
         "properties": {
           "distinct": {
+            "description": "Field used to group the count results",
             "type": "string"
           },
           "end": {
+            "description": "Search window end timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of distinct count results requested",
             "type": "integer"
           },
           "results": {
-            "$ref": "#/components/schemas/count_results"
+            "$ref": "#/components/schemas/count_results",
+            "description": "Count results grouped by the distinct field"
           },
           "start": {
+            "description": "Search window start timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "total": {
+            "description": "Number of distinct result buckets returned",
             "type": "integer"
           }
         },
@@ -595,23 +617,30 @@
       },
       "response_events_rogue_search": {
         "additionalProperties": false,
+        "description": "Paginated response for rogue AP event search results",
         "properties": {
           "end": {
+            "description": "Epoch timestamp for the end of the rogue AP event search window",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of rogue AP event records returned in this page",
             "type": "integer"
           },
           "next": {
+            "description": "Pagination cursor or URL for retrieving the next page of rogue AP event records",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/response_events_rogue_search_results"
+            "$ref": "#/components/schemas/response_events_rogue_search_results",
+            "description": "Rogue AP event records matching the search filters"
           },
           "start": {
+            "description": "Epoch timestamp for the start of the rogue AP event search window",
             "type": "integer"
           },
           "total": {
+            "description": "Number of rogue AP event records matching the search filters across all pages",
             "type": "integer"
           }
         },
@@ -625,6 +654,7 @@
         "type": "object"
       },
       "response_events_rogue_search_results": {
+        "description": "Rogue AP event records returned by a search response",
         "items": {
           "$ref": "#/components/schemas/events_rogue"
         },
@@ -633,8 +663,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -645,8 +677,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -657,8 +691,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -669,8 +705,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -678,8 +716,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -690,21 +730,26 @@
       },
       "response_insight_rogue": {
         "additionalProperties": false,
+        "description": "Paginated response for rogue or neighbor AP insight results",
         "properties": {
           "end": {
+            "description": "Epoch timestamp for the end of the rogue AP insight window",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of rogue or neighbor AP observations returned in this page",
             "type": "integer"
           },
           "next": {
-            "description": "Link to next set of results. If more results aren’t present, next is null.",
+            "description": "Pagination cursor or URL for retrieving the next page of rogue or neighbor AP observations; null when no next page exists",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/response_insight_rogue_results"
+            "$ref": "#/components/schemas/response_insight_rogue_results",
+            "description": "Rogue or neighbor AP observations returned for the site insight query"
           },
           "start": {
+            "description": "Epoch timestamp for the start of the rogue AP insight window",
             "type": "integer"
           }
         },
@@ -718,20 +763,26 @@
       },
       "response_insight_rogue_client": {
         "additionalProperties": false,
+        "description": "Paginated response for rogue client insight results",
         "properties": {
           "end": {
+            "description": "Epoch timestamp for the end of the rogue client insight window",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of rogue client observations returned in this page",
             "type": "integer"
           },
           "next": {
+            "description": "Pagination cursor or URL for retrieving the next page of rogue client observations",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/response_insight_rogue_client_results"
+            "$ref": "#/components/schemas/response_insight_rogue_client_results",
+            "description": "Rogue client observations returned for the site insight query"
           },
           "start": {
+            "description": "Epoch timestamp for the start of the rogue client insight window",
             "type": "integer"
           }
         },
@@ -744,6 +795,7 @@
         "type": "object"
       },
       "response_insight_rogue_client_results": {
+        "description": "Rogue client insight observations returned by a query",
         "items": {
           "$ref": "#/components/schemas/insight_rogue_client"
         },
@@ -751,6 +803,7 @@
         "uniqueItems": true
       },
       "response_insight_rogue_results": {
+        "description": "Rogue or neighbor AP insight observations returned by a query",
         "items": {
           "$ref": "#/components/schemas/insight_rogue_ap"
         },
@@ -759,11 +812,14 @@
       },
       "rogue_details": {
         "additionalProperties": false,
+        "description": "Rogue AP detail response",
         "properties": {
           "manufacture": {
+            "description": "Vendor or manufacturer name reported for the rogue AP",
             "type": "string"
           },
           "seen_as_client": {
+            "description": "Whether this rogue AP was also observed as a client",
             "type": "boolean"
           }
         },
@@ -795,7 +851,7 @@
         "type": "string"
       },
       "timestamp": {
-        "description": "Epoch (seconds)",
+        "description": "Epoch timestamp, in seconds",
         "format": "double",
         "readOnly": true,
         "type": "number"
@@ -1045,10 +1101,9 @@
     },
     "parameters": {
       "duration": {
-        "description": "Duration like 7d, 2w",
+        "description": "Time range duration for the query, using relative units such as `10m`, `7d`, or `2w`",
         "in": "query",
         "name": "duration",
-        "required": false,
         "schema": {
           "default": "1d",
           "examples": [
@@ -1058,7 +1113,7 @@
         }
       },
       "end": {
-        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
         "in": "query",
         "name": "end",
         "schema": {
@@ -1069,7 +1124,6 @@
         "description": "Aggregation works by giving a time range plus interval (e.g. 1d, 1h, 10m) where aggregation function would be applied to.",
         "in": "query",
         "name": "interval",
-        "required": false,
         "schema": {
           "examples": [
             "10m"
@@ -1078,9 +1132,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -1100,6 +1154,7 @@
         }
       },
       "rogue_type": {
+        "description": "Rogue classification used to filter the results. enum: `honeypot`, `lan`, `others`, `spoof`",
         "in": "query",
         "name": "type",
         "schema": {
@@ -1130,7 +1185,6 @@
         "description": "On which field the list should be sorted, -prefix represents DESC order",
         "in": "query",
         "name": "sort",
-        "required": false,
         "schema": {
           "default": "timestamp",
           "examples": [
@@ -1140,7 +1194,7 @@
         }
       },
       "start": {
-        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
         "in": "query",
         "name": "start",
         "schema": {
@@ -1257,19 +1311,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

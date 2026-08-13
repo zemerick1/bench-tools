@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs NAC Tags",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -74,37 +70,43 @@
   ],
   "paths": {
     "/api/v1/orgs/{org_id}/nactags": {
+      "description": "NAC Tags are the building blocks to compose NAC Rules.\n\nThey can either appear in the `matching` / `not_matching` sections of a NAC Rule,\nin which case they play the role of classifiers, or they could appear in the `apply_tags`\nsection of a NAC Rule, in which case they influence the result.\n\nWhen the `type` field of a NAC Tag is `match`, it can be used as a classifier of a NAC Rule:\n  - The `match` field specifies the attribute name and the `values` field specifies the list of\n    attribute values to match on.\n  - When multiple values are specified, they are treated as an OR condition between those values.\n    This behavior can be changed by setting the `match_all` field to `true`, in which case it is\n    treated as an AND condition between those values.\n  - By default an exact match is performed. This behavior can be changed as follows:\n    - Adding `*` at the beginning will perform a suffix match\n      (ex: `*-staff` will match `foo-staff` and `bar-staff`)\n    - Adding `*` at the end will perform a prefix match\n      (ex: `foo-*` will match `foo-staff` and `foo-interns`)\n    - Adding `*` at both ends will perform a substring match\n      (ex: `*printer*` will match `hp-printer-bldg1`, `brother-printer-lab`)\n    - Adding `!` at the beginning will perform a negation of the match\n      (ex: `!ssid-guest` will match any string that is not `ssid-guest`)\n    - Note: when negation should be used along with suffix/substring operation,\n      `!` should always precede `*`\n      (ex: `!*guest` will match any string that is not ending with `guest`)\n  - Prepending the value with the keyword `regex=` followed by a regular expression will\n    evaluate the match as a regex (instead of the wildcard behaviors above: prefix, suffix,\n    substring, or exact match).\n    (ex: `regex=^foo-(staff|interns)$` will match `foo-staff` and `foo-interns`)\n",
       "parameters": [
         {
           "$ref": "#/components/parameters/org_id"
         }
       ],
       "get": {
-        "description": "Get List of Org NAC Tags",
+        "description": "List organization NAC tags, optionally filtering by tag type, name, or match attribute.",
         "operationId": "listOrgNacTags",
         "parameters": [
           {
-            "description": "Type of NAC Tag. enum: `egress_vlan_names`, `gbp_tag`, `match`, `radius_attrs`, `radius_group`, `radius_vendor_attrs`, `session_timeout`, `username_attr`, `vlan`",
+            "description": "Filter results by type. enum: `egress_vlan_names`, `gbp_tag`, `match`, `radius_attrs`, `radius_group`, `radius_vendor_attrs`, `redirect_nacportal_id`, `session_timeout`, `username_attr`, `vlan`. Accepts multiple comma-separated values.",
+            "example": "match,vlan",
             "in": "query",
             "name": "type",
-            "schema": {
-              "$ref": "#/components/schemas/nac_tag_type"
-            }
-          },
-          {
-            "description": "Name of NAC Tag",
-            "in": "query",
-            "name": "name",
             "schema": {
               "type": "string"
             }
           },
           {
-            "description": "if `type`==`match`, Type of NAC Tag. enum: `cert_cn`, `cert_eku`, `cert_issuer`, `cert_san`, `cert_serial`, `cert_sub`, `cert_template`, `client_mac`, `edr_status`, `gbp_tag`, `hostname`, `idp_role`, `ingress_vlan`, `mdm_status`, `nas_ip`, `radius_group`, `realm`, `ssid`, `user_name`, `usermac_label`",
+            "description": "Filter results by name. Accepts multiple comma-separated values.",
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "examples": [
+                "name-a,name-b"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "if `type`==`match`, Type of NAC Tag. enum: `cert_cn`, `cert_eku`, `cert_issuer`, `cert_san`, `cert_serial`, `cert_sub`, `cert_template`, `client_mac`, `edr_status`, `gbp_tag`, `hostname`, `idp_role`, `ingress_vlan`, `mdm_status`, `nas_ip`, `radius_group`, `realm`, `ssid`, `user_name`, `usermac_label`. Accepts multiple comma-separated values.",
+            "example": "ssid,idp_role",
             "in": "query",
             "name": "match",
             "schema": {
-              "$ref": "#/components/schemas/nac_tag_match"
+              "type": "string"
             }
           },
           {
@@ -140,7 +142,7 @@
         ]
       },
       "post": {
-        "description": "Create Org NAC Tag",
+        "description": "Create a NAC tag used either as rule-matching criteria or as a result attribute returned when NAC allows access.",
         "operationId": "createOrgNacTag",
         "requestBody": {
           "content": {
@@ -187,7 +189,7 @@
         }
       ],
       "get": {
-        "description": "Get Org NAC Tag",
+        "description": "Retrieve configuration details for a specific NAC tag, including type, match values, RADIUS attributes, VLAN or session results, and portal redirection settings.",
         "operationId": "getOrgNacTag",
         "responses": {
           "200": {
@@ -215,7 +217,7 @@
         ]
       },
       "put": {
-        "description": "Update Org NAC Tag",
+        "description": "Update a NAC tag, including matcher values or result attributes such as RADIUS attributes, VLAN, session timeout, username attribute, or portal redirection.",
         "operationId": "updateOrgNacTag",
         "requestBody": {
           "content": {
@@ -252,7 +254,7 @@
         ]
       },
       "delete": {
-        "description": "Delete Org NAC Tag",
+        "description": "Delete an organization NAC tag by tag ID so it can no longer be used by NAC rules.",
         "operationId": "deleteOrgNacTag",
         "responses": {
           "200": {
@@ -305,26 +307,32 @@
         "type": "number"
       },
       "nac_tag": {
+        "description": "NAC tag used as a rule-matching classifier or as a result attribute for allowed users",
         "properties": {
           "allow_usermac_override": {
             "default": false,
-            "description": "Can be set to true to allow the override by usermac result",
+            "description": "Whether usermac result values can override this NAC tag when the result type is also supported by usermac",
             "type": "boolean"
           },
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Epoch timestamp when the NAC tag was created"
           },
           "egress_vlan_names": {
-            "$ref": "#/components/schemas/nac_tag_egress_vlan_names"
+            "$ref": "#/components/schemas/nac_tag_egress_vlan_names",
+            "description": "If `type`==`egress_vlan_names`, list of egress VLAN names returned by the NAC rule"
           },
           "gbp_tag": {
-            "$ref": "#/components/schemas/nac_tag_gbp_tag"
+            "$ref": "#/components/schemas/nac_tag_gbp_tag",
+            "description": "If `type`==`gbp_tag`, GBP tag value returned by the NAC rule"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the NAC tag"
           },
           "match": {
-            "$ref": "#/components/schemas/nac_tag_match"
+            "$ref": "#/components/schemas/nac_tag_match",
+            "description": "If `type`==`match`, client or authentication attribute used for rule matching"
           },
           "match_all": {
             "default": false,
@@ -332,46 +340,55 @@
             "type": "boolean"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Epoch timestamp when the NAC tag was last modified"
           },
           "nacportal_id": {
-            "$ref": "#/components/schemas/redirect_nacportal_id"
+            "$ref": "#/components/schemas/redirect_nacportal_id",
+            "description": "If `type`==`redirect_nacportal_id`, NAC portal ID used for client redirection"
           },
           "name": {
+            "description": "Human-readable name of the NAC tag",
             "minLength": 1,
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Org identifier that owns the NAC tag"
           },
           "radius_attrs": {
-            "$ref": "#/components/schemas/nac_tag_radius_attrs"
+            "$ref": "#/components/schemas/nac_tag_radius_attrs",
+            "description": "If `type`==`radius_attrs`, standard RADIUS attributes returned by the NAC rule"
           },
           "radius_group": {
-            "description": "If `type`==`radius_group`",
+            "description": "If `type`==`radius_group`, RADIUS group value returned by the NAC rule",
             "type": "string"
           },
           "radius_vendor_attrs": {
-            "$ref": "#/components/schemas/nac_tag_radius_vendor_attrs"
+            "$ref": "#/components/schemas/nac_tag_radius_vendor_attrs",
+            "description": "If `type`==`radius_vendor_attrs`, vendor-specific RADIUS attributes returned by the NAC rule"
           },
           "session_timeout": {
-            "description": "If `type`==`session_timeout, in seconds",
+            "description": "If `type`==`session_timeout`, session timeout returned by the NAC rule, in seconds",
             "examples": [
               86000
             ],
             "type": "integer"
           },
           "type": {
-            "$ref": "#/components/schemas/nac_tag_type"
+            "$ref": "#/components/schemas/nac_tag_type",
+            "description": "NAC tag type that determines whether the tag is a matcher or a result attribute"
           },
           "username_attr": {
-            "$ref": "#/components/schemas/nac_tag_username_attr"
+            "$ref": "#/components/schemas/nac_tag_username_attr",
+            "description": "If `type`==`username_attr`, attribute used to derive the username returned by the NAC rule"
           },
           "values": {
-            "$ref": "#/components/schemas/nac_tag_values"
+            "$ref": "#/components/schemas/nac_tag_values",
+            "description": "If `type`==`match`, attribute values used by the NAC tag matcher"
           },
           "vlan": {
-            "description": "If `type`==`vlan`",
+            "description": "If `type`==`vlan`, VLAN name or ID returned by the NAC rule",
             "type": "string"
           }
         },
@@ -406,7 +423,7 @@
             "type": "string"
           }
         ],
-        "description": "If `type`==`gbp_tag`"
+        "description": "If `type`==`gbp_tag`, GBP tag value returned by the NAC rule"
       },
       "nac_tag_match": {
         "description": "if `type`==`match`. enum: `cert_cn`, `cert_eku`, `cert_issuer`, `cert_san`, `cert_serial`, `cert_sub`, `cert_template`, `client_mac`, `edr_status`, `gbp_tag`, `hostname`, `idp_role`, `ingress_vlan`, `mdm_status`, `nas_ip`, `radius_group`, `realm`, `ssid`, `user_name`, `usermac_label`",
@@ -490,19 +507,21 @@
         "type": "string"
       },
       "nac_tag_values": {
-        "description": "If `type`==`match`",
+        "description": "If `type`==`match`, attribute values used by the NAC tag matcher",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
       "nac_tags": {
+        "description": "List of NAC tags",
         "items": {
           "$ref": "#/components/schemas/nac_tag"
         },
         "type": "array"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -520,8 +539,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -532,8 +553,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -544,8 +567,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -556,8 +581,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -565,8 +592,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -846,9 +875,9 @@
     },
     "parameters": {
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -880,9 +909,9 @@
         }
       },
       "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
         "in": "query",
         "name": "page",
-        "required": false,
         "schema": {
           "default": 1,
           "minimum": 1,
@@ -1118,19 +1147,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

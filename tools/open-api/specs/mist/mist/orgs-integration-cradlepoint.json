@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Integration Cradlepoint",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "get": {
-        "description": "This tests the Cradlepoint integration in Mist",
+        "description": "Test the current Cradlepoint integration configuration and return whether the most recent integration status is active or inactive.",
         "operationId": "testOrgCradlepointConnection",
         "responses": {
           "200": {
@@ -108,7 +104,7 @@
         ]
       },
       "put": {
-        "description": "This updates the Cradlepoint integration settings in Mist",
+        "description": "Update the stored Cradlepoint API and ECM credentials and the LLDP-based device linking option used by Mist.",
         "operationId": "updateOrgCradlepointConnectionToMist",
         "requestBody": {
           "content": {
@@ -119,7 +115,8 @@
                     "cp_api_id": "84446d61-2206-4ea5-855a-0043f980be54",
                     "cp_api_key": "REDACTED",
                     "ecm_api_id": "73446d61-2206-4ea5-855a-0043f980be62",
-                    "ecm_api_key": "REDACTED"
+                    "ecm_api_key": "REDACTED",
+                    "enable_lldp": true
                   }
                 }
               },
@@ -155,11 +152,22 @@
         ]
       },
       "post": {
-        "description": "This sets up cradlepoint webhooks to send events to Mist",
+        "description": "Configure the Cradlepoint integration by storing Cradlepoint API and ECM credentials and setting up Cradlepoint webhooks to send events to Mist.",
         "operationId": "setupOrgCradlepointConnectionToMist",
         "requestBody": {
           "content": {
             "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "cp_api_id": "84446d61-2206-4ea5-855a-0043f980be54",
+                    "cp_api_key": "REDACTED",
+                    "ecm_api_id": "73446d61-2206-4ea5-855a-0043f980be62",
+                    "ecm_api_key": "REDACTED",
+                    "enable_lldp": true
+                  }
+                }
+              },
               "schema": {
                 "$ref": "#/components/schemas/account_cradlepoint_config"
               }
@@ -192,7 +200,7 @@
         ]
       },
       "delete": {
-        "description": "This deletes the Cradlepoint integration in Mist",
+        "description": "Remove the Cradlepoint integration configuration from the organization.",
         "operationId": "deleteOrgCradlepointConnection",
         "responses": {
           "200": {
@@ -227,7 +235,7 @@
         }
       ],
       "post": {
-        "description": "This syncs cradlepoint devices with Mist. We’ll also attempt to use the LLDP data from cradlepoint to identify the linkage against Mist Site / Device",
+        "description": "Trigger a Cradlepoint device synchronization with Mist. When LLDP linking is enabled, Mist also uses Cradlepoint LLDP data to associate routers with Mist sites and devices.",
         "operationId": "syncOrgCradlepointRouters",
         "responses": {
           "200": {
@@ -259,32 +267,38 @@
   "components": {
     "schemas": {
       "account_cradlepoint_config": {
+        "description": "Cradlepoint account credentials and LLDP integration settings",
         "properties": {
           "cp_api_id": {
+            "description": "Cradlepoint API ID used by Mist for the integration",
             "examples": [
               "84446d61-2206-4ea5-855a-0043f980be54"
             ],
             "type": "string"
           },
           "cp_api_key": {
+            "description": "Cradlepoint API key paired with the Cradlepoint API ID",
             "examples": [
               "REDACTED"
             ],
             "type": "string"
           },
           "ecm_api_id": {
+            "description": "Cradlepoint ECM API ID used by Mist for the integration",
             "examples": [
               "73446d61-2206-4ea5-855a-0043f980be62"
             ],
             "type": "string"
           },
           "ecm_api_key": {
+            "description": "Cradlepoint ECM API key paired with the ECM API ID",
             "examples": [
               "REDACTED"
             ],
             "type": "string"
           },
           "enable_lldp": {
+            "description": "Whether Mist uses Cradlepoint LLDP data to link routers to Mist sites and devices",
             "type": "boolean"
           }
         },
@@ -292,8 +306,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -304,8 +320,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -316,8 +334,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -328,8 +348,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -337,8 +359,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -349,7 +373,63 @@
       },
       "test_cradlepoint": {
         "additionalProperties": false,
+        "description": "Cradlepoint integration connectivity test result",
         "properties": {
+          "alert_config_id": {
+            "description": "Cradlepoint alert configuration ID created by the integration setup",
+            "examples": [
+              "8b7e06ac-0yu5-11f1-88h2-42628k552c3d"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "cp_api_id": {
+            "description": "Cradlepoint API ID stored for the integration (masked)",
+            "examples": [
+              "********"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "cp_api_key": {
+            "description": "Cradlepoint API key stored for the integration (masked)",
+            "examples": [
+              "********"
+            ],
+            "format": "password",
+            "readOnly": true,
+            "type": "string"
+          },
+          "destination_config_id": {
+            "description": "Cradlepoint destination configuration ID created by the integration setup",
+            "examples": [
+              "8ad364de-0yu5-13r1-9abc-263675be6074"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "ecm_api_id": {
+            "description": "Cradlepoint ECM API ID stored for the integration (masked)",
+            "examples": [
+              "********"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "ecm_api_key": {
+            "description": "Cradlepoint ECM API key stored for the integration (masked)",
+            "examples": [
+              "********"
+            ],
+            "format": "password",
+            "readOnly": true,
+            "type": "string"
+          },
+          "enable_lldp": {
+            "description": "Whether Mist uses Cradlepoint LLDP data to link routers to Mist sites and devices",
+            "readOnly": true,
+            "type": "boolean"
+          },
           "error": {
             "description": "if status is `inactive` this field returns the reason for it being inactive.",
             "examples": [
@@ -359,7 +439,17 @@
             "type": "string"
           },
           "last_status": {
-            "$ref": "#/components/schemas/test_cradlepoint_last_status"
+            "$ref": "#/components/schemas/test_cradlepoint_last_status",
+            "description": "Integration status detected during the most recent Cradlepoint sync"
+          },
+          "shared_secret": {
+            "description": "Shared secret generated by the integration setup (masked)",
+            "examples": [
+              "********"
+            ],
+            "format": "password",
+            "readOnly": true,
+            "type": "string"
           }
         },
         "type": "object"
@@ -559,26 +649,29 @@
       },
       "TestCradlepointCrowdstrike": {
         "value": {
+          "alert_config_id": "8b7e06ac-0yu5-11f1-88h2-42628k552c3d",
+          "cp_api_id": "********",
+          "cp_api_key": "********",
+          "destination_config_id": "8ad364de-0yu5-13r1-9abc-263675be6074",
+          "ecm_api_id": "********",
+          "ecm_api_key": "********",
+          "enable_lldp": false,
           "error": "Cradlepoint API keys are no longer valid, please verify and update the keys under organization settings.",
-          "last_status": "inactive"
+          "last_status": "inactive",
+          "shared_secret": "********"
         }
       }
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

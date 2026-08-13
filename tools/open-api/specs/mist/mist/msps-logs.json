@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "MSPs Logs",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,11 +76,11 @@
         }
       ],
       "get": {
-        "description": "Get list of change logs for the current MSP",
+        "description": "List audit log entries for configuration and administrative changes within this MSP, with optional filters by site, administrator, message text, and time range.",
         "operationId": "listMspAuditLogs",
         "parameters": [
           {
-            "description": "Site id",
+            "description": "Filter results by site identifier",
             "in": "query",
             "name": "site_id",
             "schema": {
@@ -106,7 +102,7 @@
             }
           },
           {
-            "description": "Message",
+            "description": "Filter results by message text",
             "in": "query",
             "name": "message",
             "schema": {
@@ -117,7 +113,7 @@
             }
           },
           {
-            "description": "Sort order",
+            "description": "Field used to sort results; a leading `-` indicates descending order. enum: `-timestamp`, `admin_id`, `site_id`, `timestamp`",
             "in": "query",
             "name": "sort",
             "schema": {
@@ -173,10 +169,11 @@
         }
       ],
       "get": {
-        "description": "Count by Distinct Attributes of Audit Logs.",
+        "description": "Return distinct counts of MSP audit log entries grouped by the requested field, such as administrator, message, or organization.",
         "operationId": "countMspAuditLogs",
         "parameters": [
           {
+            "description": "Field used to group this count response. enum: `admin_id`, `admin_name`, `message`, `org_id`",
             "in": "query",
             "name": "distinct",
             "schema": {
@@ -220,8 +217,10 @@
         "additionalProperties": {
           "type": "string"
         },
+        "description": "Count result row with the matching distinct field values",
         "properties": {
           "count": {
+            "description": "Number of matching items for the distinct value or values in this result",
             "type": "integer"
           }
         },
@@ -231,6 +230,7 @@
         "type": "object"
       },
       "count_results": {
+        "description": "List of count result rows",
         "items": {
           "$ref": "#/components/schemas/count_result"
         },
@@ -258,9 +258,10 @@
       },
       "log_event": {
         "additionalProperties": false,
+        "description": "Audit log event recorded for an organization or site",
         "properties": {
           "admin_id": {
-            "description": "admin id",
+            "description": "Admin user identifier associated with the log event",
             "format": "uuid",
             "readOnly": true,
             "type": [
@@ -289,7 +290,7 @@
             "type": "object"
           },
           "device_id": {
-            "description": "Device id",
+            "description": "Device identifier associated with the log event",
             "format": "uuid",
             "readOnly": true,
             "type": [
@@ -298,21 +299,25 @@
             ]
           },
           "for_site": {
+            "description": "Whether this log event is scoped to a site",
             "readOnly": true,
             "type": "boolean"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the log event"
           },
           "message": {
-            "description": "log message",
+            "description": "Human-readable log message describing the event",
             "readOnly": true,
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization associated with the log event"
           },
           "site_id": {
+            "description": "Site associated with the log event, if any",
             "format": "uuid",
             "readOnly": true,
             "type": [
@@ -321,11 +326,12 @@
             ]
           },
           "src_ip": {
-            "description": "sender source ip address",
+            "description": "sender source IP address",
             "type": "string"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Time when the log event occurred"
           }
         },
         "required": [
@@ -336,6 +342,7 @@
         "type": "object"
       },
       "log_events": {
+        "description": "Audit log events returned by a log query",
         "items": {
           "$ref": "#/components/schemas/log_event"
         },
@@ -354,6 +361,7 @@
         "type": "string"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -363,23 +371,30 @@
       },
       "response_count": {
         "additionalProperties": false,
+        "description": "Distinct count response for time-bounded search results",
         "properties": {
           "distinct": {
+            "description": "Field used to group the count results",
             "type": "string"
           },
           "end": {
+            "description": "Search window end timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of distinct count results requested",
             "type": "integer"
           },
           "results": {
-            "$ref": "#/components/schemas/count_results"
+            "$ref": "#/components/schemas/count_results",
+            "description": "Count results grouped by the distinct field"
           },
           "start": {
+            "description": "Search window start timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "total": {
+            "description": "Number of distinct result buckets returned",
             "type": "integer"
           }
         },
@@ -395,8 +410,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -407,8 +424,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -419,8 +438,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -431,8 +452,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -440,8 +463,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -452,23 +477,30 @@
       },
       "response_log_search": {
         "additionalProperties": false,
+        "description": "Paginated response for audit log search results",
         "properties": {
           "end": {
+            "description": "Epoch timestamp for the end of the audit log search window",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of audit log events returned in this page",
             "type": "integer"
           },
           "next": {
+            "description": "Pagination cursor or URL for retrieving the next page of audit log events",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/log_events"
+            "$ref": "#/components/schemas/log_events",
+            "description": "Audit log events matching the search filters"
           },
           "start": {
+            "description": "Epoch timestamp for the start of the audit log search window",
             "type": "integer"
           },
           "total": {
+            "description": "Number of audit log events matching the search filters across all pages",
             "type": "integer"
           }
         },
@@ -482,7 +514,7 @@
         "type": "object"
       },
       "timestamp": {
-        "description": "Epoch (seconds)",
+        "description": "Epoch timestamp, in seconds",
         "format": "double",
         "readOnly": true,
         "type": "number"
@@ -657,10 +689,9 @@
     },
     "parameters": {
       "duration": {
-        "description": "Duration like 7d, 2w",
+        "description": "Time range duration for the query, using relative units such as `10m`, `7d`, or `2w`",
         "in": "query",
         "name": "duration",
-        "required": false,
         "schema": {
           "default": "1d",
           "examples": [
@@ -670,7 +701,7 @@
         }
       },
       "end": {
-        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
         "in": "query",
         "name": "end",
         "schema": {
@@ -678,9 +709,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -700,9 +731,9 @@
         }
       },
       "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
         "in": "query",
         "name": "page",
-        "required": false,
         "schema": {
           "default": 1,
           "minimum": 1,
@@ -710,7 +741,7 @@
         }
       },
       "start": {
-        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
         "in": "query",
         "name": "start",
         "schema": {
@@ -776,19 +807,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

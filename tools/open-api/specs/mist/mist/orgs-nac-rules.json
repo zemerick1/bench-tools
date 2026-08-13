@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs NAC Rules",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "get": {
-        "description": "Get List of Org NAC Rules",
+        "description": "List organization NAC authentication policy rules with evaluation order.",
         "operationId": "listOrgNacRules",
         "parameters": [
           {
@@ -116,7 +112,7 @@
         ]
       },
       "post": {
-        "description": "Create Org NAC Rule",
+        "description": "Create a NAC authentication policy rule with match and not-match criteria, an allow or block action, optional result tags, and rule priority.",
         "operationId": "createOrgNacRule",
         "requestBody": {
           "content": {
@@ -194,7 +190,7 @@
         }
       ],
       "get": {
-        "description": "Get Org NAC Rule",
+        "description": "Retrieve configuration details for a specific NAC authentication policy rule, including action, matching criteria, dry-run state, and priority.",
         "operationId": "getOrgNacRule",
         "responses": {
           "200": {
@@ -222,7 +218,7 @@
         ]
       },
       "put": {
-        "description": "Update Org NAC Rule",
+        "description": "Update a NAC authentication policy rule, including match and not-match criteria, action, result tags, dry-run state, and priority.",
         "operationId": "updateOrgNacRule",
         "requestBody": {
           "content": {
@@ -259,7 +255,7 @@
         ]
       },
       "delete": {
-        "description": "Delete Org NAC Rule",
+        "description": "Delete an organization NAC authentication policy rule by rule ID.",
         "operationId": "deleteOrgNacRule",
         "responses": {
           "200": {
@@ -329,41 +325,55 @@
         "type": "string"
       },
       "nac_rule": {
+        "description": "NAC authentication policy rule that matches request criteria and applies an allow or block action",
         "properties": {
           "action": {
-            "$ref": "#/components/schemas/nac_rule_action"
+            "$ref": "#/components/schemas/nac_rule_action",
+            "description": "Allow or block decision applied when the NAC rule matches"
           },
           "apply_tags": {
-            "$ref": "#/components/schemas/nac_rule_apply_tags"
+            "$ref": "#/components/schemas/nac_rule_apply_tags",
+            "description": "NAC tag IDs to include in the Access-Accept when the rule allows access"
           },
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Epoch timestamp when the NAC rule was created"
+          },
+          "dry_run": {
+            "description": "Whether the NAC rule is in dry-run mode, where matches are logged but the action is not enforced",
+            "type": "boolean"
           },
           "enabled": {
             "default": true,
-            "description": "Enabled or not",
+            "description": "Whether the NAC rule is evaluated during policy matching",
             "type": "boolean"
           },
           "guest_auth_state": {
-            "$ref": "#/components/schemas/nac_rule_guest_auth_state"
+            "$ref": "#/components/schemas/nac_rule_guest_auth_state",
+            "description": "Guest portal authorization state condition for the rule"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the NAC rule"
           },
           "matching": {
-            "$ref": "#/components/schemas/nac_rule_matching"
+            "$ref": "#/components/schemas/nac_rule_matching",
+            "description": "Criteria that must match for the NAC rule to apply"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Epoch timestamp when the NAC rule was last modified"
           },
           "name": {
+            "description": "Human-readable name of the NAC rule",
             "type": "string"
           },
           "not_matching": {
-            "$ref": "#/components/schemas/nac_rule_matching"
+            "$ref": "#/components/schemas/nac_rule_matching",
+            "description": "Criteria that must not match for the NAC rule to apply"
           },
           "order": {
-            "description": "Order of the rule, lower value implies higher priority",
+            "description": "Rule priority; lower values are evaluated with higher priority",
             "examples": [
               1
             ],
@@ -371,7 +381,8 @@
             "type": "integer"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Org identifier that owns the NAC rule"
           }
         },
         "required": [
@@ -381,7 +392,7 @@
         "type": "object"
       },
       "nac_rule_action": {
-        "description": "enum: `allow`, `block`",
+        "description": "Allow or block decision applied when the NAC rule matches. enum: `allow`, `block`",
         "enum": [
           "allow",
           "block"
@@ -416,36 +427,47 @@
       },
       "nac_rule_matching": {
         "additionalProperties": false,
+        "description": "Criteria used to include or exclude a NAC authentication request from a rule",
         "properties": {
           "auth_type": {
-            "$ref": "#/components/schemas/nac_auth_type"
+            "$ref": "#/components/schemas/nac_auth_type",
+            "description": "NAC authentication method that must match the request"
           },
           "family": {
-            "$ref": "#/components/schemas/nac_rule_matching_family"
+            "$ref": "#/components/schemas/nac_rule_matching_family",
+            "description": "Client device family values that must match the request"
           },
           "mfg": {
-            "$ref": "#/components/schemas/nac_rule_matching_model"
+            "$ref": "#/components/schemas/nac_rule_matching_model",
+            "description": "Client device manufacturer values that must match the request"
           },
           "model": {
-            "$ref": "#/components/schemas/nac_rule_matching_mfg"
+            "$ref": "#/components/schemas/nac_rule_matching_mfg",
+            "description": "Client device model values that must match the request"
           },
           "nactags": {
-            "$ref": "#/components/schemas/nac_rule_matching_nactags"
+            "$ref": "#/components/schemas/nac_rule_matching_nactags",
+            "description": "NAC tag IDs whose match criteria must be satisfied by the request"
           },
           "os_type": {
-            "$ref": "#/components/schemas/nac_rule_matching_os_type"
+            "$ref": "#/components/schemas/nac_rule_matching_os_type",
+            "description": "Client OS type values that must match the request"
           },
           "port_types": {
-            "$ref": "#/components/schemas/nac_rule_matching_port_types"
+            "$ref": "#/components/schemas/nac_rule_matching_port_types",
+            "description": "Wired or wireless access types that must match the request"
           },
           "site_ids": {
-            "$ref": "#/components/schemas/nac_rule_matching_site_ids"
+            "$ref": "#/components/schemas/nac_rule_matching_site_ids",
+            "description": "Site IDs where the rule criteria apply"
           },
           "sitegroup_ids": {
-            "$ref": "#/components/schemas/nac_rule_matching_sitegroup_ids"
+            "$ref": "#/components/schemas/nac_rule_matching_sitegroup_ids",
+            "description": "Site group IDs where the rule criteria apply"
           },
           "vendor": {
-            "$ref": "#/components/schemas/nac_rule_matching_vendor"
+            "$ref": "#/components/schemas/nac_rule_matching_vendor",
+            "description": "Client device vendor values that must match the request"
           }
         },
         "type": "object"
@@ -472,6 +494,7 @@
         "type": "array"
       },
       "nac_rule_matching_nactags": {
+        "description": "NAC tag identifiers used as rule-matching criteria",
         "examples": [
           [
             "041d5d36-716c-4cfb-4988-3857c6aa14a2",
@@ -491,7 +514,7 @@
         "type": "array"
       },
       "nac_rule_matching_port_type": {
-        "description": "enum: `wired`, `wireless`",
+        "description": "Port attachment type matched by a NAC rule. enum: `wired`, `wireless`",
         "enum": [
           "wired",
           "wireless"
@@ -499,6 +522,7 @@
         "type": "string"
       },
       "nac_rule_matching_port_types": {
+        "description": "Wired or wireless access types used as NAC rule-matching criteria",
         "examples": [
           [
             "wired"
@@ -548,12 +572,14 @@
         "type": "array"
       },
       "nac_rules": {
+        "description": "List of NAC authentication policy rules",
         "items": {
           "$ref": "#/components/schemas/nac_rule"
         },
         "type": "array"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -563,8 +589,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -575,8 +603,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -587,8 +617,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -599,8 +631,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -608,8 +642,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -781,9 +817,9 @@
     },
     "parameters": {
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -815,9 +851,9 @@
         }
       },
       "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
         "in": "query",
         "name": "page",
-        "required": false,
         "schema": {
           "default": 1,
           "minimum": 1,
@@ -895,19 +931,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

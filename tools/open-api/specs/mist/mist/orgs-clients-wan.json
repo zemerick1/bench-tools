@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Clients - Wan",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -84,6 +80,7 @@
         "operationId": "countOrgWanClientEvents",
         "parameters": [
           {
+            "description": "Field used to group this count response. enum: `hostname`, `ip`, `mac`, `mfg`, `type`",
             "in": "query",
             "name": "distinct",
             "schema": {
@@ -143,6 +140,7 @@
         "operationId": "countOrgWanClients",
         "parameters": [
           {
+            "description": "Field used to group this count response. enum: `hostname`, `ip`, `mac`, `mfg`, `network`",
             "in": "query",
             "name": "distinct",
             "schema": {
@@ -202,39 +200,19 @@
             "$ref": "#/components/parameters/client_event_type"
           },
           {
-            "description": "Partial / full MAC address",
-            "in": "query",
-            "name": "mac",
-            "schema": {
-              "type": "string"
-            }
+            "$ref": "#/components/parameters/partial_filter_mac_client"
           },
           {
-            "description": "Partial / full hostname",
-            "in": "query",
-            "name": "hostname",
-            "schema": {
-              "type": "string"
-            }
+            "$ref": "#/components/parameters/partial_filter_hostname_client"
           },
           {
-            "description": "Client IP",
-            "in": "query",
-            "name": "ip",
-            "schema": {
-              "type": "string"
-            }
+            "$ref": "#/components/parameters/partial_filter_ip_client"
           },
           {
-            "description": "Manufacture",
-            "in": "query",
-            "name": "mfg",
-            "schema": {
-              "type": "string"
-            }
+            "$ref": "#/components/parameters/partial_filter_mfg_client"
           },
           {
-            "description": "nacrule_id",
+            "description": "Filter results by NAC rule identifier",
             "in": "query",
             "name": "nacrule_id",
             "schema": {
@@ -297,7 +275,7 @@
         "operationId": "searchOrgWanClients",
         "parameters": [
           {
-            "description": "Site ID",
+            "description": "Filter results by site identifier",
             "in": "query",
             "name": "site_id",
             "schema": {
@@ -309,50 +287,78 @@
             }
           },
           {
-            "description": "Partial / full MAC address",
-            "in": "query",
-            "name": "mac",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Partial / full hostname",
+            "description": "Partial / full Client hostname. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `everest*` and `*rest*` match `my-everest-client`). Suffix-only wildcards (e.g. `*everest`) are not supported. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "hostname",
             "schema": {
+              "examples": [
+                "my-everest-client,my-everest*",
+                "my-everest-client",
+                "my-everest*",
+                "*everest*"
+              ],
               "type": "string"
             }
           },
           {
-            "description": "Client IP",
+            "description": "Partial / full Client IP address. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `10.100.10.*` and `*100.10.*` match `10.100.10.54`). Suffix-only wildcards (e.g. `*.54`) are not supported. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "ip",
             "schema": {
+              "examples": [
+                "10.100.10.54,10.100.10.*",
+                "10.100.10.54",
+                "10.100.10.*",
+                "*100.10.*"
+              ],
               "type": "string"
             }
           },
           {
-            "description": "Network",
-            "in": "query",
-            "name": "network",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "IP source",
+            "description": "Filter results by source IP address",
             "in": "query",
             "name": "ip_src",
             "schema": {
+              "examples": [
+                "dhcp"
+              ],
               "type": "string"
             }
           },
           {
-            "description": "Manufacture",
+            "description": "Filter results by MAC address. Accepts multiple comma-separated values.",
+            "in": "query",
+            "name": "mac",
+            "schema": {
+              "examples": [
+                "5c5b53010101,5c5b53020202",
+                "5c5b53010101"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter results by manufacturer. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "mfg",
             "schema": {
+              "examples": [
+                "Unknown,Juniper Networks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Partial / full Name of the network the client is/was connected to. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `my-corp*` and `*corp*` match `my-corp-network`). Suffix-only wildcards (e.g. `*corp`) are not supported. Accepts multiple comma-separated values.",
+            "in": "query",
+            "name": "network",
+            "schema": {
+              "examples": [
+                "my-corp-network,my-corp*",
+                "my-corp-network",
+                "my-corp*",
+                "*corp*"
+              ],
               "type": "string"
             }
           },
@@ -408,8 +414,10 @@
         "additionalProperties": {
           "type": "string"
         },
+        "description": "Count result row with the matching distinct field values",
         "properties": {
           "count": {
+            "description": "Number of matching items for the distinct value or values in this result",
             "type": "integer"
           }
         },
@@ -419,6 +427,7 @@
         "type": "object"
       },
       "count_results": {
+        "description": "List of count result rows",
         "items": {
           "$ref": "#/components/schemas/count_result"
         },
@@ -427,14 +436,17 @@
       },
       "events_client_wan": {
         "additionalProperties": false,
+        "description": "WAN client event returned by WAN client event search APIs",
         "properties": {
           "When": {
+            "description": "Event timestamp string reported by the WAN client event source",
             "examples": [
               "2022-12-31 23:59:59.293000+00:00"
             ],
             "type": "string"
           },
           "ev_type": {
+            "description": "WAN client event type identifier",
             "examples": [
               "CLIENT_IP_ASSIGNED"
             ],
@@ -442,24 +454,30 @@
           },
           "metadata": {
             "additionalProperties": true,
+            "description": "Additional attributes provided with the WAN client event",
             "type": "object"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization that contains the WAN client event"
           },
           "random_mac": {
+            "description": "Whether the WAN client used a randomized MAC address",
             "type": "boolean"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site where the WAN client event occurred"
           },
           "text": {
+            "description": "Human-readable message for the WAN client event",
             "examples": [
               "DHCP Ack IP 192.168.88.216"
             ],
             "type": "string"
           },
           "wcid": {
+            "description": "WAN client identifier associated with the event",
             "examples": [
               "62bbfb75-10d8-49d1-dec7-d2df91624287"
             ],
@@ -470,6 +488,7 @@
         "type": "object"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -503,23 +522,30 @@
       },
       "response_count": {
         "additionalProperties": false,
+        "description": "Distinct count response for time-bounded search results",
         "properties": {
           "distinct": {
+            "description": "Field used to group the count results",
             "type": "string"
           },
           "end": {
+            "description": "Search window end timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of distinct count results requested",
             "type": "integer"
           },
           "results": {
-            "$ref": "#/components/schemas/count_results"
+            "$ref": "#/components/schemas/count_results",
+            "description": "Count results grouped by the distinct field"
           },
           "start": {
+            "description": "Search window start timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "total": {
+            "description": "Number of distinct result buckets returned",
             "type": "integer"
           }
         },
@@ -535,8 +561,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -547,8 +575,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -559,8 +589,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -571,8 +603,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -580,8 +614,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -592,23 +628,30 @@
       },
       "search_events_wan_client": {
         "additionalProperties": false,
+        "description": "Paginated response for WAN client event searches",
         "properties": {
           "end": {
+            "description": "Upper bound timestamp of the WAN client event search window, in epoch seconds",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of WAN client event results returned by this page",
             "type": "integer"
           },
           "next": {
+            "description": "URL for the next page of WAN client event results, when more results are available",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/events_client_wan"
+            "$ref": "#/components/schemas/events_client_wan",
+            "description": "WAN client event result data returned by the search response"
           },
           "start": {
+            "description": "Lower bound timestamp of the WAN client event search window, in epoch seconds",
             "type": "integer"
           },
           "total": {
+            "description": "Count of WAN client event results matching the search",
             "type": "integer"
           }
         },
@@ -616,29 +659,37 @@
       },
       "search_wan_client": {
         "additionalProperties": false,
+        "description": "Paginated response for WAN client searches",
         "properties": {
           "end": {
+            "description": "Upper bound timestamp of the WAN client search window, in epoch seconds",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of WAN client records returned by this page",
             "type": "integer"
           },
           "next": {
+            "description": "URL for the next page of WAN client records, when more results are available",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/stats_wan_clients"
+            "$ref": "#/components/schemas/stats_wan_clients",
+            "description": "WAN client records returned by the search response"
           },
           "start": {
+            "description": "Lower bound timestamp of the WAN client search window, in epoch seconds",
             "type": "integer"
           },
           "total": {
+            "description": "Count of WAN client records matching the search",
             "type": "integer"
           }
         },
         "type": "object"
       },
       "site_id": {
+        "description": "Unique identifier of a Mist site",
         "examples": [
           "441a1214-6928-442a-8e92-e1d34b8ec6a6"
         ],
@@ -648,59 +699,73 @@
       },
       "stats_wan_client": {
         "additionalProperties": false,
+        "description": "WAN client record returned by WAN client search",
         "properties": {
           "dhcp_expire_time": {
+            "description": "DHCP lease expiration time for the WAN client, in epoch seconds",
             "type": "number"
           },
           "dhcp_start_time": {
+            "description": "DHCP lease start time for the WAN client, in epoch seconds",
             "type": "number"
           },
           "hostname": {
-            "$ref": "#/components/schemas/stats_wan_client_hostname"
+            "$ref": "#/components/schemas/stats_wan_client_hostname",
+            "description": "Observed hostnames for the WAN client during the search window"
           },
           "ip": {
-            "$ref": "#/components/schemas/stats_wan_client_ip"
+            "$ref": "#/components/schemas/stats_wan_client_ip",
+            "description": "Observed IP addresses for the WAN client during the search window"
           },
           "ip_src": {
+            "description": "Source used to learn the WAN client IP address, such as dhcp",
             "examples": [
               "dhcp"
             ],
             "type": "string"
           },
           "last_hostname": {
+            "description": "Most recent hostname observed for the WAN client",
             "examples": [
               "sonoszp"
             ],
             "type": "string"
           },
           "last_ip": {
+            "description": "Most recent IP address observed for the WAN client",
             "examples": [
               "192.168.1.139"
             ],
             "type": "string"
           },
           "mfg": {
+            "description": "Manufacturer inferred for the WAN client",
             "examples": [
               "Sonos"
             ],
             "type": "string"
           },
           "network": {
+            "description": "Mist network name associated with the WAN client",
             "examples": [
               "lan"
             ],
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Owning organization identifier for the WAN client record"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site identifier associated with the WAN client record"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Time when the WAN client record was observed, in epoch seconds"
           },
           "wcid": {
+            "description": "WAN client identifier associated with the record",
             "examples": [
               "8bbe7389-212b-c65d-2208-00fab2017936"
             ],
@@ -710,6 +775,7 @@
         "type": "object"
       },
       "stats_wan_client_hostname": {
+        "description": "Hostnames observed for a WAN client",
         "items": {
           "examples": [
             "sonoszp"
@@ -719,6 +785,7 @@
         "type": "array"
       },
       "stats_wan_client_ip": {
+        "description": "IP addresses observed for a WAN client",
         "items": {
           "examples": [
             "192.168.1.139"
@@ -728,13 +795,14 @@
         "type": "array"
       },
       "stats_wan_clients": {
+        "description": "WAN client records returned by the search response",
         "items": {
           "$ref": "#/components/schemas/stats_wan_client"
         },
         "type": "array"
       },
       "timestamp": {
-        "description": "Epoch (seconds)",
+        "description": "Epoch timestamp, in seconds",
         "format": "double",
         "readOnly": true,
         "type": "number"
@@ -942,10 +1010,9 @@
         }
       },
       "duration": {
-        "description": "Duration like 7d, 2w",
+        "description": "Time range duration for the query, using relative units such as `10m`, `7d`, or `2w`",
         "in": "query",
         "name": "duration",
-        "required": false,
         "schema": {
           "default": "1d",
           "examples": [
@@ -955,7 +1022,7 @@
         }
       },
       "end": {
-        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
         "in": "query",
         "name": "end",
         "schema": {
@@ -963,9 +1030,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -984,6 +1051,58 @@
           "type": "string"
         }
       },
+      "partial_filter_hostname_client": {
+        "description": "Partial / full Client hostname. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `everest*` and `*rest*` match `my-everest-client`). Suffix-only wildcards (e.g. `*everest`) are not supported",
+        "in": "query",
+        "name": "hostname",
+        "schema": {
+          "examples": [
+            "my-everest-client",
+            "my-everest*",
+            "*everest*"
+          ],
+          "type": "string"
+        }
+      },
+      "partial_filter_ip_client": {
+        "description": "Partial / full Client IP address. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `10.100.10.*` and `*100.10.*` match `10.100.10.54`). Suffix-only wildcards (e.g. `*.54`) are not supported",
+        "in": "query",
+        "name": "ip",
+        "schema": {
+          "examples": [
+            "10.100.10.54",
+            "10.100.10.*",
+            "*100.10.*"
+          ],
+          "type": "string"
+        }
+      },
+      "partial_filter_mac_client": {
+        "description": "Partial / full Client MAC address. Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `aabbcc*` and `*bbcc*` match `aabbccddeeff`). Suffix-only wildcards (e.g. `*bccddeeff`) are not supported",
+        "in": "query",
+        "name": "mac",
+        "schema": {
+          "examples": [
+            "aabbccddeeff",
+            "aabbcc*",
+            "*bbcc*"
+          ],
+          "type": "string"
+        }
+      },
+      "partial_filter_mfg_client": {
+        "description": "Partial / full Client manufacturer (e.g. \"apple\", \"cisco\", \"juniper\"). Use `prefix*` for prefix search or `*substring*` for contains search (e.g. `Raspberry Pi*` and `*Pi*` match `Raspberry Pi Trading Ltd`). Suffix-only wildcards (e.g. `*Ltd`) are not supported",
+        "in": "query",
+        "name": "mfg",
+        "schema": {
+          "examples": [
+            "Raspberry Pi Trading Ltd",
+            "Raspberry Pi*",
+            "*Pi*"
+          ],
+          "type": "string"
+        }
+      },
       "search_after": {
         "description": "Pagination cursor for retrieving subsequent pages of results. This value is automatically populated by Mist in the `next` URL from the previous response and should not be manually constructed.",
         "in": "query",
@@ -996,7 +1115,6 @@
         "description": "On which field the list should be sorted, -prefix represents DESC order",
         "in": "query",
         "name": "sort",
-        "required": false,
         "schema": {
           "default": "timestamp",
           "examples": [
@@ -1006,7 +1124,7 @@
         }
       },
       "start": {
-        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
         "in": "query",
         "name": "start",
         "schema": {
@@ -1095,19 +1213,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

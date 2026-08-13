@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Integration JSE",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,16 +59,12 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
   "tags": [
     {
-      "description": "JSE stands for Juniper Secure Edge and it is a feature within the Mist UI that allows customers to configure Secure Cloud Connectors.\n\nWith JSE, users can establish a tunnel via IPSEC protocol and use application policy and traffic steering to send traffic from a WAN edge device to JSE. Mist also provides insights and telemetry for the secure edge connection, which is helpful for troubleshooting and monitoring data.",
+      "description": "JSE stands for Juniper Secure Edge and it is a feature within the Mist UI that allows customers to configure Secure Cloud Connectors.\n\nWith JSE, users can establish a tunnel via IPSec  protocol and use application policy and traffic steering to send traffic from a WAN edge device to JSE. Mist also provides insights and telemetry for the secure edge connection, which is helpful for troubleshooting and monitoring data.",
       "name": "Orgs Integration JSE"
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "get": {
-        "description": "Retrieves the list of JSE orgs associated with the account.",
+        "description": "Return the JSE organizations associated with the configured account. Use the returned organization names when selecting JSE provider options for secure edge tunnels.",
         "operationId": "getOrgJseInfo",
         "responses": {
           "200": {
@@ -115,7 +111,7 @@
         }
       ],
       "get": {
-        "description": "Get Org JSE Integration",
+        "description": "Return the JSE integration configuration, including the cloud hostname, integration username, and associated JSE organization names.",
         "operationId": "getOrgJseIntegration",
         "responses": {
           "200": {
@@ -143,7 +139,7 @@
         ]
       },
       "post": {
-        "description": "In JSE UI: \n1. Create custom role with Read access to service_location and RW access to site and IPSec profile APIs. \n2. Create a user with the above custom role. - email: john@abc.com \n3. Activate the user in the JSE account. \n4. Create the service locations on the JSE account.",
+        "description": "Configure the JSE integration with the JSE cloud hostname and integration-user credentials. In JSE, use a custom role with read access to `service_location` and read-write access to site and IPsec profile APIs, then create and activate the integration user and service locations.",
         "operationId": "setupOrgJseIntegration",
         "requestBody": {
           "content": {
@@ -189,7 +185,7 @@
         ]
       },
       "delete": {
-        "description": "Delete JSE Integration",
+        "description": "Remove the JSE integration configuration from the organization.",
         "operationId": "deleteOrgJseIntegration",
         "responses": {
           "200": {
@@ -221,20 +217,25 @@
   "components": {
     "schemas": {
       "account_jse_config": {
+        "description": "Juniper Security Exchange account credentials used for integration",
         "properties": {
           "cloud_name": {
+            "description": "JSE cloud hostname used for the integration",
             "examples": [
               "devcentral.juniperclouds.net"
             ],
             "type": "string"
           },
           "password": {
+            "description": "Credential password for the JSE integration user",
             "examples": [
               "foryoureyesonly"
             ],
+            "format": "password",
             "type": "string"
           },
           "username": {
+            "description": "JSE integration username with access to service location, site, and IPsec profile APIs",
             "examples": [
               "john@abc.com"
             ],
@@ -249,17 +250,21 @@
       },
       "account_jse_info": {
         "additionalProperties": false,
+        "description": "Linked Juniper Security Exchange account information",
         "properties": {
           "cloud_name": {
+            "description": "JSE cloud hostname configured for the integration",
             "examples": [
               "devcentral.juniperclouds.net"
             ],
             "type": "string"
           },
           "org_names": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "JSE organization names associated with the linked account"
           },
           "username": {
+            "description": "JSE integration username configured for the linked account",
             "examples": [
               "john@abc.com"
             ],
@@ -270,8 +275,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -282,8 +289,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -294,8 +303,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -306,8 +317,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -315,8 +328,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -326,6 +341,7 @@
         "type": "object"
       },
       "strings": {
+        "description": "Unique string values returned or accepted by this schema",
         "items": {
           "type": "string"
         },
@@ -540,19 +556,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

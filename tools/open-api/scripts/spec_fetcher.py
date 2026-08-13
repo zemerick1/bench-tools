@@ -60,6 +60,17 @@ PROJECTS: list[dict[str, Any]] = [
     {"slug": "aoscx", "api": "aos-cx", "variant": None, "label": "AOS-CX", "central": False},
 ]
 
+# Direct OpenAPI URLs (not on the HPE ReadMe hub). Same source/ layout as hub files.
+REMOTE_SPECS: list[dict[str, Any]] = [
+    {
+        "api": "mist",
+        "label": "Mist",
+        "url": "https://raw.githubusercontent.com/mistsys/mist_openapi/refs/heads/master/mist.openapi.json",
+        "filename": "mist.json",
+        "central": False,
+    },
+]
+
 _SSR_PROPS_RE = re.compile(r'<script id="ssr-props"[^>]*>(.*?)</script>', re.DOTALL)
 _README_REGISTRY = "https://dash.readme.com/api/v1/api-registry"
 
@@ -70,7 +81,9 @@ _RETRY_BACKOFF = 3
 
 _ssl_verify: ssl.SSLContext | bool = True
 
-DEFAULT_SOURCE_DIR = Path(__file__).resolve().parent.parent / "source"
+TOOL_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_SOURCE_DIR = TOOL_ROOT / "source"
+LOCAL_SOURCE_DIR = TOOL_ROOT / "local"
 
 
 def _configure_ssl_verify(*, no_verify: bool = False) -> None:
@@ -281,6 +294,72 @@ def fetch_project(project: dict[str, Any], source_dir: Path) -> list[dict[str, A
     return entries
 
 
+def fetch_remote_spec(remote: dict[str, Any], source_dir: Path) -> list[dict[str, Any]]:
+    """Download one OpenAPI document from a raw URL into source/."""
+    label = remote["label"]
+    url = remote["url"]
+    logger.info("── %s (url) ──", label)
+    try:
+        raw = _http_get(url)
+        spec = json.loads(raw)
+    except Exception as exc:
+        logger.error("  ✗ %s: %s", label, exc)
+        return []
+    if not _looks_like_oas(spec):
+        logger.error("  ✗ %s: URL did not return a valid OpenAPI document", label)
+        return []
+
+    file_slug = Path(remote["filename"]).stem
+    relpath = _relpath_for(remote, file_slug)
+    dest = source_dir / relpath
+    _write_json(dest, spec)
+    info = spec.get("info") or {}
+    size = dest.stat().st_size
+    logger.info(
+        "  ✓ Wrote %s — %d paths (%.2f MB)",
+        relpath,
+        len(spec.get("paths") or {}),
+        size / (1024 * 1024),
+    )
+    return [
+        {
+            "path": relpath,
+            "api": remote["api"],
+            "variant": remote.get("variant"),
+            "source_stem": file_slug,
+            "slug": "",
+            "label": label,
+            "filename": remote["filename"],
+            "uuid": "",
+            "title": info.get("title") or label,
+            "version": info.get("version") or "",
+            "paths": len(spec.get("paths") or {}),
+            "bytes": size,
+            "url": url,
+        }
+    ]
+
+
+def seed_local_sources(source_dir: Path, local_dir: Path | None = None) -> int:
+    """Copy committed ``local/`` specs into gitignored ``source/``.
+
+    Hub fetches never see SDC / Axis. CI has no leftover ``source/``,
+    so those platforms only survive a scheduled run if they live here.
+    """
+    root = local_dir or LOCAL_SOURCE_DIR
+    if not root.is_dir():
+        return 0
+    copied = 0
+    for path in sorted(root.rglob("*.json")):
+        rel = path.relative_to(root)
+        dest = source_dir / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(path.read_bytes())
+        copied += 1
+        logger.info("  seeded local/%s", rel.as_posix())
+    return copied
+
+
 def local_source_entry(source_dir: Path, rel: str) -> dict[str, Any]:
     """Index metadata for a spec dropped into source/ by hand."""
     path = source_dir / rel
@@ -310,7 +389,7 @@ def local_source_entry(source_dir: Path, rel: str) -> dict[str, Any]:
 
 
 def merge_local_source_files(source_dir: Path, files: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Keep hand-dropped specs (mist/axis/sdc, …) when rewriting index.json."""
+    """Keep hand-dropped specs (axis/sdc, …) when rewriting index.json."""
     known = {entry.get("path") for entry in files}
     for path in sorted(source_dir.rglob("*.json")):
         if path.name == "index.json" or path.name.endswith(".meta.json"):
@@ -334,6 +413,8 @@ def fetch_all_specs(
     files: list[dict[str, Any]] = []
     failures: list[str] = []
 
+    seed_local_sources(source_dir)
+
     for project in PROJECTS:
         if central_only and not project["central"]:
             continue
@@ -342,6 +423,16 @@ def fetch_all_specs(
         entries = fetch_project(project, source_dir)
         if not entries:
             failures.append(project["slug"])
+        files.extend(entries)
+
+    for remote in REMOTE_SPECS:
+        if central_only:
+            continue
+        if wanted_apis and remote["api"] not in wanted_apis:
+            continue
+        entries = fetch_remote_spec(remote, source_dir)
+        if not entries:
+            failures.append(remote["api"])
         files.extend(entries)
 
     files = merge_local_source_files(source_dir, files)
@@ -354,6 +445,10 @@ def fetch_all_specs(
 
     if not files:
         raise RuntimeError("No OpenAPI specs fetched — refusing to write an empty source tree")
+    if failures:
+        raise RuntimeError(
+            "Fetch failed for: " + ", ".join(failures) + " — refusing a partial source tree"
+        )
 
     return index
 
@@ -373,7 +468,7 @@ def main() -> int:
         "--api",
         action="append",
         dest="apis",
-        help="Limit to this api id (repeatable): aruba-central, clearpass, aos-cx, uxi.",
+        help="Limit to this api id (repeatable): aruba-central, clearpass, aos-cx, uxi, mist.",
     )
     parser.add_argument(
         "--source-dir",
@@ -420,7 +515,7 @@ def main() -> int:
     if index["failures"]:
         print(f"\n  Failed projects: {', '.join(index['failures'])}")
     print("═" * 60)
-    return 1 if index["failures"] and not index["files"] else 0
+    return 0
 
 
 if __name__ == "__main__":

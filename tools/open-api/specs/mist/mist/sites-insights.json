@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sites Insights",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -73,22 +69,168 @@
     }
   ],
   "paths": {
-    "/api/v1/sites/{site_id}/insights/client/{client_mac}/{metric}": {
+    "/api/v1/sites/{site_id}/insights": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        }
+      ],
+      "get": {
+        "description": "Get Site Insight Metrics",
+        "operationId": "getSiteInsightMetrics",
+        "parameters": [
+          {
+            "description": "Comma separated Metric names, e.g. `num_clients,num_aps`. See possible values at [List Insight Metrics](/#operations/listInsightMetrics)",
+            "in": "query",
+            "name": "metrics",
+            "required": true,
+            "schema": {
+              "examples": [
+                "num_clients,num_aps"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/start"
+          },
+          {
+            "$ref": "#/components/parameters/end"
+          },
+          {
+            "$ref": "#/components/parameters/duration"
+          },
+          {
+            "$ref": "#/components/parameters/interval"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/InsightMetric"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getSiteInsightMetrics",
+        "tags": [
+          "Sites Insights"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/insights/ap/{device_id}/stats": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "get": {
+        "description": "Get AP Insight Metrics",
+        "operationId": "getSiteInsightMetricsForAP",
+        "parameters": [
+          {
+            "description": "Comma separated Metric names, e.g. `num_clients,num_stressed_clients`. See possible values at [List Insight Metrics](/#operations/listInsightMetrics)",
+            "in": "query",
+            "name": "metrics",
+            "required": true,
+            "schema": {
+              "examples": [
+                "num_clients,num_stressed_clients"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/start"
+          },
+          {
+            "$ref": "#/components/parameters/end"
+          },
+          {
+            "$ref": "#/components/parameters/duration"
+          },
+          {
+            "$ref": "#/components/parameters/interval"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DeviceMetric"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getSiteInsightMetricsForAP",
+        "tags": [
+          "Sites Insights"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/insights/client/{client_mac}": {
       "parameters": [
         {
           "$ref": "#/components/parameters/site_id"
         },
         {
           "$ref": "#/components/parameters/client_mac"
-        },
-        {
-          "$ref": "#/components/parameters/metric"
         }
       ],
       "get": {
-        "description": "Get Client Insight Metrics\nSee metrics possibilities at [List Insight Metrics](/#operations/listInsightMetrics)",
+        "description": "Get Client Insight Metrics",
         "operationId": "getSiteInsightMetricsForClient",
         "parameters": [
+          {
+            "description": "Comma separated Metric names, e.g. `top-app-by-num_client,top-app-by-bytes`. See possible values at [List Insight Metrics](/#operations/listInsightMetrics)",
+            "in": "query",
+            "name": "metrics",
+            "required": true,
+            "schema": {
+              "examples": [
+                "top-app-by-num_client,top-app-by-bytes"
+              ],
+              "type": "string"
+            }
+          },
           {
             "$ref": "#/components/parameters/start"
           },
@@ -151,6 +293,17 @@
         "operationId": "getSiteInsightMetricsForDevice",
         "parameters": [
           {
+            "description": "Port ID of the device, e.g. `ge-0/0/1`. Can be used with metrics related to interfaces, e.g. `rx_bytes`.",
+            "in": "query",
+            "name": "port_id",
+            "schema": {
+              "examples": [
+                "ge-0/0/1"
+              ],
+              "type": "string"
+            }
+          },
+          {
             "$ref": "#/components/parameters/start"
           },
           {
@@ -195,22 +348,42 @@
         ]
       }
     },
-    "/api/v1/sites/{site_id}/insights/gateway/{device_id}/stats/{metric}": {
+    "/api/v1/sites/{site_id}/insights/gateway/{device_id}/stats": {
       "parameters": [
         {
           "$ref": "#/components/parameters/site_id"
-        },
-        {
-          "$ref": "#/components/parameters/metric"
         },
         {
           "$ref": "#/components/parameters/device_id"
         }
       ],
       "get": {
-        "description": "Get Gateway Insight Metrics\nSee metrics possibilities at [List Insight Metrics](/#operations/listInsightMetrics)",
+        "description": "Get Gateway Insight Metrics",
         "operationId": "getSiteInsightMetricsForGateway",
         "parameters": [
+          {
+            "description": "Comma separated Metric names, e.g. `tx_bps,rx_bps`. See possible values at [List Insight Metrics](/#operations/listInsightMetrics)",
+            "in": "query",
+            "name": "metrics",
+            "required": true,
+            "schema": {
+              "examples": [
+                "tx_bps,rx_bps"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Port ID of the gateway device, e.g. `ge-0/0/1`",
+            "in": "query",
+            "name": "port_id",
+            "schema": {
+              "examples": [
+                "ge-0/0/1"
+              ],
+              "type": "string"
+            }
+          },
           {
             "$ref": "#/components/parameters/start"
           },
@@ -273,6 +446,17 @@
         "operationId": "getSiteInsightMetricsForMxEdge",
         "parameters": [
           {
+            "description": "Port ID of the MxEdge device, e.g. `port0`. Can be used with metrics related to interfaces, e.g. `rx_bytes`.",
+            "in": "query",
+            "name": "port_id",
+            "schema": {
+              "examples": [
+                "port0"
+              ],
+              "type": "string"
+            }
+          },
+          {
             "$ref": "#/components/parameters/start"
           },
           {
@@ -334,6 +518,17 @@
         "operationId": "getSiteInsightMetricsForSwitch",
         "parameters": [
           {
+            "description": "Port ID of the switch device, e.g. `ge-0/0/1`. Can be used with metrics related to interfaces, e.g. `rx_bytes`.",
+            "in": "query",
+            "name": "port_id",
+            "schema": {
+              "examples": [
+                "ge-0/0/1"
+              ],
+              "type": "string"
+            }
+          },
+          {
             "$ref": "#/components/parameters/start"
           },
           {
@@ -377,84 +572,32 @@
           "Sites Insights"
         ]
       }
-    },
-    "/api/v1/sites/{site_id}/insights/{metric}": {
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/site_id"
-        },
-        {
-          "$ref": "#/components/parameters/metric"
-        }
-      ],
-      "get": {
-        "description": "Get Site Insight Metrics\nSee metrics possibilities at [List Insight Metrics](/#operations/listInsightMetrics)",
-        "operationId": "getSiteInsightMetrics",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/start"
-          },
-          {
-            "$ref": "#/components/parameters/end"
-          },
-          {
-            "$ref": "#/components/parameters/duration"
-          },
-          {
-            "$ref": "#/components/parameters/interval"
-          },
-          {
-            "$ref": "#/components/parameters/limit"
-          },
-          {
-            "$ref": "#/components/parameters/page"
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/InsightMetric"
-          },
-          "400": {
-            "$ref": "#/components/responses/HTTP400"
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "404": {
-            "$ref": "#/components/responses/HTTP404"
-          },
-          "429": {
-            "$ref": "#/components/responses/HTTP429"
-          }
-        },
-        "summary": "getSiteInsightMetrics",
-        "tags": [
-          "Sites Insights"
-        ]
-      }
     }
   },
   "components": {
     "schemas": {
       "insight_metrics": {
         "additionalProperties": false,
+        "description": "Insight metric response for a requested time range and aggregation interval",
         "properties": {
           "end": {
+            "description": "Window end timestamp for the returned insight metrics",
             "type": "integer"
           },
           "interval": {
+            "description": "Aggregation interval used for the metric results",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of insight metric result items returned",
             "type": "integer"
           },
           "results": {
-            "$ref": "#/components/schemas/insight_metrics_results"
+            "$ref": "#/components/schemas/insight_metrics_results",
+            "description": "Metric result values for the requested insight metric"
           },
           "start": {
+            "description": "Window start timestamp for the returned insight metrics",
             "type": "integer"
           }
         },
@@ -482,30 +625,39 @@
             "additionalProperties": true,
             "type": "object"
           }
-        ]
+        ],
+        "description": "Insight metric result item, returned either as a number or an object depending on the requested metric"
       },
       "response_device_metrics": {
         "additionalProperties": false,
+        "description": "Time-series insight metric response for a device",
         "properties": {
           "end": {
+            "description": "Epoch timestamp for the end of the metric query window",
             "type": "integer"
           },
           "interval": {
+            "description": "Aggregation interval in seconds for each metric sample",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of metric samples returned in this page",
             "type": "integer"
           },
           "page": {
+            "description": "Returned page number for paginated metric samples",
             "type": "integer"
           },
           "results": {
-            "$ref": "#/components/schemas/response_device_metrics_results"
+            "$ref": "#/components/schemas/response_device_metrics_results",
+            "description": "Metric values for the requested insight metric, aligned by position with the `rt` timestamps"
           },
           "rt": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Timestamps for the metric samples, aligned by position with the `results` values"
           },
           "start": {
+            "description": "Epoch timestamp for the start of the metric query window",
             "type": "integer"
           }
         },
@@ -518,12 +670,14 @@
         "type": "object"
       },
       "response_device_metrics_results": {
+        "description": "Device metric result values aligned with the response timestamps",
         "items": {
           "$ref": "#/components/schemas/response_device_metrics_results_items"
         },
         "type": "array"
       },
       "response_device_metrics_results_items": {
+        "description": "Device metric result value, returned as a string or integer",
         "oneOf": [
           {
             "type": "string"
@@ -535,8 +689,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -547,8 +703,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -559,8 +717,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -571,8 +731,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -580,8 +742,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -591,6 +755,7 @@
         "type": "object"
       },
       "strings": {
+        "description": "Unique string values returned or accepted by this schema",
         "items": {
           "type": "string"
         },
@@ -803,10 +968,9 @@
         }
       },
       "duration": {
-        "description": "Duration like 7d, 2w",
+        "description": "Time range duration for the query, using relative units such as `10m`, `7d`, or `2w`",
         "in": "query",
         "name": "duration",
-        "required": false,
         "schema": {
           "default": "1d",
           "examples": [
@@ -816,7 +980,7 @@
         }
       },
       "end": {
-        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
         "in": "query",
         "name": "end",
         "schema": {
@@ -827,7 +991,6 @@
         "description": "Aggregation works by giving a time range plus interval (e.g. 1d, 1h, 10m) where aggregation function would be applied to.",
         "in": "query",
         "name": "interval",
-        "required": false,
         "schema": {
           "examples": [
             "10m"
@@ -836,9 +999,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -855,9 +1018,9 @@
         }
       },
       "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
         "in": "query",
         "name": "page",
-        "required": false,
         "schema": {
           "default": 1,
           "minimum": 1,
@@ -877,7 +1040,7 @@
         }
       },
       "start": {
-        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
         "in": "query",
         "name": "start",
         "schema": {
@@ -980,19 +1143,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Utilities Common",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -146,7 +142,7 @@
         }
       ],
       "post": {
-        "description": "ARP can be performed on the Device. The output will be available through websocket. As there can be multiple command issued against the same AP at the same time and the output all goes through the same websocket stream, session is introduced for demux.\n\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n##### Example output from ws stream\n```json\n{ \n \"event\": \"data\", \n \"channel\": \"/sites/4ac1dcf4-9d8b-7211-65c4-057819f0862b/devices/00000000-0000-0000-1000-5c5b350e0060/cmd\", \n \"data\": { \n   \"session\": \"session_id\", \n   \"raw\": \n   \"Output\": \"\\tMAC\\t\\tDEV\\tVLAN\\tRx Packets\\t\\t Rx Bytes\\t\\tTx Packets\\t\\t Tx Bytes\\tFlows\\tIdle sec\\n-----------------------------------------------------------------------------------------------------------------------\"\n  } \n}\n```",
+        "description": "ARP can be performed on the Device. The output will be available through websocket. As there can be multiple commands issued against the same AP at the same time and the output all goes through the same websocket stream, session is introduced for demux.\n\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n##### Example output from ws stream\n```json\n{ \n \"event\": \"data\", \n \"channel\": \"/sites/4ac1dcf4-9d8b-7211-65c4-057819f0862b/devices/00000000-0000-0000-1000-5c5b350e0060/cmd\", \n \"data\": { \n   \"session\": \"session_id\", \n   \"raw\": \n   \"Output\": \"\\tMAC\\t\\tDEV\\tVLAN\\tRx Packets\\t\\t Rx Bytes\\t\\tTx Packets\\t\\t Tx Bytes\\tFlows\\tIdle sec\\n-----------------------------------------------------------------------------------------------------------------------\"\n  } \n}\n```",
         "operationId": "arpFromDevice",
         "requestBody": {
           "content": {
@@ -200,7 +196,7 @@
         }
       ],
       "post": {
-        "description": "Port Bounce can be performed from Switch/Gateway.\n\n **Note:** Ports starting with vme, ae, irb, and HA control ports (for SSR only) are not supported\n\nThe output will be available through websocket. As there can be multiple command issued against the same AP at the same time and the output all goes through the same websocket stream, session is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n##### Example output from ws stream\n```json\n{\n    \"event\": \"data\",\n    \"channel\": \"/sites/4ac1dcf4-9d8b-7211-65c4-057819f0862b/devices/00000000-0000-0000-1000-5c5b350e0060/cmd\",\n    \"data\": {\n        \"session\": \"session_id\",\n        \"raw\": \"Port bounce complete.\"\n    }\n}\n```",
+        "description": "Port Bounce can be performed from Switch/Gateway.\n\n **Note:** Ports starting with vme, ae, irb, and HA control ports (for SSR only) are not supported\n\nThe output will be available through websocket. As there can be multiple commands issued against the same AP at the same time and the output all goes through the same websocket stream, session is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n##### Example output from ws stream\n```json\n{\n    \"event\": \"data\",\n    \"channel\": \"/sites/4ac1dcf4-9d8b-7211-65c4-057819f0862b/devices/00000000-0000-0000-1000-5c5b350e0060/cmd\",\n    \"data\": {\n        \"session\": \"session_id\",\n        \"raw\": \"Port bounce complete.\"\n    }\n}\n```",
         "operationId": "bounceDevicePort",
         "requestBody": {
           "content": {
@@ -258,7 +254,7 @@
         }
       ],
       "post": {
-        "description": "Clear MAC Table from the Device.\n\nThe output will be available through websocket. As there can be multiple command issued against the same device at the same time and the output all goes through the same websocket stream, `session` is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n",
+        "description": "Clear MAC Table from the Device.\n\nThe output will be available through websocket. As there can be multiple commands issued against the same device at the same time and the output all goes through the same websocket stream, `session` is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n",
         "operationId": "clearSiteDeviceMacTable",
         "requestBody": {
           "content": {
@@ -306,8 +302,24 @@
         }
       ],
       "post": {
-        "description": "Clear application policy hit counts for all the policies",
+        "description": "Clear application policy hit counts for the specified policy.",
         "operationId": "clearSiteDevicePolicyHitCount",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "policy_name": "http"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/clear_policy_hit_count"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "$ref": "#/components/responses/WebsocketSessionWithUrl"
@@ -487,7 +499,7 @@
         }
       ],
       "post": {
-        "description": "Ping from AP, Switch and SSR\n\nPing can be performed from the Device. The output will be available through websocket. As there can be multiple command issued against the same AP at the same time and the output all goes through the same websocket stream, session is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n##### Example output from ws stream\n```json\n{\n    \"event\": \"data\",\n    \"channel\": \"/sites/4ac1dcf4-9d8b-7211-65c4-057819f0862b/devices/00000000-0000-0000-1000-5c5b350e0060/cmd\",\n    \"data\": {\n        \"session\": \"session_id\",\n        \"raw\": \"64 bytes from 23.211.0.110: seq=8 ttl=58 time=12.323 ms\\n\"\n    }\n}\n```",
+        "description": "Ping from AP, Switch and SSR\n\nPing can be performed from the Device. The output will be available through websocket. As there can be multiple commands issued against the same AP at the same time and the output all goes through the same websocket stream, session is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n##### Example output from ws stream\n```json\n{\n    \"event\": \"data\",\n    \"channel\": \"/sites/4ac1dcf4-9d8b-7211-65c4-057819f0862b/devices/00000000-0000-0000-1000-5c5b350e0060/cmd\",\n    \"data\": {\n        \"session\": \"session_id\",\n        \"raw\": \"64 bytes from 23.211.0.110: seq=8 ttl=58 time=12.323 ms\\n\"\n    }\n}\n```",
         "operationId": "pingFromDevice",
         "requestBody": {
           "content": {
@@ -809,54 +821,6 @@
         ]
       }
     },
-    "/api/v1/sites/{site_id}/devices/{device_id}/show_arp": {
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/site_id"
-        },
-        {
-          "$ref": "#/components/parameters/device_id"
-        }
-      ],
-      "post": {
-        "description": "Get ARP Table from the Device.\n\nThe output will be available through websocket. As there can be multiple command issued against the same device at the same time and the output all goes through the same websocket stream, `session` is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n",
-        "operationId": "showSiteDeviceArpTable",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/utils_show_arp"
-              }
-            }
-          },
-          "description": "All attributes are optional"
-        },
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/WebsocketSession"
-          },
-          "400": {
-            "$ref": "#/components/responses/HTTP400"
-          },
-          "401": {
-            "$ref": "#/components/responses/HTTP401"
-          },
-          "403": {
-            "$ref": "#/components/responses/HTTP403"
-          },
-          "404": {
-            "$ref": "#/components/responses/HTTP404"
-          },
-          "429": {
-            "$ref": "#/components/responses/HTTP429"
-          }
-        },
-        "summary": "showSiteDeviceArpTable",
-        "tags": [
-          "Utilities Common"
-        ]
-      }
-    },
     "/api/v1/sites/{site_id}/devices/{device_id}/show_bgp_summary": {
       "parameters": [
         {
@@ -867,7 +831,7 @@
         }
       ],
       "post": {
-        "description": "Get BGP Summary from SSR, SRX and Switch.\n\n\nThe output will be available through websocket. As there can be multiple command issued against the same device at the same time and the output all goes through the same websocket stream, `session` is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n\n}\n```\n\n##### Example output from ws stream\n```\nTue 2024-04-23 16:36:06 UTC\nRetrieving bgp entries...\nBGP table version is 354, local router ID is 10.224.8.16, vrf id 0\nDefault local pref 100, local AS 65000\nStatus codes:  s suppressed, d damped, h history, * valid, > best, = multipath,\n              i internal, r RIB_failure, S Stale, R Removed\nNexthop codes: @NNN nexthop's vrf id, < announce-nh-self\nOrigin codes:  i - IGP, e - EGP, ? - incomplete\nRPKI validation codes: V valid, I invalid, N Not found\n\n  Network                                      Next Hop                                  Metric LocPrf Weight Path\n*> 161.161.161.0/24\n```\"",
+        "description": "Get BGP Summary from SSR, SRX and Switch.\n\n\nThe output will be available through websocket. As there can be multiple commands issued against the same device at the same time and the output all goes through the same websocket stream, `session` is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n\n}\n```\n\n##### Example output from ws stream\n```\nTue 2024-04-23 16:36:06 UTC\nRetrieving bgp entries...\nBGP table version is 354, local router ID is 10.224.8.16, vrf id 0\nDefault local pref 100, local AS 65000\nStatus codes:  s suppressed, d damped, h history, * valid, > best, = multipath,\n              i internal, r RIB_failure, S Stale, R Removed\nNexthop codes: @NNN nexthop's vrf id, < announce-nh-self\nOrigin codes:  i - IGP, e - EGP, ? - incomplete\nRPKI validation codes: V valid, I invalid, N Not found\n\n  Network                                      Next Hop                                  Metric LocPrf Weight Path\n*> 161.161.161.0/24\n```\"",
         "operationId": "showSiteDeviceBgpSummary",
         "requestBody": {
           "content": {
@@ -962,7 +926,7 @@
         }
       ],
       "post": {
-        "description": "Get Dot1X Table from the Device.\n\nThe output will be available through websocket. As there can be multiple command issued against the same device at the same time and the output all goes through the same websocket stream, `session` is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n",
+        "description": "Get Dot1X Table from the Device.\n\nThe output will be available through websocket. As there can be multiple commands issued against the same device at the same time and the output all goes through the same websocket stream, `session` is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n",
         "operationId": "showSiteDeviceDot1xTable",
         "requestBody": {
           "content": {
@@ -1058,7 +1022,7 @@
         }
       ],
       "post": {
-        "description": "Get forwarding table from the Device. The output will be available through websocket. As there can be multiple command issued against the same device at the same time and the output all goes through the same websocket stream, `session` is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n\n##### Example output from ws stream\n```\nMon 2024-05-20 16:47:30 UTC Retrieving fib entries… Entry Count: 3268 Capacity:    22668 ==================== ====== ======= ================== ===== ====================== =========== =========== ====== IP Prefix            Port   Proto   Tenant             VRF   Service                Next Hops   Vector      Cost ==================== ====== ======= ================== ===== ====================== =========== =========== ====== 0.0.0.0/0               0   None    Old_Mgmt           -     internet-wan_and_lte   1-2.0       broadband      1 1-4.0       lte           10 branch1-Kiosk      -     internet-wan_and_lte   1-2.0       broadband      1 1-4.0       lte           10 branch1-MGT        -     internet-wan_and_lte   1-2.0       broadband      1 1-4.0       lte           10 3.1.1.0/24              0   None    Old_Mgmt           -     internet-wan_and_lte   1-2.0       broadband      1 1-4.0       lte           10 branch1-Kiosk      -     internet-wan_and_lte   1-2.0       broadband      1 1-4.0       lte           10 branch1-MGT        -     internet-wan_and_lte   1-2.0       broadband      1 1-4.0       lte           10\n\n```\n",
+        "description": "Get forwarding table from the Device. The output will be available through websocket. As there can be multiple commands issued against the same device at the same time and the output all goes through the same websocket stream, `session` is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n\n##### Example output from ws stream\n```\nMon 2024-05-20 16:47:30 UTC Retrieving fib entries… Entry Count: 3268 Capacity:    22668 ==================== ====== ======= ================== ===== ====================== =========== =========== ====== IP Prefix            Port   Proto   Tenant             VRF   Service                Next Hops   Vector      Cost ==================== ====== ======= ================== ===== ====================== =========== =========== ====== 0.0.0.0/0               0   None    Old_Mgmt           -     internet-wan_and_lte   1-2.0       broadband      1 1-4.0       lte           10 branch1-Kiosk      -     internet-wan_and_lte   1-2.0       broadband      1 1-4.0       lte           10 branch1-MGT        -     internet-wan_and_lte   1-2.0       broadband      1 1-4.0       lte           10 3.1.1.0/24              0   None    Old_Mgmt           -     internet-wan_and_lte   1-2.0       broadband      1 1-4.0       lte           10 branch1-Kiosk      -     internet-wan_and_lte   1-2.0       broadband      1 1-4.0       lte           10 branch1-MGT        -     internet-wan_and_lte   1-2.0       broadband      1 1-4.0       lte           10\n\n```\n",
         "operationId": "showSiteDeviceForwardingTable",
         "requestBody": {
           "content": {
@@ -1106,7 +1070,7 @@
         }
       ],
       "post": {
-        "description": "Get MAC Table from the Device.\n\nThe output will be available through websocket. As there can be multiple command issued against the same device at the same time and the output all goes through the same websocket stream, `session` is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n",
+        "description": "Get MAC Table from the Device.\n\nThe output will be available through websocket. As there can be multiple commands issued against the same device at the same time and the output all goes through the same websocket stream, `session` is introduced for demux.\n\n\n\n#### Subscribe to Device Command outputs\n\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n```\n\n\n#### Example output from ws stream\n\n```json \n{\n    \"event\": \"data\",\n    \"channel\": \"/sites/d6fb4f96-xxxx-xxxx-xxxx-a8d7b85087ac/devices/00000000-0000-0000-1000-209339xxxxxx/cmd\",\n    \"data\": \"{\\\"event\\\": \\\"data\\\", \\\"channel\\\": \\\"/sites/d6fb4f96-xxxx-xxxx-xxxx-a8d7b85087ac/devices/209339xxxxxx/cmd\\\", \\\"data\\\": {\\\"session\\\": \\\"eec2b6e4-1e63-4f9f-9cf8-ef7f9632861e\\\", \\\"raw\\\": \\\"\\\\nMAC flags (S - static MAC, D - dynamic MAC, L - locally learned, P - Persistent static, C - Control MAC\\\\n           SE - statistics enabled, NM - non configured MAC, R - remote PE MAC, O - ovsdb MAC\\\\n           GBP - group based policy, B - Blocked MAC)\\\\n\\\\n\\\\nE\\\"}}\"\n}\n{\n    \"event\": \"data\",\n    \"channel\": \"/sites/d6fb4f96-xxxx-xxxx-xxxx-a8d7b85087ac/devices/00000000-0000-0000-1000-209339xxxxxx/cmd\",\n    \"data\": \"{\\\"event\\\": \\\"data\\\", \\\"channel\\\": \\\"/sites/d6fb4f96-xxxx-xxxx-xxxx-a8d7b85087ac/devices/209339xxxxxx/cmd\\\", \\\"data\\\": {\\\"session\\\": \\\"eec2b6e4-1e63-4f9f-9cf8-ef7f9632861e\\\", \\\"raw\\\": \\\"thernet switching table : 59 entries, 59 learned\\\\nRouting instance : default-switch\\\\n    Vlan                MAC                 MAC         Age   GBP     Logical                NH        MAC        RTR\\\\n    name                address             flags      \\\"}}\"\n}\n{\n    \"event\": \"data\",\n    \"channel\": \"/sites/d6fb4f96-xxxx-xxxx-xxxx-a8d7b85087ac/devices/00000000-0000-0000-1000-209339xxxxxx/cmd\",\n    \"data\": \"{\\\"event\\\": \\\"data\\\", \\\"channel\\\": \\\"/sites/d6fb4f96-xxxx-xxxx-xxxx-a8d7b85087ac/devices/209339xxxxxx/cmd\\\", \\\"data\\\": {\\\"session\\\": \\\"eec2b6e4-1e63-4f9f-9cf8-ef7f9632861e\\\", \\\"raw\\\": \\\"       Tag     interface              Index     property   ID\\\\n    corp                00:50:56:87:4f:69   D             -           xe-0/1/3.0             0                    0       \\\\n    corp                00:50:56:87:ce:f5   D             -           x\\\"}}\"\n}\n{\n    \"event\": \"data\",\n    \"channel\": \"/sites/d6fb4f96-xxxx-xxxx-xxxx-a8d7b85087ac/devices/00000000-0000-0000-1000-209339xxxxxx/cmd\",\n    \"data\": \"{\\\"event\\\": \\\"data\\\", \\\"channel\\\": \\\"/sites/d6fb4f96-xxxx-xxxx-xxxx-a8d7b85087ac/devices/209339xxxxxx/cmd\\\", \\\"data\\\": {\\\"session\\\": \\\"eec2b6e4-1e63-4f9f-9cf8-ef7f9632861e\\\", \\\"raw\\\": \\\"e-0/1/3.0             0                    0       \\\\n    corp                20:93:39:0f:62:00   D             -           xe-0/1/3.0             0                    0       \\\\n    ifo                 00:50:56:87:2d:42   D             -           xe-0/1/3.0 \\\"}}\"\n}\n...\n```",
         "operationId": "showSiteDeviceMacTable",
         "requestBody": {
           "content": {
@@ -1154,7 +1118,7 @@
         }
       ],
       "post": {
-        "description": "Support / Upload device support files\n\n#### Info Param\n| Name | Type | Description |\n| --- | --- | --- |\n| process | string | Upload 1 file with output of show system processes extensive |\n| outbound-ssh | string | Upload 1 file that concatenates all /var/log/outbound-ssh.log* files |\n| messages | string | Upload 1 to 10 /var/log/messages* files |\n| core-dumps | string | Upload all core dump files, if any |\n| full | string | Upload 1 file with output of request support information, 1 file that concatenates all /var/log/outbound-ssh.log files, all core dump files, the 3 most recent /var/log/messages files, and Mist agent logs (for Junos devices running the Mist agent) |\n| var-logs | string | Upload all non-empty files in the /var/log/ directory |\n| jma-logs | string | Upload Mist agent logs (for Junos devices running the Mist agent only) |\n\"",
+        "description": "Support / Upload device support files\n\n#### Info Param\n| Name | Type | Description |\n| --- | --- | --- |\n| process | string | Upload 1 file with output of show system processes extensive |\n| outbound-ssh | string | Upload 1 file that concatenates all /var/log/outbound-ssh.log* files |\n| messages | string | Upload 1 to 10 /var/log/messages* files |\n| core-dumps | string | Upload all core dump files, if any. Uploads for all members of VC on switches.|\n| full | string | Upload 1 file with output of request support information, 1 file that concatenates all /var/log/outbound-ssh.log files, all core dump files, the 3 most recent /var/log/messages files, and Mist agent logs (for Junos devices running the Mist agent) |\n| var-logs | string | Upload all non-empty files in the /var/log/ directory |\n| jma-logs | string | Upload Mist agent logs (for Junos devices running the Mist agent only) |\n\"",
         "operationId": "uploadSiteDeviceSupportFile",
         "requestBody": {
           "content": {
@@ -1209,7 +1173,7 @@
         }
       ],
       "post": {
-        "description": "Traceroute can be performed from the Device.\n\nThe output will be available through websocket. As there can be multiple command issued against the same Device at the same time and the output all goes through the same websocket stream, session is introduced for demux.\n\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}```\n\n\n\n#### Example output from ws stream\n\n```json\n{  \n  \"channel\": \"/sites/d6fb4f96-xxxx-xxxx-xxxx-xxxxxxxxxxxx/devices/00000000-0000-0000-1000-xxxxxxxxxxxx/cmd\",\n  \"event\": \"data\",\n  \"data\": {\n    \"session\": \"9106e908-74dc-4a4f-9050-9c2adcaf44a5\",\n    \"raw\": \"Running traceroute...\\ntraceroute to 8.8.8.8, 64 hops max\\n 0  192.168.1.1 1 ms  192.168.1.1 1 ms  192.168.1.1 1 ms\\n 1  80.10.236.81 2 ms  80.10.236.81 4 ms  80.10.236.81 2 ms\\n 2  193.253.80.250 3 ms  193.253.80.250 2 ms  193.253.80.250 2 ms\\n 3  193.252.159.41 2 ms  193.252.159.41 1 ms  193.252.159.41 3 ms\\n\"\n  }\n}\n```\n\"",
+        "description": "Traceroute can be performed from the Device.\n\nThe output will be available through websocket. As there can be multiple commands issued against the same Device at the same time and the output all goes through the same websocket stream, session is introduced for demux.\n\n\n#### Subscribe to Device Command outputs\n\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/devices/{device_id}/cmd\"\n}\n```\n\n\n#### Example output from ws stream\n```json\n{\n  \"channel\": \"/sites/d6fb4f96-xxxx-xxxx-xxxx-xxxxxxxxxxxx/devices/00000000-0000-0000-1000-xxxxxxxxxxxx/cmd\",\n  \"event\": \"data\",\n  \"data\": {\n    \"session\": \"9106e908-74dc-4a4f-9050-9c2adcaf44a5\",\n    \"raw\": \"Running traceroute...\\ntraceroute to 8.8.8.8, 64 hops max\\n 0  192.168.1.1 1 ms  192.168.1.1 1 ms  192.168.1.1 1 ms\\n 1  80.10.236.81 2 ms  80.10.236.81 4 ms  80.10.236.81 2 ms\\n 2  193.253.80.250 3 ms  193.253.80.250 2 ms  193.253.80.250 2 ms\\n 3  193.252.159.41 2 ms  193.252.159.41 1 ms  193.252.159.41 3 ms\\n\"\n}\n```",
         "operationId": "tracerouteFromDevice",
         "requestBody": {
           "content": {
@@ -1297,16 +1261,31 @@
   },
   "components": {
     "schemas": {
+      "clear_policy_hit_count": {
+        "description": "Request body for clearing hit counters on an application policy",
+        "properties": {
+          "policy_name": {
+            "description": "Application policy name whose hit counters should be cleared",
+            "type": "string"
+          }
+        },
+        "required": [
+          "policy_name"
+        ],
+        "type": "object"
+      },
       "ha_cluster_node": {
+        "description": "HA cluster node selector for device operations",
         "properties": {
           "node": {
-            "$ref": "#/components/schemas/ha_cluster_node_enum"
+            "$ref": "#/components/schemas/ha_cluster_node_enum",
+            "description": "HA cluster node on which to run the device operation"
           }
         },
         "type": "object"
       },
       "ha_cluster_node_enum": {
-        "description": "only for HA. enum: `node0`, `node1`",
+        "description": "HA cluster node selector. enum: `node0`, `node1`",
         "enum": [
           "node0",
           "node1"
@@ -1314,6 +1293,7 @@
         "type": "string"
       },
       "locate_switch": {
+        "description": "Request body for locating a switch or virtual chassis member by MAC address for a limited duration",
         "properties": {
           "duration": {
             "default": 5,
@@ -1334,9 +1314,11 @@
       },
       "response_device_config_cli": {
         "additionalProperties": false,
+        "description": "Device configuration rendered as CLI commands",
         "properties": {
           "cli": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Command lines generated for the device configuration in CLI syntax"
           }
         },
         "required": [
@@ -1346,8 +1328,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -1358,8 +1342,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -1370,8 +1356,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -1382,8 +1370,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -1391,8 +1381,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -1403,8 +1395,11 @@
       },
       "root_password_string": {
         "additionalProperties": false,
+        "description": "Temporary root password response for device ZTP recovery",
         "properties": {
           "root_password": {
+            "description": "Temporary root password returned for ZTP recovery",
+            "format": "password",
             "minLength": 1,
             "type": "string"
           }
@@ -1415,14 +1410,17 @@
         "type": "object"
       },
       "shell_node": {
+        "description": "Request body for creating a shell session on a specific HA node",
         "properties": {
           "node": {
-            "$ref": "#/components/schemas/ha_cluster_node_enum"
+            "$ref": "#/components/schemas/ha_cluster_node_enum",
+            "description": "HA cluster node on which to create the shell session"
           }
         },
         "type": "object"
       },
       "strings": {
+        "description": "Unique string values returned or accepted by this schema",
         "items": {
           "type": "string"
         },
@@ -1430,41 +1428,47 @@
         "uniqueItems": true
       },
       "utils_bounce_port": {
+        "description": "Request to bounce one or more device ports",
         "properties": {
           "ports": {
-            "$ref": "#/components/schemas/utils_bounce_port_ports"
+            "$ref": "#/components/schemas/utils_bounce_port_ports",
+            "description": "Device ports to bounce"
           }
         },
         "type": "object"
       },
       "utils_bounce_port_ports": {
-        "description": "List of ports to bounce",
+        "description": "Device port identifiers to bounce",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
       "utils_devices_restart": {
+        "description": "Request to restart a device or device node",
         "properties": {
           "member": {
-            "description": "Optional for VC member",
+            "description": "Virtual Chassis member number to restart",
             "maximum": 9,
             "minimum": 0,
             "type": "integer"
           },
           "node": {
-            "$ref": "#/components/schemas/utils_devices_restart_node"
+            "$ref": "#/components/schemas/utils_devices_restart_node",
+            "description": "SRX or SSR node to restart"
           }
         },
         "type": "object"
       },
       "utils_devices_restart_multi": {
+        "description": "Request to restart multiple devices",
         "properties": {
           "device_ids": {
-            "$ref": "#/components/schemas/utils_devices_restart_multi_device_ids"
+            "$ref": "#/components/schemas/utils_devices_restart_multi_device_ids",
+            "description": "Identifiers of devices to restart"
           },
           "node": {
-            "description": "only for SSR: if node is not present, both nodes are restarted. For other devices: node should not be present",
+            "description": "Only for SSR: if node is not present, both nodes are restarted. For other devices: node should not be present",
             "type": "string"
           }
         },
@@ -1474,6 +1478,7 @@
         "type": "object"
       },
       "utils_devices_restart_multi_device_ids": {
+        "description": "List of device identifiers to restart",
         "items": {
           "format": "uuid",
           "type": "string"
@@ -1481,7 +1486,7 @@
         "type": "array"
       },
       "utils_devices_restart_node": {
-        "description": "only for SRX/SSR: if node is not present, both nodes are restarted. For other devices: node should not be present",
+        "description": "only for SRX/SSR: if node is not present, both nodes are restarted. For other devices: node should not be present. enum: `node0`, `node1`",
         "enum": [
           "node0",
           "node1"
@@ -1489,20 +1494,24 @@
         "type": "string"
       },
       "utils_mac_table": {
+        "description": "MAC table lookup filters",
         "properties": {
           "mac_address": {
+            "description": "Client MAC address filter for the MAC table lookup",
             "examples": [
               "f8c1165c6400"
             ],
             "type": "string"
           },
           "port_id": {
+            "description": "Interface identifier filter for the MAC table lookup",
             "examples": [
               "ge-0/0/0.0"
             ],
             "type": "string"
           },
           "vlan_id": {
+            "description": "VLAN identifier filter for the MAC table lookup",
             "examples": [
               "ge-0/0/0.0"
             ],
@@ -1512,9 +1521,10 @@
         "type": "object"
       },
       "utils_monitor_traffic": {
+        "description": "Request body for monitoring traffic on one port or all ports",
         "properties": {
           "port": {
-            "description": "Port name, if no port input is provided then all ports will be monitored",
+            "description": "Interface name to monitor; omit this field to monitor all ports",
             "examples": [
               "ge-0/0/1"
             ],
@@ -1524,37 +1534,42 @@
         "type": "object"
       },
       "utils_ping": {
+        "description": "Request body for running a ping utility command",
         "properties": {
           "count": {
             "default": 10,
+            "description": "Number of echo requests to send",
             "type": "integer"
           },
           "egress_interface": {
-            "description": "Interface through which packet needs to egress",
+            "description": "Interface through which ping packets should egress",
             "type": "string"
           },
           "host": {
+            "description": "Destination IP address, IPv6 address, or hostname to ping",
             "examples": [
               "1.1.1.1"
             ],
-            "format": "ipv4",
             "type": "string"
           },
           "node": {
-            "$ref": "#/components/schemas/ha_cluster_node_enum"
+            "$ref": "#/components/schemas/ha_cluster_node_enum",
+            "description": "HA cluster node from which to send ping packets"
           },
           "size": {
             "default": 56,
+            "description": "ICMP payload size, in bytes",
             "maximum": 65535,
             "minimum": 56,
             "type": "integer"
           },
           "use_ipv6": {
             "default": false,
+            "description": "applicable when host is hostname",
             "type": "boolean"
           },
           "vrf": {
-            "description": "VRF/Routing instance through which the packet needs to be sent",
+            "description": "Routing instance or VRF through which ping packets are sent",
             "type": "string"
           }
         },
@@ -1566,21 +1581,23 @@
       "utils_release_dhcp_leases": {
         "description": "Note: \n  * valid combinations for Junos: \n    * `port_id` \n    * `macs` + `network`\n  * valid combinations for SSR: \n    * `port_id` \n    * `macs` + `network`\n    * `port_id` + `network`\n    * `network`\n  * if network or port_id is specified and macs is empty, it means all clients under network or port_id",
         "properties": {
-          "mac": {
-            "$ref": "#/components/schemas/utils_release_dhcp_leases_mac"
+          "macs": {
+            "$ref": "#/components/schemas/utils_release_dhcp_leases_macs",
+            "description": "Client MAC addresses whose DHCP leases should be released"
           },
           "network": {
-            "description": "The network for the leases IPs to be released",
+            "description": "DHCP network containing the leases to release",
             "examples": [
               "guest"
             ],
             "type": "string"
           },
           "node": {
-            "$ref": "#/components/schemas/ha_cluster_node_enum"
+            "$ref": "#/components/schemas/ha_cluster_node_enum",
+            "description": "HA cluster node on which to release DHCP leases"
           },
           "port_id": {
-            "description": "The network interface on which to release the current DHCP release",
+            "description": "Network interface containing the DHCP leases to release",
             "examples": [
               "ge-0/0/1.10"
             ],
@@ -1593,8 +1610,8 @@
         ],
         "type": "object"
       },
-      "utils_release_dhcp_leases_mac": {
-        "description": "A list of client macs to be released",
+      "utils_release_dhcp_leases_macs": {
+        "description": "Client MAC addresses whose DHCP leases should be released",
         "examples": [
           [
             "90ec77aabbcc",
@@ -1607,17 +1624,19 @@
         "type": "array"
       },
       "utils_send_support_logs": {
+        "description": "Request to upload support files from a device",
         "properties": {
           "info": {
-            "$ref": "#/components/schemas/utils_send_support_logs_info"
+            "$ref": "#/components/schemas/utils_send_support_logs_info",
+            "description": "Support file bundle type to upload"
           },
           "node": {
-            "description": "optional: for SSR, if node is not present, both nodes support files are uploaded",
+            "description": "Optional for SSR: if node is not present, both nodes support files are uploaded",
             "type": "string"
           },
           "num_messages_files": {
             "default": 1,
-            "description": "optional: number of most recent messages files to upload.",
+            "description": "Number of most recent messages files to upload when `info`==`messages`",
             "maximum": 10,
             "minimum": 1,
             "type": "integer"
@@ -1627,7 +1646,7 @@
       },
       "utils_send_support_logs_info": {
         "default": "full",
-        "description": "Optional, enum: \n    * `code-dumps`: Upload all core dump files, if any found\n    * `full`: Upload 1 file with output of `request support information`, 1 file that concatenates all `/var/log/outbound-ssh.log*` files, all core dump files, the 5 most recent `/var/log/messages*` files, and Mist agent logs\n    * `messages`: Upload 1 to 10 `/var/log/messages*` files\n    * `outbound-ssh`: Upload 1 file that concatenates all `/var/log/outbound-ssh.log*` files\n    * `process`: Upload 1 file with output of show `system processes extensive``\n    * `var-logs`: Upload all non-empty files in the `/var/log/` directory",
+        "description": "Optional, enum: \n    * `code-dumps`: Upload all core dump files, if any found. Uploads for all members of VC on switches.\n    * `full`: Upload 1 file with output of `request support information`, 1 file that concatenates all `/var/log/outbound-ssh.log*` files, all core dump files, the 5 most recent `/var/log/messages*` files, and Mist agent logs\n    * `messages`: Upload 1 to 10 `/var/log/messages*` files\n    * `outbound-ssh`: Upload 1 file that concatenates all `/var/log/outbound-ssh.log*` files\n    * `process`: Upload 1 file with output of show `system processes extensive``\n    * `var-logs`: Upload all non-empty files in the `/var/log/` directory",
         "enum": [
           "code-dumps",
           "full",
@@ -1638,55 +1657,18 @@
         ],
         "type": "string"
       },
-      "utils_show_arp": {
-        "properties": {
-          "duration": {
-            "default": 0,
-            "description": "Duration in sec for which refresh is enabled. Should be set only if interval is configured to non-zero value.",
-            "maximum": 300,
-            "minimum": 0,
-            "type": "integer"
-          },
-          "interval": {
-            "default": 0,
-            "description": "Rate at which output will refresh",
-            "maximum": 10,
-            "minimum": 0,
-            "type": "integer"
-          },
-          "ip": {
-            "description": "IP Address",
-            "examples": [
-              "192.168.30.7"
-            ],
-            "type": "string"
-          },
-          "port_id": {
-            "description": "Device Port ID",
-            "examples": [
-              "ge-0/0/0.0"
-            ],
-            "type": "string"
-          },
-          "vrf": {
-            "description": "VRF Name",
-            "examples": [
-              "guest"
-            ],
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
       "utils_show_bgp_summary": {
+        "description": "BGP summary command request",
         "properties": {
           "node": {
-            "$ref": "#/components/schemas/ha_cluster_node_enum"
+            "$ref": "#/components/schemas/ha_cluster_node_enum",
+            "description": "HA cluster node on which to show the BGP summary"
           }
         },
         "type": "object"
       },
       "utils_show_dhcp_leases": {
+        "description": "DHCP leases command request",
         "properties": {
           "network": {
             "description": "DHCP network for the leases, returns full table if not specified",
@@ -1696,7 +1678,8 @@
             "type": "string"
           },
           "node": {
-            "$ref": "#/components/schemas/ha_cluster_node_enum"
+            "$ref": "#/components/schemas/ha_cluster_node_enum",
+            "description": "HA cluster node on which to show DHCP leases"
           }
         },
         "required": [
@@ -1705,23 +1688,24 @@
         "type": "object"
       },
       "utils_show_dot1x": {
+        "description": "802.1X table lookup request for device command output",
         "properties": {
           "duration": {
             "default": 0,
-            "description": "Duration in sec for which refresh is enabled. Should be set only if interval is configured to non-zero value.",
+            "description": "Refresh duration in seconds; set only when `interval` is nonzero",
             "maximum": 300,
             "minimum": 0,
             "type": "integer"
           },
           "interval": {
             "default": 0,
-            "description": "Rate at which output will refresh",
+            "description": "Refresh interval in seconds for repeated command output",
             "maximum": 10,
             "minimum": 0,
             "type": "integer"
           },
           "port_id": {
-            "description": "Device Port ID",
+            "description": "Device port identifier filter for the 802.1X table lookup",
             "examples": [
               "ge-0/0/0.0"
             ],
@@ -1731,30 +1715,31 @@
         "type": "object"
       },
       "utils_show_evpn_database": {
+        "description": "EVPN database lookup request for device command output",
         "properties": {
           "duration": {
             "default": 0,
-            "description": "Duration in sec for which refresh is enabled. Should be set only if interval is configured to non-zero value.",
+            "description": "Refresh duration in seconds; set only when `interval` is nonzero",
             "maximum": 300,
             "minimum": 0,
             "type": "integer"
           },
           "interval": {
             "default": 0,
-            "description": "Rate at which output will refresh",
+            "description": "Refresh interval in seconds for repeated command output",
             "maximum": 10,
             "minimum": 0,
             "type": "integer"
           },
           "mac": {
-            "description": "Client mac filter",
+            "description": "Client MAC address filter for the EVPN database lookup",
             "examples": [
               "f8c1165c6400"
             ],
             "type": "string"
           },
           "port_id": {
-            "description": "Interface name",
+            "description": "Interface identifier filter for the EVPN database lookup",
             "examples": [
               "ge-0/0/0.0"
             ],
@@ -1764,12 +1749,14 @@
         "type": "object"
       },
       "utils_show_forwarding_table": {
+        "description": "Forwarding table lookup request for device command output",
         "properties": {
           "node": {
-            "$ref": "#/components/schemas/ha_cluster_node_enum"
+            "$ref": "#/components/schemas/ha_cluster_node_enum",
+            "description": "HA cluster node on which to show the forwarding table"
           },
           "prefix": {
-            "description": "IP Prefix",
+            "description": "IPv4 or IPv6 prefix filter for forwarding table entries",
             "examples": [
               "3.1.1.0/24"
             ],
@@ -1811,7 +1798,7 @@
             "type": "string"
           },
           "vrf": {
-            "description": "VRF Name",
+            "description": "Routing instance or VRF filter for forwarding table entries",
             "examples": [
               "guest"
             ],
@@ -1821,18 +1808,20 @@
         "type": "object"
       },
       "utils_traceroute": {
+        "description": "Request body for running a traceroute utility command",
         "properties": {
           "host": {
-            "description": "Host name",
+            "description": "Destination IP address, IPv6 address, or hostname for traceroute",
             "type": "string"
           },
           "network": {
             "default": "internal",
-            "description": "For SSR, optional, the source to initiate traceroute from",
+            "description": "For SSR, source network from which to initiate traceroute",
             "type": "string"
           },
           "node": {
-            "$ref": "#/components/schemas/ha_cluster_node_enum"
+            "$ref": "#/components/schemas/ha_cluster_node_enum",
+            "description": "HA cluster node from which to run traceroute"
           },
           "port": {
             "default": 33434,
@@ -1840,7 +1829,8 @@
             "type": "integer"
           },
           "protocol": {
-            "$ref": "#/components/schemas/utils_traceroute_protocol"
+            "$ref": "#/components/schemas/utils_traceroute_protocol",
+            "description": "Transport protocol to use for traceroute"
           },
           "timeout": {
             "default": 60,
@@ -1849,10 +1839,11 @@
           },
           "use_ipv6": {
             "default": false,
+            "description": "Whether to resolve hostname targets over IPv6",
             "type": "boolean"
           },
           "vrf": {
-            "description": "For SRX, optional, the source to initiate traceroute from. by default, master VRF/RI is assumed",
+            "description": "For SRX, routing instance or VRF from which to initiate traceroute; master VRF/RI is used by default",
             "type": "string"
           }
         },
@@ -1869,8 +1860,10 @@
       },
       "websocket_session": {
         "additionalProperties": false,
+        "description": "Response containing the WebSocket session handle for asynchronous command output",
         "properties": {
           "session": {
+            "description": "Identifier used to correlate output on the WebSocket stream",
             "examples": [
               "19e73828-937f-05e6-f709-e29efdb0a82b"
             ],
@@ -1884,14 +1877,17 @@
       },
       "websocket_session_with_url": {
         "additionalProperties": false,
+        "description": "Response containing a WebSocket session handle and connection URL",
         "properties": {
           "session": {
+            "description": "Identifier used to correlate output on the WebSocket stream",
             "examples": [
               "19e73828-937f-05e6-f709-e29efdb0a82b"
             ],
             "type": "string"
           },
           "url": {
+            "description": "WebSocket URL returned for connecting to this session",
             "examples": [
               "wss://api-ws.mist.com/ssh?jwt=xxxx"
             ],
@@ -2137,19 +2133,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sites Psks",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,16 +59,12 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
   "tags": [
     {
-      "description": "A multi PSK (Pre-Shared Key) is a feature that allows the use of multiple PSKs for securing network connections.\n\nIt provides a simple and comprehensive way to onboard client devices without relying on client mac addresses.\n\nEach psk has its own key name, which can be used for user-level accountability, key rotation, and visibility in the management platform. It supports the creation, rotation, and auto-expiration of psks, and allows vlan assignment and role assignment for dynamic per-user policies.\n\nMulti PSKs create virtual broadcast domains and can be used for end-user onboarding via authenticated sso login.\n\nMist supports two methods of Site PSKs lookup: * local * radius",
+      "description": "A multi PSK (Pre-Shared Key) is a feature that allows the use of multiple PSKs for securing network connections.\n\nIt provides a simple and comprehensive way to onboard client devices without relying on client MAC addresses.\n\nEach psk has its own key name, which can be used for user-level accountability, key rotation, and visibility in the management platform. It supports the creation, rotation, and auto-expiration of psks, and allows vlan assignment and role assignment for dynamic per-user policies.\n\nMulti PSKs create virtual broadcast domains and can be used for end-user onboarding via authenticated sso login.\n\nMist supports two methods of Site PSKs lookup: * local * radius",
       "name": "Sites Psks"
     }
   ],
@@ -84,6 +80,7 @@
         "operationId": "listSitePsks",
         "parameters": [
           {
+            "description": "Filter results by SSID",
             "in": "query",
             "name": "ssid",
             "schema": {
@@ -91,6 +88,7 @@
             }
           },
           {
+            "description": "Filter PSK results by role",
             "in": "query",
             "name": "role",
             "schema": {
@@ -170,7 +168,7 @@
         ]
       },
       "post": {
-        "description": "Create Site PSK\n\n\nWhen `usage`==`macs`, corresponding \"macs\" field will hold a list consisting of client mac addresses ([\"xx:xx:xx:xx:xx\",...]) or mac patterns([\"xx:xx:*\",\"xx*\",...]) or both ([\"xx:xx:xx:xx:xx:xx\", \"xx:*\", ...]). This list is capped at 5000",
+        "description": "Create Site PSK\n\n\nWhen `usage`==`macs`, corresponding \"macs\" field will hold a list consisting of client MAC addresses ([\"xx:xx:xx:xx:xx\",...]) or mac patterns([\"xx:xx:*\",\"xx*\",...]) or both ([\"xx:xx:xx:xx:xx:xx\", \"xx:*\", ...]). This list is capped at 5000",
         "operationId": "createSitePsk",
         "requestBody": {
           "content": {
@@ -410,6 +408,7 @@
         "type": "number"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -418,7 +417,7 @@
         "type": "string"
       },
       "psk": {
-        "description": "PSK",
+        "description": "Personal pre-shared key configuration for WLAN access",
         "properties": {
           "admin_sso_id": {
             "description": "sso id for psk created from psk portal",
@@ -426,10 +425,11 @@
             "type": "string"
           },
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Epoch timestamp when the PSK was created"
           },
           "email": {
-            "description": "email to send psk expiring notifications to",
+            "description": "Notification recipient email address for PSK creation notification and expiration reminders",
             "type": "string"
           },
           "expire_time": {
@@ -448,14 +448,16 @@
             "type": "integer"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the PSK"
           },
           "mac": {
-            "description": "If `usage`==`single`, the mac that this PSK ties to, empty if `auto-binding`",
+            "description": "If `usage`==`single`, client MAC address this PSK is bound to; empty when auto-binding is used",
             "type": "string"
           },
           "macs": {
-            "$ref": "#/components/schemas/psk_macs"
+            "$ref": "#/components/schemas/psk_macs",
+            "description": "Client MAC addresses or MAC patterns allowed when `usage`==`macs`"
           },
           "max_usage": {
             "default": 0,
@@ -463,12 +465,15 @@
             "type": "integer"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Epoch timestamp when the PSK was last modified"
           },
           "name": {
+            "description": "Display name of the PSK",
             "type": "string"
           },
           "note": {
+            "description": "Admin note or description stored with the PSK",
             "type": "string"
           },
           "notify_expiry": {
@@ -485,31 +490,45 @@
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization that owns the org-level PSK"
           },
           "passphrase": {
-            "description": "passphrase of the PSK (8-63 character or 64 in hex)",
+            "description": "PSK passphrase, 8-63 characters or 64 hexadecimal characters",
+            "format": "password",
             "maxLength": 64,
             "minLength": 8,
             "type": "string"
           },
           "role": {
+            "description": "Client role applied to users authenticated with this PSK",
             "maxLength": 32,
             "minLength": 0,
             "type": "string"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site associated with the site-level PSK"
           },
           "ssid": {
-            "description": "SSID this PSK should be applicable to",
+            "description": "WLAN SSID where this PSK can be used",
             "type": "string"
           },
           "usage": {
-            "$ref": "#/components/schemas/psk_usage"
+            "$ref": "#/components/schemas/psk_usage",
+            "description": "Binding mode for this PSK, enum: `macs`, `multi`, `single`, `usermac_labels`"
+          },
+          "usermac_labels": {
+            "$ref": "#/components/schemas/psk_usermac_labels",
+            "description": "Usermac labels allowed when `usage`==`usermac_labels`; this list is capped at 100 entries"
           },
           "vlan_id": {
-            "$ref": "#/components/schemas/psk_vlan_id"
+            "$ref": "#/components/schemas/psk_vlan_id",
+            "description": "VLAN ID returned for clients using this PSK"
+          },
+          "vlan_name": {
+            "description": "VLAN name to be assigned. Optional, `vlan_id` takes precedence if both are provided",
+            "type": "string"
           }
         },
         "required": [
@@ -520,13 +539,14 @@
         "type": "object"
       },
       "psk_list": {
+        "description": "List of personal PSK configurations",
         "items": {
           "$ref": "#/components/schemas/psk"
         },
         "type": "array"
       },
       "psk_macs": {
-        "description": "If `usage`==`macs`, this list contains N number of client mac addresses or mac patterns(1122*) or both. This list is capped at 5000",
+        "description": "If `usage`==`macs`, this list contains client MAC addresses, MAC patterns such as `1122*`, or both. This list is capped at 5000 entries",
         "examples": [
           [
             "112233abcedf",
@@ -540,13 +560,28 @@
       },
       "psk_usage": {
         "default": "multi",
-        "description": "enum: `macs`, `multi`, `single`",
+        "description": "enum: `macs`, `multi`, `single`, `usermac_labels`",
         "enum": [
           "macs",
           "multi",
-          "single"
+          "single",
+          "usermac_labels"
         ],
         "type": "string"
+      },
+      "psk_usermac_labels": {
+        "description": "If `usage`==`usermac_labels`, this list contains usermac labels (e.g. `iot`, `students`). This list is capped at 100 entries",
+        "examples": [
+          [
+            "iot",
+            "students"
+          ]
+        ],
+        "items": {
+          "type": "string"
+        },
+        "maxItems": 100,
+        "type": "array"
       },
       "psk_vlan_id": {
         "description": "VLAN for this PSK key",
@@ -562,6 +597,7 @@
         ]
       },
       "psks": {
+        "description": "List of personal PSK configurations",
         "items": {
           "$ref": "#/components/schemas/psk"
         },
@@ -570,9 +606,11 @@
       },
       "psks_import_file": {
         "additionalProperties": false,
+        "description": "Multipart upload payload for importing PSKs",
         "properties": {
           "file": {
             "contentMediaType": "application/octet-stream",
+            "description": "Uploaded CSV or binary file containing PSKs to import",
             "type": "string"
           }
         },
@@ -580,8 +618,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -592,8 +632,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -604,8 +646,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -616,8 +660,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -625,8 +671,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -636,6 +684,7 @@
         "type": "object"
       },
       "site_id": {
+        "description": "Unique identifier of a Mist site",
         "examples": [
           "441a1214-6928-442a-8e92-e1d34b8ec6a6"
         ],
@@ -806,9 +855,9 @@
     },
     "parameters": {
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -816,17 +865,17 @@
         }
       },
       "name": {
+        "description": "Filter results by name",
         "in": "query",
         "name": "name",
-        "required": false,
         "schema": {
           "type": "string"
         }
       },
       "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
         "in": "query",
         "name": "page",
-        "required": false,
         "schema": {
           "default": 1,
           "minimum": 1,
@@ -900,19 +949,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

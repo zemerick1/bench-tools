@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs EVPN Topologies",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,11 +76,11 @@
         }
       ],
       "get": {
-        "description": "Get List of the existing Org EVPN topologies",
+        "description": "List EVPN topology records in the organization, optionally filtering for org-level, site-level, or all topologies with `for_site`.",
         "operationId": "listOrgEvpnTopologies",
         "parameters": [
           {
-            "description": "Filter for org/site level EVPN Toplogies",
+            "description": "Filter for org/site level EVPN topologies. enum: `any`, `false`, `true`",
             "in": "query",
             "name": "for_site",
             "schema": {
@@ -192,7 +188,7 @@
         }
       ],
       "get": {
-        "description": "Get One EVPN Topology Detail",
+        "description": "Retrieve the switch roles, links, and generation options for a specific EVPN topology.",
         "operationId": "getOrgEvpnTopology",
         "responses": {
           "200": {
@@ -220,7 +216,7 @@
         ]
       },
       "put": {
-        "description": "Update the EVPN Topology",
+        "description": "Update an EVPN topology, including switch membership, switch roles, links, and generation options.",
         "operationId": "updateOrgEvpnTopology",
         "requestBody": {
           "content": {
@@ -274,7 +270,7 @@
         ]
       },
       "delete": {
-        "description": "Delete the Org EVPN Topology",
+        "description": "Delete an EVPN topology from the organization by topology ID.",
         "operationId": "deleteOrgEvpnTopology",
         "responses": {
           "200": {
@@ -313,7 +309,7 @@
       },
       "evpn_options": {
         "additionalProperties": false,
-        "description": "EVPN Options",
+        "description": "EVPN topology generation options for campus fabric configuration",
         "properties": {
           "auto_loopback_subnet": {
             "default": "172.16.192.0/24",
@@ -342,13 +338,19 @@
             "description": "Optional, for ERB or CLOS, you can either use esilag to upstream routers or to also be the virtual-gateway. When `routed_at` != `core`, whether to do virtual-gateway at core as well",
             "type": "boolean"
           },
+          "enable_inband_mgmt": {
+            "default": false,
+            "description": "Whether to route management traffic inband; routes will be propagated to downstream switches",
+            "type": "boolean"
+          },
           "enable_inband_ztp": {
             "default": false,
             "description": "if the mangement traffic goes inbnd, during installation, only the border/core switches are connected to the Internet to allow initial configuration to be pushed down and leave the downstream access switches stay in the Factory Default state enabling inband-ztp allows upstream switches to use LLDP to assign IP and gives Internet to downstream switches in that state",
             "type": "boolean"
           },
           "overlay": {
-            "$ref": "#/components/schemas/evpn_options_overlay"
+            "$ref": "#/components/schemas/evpn_options_overlay",
+            "description": "EVPN overlay BGP settings for the topology"
           },
           "per_vlan_vga_v4_mac": {
             "default": false,
@@ -361,19 +363,23 @@
             "type": "boolean"
           },
           "routed_at": {
-            "$ref": "#/components/schemas/evpn_options_routed_at"
+            "$ref": "#/components/schemas/evpn_options_routed_at",
+            "description": "Topology tier where EVPN virtual gateway routing is placed"
           },
           "underlay": {
-            "$ref": "#/components/schemas/evpn_options_underlay"
+            "$ref": "#/components/schemas/evpn_options_underlay",
+            "description": "EVPN underlay BGP and subnet settings for the topology"
           },
           "vs_instances": {
-            "$ref": "#/components/schemas/evpn_options_vs_instances"
+            "$ref": "#/components/schemas/evpn_options_vs_instances",
+            "description": "Virtual-switch instance mappings used to segregate EVPN networks"
           }
         },
         "type": "object"
       },
       "evpn_options_overlay": {
         "additionalProperties": false,
+        "description": "EVPN overlay BGP settings",
         "properties": {
           "as": {
             "default": 65000,
@@ -400,6 +406,7 @@
       },
       "evpn_options_underlay": {
         "additionalProperties": false,
+        "description": "EVPN underlay BGP and subnet settings",
         "properties": {
           "as_base": {
             "default": 65001,
@@ -412,6 +419,7 @@
             "type": "integer"
           },
           "routed_id_prefix": {
+            "description": "Prefix length used for automatically derived underlay router identifiers",
             "examples": [
               "/24"
             ],
@@ -434,9 +442,11 @@
       },
       "evpn_options_vs_instance": {
         "additionalProperties": false,
+        "description": "EVPN virtual-switch instance network mapping",
         "properties": {
           "networks": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "List of network names included in this virtual-switch instance"
           }
         },
         "type": "object"
@@ -464,35 +474,44 @@
         "type": "object"
       },
       "evpn_topologies_response": {
+        "description": "EVPN topology records returned by list APIs",
         "items": {
           "$ref": "#/components/schemas/evpn_topology_response"
         },
         "type": "array"
       },
       "evpn_topology": {
+        "description": "EVPN topology create or update payload",
         "properties": {
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Timestamp when the EVPN topology was created"
           },
           "evpn_options": {
-            "$ref": "#/components/schemas/evpn_options"
+            "$ref": "#/components/schemas/evpn_options",
+            "description": "Generation options applied to the EVPN topology"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the EVPN topology"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Timestamp when the EVPN topology was last modified"
           },
           "name": {
+            "description": "Display name for the EVPN topology",
             "examples": [
               "CC"
             ],
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization that owns the EVPN topology"
           },
           "overwrite": {
+            "description": "Whether to apply generated EVPN configuration changes automatically",
             "type": "boolean"
           },
           "pod_names": {
@@ -503,13 +522,16 @@
             "type": "object"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site associated with the EVPN topology"
           },
           "switch_configs": {
-            "$ref": "#/components/schemas/evpn_topology_switch_configs"
+            "$ref": "#/components/schemas/evpn_topology_switch_configs",
+            "description": "Per-switch configuration overrides included in the EVPN topology"
           },
           "switches": {
-            "$ref": "#/components/schemas/evpn_topology_switches"
+            "$ref": "#/components/schemas/evpn_topology_switches",
+            "description": "Topology member switches, roles, and links"
           }
         },
         "required": [
@@ -519,32 +541,41 @@
       },
       "evpn_topology_response": {
         "additionalProperties": false,
+        "description": "EVPN topology metadata returned by EVPN topology APIs",
         "properties": {
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Timestamp when the EVPN topology was created"
           },
           "evpn_options": {
-            "$ref": "#/components/schemas/evpn_options"
+            "$ref": "#/components/schemas/evpn_options",
+            "description": "Generation options applied to the EVPN topology"
           },
           "for_site": {
+            "description": "Whether the EVPN topology is scoped to a site rather than the organization",
             "type": "boolean"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the EVPN topology"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Timestamp when the EVPN topology was last modified"
           },
           "name": {
+            "description": "Display name for the EVPN topology",
             "examples": [
               "CC"
             ],
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization that owns the EVPN topology"
           },
           "overwrite": {
+            "description": "Whether generated EVPN configuration changes are applied automatically",
             "type": "boolean"
           },
           "pod_names": {
@@ -555,18 +586,22 @@
             "type": "object"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site associated with the EVPN topology"
           }
         },
         "type": "object"
       },
       "evpn_topology_switch": {
         "additionalProperties": false,
+        "description": "Switch member of an EVPN topology, including role and link relationships",
         "properties": {
           "config": {
-            "$ref": "#/components/schemas/evpn_topology_switch_config"
+            "$ref": "#/components/schemas/evpn_topology_switch_config",
+            "description": "Per-switch configuration supplied for this topology member. Use the [Update Site Device](/#operations/updateSiteDevice) endpoint to update the switch configuration."
           },
           "deviceprofile_id": {
+            "description": "Associated device profile identifier for the switch. Use the [Assign Org Device Profile](/#operations/assignOrgDeviceProfile) endpoint to assign a Device Profile to the switch.",
             "examples": [
               "6a1deab1-96df-4fa2-8455-d5253f943d06"
             ],
@@ -575,20 +610,25 @@
             "type": "string"
           },
           "downlink_ips": {
-            "$ref": "#/components/schemas/evpn_topology_switch_downlink_ips"
+            "$ref": "#/components/schemas/evpn_topology_switch_downlink_ips",
+            "description": "IP addresses used by this switch for EVPN downlinks"
           },
           "downlinks": {
-            "$ref": "#/components/schemas/evpn_topology_switch_downlinks"
+            "$ref": "#/components/schemas/evpn_topology_switch_downlinks",
+            "description": "Switch MAC addresses connected as downlinks from this topology member"
           },
           "esilaglinks": {
-            "$ref": "#/components/schemas/evpn_topology_switch_esilaglinks"
+            "$ref": "#/components/schemas/evpn_topology_switch_esilaglinks",
+            "description": "Switch MAC addresses connected through ESI-LAG from this topology member"
           },
           "evpn_id": {
+            "description": "Topology identifier number for this EVPN switch member",
             "minimum": 1,
             "readOnly": true,
             "type": "integer"
           },
           "mac": {
+            "description": "Switch MAC address used to identify the topology member",
             "examples": [
               "5c5b35000003"
             ],
@@ -596,6 +636,7 @@
             "type": "string"
           },
           "model": {
+            "description": "Switch model for this topology member",
             "examples": [
               "QFX10002-36Q"
             ],
@@ -610,12 +651,15 @@
             "type": "integer"
           },
           "pods": {
-            "$ref": "#/components/schemas/evpn_topology_switch_pods"
+            "$ref": "#/components/schemas/evpn_topology_switch_pods",
+            "description": "List of pod numbers this switch participates in"
           },
           "role": {
-            "$ref": "#/components/schemas/evpn_topology_switch_role"
+            "$ref": "#/components/schemas/evpn_topology_switch_role",
+            "description": "EVPN topology role for this switch"
           },
           "router_id": {
+            "description": "Routing identifier used by this switch for EVPN routing",
             "examples": [
               "172.16.254.4"
             ],
@@ -623,19 +667,24 @@
             "type": "string"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Associated site for this EVPN topology switch"
           },
           "suggested_downlinks": {
-            "$ref": "#/components/schemas/evpn_topology_switch_suggested_downlinks"
+            "$ref": "#/components/schemas/evpn_topology_switch_suggested_downlinks",
+            "description": "Builder-suggested downlink switch MAC addresses"
           },
           "suggested_esilaglinks": {
-            "$ref": "#/components/schemas/evpn_topology_switch_suggested_esilaglinks"
+            "$ref": "#/components/schemas/evpn_topology_switch_suggested_esilaglinks",
+            "description": "Builder-suggested ESI-LAG switch MAC addresses"
           },
           "suggested_uplinks": {
-            "$ref": "#/components/schemas/evpn_topology_switch_suggested_uplinks"
+            "$ref": "#/components/schemas/evpn_topology_switch_suggested_uplinks",
+            "description": "Builder-suggested uplink switch MAC addresses"
           },
           "uplinks": {
-            "$ref": "#/components/schemas/evpn_topology_switch_uplinks"
+            "$ref": "#/components/schemas/evpn_topology_switch_uplinks",
+            "description": "Switch MAC addresses connected as uplinks from this topology member"
           }
         },
         "required": [
@@ -646,21 +695,27 @@
       },
       "evpn_topology_switch_config": {
         "additionalProperties": false,
+        "description": "Per-switch configuration used by an EVPN topology member",
         "properties": {
           "dhcpd_config": {
-            "$ref": "#/components/schemas/evpn_topology_switch_config_dhcpd_config"
+            "$ref": "#/components/schemas/evpn_topology_switch_config_dhcpd_config",
+            "description": "Switch DHCP server configuration for the topology member"
           },
           "networks": {
-            "$ref": "#/components/schemas/switch_networks"
+            "$ref": "#/components/schemas/switch_networks",
+            "description": "EVPN network definitions for the topology member"
           },
           "other_ip_configs": {
-            "$ref": "#/components/schemas/evpn_topology_switch_config_other_ip_configs"
+            "$ref": "#/components/schemas/evpn_topology_switch_config_other_ip_configs",
+            "description": "Additional interface IP configurations for the topology member"
           },
           "port_config": {
-            "$ref": "#/components/schemas/wired_port_config"
+            "$ref": "#/components/schemas/wired_port_config",
+            "description": "Switch port configuration for the topology member"
           },
           "port_usages": {
-            "$ref": "#/components/schemas/switch_port_usages"
+            "$ref": "#/components/schemas/switch_port_usages",
+            "description": "Switch port usage definitions for the topology member"
           },
           "router_id": {
             "description": "Used for OSPF / BGP / EVPN",
@@ -670,13 +725,15 @@
             "type": "string"
           },
           "vrf_config": {
-            "$ref": "#/components/schemas/evpn_topology_switch_config_vrf_config"
+            "$ref": "#/components/schemas/evpn_topology_switch_config_vrf_config",
+            "description": "Routing instance and VRF settings for the topology member"
           }
         },
         "type": "object"
       },
       "evpn_topology_switch_config_dhcpd_config": {
         "additionalProperties": false,
+        "description": "DHCP server enablement for an EVPN topology switch override",
         "properties": {
           "enabled": {
             "description": "If DHCPD is enabled on the switch",
@@ -689,11 +746,12 @@
         "additionalProperties": {
           "$ref": "#/components/schemas/junos_other_ip_config"
         },
-        "description": "Additional IP Addresses configured on the switch. Property key is the port network name",
+        "description": "Additional IP addresses configured on the switch. Property key is the port network name",
         "type": "object"
       },
       "evpn_topology_switch_config_vrf_config": {
         "additionalProperties": false,
+        "description": "VRF enablement for an EVPN topology switch override",
         "properties": {
           "enabled": {
             "description": "Whether to enable VRF (when supported on the device)",
@@ -706,10 +764,11 @@
         "additionalProperties": {
           "$ref": "#/components/schemas/evpn_topology_switch_config"
         },
-        "description": "Property key is the switch mac",
+        "description": "Property key is the switch MAC address",
         "type": "object"
       },
       "evpn_topology_switch_downlink_ips": {
+        "description": "Downlink IP addresses used by an EVPN topology switch",
         "items": {
           "readOnly": true,
           "type": "string"
@@ -718,6 +777,7 @@
         "type": "array"
       },
       "evpn_topology_switch_downlinks": {
+        "description": "Downlink switch MAC addresses for an EVPN topology switch",
         "examples": [
           [
             "5c5b35000005",
@@ -730,6 +790,7 @@
         "type": "array"
       },
       "evpn_topology_switch_esilaglinks": {
+        "description": "ESI-LAG switch MAC addresses for an EVPN topology switch",
         "examples": [
           [
             "5c5b35000005",
@@ -749,9 +810,10 @@
         "type": "array"
       },
       "evpn_topology_switch_role": {
-        "description": "use `role`==`none` to remove a switch from the topology. enum: `access`, `collapsed-core`, `core`, `distribution`, `esilag-access`, `none`",
+        "description": "use `role`==`none` to remove a switch from the topology. enum: `access`, `border`, `collapsed-core`, `core`, `distribution`, `esilag-access`, `none`",
         "enum": [
           "access",
+          "border",
           "collapsed-core",
           "core",
           "distribution",
@@ -762,6 +824,7 @@
         "type": "string"
       },
       "evpn_topology_switch_suggested_downlinks": {
+        "description": "Builder-suggested downlink switch MAC addresses for an EVPN topology switch",
         "examples": [
           [
             "5c5b35000005",
@@ -776,6 +839,7 @@
         "type": "array"
       },
       "evpn_topology_switch_suggested_esilaglinks": {
+        "description": "Builder-suggested ESI-LAG switch MAC addresses for an EVPN topology switch",
         "examples": [
           [
             "5c5b35000005",
@@ -790,6 +854,7 @@
         "type": "array"
       },
       "evpn_topology_switch_suggested_uplinks": {
+        "description": "Builder-suggested uplink switch MAC addresses for an EVPN topology switch",
         "examples": [
           [
             "5c5b35000005",
@@ -804,6 +869,7 @@
         "type": "array"
       },
       "evpn_topology_switch_uplinks": {
+        "description": "Uplink switch MAC addresses for an EVPN topology switch",
         "examples": [
           [
             "5c5b35000005",
@@ -816,6 +882,7 @@
         "type": "array"
       },
       "evpn_topology_switches": {
+        "description": "Switch members included in an EVPN topology",
         "items": {
           "$ref": "#/components/schemas/evpn_topology_switch"
         },
@@ -833,7 +900,7 @@
       },
       "ip_type": {
         "default": "dhcp",
-        "description": "enum: `dhcp`, `static`",
+        "description": "IP address assignment mode, either DHCP or static. enum: `dhcp`, `static`",
         "enum": [
           "dhcp",
           "static"
@@ -859,53 +926,55 @@
       },
       "junos_other_ip_config": {
         "additionalProperties": false,
-        "description": "Optional, if it's required to have switch's L3 presence on a network/vlan",
+        "description": "Optional switch L3 presence on an additional network or VLAN",
         "properties": {
           "evpn_anycast": {
             "default": false,
-            "description": "For EVPN, if anycast is desired",
+            "description": "For EVPN, whether anycast is desired",
             "type": "boolean"
           },
           "ip": {
-            "description": "Required if `type`==`static`",
+            "description": "Required if `type`==`static`; IPv4 address for the additional Junos L3 presence",
             "examples": [
               "10.3.3.1"
             ],
             "type": "string"
           },
           "ip6": {
-            "description": "Required if `type6`==`static`",
+            "description": "Required if `type6`==`static`; IPv6 address for the additional Junos L3 presence",
             "examples": [
               "fdad:b0bc:f29e::3d16"
             ],
             "type": "string"
           },
           "netmask": {
-            "description": "Optional, `subnet` from `network` definition will be used if defined",
+            "description": "Optional IPv4 netmask; `subnet` from `network` definition will be used if defined",
             "examples": [
               "255.255.255.0"
             ],
             "type": "string"
           },
           "netmask6": {
-            "description": "Optional, `subnet` from `network` definition will be used if defined",
+            "description": "Optional IPv6 prefix length; `subnet` from `network` definition will be used if defined",
             "examples": [
               "/64"
             ],
             "type": "string"
           },
           "type": {
-            "$ref": "#/components/schemas/ip_type"
+            "$ref": "#/components/schemas/ip_type",
+            "description": "IPv4 assignment mode for the additional Junos L3 presence"
           },
           "type6": {
-            "$ref": "#/components/schemas/ip_type6"
+            "$ref": "#/components/schemas/ip_type6",
+            "description": "IPv6 assignment mode for the additional Junos L3 presence"
           }
         },
         "type": "object"
       },
       "junos_port_config": {
         "additionalProperties": false,
-        "description": "Switch port config",
+        "description": "Junos switch port configuration",
         "properties": {
           "ae_disable_lacp": {
             "description": "To disable LACP support for the AE interface",
@@ -915,12 +984,23 @@
             "description": "Users could force to use the designated AE name",
             "type": "integer"
           },
+          "ae_lacp_force_up": {
+            "default": false,
+            "description": "If `aggregated`==`true`, sets the state of the interface as UP when the peer has limited LACP capability. Use case: When a device connected to this AE port is ZTPing for the first time, it will not have LACP configured on the other end. **Note:** Turning this on will enable force-up on one of the interfaces in the bundle only",
+            "type": "boolean"
+          },
+          "ae_lacp_passive": {
+            "default": false,
+            "description": "If `aggregated`==`true`, sets LACP to passive mode on this AE interface; by default, active (fast) mode is used",
+            "type": "boolean"
+          },
           "ae_lacp_slow": {
-            "description": "To use fast timeout",
+            "description": "To use slow timeout",
             "type": "boolean"
           },
           "aggregated": {
             "default": false,
+            "description": "Whether this port is configured as an aggregated Ethernet member",
             "type": "boolean"
           },
           "critical": {
@@ -929,6 +1009,7 @@
             "type": "boolean"
           },
           "description": {
+            "description": "Human-readable description for this Junos port",
             "type": "string"
           },
           "disable_autoneg": {
@@ -937,7 +1018,8 @@
             "type": "boolean"
           },
           "duplex": {
-            "$ref": "#/components/schemas/junos_port_config_duplex"
+            "$ref": "#/components/schemas/junos_port_config_duplex",
+            "description": "Link duplex mode for this Junos port"
           },
           "dynamic_usage": {
             "description": "Enable dynamic usage for this port. Set to `dynamic` to enable.",
@@ -947,6 +1029,7 @@
             ]
           },
           "esilag": {
+            "description": "Whether this Junos port participates in an ESI-LAG",
             "type": "boolean"
           },
           "mtu": {
@@ -968,6 +1051,7 @@
           },
           "poe_disabled": {
             "default": false,
+            "description": "Whether PoE capabilities are disabled for this Junos port",
             "type": "boolean"
           },
           "port_network": {
@@ -975,7 +1059,8 @@
             "type": "string"
           },
           "speed": {
-            "$ref": "#/components/schemas/junos_port_config_speed"
+            "$ref": "#/components/schemas/junos_port_config_speed",
+            "description": "Link speed for this Junos port"
           },
           "usage": {
             "description": "Port usage name. For Q-in-Q, use `vlan_tunnel`. If EVPN is used, use `evpn_uplink`or `evpn_downlink`",
@@ -1031,6 +1116,7 @@
         "type": "string"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -1048,8 +1134,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -1060,8 +1148,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -1072,8 +1162,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -1084,8 +1176,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -1093,8 +1187,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -1104,6 +1200,7 @@
         "type": "object"
       },
       "site_id": {
+        "description": "Unique identifier of a Mist site",
         "examples": [
           "441a1214-6928-442a-8e92-e1d34b8ec6a6"
         ],
@@ -1112,6 +1209,7 @@
         "type": "string"
       },
       "strings": {
+        "description": "Unique string values returned or accepted by this schema",
         "items": {
           "type": "string"
         },
@@ -1136,10 +1234,15 @@
             "type": "boolean"
           },
           "isolation_vlan_id": {
+            "description": "Required when `isolation`==`true`. Unique VLAN ID used for client isolation",
             "examples": [
               "3070"
             ],
             "type": "string"
+          },
+          "multicast": {
+            "$ref": "#/components/schemas/switch_network_multicast",
+            "description": "Multicast (IGMP snooping) settings for this VLAN"
           },
           "subnet": {
             "description": "Optional for pure switching, required when L3 / routing features are used",
@@ -1150,12 +1253,34 @@
             "type": "string"
           },
           "vlan_id": {
-            "$ref": "#/components/schemas/vlan_id_with_variable"
+            "$ref": "#/components/schemas/vlan_id_with_variable",
+            "description": "VLAN identifier for this switch network"
           }
         },
         "required": [
           "vlan_id"
         ],
+        "type": "object"
+      },
+      "switch_network_multicast": {
+        "additionalProperties": false,
+        "description": "Multicast settings for a switch network (VLAN)",
+        "properties": {
+          "enabled": {
+            "default": false,
+            "description": "Whether to enable IGMP snooping on this VLAN",
+            "type": "boolean"
+          },
+          "igmp_version": {
+            "default": "2",
+            "description": "IGMP version. '2' (default, ASM/IGMPv2) / '3' (SSM/IGMPv3)",
+            "enum": [
+              "2",
+              "3"
+            ],
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "switch_networks": {
@@ -1167,7 +1292,7 @@
       },
       "switch_port_usage": {
         "additionalProperties": false,
-        "description": "Junos port usages",
+        "description": "Junos switch port usage template and authentication settings",
         "properties": {
           "all_networks": {
             "default": false,
@@ -1217,10 +1342,12 @@
             "type": "boolean"
           },
           "duplex": {
-            "$ref": "#/components/schemas/switch_port_usage_duplex"
+            "$ref": "#/components/schemas/switch_port_usage_duplex",
+            "description": "Only if `mode`!=`dynamic`. Link duplex mode for this port usage"
           },
           "dynamic_vlan_networks": {
-            "$ref": "#/components/schemas/switch_port_usage_dynamic_vlan_networks"
+            "$ref": "#/components/schemas/switch_port_usage_dynamic_vlan_networks",
+            "description": "Only if `mode`!=`dynamic` and `port_auth`==`dot1x`. Networks or VLANs that RADIUS can return for dynamic VLAN assignment"
           },
           "enable_mac_auth": {
             "default": false,
@@ -1258,19 +1385,24 @@
             "type": "boolean"
           },
           "mac_auth_protocol": {
-            "$ref": "#/components/schemas/switch_port_usage_mac_auth_protocol"
+            "$ref": "#/components/schemas/switch_port_usage_mac_auth_protocol",
+            "description": "Only if `mode`!=`dynamic` and `enable_mac_auth`==`true`. MAC authentication protocol to use; ignored if Mist NAC is enabled"
           },
           "mac_limit": {
-            "$ref": "#/components/schemas/switch_port_usage_mac_limit"
+            "$ref": "#/components/schemas/switch_port_usage_mac_limit",
+            "description": "Only if `mode`!=`dynamic`. Maximum number of MAC addresses allowed on the port; 0 means unlimited"
           },
           "mode": {
-            "$ref": "#/components/schemas/switch_port_usage_mode"
+            "$ref": "#/components/schemas/switch_port_usage_mode",
+            "description": "Switching mode for this port usage"
           },
           "mtu": {
-            "$ref": "#/components/schemas/switch_port_usage_mtu"
+            "$ref": "#/components/schemas/switch_port_usage_mtu",
+            "description": "Only if `mode`!=`dynamic`. MTU for ports using this port usage"
           },
           "networks": {
-            "$ref": "#/components/schemas/switch_port_usage_networks"
+            "$ref": "#/components/schemas/switch_port_usage_networks",
+            "description": "Only if `mode`==`trunk`. Network or VLAN names to trunk"
           },
           "persist_mac": {
             "default": false,
@@ -1282,24 +1414,34 @@
             "description": "Only if `mode`!=`dynamic`. Whether PoE capabilities are disabled for a port",
             "type": "boolean"
           },
+          "poe_keep_state_when_reboot": {
+            "default": false,
+            "description": "Only if `mode`!=`dynamic`. Whether Perpetual PoE is enabled; keeps PoE state across reboots",
+            "type": "boolean"
+          },
           "poe_priority": {
-            "$ref": "#/components/schemas/poe_priority"
+            "$ref": "#/components/schemas/poe_priority",
+            "description": "Only if `mode`!=`dynamic`. PoE priority for ports using this port usage"
           },
           "port_auth": {
-            "$ref": "#/components/schemas/switch_port_usage_dot1x"
+            "$ref": "#/components/schemas/switch_port_usage_dot1x",
+            "description": "Only if `mode`!=`dynamic`. 802.1X authentication mode for this port usage"
           },
           "port_network": {
             "description": "Only if `mode`!=`dynamic`. Native network/vlan for untagged traffic",
             "type": "string"
           },
           "reauth_interval": {
-            "$ref": "#/components/schemas/switch_port_usage_reauth_interval"
+            "$ref": "#/components/schemas/switch_port_usage_reauth_interval",
+            "description": "Only if `mode`!=`dynamic` and `port_auth`==`dot1x`. RADIUS reauthentication interval for clients on the port"
           },
           "reset_default_when": {
-            "$ref": "#/components/schemas/switch_port_usage_dynamic_reset_default_when"
+            "$ref": "#/components/schemas/switch_port_usage_dynamic_reset_default_when",
+            "description": "Only if `mode`==`dynamic`. Condition that resets a dynamic port to the default port usage"
           },
           "rules": {
-            "$ref": "#/components/schemas/switch_port_usage_dynamic_rules"
+            "$ref": "#/components/schemas/switch_port_usage_dynamic_rules",
+            "description": "Only if `mode`==`dynamic`. Dynamic matching rules that select the port usage to apply"
           },
           "server_fail_network": {
             "description": "Only if `mode`!=`dynamic` and `port_auth`==`dot1x`. Sets server fail fallback vlan",
@@ -1308,18 +1450,27 @@
               "null"
             ]
           },
+          "server_fail_retry_interval": {
+            "default": 120,
+            "description": "Only if `mode`!=`dynamic` and `port_auth`==`dot1x`. Interval, in seconds. Sets the wait time before retrying authentication after RADIUS failure to reduce client flapping. Range 120-65535",
+            "maximum": 65535,
+            "minimum": 120,
+            "type": "integer"
+          },
           "server_reject_network": {
-            "description": "Only if `mode`!=`dynamic` and `port_auth`==`dot1x`. When radius server reject / fails",
+            "description": "Only if `mode`!=`dynamic` and `port_auth`==`dot1x`. When RADIUS server reject / fails",
             "type": [
               "string",
               "null"
             ]
           },
           "speed": {
-            "$ref": "#/components/schemas/switch_port_usage_speed"
+            "$ref": "#/components/schemas/switch_port_usage_speed",
+            "description": "Only if `mode`!=`dynamic`. Link speed for this port usage"
           },
           "storm_control": {
-            "$ref": "#/components/schemas/switch_port_usage_storm_control"
+            "$ref": "#/components/schemas/switch_port_usage_storm_control",
+            "description": "Only if `mode`!=`dynamic`. Storm-control settings for this port usage"
           },
           "stp_disable": {
             "default": false,
@@ -1400,26 +1551,30 @@
       },
       "switch_port_usage_dynamic_rule": {
         "additionalProperties": false,
+        "description": "Dynamic port usage rule evaluated against LLDP, RADIUS, or peer MAC attributes",
         "properties": {
           "description": {
             "description": "Optional description of the rule",
             "type": "string"
           },
           "equals": {
+            "description": "Exact value that the selected source attribute must match",
             "type": "string"
           },
           "equals_any": {
-            "$ref": "#/components/schemas/switch_port_usage_dynamic_rule_equals_any"
+            "$ref": "#/components/schemas/switch_port_usage_dynamic_rule_equals_any",
+            "description": "List of values where any match satisfies this dynamic rule"
           },
           "expression": {
             "description": "\"[0:3]\":\"abcdef\" -> \"abc\"\n\"split(.)[1]\": \"a.b.c\" -> \"b\"\n\"split(-)[1][0:3]: \"a1234-b5678-c90\" -> \"b56\"",
             "type": "string"
           },
           "src": {
-            "$ref": "#/components/schemas/switch_port_usage_dynamic_rule_src"
+            "$ref": "#/components/schemas/switch_port_usage_dynamic_rule_src",
+            "description": "Source attribute evaluated by this dynamic rule"
           },
           "usage": {
-            "description": "`port_usage` name",
+            "description": "Port usage name to apply when this dynamic rule matches",
             "type": "string"
           }
         },
@@ -1453,7 +1608,7 @@
         "type": "string"
       },
       "switch_port_usage_dynamic_rules": {
-        "description": "Only if `mode`==`dynamic`",
+        "description": "Only if `mode`==`dynamic`. Dynamic matching rules that select the port usage to apply",
         "items": {
           "$ref": "#/components/schemas/switch_port_usage_dynamic_rule"
         },
@@ -1494,7 +1649,7 @@
             "type": "string"
           }
         ],
-        "description": "Only if `mode`!=`dynamic`, max number of mac addresses, default is 0 for unlimited, otherwise range is 1 to 16383 (upper bound constrained by platform)"
+        "description": "Only if `mode`!=`dynamic`, max number of MAC addresses, default is 0 for unlimited, otherwise range is 1 to 16383 (upper bound constrained by platform)"
       },
       "switch_port_usage_mode": {
         "description": "`mode`==`dynamic` must only be used if the port usage name is `dynamic`. enum: `access`, `dynamic`, `inet`, `trunk`",
@@ -1541,7 +1696,7 @@
             "type": "string"
           }
         ],
-        "description": "Only if `mode`!=`dynamic` and `port_auth`=`dot1x` reauthentication interval range (min: 10, max: 65535, default: 3600)"
+        "description": "Only if `mode`!=`dynamic` and `port_auth`=`dot1x` reauthentication interval range (min: 10, max: 65535, default: 3600). Set to 0 to disable reauthentication (no-reauthentication)."
       },
       "switch_port_usage_speed": {
         "default": "auto",
@@ -1607,6 +1762,7 @@
         "type": "object"
       },
       "vlan_id_with_variable": {
+        "description": "VLAN ID, either numeric or expressed as a template variable string",
         "oneOf": [
           {
             "type": "string"
@@ -1810,9 +1966,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -1832,9 +1988,9 @@
         }
       },
       "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
         "in": "query",
         "name": "page",
-        "required": false,
         "schema": {
           "default": 1,
           "minimum": 1,
@@ -1934,19 +2090,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

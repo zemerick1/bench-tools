@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Gateway Templates",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "get": {
-        "description": "Get List of Org Gateway Templates",
+        "description": "List organization gateway templates, which provide reusable WAN gateway configuration that can be applied to gateways at sites.",
         "operationId": "listOrgGatewayTemplates",
         "parameters": [
           {
@@ -116,7 +112,7 @@
         ]
       },
       "post": {
-        "description": "Create Org Gateway Template",
+        "description": "Create an organization gateway template with reusable WAN gateway networks, ports, routing, and service-policy configuration.\n\nGateway templates can be applied to multiple sites within the organization to provide consistent gateway configuration across sites.\nTo assign a gateway template to a site, use the [Update Site](/#operations/updateSiteInfo) endpoint and specify the gateway template ID in the `gatewaytemplate_id` field of the request body.",
         "operationId": "createOrgGatewayTemplate",
         "requestBody": {
           "content": {
@@ -338,7 +334,7 @@
         }
       ],
       "get": {
-        "description": "Get Organization Gateway Template details",
+        "description": "Retrieve the configuration stored in a specific organization gateway template.",
         "operationId": "getOrgGatewayTemplate",
         "responses": {
           "200": {
@@ -366,7 +362,7 @@
         ]
       },
       "put": {
-        "description": "Update Organization Gateway Template",
+        "description": "Update the configuration stored in an organization gateway template.",
         "operationId": "updateOrgGatewayTemplate",
         "requestBody": {
           "content": {
@@ -578,7 +574,7 @@
         ]
       },
       "delete": {
-        "description": "Delete Organization Gateway Template",
+        "description": "Delete an organization gateway template and remove that reusable gateway configuration object from the organization.",
         "operationId": "deleteOrgGatewayTemplate",
         "responses": {
           "200": {
@@ -621,12 +617,135 @@
         "type": "array"
       },
       "allow_deny": {
-        "description": "enum: `allow`, `deny`",
+        "description": "Policy action value that either allows or denies matching traffic. enum: `allow`, `deny`",
         "enum": [
           "allow",
           "deny"
         ],
         "type": "string"
+      },
+      "app_probing": {
+        "additionalProperties": false,
+        "description": "Application reachability probing settings for gateway management",
+        "properties": {
+          "apps": {
+            "$ref": "#/components/schemas/app_probing_apps",
+            "description": "Predefined application keys to probe"
+          },
+          "custom_apps": {
+            "$ref": "#/components/schemas/app_probing_custom_apps",
+            "description": "User-defined application probe definitions"
+          },
+          "enabled": {
+            "description": "Whether gateway application probing is enabled",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "app_probing_apps": {
+        "description": "Application keys from [List Applications](/#operations/listApplications)",
+        "examples": [
+          [
+            "facebook"
+          ]
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "app_probing_custom_app": {
+        "additionalProperties": false,
+        "description": "User-defined application probe definition",
+        "properties": {
+          "address": {
+            "description": "Required if `protocol`==`icmp`. IP address probed by the ICMP custom app",
+            "examples": [
+              "192.168.1.1"
+            ],
+            "type": "string"
+          },
+          "app_type": {
+            "description": "Category label used for this custom application probe",
+            "type": "string"
+          },
+          "hostnames": {
+            "$ref": "#/components/schemas/app_probing_custom_app_hostname",
+            "description": "If `protocol`==`http`. Hostnames or URLs probed by this custom app"
+          },
+          "key": {
+            "description": "Stable key used to identify this custom application probe",
+            "type": "string"
+          },
+          "name": {
+            "description": "Display name for this custom application probe",
+            "examples": [
+              "pos_app"
+            ],
+            "type": "string"
+          },
+          "network": {
+            "description": "Gateway network used as the source context for this probe",
+            "examples": [
+              "lan"
+            ],
+            "type": "string"
+          },
+          "packetSize": {
+            "description": "If `protocol`==`icmp`. ICMP packet size used by this custom app probe",
+            "maximum": 65400,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "protocol": {
+            "$ref": "#/components/schemas/app_probing_custom_app_protocol",
+            "description": "Probe protocol used by this custom application definition"
+          },
+          "url": {
+            "description": "If `protocol`==`http`. HTTP URL or hostname probed by this custom app",
+            "examples": [
+              "www.abc.com"
+            ],
+            "type": "string"
+          },
+          "vrf": {
+            "description": "Gateway VRF used as the source context for this probe",
+            "examples": [
+              "lan"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "app_probing_custom_app_hostname": {
+        "description": "If `protocol`==`http`. HTTP hostnames or URLs probed by the custom app",
+        "examples": [
+          [
+            "https://www.abc.com"
+          ]
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "app_probing_custom_app_protocol": {
+        "default": "http",
+        "description": "Probe protocol for a custom application. enum: `http`, `icmp`",
+        "enum": [
+          "http",
+          "icmp"
+        ],
+        "type": "string"
+      },
+      "app_probing_custom_apps": {
+        "description": "User-defined application probe definitions",
+        "items": {
+          "$ref": "#/components/schemas/app_probing_custom_app"
+        },
+        "type": "array"
       },
       "bgp_as": {
         "anyOf": [
@@ -646,7 +765,7 @@
       },
       "bgp_config": {
         "additionalProperties": false,
-        "description": "BFD is enabled when either bfd_minimum_interval or bfd_multiplier is configured",
+        "description": "BGP session configuration. BFD is enabled when either bfd_minimum_interval or bfd_multiplier is configured",
         "properties": {
           "auth_key": {
             "description": "Optional if `via`==`lan`, `via`==`tunnel` or `via`==`wan`",
@@ -678,6 +797,7 @@
             "type": "boolean"
           },
           "export": {
+            "description": "Routing policy applied to routes exported by this BGP session",
             "type": "string"
           },
           "export_policy": {
@@ -703,6 +823,7 @@
             "type": "integer"
           },
           "import": {
+            "description": "Routing policy applied to routes imported by this BGP session",
             "type": "string"
           },
           "import_policy": {
@@ -710,10 +831,12 @@
             "type": "string"
           },
           "local_as": {
-            "$ref": "#/components/schemas/bgp_local_as"
+            "$ref": "#/components/schemas/bgp_local_as",
+            "description": "Required if `via`==`lan`, `via`==`tunnel` or `via`==`wan`; local BGP Autonomous System (AS) number"
           },
           "neighbor_as": {
-            "$ref": "#/components/schemas/bgp_as"
+            "$ref": "#/components/schemas/bgp_as",
+            "description": "Default BGP neighbor Autonomous System (AS) number for this session"
           },
           "neighbors": {
             "additionalProperties": {
@@ -723,7 +846,8 @@
             "type": "object"
           },
           "networks": {
-            "$ref": "#/components/schemas/bgp_config_networks"
+            "$ref": "#/components/schemas/bgp_config_networks",
+            "description": "Optional if `via`==`lan`; networks where BGP neighbors can connect to or from"
           },
           "no_private_as": {
             "default": false,
@@ -736,21 +860,23 @@
             "type": "boolean"
           },
           "tunnel_name": {
-            "description": "Optional if `via`==`tunnel`",
+            "description": "Optional if `via`==`tunnel`; tunnel name used for this BGP session",
             "type": "string"
           },
           "type": {
-            "$ref": "#/components/schemas/bgp_config_type"
+            "$ref": "#/components/schemas/bgp_config_type",
+            "description": "Required if `via`==`lan`, `via`==`tunnel` or `via`==`wan`; BGP session type, internal or external"
           },
           "via": {
-            "$ref": "#/components/schemas/bgp_config_via"
+            "$ref": "#/components/schemas/bgp_config_via",
+            "description": "Transport used for this BGP session, such as LAN, tunnel, VPN, or WAN"
           },
           "vpn_name": {
-            "description": "Optional if `via`==`vpn`",
+            "description": "Optional if `via`==`vpn`; VPN name used for this BGP session",
             "type": "string"
           },
           "wan_name": {
-            "description": "Optional if `via`==`wan`",
+            "description": "Optional if `via`==`wan`; WAN interface name used for this BGP session",
             "type": "string"
           }
         },
@@ -761,6 +887,7 @@
       },
       "bgp_config_neighbors": {
         "additionalProperties": false,
+        "description": "Per-neighbor BGP session settings",
         "properties": {
           "disabled": {
             "default": false,
@@ -768,15 +895,18 @@
             "type": "boolean"
           },
           "export_policy": {
+            "description": "Export policy applied only to this BGP neighbor",
             "type": "string"
           },
           "hold_time": {
             "default": 90,
+            "description": "BGP hold time for this neighbor, in seconds",
             "maximum": 65535,
             "minimum": 0,
             "type": "integer"
           },
           "import_policy": {
+            "description": "Import policy applied only to this BGP neighbor",
             "type": "string"
           },
           "multihop_ttl": {
@@ -786,7 +916,12 @@
             "type": "integer"
           },
           "neighbor_as": {
-            "$ref": "#/components/schemas/bgp_as"
+            "$ref": "#/components/schemas/bgp_as",
+            "description": "Autonomous System (AS) number of this BGP neighbor"
+          },
+          "tunnel_via": {
+            "$ref": "#/components/schemas/tunnel_via",
+            "description": "If `via`==`tunnel`, primary or secondary tunnel associated with this BGP neighbor"
           }
         },
         "required": [
@@ -843,10 +978,25 @@
         "readOnly": true,
         "type": "number"
       },
+      "day_of_week": {
+        "description": "enum: `any`, `fri`, `mon`, `sat`, `sun`, `thu`, `tue`, `wed`",
+        "enum": [
+          "any",
+          "fri",
+          "mon",
+          "sat",
+          "sun",
+          "thu",
+          "tue",
+          "wed"
+        ],
+        "type": "string"
+      },
       "dhcpd_config": {
         "additionalProperties": {
           "$ref": "#/components/schemas/dhcpd_config_property"
         },
+        "description": "DHCP server configuration map with a global enable flag",
         "properties": {
           "enabled": {
             "default": true,
@@ -885,20 +1035,24 @@
       },
       "dhcpd_config_fixed_binding": {
         "additionalProperties": false,
+        "description": "Static DHCP binding for a client MAC address",
         "properties": {
           "ip": {
+            "description": "Reserved IPv4 address for this fixed DHCP binding",
             "examples": [
               "192.168.70.35"
             ],
             "type": "string"
           },
           "ip6": {
+            "description": "Reserved IPv6 address for this fixed DHCP binding",
             "examples": [
               "2607:f8b0:4005:808::2"
             ],
             "type": "string"
           },
           "name": {
+            "description": "Friendly name for this fixed DHCP binding",
             "type": "string"
           }
         },
@@ -908,7 +1062,7 @@
         "additionalProperties": {
           "$ref": "#/components/schemas/dhcpd_config_fixed_binding"
         },
-        "description": "If `type`==`local` or `type6`==`local`. Property key is the MAC Address. Format is `[0-9a-f]{12}` (e.g. \"5684dae9ac8b\")",
+        "description": "If `type`==`local` or `type6`==`local`. Property key is the client MAC address. Format is `[0-9a-f]{12}` (e.g. \"5684dae9ac8b\")",
         "examples": [
           {
             "5684dae9ac8b": {
@@ -921,11 +1075,14 @@
       },
       "dhcpd_config_option": {
         "additionalProperties": false,
+        "description": "Custom DHCP option value",
         "properties": {
           "type": {
-            "$ref": "#/components/schemas/dhcpd_config_option_type"
+            "$ref": "#/components/schemas/dhcpd_config_option_type",
+            "description": "Data type used to encode this DHCP option value"
           },
           "value": {
+            "description": "Option value to send for this DHCP option",
             "type": "string"
           }
         },
@@ -954,15 +1111,19 @@
       },
       "dhcpd_config_property": {
         "additionalProperties": false,
+        "description": "DHCP server or relay configuration for one network",
         "properties": {
           "dns_servers": {
-            "$ref": "#/components/schemas/dhcpd_config_dns_servers"
+            "$ref": "#/components/schemas/dhcpd_config_dns_servers",
+            "description": "If `type`==`local` or `type6`==`local`, DNS servers advertised to DHCP clients"
           },
           "dns_suffix": {
-            "$ref": "#/components/schemas/dhcpd_config_dns_suffix"
+            "$ref": "#/components/schemas/dhcpd_config_dns_suffix",
+            "description": "If `type`==`local` or `type6`==`local`, DNS search suffixes advertised to DHCP clients"
           },
           "fixed_bindings": {
-            "$ref": "#/components/schemas/dhcpd_config_fixed_bindings"
+            "$ref": "#/components/schemas/dhcpd_config_fixed_bindings",
+            "description": "If `type`==`local` or `type6`==`local`, fixed client bindings for local DHCP service"
           },
           "gateway": {
             "description": "If `type`==`local` - optional, `ip` will be used if not provided",
@@ -972,28 +1133,28 @@
             "type": "string"
           },
           "ip6_end": {
-            "description": "If `type6`==`local`",
+            "description": "If `type6`==`local`, ending IPv6 address for the DHCP lease pool",
             "examples": [
               "2607:f8b0:4005:808::ff"
             ],
             "type": "string"
           },
           "ip6_start": {
-            "description": "If `type6`==`local`",
+            "description": "If `type6`==`local`, starting IPv6 address for the DHCP lease pool",
             "examples": [
               "2607:f8b0:4005:808::2"
             ],
             "type": "string"
           },
           "ip_end": {
-            "description": "If `type`==`local`",
+            "description": "If `type`==`local`, ending IPv4 address for the DHCP lease pool",
             "examples": [
               "192.168.70.200"
             ],
             "type": "string"
           },
           "ip_start": {
-            "description": "If `type`==`local`",
+            "description": "If `type`==`local`, starting IPv4 address for the DHCP lease pool",
             "examples": [
               "192.168.70.100"
             ],
@@ -1007,7 +1168,8 @@
             "type": "integer"
           },
           "options": {
-            "$ref": "#/components/schemas/dhcpd_config_options"
+            "$ref": "#/components/schemas/dhcpd_config_options",
+            "description": "If `type`==`local` or `type6`==`local`, custom DHCP options advertised to clients"
           },
           "server_id_override": {
             "default": false,
@@ -1015,25 +1177,30 @@
             "type": "boolean"
           },
           "servers": {
-            "$ref": "#/components/schemas/dhcpd_config_servers"
+            "$ref": "#/components/schemas/dhcpd_config_servers",
+            "description": "If `type`==`relay`, upstream IPv4 DHCP servers"
           },
           "serversv6": {
-            "$ref": "#/components/schemas/dhcpd_config_servers6"
+            "$ref": "#/components/schemas/dhcpd_config_servers6",
+            "description": "If `type6`==`relay`, upstream IPv6 DHCP servers"
           },
           "type": {
-            "$ref": "#/components/schemas/dhcpd_config_type"
+            "$ref": "#/components/schemas/dhcpd_config_type",
+            "description": "IPv4 DHCP mode for this network"
           },
           "type6": {
-            "$ref": "#/components/schemas/dhcpd_config_type6"
+            "$ref": "#/components/schemas/dhcpd_config_type6",
+            "description": "IPv6 DHCP mode for this network"
           },
           "vendor_encapsulated": {
-            "$ref": "#/components/schemas/dhcpd_config_vendor_options"
+            "$ref": "#/components/schemas/dhcpd_config_vendor_options",
+            "description": "If `type`==`local` or `type6`==`local`, vendor-encapsulated DHCP options advertised to clients"
           }
         },
         "type": "object"
       },
       "dhcpd_config_servers": {
-        "description": "If `type`==`relay`",
+        "description": "If `type`==`relay`, upstream IPv4 DHCP servers",
         "examples": [
           [
             "11.2.3.4"
@@ -1045,7 +1212,7 @@
         "type": "array"
       },
       "dhcpd_config_servers6": {
-        "description": "If `type6`==`relay`",
+        "description": "If `type6`==`relay`, upstream IPv6 DHCP servers",
         "examples": [
           [
             "2607:f8b0:4005:808::64"
@@ -1078,11 +1245,14 @@
       },
       "dhcpd_config_vendor_option": {
         "additionalProperties": false,
+        "description": "Vendor-encapsulated DHCP option value",
         "properties": {
           "type": {
-            "$ref": "#/components/schemas/dhcpd_config_vendor_option_type"
+            "$ref": "#/components/schemas/dhcpd_config_vendor_option_type",
+            "description": "Data type used to encode this vendor option value"
           },
           "value": {
+            "description": "Option value to send for this vendor option",
             "type": "string"
           }
         },
@@ -1125,8 +1295,10 @@
       },
       "gateway_extra_route": {
         "additionalProperties": false,
+        "description": "Gateway IPv4 extra route next-hop settings",
         "properties": {
           "via": {
+            "description": "Next-hop IPv4 address for the gateway extra route",
             "format": "ipv4",
             "type": "string"
           }
@@ -1135,8 +1307,10 @@
       },
       "gateway_extra_route6": {
         "additionalProperties": false,
+        "description": "Gateway IPv6 extra route next-hop settings",
         "properties": {
           "via": {
+            "description": "Next-hop IPv6 address for the gateway extra route",
             "format": "ipv6",
             "type": "string"
           }
@@ -1187,35 +1361,43 @@
       },
       "gateway_ip_config_property": {
         "additionalProperties": false,
+        "description": "Gateway network interface IP configuration",
         "properties": {
           "ip": {
+            "description": "Static IPv4 address for the gateway network interface when `type`==`static`",
             "format": "ipv4",
             "type": "string"
           },
           "ip6": {
+            "description": "Static IPv6 address for the gateway network interface when `type6`==`static`",
             "format": "ipv6",
             "type": "string"
           },
           "netmask": {
+            "description": "IPv4 netmask or prefix length for the gateway network interface when `type`==`static`",
             "examples": [
               "/24"
             ],
             "type": "string"
           },
           "netmask6": {
+            "description": "IPv6 netmask or prefix length for the gateway network interface when `type6`==`static`",
             "examples": [
               "2001:db8:abcd:12::1"
             ],
             "type": "string"
           },
           "secondary_ips": {
-            "$ref": "#/components/schemas/gateway_ip_config_property_second_ips"
+            "$ref": "#/components/schemas/gateway_ip_config_property_second_ips",
+            "description": "Additional IPv4 addresses in CIDR notation for this gateway network interface"
           },
           "type": {
-            "$ref": "#/components/schemas/ip_type"
+            "$ref": "#/components/schemas/ip_type",
+            "description": "IPv4 address assignment mode for this gateway network interface"
           },
           "type6": {
-            "$ref": "#/components/schemas/ip_type6"
+            "$ref": "#/components/schemas/ip_type6",
+            "description": "IPv6 address assignment mode for this gateway network interface"
           }
         },
         "type": "object"
@@ -1242,13 +1424,15 @@
       },
       "gateway_matching": {
         "additionalProperties": false,
-        "description": "Gateway matching",
+        "description": "Gateway matching configuration used to apply gateway-specific settings",
         "properties": {
           "enable": {
+            "description": "Whether gateway matching is enabled",
             "type": "boolean"
           },
           "rules": {
-            "$ref": "#/components/schemas/gateway_matching_rules"
+            "$ref": "#/components/schemas/gateway_matching_rules",
+            "description": "Gateway matching rules evaluated for this configuration"
           }
         },
         "type": "object"
@@ -1258,11 +1442,14 @@
           "description": "Property key defines the type of matching. e.g: `match_name[0:3]`, `match_model[0-6]` or `match_role`",
           "type": "string"
         },
+        "description": "Gateway matching rule that applies settings when its match keys select a gateway",
         "properties": {
           "additional_config_cmds": {
-            "$ref": "#/components/schemas/additional_config_cmds"
+            "$ref": "#/components/schemas/additional_config_cmds",
+            "description": "For SRX only, additional Junos CLI commands appended when this gateway matching rule applies"
           },
           "name": {
+            "description": "Display name for the gateway matching rule",
             "type": "string"
           },
           "port_config": {
@@ -1276,33 +1463,181 @@
         "type": "object"
       },
       "gateway_matching_rules": {
+        "description": "Gateway matching rules used by a gateway matching configuration",
         "items": {
           "$ref": "#/components/schemas/gateway_matching_rule"
         },
         "type": "array",
         "uniqueItems": true
       },
+      "gateway_mgmt": {
+        "additionalProperties": false,
+        "description": "Gateway management-plane and access settings",
+        "properties": {
+          "admin_sshkeys": {
+            "$ref": "#/components/schemas/gateway_mgmt_admin_sshkeys",
+            "description": "SSR-only SSH public keys for administrative access"
+          },
+          "app_probing": {
+            "$ref": "#/components/schemas/app_probing",
+            "description": "Application probing configuration for gateway monitoring"
+          },
+          "app_usage": {
+            "description": "Consumes uplink bandwidth, requires WA license",
+            "type": "boolean"
+          },
+          "auto_signature_update": {
+            "$ref": "#/components/schemas/gateway_mgmt_auto_signature_update",
+            "description": "Schedule for automatic security signature updates"
+          },
+          "config_revert_timer": {
+            "default": 10,
+            "description": "Rollback timer for commit confirmed",
+            "maximum": 30,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "disable_console": {
+            "default": false,
+            "description": "For SSR and SRX, disable console port",
+            "type": "boolean"
+          },
+          "disable_idp_pcap": {
+            "default": false,
+            "description": "For SRX only, disable IDP packet capture",
+            "type": "boolean"
+          },
+          "disable_oob": {
+            "default": false,
+            "description": "For SSR and SRX, disable management interface",
+            "type": "boolean"
+          },
+          "disable_usb": {
+            "default": false,
+            "description": "For SSR and SRX, disable usb interface",
+            "type": "boolean"
+          },
+          "fips_enabled": {
+            "default": false,
+            "description": "Whether FIPS mode is enabled on the gateway",
+            "type": "boolean"
+          },
+          "probe_hosts": {
+            "$ref": "#/components/schemas/gateway_mgmt_probe_hosts",
+            "description": "IPv4 probe targets used for gateway connectivity checks"
+          },
+          "probe_hostsv6": {
+            "$ref": "#/components/schemas/gateway_mgmt_probe_hostsv6",
+            "description": "IPv6 probe targets used for gateway connectivity checks"
+          },
+          "protect_re": {
+            "$ref": "#/components/schemas/protect_re",
+            "description": "Control-plane protection settings for the gateway"
+          },
+          "root_password": {
+            "description": "SRX only. Root password for local gateway access",
+            "format": "password",
+            "type": "string"
+          },
+          "security_log_source_address": {
+            "description": "IPv4 source address used for gateway security log traffic",
+            "examples": [
+              "192.168.1.1"
+            ],
+            "format": "ipv4",
+            "type": "string"
+          },
+          "security_log_source_interface": {
+            "description": "Source interface used for gateway security log traffic",
+            "examples": [
+              "ge-0/0/1.0"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "gateway_mgmt_admin_sshkeys": {
+        "description": "For SSR only, as direct root access is not allowed",
+        "examples": [
+          [
+            "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAA...Wxa6p6UW0ZbcP john@host"
+          ]
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "gateway_mgmt_auto_signature_update": {
+        "additionalProperties": false,
+        "description": "Automatic security signature update schedule",
+        "properties": {
+          "day_of_week": {
+            "$ref": "#/components/schemas/day_of_week",
+            "description": "Scheduled weekday for automatic signature updates"
+          },
+          "enable": {
+            "default": true,
+            "description": "Whether automatic security signature updates are enabled",
+            "type": "boolean"
+          },
+          "time_of_day": {
+            "description": "Optional, Mist will decide the timing",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "gateway_mgmt_probe_hosts": {
+        "description": "IPv4 probe hosts used for gateway connectivity checks",
+        "examples": [
+          [
+            "8.8.8.8"
+          ]
+        ],
+        "format": "ipv4",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "gateway_mgmt_probe_hostsv6": {
+        "description": "IPv6 probe hosts used for gateway connectivity checks",
+        "examples": [
+          [
+            "2001:4860:4860::8888"
+          ]
+        ],
+        "format": "ipv6",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
       "gateway_oob_ip_config": {
         "additionalProperties": false,
-        "description": "Out-of-band (vme/em0/fxp0) IP config",
+        "description": "Out-of-band management IP configuration for gateway interfaces such as vme, em0, or fxp0",
         "properties": {
           "gateway": {
-            "description": "If `type`==`static`",
+            "description": "Default gateway for the out-of-band management interface when `type`==`static`",
             "type": "string"
           },
           "ip": {
-            "description": "If `type`==`static`",
+            "description": "Static IPv4 address for the out-of-band management interface when `type`==`static`",
             "type": "string"
           },
           "netmask": {
-            "description": "If `type`==`static`",
+            "description": "IPv4 netmask or prefix length for the out-of-band management interface when `type`==`static`",
             "type": "string"
           },
           "node1": {
-            "$ref": "#/components/schemas/gateway_oob_ip_config_node1"
+            "$ref": "#/components/schemas/gateway_oob_ip_config_node1",
+            "description": "Out-of-band management IP configuration override for node1 in an HA cluster"
           },
           "type": {
-            "$ref": "#/components/schemas/ip_type"
+            "$ref": "#/components/schemas/ip_type",
+            "description": "IP assignment mode for the out-of-band management interface"
           },
           "use_mgmt_vrf": {
             "default": false,
@@ -1315,28 +1650,31 @@
             "type": "boolean"
           },
           "vlan_id": {
-            "type": "string"
+            "$ref": "#/components/schemas/gateway_port_vlan_id_with_variable",
+            "description": "VLAN ID used for out-of-band management traffic"
           }
         },
         "type": "object"
       },
       "gateway_oob_ip_config_node1": {
         "additionalProperties": false,
-        "description": "For HA Cluster, node1 can have different IP Config",
+        "description": "Node1-specific out-of-band management IP configuration for HA clusters",
         "properties": {
           "gateway": {
-            "description": "If `type`==`static`",
+            "description": "Default gateway for the node1 out-of-band management interface when `type`==`static`",
             "type": "string"
           },
           "ip": {
+            "description": "Static IPv4 address for the node1 out-of-band management interface when `type`==`static`",
             "type": "string"
           },
           "netmask": {
-            "description": "Used only if `subnet` is not specified in `networks`",
+            "description": "IPv4 netmask or prefix length for the node1 out-of-band management interface when `type`==`static`; used only if `subnet` is not specified in `networks`",
             "type": "string"
           },
           "type": {
-            "$ref": "#/components/schemas/ip_type"
+            "$ref": "#/components/schemas/ip_type",
+            "description": "IP assignment mode for the node1 out-of-band management interface"
           },
           "use_mgmt_vrf": {
             "default": false,
@@ -1349,27 +1687,33 @@
             "type": "boolean"
           },
           "vlan_id": {
-            "type": "string"
+            "$ref": "#/components/schemas/gateway_port_vlan_id_with_variable",
+            "description": "VLAN ID used for node1 out-of-band management traffic"
           }
         },
         "type": "object"
       },
       "gateway_path_preferences": {
         "additionalProperties": false,
+        "description": "Gateway path preference that selects among one or more local, WAN, VPN, or tunnel paths",
         "properties": {
           "paths": {
-            "$ref": "#/components/schemas/gateway_path_preferences_paths"
+            "$ref": "#/components/schemas/gateway_path_preferences_paths",
+            "description": "Candidate paths evaluated for this gateway path preference"
           },
           "strategy": {
-            "$ref": "#/components/schemas/gateway_path_strategy"
+            "$ref": "#/components/schemas/gateway_path_strategy",
+            "description": "Selection strategy used to evaluate the candidate paths"
           }
         },
         "type": "object"
       },
       "gateway_path_preferences_path": {
         "additionalProperties": false,
+        "description": "Candidate path within a gateway path preference",
         "properties": {
           "cost": {
+            "description": "Relative cost assigned to this path for gateway path selection",
             "type": "integer"
           },
           "disabled": {
@@ -1389,16 +1733,19 @@
             "type": "string"
           },
           "networks": {
-            "$ref": "#/components/schemas/gateway_path_preferences_path_networks"
+            "$ref": "#/components/schemas/gateway_path_preferences_path_networks",
+            "description": "List of network names used when `type`==`local`"
           },
           "target_ips": {
-            "$ref": "#/components/schemas/gateway_path_preferences_path_target_ips"
+            "$ref": "#/components/schemas/gateway_path_preferences_path_target_ips",
+            "description": "List of destination IP addresses to replace when `type`==`local`"
           },
           "type": {
-            "$ref": "#/components/schemas/gateway_path_type"
+            "$ref": "#/components/schemas/gateway_path_type",
+            "description": "Gateway path source type, such as local network, WAN interface, VPN path, or tunnel"
           },
           "wan_name": {
-            "description": "Optional if `type`==`vpn`",
+            "description": "Optional if `type`==`vpn`; WAN interface name associated with the VPN path",
             "examples": [
               "wan0"
             ],
@@ -1411,20 +1758,21 @@
         "type": "object"
       },
       "gateway_path_preferences_path_networks": {
-        "description": "Required when `type`==`local`",
+        "description": "Network names used by a local path; required when `type`==`local`",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
       "gateway_path_preferences_path_target_ips": {
-        "description": "If `type`==`local`, if destination IP is to be replaced",
+        "description": "Destination IP addresses to replace when `type`==`local`",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
       "gateway_path_preferences_paths": {
+        "description": "Candidate paths evaluated by a gateway path preference",
         "items": {
           "$ref": "#/components/schemas/gateway_path_preferences_path"
         },
@@ -1452,7 +1800,7 @@
       },
       "gateway_port_config": {
         "additionalProperties": false,
-        "description": "Gateway port config",
+        "description": "Gateway port configuration for LAN, WAN, tunnel, and HA interfaces",
         "properties": {
           "ae_disable_lacp": {
             "default": false,
@@ -1473,6 +1821,7 @@
           },
           "aggregated": {
             "default": false,
+            "description": "Whether the port participates in an aggregated Ethernet interface",
             "type": "boolean"
           },
           "critical": {
@@ -1486,6 +1835,7 @@
           },
           "disable_autoneg": {
             "default": false,
+            "description": "Whether Ethernet autonegotiation is disabled on the port",
             "type": "boolean"
           },
           "disabled": {
@@ -1494,7 +1844,8 @@
             "type": "boolean"
           },
           "dsl_type": {
-            "$ref": "#/components/schemas/gateway_port_dsl_type"
+            "$ref": "#/components/schemas/gateway_port_dsl_type",
+            "description": "If `wan_type`==`dsl`. DSL technology used by the WAN port"
           },
           "dsl_vci": {
             "default": 35,
@@ -1507,45 +1858,58 @@
             "type": "integer"
           },
           "duplex": {
-            "$ref": "#/components/schemas/gateway_port_duplex"
+            "$ref": "#/components/schemas/gateway_port_duplex",
+            "description": "Ethernet duplex mode configured on the port"
           },
           "ip_config": {
-            "$ref": "#/components/schemas/gateway_port_config_ip_config"
+            "$ref": "#/components/schemas/gateway_port_config_ip_config",
+            "description": "Layer 3 IP configuration for the port"
           },
           "lte_apn": {
-            "description": "If `wan_type`==`lte`",
+            "description": "If `wan_type`==`lte`. APN used by the LTE uplink",
             "type": "string"
           },
           "lte_auth": {
-            "$ref": "#/components/schemas/gateway_port_lte_auth"
+            "$ref": "#/components/schemas/gateway_port_lte_auth",
+            "description": "If `wan_type`==`lte`. Authentication method used by the LTE uplink"
           },
           "lte_backup": {
+            "description": "Whether the LTE uplink is used as a backup WAN connection",
             "type": "boolean"
           },
           "lte_password": {
-            "description": "If `wan_type`==`lte`",
+            "description": "If `wan_type`==`lte`. Password used for LTE uplink authentication",
+            "format": "password",
             "type": "string"
           },
           "lte_username": {
-            "description": "If `wan_type`==`lte`",
+            "description": "If `wan_type`==`lte`. Username used for LTE uplink authentication",
             "type": "string"
           },
           "mtu": {
+            "description": "Layer 3 MTU configured on the port",
             "type": "integer"
           },
           "name": {
-            "description": "Name that we'll use to derive config",
+            "description": "Interface name used to derive device configuration",
             "type": "string"
           },
           "networks": {
-            "$ref": "#/components/schemas/gateway_port_networks"
+            "$ref": "#/components/schemas/gateway_port_networks",
+            "description": "If `usage`==`lan`. Networks attached to the interface"
           },
           "outer_vlan_id": {
-            "description": "For Q-in-Q",
+            "description": "For Q-in-Q. Outer VLAN ID used for QinQ encapsulation",
             "type": "integer"
           },
           "poe_disabled": {
             "default": false,
+            "description": "Whether PoE output is disabled on the port",
+            "type": "boolean"
+          },
+          "poe_keep_state_when_reboot": {
+            "default": false,
+            "description": "Whether Perpetual PoE capabilities are enabled for a port",
             "type": "boolean"
           },
           "port_network": {
@@ -1558,7 +1922,7 @@
             "type": "boolean"
           },
           "redundant": {
-            "description": "If HA mode",
+            "description": "If HA mode. Whether the port participates in the redundant Ethernet configuration",
             "type": "boolean"
           },
           "redundant_group": {
@@ -1568,17 +1932,20 @@
             "type": "integer"
           },
           "reth_idx": {
-            "$ref": "#/components/schemas/gateway_port_config_reth_idx"
+            "$ref": "#/components/schemas/gateway_port_config_reth_idx",
+            "description": "If HA mode and for SRX only. Redundant Ethernet interface index assigned to the port"
           },
           "reth_node": {
-            "description": "If HA mode",
+            "description": "If HA mode. Node associated with the redundant Ethernet interface",
             "type": "string"
           },
           "reth_nodes": {
-            "$ref": "#/components/schemas/gateway_port_reth_nodes"
+            "$ref": "#/components/schemas/gateway_port_reth_nodes",
+            "description": "If HA mode and for SSR only. Per-network node assignment used for VLAN-based redundancy"
           },
           "speed": {
             "default": "auto",
+            "description": "Link speed configured on the port",
             "examples": [
               "1g"
             ],
@@ -1591,26 +1958,31 @@
           },
           "svr_port_range": {
             "default": "none",
-            "description": "For SSR only",
+            "description": "For SSR only. Port range configured on the interface",
             "examples": [
               "60000-60005"
             ],
             "type": "string"
           },
           "traffic_shaping": {
-            "$ref": "#/components/schemas/gateway_traffic_shaping"
+            "$ref": "#/components/schemas/gateway_traffic_shaping",
+            "description": "Traffic shaping settings applied to the port"
           },
           "usage": {
-            "$ref": "#/components/schemas/gateway_port_usage"
+            "$ref": "#/components/schemas/gateway_port_usage",
+            "description": "Logical usage assigned to the port"
           },
           "vlan_id": {
-            "$ref": "#/components/schemas/gateway_port_vlan_id_with_variable"
+            "$ref": "#/components/schemas/gateway_port_vlan_id_with_variable",
+            "description": "VLAN ID or variable used when the WAN interface is carried on a VLAN"
           },
           "vpn_paths": {
-            "$ref": "#/components/schemas/gateway_port_vpn_paths"
+            "$ref": "#/components/schemas/gateway_port_vpn_paths",
+            "description": "Per-VPN path settings for traffic that uses this port"
           },
           "wan_arp_policer": {
-            "$ref": "#/components/schemas/gateway_port_wan_arp_policer"
+            "$ref": "#/components/schemas/gateway_port_wan_arp_policer",
+            "description": "Only when `wan_type`==`broadband`. ARP policer profile applied to the WAN port"
           },
           "wan_ext_ip": {
             "description": "Only if `usage`==`wan`, optional. If spoke should reach this port by a different IP",
@@ -1641,19 +2013,24 @@
             "type": "object"
           },
           "wan_networks": {
-            "$ref": "#/components/schemas/gateway_port_config_wan_networks"
+            "$ref": "#/components/schemas/gateway_port_config_wan_networks",
+            "description": "Only if `usage`==`wan`. Networks reachable through this WAN port for policy definition"
           },
           "wan_probe_override": {
-            "$ref": "#/components/schemas/gateway_wan_probe_override"
+            "$ref": "#/components/schemas/gateway_wan_probe_override",
+            "description": "Optional WAN health probe override settings for this port"
           },
           "wan_source_nat": {
-            "$ref": "#/components/schemas/gateway_port_wan_source_nat"
+            "$ref": "#/components/schemas/gateway_port_wan_source_nat",
+            "description": "Source NAT settings applied to traffic leaving this WAN port"
           },
           "wan_speedtest_mode": {
-            "$ref": "#/components/schemas/gateway_port_config_wan_speedtest_mode"
+            "$ref": "#/components/schemas/gateway_port_config_wan_speedtest_mode",
+            "description": "Controls whether Marvis or the scheduler can run speed tests on this WAN port"
           },
           "wan_type": {
-            "$ref": "#/components/schemas/gateway_port_wan_type"
+            "$ref": "#/components/schemas/gateway_port_wan_type",
+            "description": "Only if `usage`==`wan`. WAN uplink type configured on the port"
           }
         },
         "required": [
@@ -1663,16 +2040,18 @@
       },
       "gateway_port_config_ip_config": {
         "additionalProperties": false,
-        "description": "Junos IP Config",
+        "description": "Junos IP configuration for a gateway port interface",
         "properties": {
           "dns": {
-            "$ref": "#/components/schemas/gateway_ip_config_dns_servers"
+            "$ref": "#/components/schemas/gateway_ip_config_dns_servers",
+            "description": "Resolver server IP addresses used by this interface, except on out-of-band interfaces such as vme, em0, or fxp0"
           },
           "dns_suffix": {
-            "$ref": "#/components/schemas/gateway_ip_config_dns_suffix"
+            "$ref": "#/components/schemas/gateway_ip_config_dns_suffix",
+            "description": "DNS search suffixes used by this interface, except on out-of-band interfaces such as vme, em0, or fxp0"
           },
           "gateway": {
-            "description": "Except for out-of_band interface (vme/em0/fxp0). Interface Default Gateway IP Address (i.e. \"192.168.1.1\") or a Variable (i.e. \"{{myvar}}\")",
+            "description": "Except for out-of_band interface (vme/em0/fxp0). Interface Default Gateway IP address (i.e. \"192.168.1.1\") or a Variable (i.e. \"{{myvar}}\")",
             "examples": [
               "192.168.1.1"
             ],
@@ -1686,7 +2065,7 @@
             "type": "string"
           },
           "ip": {
-            "description": "Interface IP Address (i.e. \"192.168.1.8\") or a Variable (i.e. \"{{myvar}}\")",
+            "description": "Interface IP address (i.e. \"192.168.1.8\") or a Variable (i.e. \"{{myvar}}\")",
             "examples": [
               "192.168.1.8"
             ],
@@ -1720,21 +2099,25 @@
             "type": "string"
           },
           "poser_password": {
-            "description": "If `type`==`pppoe`",
+            "description": "Password used for PPPoE when `type`==`pppoe`",
+            "format": "password",
             "type": "string"
           },
           "pppoe_auth": {
-            "$ref": "#/components/schemas/gateway_wan_ppoe_auth"
+            "$ref": "#/components/schemas/gateway_wan_ppoe_auth",
+            "description": "Authentication protocol used for PPPoE when `type`==`pppoe`"
           },
           "pppoe_username": {
-            "description": "If `type`==`pppoe`",
+            "description": "Username used for PPPoE when `type`==`pppoe`",
             "type": "string"
           },
           "type": {
-            "$ref": "#/components/schemas/gateway_wan_type"
+            "$ref": "#/components/schemas/gateway_wan_type",
+            "description": "IPv4 assignment mode for this gateway port interface"
           },
           "type6": {
-            "$ref": "#/components/schemas/gateway_wan_type6"
+            "$ref": "#/components/schemas/gateway_wan_type6",
+            "description": "IPv6 assignment mode for this gateway port interface"
           }
         },
         "type": "object"
@@ -1748,7 +2131,7 @@
             "type": "string"
           }
         ],
-        "description": "For SRX only and if HA Mode"
+        "description": "For SRX only and if HA Mode. `-1` means it will be managed by the device. Use `>= 0` values to manage it manually. Ensure no conflicting values are assigned across all ports."
       },
       "gateway_port_config_wan_networks": {
         "description": "Only if `usage`==`wan`. If some networks are connected to this WAN port, it can be added here so policies can be defined",
@@ -1847,9 +2230,11 @@
       },
       "gateway_port_vpn_path": {
         "additionalProperties": false,
+        "description": "VPN path settings for traffic that uses a gateway port",
         "properties": {
           "bfd_profile": {
-            "$ref": "#/components/schemas/gateway_port_vpn_path_bfd_profile"
+            "$ref": "#/components/schemas/gateway_port_vpn_path_bfd_profile",
+            "description": "BFD profile used for this VPN path when the VPN `type`==`hub_spoke`"
           },
           "bfd_use_tunnel_mode": {
             "default": false,
@@ -1861,10 +2246,12 @@
             "type": "integer"
           },
           "role": {
-            "$ref": "#/components/schemas/gateway_port_vpn_path_role"
+            "$ref": "#/components/schemas/gateway_port_vpn_path_role",
+            "description": "Gateway role for this VPN path; valid values depend on the VPN `type`"
           },
           "traffic_shaping": {
-            "$ref": "#/components/schemas/gateway_traffic_shaping"
+            "$ref": "#/components/schemas/gateway_traffic_shaping",
+            "description": "Traffic shaping settings applied to this VPN path"
           }
         },
         "type": "object"
@@ -1945,72 +2332,96 @@
         "description": "Gateway Template is applied to a site for gateway(s) in a site.",
         "properties": {
           "additional_config_cmds": {
-            "$ref": "#/components/schemas/additional_config_cmds"
+            "$ref": "#/components/schemas/additional_config_cmds",
+            "description": "Additional CLI configuration commands provided by this gateway template"
           },
           "bgp_config": {
             "additionalProperties": {
               "$ref": "#/components/schemas/bgp_config"
             },
+            "description": "BGP routing defaults for this gateway template. Property key is the BGP session name",
             "type": "object"
           },
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Timestamp when the gateway template was created"
           },
           "dhcpd_config": {
-            "$ref": "#/components/schemas/dhcpd_config"
+            "$ref": "#/components/schemas/dhcpd_config",
+            "description": "DHCP server defaults provided by this gateway template"
           },
           "dnsOverride": {
             "default": false,
+            "description": "Whether DNS server and suffix settings in this template override inherited values",
             "type": "boolean"
           },
           "dns_servers": {
-            "$ref": "#/components/schemas/dns_servers"
+            "$ref": "#/components/schemas/dns_servers",
+            "description": "DNS servers provided by this gateway template"
           },
           "dns_suffix": {
-            "$ref": "#/components/schemas/dns_suffix"
+            "$ref": "#/components/schemas/dns_suffix",
+            "description": "DNS search suffixes provided by this gateway template"
           },
           "extra_routes": {
-            "$ref": "#/components/schemas/gateway_extra_routes"
+            "$ref": "#/components/schemas/gateway_extra_routes",
+            "description": "Additional IPv4 route defaults in this gateway template"
           },
           "extra_routes6": {
-            "$ref": "#/components/schemas/gateway_extra_routes6"
+            "$ref": "#/components/schemas/gateway_extra_routes6",
+            "description": "Additional IPv6 route defaults in this gateway template"
           },
           "gateway_matching": {
-            "$ref": "#/components/schemas/gateway_matching"
+            "$ref": "#/components/schemas/gateway_matching",
+            "description": "Matching rules that select gateways for this template"
+          },
+          "gateway_mgmt": {
+            "$ref": "#/components/schemas/gateway_mgmt",
+            "description": "Management-plane defaults provided by this gateway template"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the gateway template"
           },
           "idp_profiles": {
-            "$ref": "#/components/schemas/gateway_idp_profiles"
+            "$ref": "#/components/schemas/gateway_idp_profiles",
+            "description": "Intrusion detection and prevention profile defaults in this gateway template"
           },
           "ip_configs": {
-            "$ref": "#/components/schemas/gateway_ip_configs"
+            "$ref": "#/components/schemas/gateway_ip_configs",
+            "description": "Gateway interface IP configuration defaults by network name"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Timestamp when the gateway template was last modified"
           },
           "name": {
+            "description": "Display name of the gateway template",
             "examples": [
               "gw_template"
             ],
             "type": "string"
           },
           "networks": {
-            "$ref": "#/components/schemas/networks"
+            "$ref": "#/components/schemas/networks",
+            "description": "Layer 3 networks configured by this gateway template"
           },
           "ntpOverride": {
             "default": false,
+            "description": "Whether NTP servers in this template override inherited values",
             "type": "boolean"
           },
           "ntp_servers": {
-            "$ref": "#/components/schemas/ntp_servers"
+            "$ref": "#/components/schemas/ntp_servers",
+            "description": "NTP servers provided by this gateway template"
           },
           "oob_ip_config": {
-            "$ref": "#/components/schemas/gateway_oob_ip_config"
+            "$ref": "#/components/schemas/gateway_oob_ip_config",
+            "description": "Out-of-band management IP defaults in this gateway template"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization that owns this gateway template"
           },
           "path_preferences": {
             "additionalProperties": {
@@ -2034,10 +2445,12 @@
             "type": "string"
           },
           "routing_policies": {
-            "$ref": "#/components/schemas/gw_routing_policies"
+            "$ref": "#/components/schemas/gw_routing_policies",
+            "description": "Routing policy defaults applied by this gateway template"
           },
           "service_policies": {
-            "$ref": "#/components/schemas/service_policies"
+            "$ref": "#/components/schemas/service_policies",
+            "description": "Traffic service policy defaults enforced by this gateway template"
           },
           "tunnel_configs": {
             "additionalProperties": {
@@ -2047,10 +2460,12 @@
             "type": "object"
           },
           "tunnel_provider_options": {
-            "$ref": "#/components/schemas/tunnel_provider_options"
+            "$ref": "#/components/schemas/tunnel_provider_options",
+            "description": "Provider-specific tunnel options defined by this gateway template"
           },
           "type": {
-            "$ref": "#/components/schemas/gateway_template_type"
+            "$ref": "#/components/schemas/gateway_template_type",
+            "description": "Gateway template deployment type"
           },
           "url_filtering_deny_msg": {
             "default": "Access to this URL Category has been blocked",
@@ -2061,10 +2476,12 @@
             "type": "string"
           },
           "vrf_config": {
-            "$ref": "#/components/schemas/vrf_config"
+            "$ref": "#/components/schemas/vrf_config",
+            "description": "VRF defaults applied by this gateway template"
           },
           "vrf_instances": {
-            "$ref": "#/components/schemas/gateway_vrf_instances"
+            "$ref": "#/components/schemas/gateway_vrf_instances",
+            "description": "VRF instances configured by this gateway template"
           }
         },
         "required": [
@@ -2074,7 +2491,7 @@
       },
       "gateway_template_type": {
         "default": "standalone",
-        "description": "enum: `spoke`, `standalone`",
+        "description": "Gateway template deployment type. enum: `spoke`, `standalone`",
         "enum": [
           "spoke",
           "standalone"
@@ -2085,6 +2502,7 @@
         "type": "string"
       },
       "gateway_templates": {
+        "description": "List of gateway device profiles",
         "items": {
           "$ref": "#/components/schemas/gateway_template"
         },
@@ -2092,16 +2510,19 @@
       },
       "gateway_traffic_shaping": {
         "additionalProperties": false,
+        "description": "Traffic shaping settings for a gateway interface or VPN path",
         "properties": {
           "class_percentages": {
-            "$ref": "#/components/schemas/gateway_traffic_shaping_class_percentages"
+            "$ref": "#/components/schemas/gateway_traffic_shaping_class_percentages",
+            "description": "Traffic class bandwidth percentages for high, medium, low, and best-effort queues"
           },
           "enabled": {
             "default": false,
+            "description": "Whether traffic shaping is enabled",
             "type": "boolean"
           },
           "max_tx_kbps": {
-            "description": "Interface Transmit Cap in kbps",
+            "description": "Maximum transmit bandwidth for the interface, in Kbps",
             "type": "integer"
           }
         },
@@ -2116,6 +2537,7 @@
       },
       "gateway_vrf_instance": {
         "additionalProperties": false,
+        "description": "Gateway VRF instance and its member networks",
         "examples": [
           {
             "networks": [
@@ -2126,7 +2548,8 @@
         ],
         "properties": {
           "networks": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Network names included in this gateway VRF instance"
           }
         },
         "type": "object"
@@ -2135,7 +2558,7 @@
         "additionalProperties": {
           "$ref": "#/components/schemas/gateway_vrf_instance"
         },
-        "description": "Property key is the network name",
+        "description": "Property key is the VRF instance name",
         "examples": [
           {
             "CORP_VRF": {
@@ -2160,23 +2583,66 @@
       },
       "gateway_wan_probe_override": {
         "additionalProperties": false,
-        "description": "Only if `usage`==`wan`",
+        "description": "Only if `usage`==`wan`. WAN health probe override for this gateway port",
         "properties": {
+          "hostnames": {
+            "$ref": "#/components/schemas/strings",
+            "description": "List of hostnames used as probe destinations; applicable for both IPv4 and IPv6"
+          },
+          "http": {
+            "$ref": "#/components/schemas/gateway_wan_probe_override_http",
+            "description": "HTTP probe settings; success from any ICMP or HTTP probe indicates the WAN is up"
+          },
           "ip6s": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "List of IPv6 probe host addresses used by this WAN override"
           },
           "ips": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "List of IPv4 probe host addresses used by this WAN override"
           },
           "probe_profile": {
-            "$ref": "#/components/schemas/gateway_wan_probe_override_probe_profile"
+            "$ref": "#/components/schemas/gateway_wan_probe_override_probe_profile",
+            "description": "WAN probe profile used for health checks on this port"
+          }
+        },
+        "type": "object"
+      },
+      "gateway_wan_probe_override_http": {
+        "additionalProperties": false,
+        "description": "HTTP probe settings for a WAN probe override",
+        "properties": {
+          "accepted_status_codes": {
+            "description": "HTTP response status codes that indicate a successful probe. Defaults to 200 if not specified.",
+            "examples": [
+              [
+                204
+              ]
+            ],
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "urls": {
+            "description": "HTTP or HTTPS URLs to probe",
+            "examples": [
+              [
+                "http://www.google.com/generate_204",
+                "https://www.google.com/generate_204"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           }
         },
         "type": "object"
       },
       "gateway_wan_probe_override_probe_profile": {
         "default": "broadband",
-        "description": "enum: `broadband`, `lte`",
+        "description": "WAN probe profile used for health checks on this port. enum: `broadband`, `lte`",
         "enum": [
           "broadband",
           "lte"
@@ -2212,60 +2678,85 @@
       },
       "gw_routing_policy": {
         "additionalProperties": false,
+        "description": "Gateway routing policy made of ordered match-action terms",
         "properties": {
           "terms": {
-            "$ref": "#/components/schemas/gw_routing_policy_terms"
+            "$ref": "#/components/schemas/gw_routing_policy_terms",
+            "description": "Ordered terms evaluated by this gateway routing policy"
           }
         },
         "type": "object"
       },
       "gw_routing_policy_term": {
         "additionalProperties": false,
+        "description": "Gateway routing policy term with match criteria and actions",
         "properties": {
           "actions": {
-            "$ref": "#/components/schemas/gw_routing_policy_term_action"
+            "$ref": "#/components/schemas/gw_routing_policy_term_action",
+            "description": "Policy actions applied when this routing policy term matches"
           },
           "matching": {
-            "$ref": "#/components/schemas/gw_routing_policy_term_matching"
+            "$ref": "#/components/schemas/gw_routing_policy_term_matching",
+            "description": "Route match criteria that must be satisfied before actions are applied"
           }
         },
         "type": "object"
       },
       "gw_routing_policy_term_action": {
         "additionalProperties": false,
-        "description": "When used as import policy",
+        "description": "Actions applied to routes matched by a gateway routing policy term",
         "properties": {
           "accept": {
+            "description": "Whether to accept routes that match this term. Precedence is `accept` > `next_term` > `next_policy`; routes are rejected if all three are false",
             "type": "boolean"
           },
           "add_community": {
-            "$ref": "#/components/schemas/gw_routing_policy_term_action_add_community"
+            "$ref": "#/components/schemas/gw_routing_policy_term_action_add_community",
+            "description": "BGP communities to add to routes that match this term"
           },
           "add_target_vrfs": {
-            "$ref": "#/components/schemas/gw_routing_policy_term_action_add_target_vrfs"
+            "$ref": "#/components/schemas/gw_routing_policy_term_action_add_target_vrfs",
+            "description": "SSR target VRFs to add when leaking routes from hub to spoke"
           },
           "community": {
-            "$ref": "#/components/schemas/routing_policy_term_action_community"
+            "$ref": "#/components/schemas/routing_policy_term_action_community",
+            "description": "BGP communities to set when this term is used as an export policy"
           },
           "exclude_as_path": {
-            "$ref": "#/components/schemas/gw_routing_policy_term_action_exclude_as_path"
+            "$ref": "#/components/schemas/gw_routing_policy_term_action_exclude_as_path",
+            "description": "AS path values to exclude when this term is used as an export policy"
           },
           "exclude_community": {
-            "$ref": "#/components/schemas/gw_routing_policy_term_action_exclude_community"
+            "$ref": "#/components/schemas/gw_routing_policy_term_action_exclude_community",
+            "description": "BGP communities to exclude from routes that match this term"
           },
           "export_communities": {
-            "$ref": "#/components/schemas/gw_routing_policy_term_action_export_communities"
+            "$ref": "#/components/schemas/gw_routing_policy_term_action_export_communities",
+            "description": "BGP communities allowed for export when this term is used as an export policy"
           },
           "local_preference": {
-            "$ref": "#/components/schemas/routing_policy_local_preference"
+            "$ref": "#/components/schemas/routing_policy_local_preference",
+            "description": "Preference value to set when this term is used as an import policy"
+          },
+          "next_policy": {
+            "default": false,
+            "description": "When true, continue evaluating the next routing policy in the chain after this term matches; default is false",
+            "type": "boolean"
+          },
+          "next_term": {
+            "default": false,
+            "description": "When true, continue evaluating the next term in the same routing policy after this term matches; default is false",
+            "type": "boolean"
           },
           "prepend_as_path": {
-            "$ref": "#/components/schemas/routing_policy_term_action_prepend_as_path"
+            "$ref": "#/components/schemas/routing_policy_term_action_prepend_as_path",
+            "description": "AS path values to prepend when this term is used as an export policy"
           }
         },
         "type": "object"
       },
       "gw_routing_policy_term_action_add_community": {
+        "description": "BGP communities added to routes matched by a gateway routing policy term",
         "items": {
           "examples": [
             "3900190"
@@ -2275,14 +2766,14 @@
         "type": "array"
       },
       "gw_routing_policy_term_action_add_target_vrfs": {
-        "description": "For SSR, hub decides how VRF routes are leaked on spoke",
+        "description": "For SSR, target VRFs used by a hub when leaking VRF routes to spokes",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
       "gw_routing_policy_term_action_exclude_as_path": {
-        "description": "When used as export policy, optional. To exclude certain AS",
+        "description": "Optional when used as an export policy. AS path values to exclude",
         "items": {
           "examples": [
             "65002"
@@ -2292,6 +2783,7 @@
         "type": "array"
       },
       "gw_routing_policy_term_action_exclude_community": {
+        "description": "BGP communities excluded by a gateway routing policy term",
         "items": {
           "examples": [
             "3900190"
@@ -2301,7 +2793,7 @@
         "type": "array"
       },
       "gw_routing_policy_term_action_export_communities": {
-        "description": "When used as export policy, optional",
+        "description": "Optional when used as an export policy. BGP communities that may be exported",
         "items": {
           "type": "string"
         },
@@ -2309,39 +2801,49 @@
       },
       "gw_routing_policy_term_matching": {
         "additionalProperties": false,
-        "description": "zero or more criteria/filter can be specified to match the term, all criteria have to be met",
+        "description": "Route match criteria for a gateway routing policy term; all specified criteria must match",
         "properties": {
           "as_path": {
-            "$ref": "#/components/schemas/routing_policy_term_matching_as_path"
+            "$ref": "#/components/schemas/routing_policy_term_matching_as_path",
+            "description": "AS path values that routes must match"
           },
           "community": {
-            "$ref": "#/components/schemas/routing_policy_term_matching_community"
+            "$ref": "#/components/schemas/routing_policy_term_matching_community",
+            "description": "BGP communities that routes must match"
           },
           "network": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Configured network names that routes must match"
           },
           "prefix": {
-            "$ref": "#/components/schemas/routing_policy_term_matching_prefix"
+            "$ref": "#/components/schemas/routing_policy_term_matching_prefix",
+            "description": "Route prefixes that routes must match"
           },
           "protocol": {
-            "$ref": "#/components/schemas/gw_routing_policy_term_matching_protocol"
+            "$ref": "#/components/schemas/gw_routing_policy_term_matching_protocol",
+            "description": "Routing protocols that routes must match"
           },
           "route_exists": {
-            "$ref": "#/components/schemas/gw_routing_policy_term_matching_route_exists"
+            "$ref": "#/components/schemas/gw_routing_policy_term_matching_route_exists",
+            "description": "Existing route condition that must be satisfied before this term matches"
           },
           "vpn_neighbor_mac": {
-            "$ref": "#/components/schemas/gw_routing_policy_term_matching_vpn_neighbor_mac"
+            "$ref": "#/components/schemas/gw_routing_policy_term_matching_vpn_neighbor_mac",
+            "description": "Overlay neighbor MAC addresses used as match criteria for BGP sessions with `via`==`vpn`"
           },
           "vpn_path": {
-            "$ref": "#/components/schemas/gw_routing_policy_term_matching_vpn_path"
+            "$ref": "#/components/schemas/gw_routing_policy_term_matching_vpn_path",
+            "description": "Overlay path names used as match criteria for BGP sessions with `via`==`vpn`"
           },
           "vpn_path_sla": {
-            "$ref": "#/components/schemas/gw_routing_policy_term_matching_vpn_path_sla"
+            "$ref": "#/components/schemas/gw_routing_policy_term_matching_vpn_path_sla",
+            "description": "SLA thresholds used when matching a VPN path"
           }
         },
         "type": "object"
       },
       "gw_routing_policy_term_matching_protocol": {
+        "description": "Routing protocols that can match a gateway routing policy term",
         "items": {
           "$ref": "#/components/schemas/gw_routing_policy_term_matching_protocol_enum"
         },
@@ -2360,8 +2862,10 @@
       },
       "gw_routing_policy_term_matching_route_exists": {
         "additionalProperties": false,
+        "description": "Route-existence match condition for a gateway routing policy term",
         "properties": {
           "route": {
+            "description": "Prefix that must exist for this condition to match",
             "examples": [
               "192.168.0.0/24"
             ],
@@ -2369,21 +2873,21 @@
           },
           "vrf_name": {
             "default": "default",
-            "description": "Name of the vrf instance, it can also be the name of the VPN or wan if they",
+            "description": "Name of the VRF instance where the route is checked; can also be a VPN or WAN name when applicable",
             "type": "string"
           }
         },
         "type": "object"
       },
       "gw_routing_policy_term_matching_vpn_neighbor_mac": {
-        "description": "overlay-facing criteria (used for bgp_config where via=vpn)",
+        "description": "Overlay neighbor MAC addresses used for bgp_config where `via`==`vpn`",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
       "gw_routing_policy_term_matching_vpn_path": {
-        "description": "overlay-facing criteria (used for bgp_config where via=vpn). ordered-",
+        "description": "Overlay path names used for bgp_config where `via`==`vpn`; order is significant",
         "items": {
           "type": "string"
         },
@@ -2391,14 +2895,17 @@
       },
       "gw_routing_policy_term_matching_vpn_path_sla": {
         "additionalProperties": false,
+        "description": "SLA thresholds used when matching VPN paths",
         "properties": {
           "max_jitter": {
+            "description": "Maximum jitter threshold allowed for the VPN path",
             "type": [
               "integer",
               "null"
             ]
           },
           "max_latency": {
+            "description": "Maximum latency threshold allowed for the VPN path",
             "examples": [
               1500
             ],
@@ -2408,6 +2915,7 @@
             ]
           },
           "max_loss": {
+            "description": "Maximum packet-loss threshold allowed for the VPN path",
             "examples": [
               30
             ],
@@ -2438,12 +2946,15 @@
       },
       "idp_config": {
         "additionalProperties": false,
+        "description": "Intrusion detection and prevention settings for a service policy",
         "properties": {
           "alert_only": {
+            "description": "Whether to alert without enforcing IDP prevention actions",
             "type": "boolean"
           },
           "enabled": {
             "default": false,
+            "description": "Whether IDP inspection is enabled for the policy",
             "type": "boolean"
           },
           "idpprofile_id": {
@@ -2463,37 +2974,45 @@
         "type": "object"
       },
       "idp_profile": {
+        "description": "Organization IDP profile with a base profile and targeted overwrite rules",
         "properties": {
           "base_profile": {
-            "$ref": "#/components/schemas/idp_profile_base_profile"
+            "$ref": "#/components/schemas/idp_profile_base_profile",
+            "description": "Built-in IDP baseline profile inherited before applying overwrites"
           },
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Timestamp when the IDP profile was created"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the IDP profile"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Timestamp when the IDP profile was last modified"
           },
           "name": {
+            "description": "Display name of the IDP profile",
             "examples": [
               "relaxed"
             ],
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Owning organization for the IDP profile"
           },
           "overwrites": {
-            "$ref": "#/components/schemas/idp_profile_overwrites"
+            "$ref": "#/components/schemas/idp_profile_overwrites",
+            "description": "IDP signature override rules applied on top of the base profile"
           }
         },
         "type": "object"
       },
       "idp_profile_action": {
         "default": "alert",
-        "description": "enum:\n  * alert (default)\n  * drop: silently dropping packets\n  * close: notify client/server to close connection",
+        "description": "IDP profile action. enum: `alert`, `close`, `drop`. `alert` is the default, `drop` silently drops packets, and `close` asks the client/server to close the connection",
         "enum": [
           "alert",
           "close",
@@ -2518,20 +3037,25 @@
       },
       "idp_profile_matching": {
         "additionalProperties": false,
+        "description": "Criteria that select IDP signatures for an overwrite rule",
         "properties": {
           "attack_name": {
-            "$ref": "#/components/schemas/idp_profile_matching_attack_name"
+            "$ref": "#/components/schemas/idp_profile_matching_attack_name",
+            "description": "Signature names matched by the IDP profile overwrite"
           },
           "dst_subnet": {
-            "$ref": "#/components/schemas/idp_profile_matching_dst_subnet"
+            "$ref": "#/components/schemas/idp_profile_matching_dst_subnet",
+            "description": "Destination subnets matched by the IDP profile overwrite"
           },
           "severity": {
-            "$ref": "#/components/schemas/idp_profile_matching_severity"
+            "$ref": "#/components/schemas/idp_profile_matching_severity",
+            "description": "Threat levels matched by the IDP profile overwrite"
           }
         },
         "type": "object"
       },
       "idp_profile_matching_attack_name": {
+        "description": "IDP attack signature names matched by an overwrite rule",
         "items": {
           "examples": [
             "HTTP:INVALID:HDR-FIELD"
@@ -2541,6 +3065,7 @@
         "type": "array"
       },
       "idp_profile_matching_dst_subnet": {
+        "description": "Destination CIDR subnets matched by an IDP profile overwrite",
         "items": {
           "examples": [
             "63.1.2.0/24"
@@ -2550,6 +3075,7 @@
         "type": "array"
       },
       "idp_profile_matching_severity": {
+        "description": "Severity levels matched by an IDP profile overwrite",
         "items": {
           "$ref": "#/components/schemas/idp_profile_matching_severity_value"
         },
@@ -2570,20 +3096,25 @@
       },
       "idp_profile_overwrite": {
         "additionalProperties": false,
+        "description": "Override rule that changes the IDP action for matching signatures",
         "properties": {
           "action": {
-            "$ref": "#/components/schemas/idp_profile_action"
+            "$ref": "#/components/schemas/idp_profile_action",
+            "description": "Enforcement action applied when this overwrite rule matches"
           },
           "matching": {
-            "$ref": "#/components/schemas/idp_profile_matching"
+            "$ref": "#/components/schemas/idp_profile_matching",
+            "description": "Criteria that select signatures for this overwrite rule"
           },
           "name": {
+            "description": "Display name for this IDP profile overwrite rule",
             "type": "string"
           }
         },
         "type": "object"
       },
       "idp_profile_overwrites": {
+        "description": "IDP profile overwrite rules applied to the base profile",
         "items": {
           "$ref": "#/components/schemas/idp_profile_overwrite"
         },
@@ -2591,7 +3122,7 @@
       },
       "ip_type": {
         "default": "dhcp",
-        "description": "enum: `dhcp`, `static`",
+        "description": "IP address assignment mode, either DHCP or static. enum: `dhcp`, `static`",
         "enum": [
           "dhcp",
           "static"
@@ -2622,10 +3153,11 @@
         "type": "number"
       },
       "network": {
-        "description": "Networks are usually subnets that have cross-site significance. `networks`in Org Settings will got merged into `networks`in Site Setting. For gateways, they can be used to define Service Routes.",
+        "description": "Organization-level Layer 3 network definition that can be merged into site settings and used for service routes. Networks are used to define the service routes in the Gateway settings or templates",
         "properties": {
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Epoch timestamp when the network was created"
           },
           "disallow_mist_services": {
             "default": false,
@@ -2633,6 +3165,7 @@
             "type": "boolean"
           },
           "gateway": {
+            "description": "IPv4 gateway address for this network",
             "examples": [
               "192.168.70.1"
             ],
@@ -2640,6 +3173,7 @@
             "type": "string"
           },
           "gateway6": {
+            "description": "IPv6 gateway address for this network",
             "examples": [
               "fdad:b0bc:f29e::1"
             ],
@@ -2647,53 +3181,66 @@
             "type": "string"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the network"
           },
           "internal_access": {
-            "$ref": "#/components/schemas/network_internal_access"
+            "$ref": "#/components/schemas/network_internal_access",
+            "description": "Internal access settings for this network"
           },
           "internet_access": {
-            "$ref": "#/components/schemas/network_internet_access"
+            "$ref": "#/components/schemas/network_internet_access",
+            "description": "Direct internet access and NAT settings for this network"
           },
           "isolation": {
             "description": "Whether to allow clients in the network to talk to each other",
             "type": "boolean"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Epoch timestamp when the network was last modified"
           },
           "multicast": {
-            "$ref": "#/components/schemas/network_multicast"
+            "$ref": "#/components/schemas/network_multicast",
+            "description": "Settings for multicast routing on this network"
           },
           "name": {
+            "description": "Display name of the organization network",
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization that owns this network"
           },
           "routed_for_networks": {
-            "$ref": "#/components/schemas/network_routed_for_networks"
+            "$ref": "#/components/schemas/network_routed_for_networks",
+            "description": "Other network names this network can route to, for example through BGP, OSPF or static routes"
           },
           "subnet": {
+            "description": "IPv4 subnet CIDR for this network",
             "examples": [
               "192.168.70.0/24"
             ],
             "type": "string"
           },
           "subnet6": {
+            "description": "IPv6 subnet CIDR for this network",
             "examples": [
               "fdad:b0bc:f29e::/32"
             ],
             "type": "string"
           },
           "tenants": {
-            "$ref": "#/components/schemas/network_tenants"
+            "$ref": "#/components/schemas/network_tenants",
+            "description": "Tenant address mappings associated with this network"
           },
           "vlan_id": {
-            "$ref": "#/components/schemas/vlan_id_with_variable"
+            "$ref": "#/components/schemas/vlan_id_with_variable",
+            "description": "VLAN ID or variable associated with this network"
           },
           "vpn_access": {
-            "$ref": "#/components/schemas/network_vpn_access"
+            "$ref": "#/components/schemas/network_vpn_access",
+            "description": "VPN access settings keyed by VPN name for this network"
           }
         },
         "required": [
@@ -2703,8 +3250,10 @@
       },
       "network_internal_access": {
         "additionalProperties": false,
+        "description": "Internal access settings for an organization network",
         "properties": {
           "enabled": {
+            "description": "Whether internal access is enabled for this network",
             "type": "boolean"
           }
         },
@@ -2712,16 +3261,19 @@
       },
       "network_internet_access": {
         "additionalProperties": false,
-        "description": "Whether this network has direct internet access",
+        "description": "Direct internet access settings for an organization network",
         "properties": {
           "create_simple_service_policy": {
             "default": false,
+            "description": "Whether Mist should create simple service policies for restricted internet access",
             "type": "boolean"
           },
           "destination_nat": {
-            "$ref": "#/components/schemas/network_internet_access_destination_nat"
+            "$ref": "#/components/schemas/network_internet_access_destination_nat",
+            "description": "Destination NAT rules for direct internet access"
           },
           "enabled": {
+            "description": "Whether direct internet access is enabled for this network",
             "type": "boolean"
           },
           "restricted": {
@@ -2730,7 +3282,8 @@
             "type": "boolean"
           },
           "static_nat": {
-            "$ref": "#/components/schemas/network_internet_access_static_nat"
+            "$ref": "#/components/schemas/network_internet_access_static_nat",
+            "description": "Static NAT rules for direct internet access"
           }
         },
         "type": "object"
@@ -2744,22 +3297,24 @@
       },
       "network_internet_access_destination_nat_property": {
         "additionalProperties": false,
+        "description": "Direct-internet destination NAT rule target settings",
         "properties": {
           "internal_ip": {
-            "description": "The Destination NAT destination IP Address. Must be an IP (i.e. \"192.168.70.30\") or a Variable (i.e. \"{{myvar}}\")",
+            "description": "The Destination NAT destination IP address. Must be an IP (i.e. \"192.168.70.30\") or a Variable (i.e. \"{{myvar}}\")",
             "examples": [
               "192.168.70.30"
             ],
             "type": "string"
           },
           "name": {
+            "description": "Label for this direct internet destination NAT rule",
             "examples": [
               "web server"
             ],
             "type": "string"
           },
           "port": {
-            "description": "The Destination NAT destination IP Address. Must be a Port (i.e. \"443\") or a Variable (i.e. \"{{myvar}}\")",
+            "description": "The Destination NAT destination IP address. Must be a Port (i.e. \"443\") or a Variable (i.e. \"{{myvar}}\")",
             "examples": [
               "443"
             ],
@@ -2779,20 +3334,22 @@
         "additionalProperties": {
           "$ref": "#/components/schemas/network_internet_access_static_nat_property"
         },
-        "description": "Property key may be an External IP Address (i.e. \"63.16.0.3\"), a CIDR (i.e. \"63.16.0.12/20\") or a Variable (i.e. \"{{myvar}}\")",
+        "description": "Property key may be an External IP address (i.e. \"63.16.0.3\"), a CIDR (i.e. \"63.16.0.12/20\") or a Variable (i.e. \"{{myvar}}\")",
         "type": "object"
       },
       "network_internet_access_static_nat_property": {
         "additionalProperties": false,
+        "description": "Direct-internet static NAT rule target settings",
         "properties": {
           "internal_ip": {
-            "description": "The Static NAT destination IP Address. Must be an IP Address (i.e. \"192.168.70.3\") or a Variable (i.e. \"{{myvar}}\")",
+            "description": "The Static NAT destination IP address. Must be an IP address (i.e. \"192.168.70.3\") or a Variable (i.e. \"{{myvar}}\")",
             "examples": [
               "192.168.70.3"
             ],
             "type": "string"
           },
           "name": {
+            "description": "Label for this direct internet static NAT rule",
             "examples": [
               "pos_station-1"
             ],
@@ -2819,19 +3376,22 @@
           },
           "enabled": {
             "default": false,
+            "description": "Whether multicast support is enabled for this network",
             "type": "boolean"
           },
           "groups": {
-            "$ref": "#/components/schemas/network_multicast_groups"
+            "$ref": "#/components/schemas/network_multicast_groups",
+            "description": "Multicast group-to-RP mappings for this network"
           }
         },
         "type": "object"
       },
       "network_multicast_group": {
         "additionalProperties": false,
+        "description": "Multicast group rendezvous point mapping",
         "properties": {
           "rp_ip": {
-            "description": "RP (rendezvous point) IP Address",
+            "description": "RP (rendezvous point) IP address",
             "type": "string"
           }
         },
@@ -2841,7 +3401,7 @@
         "additionalProperties": {
           "$ref": "#/components/schemas/network_multicast_group"
         },
-        "description": "Group address to RP (rendezvous point) mapping. Property Key is the CIDR (example \"225.1.0.3/32\")",
+        "description": "Group address to RP (rendezvous point) mapping (gateway only). Property Key is the CIDR (example \"225.1.0.3/32\")",
         "type": "object"
       },
       "network_routed_for_networks": {
@@ -2859,6 +3419,7 @@
         "description": "If `routed`==`false` (usually at Spoke), but some hosts needs to be reachable from Hub",
         "properties": {
           "external_ip": {
+            "description": "External source NAT IP or subnet used when spoke hosts must be reachable from the hub",
             "examples": [
               "172.16.0.8/30"
             ],
@@ -2869,16 +3430,19 @@
       },
       "network_tenant": {
         "additionalProperties": false,
+        "description": "Tenant address entry for a network",
         "properties": {
           "addresses": {
-            "$ref": "#/components/schemas/network_tenant_addresses"
+            "$ref": "#/components/schemas/network_tenant_addresses",
+            "description": "IP addresses or subnets assigned to this tenant in the network"
           }
         },
         "type": "object"
       },
       "network_tenant_addresses": {
+        "description": "IP addresses or subnets assigned to a network tenant",
         "items": {
-          "description": "The user/tenant IP Address (i.e. \"192.168.70.30\"), an Subnet (i.e. \"192.168.70.0/24\") or a Variable (i.e. \"{{myvar}}\")",
+          "description": "The user/tenant IP address (i.e. \"192.168.70.30\"), an Subnet (i.e. \"192.168.70.0/24\") or a Variable (i.e. \"{{myvar}}\")",
           "examples": [
             "192.168.70.30"
           ],
@@ -2902,6 +3466,7 @@
       },
       "network_vpn_access_config": {
         "additionalProperties": false,
+        "description": "VPN access settings for a network and VPN pair",
         "properties": {
           "advertised_subnet": {
             "description": "If `routed`==`true`, whether to advertise an aggregated subnet toward HUB this is useful when there are multiple networks on SPOKE's side",
@@ -2915,7 +3480,8 @@
             "type": "boolean"
           },
           "destination_nat": {
-            "$ref": "#/components/schemas/network_vpn_access_destination_nat"
+            "$ref": "#/components/schemas/network_vpn_access_destination_nat",
+            "description": "Destination NAT rules applied for VPN access to this network"
           },
           "nat_pool": {
             "description": "If `routed`==`false` (usually at Spoke), but some hosts needs to be reachable from Hub, a subnet is required to create and advertise the route to Hub",
@@ -2939,17 +3505,20 @@
             "type": "boolean"
           },
           "other_vrfs": {
-            "$ref": "#/components/schemas/network_vpn_access_config_other_vrfs"
+            "$ref": "#/components/schemas/network_vpn_access_config_other_vrfs",
+            "description": "Other VRFs that can receive leaked routes from this spoke network"
           },
           "routed": {
             "description": "Whether this network is routable",
             "type": "boolean"
           },
           "source_nat": {
-            "$ref": "#/components/schemas/network_source_nat"
+            "$ref": "#/components/schemas/network_source_nat",
+            "description": "Source NAT settings used when non-routed spoke hosts must be reachable from the hub"
           },
           "static_nat": {
-            "$ref": "#/components/schemas/network_vpn_access_static_nat"
+            "$ref": "#/components/schemas/network_vpn_access_static_nat",
+            "description": "Static NAT rules applied for VPN access to this network"
           },
           "summarized_subnet": {
             "description": "toward overlay, how HUB should deal with routes it received from Spokes",
@@ -2994,21 +3563,24 @@
       },
       "network_vpn_access_destination_nat_property": {
         "additionalProperties": false,
+        "description": "VPN access destination NAT rule target settings",
         "properties": {
           "internal_ip": {
-            "description": "The Destination NAT destination IP Address. Must be an IP (i.e. \"192.168.70.30\") or a Variable (i.e. \"{{myvar}}\")",
+            "description": "The Destination NAT destination IP address. Must be an IP (i.e. \"192.168.70.30\") or a Variable (i.e. \"{{myvar}}\")",
             "examples": [
               "192.168.70.30"
             ],
             "type": "string"
           },
           "name": {
+            "description": "Label for this VPN destination NAT rule",
             "examples": [
               "web server"
             ],
             "type": "string"
           },
           "port": {
+            "description": "Destination port or variable for this VPN destination NAT rule",
             "examples": [
               "443"
             ],
@@ -3021,20 +3593,22 @@
         "additionalProperties": {
           "$ref": "#/components/schemas/network_vpn_access_static_nat_property"
         },
-        "description": "Property key may be an External IP Address (i.e. \"63.16.0.3\"), a CIDR (i.e. \"63.16.0.12/20\") or a Variable (i.e. \"{{myvar}}\")",
+        "description": "Property key may be an External IP address (i.e. \"63.16.0.3\"), a CIDR (i.e. \"63.16.0.12/20\") or a Variable (i.e. \"{{myvar}}\")",
         "type": "object"
       },
       "network_vpn_access_static_nat_property": {
         "additionalProperties": false,
+        "description": "VPN access static NAT rule target settings",
         "properties": {
           "internal_ip": {
-            "description": "The Static NAT destination IP Address. Must be an IP Address (i.e. \"192.168.70.3\") or a Variable (i.e. \"{{myvar}}\")",
+            "description": "The Static NAT destination IP address. Must be an IP address (i.e. \"192.168.70.3\") or a Variable (i.e. \"{{myvar}}\")",
             "examples": [
               "192.168.70.3"
             ],
             "type": "string"
           },
           "name": {
+            "description": "Label for this VPN static NAT rule",
             "examples": [
               "pos_station-1"
             ],
@@ -3044,6 +3618,7 @@
         "type": "object"
       },
       "networks": {
+        "description": "List of organization network definitions",
         "items": {
           "$ref": "#/components/schemas/network"
         },
@@ -3057,6 +3632,7 @@
         "type": "array"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -3064,10 +3640,123 @@
         "readOnly": true,
         "type": "string"
       },
+      "protect_re": {
+        "additionalProperties": false,
+        "description": "Restrict inbound-traffic to host\nwhen enabled, all traffic that is not essential to our operation will be dropped \ne.g. ntp / dns / traffic to mist will be allowed by default, if dhcpd is enabled, we'll make sure it works",
+        "properties": {
+          "allowed_services": {
+            "$ref": "#/components/schemas/protect_re_allowed_services",
+            "description": "Built-in services explicitly allowed by the Protect RE policy"
+          },
+          "custom": {
+            "$ref": "#/components/schemas/protect_re_customs",
+            "description": "Additional ACL entries allowed by the Protect RE policy"
+          },
+          "enabled": {
+            "default": false,
+            "description": "When enabled, all traffic that is not essential to our operation will be dropped\ne.g. ntp / dns / traffic to mist will be allowed by default\n     if dhcpd is enabled, we'll make sure it works",
+            "type": "boolean"
+          },
+          "hit_count": {
+            "default": false,
+            "description": "Whether to enable hit count for Protect_RE policy",
+            "type": "boolean"
+          },
+          "trusted_hosts": {
+            "$ref": "#/components/schemas/protect_re_trusted_hosts",
+            "description": "Trusted host or subnet entries allowed by the Protect RE policy"
+          }
+        },
+        "type": "object"
+      },
+      "protect_re_allowed_service": {
+        "description": "Services allowed through protect-RE filters. enum: `icmp`, `ssh`",
+        "enum": [
+          "icmp",
+          "ssh"
+        ],
+        "type": "string"
+      },
+      "protect_re_allowed_services": {
+        "description": "Built-in services explicitly allowed by the Protect RE policy",
+        "examples": [
+          [
+            "icmp",
+            "ssh"
+          ]
+        ],
+        "items": {
+          "$ref": "#/components/schemas/protect_re_allowed_service"
+        },
+        "type": "array"
+      },
+      "protect_re_custom": {
+        "additionalProperties": false,
+        "description": "Custom Protect RE ACL entry",
+        "properties": {
+          "port_range": {
+            "default": "0",
+            "description": "Matched dst port, \"0\" means any",
+            "examples": [
+              "80,1035-1040"
+            ],
+            "type": "string"
+          },
+          "protocol": {
+            "$ref": "#/components/schemas/protect_re_custom_protocol",
+            "description": "Transport protocol matched by this custom Protect RE ACL"
+          },
+          "subnets": {
+            "$ref": "#/components/schemas/protect_re_custom_subnet",
+            "description": "Source subnets matched by this custom Protect RE ACL"
+          }
+        },
+        "type": "object"
+      },
+      "protect_re_custom_protocol": {
+        "default": "any",
+        "description": "enum: `any`, `icmp`, `tcp`, `udp`",
+        "enum": [
+          "any",
+          "icmp",
+          "tcp",
+          "udp"
+        ],
+        "type": "string"
+      },
+      "protect_re_custom_subnet": {
+        "description": "Source subnets matched by a custom Protect RE ACL",
+        "items": {
+          "examples": [
+            "10.1.2.0/24"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "protect_re_customs": {
+        "description": "Custom Protect RE ACL entries",
+        "items": {
+          "$ref": "#/components/schemas/protect_re_custom"
+        },
+        "type": "array"
+      },
+      "protect_re_trusted_hosts": {
+        "description": "Host or subnet entries allowed by the Protect RE policy",
+        "items": {
+          "examples": [
+            "10.242.3.0/24"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -3078,8 +3767,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -3090,8 +3781,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -3102,8 +3795,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -3111,8 +3806,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -3155,12 +3852,14 @@
         "type": "array"
       },
       "routing_policy_term_matching_as_path": {
+        "description": "BGP AS path values used as routing-policy match criteria",
         "items": {
           "$ref": "#/components/schemas/bgp_as"
         },
         "type": "array"
       },
       "routing_policy_term_matching_community": {
+        "description": "BGP community values used as routing-policy match criteria",
         "items": {
           "examples": [
             "3900062"
@@ -3180,6 +3879,7 @@
         "type": "array"
       },
       "service_policies": {
+        "description": "Service policies returned by derived site configuration",
         "items": {
           "$ref": "#/components/schemas/service_policy"
         },
@@ -3187,27 +3887,34 @@
       },
       "service_policy": {
         "additionalProperties": false,
+        "description": "Site-level service policy that allows or denies traffic for tenants and services",
         "properties": {
           "action": {
-            "$ref": "#/components/schemas/allow_deny"
+            "$ref": "#/components/schemas/allow_deny",
+            "description": "Allow or deny action for traffic matched by this service policy"
           },
           "antivirus": {
-            "$ref": "#/components/schemas/service_policy_antivirus"
+            "$ref": "#/components/schemas/service_policy_antivirus",
+            "description": "Malware and virus inspection settings applied by this service policy"
           },
           "appqoe": {
-            "$ref": "#/components/schemas/service_policy_appqoe"
+            "$ref": "#/components/schemas/service_policy_appqoe",
+            "description": "Application QoE settings applied by this service policy"
           },
           "ewf": {
-            "$ref": "#/components/schemas/service_policy_ewf"
+            "$ref": "#/components/schemas/service_policy_ewf",
+            "description": "Enhanced web filtering rules applied by this service policy"
           },
           "idp": {
-            "$ref": "#/components/schemas/idp_config"
+            "$ref": "#/components/schemas/idp_config",
+            "description": "Intrusion detection and prevention settings applied by this service policy"
           },
           "local_routing": {
-            "description": "access within the same VRF",
+            "description": "Whether the policy permits access within the same VRF",
             "type": "boolean"
           },
           "name": {
+            "description": "Display name of the service policy",
             "type": "string"
           },
           "path_preference": {
@@ -3215,46 +3922,53 @@
             "type": "string"
           },
           "secintel": {
-            "$ref": "#/components/schemas/service_policy_secintel"
+            "$ref": "#/components/schemas/service_policy_secintel",
+            "description": "Threat intelligence settings applied by this service policy"
           },
           "servicepolicy_id": {
-            "description": "Used to link servicepolicy defined at org level and overwrite some attributes",
+            "description": "Organization-level service policy identifier used to link and override selected attributes",
             "format": "uuid",
             "type": "string"
           },
           "services": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Application services or service groups matched by this policy"
           },
           "skyatp": {
-            "$ref": "#/components/schemas/service_policy_skyatp"
+            "$ref": "#/components/schemas/service_policy_skyatp",
+            "description": "Threat inspection settings provided by Sky ATP for this service policy"
           },
           "ssl_proxy": {
-            "$ref": "#/components/schemas/service_policy_ssl_proxy"
+            "$ref": "#/components/schemas/service_policy_ssl_proxy",
+            "description": "TLS inspection settings applied by this service policy"
           },
           "syslog": {
-            "$ref": "#/components/schemas/service_policy_syslog"
+            "$ref": "#/components/schemas/service_policy_syslog",
+            "description": "Remote logging settings applied by this service policy"
           },
           "tenants": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "User or network tenants matched by this service policy"
           }
         },
         "type": "object"
       },
       "service_policy_antivirus": {
         "additionalProperties": false,
-        "description": "For SRX-only",
+        "description": "SRX antivirus inspection settings for a service policy",
         "properties": {
           "avprofile_id": {
-            "description": "org-level AV Profile can be used, this takes precedence over 'profile'",
+            "description": "Organization-level antivirus profile ID; takes precedence over inline `profile` settings",
             "format": "uuid",
             "type": "string"
           },
           "enabled": {
             "default": false,
+            "description": "Whether antivirus inspection is enabled for the service policy",
             "type": "boolean"
           },
           "profile": {
-            "description": "Default / noftp / httponly / or keys from av_profiles",
+            "description": "Antivirus profile name to apply, such as `default`, `noftp`, `httponly`, or an AV profile key",
             "type": "string"
           }
         },
@@ -3262,16 +3976,18 @@
       },
       "service_policy_appqoe": {
         "additionalProperties": false,
-        "description": "SRX only",
+        "description": "SRX application QoE settings for a service policy",
         "properties": {
           "enabled": {
             "default": false,
+            "description": "Whether application QoE is enabled for the service policy",
             "type": "boolean"
           }
         },
         "type": "object"
       },
       "service_policy_ewf": {
+        "description": "Enhanced web filtering rules applied by a service policy",
         "items": {
           "$ref": "#/components/schemas/service_policy_ewf_rule"
         },
@@ -3279,11 +3995,14 @@
       },
       "service_policy_ewf_rule": {
         "additionalProperties": false,
+        "description": "Enhanced web filtering rule applied by a service policy",
         "properties": {
           "alert_only": {
+            "description": "Whether matching enhanced web filtering traffic is logged without being blocked",
             "type": "boolean"
           },
           "block_message": {
+            "description": "Message returned when enhanced web filtering blocks a request",
             "examples": [
               "Access to this URL Category has been blocked"
             ],
@@ -3291,10 +4010,12 @@
           },
           "enabled": {
             "default": false,
+            "description": "Whether this enhanced web filtering rule is enabled",
             "type": "boolean"
           },
           "profile": {
-            "$ref": "#/components/schemas/service_policy_ewf_rule_profile"
+            "$ref": "#/components/schemas/service_policy_ewf_rule_profile",
+            "description": "Enhanced web filtering profile applied by this rule"
           }
         },
         "type": "object"
@@ -3311,17 +4032,19 @@
       },
       "service_policy_secintel": {
         "additionalProperties": false,
-        "description": "SRX only",
+        "description": "SRX SecIntel settings for a service policy",
         "properties": {
           "enabled": {
             "default": false,
+            "description": "Whether SecIntel inspection is enabled for the service policy",
             "type": "boolean"
           },
           "profile": {
-            "$ref": "#/components/schemas/service_policy_secintel_profile"
+            "$ref": "#/components/schemas/service_policy_secintel_profile",
+            "description": "Protection level applied by SecIntel inspection"
           },
           "secintelprofile_id": {
-            "description": "org-level secintel Profile can be used, this takes precedence over 'profile'",
+            "description": "Organization-level SecIntel profile ID; takes precedence over inline `profile` settings",
             "type": "string"
           }
         },
@@ -3339,31 +4062,38 @@
       },
       "service_policy_skyatp": {
         "additionalProperties": false,
-        "description": "SRX only",
+        "description": "SRX Sky ATP threat inspection settings for a service policy",
         "properties": {
           "dns_dga_detection": {
-            "$ref": "#/components/schemas/service_policy_skyatp_dns_dga_detection"
+            "$ref": "#/components/schemas/service_policy_skyatp_dns_dga_detection",
+            "description": "Detection settings for DNS DGA threats provided by Sky ATP"
           },
           "dns_tunnel_detection": {
-            "$ref": "#/components/schemas/service_policy_skyatp_dns_tunnel_detection"
+            "$ref": "#/components/schemas/service_policy_skyatp_dns_tunnel_detection",
+            "description": "Detection settings for DNS tunneling threats provided by Sky ATP"
           },
           "http_inspection": {
-            "$ref": "#/components/schemas/service_policy_skyatp_http_inspection"
+            "$ref": "#/components/schemas/service_policy_skyatp_http_inspection",
+            "description": "Web traffic inspection settings provided by Sky ATP"
           },
           "iot_device_policy": {
-            "$ref": "#/components/schemas/service_policy_skyatp_iot_device_policy"
+            "$ref": "#/components/schemas/service_policy_skyatp_iot_device_policy",
+            "description": "Device threat policy settings provided by Sky ATP for IoT clients"
           }
         },
         "type": "object"
       },
       "service_policy_skyatp_dns_dga_detection": {
         "additionalProperties": false,
+        "description": "Sky ATP DNS DGA detection settings",
         "properties": {
           "enabled": {
+            "description": "Whether Sky ATP DNS DGA detection is enabled",
             "type": "boolean"
           },
           "profile": {
-            "$ref": "#/components/schemas/service_policy_skyatp_dns_dga_detection_profile"
+            "$ref": "#/components/schemas/service_policy_skyatp_dns_dga_detection_profile",
+            "description": "Sky ATP DNS DGA detection profile to apply"
           }
         },
         "type": "object"
@@ -3379,12 +4109,15 @@
       },
       "service_policy_skyatp_dns_tunnel_detection": {
         "additionalProperties": false,
+        "description": "Sky ATP DNS tunneling detection settings",
         "properties": {
           "enabled": {
+            "description": "Whether Sky ATP DNS tunneling detection is enabled",
             "type": "boolean"
           },
           "profile": {
-            "$ref": "#/components/schemas/service_policy_skyatp_dns_tunnel_detection_profile"
+            "$ref": "#/components/schemas/service_policy_skyatp_dns_tunnel_detection_profile",
+            "description": "Sky ATP DNS tunneling detection profile to apply"
           }
         },
         "type": "object"
@@ -3400,18 +4133,21 @@
       },
       "service_policy_skyatp_http_inspection": {
         "additionalProperties": false,
+        "description": "Sky ATP HTTP inspection settings",
         "properties": {
           "enabled": {
+            "description": "Whether Sky ATP HTTP inspection is enabled",
             "type": "boolean"
           },
           "profile": {
-            "$ref": "#/components/schemas/service_policy_skyatp_http_inspection_profile"
+            "$ref": "#/components/schemas/service_policy_skyatp_http_inspection_profile",
+            "description": "Sky ATP HTTP inspection profile to apply"
           }
         },
         "type": "object"
       },
       "service_policy_skyatp_http_inspection_profile": {
-        "description": "enum: `standard`, `strict`",
+        "description": "Sky ATP HTTP inspection profile to apply. enum: `standard`, `strict`",
         "enum": [
           "standard",
           "strict"
@@ -3420,8 +4156,10 @@
       },
       "service_policy_skyatp_iot_device_policy": {
         "additionalProperties": false,
+        "description": "Sky ATP IoT device policy settings",
         "properties": {
           "enabled": {
+            "description": "Whether Sky ATP IoT device policy inspection is enabled",
             "type": "boolean"
           }
         },
@@ -3429,13 +4167,15 @@
       },
       "service_policy_ssl_proxy": {
         "additionalProperties": false,
-        "description": "For SRX-only",
+        "description": "SRX SSL proxy inspection settings for a service policy",
         "properties": {
           "ciphers_category": {
-            "$ref": "#/components/schemas/ssl_proxy_ciphers_category"
+            "$ref": "#/components/schemas/ssl_proxy_ciphers_category",
+            "description": "Allowed cipher strength category for SSL proxy inspection"
           },
           "enabled": {
             "default": false,
+            "description": "Whether SSL proxy inspection is enabled for the service policy",
             "type": "boolean"
           }
         },
@@ -3443,13 +4183,15 @@
       },
       "service_policy_syslog": {
         "additionalProperties": false,
-        "description": "Required for syslog logging",
+        "description": "Syslog logging settings for a service policy",
         "properties": {
           "enabled": {
             "default": false,
+            "description": "Whether syslog logging is enabled for the service policy",
             "type": "boolean"
           },
           "server_names": {
+            "description": "Names of syslog servers that receive logs for this service policy",
             "examples": [
               [
                 "dc_syslog_server"
@@ -3474,6 +4216,7 @@
         "type": "string"
       },
       "strings": {
+        "description": "Unique string values returned or accepted by this schema",
         "items": {
           "type": "string"
         },
@@ -3482,64 +4225,79 @@
       },
       "tunnel_config": {
         "additionalProperties": false,
+        "description": "Gateway tunnel configuration for provider-managed or custom tunnels",
         "properties": {
           "auto_provision": {
-            "$ref": "#/components/schemas/tunnel_config_auto_provision"
+            "$ref": "#/components/schemas/tunnel_config_auto_provision",
+            "description": "Provider auto-provisioning settings for tunnel endpoints"
           },
           "ike_lifetime": {
-            "description": "Only if `provider`==`custom-ipsec`",
+            "description": "Only if `provider`==`custom-ipsec`. IKE lifetime configured for the custom IPsec tunnel",
             "type": "integer"
           },
           "ike_mode": {
-            "$ref": "#/components/schemas/tunnel_config_ike_mode"
+            "$ref": "#/components/schemas/tunnel_config_ike_mode",
+            "description": "Only if `provider`==`custom-ipsec`. IKE negotiation mode for the tunnel"
           },
           "ike_proposals": {
-            "$ref": "#/components/schemas/tunnel_config_ike_proposals"
+            "$ref": "#/components/schemas/tunnel_config_ike_proposals",
+            "description": "If `provider`==`custom-ipsec`, IKE proposals used for custom IPsec negotiation"
           },
           "ipsec_lifetime": {
-            "description": "If `provider`==`custom-ipsec`",
+            "description": "If `provider`==`custom-ipsec`, IPsec lifetime configured for the custom tunnel",
             "type": "integer"
           },
           "ipsec_proposals": {
-            "$ref": "#/components/schemas/tunnel_config_ipsec_proposals"
+            "$ref": "#/components/schemas/tunnel_config_ipsec_proposals",
+            "description": "Only if `provider`==`custom-ipsec`. IPsec proposals used for custom IPsec negotiation"
           },
           "local_id": {
             "description": "Required if `provider`==`zscaler-ipsec`, `provider`==`jse-ipsec` or `provider`==`custom-ipsec`",
             "type": "string"
           },
           "local_subnets": {
-            "$ref": "#/components/schemas/tunnel_config_local_subnets"
+            "$ref": "#/components/schemas/tunnel_config_local_subnets",
+            "description": "Local protected subnets advertised by this tunnel"
           },
           "mode": {
-            "$ref": "#/components/schemas/tunnel_config_tunnel_mode"
+            "$ref": "#/components/schemas/tunnel_config_tunnel_mode",
+            "description": "Tunnel failover mode used for primary and secondary endpoints"
           },
           "networks": {
-            "$ref": "#/components/schemas/tunnel_config_networks"
+            "$ref": "#/components/schemas/tunnel_config_networks",
+            "description": "Destination networks reachable through this tunnel"
           },
           "primary": {
-            "$ref": "#/components/schemas/tunnel_config_node"
+            "$ref": "#/components/schemas/tunnel_config_node",
+            "description": "Main remote tunnel endpoint settings"
           },
           "probe": {
-            "$ref": "#/components/schemas/tunnel_config_probe"
+            "$ref": "#/components/schemas/tunnel_config_probe",
+            "description": "Tunnel health probe settings"
           },
           "protocol": {
-            "$ref": "#/components/schemas/tunnel_config_protocol"
+            "$ref": "#/components/schemas/tunnel_config_protocol",
+            "description": "Only if `provider`==`custom-ipsec`. Tunnel protocol for custom tunnel negotiation"
           },
           "provider": {
-            "$ref": "#/components/schemas/tunnel_config_provider"
+            "$ref": "#/components/schemas/tunnel_config_provider",
+            "description": "Tunnel provider used when auto provisioning is disabled"
           },
           "psk": {
             "description": "Required if `provider`==`zscaler-ipsec`, `provider`==`jse-ipsec` or `provider`==`custom-ipsec`",
             "type": "string"
           },
           "remote_subnets": {
-            "$ref": "#/components/schemas/tunnel_config_remote_subnets"
+            "$ref": "#/components/schemas/tunnel_config_remote_subnets",
+            "description": "Remote protected subnets reached through policy-based IPsec"
           },
           "secondary": {
-            "$ref": "#/components/schemas/tunnel_config_node"
+            "$ref": "#/components/schemas/tunnel_config_node",
+            "description": "Backup remote tunnel endpoint settings"
           },
           "version": {
-            "$ref": "#/components/schemas/tunnel_config_version"
+            "$ref": "#/components/schemas/tunnel_config_version",
+            "description": "Only if `provider`==`custom-gre` or `provider`==`custom-ipsec`. Tunnel version value for custom tunnel configuration"
           }
         },
         "type": "object"
@@ -3555,27 +4313,31 @@
       },
       "tunnel_config_auto_provision": {
         "additionalProperties": false,
-        "description": "Auto Provisioning configuration for the tunne. This takes precedence over the `primary` and `secondary` nodes.",
+        "description": "Auto-provisioning configuration for the tunnel. This takes precedence over the `primary` and `secondary` nodes.",
         "properties": {
           "enabled": {
             "description": "Enable auto provisioning for the tunnel. If enabled, the `primary` and `secondary` nodes will be ignored.",
             "type": "boolean"
           },
           "latlng": {
-            "$ref": "#/components/schemas/tunnel_config_auto_provision_lat_lng"
+            "$ref": "#/components/schemas/tunnel_config_auto_provision_lat_lng",
+            "description": "Geographic coordinate override used for tunnel POP selection"
           },
           "primary": {
-            "$ref": "#/components/schemas/tunnel_config_auto_provision_node"
+            "$ref": "#/components/schemas/tunnel_config_auto_provision_node",
+            "description": "Main auto-provisioned tunnel endpoint settings"
           },
           "provider": {
-            "$ref": "#/components/schemas/tunnel_config_auto_provision_provider"
+            "$ref": "#/components/schemas/tunnel_config_auto_provision_provider",
+            "description": "Tunnel provider used for automatic endpoint provisioning"
           },
           "region": {
             "description": "API override for POP selection in the case user wants to override the auto discovery of remote network location and force the tunnel to use the specified peer location.",
             "type": "string"
           },
           "secondary": {
-            "$ref": "#/components/schemas/tunnel_config_auto_provision_node"
+            "$ref": "#/components/schemas/tunnel_config_auto_provision_node",
+            "description": "Backup auto-provisioned tunnel endpoint settings"
           },
           "service_connection": {
             "description": "if `provider`==`prisma-ipsec`. By default, we'll use the location of the site to determine the optimal Remote Network location, optionally, service_connection can be considered, then we'll also consider this along with the site location. Define service_connection if the traffic is to be routed to a specific service connection. This field takes a service connection name that is configured in the Prisma cloud, Prisma Access Setup -> Service Connections.",
@@ -3592,9 +4354,10 @@
       },
       "tunnel_config_auto_provision_lat_lng": {
         "additionalProperties": false,
-        "description": "API override for POP selection",
+        "description": "Geographic coordinate override for tunnel POP selection",
         "properties": {
           "lat": {
+            "description": "Geographic latitude used for POP selection override",
             "examples": [
               37.295833
             ],
@@ -3602,6 +4365,7 @@
             "type": "number"
           },
           "lng": {
+            "description": "Geographic longitude used for POP selection override",
             "examples": [
               -122.032946
             ],
@@ -3616,12 +4380,15 @@
         "type": "object"
       },
       "tunnel_config_auto_provision_node": {
+        "description": "Auto-provisioned tunnel endpoint settings",
         "properties": {
           "probe_ips": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Probe IP addresses used to monitor auto-provisioned tunnel reachability"
           },
           "wan_names": {
-            "$ref": "#/components/schemas/tunnel_config_auto_provision_node_wan_names"
+            "$ref": "#/components/schemas/tunnel_config_auto_provision_node_wan_names",
+            "description": "WAN interface names used by the auto-provisioned tunnel endpoint"
           }
         }
       },
@@ -3636,7 +4403,7 @@
         "type": "array"
       },
       "tunnel_config_auto_provision_provider": {
-        "description": "enum: `jse-ipsec`, `zscaler-ipsec`",
+        "description": "Tunnel provider used for automatic endpoint provisioning. enum: `jse-ipsec`, `zscaler-ipsec`",
         "enum": [
           "jse-ipsec",
           "zscaler-ipsec"
@@ -3645,7 +4412,7 @@
       },
       "tunnel_config_dh_group": {
         "default": "14",
-        "description": "Only if `provider`==`custom-ipsec`. enum:\n  * 1\n  * 2 (1024-bit)\n  * 5\n  * 14 (default, 2048-bit)\n  * 15 (3072-bit)\n  * 16 (4096-bit)\n  * 19 (256-bit ECP)\n  * 20 (384-bit ECP)\n  * 21 (521-bit ECP)\n  * 24 (2048-bit ECP)",
+        "description": "Only if `provider`==`custom-ipsec`. Diffie-Hellman group for IPsec phase 2. enum: `1`, `14`, `15`, `16`, `19`, `2`, `20`, `21`, `24`, `5`. `14` is the default 2048-bit group; `19`, `20`, `21`, and `24` are ECP groups",
         "enum": [
           "1",
           "14",
@@ -3677,7 +4444,7 @@
       },
       "tunnel_config_ike_dh_group": {
         "default": "14",
-        "description": "enum:\n  * 1\n  * 2 (1024-bit)\n  * 5\n  * 14 (default, 2048-bit)\n  * 15 (3072-bit)\n  * 16 (4096-bit)\n  * 19 (256-bit ECP)\n  * 20 (384-bit ECP)\n  * 21 (521-bit ECP)\n  * 24 (2048-bit ECP)",
+        "description": "Diffie-Hellman group for IKE phase 1. enum: `1`, `14`, `15`, `16`, `19`, `2`, `20`, `21`, `24`, `5`. `14` is the default 2048-bit group; `19`, `20`, `21`, and `24` are ECP groups",
         "enum": [
           "1",
           "14",
@@ -3703,21 +4470,25 @@
       },
       "tunnel_config_ike_proposal": {
         "additionalProperties": false,
+        "description": "IKE proposal settings for custom IPsec tunnels",
         "properties": {
           "auth_algo": {
-            "$ref": "#/components/schemas/tunnel_config_auth_algo"
+            "$ref": "#/components/schemas/tunnel_config_auth_algo",
+            "description": "Integrity algorithm used by this IKE proposal"
           },
           "dh_group": {
-            "$ref": "#/components/schemas/tunnel_config_ike_dh_group"
+            "$ref": "#/components/schemas/tunnel_config_ike_dh_group",
+            "description": "Diffie-Hellman group used by this IKE proposal"
           },
           "enc_algo": {
-            "$ref": "#/components/schemas/tunnel_config_enc_algo"
+            "$ref": "#/components/schemas/tunnel_config_enc_algo",
+            "description": "Cipher algorithm used by this IKE proposal"
           }
         },
         "type": "object"
       },
       "tunnel_config_ike_proposals": {
-        "description": "If `provider`==`custom-ipsec`",
+        "description": "If `provider`==`custom-ipsec`, IKE proposals used for custom IPsec negotiation",
         "items": {
           "$ref": "#/components/schemas/tunnel_config_ike_proposal"
         },
@@ -3725,21 +4496,25 @@
       },
       "tunnel_config_ipsec_proposal": {
         "additionalProperties": false,
+        "description": "IPsec proposal settings for custom IPsec tunnels",
         "properties": {
           "auth_algo": {
-            "$ref": "#/components/schemas/tunnel_config_auth_algo"
+            "$ref": "#/components/schemas/tunnel_config_auth_algo",
+            "description": "Integrity algorithm used by this IPsec proposal"
           },
           "dh_group": {
-            "$ref": "#/components/schemas/tunnel_config_dh_group"
+            "$ref": "#/components/schemas/tunnel_config_dh_group",
+            "description": "Diffie-Hellman group used by this IPsec proposal"
           },
           "enc_algo": {
-            "$ref": "#/components/schemas/tunnel_config_enc_algo"
+            "$ref": "#/components/schemas/tunnel_config_enc_algo",
+            "description": "Cipher algorithm used by this IPsec proposal"
           }
         },
         "type": "object"
       },
       "tunnel_config_ipsec_proposals": {
-        "description": "Only if  `provider`==`custom-ipsec`",
+        "description": "Only if `provider`==`custom-ipsec`. IPsec proposals used for custom IPsec negotiation",
         "items": {
           "$ref": "#/components/schemas/tunnel_config_ipsec_proposal"
         },
@@ -3764,19 +4539,40 @@
         "description": "Only if `provider`==`zscaler-ipsec`, `provider`==`jse-ipsec` or `provider`==`custom-ipsec`",
         "properties": {
           "hosts": {
-            "$ref": "#/components/schemas/tunnel_config_node_hosts"
+            "$ref": "#/components/schemas/tunnel_config_node_hosts",
+            "description": "Remote gateway host addresses for this tunnel node"
+          },
+          "internal_ip6s": {
+            "$ref": "#/components/schemas/strings",
+            "description": "IPv6 addresses configured on this tunnel node"
           },
           "internal_ips": {
-            "$ref": "#/components/schemas/tunnel_config_node_internal_ips"
+            "$ref": "#/components/schemas/tunnel_config_node_internal_ips",
+            "description": "Internal IP addresses configured on this tunnel node"
+          },
+          "probe_hostnames": {
+            "$ref": "#/components/schemas/strings",
+            "description": "Hostnames used as ICMP probe destinations for this tunnel node; applicable for both IPv4 and IPv6"
+          },
+          "probe_http": {
+            "$ref": "#/components/schemas/tunnel_config_node_probe_http",
+            "description": "HTTP probe settings for this tunnel node; success from any ICMP or HTTP probe indicates the tunnel is up"
+          },
+          "probe_ip6s": {
+            "$ref": "#/components/schemas/strings",
+            "description": "IPv6 ICMP probe addresses used to monitor this tunnel node"
           },
           "probe_ips": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Health-check IP addresses used to monitor this tunnel node"
           },
           "remote_ids": {
-            "$ref": "#/components/schemas/tunnel_config_node_remote_ids"
+            "$ref": "#/components/schemas/tunnel_config_node_remote_ids",
+            "description": "IKE identities expected from this tunnel node"
           },
           "wan_names": {
-            "$ref": "#/components/schemas/tunnel_config_node_wan_names"
+            "$ref": "#/components/schemas/tunnel_config_node_wan_names",
+            "description": "Interface names that source tunnel traffic for this node"
           }
         },
         "required": [
@@ -3786,8 +4582,9 @@
         "type": "object"
       },
       "tunnel_config_node_hosts": {
+        "description": "Remote gateway host addresses for a tunnel node",
         "items": {
-          "description": "IP Address of the remote host",
+          "description": "IP address of the remote host",
           "type": "string"
         },
         "type": "array"
@@ -3799,14 +4596,47 @@
         },
         "type": "array"
       },
+      "tunnel_config_node_probe_http": {
+        "additionalProperties": false,
+        "description": "HTTP probe settings for a custom IPsec tunnel node",
+        "properties": {
+          "accepted_status_codes": {
+            "description": "HTTP response status codes that indicate a successful probe. Defaults to 200 if not specified.",
+            "examples": [
+              [
+                204
+              ]
+            ],
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "urls": {
+            "description": "HTTP or HTTPS URLs to probe",
+            "examples": [
+              [
+                "http://www.google.com/generate_204",
+                "https://www.google.com/generate_204"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "tunnel_config_node_remote_ids": {
-        "description": "Only if  `provider`==`jse-ipsec` or `provider`==`custom-ipsec`",
+        "description": "Only if `provider`==`jse-ipsec` or `provider`==`custom-ipsec`",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
       "tunnel_config_node_wan_names": {
+        "description": "Interface names that source tunnel traffic for a tunnel node",
         "items": {
           "type": "string"
         },
@@ -3814,7 +4644,7 @@
       },
       "tunnel_config_probe": {
         "additionalProperties": false,
-        "description": "Only if `provider`==`custom-ipsec`",
+        "description": "Tunnel health probe settings",
         "properties": {
           "interval": {
             "description": "How often to trigger the probe",
@@ -3829,14 +4659,15 @@
             "type": "integer"
           },
           "type": {
-            "$ref": "#/components/schemas/tunnel_config_probe_type"
+            "$ref": "#/components/schemas/tunnel_config_probe_type",
+            "description": "Protocol used by the custom IPsec tunnel health probe"
           }
         },
         "type": "object"
       },
       "tunnel_config_probe_type": {
         "default": "icmp",
-        "description": "enum: `http`, `icmp`",
+        "description": "Protocol used by the custom IPsec tunnel health probe. `http` is deprecated — use `probe_ips`/`probe_hostnames` for ICMP probes and `probe_http` for HTTP probes instead. enum: `http`, `icmp`",
         "enum": [
           "http",
           "icmp"
@@ -3890,15 +4721,19 @@
       },
       "tunnel_provider_options": {
         "additionalProperties": false,
+        "description": "Provider-specific options for gateway tunnel auto provisioning",
         "properties": {
           "jse": {
-            "$ref": "#/components/schemas/tunnel_provider_options_jse"
+            "$ref": "#/components/schemas/tunnel_provider_options_jse",
+            "description": "Juniper Secure Edge provisioning options for tunnel endpoints"
           },
           "prisma": {
-            "$ref": "#/components/schemas/tunnel_provider_options_prisma"
+            "$ref": "#/components/schemas/tunnel_provider_options_prisma",
+            "description": "Palo Alto Prisma Access provisioning options for tunnel endpoints"
           },
           "zscaler": {
-            "$ref": "#/components/schemas/tunnel_provider_options_zscaler"
+            "$ref": "#/components/schemas/tunnel_provider_options_zscaler",
+            "description": "Provider settings for Zscaler tunnel endpoints"
           }
         },
         "type": "object"
@@ -3908,6 +4743,7 @@
         "description": "For jse-ipsec, this allows provisioning of adequate resource on JSE. Make sure adequate licenses are added",
         "properties": {
           "num_users": {
+            "description": "User capacity to provision on Juniper Secure Edge",
             "examples": [
               5
             ],
@@ -3925,6 +4761,7 @@
       },
       "tunnel_provider_options_prisma": {
         "additionalProperties": false,
+        "description": "Prisma Access provider options for tunnel auto provisioning",
         "properties": {
           "service_account_name": {
             "description": "For prisma-ipsec, service account name to used for tunnel auto provisioning",
@@ -3942,6 +4779,7 @@
         "properties": {
           "aup_block_internet_until_accepted": {
             "default": false,
+            "description": "Whether Zscaler blocks internet access until the Acceptable Use Policy is accepted",
             "type": "boolean"
           },
           "aup_enabled": {
@@ -3995,7 +4833,8 @@
             "type": "boolean"
           },
           "sub_locations": {
-            "$ref": "#/components/schemas/zscaler_sub_locations"
+            "$ref": "#/components/schemas/zscaler_sub_locations",
+            "description": "Per-network Zscaler sub-location settings"
           },
           "surrogate_IP": {
             "default": false,
@@ -4035,9 +4874,11 @@
       },
       "tunnel_provider_options_zscaler_sub_location": {
         "additionalProperties": false,
+        "description": "Zscaler sub-location settings for a specific network",
         "properties": {
           "aup_block_internet_until_accepted": {
             "default": false,
+            "description": "Whether this sub-location blocks internet access until the Acceptable Use Policy is accepted",
             "type": "boolean"
           },
           "aup_enabled": {
@@ -4125,7 +4966,17 @@
         },
         "type": "object"
       },
+      "tunnel_via": {
+        "default": "primary",
+        "description": "If `via`==`tunnel`, specifies which tunnel (primary/secondary) this neighbor is associated with. enum: `primary`, `secondary`",
+        "enum": [
+          "primary",
+          "secondary"
+        ],
+        "type": "string"
+      },
       "vlan_id_with_variable": {
+        "description": "VLAN ID, either numeric or expressed as a template variable string",
         "oneOf": [
           {
             "type": "string"
@@ -4139,6 +4990,7 @@
       },
       "vrf_config": {
         "additionalProperties": false,
+        "description": "VRF enablement settings applied when supported on the device",
         "properties": {
           "enabled": {
             "description": "Whether to enable VRF (when supported on the device)",
@@ -4149,8 +5001,10 @@
       },
       "wan_extra_routes": {
         "additionalProperties": false,
+        "description": "Additional IPv4 route for a WAN interface",
         "properties": {
           "via": {
+            "description": "IPv4 next-hop address for this WAN extra route",
             "format": "ipv4",
             "type": "string"
           }
@@ -4159,8 +5013,10 @@
       },
       "wan_extra_routes6": {
         "additionalProperties": false,
+        "description": "Additional IPv6 route for a WAN interface",
         "properties": {
           "via": {
+            "description": "IPv6 next-hop address for this WAN extra route",
             "format": "ipv6",
             "type": "string"
           }
@@ -4339,9 +5195,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -4361,9 +5217,9 @@
         }
       },
       "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
         "in": "query",
         "name": "page",
-        "required": false,
         "schema": {
           "default": 1,
           "minimum": 1,
@@ -4395,19 +5251,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Integration SkyATP",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "put": {
-        "description": "Update Sky ATP Allowed List",
+        "description": "Update the Sky ATP SecIntel allowlist with domain and IP address entries for the organization.",
         "operationId": "udpateOrgAtpAllowedList",
         "requestBody": {
           "content": {
@@ -142,7 +138,7 @@
         }
       ],
       "put": {
-        "description": "Update Sky ATP Blocked List",
+        "description": "Update the Sky ATP SecIntel blocklist with domain and IP address entries for the organization.",
         "operationId": "udpateOrgAtpBlockedList",
         "requestBody": {
           "content": {
@@ -204,7 +200,7 @@
         }
       ],
       "get": {
-        "description": "Get Org SkyATP Integration",
+        "description": "Return the Sky ATP integration configuration, including linked realm information and generated SecIntel allowlist and blocklist URLs.",
         "operationId": "getOrgSkyAtpIntegration",
         "responses": {
           "200": {
@@ -232,7 +228,7 @@
         ]
       },
       "put": {
-        "description": "Update Sky ATP config",
+        "description": "Update Sky ATP SecIntel feed configuration, including the third-party threat feeds enabled for the organization.",
         "operationId": "udpateOrgAtpIntegration",
         "requestBody": {
           "content": {
@@ -280,7 +276,7 @@
         ]
       },
       "post": {
-        "description": "1. Login to the Sky ATP realm through the Mist UI by providing the realm, username and password.\n2. Sky ATP API is invoked which creates the realm using above details.\n3. Sky ATP by default will provide functionality for Security-Intelligence and Advanced Anti Malware.\n4. Security Intelligence will provide configuration for CC, DNS Feeds, Infected Host, Blocklists and Allowlists.",
+        "description": "Configure the Sky ATP integration by linking or creating the Sky ATP realm with the supplied cloud, realm, username, and password. The integration enables Security Intelligence and Advanced Anti-Malware features, with SecIntel configuration for command-and-control, DNS feeds, infected hosts, blocklists, and allowlists.",
         "operationId": "setupOrgAtpIntegration",
         "requestBody": {
           "content": {
@@ -288,6 +284,7 @@
               "examples": {
                 "Example": {
                   "value": {
+                    "cloud_name": "www.amerskyatp.com",
                     "password": "foryoureyesonly",
                     "realm": "mist-team",
                     "username": "john@abc.com"
@@ -326,7 +323,7 @@
         ]
       },
       "delete": {
-        "description": "Delete SkyATP Integration",
+        "description": "Remove the Sky ATP integration configuration from the organization.",
         "operationId": "deleteOrgSkyAtpIntegration",
         "responses": {
           "200": {
@@ -357,21 +354,43 @@
   },
   "components": {
     "schemas": {
+      "account_skyatp_cloud_name": {
+        "description": "Sky ATP cloud name. enum: `www.amerskyatp.com`, `www.apacskyatp.com`, `www.euroskyatp.com`, `www.canadaskyatp.com`",
+        "enum": [
+          "www.amerskyatp.com",
+          "www.apacskyatp.com",
+          "www.euroskyatp.com",
+          "www.canadaskyatp.com"
+        ],
+        "examples": [
+          "www.amerskyatp.com"
+        ],
+        "type": "string"
+      },
       "account_skyatp_config": {
+        "description": "Sky ATP account credentials and realm settings used for integration",
         "properties": {
+          "cloud_name": {
+            "$ref": "#/components/schemas/account_skyatp_cloud_name",
+            "description": "Sky ATP cloud endpoint used for the integration"
+          },
           "password": {
+            "description": "Credential password for the Sky ATP realm user",
             "examples": [
               "foryoureyesonly"
             ],
+            "format": "password",
             "type": "string"
           },
           "realm": {
+            "description": "Sky ATP realm to create or link with this Mist organization",
             "examples": [
               "mist-team"
             ],
             "type": "string"
           },
           "username": {
+            "description": "Sky ATP username used to create or access the realm",
             "examples": [
               "john@abc.com"
             ],
@@ -386,11 +405,14 @@
         "type": "object"
       },
       "account_skyatp_data": {
+        "description": "Sky ATP SecIntel feed data and generated list URLs",
         "properties": {
           "secintel": {
-            "$ref": "#/components/schemas/account_skyatp_data_secintel"
+            "$ref": "#/components/schemas/account_skyatp_data_secintel",
+            "description": "Juniper SecIntel threat feed configuration provided by Sky ATP"
           },
           "secintel_allowlist_url": {
+            "description": "URL for the Sky ATP SecIntel allowlist",
             "examples": [
               "https://papi.s3.amazonaws.com/secintel_allowlist/xxx..."
             ],
@@ -398,6 +420,7 @@
             "type": "string"
           },
           "secintel_blocklist_url": {
+            "description": "URL for the Sky ATP SecIntel blocklist",
             "examples": [
               "https://papi.s3.amazonaws.com/secintel_blocklist/xxx..."
             ],
@@ -412,21 +435,29 @@
         "description": "juniper secintel_feeds are enabled depending on your license tier: infected_host, geo_ip, attacker_ip, command_and_control.\nthird party:\n  * ip-based: block_list, threatfox_ip, feodo_tracker, dshield, tor\n  * url-based: threatfox_url, urlhaus, open_phish\n  * domain-based: threatfox_domains",
         "properties": {
           "third_party_threat_feeds": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Third-party threat feed names enabled for SecIntel"
           }
         },
         "type": "object"
       },
       "account_skyatp_info": {
         "additionalProperties": false,
+        "description": "Linked Sky ATP account and realm information",
         "properties": {
+          "cloud_name": {
+            "$ref": "#/components/schemas/account_skyatp_cloud_name",
+            "description": "Sky ATP cloud endpoint configured for the integration"
+          },
           "realm": {
+            "description": "Sky ATP realm linked with this Mist organization",
             "examples": [
               "mist-team"
             ],
             "type": "string"
           },
           "username": {
+            "description": "Sky ATP username configured for the linked realm",
             "examples": [
               "john@abc.com"
             ],
@@ -437,8 +468,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -449,8 +482,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -461,8 +496,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -473,8 +510,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -482,8 +521,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -493,26 +534,32 @@
         "type": "object"
       },
       "skyatp_list": {
+        "description": "Sky ATP SecIntel allowlist or blocklist entries",
         "properties": {
           "domains": {
-            "$ref": "#/components/schemas/skyatp_list_domains"
+            "$ref": "#/components/schemas/skyatp_list_domains",
+            "description": "SecIntel domain entries in this Sky ATP list"
           },
           "ip": {
-            "$ref": "#/components/schemas/skyatp_list_ips"
+            "$ref": "#/components/schemas/skyatp_list_ips",
+            "description": "SecIntel IP address entries in this Sky ATP list"
           }
         },
         "type": "object"
       },
       "skyatp_list_domain": {
         "additionalProperties": false,
+        "description": "Domain entry in a Sky ATP SecIntel list",
         "properties": {
           "comment": {
+            "description": "Optional note describing the domain list entry",
             "examples": [
               "restricted"
             ],
             "type": "string"
           },
           "value": {
+            "description": "Domain name included in the Sky ATP SecIntel list",
             "examples": [
               "unsafe.com"
             ],
@@ -525,6 +572,7 @@
         "type": "object"
       },
       "skyatp_list_domains": {
+        "description": "Domain entries in a Sky ATP SecIntel list",
         "items": {
           "$ref": "#/components/schemas/skyatp_list_domain"
         },
@@ -532,14 +580,17 @@
       },
       "skyatp_list_ip": {
         "additionalProperties": false,
+        "description": "IP address entry in a Sky ATP SecIntel list",
         "properties": {
           "comment": {
+            "description": "Optional note describing the IP address list entry",
             "examples": [
               "nas"
             ],
             "type": "string"
           },
           "value": {
+            "description": "IP address included in the Sky ATP SecIntel list",
             "examples": [
               "10.1.3.5"
             ],
@@ -552,12 +603,14 @@
         "type": "object"
       },
       "skyatp_list_ips": {
+        "description": "IP address entries in a Sky ATP SecIntel list",
         "items": {
           "$ref": "#/components/schemas/skyatp_list_ip"
         },
         "type": "array"
       },
       "strings": {
+        "description": "Unique string values returned or accepted by this schema",
         "items": {
           "type": "string"
         },
@@ -807,19 +860,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

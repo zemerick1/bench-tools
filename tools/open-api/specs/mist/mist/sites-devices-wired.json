@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sites Devices - Wired",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -163,7 +159,7 @@
     "schemas": {
       "junos_local_port_config": {
         "additionalProperties": false,
-        "description": "Switch port config",
+        "description": "Per-port Switch Port Operator (SPO) override configuration used in `local_port_config` to customize settings inherited from `port_config`",
         "properties": {
           "all_networks": {
             "default": false,
@@ -176,6 +172,7 @@
           },
           "allow_multiple_supplicants": {
             "default": false,
+            "description": "Whether multiple supplicants may authenticate on the port",
             "type": "boolean"
           },
           "bypass_auth_when_server_down": {
@@ -189,6 +186,7 @@
             "type": "boolean"
           },
           "description": {
+            "description": "Human-readable description for this local port configuration",
             "type": "string"
           },
           "disable_autoneg": {
@@ -202,10 +200,12 @@
             "type": "boolean"
           },
           "duplex": {
-            "$ref": "#/components/schemas/switch_port_local_usage_duplex"
+            "$ref": "#/components/schemas/switch_port_local_usage_duplex",
+            "description": "Link duplex mode for this local port configuration"
           },
           "dynamic_vlan_networks": {
-            "$ref": "#/components/schemas/switch_port_local_usage_dynamic_vlan_networks"
+            "$ref": "#/components/schemas/switch_port_local_usage_dynamic_vlan_networks",
+            "description": "Only if `port_auth`==`dot1x`, networks or VLANs that RADIUS can return for dynamic VLAN assignment"
           },
           "enable_mac_auth": {
             "default": false,
@@ -214,6 +214,7 @@
           },
           "enable_qos": {
             "default": false,
+            "description": "Whether QoS is enabled on ports using this local configuration",
             "type": "boolean"
           },
           "guest_network": {
@@ -225,11 +226,11 @@
           },
           "inter_switch_link": {
             "default": false,
-            "description": "inter_switch_link is used together with \"isolation\" under networks. NOTE: inter_switch_link works only between Juniper devices. This has to be applied to both ports connected together",
+            "description": "Used together with \"isolation\" under networks for links between Juniper devices; must be applied to both connected ports",
             "type": "boolean"
           },
           "mac_auth_only": {
-            "description": "Only if `enable_mac_auth`==`true`",
+            "description": "Only if `enable_mac_auth`==`true`, whether to use MAC authentication without 802.1X",
             "type": "boolean"
           },
           "mac_auth_preferred": {
@@ -237,23 +238,26 @@
             "type": "boolean"
           },
           "mac_auth_protocol": {
-            "$ref": "#/components/schemas/switch_port_local_usage_mac_auth_protocol"
+            "$ref": "#/components/schemas/switch_port_local_usage_mac_auth_protocol",
+            "description": "Only if `enable_mac_auth`==`true`, MAC authentication protocol to use"
           },
           "mac_limit": {
             "default": 0,
-            "description": "Max number of mac addresses, default is 0 for unlimited, otherwise range is 1 or higher, with upper bound constrained by platform",
+            "description": "Max number of MAC addresses, default is 0 for unlimited, otherwise range is 1 or higher, with upper bound constrained by platform",
             "minimum": 0,
             "type": "integer"
           },
           "mode": {
-            "$ref": "#/components/schemas/switch_port_local_usage_mode"
+            "$ref": "#/components/schemas/switch_port_local_usage_mode",
+            "description": "Switching mode for this local port configuration"
           },
           "mtu": {
             "description": "Media maximum transmission unit (MTU) is the largest data unit that can be forwarded without fragmentation. The default value is 1514.",
             "type": "integer"
           },
           "networks": {
-            "$ref": "#/components/schemas/switch_port_usage_networks"
+            "$ref": "#/components/schemas/switch_port_usage_networks",
+            "description": "Only if `mode`==`trunk`, network or VLAN names to trunk"
           },
           "note": {
             "description": "Additional note for the port config override",
@@ -273,14 +277,16 @@
             "type": "boolean"
           },
           "port_auth": {
-            "$ref": "#/components/schemas/switch_port_local_usage_dot1x"
+            "$ref": "#/components/schemas/switch_port_local_usage_dot1x",
+            "description": "802.1X authentication mode for this local port configuration"
           },
           "port_network": {
             "description": "Native network/vlan for untagged traffic",
             "type": "string"
           },
           "reauth_interval": {
-            "$ref": "#/components/schemas/switch_port_usage_reauth_interval"
+            "$ref": "#/components/schemas/switch_port_usage_reauth_interval",
+            "description": "Only if `port_auth`==`dot1x`, RADIUS reauthentication interval for clients on the port"
           },
           "server_fail_network": {
             "description": "Only if `port_auth`==`dot1x` sets server fail fallback vlan",
@@ -290,17 +296,19 @@
             ]
           },
           "server_reject_network": {
-            "description": "Only if `port_auth`==`dot1x` when radius server reject / fails",
+            "description": "Only if `port_auth`==`dot1x` when RADIUS server reject / fails",
             "type": [
               "string",
               "null"
             ]
           },
           "speed": {
-            "$ref": "#/components/schemas/junos_port_config_speed"
+            "$ref": "#/components/schemas/junos_port_config_speed",
+            "description": "Link speed for this local port configuration"
           },
           "storm_control": {
-            "$ref": "#/components/schemas/switch_port_local_usage_storm_control"
+            "$ref": "#/components/schemas/switch_port_local_usage_storm_control",
+            "description": "Storm-control settings for this local port configuration"
           },
           "stp_edge": {
             "default": false,
@@ -309,14 +317,16 @@
           },
           "stp_no_root_port": {
             "default": false,
+            "description": "Whether STP should prevent this port from becoming a root port",
             "type": "boolean"
           },
           "stp_p2p": {
             "default": false,
+            "description": "Whether STP treats this port as a point-to-point link",
             "type": "boolean"
           },
           "usage": {
-            "description": "Port usage name.",
+            "description": "Port usage profile name for this local port configuration",
             "type": "string"
           },
           "use_vstp": {
@@ -355,13 +365,15 @@
         "additionalProperties": {
           "$ref": "#/components/schemas/junos_local_port_config"
         },
-        "description": "Local port override, overriding the port configuration from `port_config`. Property key is the port name or range (e.g. \"ge-0/0/0-10\")",
+        "description": "Per-port Switch Port Operator (SPO) override, overriding the port configuration from `port_config`. Property key is the port name or range (e.g. \"ge-0/0/0-10\")",
         "type": "object"
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -372,8 +384,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -384,8 +398,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -396,8 +412,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -405,8 +423,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -469,7 +489,7 @@
       },
       "switch_port_local_usage_storm_control": {
         "additionalProperties": false,
-        "description": "Switch storm control",
+        "description": "Storm-control settings for this local port configuration",
         "properties": {
           "disable_port": {
             "default": false,
@@ -525,7 +545,7 @@
             "type": "string"
           }
         ],
-        "description": "Only if `mode`!=`dynamic` and `port_auth`=`dot1x` reauthentication interval range (min: 10, max: 65535, default: 3600)"
+        "description": "Only if `mode`!=`dynamic` and `port_auth`=`dot1x` reauthentication interval range (min: 10, max: 65535, default: 3600). Set to 0 to disable reauthentication (no-reauthentication)."
       }
     },
     "responses": {
@@ -698,19 +718,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

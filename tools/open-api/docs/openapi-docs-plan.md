@@ -336,35 +336,34 @@ python3 -m venv .venv
 
 `--offline` is how we iterate on the splitter without hitting ReadMe every run.
 
-## GitHub Actions (Phase 4 — end state)
+## GitHub Actions (Phase 4)
 
-This is the intended maintenance path, not a nice-to-have. It is last because it is only safe after:
-
-- Output is byte-stable
-- Validation fails closed
-- Slice sizes are known
-- `source/` is not being committed
+Workflow: `.github/workflows/update-openapi-docs.yml`.
 
 Triggers:
 
 - `workflow_dispatch`
-- Schedule (daily or weekly)
-- Changes to `tools/open-api/scripts/**` or the workflow file
+- Daily cron (`17 7 * * *` UTC)
+- Push to `main` or `feature/openapi-docs` that touches `tools/open-api/scripts/**`, `tools/open-api/local/**`, or the workflow file
 
 ```text
 Checkout
    |
-Setup Python + pip install -r tools/open-api/scripts/requirements.txt
+Setup Python 3.12 + pip install -r tools/open-api/scripts/requirements.txt
    |
-Fetch current OpenAPI specs into source/     (not committed)
+Unit tests (test_splitter.py)
    |
-Split → specs/
+Seed tools/open-api/local/ → source/     (SDC / Axis)
    |
-Write data/manifest.json
+Fetch Mist from mistsys/mist_openapi
+   |
+Fetch hub specs into source/             (not committed)
+   |
+Split → specs/  +  data/manifest.json
    |
 Validate every generated spec
    |
-If validation failed: fail the job
+If validation or any hub project failed: fail the job (no commit)
    |
 If specs/ + manifest changed: commit and push
    |
@@ -373,12 +372,11 @@ Cloudflare Pages/Workers picks up the push
 
 Operational notes:
 
-- The fetcher scrapes ReadMe `ssr-props`. A portal HTML change will break the job. Fail loudly (zero specs fetched = failure), do not commit an empty `specs/`.
-- Needs a token that can push to `main` (or a bot branch + auto-PR if `main` is protected).
-- Do not commit `source/`.
+- The fetcher scrapes ReadMe `ssr-props`. A portal HTML change will break the job. Fail loudly (zero specs **or any project fetch failure** = no commit). Do not publish a tree that silently dropped Central.
+- `contents: write` on `GITHUB_TOKEN` is enough if the branch allows Actions to push. If `main` is protected, add a PAT as `OPENAPI_DOCS_TOKEN` and point `actions/checkout` at it.
+- Do not commit `source/`. Hand-dropped specs that the hub does not publish live in committed `tools/open-api/local/`.
 - GHA runners do not need the laptop `--no-ssl-verify` path.
-
-Until Phase 4 exists, a human runs `build.py` and commits `specs/` + `data/manifest.json` the same way Central Alerts and CLI Explorer refresh data today.
+- The commit only adds `tools/open-api/specs` and `data/manifest.json`, so it does not re-trigger this workflow.
 
 ## Why not resolve first?
 
@@ -441,7 +439,7 @@ No splitter redesign. New APIs are more source directories and more manifest ent
 
 ### Phase 4 — GitHub Actions
 
-Automate **fetch → split → validate → commit** as described above. After this, generated docs should not need a manual refresh.
+Done: `.github/workflows/update-openapi-docs.yml` automates **fetch → split → validate → commit**. After merge to `main`, generated docs refresh on the daily schedule (or via **Actions → Update OpenAPI docs → Run workflow**).
 
 ### Phase 5 — UI extras
 

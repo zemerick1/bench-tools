@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "MSPs Licenses",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "post": {
-        "description": "Claim an Order by Activation Code",
+        "description": "Claim a license order for this MSP by submitting the activation code from the order.",
         "operationId": "claimMspLicense",
         "requestBody": {
           "content": {
@@ -131,7 +127,7 @@
         }
       ],
       "get": {
-        "description": "Get List of Msp Licenses",
+        "description": "Return MSP license entitlement, subscription, amendment, and usage summary information.",
         "operationId": "listMspLicenses",
         "responses": {
           "200": {
@@ -159,7 +155,7 @@
         ]
       },
       "put": {
-        "description": "Move or Delete MSP Licenses",
+        "description": "Perform an MSP license action, such as amending license quantity to an organization, deleting a subscription, undoing an amendment, or annotating a subscription.",
         "operationId": "moveOrDeleteMspLicenseToAnotherOrg",
         "requestBody": {
           "content": {
@@ -225,7 +221,7 @@
         }
       ],
       "get": {
-        "description": "Get List of MSP Licenses",
+        "description": "Return license entitlement, subscription, amendment, and usage statistics for organizations managed by this MSP.",
         "operationId": "listMspOrgLicenses",
         "responses": {
           "200": {
@@ -257,8 +253,10 @@
   "components": {
     "schemas": {
       "code_string": {
+        "description": "Request body containing a single authorization or claim code",
         "properties": {
           "code": {
+            "description": "Request-supplied authorization or claim code value",
             "type": "string"
           }
         },
@@ -284,10 +282,11 @@
       },
       "license": {
         "additionalProperties": false,
-        "description": "License",
+        "description": "Organization license entitlement, subscription, and usage summary",
         "properties": {
           "amendments": {
-            "$ref": "#/components/schemas/license_amendments"
+            "$ref": "#/components/schemas/license_amendments",
+            "description": "Read-only license amendments associated with the organization"
           },
           "entitled": {
             "additionalProperties": {
@@ -298,56 +297,70 @@
             "type": "object"
           },
           "fully_loaded": {
-            "$ref": "#/components/schemas/license_fully_loaded"
+            "$ref": "#/components/schemas/license_fully_loaded",
+            "description": "Maximum license demand by service if all organization devices use each service"
           },
           "licenses": {
-            "$ref": "#/components/schemas/licenses"
+            "$ref": "#/components/schemas/licenses",
+            "description": "Read-only license subscriptions for the organization"
           },
           "summary": {
-            "$ref": "#/components/schemas/license_summary"
+            "$ref": "#/components/schemas/license_summary",
+            "description": "Current license consumption by license type"
           },
           "usages": {
-            "$ref": "#/components/schemas/license_usages"
+            "$ref": "#/components/schemas/license_usages",
+            "description": "Available license counts by service"
           }
         },
         "type": "object"
       },
       "license_amendment": {
         "additionalProperties": false,
+        "description": "Read-only change applied to a license subscription",
         "properties": {
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Timestamp when the license amendment was created"
           },
           "end_time": {
+            "description": "End time of the license amendment",
             "readOnly": true,
             "type": "integer"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the license amendment"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Timestamp when the license amendment was last modified"
           },
           "quantity": {
+            "description": "License quantity associated with this amendment",
             "readOnly": true,
             "type": "integer"
           },
           "start_time": {
+            "description": "Start time of the license amendment",
             "readOnly": true,
             "type": "integer"
           },
           "subscription_id": {
+            "description": "Subscription identifier associated with this amendment",
             "readOnly": true,
             "type": "string"
           },
           "type": {
-            "$ref": "#/components/schemas/license_type"
+            "$ref": "#/components/schemas/license_type",
+            "description": "License type affected by this amendment"
           }
         },
         "readOnly": true,
         "type": "object"
       },
       "license_amendments": {
+        "description": "Read-only list of license amendments",
         "items": {
           "$ref": "#/components/schemas/license_amendment"
         },
@@ -366,9 +379,11 @@
       },
       "license_sub": {
         "additionalProperties": false,
+        "description": "Read-only license subscription record",
         "properties": {
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Timestamp when the license subscription was created"
           },
           "end_time": {
             "description": "End date of the license term",
@@ -376,17 +391,21 @@
             "type": "integer"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the license subscription"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Timestamp when the license subscription was last modified"
           },
           "order_id": {
+            "description": "Order identifier for this license subscription",
             "readOnly": true,
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization that owns this license subscription"
           },
           "quantity": {
             "description": "Number of devices entitled for this license",
@@ -403,11 +422,13 @@
             "type": "integer"
           },
           "subscription_id": {
+            "description": "Subscription identifier for this license subscription",
             "readOnly": true,
             "type": "string"
           },
           "type": {
-            "$ref": "#/components/schemas/license_type"
+            "$ref": "#/components/schemas/license_type",
+            "description": "License type for this subscription"
           }
         },
         "readOnly": true,
@@ -431,11 +452,12 @@
           "readOnly": true,
           "type": "integer"
         },
-        "description": "Number of available licenes. Property key is the service name (e.g. \"SUB-MAN\"). name (e.g. \"SUB-MAN\")",
+        "description": "Number of available licenses. Property key is the service name (e.g. \"SUB-MAN\").",
         "readOnly": true,
         "type": "object"
       },
       "licenses": {
+        "description": "License subscriptions for the organization",
         "items": {
           "$ref": "#/components/schemas/license_sub"
         },
@@ -448,29 +470,31 @@
         "type": "number"
       },
       "msp_license_action": {
+        "description": "License operation request for an MSP account",
         "properties": {
           "amendment_id": {
-            "description": "Required if `op`==`unamend`",
+            "description": "Required if `op`==`unamend`; identifies the license amendment to undo",
             "type": "string"
           },
           "dst_org_id": {
-            "description": "Required if `op`==`amend`, destination org id",
+            "description": "Required if `op`==`amend`; destination org ID that receives the amended license quantity",
             "format": "uuid",
             "type": "string"
           },
           "notes": {
-            "description": "Required if `op`==`annotate`",
+            "description": "Required if `op`==`annotate`; note text to attach to the license action",
             "type": "string"
           },
           "op": {
-            "$ref": "#/components/schemas/msp_license_action_operation"
+            "$ref": "#/components/schemas/msp_license_action_operation",
+            "description": "License operation to perform for this MSP request"
           },
           "quantity": {
-            "description": "Required if `op`==`amend`",
+            "description": "Required if `op`==`amend`; license quantity to move to the destination org",
             "type": "number"
           },
           "subscription_id": {
-            "description": "Required if `op`==`annotate`",
+            "description": "Required if `op`==`annotate`; subscription ID for the license action",
             "minLength": 1,
             "type": "string"
           }
@@ -492,6 +516,7 @@
         "type": "string"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -501,24 +526,31 @@
       },
       "response_claim_license": {
         "additionalProperties": false,
+        "description": "Result of claiming licenses or activation codes",
         "properties": {
           "inventory_added": {
-            "$ref": "#/components/schemas/response_claim_license_inventory_added"
+            "$ref": "#/components/schemas/response_claim_license_inventory_added",
+            "description": "Inventory devices added by the claim operation"
           },
           "inventory_duplicated": {
-            "$ref": "#/components/schemas/response_claim_license_inventory_duplicated"
+            "$ref": "#/components/schemas/response_claim_license_inventory_duplicated",
+            "description": "Inventory devices already present during the claim operation"
           },
           "inventory_pending": {
-            "$ref": "#/components/schemas/response_claim_license_inventory_pending"
+            "$ref": "#/components/schemas/response_claim_license_inventory_pending",
+            "description": "Inventory devices pending asynchronous claim processing"
           },
           "license_added": {
-            "$ref": "#/components/schemas/response_claim_license_license_added"
+            "$ref": "#/components/schemas/response_claim_license_license_added",
+            "description": "License entitlements added by the claim operation"
           },
           "license_duplicated": {
-            "$ref": "#/components/schemas/response_claim_license_license_duplicated"
+            "$ref": "#/components/schemas/response_claim_license_license_duplicated",
+            "description": "License entitlements already present during the claim operation"
           },
           "license_error": {
-            "$ref": "#/components/schemas/response_claim_license_license_error"
+            "$ref": "#/components/schemas/response_claim_license_license_error",
+            "description": "License claim errors returned by order number"
           }
         },
         "required": [
@@ -531,6 +563,7 @@
         "type": "object"
       },
       "response_claim_license_inventory_added": {
+        "description": "Inventory devices added by the claim operation",
         "items": {
           "$ref": "#/components/schemas/response_claim_license_inventory_item"
         },
@@ -538,6 +571,7 @@
         "uniqueItems": true
       },
       "response_claim_license_inventory_duplicated": {
+        "description": "Inventory devices already present during the claim operation",
         "items": {
           "$ref": "#/components/schemas/response_claim_license_inventory_item"
         },
@@ -545,20 +579,26 @@
         "uniqueItems": true
       },
       "response_claim_license_inventory_item": {
+        "description": "Inventory device returned by a license claim",
         "properties": {
           "mac": {
+            "description": "Device MAC address for the claimed inventory item",
             "type": "string"
           },
           "magic": {
+            "description": "Activation code or claim code associated with the inventory item",
             "type": "string"
           },
           "model": {
+            "description": "Device model for the claimed inventory item",
             "type": "string"
           },
           "serial": {
+            "description": "Device serial number for the claimed inventory item",
             "type": "string"
           },
           "type": {
+            "description": "Device type for the claimed inventory item",
             "type": "string"
           }
         },
@@ -571,7 +611,7 @@
         ]
       },
       "response_claim_license_inventory_pending": {
-        "description": "for async claim",
+        "description": "Inventory devices pending asynchronous claim processing",
         "items": {
           "$ref": "#/components/schemas/response_claim_license_inventory_pending_item"
         },
@@ -580,14 +620,17 @@
       },
       "response_claim_license_inventory_pending_item": {
         "additionalProperties": false,
+        "description": "Inventory device pending asynchronous claim processing",
         "properties": {
           "mac": {
+            "description": "Device MAC address pending asynchronous inventory claim",
             "type": "string"
           }
         },
         "type": "object"
       },
       "response_claim_license_license_added": {
+        "description": "License entitlements added by the claim operation",
         "items": {
           "$ref": "#/components/schemas/response_claim_license_license_item"
         },
@@ -595,6 +638,7 @@
         "uniqueItems": true
       },
       "response_claim_license_license_duplicated": {
+        "description": "License entitlements already present during the claim operation",
         "items": {
           "$ref": "#/components/schemas/response_claim_license_license_item"
         },
@@ -602,6 +646,7 @@
         "uniqueItems": true
       },
       "response_claim_license_license_error": {
+        "description": "License claim errors returned by order number",
         "items": {
           "$ref": "#/components/schemas/response_claim_license_license_error_item"
         },
@@ -609,11 +654,14 @@
         "uniqueItems": true
       },
       "response_claim_license_license_error_item": {
+        "description": "License order that could not be claimed",
         "properties": {
           "order": {
+            "description": "License order number or claim identifier that failed",
             "type": "string"
           },
           "reason": {
+            "description": "Explanation of why the license order could not be claimed",
             "type": "string"
           }
         },
@@ -623,17 +671,22 @@
         ]
       },
       "response_claim_license_license_item": {
+        "description": "License entitlement returned by a claim operation",
         "properties": {
           "end": {
+            "description": "Epoch timestamp when the license entitlement ends",
             "type": "integer"
           },
           "quantity": {
+            "description": "Number of license units included in the entitlement",
             "type": "integer"
           },
           "start": {
+            "description": "Epoch timestamp when the license entitlement starts",
             "type": "integer"
           },
           "type": {
+            "description": "License SKU or subscription type",
             "type": "string"
           }
         },
@@ -646,8 +699,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -658,8 +713,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -670,8 +727,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -682,8 +741,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -691,8 +752,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -1158,19 +1221,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

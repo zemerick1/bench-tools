@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sites Stats - Clients Wireless",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -84,6 +80,7 @@
         "operationId": "listSiteWirelessClientsStats",
         "parameters": [
           {
+            "description": "Filter results by whether the client is wired",
             "in": "query",
             "name": "wired",
             "schema": {
@@ -147,6 +144,7 @@
         "operationId": "getSiteWirelessClientStats",
         "parameters": [
           {
+            "description": "Filter results by whether the client is wired",
             "in": "query",
             "name": "wired",
             "schema": {
@@ -303,11 +301,15 @@
   "components": {
     "schemas": {
       "dot11_band": {
-        "description": "enum: `24`, `5`, `6`",
+        "description": "enum: `24`, `5`, `5-dedicated`, `5-selectable`, `6`, `6-dedicated`, `6-selectable`",
         "enum": [
           "24",
           "5",
-          "6"
+          "5-dedicated",
+          "5-selectable",
+          "6",
+          "6-dedicated",
+          "6-selectable"
         ],
         "type": "string"
       },
@@ -325,7 +327,7 @@
         "type": "string"
       },
       "guest": {
-        "description": "Guest",
+        "description": "Guest authorization record at site scope",
         "properties": {
           "access_code_email": {
             "description": "If `auth_method`==`email`, the email address where the authorization code has been sent to",
@@ -333,22 +335,22 @@
             "type": "string"
           },
           "ap_mac": {
-            "description": "MAC Address of the AP the guest was connected to during the registration process",
+            "description": "MAC address of the AP used during guest registration",
             "readOnly": true,
             "type": "string"
           },
           "auth_method": {
-            "description": "Type of guest authorization",
+            "description": "Guest authentication method used for the authorization",
             "readOnly": true,
             "type": "string"
           },
           "authorized": {
             "default": true,
-            "description": "Whether the guest is current authorized",
+            "description": "Whether the guest is currently authorized",
             "type": "boolean"
           },
           "authorized_expiring_time": {
-            "description": "When the authorization would expire",
+            "description": "Unix timestamp when the guest authorization expires",
             "examples": [
               1480704955
             ],
@@ -356,7 +358,7 @@
             "type": "number"
           },
           "authorized_time": {
-            "description": "When the guest was authorized",
+            "description": "Unix timestamp when the guest was authorized",
             "examples": [
               1480704355
             ],
@@ -364,14 +366,14 @@
             "type": "number"
           },
           "company": {
-            "description": "Optional, the info provided by user",
+            "description": "Optional company name provided by the guest during registration",
             "examples": [
               "abc"
             ],
             "type": "string"
           },
           "email": {
-            "description": "Optional, the info provided by user",
+            "description": "Optional email address provided by the guest during registration",
             "examples": [
               "john@abc.com"
             ],
@@ -379,20 +381,23 @@
             "type": "string"
           },
           "field1": {
-            "description": "Optional, the info provided by user",
+            "description": "Optional custom field 1 value provided by the guest during registration",
             "type": "string"
           },
           "field2": {
+            "description": "Optional custom field 2 value provided by the guest during registration",
             "type": "string"
           },
           "field3": {
+            "description": "Optional custom field 3 value provided by the guest during registration",
             "type": "string"
           },
           "field4": {
+            "description": "Optional custom field 4 value provided by the guest during registration",
             "type": "string"
           },
           "mac": {
-            "description": "MAC Address",
+            "description": "Device MAC address captured during guest registration",
             "readOnly": true,
             "type": "string"
           },
@@ -404,7 +409,7 @@
             "type": "integer"
           },
           "name": {
-            "description": "Optional, the info provided by user",
+            "description": "Optional name provided by the guest during registration",
             "examples": [
               "John Smith"
             ],
@@ -412,7 +417,7 @@
             "type": "string"
           },
           "random_mac": {
-            "description": "If the client is using a randomized MAC Address to connect the SSID",
+            "description": "Whether the guest device used a randomized MAC address to connect to the SSID",
             "readOnly": true,
             "type": "boolean"
           },
@@ -425,7 +430,7 @@
             "type": "string"
           },
           "wlan_id": {
-            "description": "ID of the SSID",
+            "description": "Identifier of the WLAN used for the guest authorization",
             "examples": [
               "6748cfa6-4e12-11e6-9188-0242ac110007"
             ],
@@ -446,7 +451,7 @@
         "type": "string"
       },
       "last_seen": {
-        "description": "Last seen timestamp",
+        "description": "Timestamp indicating when the entity was last seen",
         "examples": [
           1470417522
         ],
@@ -459,8 +464,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -471,8 +478,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -483,8 +492,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -495,8 +506,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -504,8 +517,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -551,7 +566,7 @@
         ]
       },
       "rx_rate": {
-        "description": "RX Rate, Mbps",
+        "description": "Receive data rate reported for a wireless or mesh link, in Mbps",
         "format": "float",
         "readOnly": true,
         "type": [
@@ -568,6 +583,7 @@
         ]
       },
       "site_id": {
+        "description": "Unique identifier of a Mist site",
         "examples": [
           "441a1214-6928-442a-8e92-e1d34b8ec6a6"
         ],
@@ -576,6 +592,7 @@
         "type": "string"
       },
       "stats_client": {
+        "description": "Client statistics record for a wireless or wired client",
         "oneOf": [
           {
             "$ref": "#/components/schemas/stats_wireless_client"
@@ -586,6 +603,7 @@
         ]
       },
       "stats_client_any_of": {
+        "description": "Client statistics records returned by a stats response",
         "items": {
           "$ref": "#/components/schemas/stats_client"
         },
@@ -593,17 +611,18 @@
       },
       "stats_unconnected_client": {
         "additionalProperties": false,
-        "description": "Unconnected clients statistics",
+        "description": "Location statistics for an unconnected Wi-Fi client observed by an AP",
         "properties": {
           "ap_mac": {
             "description": "MAC address of the AP that heard the client",
             "type": "string"
           },
           "last_seen": {
-            "$ref": "#/components/schemas/last_seen"
+            "$ref": "#/components/schemas/last_seen",
+            "description": "Time when Mist last observed the unconnected client, in epoch seconds"
           },
           "mac": {
-            "description": "MAC address of the (unconnected) client",
+            "description": "Unconnected client MAC address observed by an AP",
             "type": "string"
           },
           "manufacture": {
@@ -611,7 +630,7 @@
             "type": "string"
           },
           "map_id": {
-            "description": "Map_id of the client (if known), or null",
+            "description": "Map identifier for the unconnected client's location, if known",
             "format": "uuid",
             "type": [
               "string",
@@ -623,12 +642,12 @@
             "type": "integer"
           },
           "x": {
-            "description": "X (in pixels) of user location on the map (if known)",
+            "description": "Horizontal map coordinate of the unconnected client location, in pixels, if known",
             "format": "double",
             "type": "number"
           },
           "y": {
-            "description": "Y (in pixels) of user location on the map (if known)",
+            "description": "Vertical map coordinate of the unconnected client location, in pixels, if known",
             "format": "double",
             "type": "number"
           }
@@ -643,6 +662,7 @@
         "type": "object"
       },
       "stats_unconnected_clients": {
+        "description": "Unconnected Wi-Fi client location statistics returned by the request",
         "items": {
           "$ref": "#/components/schemas/stats_unconnected_client"
         },
@@ -650,52 +670,58 @@
       },
       "stats_wired_client": {
         "additionalProperties": false,
+        "description": "Wired client statistics for a client connected through an AP Ethernet port",
         "properties": {
           "auth_state": {
-            "description": "Client authorization status",
+            "description": "Authorization state reported for the wired client",
             "minLength": 1,
             "type": "string"
           },
           "device_id": {
-            "description": "Device ID the client is connected to",
+            "description": "Identifier of the AP the wired client is connected to",
             "minLength": 1,
             "type": "string"
           },
           "eth_port": {
-            "description": "Port on AP where the wired client is connected",
+            "description": "AP Ethernet port where the wired client is connected",
             "minLength": 1,
             "type": "string"
           },
           "last_seen": {
-            "description": "Time when last Tx/Rx observed",
+            "description": "Time when transmit or receive traffic was last observed for the wired client",
             "type": "number"
           },
           "mac": {
-            "description": "Client mac",
+            "description": "Wired client MAC address observed on the AP Ethernet port",
             "minLength": 1,
             "type": "string"
           },
           "rx_bytes": {
-            "$ref": "#/components/schemas/rx_bytes"
+            "$ref": "#/components/schemas/rx_bytes",
+            "description": "Total bytes received by the wired client connection"
           },
           "rx_pkts": {
-            "$ref": "#/components/schemas/rx_pkts"
+            "$ref": "#/components/schemas/rx_pkts",
+            "description": "Total packets received by the wired client connection"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site identifier associated with the wired client statistics record"
           },
           "tx_bytes": {
-            "$ref": "#/components/schemas/tx_bytes"
+            "$ref": "#/components/schemas/tx_bytes",
+            "description": "Total bytes transmitted by the wired client connection"
           },
           "tx_pkts": {
-            "$ref": "#/components/schemas/tx_pkts"
+            "$ref": "#/components/schemas/tx_pkts",
+            "description": "Total packets transmitted by the wired client connection"
           },
           "uptime": {
-            "description": "How long, in seconds, has the client been connected",
+            "description": "Elapsed time since the wired client connected, in seconds",
             "type": "number"
           },
           "vlan_id": {
-            "description": "VLAN id, could be empty",
+            "description": "VLAN identifier used by the wired client, when present",
             "type": "number"
           }
         },
@@ -707,18 +733,22 @@
       },
       "stats_wireless_client": {
         "additionalProperties": false,
+        "description": "Wireless client connection, traffic, and location statistics",
         "properties": {
           "accuracy": {
             "description": "Estimated client location accuracy, in meter",
             "type": "integer"
           },
           "airespace_ifname": {
+            "description": "RADIUS Airespace interface name reported for the wireless client, when available",
             "type": "string"
           },
           "airwatch": {
-            "$ref": "#/components/schemas/stats_wireless_client_airwatch"
+            "$ref": "#/components/schemas/stats_wireless_client_airwatch",
+            "description": "Mobile device management authorization information from AirWatch for the wireless client"
           },
           "annotation": {
+            "description": "User-visible annotation label applied to the wireless client",
             "type": "string"
           },
           "ap_id": {
@@ -731,16 +761,19 @@
             "type": "string"
           },
           "assoc_time": {
+            "description": "Time when the wireless client associated to the AP, in epoch seconds",
             "type": "integer"
           },
           "band": {
-            "$ref": "#/components/schemas/dot11_band"
+            "$ref": "#/components/schemas/dot11_band",
+            "description": "Wi-Fi radio band used by the wireless client connection"
           },
           "bssid": {
+            "description": "AP radio BSSID serving the wireless client connection",
             "type": "string"
           },
           "channel": {
-            "description": "Current channel",
+            "description": "Radio channel used by the wireless client connection",
             "type": "integer"
           },
           "dual_band": {
@@ -752,13 +785,15 @@
             "type": "string"
           },
           "group": {
+            "description": "Client group label reported for the wireless client",
             "type": "string"
           },
           "guest": {
-            "$ref": "#/components/schemas/guest"
+            "$ref": "#/components/schemas/guest",
+            "description": "Portal guest details for the wireless client"
           },
           "hostname": {
-            "description": "Hostname that we learned from sniffing DHCP",
+            "description": "DHCP hostname learned for the wireless client",
             "type": "string"
           },
           "idle_time": {
@@ -766,6 +801,7 @@
             "type": "number"
           },
           "ip": {
+            "description": "Current IP address reported for the wireless client",
             "type": "string"
           },
           "is_guest": {
@@ -774,14 +810,15 @@
             "type": "boolean"
           },
           "key_mgmt": {
-            "description": "E.g. WPA2-PSK/CCMP",
+            "description": "Security key-management and cipher suite used by the wireless client",
             "type": "string"
           },
           "last_seen": {
-            "$ref": "#/components/schemas/last_seen"
+            "$ref": "#/components/schemas/last_seen",
+            "description": "Time when Mist last observed the wireless client, in epoch seconds"
           },
           "mac": {
-            "description": "Client mac",
+            "description": "Wireless client MAC address observed by Mist",
             "type": "string"
           },
           "manufacture": {
@@ -797,6 +834,11 @@
             "description": "Device model, may be available if we can identify them",
             "type": "string"
           },
+          "mxedge_id": {
+            "description": "Mist Edge the wireless client connection is tunneled through, when applicable",
+            "format": "uuid",
+            "type": "string"
+          },
           "num_locating_aps": {
             "description": "Number of APs used to locate this client",
             "type": "integer"
@@ -810,7 +852,8 @@
             "type": "boolean"
           },
           "proto": {
-            "$ref": "#/components/schemas/dot11_proto"
+            "$ref": "#/components/schemas/dot11_proto",
+            "description": "802.11 protocol amendment used by the wireless client"
           },
           "psk_id": {
             "description": "PSK id (if multi-psk is used)",
@@ -818,52 +861,64 @@
             "type": "string"
           },
           "rssi": {
-            "description": "Signal strength",
+            "description": "Received signal strength indicator for the wireless client, in dBm",
             "type": "number"
           },
           "rssizones": {
-            "$ref": "#/components/schemas/stats_wireless_client_rssi_zones"
+            "$ref": "#/components/schemas/stats_wireless_client_rssi_zones",
+            "description": "RSSI zone memberships for the wireless client"
           },
           "rx_bps": {
-            "$ref": "#/components/schemas/rx_bps"
+            "$ref": "#/components/schemas/rx_bps",
+            "description": "Receive throughput for the wireless client, in bits per second"
           },
           "rx_bytes": {
-            "$ref": "#/components/schemas/rx_bytes"
+            "$ref": "#/components/schemas/rx_bytes",
+            "description": "Total bytes received by the wireless client connection"
           },
           "rx_pkts": {
-            "$ref": "#/components/schemas/rx_pkts"
+            "$ref": "#/components/schemas/rx_pkts",
+            "description": "Total packets received by the wireless client connection"
           },
           "rx_rate": {
-            "$ref": "#/components/schemas/rx_rate"
+            "$ref": "#/components/schemas/rx_rate",
+            "description": "Receive PHY rate for the wireless client connection, in Mbps"
           },
           "rx_retries": {
-            "$ref": "#/components/schemas/rx_retries"
+            "$ref": "#/components/schemas/rx_retries",
+            "description": "Receive retry count for the wireless client connection"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site identifier associated with the wireless client statistics record"
           },
           "snr": {
-            "description": "Signal over noise",
+            "description": "Signal-to-noise ratio for the wireless client connection",
             "type": "number"
           },
           "ssid": {
-            "description": "SSID the client is connected to",
+            "description": "Wireless SSID used by the client connection",
             "type": "string"
           },
           "tx_bps": {
-            "$ref": "#/components/schemas/tx_bps"
+            "$ref": "#/components/schemas/tx_bps",
+            "description": "Transmit throughput for the wireless client, in bits per second"
           },
           "tx_bytes": {
-            "$ref": "#/components/schemas/tx_bytes"
+            "$ref": "#/components/schemas/tx_bytes",
+            "description": "Total bytes transmitted by the wireless client connection"
           },
           "tx_pkts": {
-            "$ref": "#/components/schemas/tx_pkts"
+            "$ref": "#/components/schemas/tx_pkts",
+            "description": "Total packets transmitted by the wireless client connection"
           },
           "tx_rate": {
-            "$ref": "#/components/schemas/tx_rate"
+            "$ref": "#/components/schemas/tx_rate",
+            "description": "Transmit PHY rate for the wireless client connection, in Mbps"
           },
           "tx_retries": {
-            "$ref": "#/components/schemas/tx_retries"
+            "$ref": "#/components/schemas/tx_retries",
+            "description": "Transmit retry count for the wireless client connection"
           },
           "type": {
             "description": "Client’s type, regular / vip / resource / blocked (if client object is created)",
@@ -874,14 +929,15 @@
             "type": "number"
           },
           "username": {
-            "description": "Username that we learned from 802.1X exchange or Per_user PSK or User Portal",
+            "description": "User identity learned from 802.1X, per-user PSK, or user portal authentication",
             "type": "string"
           },
           "vbeacons": {
-            "$ref": "#/components/schemas/stats_wireless_client_vbeacons"
+            "$ref": "#/components/schemas/stats_wireless_client_vbeacons",
+            "description": "Virtual beacon associations for the wireless client"
           },
           "vlan_id": {
-            "description": "VLAN id, could be empty (from older AP)",
+            "description": "VLAN ID, could be empty (from older AP)",
             "type": "string"
           },
           "wlan_id": {
@@ -895,7 +951,8 @@
             "type": "string"
           },
           "wxrule_usage": {
-            "$ref": "#/components/schemas/stats_wireless_client_wxrule_usages"
+            "$ref": "#/components/schemas/stats_wireless_client_wxrule_usages",
+            "description": "WxLAN rule usage counters for the wireless client"
           },
           "x": {
             "description": "Estimated client location in pixels",
@@ -918,7 +975,8 @@
             "type": "number"
           },
           "zones": {
-            "$ref": "#/components/schemas/stats_wireless_client_zones"
+            "$ref": "#/components/schemas/stats_wireless_client_zones",
+            "description": "Zone memberships for the wireless client"
           }
         },
         "required": [
@@ -939,9 +997,10 @@
       },
       "stats_wireless_client_airwatch": {
         "additionalProperties": false,
-        "description": "Information if airwatch enabled",
+        "description": "AirWatch authorization information reported for a wireless client",
         "properties": {
           "authorized": {
+            "description": "Whether the wireless client is authorized by AirWatch",
             "type": "boolean"
           }
         },
@@ -952,18 +1011,21 @@
       },
       "stats_wireless_client_rssi_zone": {
         "additionalProperties": false,
+        "description": "RSSI zone currently containing a wireless client",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "RSSI zone identifier that currently contains the wireless client"
           },
           "since": {
+            "description": "Time when the wireless client entered the RSSI zone, in epoch seconds",
             "type": "number"
           }
         },
         "type": "object"
       },
       "stats_wireless_client_rssi_zones": {
-        "description": "List of rssizone_id’s where client is in and since when (if known)",
+        "description": "RSSI zone memberships for the wireless client, including when each membership began",
         "items": {
           "$ref": "#/components/schemas/stats_wireless_client_rssi_zone"
         },
@@ -971,18 +1033,21 @@
       },
       "stats_wireless_client_vbeacon": {
         "additionalProperties": false,
+        "description": "Virtual beacon currently associated with a wireless client",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Virtual beacon identifier currently associated with the wireless client"
           },
           "since": {
+            "description": "Time when the wireless client began matching the virtual beacon, in epoch seconds",
             "type": "number"
           }
         },
         "type": "object"
       },
       "stats_wireless_client_vbeacons": {
-        "description": "List of beacon_id’s where the client is in and since when (if known)",
+        "description": "Virtual beacon associations for the wireless client, including when each began",
         "items": {
           "$ref": "#/components/schemas/stats_wireless_client_vbeacon"
         },
@@ -990,19 +1055,22 @@
       },
       "stats_wireless_client_wxrule_usage": {
         "additionalProperties": false,
+        "description": "WxLAN rule usage counter for one wireless tag",
         "properties": {
           "tag_id": {
+            "description": "WxLAN tag identifier for this rule usage entry",
             "format": "uuid",
             "type": "string"
           },
           "usage": {
+            "description": "Count recorded for this WxLAN rule usage entry",
             "type": "integer"
           }
         },
         "type": "object"
       },
       "stats_wireless_client_wxrule_usages": {
-        "description": "Current WxlanRule usage per tag_id",
+        "description": "Current WxLAN rule usage counters keyed by wireless tag",
         "items": {
           "$ref": "#/components/schemas/stats_wireless_client_wxrule_usage"
         },
@@ -1010,24 +1078,28 @@
       },
       "stats_wireless_client_zone": {
         "additionalProperties": false,
+        "description": "Zone currently containing a wireless client",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Zone identifier that currently contains the wireless client"
           },
           "since": {
+            "description": "Time when the wireless client entered the zone, in epoch seconds",
             "type": "number"
           }
         },
         "type": "object"
       },
       "stats_wireless_client_zones": {
-        "description": "List of zone_id’s where client is in and since when (if known)",
+        "description": "Zone memberships for the wireless client, including when each membership began",
         "items": {
           "$ref": "#/components/schemas/stats_wireless_client_zone"
         },
         "type": "array"
       },
       "stats_wireless_clients": {
+        "description": "Wireless client statistics records returned by a stats response",
         "items": {
           "$ref": "#/components/schemas/stats_wireless_client"
         },
@@ -1070,7 +1142,7 @@
         ]
       },
       "tx_rate": {
-        "description": "TX Rate, Mbps",
+        "description": "Transmit data rate reported for a wireless or mesh link, in Mbps",
         "format": "float",
         "readOnly": true,
         "type": [
@@ -1293,10 +1365,9 @@
         }
       },
       "duration": {
-        "description": "Duration like 7d, 2w",
+        "description": "Time range duration for the query, using relative units such as `10m`, `7d`, or `2w`",
         "in": "query",
         "name": "duration",
-        "required": false,
         "schema": {
           "default": "1d",
           "examples": [
@@ -1306,7 +1377,7 @@
         }
       },
       "end": {
-        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
         "in": "query",
         "name": "end",
         "schema": {
@@ -1314,9 +1385,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -1336,9 +1407,9 @@
         }
       },
       "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
         "in": "query",
         "name": "page",
-        "required": false,
         "schema": {
           "default": 1,
           "minimum": 1,
@@ -1358,7 +1429,7 @@
         }
       },
       "start": {
-        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
         "in": "query",
         "name": "start",
         "schema": {
@@ -1538,19 +1609,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

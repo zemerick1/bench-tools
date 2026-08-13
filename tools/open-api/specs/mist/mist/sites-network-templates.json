@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sites Network Templates",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -122,6 +118,7 @@
   "components": {
     "schemas": {
       "acl_policies": {
+        "description": "List of ACL policy definitions",
         "items": {
           "$ref": "#/components/schemas/acl_policy"
         },
@@ -132,27 +129,38 @@
         "description": "ACL Policy:\n  - for GBP-based policy, all src_tags and dst_tags have to be gbp-based\n  - for ACL-based policy, `network` is required in either the source or destination so that we know where to attach the policy to",
         "properties": {
           "actions": {
-            "$ref": "#/components/schemas/acl_policy_actions"
+            "$ref": "#/components/schemas/acl_policy_actions",
+            "description": "Destination tag actions evaluated for sources matching this ACL policy"
+          },
+          "disabled": {
+            "default": false,
+            "description": "Whether this ACL policy is disabled",
+            "type": "boolean"
           },
           "name": {
+            "description": "Display name of the ACL policy",
             "examples": [
               "guest access"
             ],
             "type": "string"
           },
           "src_tags": {
-            "$ref": "#/components/schemas/acl_policy_src_tags"
+            "$ref": "#/components/schemas/acl_policy_src_tags",
+            "description": "Source ACL tags that select traffic for this ACL policy"
           }
         },
         "type": "object"
       },
       "acl_policy_action": {
         "additionalProperties": false,
+        "description": "Action applied to traffic that matches a destination ACL tag",
         "properties": {
           "action": {
-            "$ref": "#/components/schemas/allow_deny"
+            "$ref": "#/components/schemas/allow_deny",
+            "description": "Allow or deny decision applied to traffic matching the destination tag"
           },
           "dst_tag": {
+            "description": "Destination ACL tag matched by this policy action",
             "examples": [
               "corp"
             ],
@@ -186,35 +194,40 @@
         "description": "Resource tags (`type`==`resource` or `type`==`gbp_resource`) can only be used in `dst_tags`",
         "properties": {
           "ether_types": {
-            "$ref": "#/components/schemas/acl_tag_ether_types"
+            "$ref": "#/components/schemas/acl_tag_ether_types",
+            "description": "Layer 2 EtherTypes matched by this ACL tag; defaults to `any`"
           },
           "gbp_tag": {
             "description": "Required if\n  - `type`==`dynamic_gbp` (gbp_tag received from RADIUS)\n  - `type`==`gbp_resource`\n  - `type`==`static_gbp` (applying gbp tag against matching conditions)",
             "type": "integer"
           },
           "macs": {
-            "$ref": "#/components/schemas/acl_tag_macs"
+            "$ref": "#/components/schemas/acl_tag_macs",
+            "description": "Client or resource MAC addresses matched by this ACL tag"
           },
           "network": {
             "description": "If:\n  * `type`==`mac` (optional. default is `any`)\n  * `type`==`subnet` (optional. default is `any`)\n  * `type`==`network`\n  * `type`==`resource` (optional. default is `any`)\n  * `type`==`static_gbp` if from matching network (vlan)",
             "type": "string"
           },
           "port_usage": {
-            "description": "Required if `type`==`port_usage`",
+            "description": "Required if `type`==`port_usage`. Switch port usage name matched by this ACL tag",
             "type": "string"
           },
           "radius_group": {
-            "description": "Required if:\n  * `type`==`radius_group`\n  * `type`==`static_gbp`\nif from matching radius_group",
+            "description": "Required if:\n  * `type`==`radius_group`\n  * `type`==`aruba_user_role`\n  * `type`==`static_gbp`\nif from matching radius_group",
             "type": "string"
           },
           "specs": {
-            "$ref": "#/components/schemas/acl_tag_specs"
+            "$ref": "#/components/schemas/acl_tag_specs",
+            "description": "Layer 4 protocol and destination-port constraints for this ACL tag"
           },
           "subnets": {
-            "$ref": "#/components/schemas/acl_tag_subnets"
+            "$ref": "#/components/schemas/acl_tag_subnets",
+            "description": "IP subnets matched by this ACL tag"
           },
           "type": {
-            "$ref": "#/components/schemas/acl_tag_type"
+            "$ref": "#/components/schemas/acl_tag_type",
+            "description": "Classifier type that determines which ACL tag fields are evaluated"
           }
         },
         "required": [
@@ -241,6 +254,7 @@
       },
       "acl_tag_spec": {
         "additionalProperties": false,
+        "description": "Layer 4 protocol and destination-port match constraint for an ACL tag",
         "properties": {
           "port_range": {
             "default": "0",
@@ -256,7 +270,7 @@
         "type": "object"
       },
       "acl_tag_specs": {
-        "description": "If `type`==`resource`, `type`==`radius_group`, `type`==`port_usage` or `type`==`gbp_resource`. Empty means unrestricted, i.e. any",
+        "description": "If `type`==`resource`, `type`==`radius_group`, `type`==`aruba_user_role`, `type`==`port_usage` or `type`==`gbp_resource`. Empty means unrestricted, i.e. any",
         "items": {
           "$ref": "#/components/schemas/acl_tag_spec"
         },
@@ -270,9 +284,10 @@
         "type": "array"
       },
       "acl_tag_type": {
-        "description": "enum: \n  * `any`: matching anything not identified\n  * `dynamic_gbp`: from the gbp_tag received from RADIUS\n  * `gbp_resource`: can only be used in `dst_tags`\n  * `mac`\n  * `network`\n  * `port_usage`\n  * `radius_group`\n  * `resource`: can only be used in `dst_tags`\n  * `static_gbp`: applying gbp tag against matching conditions\n  * `subnet`'",
+        "description": "enum: \n  * `any`: matching anything not identified\n  * `aruba_user_role`: Aruba user role matched via `radius_group`\n  * `dynamic_gbp`: from the gbp_tag received from RADIUS\n  * `gbp_resource`: can only be used in `dst_tags`\n  * `mac`\n  * `network`\n  * `port_usage`\n  * `radius_group`\n  * `resource`: can only be used in `dst_tags`\n  * `static_gbp`: applying gbp tag against matching conditions\n  * `subnet`'",
         "enum": [
           "any",
+          "aruba_user_role",
           "dynamic_gbp",
           "gbp_resource",
           "mac",
@@ -305,12 +320,15 @@
       },
       "aggregate_route": {
         "additionalProperties": false,
+        "description": "Aggregate route configuration for a network or routing instance",
         "properties": {
           "discard": {
             "default": false,
+            "description": "Whether to install the aggregate route as a discard route",
             "type": "boolean"
           },
           "metric": {
+            "description": "Routing metric assigned to the aggregate route",
             "maximum": 4294967295,
             "minimum": 0,
             "type": [
@@ -319,6 +337,7 @@
             ]
           },
           "preference": {
+            "description": "Route preference assigned to the aggregate route",
             "maximum": 4294967295,
             "minimum": 0,
             "type": [
@@ -360,7 +379,7 @@
         "type": "object"
       },
       "allow_deny": {
-        "description": "enum: `allow`, `deny`",
+        "description": "Policy action value that either allows or denies matching traffic. enum: `allow`, `deny`",
         "enum": [
           "allow",
           "deny"
@@ -392,15 +411,19 @@
       },
       "config_switch_local_accounts_user": {
         "additionalProperties": false,
+        "description": "Local switch user account credentials and access role",
         "properties": {
           "password": {
+            "description": "Local password for the switch user account",
             "examples": [
               "Juniper123"
             ],
+            "format": "password",
             "type": "string"
           },
           "role": {
-            "$ref": "#/components/schemas/config_switch_local_accounts_user_role"
+            "$ref": "#/components/schemas/config_switch_local_accounts_user_role",
+            "description": "Access role granted to the local switch user account"
           }
         },
         "type": "object"
@@ -424,8 +447,10 @@
       },
       "dhcp_snooping": {
         "additionalProperties": false,
+        "description": "DHCP snooping security settings",
         "properties": {
           "all_networks": {
+            "description": "Whether DHCP snooping applies to all configured networks",
             "type": "boolean"
           },
           "enable_arp_spoof_check": {
@@ -437,10 +462,12 @@
             "type": "boolean"
           },
           "enabled": {
+            "description": "Whether DHCP snooping is enabled",
             "type": "boolean"
           },
           "networks": {
-            "$ref": "#/components/schemas/dhcp_snooping_networks"
+            "$ref": "#/components/schemas/dhcp_snooping_networks",
+            "description": "Network names with DHCP snooping enabled when `all_networks`==`false`"
           }
         },
         "type": "object"
@@ -468,13 +495,15 @@
       },
       "extra_route": {
         "additionalProperties": false,
+        "description": "IPv4 static route settings for a destination prefix",
         "properties": {
           "discard": {
             "default": false,
-            "description": "This takes precedence",
+            "description": "Whether to install a discard route; this takes precedence over next-hop settings",
             "type": "boolean"
           },
           "metric": {
+            "description": "Route metric for the IPv4 static route",
             "examples": [
               null
             ],
@@ -489,6 +518,7 @@
             "additionalProperties": {
               "$ref": "#/components/schemas/extra_route_next_qualified_properties"
             },
+            "description": "Qualified next-hop settings keyed by IPv4 next-hop address",
             "examples": [
               {
                 "10.3.1.1": {
@@ -501,9 +531,11 @@
           },
           "no_resolve": {
             "default": false,
+            "description": "Whether to prevent recursive next-hop resolution for the IPv4 static route",
             "type": "boolean"
           },
           "preference": {
+            "description": "Route preference for the IPv4 static route",
             "examples": [
               30
             ],
@@ -515,24 +547,23 @@
             ]
           },
           "via": {
-            "description": "Next-hop IP Address",
-            "examples": [
-              "10.2.1.1"
-            ],
-            "type": "string"
+            "$ref": "#/components/schemas/next_hop_via",
+            "description": "Next-hop IPv4 address or ECMP next-hop IPv4 addresses for the route"
           }
         },
         "type": "object"
       },
       "extra_route6": {
         "additionalProperties": false,
+        "description": "IPv6 static route settings for a destination prefix",
         "properties": {
           "discard": {
             "default": false,
-            "description": "This takes precedence",
+            "description": "Whether to install a discard route; this takes precedence over next-hop settings",
             "type": "boolean"
           },
           "metric": {
+            "description": "Route metric for the IPv6 static route",
             "examples": [
               null
             ],
@@ -547,6 +578,7 @@
             "additionalProperties": {
               "$ref": "#/components/schemas/extra_route6_next_qualified_properties"
             },
+            "description": "Qualified next-hop settings keyed by IPv6 next-hop address",
             "examples": [
               {
                 "2a02:1234:200a::100": {
@@ -559,9 +591,11 @@
           },
           "no_resolve": {
             "default": false,
+            "description": "Whether to prevent recursive next-hop resolution for the IPv6 static route",
             "type": "boolean"
           },
           "preference": {
+            "description": "Route preference for the IPv6 static route",
             "examples": [
               30
             ],
@@ -573,25 +607,25 @@
             ]
           },
           "via": {
-            "description": "Next-hop IP Address",
-            "examples": [
-              "2a02:1234:200a::100"
-            ],
-            "type": "string"
+            "$ref": "#/components/schemas/next_hop_via",
+            "description": "Next-hop IPv6 address or ECMP next-hop IPv6 addresses for the route"
           }
         },
         "type": "object"
       },
       "extra_route6_next_qualified_properties": {
         "additionalProperties": false,
+        "description": "Qualified next-hop attributes for an IPv6 static route",
         "properties": {
           "metric": {
+            "description": "Route metric for this qualified IPv6 next hop",
             "type": [
               "integer",
               "null"
             ]
           },
           "preference": {
+            "description": "Route preference for this qualified IPv6 next hop",
             "type": [
               "integer",
               "null"
@@ -602,14 +636,17 @@
       },
       "extra_route_next_qualified_properties": {
         "additionalProperties": false,
+        "description": "Qualified next-hop attributes for an IPv4 static route",
         "properties": {
           "metric": {
+            "description": "Route metric for this qualified IPv4 next hop",
             "type": [
               "integer",
               "null"
             ]
           },
           "preference": {
+            "description": "Route preference for this qualified IPv4 next hop",
             "type": [
               "integer",
               "null"
@@ -657,7 +694,7 @@
       },
       "ip_type": {
         "default": "dhcp",
-        "description": "enum: `dhcp`, `static`",
+        "description": "IP address assignment mode, either DHCP or static. enum: `dhcp`, `static`",
         "enum": [
           "dhcp",
           "static"
@@ -669,7 +706,7 @@
       },
       "junos_port_config": {
         "additionalProperties": false,
-        "description": "Switch port config",
+        "description": "Junos switch port configuration",
         "properties": {
           "ae_disable_lacp": {
             "description": "To disable LACP support for the AE interface",
@@ -679,12 +716,23 @@
             "description": "Users could force to use the designated AE name",
             "type": "integer"
           },
+          "ae_lacp_force_up": {
+            "default": false,
+            "description": "If `aggregated`==`true`, sets the state of the interface as UP when the peer has limited LACP capability. Use case: When a device connected to this AE port is ZTPing for the first time, it will not have LACP configured on the other end. **Note:** Turning this on will enable force-up on one of the interfaces in the bundle only",
+            "type": "boolean"
+          },
+          "ae_lacp_passive": {
+            "default": false,
+            "description": "If `aggregated`==`true`, sets LACP to passive mode on this AE interface; by default, active (fast) mode is used",
+            "type": "boolean"
+          },
           "ae_lacp_slow": {
-            "description": "To use fast timeout",
+            "description": "To use slow timeout",
             "type": "boolean"
           },
           "aggregated": {
             "default": false,
+            "description": "Whether this port is configured as an aggregated Ethernet member",
             "type": "boolean"
           },
           "critical": {
@@ -693,6 +741,7 @@
             "type": "boolean"
           },
           "description": {
+            "description": "Human-readable description for this Junos port",
             "type": "string"
           },
           "disable_autoneg": {
@@ -701,7 +750,8 @@
             "type": "boolean"
           },
           "duplex": {
-            "$ref": "#/components/schemas/junos_port_config_duplex"
+            "$ref": "#/components/schemas/junos_port_config_duplex",
+            "description": "Link duplex mode for this Junos port"
           },
           "dynamic_usage": {
             "description": "Enable dynamic usage for this port. Set to `dynamic` to enable.",
@@ -711,6 +761,7 @@
             ]
           },
           "esilag": {
+            "description": "Whether this Junos port participates in an ESI-LAG",
             "type": "boolean"
           },
           "mtu": {
@@ -732,6 +783,7 @@
           },
           "poe_disabled": {
             "default": false,
+            "description": "Whether PoE capabilities are disabled for this Junos port",
             "type": "boolean"
           },
           "port_network": {
@@ -739,7 +791,8 @@
             "type": "string"
           },
           "speed": {
-            "$ref": "#/components/schemas/junos_port_config_speed"
+            "$ref": "#/components/schemas/junos_port_config_speed",
+            "description": "Link speed for this Junos port"
           },
           "usage": {
             "description": "Port usage name. For Q-in-Q, use `vlan_tunnel`. If EVPN is used, use `evpn_uplink`or `evpn_downlink`",
@@ -785,79 +838,106 @@
         "type": "number"
       },
       "network_template": {
-        "description": "Network Template",
+        "description": "Network template configuration applied to sites or site groups",
         "properties": {
           "acl_policies": {
-            "$ref": "#/components/schemas/acl_policies"
+            "$ref": "#/components/schemas/acl_policies",
+            "description": "ACL policy defaults provided by this network template"
           },
           "acl_tags": {
-            "$ref": "#/components/schemas/acl_tags"
+            "$ref": "#/components/schemas/acl_tags",
+            "description": "ACL tags available to access policies in this network template"
           },
           "additional_config_cmds": {
-            "$ref": "#/components/schemas/additional_config_cmds"
+            "$ref": "#/components/schemas/additional_config_cmds",
+            "description": "Additional CLI configuration commands provided by this network template"
           },
           "bgp_config": {
             "additionalProperties": {
               "$ref": "#/components/schemas/switch_bgp_config"
             },
+            "description": "BGP routing defaults for this network template. Property key is the BGP session name",
             "type": "object"
           },
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Timestamp when the network template was created"
           },
           "dhcp_snooping": {
-            "$ref": "#/components/schemas/dhcp_snooping"
+            "$ref": "#/components/schemas/dhcp_snooping",
+            "description": "DHCP snooping defaults provided by this network template"
           },
           "dns_servers": {
-            "$ref": "#/components/schemas/dns_servers"
+            "$ref": "#/components/schemas/dns_servers",
+            "description": "DNS servers provided by this network template"
           },
           "dns_suffix": {
-            "$ref": "#/components/schemas/dns_suffix"
+            "$ref": "#/components/schemas/dns_suffix",
+            "description": "DNS search suffixes provided by this network template"
           },
           "extra_routes": {
-            "$ref": "#/components/schemas/extra_routes"
+            "$ref": "#/components/schemas/extra_routes",
+            "description": "Additional IPv4 route defaults in this network template"
           },
           "extra_routes6": {
-            "$ref": "#/components/schemas/extra_routes6"
+            "$ref": "#/components/schemas/extra_routes6",
+            "description": "Additional IPv6 route defaults in this network template"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the network template"
           },
           "import_org_networks": {
-            "$ref": "#/components/schemas/network_template_import_org_networks"
+            "$ref": "#/components/schemas/network_template_import_org_networks",
+            "description": "Organization network names imported into this network template"
           },
           "mist_nac": {
-            "$ref": "#/components/schemas/switch_mist_nac"
+            "$ref": "#/components/schemas/switch_mist_nac",
+            "description": "Mist NAC defaults applied by this network template"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Timestamp when the network template was last modified"
+          },
+          "multicast_config": {
+            "$ref": "#/components/schemas/switch_multicast_config",
+            "description": "Multicast settings for networks in the master VRF (not assigned to any vrf_instances); PIM is automatically enabled when any master-VRF network has `multicast.enabled`==`true`"
           },
           "name": {
+            "description": "Display name of the network template",
             "type": "string"
           },
           "networks": {
-            "$ref": "#/components/schemas/switch_networks"
+            "$ref": "#/components/schemas/switch_networks",
+            "description": "Layer 3 networks configured by this network template"
           },
           "ntp_servers": {
-            "$ref": "#/components/schemas/ntp_servers"
+            "$ref": "#/components/schemas/ntp_servers",
+            "description": "NTP servers provided by this network template"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization that owns this network template"
           },
           "ospf_areas": {
-            "$ref": "#/components/schemas/ospf_areas"
+            "$ref": "#/components/schemas/ospf_areas",
+            "description": "OSPF area defaults provided by this network template"
           },
           "port_mirroring": {
-            "$ref": "#/components/schemas/switch_port_mirroring"
+            "$ref": "#/components/schemas/switch_port_mirroring",
+            "description": "Port mirroring defaults provided by this network template"
           },
           "port_usages": {
-            "$ref": "#/components/schemas/switch_port_usages"
+            "$ref": "#/components/schemas/switch_port_usages",
+            "description": "Reusable switch port usage profiles provided by this network template"
           },
           "radius_config": {
-            "$ref": "#/components/schemas/switch_radius_config"
+            "$ref": "#/components/schemas/switch_radius_config",
+            "description": "RADIUS authentication and accounting defaults in this network template"
           },
           "remote_syslog": {
-            "$ref": "#/components/schemas/remote_syslog"
+            "$ref": "#/components/schemas/remote_syslog",
+            "description": "Remote syslog defaults provided by this network template"
           },
           "remove_existing_configs": {
             "default": false,
@@ -865,22 +945,28 @@
             "type": "boolean"
           },
           "routing_policies": {
-            "$ref": "#/components/schemas/sw_routing_policies"
+            "$ref": "#/components/schemas/sw_routing_policies",
+            "description": "Routing policy defaults applied by this network template"
           },
           "snmp_config": {
-            "$ref": "#/components/schemas/snmp_config"
+            "$ref": "#/components/schemas/snmp_config",
+            "description": "SNMP defaults provided by this network template"
           },
           "switch_matching": {
-            "$ref": "#/components/schemas/switch_matching"
+            "$ref": "#/components/schemas/switch_matching",
+            "description": "Matching rules that select switches for this network template"
           },
           "switch_mgmt": {
-            "$ref": "#/components/schemas/switch_mgmt"
+            "$ref": "#/components/schemas/switch_mgmt",
+            "description": "Management-plane defaults provided by this network template"
           },
           "vrf_config": {
-            "$ref": "#/components/schemas/vrf_config"
+            "$ref": "#/components/schemas/vrf_config",
+            "description": "VRF defaults applied by this network template"
           },
           "vrf_instances": {
-            "$ref": "#/components/schemas/switch_vrf_instances"
+            "$ref": "#/components/schemas/switch_vrf_instances",
+            "description": "VRF instances configured by this network template"
           }
         },
         "type": "object"
@@ -895,6 +981,27 @@
         },
         "type": "array"
       },
+      "next_hop_via": {
+        "description": "Next-hop IP address. Can be a single IP address or an array of IP addresses for ECMP (Equal-Cost Multi-Path) load balancing across multiple next-hops.",
+        "examples": [
+          "10.2.1.1",
+          [
+            "10.2.1.1",
+            "10.2.1.2"
+          ]
+        ],
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        ]
+      },
       "ntp_servers": {
         "description": "List of NTP servers specific to this device. By default, those in Site Settings will be used",
         "items": {
@@ -903,6 +1010,7 @@
         "type": "array"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -916,12 +1024,14 @@
         "properties": {
           "include_loopback": {
             "default": false,
+            "description": "Whether loopback interfaces are included in this OSPF area",
             "type": "boolean"
           },
           "networks": {
             "additionalProperties": {
               "$ref": "#/components/schemas/ospf_areas_network"
             },
+            "description": "OSPF network settings keyed by network name",
             "examples": [
               {
                 "corp": {
@@ -943,7 +1053,8 @@
             "type": "object"
           },
           "type": {
-            "$ref": "#/components/schemas/ospf_area_type"
+            "$ref": "#/components/schemas/ospf_area_type",
+            "description": "Area type for this OSPF area"
           }
         },
         "type": "object"
@@ -1016,9 +1127,11 @@
             "type": "string"
           },
           "auth_type": {
-            "$ref": "#/components/schemas/ospf_area_network_auth_type"
+            "$ref": "#/components/schemas/ospf_area_network_auth_type",
+            "description": "Authentication method used by this OSPF network"
           },
           "bfd_minimum_interval": {
+            "description": "Minimum BFD interval for this OSPF network, in milliseconds",
             "examples": [
               500
             ],
@@ -1027,6 +1140,7 @@
             "type": "integer"
           },
           "dead_interval": {
+            "description": "OSPF dead interval for this network, in seconds",
             "examples": [
               40
             ],
@@ -1035,26 +1149,31 @@
             "type": "integer"
           },
           "export_policy": {
+            "description": "Routing policy used to export routes from this OSPF network",
             "examples": [
               "export_policy"
             ],
             "type": "string"
           },
           "hello_interval": {
+            "description": "OSPF hello interval for this network, in seconds",
             "maximum": 255,
             "minimum": 1,
             "type": "integer"
           },
           "import_policy": {
+            "description": "Routing policy used to import routes for this OSPF network",
             "examples": [
               "import_policy"
             ],
             "type": "string"
           },
           "interface_type": {
-            "$ref": "#/components/schemas/ospf_area_network_interface_type"
+            "$ref": "#/components/schemas/ospf_area_network_interface_type",
+            "description": "OSPF interface type used for this network"
           },
           "metric": {
+            "description": "OSPF metric assigned to this network",
             "examples": [
               10000
             ],
@@ -1091,10 +1210,12 @@
         "description": "Restrict inbound-traffic to host\nwhen enabled, all traffic that is not essential to our operation will be dropped \ne.g. ntp / dns / traffic to mist will be allowed by default, if dhcpd is enabled, we'll make sure it works",
         "properties": {
           "allowed_services": {
-            "$ref": "#/components/schemas/protect_re_allowed_services"
+            "$ref": "#/components/schemas/protect_re_allowed_services",
+            "description": "Built-in services explicitly allowed by the Protect RE policy"
           },
           "custom": {
-            "$ref": "#/components/schemas/protect_re_customs"
+            "$ref": "#/components/schemas/protect_re_customs",
+            "description": "Additional ACL entries allowed by the Protect RE policy"
           },
           "enabled": {
             "default": false,
@@ -1107,13 +1228,14 @@
             "type": "boolean"
           },
           "trusted_hosts": {
-            "$ref": "#/components/schemas/protect_re_trusted_hosts"
+            "$ref": "#/components/schemas/protect_re_trusted_hosts",
+            "description": "Trusted host or subnet entries allowed by the Protect RE policy"
           }
         },
         "type": "object"
       },
       "protect_re_allowed_service": {
-        "description": "enum: `icmp`, `ssh`",
+        "description": "Services allowed through protect-RE filters. enum: `icmp`, `ssh`",
         "enum": [
           "icmp",
           "ssh"
@@ -1121,7 +1243,7 @@
         "type": "string"
       },
       "protect_re_allowed_services": {
-        "description": "Optionally, services we'll allow",
+        "description": "Built-in services explicitly allowed by the Protect RE policy",
         "examples": [
           [
             "icmp",
@@ -1135,7 +1257,7 @@
       },
       "protect_re_custom": {
         "additionalProperties": false,
-        "description": "Custom acls",
+        "description": "Custom Protect RE ACL entry",
         "properties": {
           "port_range": {
             "default": "0",
@@ -1146,10 +1268,12 @@
             "type": "string"
           },
           "protocol": {
-            "$ref": "#/components/schemas/protect_re_custom_protocol"
+            "$ref": "#/components/schemas/protect_re_custom_protocol",
+            "description": "Transport protocol matched by this custom Protect RE ACL"
           },
           "subnets": {
-            "$ref": "#/components/schemas/protect_re_custom_subnet"
+            "$ref": "#/components/schemas/protect_re_custom_subnet",
+            "description": "Source subnets matched by this custom Protect RE ACL"
           }
         },
         "type": "object"
@@ -1166,6 +1290,7 @@
         "type": "string"
       },
       "protect_re_custom_subnet": {
+        "description": "Source subnets matched by a custom Protect RE ACL",
         "items": {
           "examples": [
             "10.1.2.0/24"
@@ -1175,13 +1300,14 @@
         "type": "array"
       },
       "protect_re_customs": {
+        "description": "Custom Protect RE ACL entries",
         "items": {
           "$ref": "#/components/schemas/protect_re_custom"
         },
         "type": "array"
       },
       "protect_re_trusted_hosts": {
-        "description": "host/subnets we'll allow traffic to/from",
+        "description": "Host or subnet entries allowed by the Protect RE policy",
         "items": {
           "examples": [
             "10.242.3.0/24"
@@ -1201,44 +1327,51 @@
             "type": "string"
           }
         ],
-        "description": "Radius Auth Port, value from 1 to 65535, default is 1813"
+        "description": "RADIUS Auth Port, value from 1 to 65535, default is 1813"
       },
       "radius_acct_server": {
         "additionalProperties": false,
+        "description": "RADIUS accounting server settings",
         "properties": {
           "host": {
-            "description": "IP/ hostname of RADIUS server",
+            "description": "Address or hostname of the RADIUS accounting server",
             "examples": [
               "1.2.3.4"
             ],
             "type": "string"
           },
           "keywrap_enabled": {
+            "description": "Whether RADIUS keywrap is enabled for messages sent to this accounting server",
             "type": "boolean"
           },
           "keywrap_format": {
-            "$ref": "#/components/schemas/radius_keywrap_format"
+            "$ref": "#/components/schemas/radius_keywrap_format",
+            "description": "Encoding format for RADIUS keywrap KEK and MACK values"
           },
           "keywrap_kek": {
+            "description": "RADIUS keywrap key encryption key (KEK)",
             "examples": [
               "1122334455"
             ],
             "type": "string"
           },
           "keywrap_mack": {
+            "description": "RADIUS keywrap message authentication code key (MACK)",
             "examples": [
               "1122334455"
             ],
             "type": "string"
           },
           "port": {
-            "$ref": "#/components/schemas/radius_acct_port"
+            "$ref": "#/components/schemas/radius_acct_port",
+            "description": "UDP port used by the RADIUS accounting server"
           },
           "secret": {
-            "description": "Secret of RADIUS server",
+            "description": "Shared secret used with this RADIUS accounting server",
             "examples": [
               "testing123"
             ],
+            "format": "password",
             "type": "string"
           }
         },
@@ -1249,6 +1382,7 @@
         "type": "object"
       },
       "radius_acct_servers": {
+        "description": "List of RADIUS accounting servers",
         "items": {
           "$ref": "#/components/schemas/radius_acct_server"
         },
@@ -1266,39 +1400,44 @@
             "type": "string"
           }
         ],
-        "description": "Radius Auth Port, value from 1 to 65535, default is 1812"
+        "description": "RADIUS Auth Port, value from 1 to 65535, default is 1812"
       },
       "radius_auth_server": {
         "additionalProperties": false,
-        "description": "Authentication Server",
+        "description": "RADIUS authentication server settings",
         "properties": {
           "host": {
-            "description": "IP/ hostname of RADIUS server",
+            "description": "Address or hostname of the RADIUS authentication server",
             "examples": [
               "1.2.3.4"
             ],
             "type": "string"
           },
           "keywrap_enabled": {
+            "description": "Whether RADIUS keywrap is enabled for messages sent to this authentication server",
             "type": "boolean"
           },
           "keywrap_format": {
-            "$ref": "#/components/schemas/radius_keywrap_format"
+            "$ref": "#/components/schemas/radius_keywrap_format",
+            "description": "Encoding format for RADIUS keywrap KEK and MACK values"
           },
           "keywrap_kek": {
+            "description": "RADIUS keywrap key encryption key (KEK)",
             "examples": [
               "1122334455"
             ],
             "type": "string"
           },
           "keywrap_mack": {
+            "description": "RADIUS keywrap message authentication code key (MACK)",
             "examples": [
               "1122334455"
             ],
             "type": "string"
           },
           "port": {
-            "$ref": "#/components/schemas/radius_auth_port"
+            "$ref": "#/components/schemas/radius_auth_port",
+            "description": "UDP port used by the RADIUS authentication server"
           },
           "require_message_authenticator": {
             "default": false,
@@ -1306,10 +1445,11 @@
             "type": "boolean"
           },
           "secret": {
-            "description": "Secret of RADIUS server",
+            "description": "Shared secret used with this RADIUS authentication server",
             "examples": [
               "testing123"
             ],
+            "format": "password",
             "type": "string"
           }
         },
@@ -1320,6 +1460,7 @@
         "type": "object"
       },
       "radius_auth_servers": {
+        "description": "List of RADIUS authentication servers",
         "items": {
           "$ref": "#/components/schemas/radius_auth_server"
         },
@@ -1337,10 +1478,10 @@
             "type": "string"
           }
         ],
-        "description": "Radius CoA Port, value from 1 to 65535, default is 3799"
+        "description": "RADIUS CoA Port, value from 1 to 65535, default is 3799"
       },
       "radius_keywrap_format": {
-        "description": "enum: `ascii`, `hex`",
+        "description": "Encoding format for RADIUS keywrap KEK and MACK values. enum: `ascii`, `hex`",
         "enum": [
           "ascii",
           "hex"
@@ -1349,25 +1490,31 @@
       },
       "remote_syslog": {
         "additionalProperties": false,
+        "description": "Remote syslog forwarding settings",
         "properties": {
           "archive": {
-            "$ref": "#/components/schemas/remote_syslog_archive"
+            "$ref": "#/components/schemas/remote_syslog_archive",
+            "description": "Retention settings for generated syslog archive files"
           },
           "cacerts": {
-            "$ref": "#/components/schemas/remote_syslog_cacerts"
+            "$ref": "#/components/schemas/remote_syslog_cacerts",
+            "description": "CA certificates used to verify TLS syslog servers"
           },
           "console": {
-            "$ref": "#/components/schemas/remote_syslog_console"
+            "$ref": "#/components/schemas/remote_syslog_console",
+            "description": "Log forwarding filters for console messages sent to remote syslog"
           },
           "enabled": {
             "default": false,
+            "description": "Whether remote syslog forwarding is enabled",
             "type": "boolean"
           },
           "files": {
-            "$ref": "#/components/schemas/remote_syslog_files"
+            "$ref": "#/components/schemas/remote_syslog_files",
+            "description": "Local syslog file definitions to generate and forward"
           },
           "network": {
-            "description": "If source_address is configured, will use the vlan firstly otherwise use source_ip",
+            "description": "Source network used for syslog traffic. If `source_address` is configured, Mist uses the VLAN first; otherwise it uses `source_ip`",
             "examples": [
               "default"
             ],
@@ -1375,27 +1522,34 @@
           },
           "send_to_all_servers": {
             "default": false,
+            "description": "Whether each log entry is sent to all configured remote syslog servers",
             "type": "boolean"
           },
           "servers": {
-            "$ref": "#/components/schemas/remote_syslog_servers"
+            "$ref": "#/components/schemas/remote_syslog_servers",
+            "description": "Remote syslog server destinations"
           },
           "time_format": {
-            "$ref": "#/components/schemas/remote_syslog_time_format"
+            "$ref": "#/components/schemas/remote_syslog_time_format",
+            "description": "Timestamp format used in forwarded syslog messages"
           },
           "users": {
-            "$ref": "#/components/schemas/remote_syslog_users"
+            "$ref": "#/components/schemas/remote_syslog_users",
+            "description": "User-specific syslog logging rules"
           }
         },
         "type": "object"
       },
       "remote_syslog_archive": {
         "additionalProperties": false,
+        "description": "Syslog file archive retention settings",
         "properties": {
           "files": {
-            "$ref": "#/components/schemas/remote_syslog_archive_files"
+            "$ref": "#/components/schemas/remote_syslog_archive_files",
+            "description": "Number of archived syslog files to retain"
           },
           "size": {
+            "description": "Maximum size of each archived syslog file, such as 5m",
             "examples": [
               "5m"
             ],
@@ -1413,11 +1567,13 @@
             "type": "integer"
           }
         ],
+        "description": "Number of archived syslog files to retain",
         "examples": [
           20
         ]
       },
       "remote_syslog_cacerts": {
+        "description": "CA certificates used to verify TLS syslog servers",
         "examples": [
           [
             "-----BEGIN CERTIFICATE-----\\nMIIFZjCCA06gAwIBAgIIP61/1qm/uDowDQYJKoZIhvcNAQELBQE\\n-----END CERTIFICATE-----",
@@ -1431,26 +1587,32 @@
       },
       "remote_syslog_console": {
         "additionalProperties": false,
+        "description": "Console log forwarding filters for remote syslog",
         "properties": {
           "contents": {
-            "$ref": "#/components/schemas/remote_syslog_contents"
+            "$ref": "#/components/schemas/remote_syslog_contents",
+            "description": "Syslog facilities and severities forwarded from console logs"
           }
         },
         "type": "object"
       },
       "remote_syslog_content": {
         "additionalProperties": false,
+        "description": "Syslog message content selector for remote logging",
         "properties": {
           "facility": {
-            "$ref": "#/components/schemas/remote_syslog_facility"
+            "$ref": "#/components/schemas/remote_syslog_facility",
+            "description": "Syslog facility to match for this selector"
           },
           "severity": {
-            "$ref": "#/components/schemas/remote_syslog_severity"
+            "$ref": "#/components/schemas/remote_syslog_severity",
+            "description": "Syslog severity to match for this selector"
           }
         },
         "type": "object"
       },
       "remote_syslog_contents": {
+        "description": "List of syslog content selectors",
         "items": {
           "$ref": "#/components/schemas/remote_syslog_content"
         },
@@ -1484,39 +1646,47 @@
       },
       "remote_syslog_file_config": {
         "additionalProperties": false,
+        "description": "Generated syslog file output settings",
         "properties": {
           "archive": {
-            "$ref": "#/components/schemas/remote_syslog_archive"
+            "$ref": "#/components/schemas/remote_syslog_archive",
+            "description": "Retention settings for this generated syslog file"
           },
           "contents": {
-            "$ref": "#/components/schemas/remote_syslog_contents"
+            "$ref": "#/components/schemas/remote_syslog_contents",
+            "description": "Syslog facilities and severities written to this file"
           },
           "enable_tls": {
-            "description": "Only if `protocol`==`tcp`",
+            "description": "Only if `protocol`==`tcp`, enable TLS for this syslog file destination",
             "type": "boolean"
           },
           "explicit_priority": {
+            "description": "Whether to include explicit syslog priority values in file output",
             "type": "boolean"
           },
           "file": {
+            "description": "Generated syslog file name",
             "examples": [
               "file-name"
             ],
             "type": "string"
           },
           "match": {
+            "description": "Expression used to filter log messages written to this file",
             "examples": [
               "!alarm|ntp|errors.crc_error[chan]"
             ],
             "type": "string"
           },
           "structured_data": {
+            "description": "Whether to include structured syslog data in file output",
             "type": "boolean"
           }
         },
         "type": "object"
       },
       "remote_syslog_files": {
+        "description": "Generated syslog file output definitions",
         "items": {
           "$ref": "#/components/schemas/remote_syslog_file_config"
         },
@@ -1524,58 +1694,70 @@
       },
       "remote_syslog_server": {
         "additionalProperties": false,
+        "description": "Remote syslog server destination settings",
         "properties": {
           "contents": {
-            "$ref": "#/components/schemas/remote_syslog_contents"
+            "$ref": "#/components/schemas/remote_syslog_contents",
+            "description": "Syslog facilities and severities sent to this server"
           },
           "explicit_priority": {
+            "description": "Whether to include explicit syslog priority values in messages sent to this server",
             "type": "boolean"
           },
           "facility": {
-            "$ref": "#/components/schemas/remote_syslog_facility"
+            "$ref": "#/components/schemas/remote_syslog_facility",
+            "description": "Default syslog facility for messages sent to this server"
           },
           "host": {
+            "description": "Address or hostname of the remote syslog server",
             "examples": [
               "syslogd.internal"
             ],
             "type": "string"
           },
           "match": {
+            "description": "Expression used to filter log messages sent to this server",
             "examples": [
               "!alarm|ntp|errors.crc_error[chan]"
             ],
             "type": "string"
           },
           "port": {
-            "$ref": "#/components/schemas/remote_syslog_server_port"
+            "$ref": "#/components/schemas/remote_syslog_server_port",
+            "description": "Network port used by the remote syslog server"
           },
           "protocol": {
-            "$ref": "#/components/schemas/remote_syslog_server_protocol"
+            "$ref": "#/components/schemas/remote_syslog_server_protocol",
+            "description": "Transport protocol used for this remote syslog server"
           },
           "routing_instance": {
+            "description": "Routing instance used to reach this remote syslog server",
             "examples": [
               "routing-instance-name"
             ],
             "type": "string"
           },
           "server_name": {
-            "description": "Name of the server",
+            "description": "TLS server name used when verifying the remote syslog server certificate",
             "examples": [
               "syslogd.internal"
             ],
             "type": "string"
           },
           "severity": {
-            "$ref": "#/components/schemas/remote_syslog_severity"
+            "$ref": "#/components/schemas/remote_syslog_severity",
+            "description": "Default syslog severity for messages sent to this server"
           },
           "source_address": {
-            "description": "If source_address is configured, will use the vlan firstly otherwise use source_ip",
+            "description": "Source address for syslog traffic. If configured, Mist uses the VLAN first; otherwise it uses `source_ip`",
             "type": "string"
           },
           "structured_data": {
+            "description": "Whether to include structured syslog data in messages sent to this server",
             "type": "boolean"
           },
           "tag": {
+            "description": "Syslog tag value added to messages sent to this server",
             "type": "string"
           }
         },
@@ -1597,7 +1779,7 @@
       },
       "remote_syslog_server_protocol": {
         "default": "udp",
-        "description": "enum: `tcp`, `udp`",
+        "description": "Transport protocol used for this remote syslog server. enum: `tcp`, `udp`",
         "enum": [
           "tcp",
           "udp"
@@ -1605,6 +1787,7 @@
         "type": "string"
       },
       "remote_syslog_servers": {
+        "description": "Remote syslog server destination list",
         "examples": [
           [
             {
@@ -1651,17 +1834,21 @@
       },
       "remote_syslog_user": {
         "additionalProperties": false,
+        "description": "User-specific syslog logging rule",
         "properties": {
           "contents": {
-            "$ref": "#/components/schemas/remote_syslog_contents"
+            "$ref": "#/components/schemas/remote_syslog_contents",
+            "description": "Syslog facilities and severities logged for this user rule"
           },
           "match": {
+            "description": "Expression used to filter user log messages",
             "examples": [
               "\"!alarm|ntp|errors.crc_error[chan]\""
             ],
             "type": "string"
           },
           "user": {
+            "description": "Account name or wildcard matched by this syslog rule",
             "examples": [
               "*"
             ],
@@ -1671,6 +1858,7 @@
         "type": "object"
       },
       "remote_syslog_users": {
+        "description": "User-specific syslog logging rules",
         "items": {
           "$ref": "#/components/schemas/remote_syslog_user"
         },
@@ -1678,8 +1866,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -1690,8 +1880,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -1702,8 +1894,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -1714,8 +1908,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -1723,8 +1919,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -1767,12 +1965,14 @@
         "type": "array"
       },
       "routing_policy_term_matching_as_path": {
+        "description": "BGP AS path values used as routing-policy match criteria",
         "items": {
           "$ref": "#/components/schemas/bgp_as"
         },
         "type": "array"
       },
       "routing_policy_term_matching_community": {
+        "description": "BGP community values used as routing-policy match criteria",
         "items": {
           "examples": [
             "3900062"
@@ -1793,17 +1993,21 @@
       },
       "snmp_config": {
         "additionalProperties": false,
+        "description": "SNMP configuration for managed network devices",
         "properties": {
           "client_list": {
-            "$ref": "#/components/schemas/snmp_config_client_lists"
+            "$ref": "#/components/schemas/snmp_config_client_lists",
+            "description": "SNMP client allowlists that can be referenced by communities"
           },
           "contact": {
+            "description": "Administrative contact string advertised through SNMP",
             "examples": [
               "cns@juniper.net"
             ],
             "type": "string"
           },
           "description": {
+            "description": "Device description string advertised through SNMP",
             "examples": [
               "Juniper QFX Series Switch - 1K_5LA"
             ],
@@ -1811,21 +2015,26 @@
           },
           "enabled": {
             "default": true,
+            "description": "Whether SNMP is enabled",
             "type": "boolean"
           },
           "engine_id": {
-            "$ref": "#/components/schemas/snmp_config_engine_id"
+            "$ref": "#/components/schemas/snmp_config_engine_id",
+            "description": "SNMP engine ID used for SNMPv3"
           },
           "engine_id_type": {
-            "$ref": "#/components/schemas/snmp_config_engine_id_type"
+            "$ref": "#/components/schemas/snmp_config_engine_id_type",
+            "description": "Method used to derive the SNMP engine ID"
           },
           "location": {
+            "description": "Physical location string advertised through SNMP",
             "examples": [
               "Las Vegas, NV"
             ],
             "type": "string"
           },
           "name": {
+            "description": "System name advertised through SNMP",
             "examples": [
               "TGH-1K-QFX10K"
             ],
@@ -1833,39 +2042,48 @@
           },
           "network": {
             "default": "default",
+            "description": "Management network used for SNMP traffic",
             "type": "string"
           },
           "trap_groups": {
-            "$ref": "#/components/schemas/snmp_config_trap_groups"
+            "$ref": "#/components/schemas/snmp_config_trap_groups",
+            "description": "SNMP trap group definitions"
           },
           "v2c_config": {
-            "$ref": "#/components/schemas/snmp_config_v2c_configs"
+            "$ref": "#/components/schemas/snmp_config_v2c_configs",
+            "description": "SNMPv2c community configuration entries for this SNMP profile"
           },
           "v3_config": {
-            "$ref": "#/components/schemas/snmpv3_config"
+            "$ref": "#/components/schemas/snmpv3_config",
+            "description": "SNMPv3 user, VACM, notify, and target configuration"
           },
           "views": {
-            "$ref": "#/components/schemas/snmp_config_views"
+            "$ref": "#/components/schemas/snmp_config_views",
+            "description": "SNMP MIB view definitions"
           }
         },
         "type": "object"
       },
       "snmp_config_client_list": {
         "additionalProperties": false,
+        "description": "SNMP client allowlist definition",
         "properties": {
           "client_list_name": {
+            "description": "Name of the SNMP client list",
             "examples": [
               "clist-1"
             ],
             "type": "string"
           },
           "clients": {
-            "$ref": "#/components/schemas/snmp_config_client_list_clients"
+            "$ref": "#/components/schemas/snmp_config_client_list_clients",
+            "description": "SNMP client IP addresses or CIDR ranges allowed by this list"
           }
         },
         "type": "object"
       },
       "snmp_config_client_list_clients": {
+        "description": "SNMP client IP addresses or CIDR ranges allowed by a client list",
         "items": {
           "examples": [
             "151.140.101.218/32"
@@ -1875,18 +2093,20 @@
         "type": "array"
       },
       "snmp_config_client_lists": {
+        "description": "SNMP client allowlists that can be referenced by communities",
         "items": {
           "$ref": "#/components/schemas/snmp_config_client_list"
         },
         "type": "array"
       },
       "snmp_config_engine_id": {
+        "description": "SNMP engine ID value used for SNMPv3",
         "maxLength": 27,
         "type": "string"
       },
       "snmp_config_engine_id_type": {
         "default": "local",
-        "description": "enum: `local`, `use_mac_address`",
+        "description": "Method used to derive the SNMP engine ID. enum: `local`, `use_mac_address`",
         "enum": [
           "local",
           "use_mac_address"
@@ -1895,27 +2115,32 @@
       },
       "snmp_config_trap_group": {
         "additionalProperties": false,
+        "description": "SNMP trap group definition",
         "properties": {
           "categories": {
-            "$ref": "#/components/schemas/snmp_config_trap_group_categories"
+            "$ref": "#/components/schemas/snmp_config_trap_group_categories",
+            "description": "Trap categories included in this SNMP trap group"
           },
           "group_name": {
-            "description": "Categories list can refer to https://www.juniper.net/documentation/software/topics/task/configuration/snmp_trap-groups-configuring-junos-nm.html",
+            "description": "Trap group name for this SNMP trap group",
             "examples": [
               "profiler"
             ],
             "type": "string"
           },
           "targets": {
-            "$ref": "#/components/schemas/snmp_config_trap_group_targets"
+            "$ref": "#/components/schemas/snmp_config_trap_group_targets",
+            "description": "Trap target addresses for this SNMP trap group"
           },
           "version": {
-            "$ref": "#/components/schemas/snmp_config_trap_version"
+            "$ref": "#/components/schemas/snmp_config_trap_version",
+            "description": "SNMP trap protocol version used by this group"
           }
         },
         "type": "object"
       },
       "snmp_config_trap_group_categories": {
+        "description": "Trap categories included in an SNMP trap group",
         "items": {
           "examples": [
             "authentication"
@@ -1925,6 +2150,7 @@
         "type": "array"
       },
       "snmp_config_trap_group_targets": {
+        "description": "Trap target addresses for an SNMP trap group",
         "items": {
           "examples": [
             "172.29.158.19"
@@ -1934,6 +2160,7 @@
         "type": "array"
       },
       "snmp_config_trap_groups": {
+        "description": "SNMP trap group definitions",
         "items": {
           "$ref": "#/components/schemas/snmp_config_trap_group"
         },
@@ -1951,28 +2178,31 @@
       },
       "snmp_config_v2c_config": {
         "additionalProperties": false,
+        "description": "SNMPv2c community configuration entry",
         "properties": {
           "authorization": {
+            "description": "Access level for the SNMPv2c community",
             "examples": [
               "read-only"
             ],
             "type": "string"
           },
           "client_list_name": {
-            "description": "Client_list_name here should refer to client_list above",
+            "description": "SNMP client list name referenced by this community",
             "examples": [
               "clist-1"
             ],
             "type": "string"
           },
           "community_name": {
+            "description": "SNMPv2c community string name",
             "examples": [
               "abc123"
             ],
             "type": "string"
           },
           "view": {
-            "description": "View name here should be defined in views above",
+            "description": "SNMP view name that must be defined in the views list",
             "examples": [
               "all"
             ],
@@ -1982,6 +2212,7 @@
         "type": "object"
       },
       "snmp_config_v2c_configs": {
+        "description": "SNMPv2c community configuration entries for this SNMP profile",
         "items": {
           "$ref": "#/components/schemas/snmp_config_v2c_config"
         },
@@ -1989,18 +2220,21 @@
       },
       "snmp_config_view": {
         "additionalProperties": false,
+        "description": "SNMP MIB view definition",
         "properties": {
           "include": {
-            "description": "If the root oid configured is included",
+            "description": "Whether the root OID is included in this SNMP view",
             "type": "boolean"
           },
           "oid": {
+            "description": "Root OID for this SNMP view",
             "examples": [
               "1.3.6.1"
             ],
             "type": "string"
           },
           "view_name": {
+            "description": "Name of the SNMP MIB view definition",
             "examples": [
               "all"
             ],
@@ -2010,6 +2244,7 @@
         "type": "object"
       },
       "snmp_config_views": {
+        "description": "SNMP MIB view definitions",
         "items": {
           "$ref": "#/components/schemas/snmp_config_view"
         },
@@ -2017,9 +2252,11 @@
       },
       "snmp_usm": {
         "additionalProperties": false,
+        "description": "SNMPv3 User-based Security Model configuration",
         "properties": {
           "engine_type": {
-            "$ref": "#/components/schemas/snmp_usm_engine_type"
+            "$ref": "#/components/schemas/snmp_usm_engine_type",
+            "description": "SNMP engine type used for this USM configuration"
           },
           "remote_engine_id": {
             "description": "Required only if `engine_type`==`remote_engine`",
@@ -2029,13 +2266,14 @@
             "type": "string"
           },
           "users": {
-            "$ref": "#/components/schemas/snmp_usm_users"
+            "$ref": "#/components/schemas/snmp_usm_users",
+            "description": "SNMPv3 USM users for this engine"
           }
         },
         "type": "object"
       },
       "snmp_usm_engine_type": {
-        "description": "enum: `local_engine`, `remote_engine`",
+        "description": "SNMP engine type used for this USM configuration. enum: `local_engine`, `remote_engine`",
         "enum": [
           "local_engine",
           "remote_engine"
@@ -2044,6 +2282,7 @@
       },
       "snmp_usm_user": {
         "additionalProperties": false,
+        "description": "SNMPv3 USM user definition",
         "properties": {
           "authentication_password": {
             "description": "Not required if `authentication_type`==`authentication-none`. Include alphabetic, numeric, and special characters, but it cannot include control characters.",
@@ -2051,7 +2290,8 @@
             "type": "string"
           },
           "authentication_type": {
-            "$ref": "#/components/schemas/snmp_usm_user_authentication_type"
+            "$ref": "#/components/schemas/snmp_usm_user_authentication_type",
+            "description": "Authentication protocol used by this SNMPv3 USM user"
           },
           "encryption_password": {
             "description": "Not required if `encryption_type`==`privacy-none`. Include alphabetic, numeric, and special characters, but it cannot include control characters",
@@ -2059,9 +2299,11 @@
             "type": "string"
           },
           "encryption_type": {
-            "$ref": "#/components/schemas/snmp_usm_user_encryption_type"
+            "$ref": "#/components/schemas/snmp_usm_user_encryption_type",
+            "description": "Privacy protocol used by this SNMPv3 USM user"
           },
           "name": {
+            "description": "Username for the SNMPv3 USM user",
             "type": "string"
           }
         },
@@ -2091,12 +2333,14 @@
         "type": "string"
       },
       "snmp_usm_users": {
+        "description": "SNMPv3 USM user definitions",
         "items": {
           "$ref": "#/components/schemas/snmp_usm_user"
         },
         "type": "array"
       },
       "snmp_usms": {
+        "description": "SNMPv3 USM engine configurations",
         "items": {
           "$ref": "#/components/schemas/snmp_usm"
         },
@@ -2104,17 +2348,21 @@
       },
       "snmp_vacm": {
         "additionalProperties": false,
+        "description": "SNMPv3 View-based Access Control Model configuration",
         "properties": {
           "access": {
-            "$ref": "#/components/schemas/snmp_vacm_access"
+            "$ref": "#/components/schemas/snmp_vacm_access",
+            "description": "VACM access rules for SNMPv3"
           },
           "security_to_group": {
-            "$ref": "#/components/schemas/snmp_vacm_security_to_group"
+            "$ref": "#/components/schemas/snmp_vacm_security_to_group",
+            "description": "VACM security-name to group mappings"
           }
         },
         "type": "object"
       },
       "snmp_vacm_access": {
+        "description": "VACM access rules for SNMPv3",
         "items": {
           "$ref": "#/components/schemas/snmp_vacm_access_item"
         },
@@ -2122,17 +2370,21 @@
       },
       "snmp_vacm_access_item": {
         "additionalProperties": false,
+        "description": "VACM access rule for an SNMP group",
         "properties": {
           "group_name": {
+            "description": "SNMP VACM group name",
             "type": "string"
           },
           "prefix_list": {
-            "$ref": "#/components/schemas/snmp_vacm_access_item_prefix_list"
+            "$ref": "#/components/schemas/snmp_vacm_access_item_prefix_list",
+            "description": "Context prefix rules for this VACM group"
           }
         },
         "type": "object"
       },
       "snmp_vacm_access_item_prefix_list": {
+        "description": "Context prefix rules for a VACM access entry",
         "items": {
           "$ref": "#/components/schemas/snmp_vacm_access_item_prefix_list_item"
         },
@@ -2140,39 +2392,43 @@
       },
       "snmp_vacm_access_item_prefix_list_item": {
         "additionalProperties": false,
+        "description": "Context prefix rule for a VACM access entry",
         "properties": {
           "context_prefix": {
-            "description": "Only required if `type`==`context_prefix`",
+            "description": "Context prefix for this VACM access rule. Required only if `type`==`context_prefix`",
             "examples": [
               "iil"
             ],
             "type": "string"
           },
           "notify_view": {
-            "description": "Refer to view name",
+            "description": "Notify view name referenced by this VACM access rule",
             "examples": [
               "all"
             ],
             "type": "string"
           },
           "read_view": {
-            "description": "Refer to view name",
+            "description": "Read view name referenced by this VACM access rule",
             "examples": [
               "all"
             ],
             "type": "string"
           },
           "security_level": {
-            "$ref": "#/components/schemas/snmp_vacm_access_item_prefix_list_item_level"
+            "$ref": "#/components/schemas/snmp_vacm_access_item_prefix_list_item_level",
+            "description": "Required security level for this VACM access rule"
           },
           "security_model": {
-            "$ref": "#/components/schemas/snmp_vacm_access_item_prefix_list_item_model"
+            "$ref": "#/components/schemas/snmp_vacm_access_item_prefix_list_item_model",
+            "description": "Required security model for this VACM access rule"
           },
           "type": {
-            "$ref": "#/components/schemas/snmp_vacm_access_item_type"
+            "$ref": "#/components/schemas/snmp_vacm_access_item_type",
+            "description": "VACM context matching type for this access rule"
           },
           "write_view": {
-            "description": "Refer to view name",
+            "description": "Write view name referenced by this VACM access rule",
             "examples": [
               "all"
             ],
@@ -2201,7 +2457,7 @@
         "type": "string"
       },
       "snmp_vacm_access_item_type": {
-        "description": "enum: `context_prefix`, `default_context_prefix`",
+        "description": "VACM context matching type for this access rule. enum: `context_prefix`, `default_context_prefix`",
         "enum": [
           "context_prefix",
           "default_context_prefix"
@@ -2219,17 +2475,21 @@
       },
       "snmp_vacm_security_to_group": {
         "additionalProperties": false,
+        "description": "VACM security-name to group mapping configuration",
         "properties": {
           "content": {
-            "$ref": "#/components/schemas/snmp_vacm_security_to_group_content"
+            "$ref": "#/components/schemas/snmp_vacm_security_to_group_content",
+            "description": "VACM security-name to group mapping entries"
           },
           "security_model": {
-            "$ref": "#/components/schemas/snmp_vacm_security_model"
+            "$ref": "#/components/schemas/snmp_vacm_security_model",
+            "description": "Required security model for these VACM group mappings"
           }
         },
         "type": "object"
       },
       "snmp_vacm_security_to_group_content": {
+        "description": "VACM security-name to group mapping entries",
         "items": {
           "$ref": "#/components/schemas/snmp_vacm_security_to_group_content_item"
         },
@@ -2237,12 +2497,14 @@
       },
       "snmp_vacm_security_to_group_content_item": {
         "additionalProperties": false,
+        "description": "VACM security-name to group mapping entry",
         "properties": {
           "group": {
-            "description": "Refer to group_name under access",
+            "description": "VACM group name referenced by this mapping",
             "type": "string"
           },
           "security_name": {
+            "description": "Name of the SNMP security principal mapped to a VACM group",
             "type": "string"
           }
         },
@@ -2250,35 +2512,44 @@
       },
       "snmpv3_config": {
         "additionalProperties": false,
+        "description": "SNMPv3 notification, target, USM, and VACM configuration",
         "properties": {
           "notify": {
-            "$ref": "#/components/schemas/snmpv3_config_notify"
+            "$ref": "#/components/schemas/snmpv3_config_notify",
+            "description": "SNMPv3 notification definitions used for traps and informs"
           },
           "notify_filter": {
-            "$ref": "#/components/schemas/snmpv3_config_notify_filter"
+            "$ref": "#/components/schemas/snmpv3_config_notify_filter",
+            "description": "SNMPv3 notification filter profiles"
           },
           "target_address": {
-            "$ref": "#/components/schemas/snmpv3_config_target_address"
+            "$ref": "#/components/schemas/snmpv3_config_target_address",
+            "description": "SNMPv3 notification target addresses"
           },
           "target_parameters": {
-            "$ref": "#/components/schemas/snmpv3_config_target_params"
+            "$ref": "#/components/schemas/snmpv3_config_target_params",
+            "description": "SNMPv3 target parameter profiles"
           },
           "usm": {
-            "$ref": "#/components/schemas/snmp_usms"
+            "$ref": "#/components/schemas/snmp_usms",
+            "description": "SNMPv3 USM engine configurations"
           },
           "vacm": {
-            "$ref": "#/components/schemas/snmp_vacm"
+            "$ref": "#/components/schemas/snmp_vacm",
+            "description": "SNMPv3 VACM access control configuration"
           }
         },
         "type": "object"
       },
       "snmpv3_config_notify": {
+        "description": "SNMPv3 notification definitions used for traps and informs",
         "items": {
           "$ref": "#/components/schemas/snmpv3_config_notify_items"
         },
         "type": "array"
       },
       "snmpv3_config_notify_filter": {
+        "description": "SNMPv3 notification filter profiles",
         "items": {
           "$ref": "#/components/schemas/snmpv3_config_notify_filter_item"
         },
@@ -2286,23 +2557,46 @@
       },
       "snmpv3_config_notify_filter_item": {
         "additionalProperties": false,
+        "description": "SNMPv3 notification filter profile",
         "properties": {
+          "categories": {
+            "$ref": "#/components/schemas/snmpv3_config_notify_filter_item_categories",
+            "description": "CX only. List of SNMP trap group categories included in this filter profile. See https://www.juniper.net/documentation/software/topics/task/configuration/snmp-trap-groups-configuring-junos-nm.html for valid category names."
+          },
           "contents": {
-            "$ref": "#/components/schemas/snmpv3_config_notify_filter_item_contents"
+            "$ref": "#/components/schemas/snmpv3_config_notify_filter_item_contents",
+            "description": "OID filter rules in this notification filter profile"
           },
           "profile_name": {
+            "description": "Notification filter profile name",
             "type": "string"
           }
         },
         "type": "object"
       },
+      "snmpv3_config_notify_filter_item_categories": {
+        "description": "List of SNMP trap group category names for a CX notification filter profile",
+        "examples": [
+          [
+            "link",
+            "authentication"
+          ]
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
       "snmpv3_config_notify_filter_item_content": {
         "additionalProperties": false,
+        "description": "OID filter rule for an SNMPv3 notification profile",
         "properties": {
           "include": {
+            "description": "Whether the matching OID subtree is included",
             "type": "boolean"
           },
           "oid": {
+            "description": "Matched OID subtree for this notification filter rule",
             "examples": [
               "1.3.6.1.4.1"
             ],
@@ -2312,6 +2606,7 @@
         "type": "object"
       },
       "snmpv3_config_notify_filter_item_contents": {
+        "description": "OID filter rules in an SNMPv3 notification filter profile",
         "items": {
           "$ref": "#/components/schemas/snmpv3_config_notify_filter_item_content"
         },
@@ -2319,21 +2614,25 @@
       },
       "snmpv3_config_notify_items": {
         "additionalProperties": false,
+        "description": "SNMPv3 notification definition for traps or informs",
         "properties": {
           "name": {
+            "description": "Identifier for this SNMPv3 notification definition",
             "type": "string"
           },
           "tag": {
+            "description": "Notification tag used to select target addresses",
             "type": "string"
           },
           "type": {
-            "$ref": "#/components/schemas/snmpv3_config_notify_type"
+            "$ref": "#/components/schemas/snmpv3_config_notify_type",
+            "description": "Delivery mode for this SNMPv3 notification, such as trap or inform"
           }
         },
         "type": "object"
       },
       "snmpv3_config_notify_type": {
-        "description": "enum: `inform`, `trap`",
+        "description": "Delivery mode for this SNMPv3 notification, such as trap or inform. enum: `inform`, `trap`",
         "enum": [
           "inform",
           "trap"
@@ -2341,6 +2640,7 @@
         "type": "string"
       },
       "snmpv3_config_target_address": {
+        "description": "SNMPv3 notification target addresses",
         "items": {
           "$ref": "#/components/schemas/snmpv3_config_target_address_item"
         },
@@ -2348,14 +2648,17 @@
       },
       "snmpv3_config_target_address_item": {
         "additionalProperties": false,
+        "description": "SNMPv3 notification target address entry",
         "properties": {
           "address": {
+            "description": "IP address or hostname of the SNMP target",
             "examples": [
               "10.11.0.2"
             ],
             "type": "string"
           },
           "address_mask": {
+            "description": "Mask applied to the SNMP target address",
             "examples": [
               "255.255.255.0"
             ],
@@ -2363,23 +2666,25 @@
           },
           "port": {
             "default": "161",
+            "description": "UDP port used by the SNMP target",
             "type": [
               "string",
               "null"
             ]
           },
           "tag_list": {
-            "description": "Refer to notify tag, can be multiple with blank",
+            "description": "Set of notification tags for this target address; use spaces between multiple tags",
             "type": "string"
           },
           "target_address_name": {
+            "description": "Name of the SNMP target address entry",
             "examples": [
               "target_address_name"
             ],
             "type": "string"
           },
           "target_parameters": {
-            "description": "Refer to notify target parameters name",
+            "description": "Target parameter profile referenced by this target address",
             "type": "string"
           }
         },
@@ -2387,25 +2692,30 @@
       },
       "snmpv3_config_target_param": {
         "additionalProperties": false,
+        "description": "SNMPv3 target parameter profile",
         "properties": {
           "message_processing_model": {
-            "$ref": "#/components/schemas/snmpv3_config_target_param_mess_process_model"
+            "$ref": "#/components/schemas/snmpv3_config_target_param_mess_process_model",
+            "description": "SNMP message processing model used by this target parameter profile"
           },
           "name": {
+            "description": "Target parameter profile name",
             "type": "string"
           },
           "notify_filter": {
-            "description": "Refer to profile-name in notify_filter",
+            "description": "Notification filter profile referenced by this target parameter profile",
             "type": "string"
           },
           "security_level": {
-            "$ref": "#/components/schemas/snmpv3_config_target_param_security_level"
+            "$ref": "#/components/schemas/snmpv3_config_target_param_security_level",
+            "description": "Required security level for this target parameter profile"
           },
           "security_model": {
-            "$ref": "#/components/schemas/snmpv3_config_target_param_security_model"
+            "$ref": "#/components/schemas/snmpv3_config_target_param_security_model",
+            "description": "Required security model for this target parameter profile"
           },
           "security_name": {
-            "description": "Refer to security_name in usm",
+            "description": "USM security name referenced by this target parameter profile",
             "examples": [
               "m01620"
             ],
@@ -2442,12 +2752,14 @@
         "type": "string"
       },
       "snmpv3_config_target_params": {
+        "description": "SNMPv3 target parameter profiles",
         "items": {
           "$ref": "#/components/schemas/snmpv3_config_target_param"
         },
         "type": "array"
       },
       "strings": {
+        "description": "Unique string values returned or accepted by this schema",
         "items": {
           "type": "string"
         },
@@ -2458,28 +2770,34 @@
         "additionalProperties": {
           "$ref": "#/components/schemas/sw_routing_policy"
         },
-        "description": "Property key is the routing policy name",
+        "description": "Switch routing policies keyed by routing policy name",
         "type": "object"
       },
       "sw_routing_policy": {
         "additionalProperties": false,
+        "description": "Switch routing policy made of ordered match-action terms",
         "properties": {
           "terms": {
-            "$ref": "#/components/schemas/sw_routing_policy_terms"
+            "$ref": "#/components/schemas/sw_routing_policy_terms",
+            "description": "Ordered terms evaluated by this switch routing policy"
           }
         },
         "type": "object"
       },
       "sw_routing_policy_term": {
         "additionalProperties": false,
+        "description": "Switch routing policy term with match criteria and actions",
         "properties": {
           "actions": {
-            "$ref": "#/components/schemas/sw_routing_policy_term_action"
+            "$ref": "#/components/schemas/sw_routing_policy_term_action",
+            "description": "Policy actions applied when this routing policy term matches"
           },
           "matching": {
-            "$ref": "#/components/schemas/sw_routing_policy_term_matching"
+            "$ref": "#/components/schemas/sw_routing_policy_term_matching",
+            "description": "Route match criteria that must be satisfied before actions are applied"
           },
           "name": {
+            "description": "Display name of the switch routing policy term",
             "type": "string"
           }
         },
@@ -2490,43 +2808,52 @@
       },
       "sw_routing_policy_term_action": {
         "additionalProperties": false,
-        "description": "When used as import policy",
+        "description": "Actions applied to routes matched by a switch routing policy term",
         "properties": {
           "accept": {
+            "description": "Whether to accept routes that match this term",
             "type": "boolean"
           },
           "community": {
-            "$ref": "#/components/schemas/routing_policy_term_action_community"
+            "$ref": "#/components/schemas/routing_policy_term_action_community",
+            "description": "BGP communities to set when this term is used as an export policy"
           },
           "local_preference": {
-            "$ref": "#/components/schemas/routing_policy_local_preference"
+            "$ref": "#/components/schemas/routing_policy_local_preference",
+            "description": "Preference value to set when this term is used as an import policy"
           },
           "prepend_as_path": {
-            "$ref": "#/components/schemas/routing_policy_term_action_prepend_as_path"
+            "$ref": "#/components/schemas/routing_policy_term_action_prepend_as_path",
+            "description": "AS path values to prepend when this term is used as an export policy"
           }
         },
         "type": "object"
       },
       "sw_routing_policy_term_matching": {
         "additionalProperties": false,
-        "description": "zero or more criteria/filter can be specified to match the term, all criteria have to be met",
+        "description": "Route match criteria for a switch routing policy term; all specified criteria must match",
         "properties": {
           "as_path": {
-            "$ref": "#/components/schemas/routing_policy_term_matching_as_path"
+            "$ref": "#/components/schemas/routing_policy_term_matching_as_path",
+            "description": "AS path values that routes must match"
           },
           "community": {
-            "$ref": "#/components/schemas/routing_policy_term_matching_community"
+            "$ref": "#/components/schemas/routing_policy_term_matching_community",
+            "description": "BGP communities that routes must match"
           },
           "prefix": {
-            "$ref": "#/components/schemas/routing_policy_term_matching_prefix"
+            "$ref": "#/components/schemas/routing_policy_term_matching_prefix",
+            "description": "Route prefixes that routes must match"
           },
           "protocol": {
-            "$ref": "#/components/schemas/sw_routing_policy_term_matching_protocol"
+            "$ref": "#/components/schemas/sw_routing_policy_term_matching_protocol",
+            "description": "Routing protocols that routes must match"
           }
         },
         "type": "object"
       },
       "sw_routing_policy_term_matching_protocol": {
+        "description": "Routing protocols that can match a switch routing policy term",
         "items": {
           "$ref": "#/components/schemas/sw_routing_policy_term_matching_protocol_enum"
         },
@@ -2544,7 +2871,7 @@
         "type": "string"
       },
       "sw_routing_policy_terms": {
-        "description": "at least criteria/filter must be specified to match the term, all criteria have to be met",
+        "description": "Ordered switch routing policy terms; at least one term is required",
         "items": {
           "$ref": "#/components/schemas/sw_routing_policy_term"
         },
@@ -2554,8 +2881,10 @@
       },
       "switch_bgp_config": {
         "additionalProperties": false,
+        "description": "Switch BGP configuration for a routing instance",
         "properties": {
           "auth_key": {
+            "description": "Authentication key used for BGP neighbor sessions, when configured",
             "type": "string"
           },
           "bfd_minimum_interval": {
@@ -2569,23 +2898,28 @@
             "type": "string"
           },
           "hold_time": {
-            "$ref": "#/components/schemas/switch_bgp_config_hold_time"
+            "$ref": "#/components/schemas/switch_bgp_config_hold_time",
+            "description": "Default BGP hold time for switch BGP sessions"
           },
           "import_policy": {
             "description": "Import policy must match one of the policy names defined in the `routing_policies` property.",
             "type": "string"
           },
           "local_as": {
-            "$ref": "#/components/schemas/bgp_as"
+            "$ref": "#/components/schemas/bgp_as",
+            "description": "Local BGP Autonomous System (AS) number for the switch"
           },
           "neighbors": {
-            "$ref": "#/components/schemas/switch_bgp_config_neighbors"
+            "$ref": "#/components/schemas/switch_bgp_config_neighbors",
+            "description": "BGP neighbor settings keyed by neighbor IP address"
           },
           "networks": {
-            "$ref": "#/components/schemas/switch_bgp_config_networks"
+            "$ref": "#/components/schemas/switch_bgp_config_networks",
+            "description": "Network names used to add BGP groups to the corresponding VRFs"
           },
           "type": {
-            "$ref": "#/components/schemas/switch_bgp_config_type"
+            "$ref": "#/components/schemas/switch_bgp_config_type",
+            "description": "BGP session type for this switch BGP configuration"
           }
         },
         "required": [
@@ -2606,11 +2940,13 @@
         ]
       },
       "switch_bgp_config_hold_time_integer": {
+        "description": "BGP hold time value from 3 to 65535 seconds",
         "maximum": 65535,
         "minimum": 3,
         "type": "integer"
       },
       "switch_bgp_config_hold_time_zero": {
+        "description": "BGP hold time value of 0",
         "enum": [
           0
         ],
@@ -2618,19 +2954,22 @@
       },
       "switch_bgp_config_neighbor": {
         "additionalProperties": false,
+        "description": "Per-neighbor switch BGP session settings",
         "properties": {
           "export_policy": {
             "description": "Export policy must match one of the policy names defined in the `routing_policies` property.",
             "type": "string"
           },
           "hold_time": {
-            "$ref": "#/components/schemas/switch_bgp_config_hold_time"
+            "$ref": "#/components/schemas/switch_bgp_config_hold_time",
+            "description": "BGP hold time for this neighbor"
           },
           "import_policy": {
             "description": "Import policy must match one of the policy names defined in the `routing_policies` property.",
             "type": "string"
           },
           "multihop_ttl": {
+            "description": "Time-to-live value for multihop BGP sessions to this neighbor",
             "maximum": 255,
             "minimum": 1,
             "type": "integer"
@@ -2649,7 +2988,7 @@
         "additionalProperties": {
           "$ref": "#/components/schemas/switch_bgp_config_neighbor"
         },
-        "description": "Property key is the BGP Neighbor IP Address.",
+        "description": "Switch BGP neighbor settings keyed by neighbor IP address",
         "type": "object"
       },
       "switch_bgp_config_networks": {
@@ -2660,7 +2999,7 @@
         "type": "array"
       },
       "switch_bgp_config_type": {
-        "description": "enum: `external`, `internal`",
+        "description": "BGP session type for this switch BGP configuration. enum: `external`, `internal`",
         "enum": [
           "external",
           "internal"
@@ -2672,10 +3011,12 @@
         "description": "Defines custom switch configuration based on different criteria",
         "properties": {
           "enable": {
+            "description": "Whether custom switch matching rules are enabled",
             "type": "boolean"
           },
           "rules": {
-            "$ref": "#/components/schemas/switch_matching_rules"
+            "$ref": "#/components/schemas/switch_matching_rules",
+            "description": "Switch matching rules evaluated to apply custom configuration"
           }
         },
         "type": "object"
@@ -2693,7 +3034,8 @@
         ],
         "properties": {
           "additional_config_cmds": {
-            "$ref": "#/components/schemas/additional_config_cmds"
+            "$ref": "#/components/schemas/additional_config_cmds",
+            "description": "Additional Junos CLI commands applied when this matching rule matches"
           },
           "default_port_usage": {
             "default": "default",
@@ -2701,7 +3043,8 @@
             "type": "string"
           },
           "ip_config": {
-            "$ref": "#/components/schemas/switch_matching_rule_ip_config"
+            "$ref": "#/components/schemas/switch_matching_rule_ip_config",
+            "description": "In-band management IP configuration applied when this matching rule matches"
           },
           "name": {
             "description": "Rule name. WARNING: the name `default` is reserved and can only be used for the last rule in the list",
@@ -2710,19 +3053,24 @@
             "type": "string"
           },
           "oob_ip_config": {
-            "$ref": "#/components/schemas/switch_matching_rule_oob_ip_config"
+            "$ref": "#/components/schemas/switch_matching_rule_oob_ip_config",
+            "description": "Out-of-band management IP configuration applied when this matching rule matches"
           },
           "port_config": {
-            "$ref": "#/components/schemas/wired_port_config"
+            "$ref": "#/components/schemas/wired_port_config",
+            "description": "Per-port wired configuration applied when this matching rule matches"
           },
           "port_mirroring": {
-            "$ref": "#/components/schemas/switch_port_mirroring"
+            "$ref": "#/components/schemas/switch_port_mirroring",
+            "description": "Port mirroring configuration applied when this matching rule matches"
           },
           "stp_config": {
-            "$ref": "#/components/schemas/switch_stp_config"
+            "$ref": "#/components/schemas/switch_stp_config",
+            "description": "Spanning Tree Protocol configuration applied when this matching rule matches"
           },
           "switch_mgmt": {
-            "$ref": "#/components/schemas/switch_mgmt"
+            "$ref": "#/components/schemas/switch_mgmt",
+            "description": "Management-plane settings applied when this matching rule matches"
           }
         },
         "type": "object"
@@ -2736,7 +3084,8 @@
             "type": "string"
           },
           "type": {
-            "$ref": "#/components/schemas/ip_type"
+            "$ref": "#/components/schemas/ip_type",
+            "description": "IP assignment mode for in-band switch management"
           }
         },
         "type": "object"
@@ -2746,7 +3095,8 @@
         "description": "Out-of-Band Management interface configuration",
         "properties": {
           "type": {
-            "$ref": "#/components/schemas/ip_type"
+            "$ref": "#/components/schemas/ip_type",
+            "description": "IP assignment mode for out-of-band switch management"
           },
           "use_mgmt_vrf": {
             "default": false,
@@ -2762,6 +3112,7 @@
         "type": "object"
       },
       "switch_matching_rules": {
+        "description": "Ordered switch matching rules for conditional configuration",
         "items": {
           "$ref": "#/components/schemas/switch_matching_rule"
         },
@@ -2770,11 +3121,11 @@
       },
       "switch_mgmt": {
         "additionalProperties": false,
-        "description": "Switch settings",
+        "description": "Switch management-plane access and proxy settings",
         "properties": {
           "ap_affinity_threshold": {
             "default": 10,
-            "description": "AP_affinity_threshold ap_affinity_threshold can be added as a field under site/setting. By default, this value is set to 12. If the field is set in both site/setting and org/setting, the value from site/setting will be used.",
+            "description": "AP affinity threshold for switch management. If set in both site settings and organization settings, the site setting value is used.",
             "type": "integer"
           },
           "cli_banner": {
@@ -2803,27 +3154,33 @@
             "type": "boolean"
           },
           "disable_oob_down_alarm": {
+            "description": "Whether to suppress alarms when the switch out-of-band management interface is down",
             "type": "boolean"
           },
           "fips_enabled": {
             "default": false,
+            "description": "Whether FIPS mode is enabled on the switch",
             "type": "boolean"
           },
           "local_accounts": {
-            "$ref": "#/components/schemas/config_switch_local_accounts"
+            "$ref": "#/components/schemas/config_switch_local_accounts",
+            "description": "Local switch user accounts keyed by username"
           },
           "mxedge_proxy_host": {
-            "description": "IP Address or FQDN of the Mist Edge used to proxy the switch management traffic to the Mist Cloud",
+            "description": "IP address or FQDN of the Mist Edge used to proxy the switch management traffic to the Mist Cloud",
             "type": "string"
           },
           "mxedge_proxy_port": {
-            "$ref": "#/components/schemas/switch_mgmt_mxedge_proxy_port"
+            "$ref": "#/components/schemas/switch_mgmt_mxedge_proxy_port",
+            "description": "Mist Edge proxy port used for switch management traffic"
           },
           "protect_re": {
-            "$ref": "#/components/schemas/protect_re"
+            "$ref": "#/components/schemas/protect_re",
+            "description": "Control-plane protection settings for the switch"
           },
           "radius": {
-            "$ref": "#/components/schemas/switch_radius"
+            "$ref": "#/components/schemas/switch_radius",
+            "description": "Management authentication settings using RADIUS"
           },
           "remove_existing_configs": {
             "default": false,
@@ -2831,13 +3188,16 @@
             "type": "boolean"
           },
           "root_password": {
+            "description": "Root password for local switch access",
+            "format": "password",
             "type": "string"
           },
           "tacacs": {
-            "$ref": "#/components/schemas/tacacs"
+            "$ref": "#/components/schemas/tacacs",
+            "description": "Management authentication settings using TACACS+"
           },
           "use_mxedge_proxy": {
-            "description": "To use mxedge as proxy",
+            "description": "Whether to use Mist Edge as a proxy for switch management traffic",
             "type": "boolean"
           }
         },
@@ -2859,13 +3219,48 @@
       },
       "switch_mist_nac": {
         "additionalProperties": false,
-        "description": "Enable mist_nac to use RadSec",
+        "description": "Mist NAC RadSec settings for a switch",
         "properties": {
           "enabled": {
+            "description": "Whether Mist NAC RadSec is enabled for the switch",
             "type": "boolean"
           },
           "network": {
+            "description": "Switch network used for Mist NAC RadSec connectivity",
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "switch_multicast_config": {
+        "additionalProperties": false,
+        "description": "Multicast configuration for a VRF. When set at the network template level it applies to networks in the master VRF (not assigned to any vrf_instances). PIM is automatically enabled when any network in the VRF has `multicast.enabled`==`true`.",
+        "properties": {
+          "anycast_rp": {
+            "default": false,
+            "description": "When `true`, auto-generates a shared RP on `is_l3_border` devices (ERB/IPClos topologies only)",
+            "type": "boolean"
+          },
+          "rp_ip": {
+            "description": "RP address used when `anycast_rp`==`false`. If the address matches a device SVI, it is configured as a local RP; otherwise a static RP is configured",
+            "examples": [
+              "10.2.1.10"
+            ],
+            "type": "string"
+          },
+          "sbd_subnet": {
+            "description": "SBD IRB subnet; Mist auto-assigns per-device IPs from this range (EVPN eOISM only)",
+            "examples": [
+              "10.99.0.0/24"
+            ],
+            "type": "string"
+          },
+          "sbd_vlan_id": {
+            "description": "Supplemental Bridge Domain VLAN ID (EVPN topology / eOISM only)",
+            "examples": [
+              3900
+            ],
+            "type": "integer"
           }
         },
         "type": "object"
@@ -2888,10 +3283,15 @@
             "type": "boolean"
           },
           "isolation_vlan_id": {
+            "description": "Required when `isolation`==`true`. Unique VLAN ID used for client isolation",
             "examples": [
               "3070"
             ],
             "type": "string"
+          },
+          "multicast": {
+            "$ref": "#/components/schemas/switch_network_multicast",
+            "description": "Multicast (IGMP snooping) settings for this VLAN"
           },
           "subnet": {
             "description": "Optional for pure switching, required when L3 / routing features are used",
@@ -2902,12 +3302,34 @@
             "type": "string"
           },
           "vlan_id": {
-            "$ref": "#/components/schemas/vlan_id_with_variable"
+            "$ref": "#/components/schemas/vlan_id_with_variable",
+            "description": "VLAN identifier for this switch network"
           }
         },
         "required": [
           "vlan_id"
         ],
+        "type": "object"
+      },
+      "switch_network_multicast": {
+        "additionalProperties": false,
+        "description": "Multicast settings for a switch network (VLAN)",
+        "properties": {
+          "enabled": {
+            "default": false,
+            "description": "Whether to enable IGMP snooping on this VLAN",
+            "type": "boolean"
+          },
+          "igmp_version": {
+            "default": "2",
+            "description": "IGMP version. '2' (default, ASM/IGMPv2) / '3' (SSM/IGMPv3)",
+            "enum": [
+              "2",
+              "3"
+            ],
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "switch_networks": {
@@ -2956,15 +3378,19 @@
       },
       "switch_port_mirroring_property": {
         "additionalProperties": false,
+        "description": "Input and output settings for one switch port mirroring session",
         "properties": {
           "input_networks_ingress": {
-            "$ref": "#/components/schemas/switch_port_mirroring_ingress_networks"
+            "$ref": "#/components/schemas/switch_port_mirroring_ingress_networks",
+            "description": "At least one mirror input source should be specified. Networks whose ingress traffic is mirrored"
           },
           "input_port_ids_egress": {
-            "$ref": "#/components/schemas/switch_port_mirroring_egress_port_ids"
+            "$ref": "#/components/schemas/switch_port_mirroring_egress_port_ids",
+            "description": "At least one mirror input source should be specified. Switch ports whose egress traffic is mirrored"
           },
           "input_port_ids_ingress": {
-            "$ref": "#/components/schemas/switch_port_mirroring_ingress_port_ids"
+            "$ref": "#/components/schemas/switch_port_mirroring_ingress_port_ids",
+            "description": "At least one mirror input source should be specified. Switch ports whose ingress traffic is mirrored"
           },
           "output_ip_address": {
             "description": "Exactly one of the `output_ip_address`, `output_port_id` or `output_network` should be provided",
@@ -2992,7 +3418,7 @@
       },
       "switch_port_usage": {
         "additionalProperties": false,
-        "description": "Junos port usages",
+        "description": "Junos switch port usage template and authentication settings",
         "properties": {
           "all_networks": {
             "default": false,
@@ -3042,10 +3468,12 @@
             "type": "boolean"
           },
           "duplex": {
-            "$ref": "#/components/schemas/switch_port_usage_duplex"
+            "$ref": "#/components/schemas/switch_port_usage_duplex",
+            "description": "Only if `mode`!=`dynamic`. Link duplex mode for this port usage"
           },
           "dynamic_vlan_networks": {
-            "$ref": "#/components/schemas/switch_port_usage_dynamic_vlan_networks"
+            "$ref": "#/components/schemas/switch_port_usage_dynamic_vlan_networks",
+            "description": "Only if `mode`!=`dynamic` and `port_auth`==`dot1x`. Networks or VLANs that RADIUS can return for dynamic VLAN assignment"
           },
           "enable_mac_auth": {
             "default": false,
@@ -3083,19 +3511,24 @@
             "type": "boolean"
           },
           "mac_auth_protocol": {
-            "$ref": "#/components/schemas/switch_port_usage_mac_auth_protocol"
+            "$ref": "#/components/schemas/switch_port_usage_mac_auth_protocol",
+            "description": "Only if `mode`!=`dynamic` and `enable_mac_auth`==`true`. MAC authentication protocol to use; ignored if Mist NAC is enabled"
           },
           "mac_limit": {
-            "$ref": "#/components/schemas/switch_port_usage_mac_limit"
+            "$ref": "#/components/schemas/switch_port_usage_mac_limit",
+            "description": "Only if `mode`!=`dynamic`. Maximum number of MAC addresses allowed on the port; 0 means unlimited"
           },
           "mode": {
-            "$ref": "#/components/schemas/switch_port_usage_mode"
+            "$ref": "#/components/schemas/switch_port_usage_mode",
+            "description": "Switching mode for this port usage"
           },
           "mtu": {
-            "$ref": "#/components/schemas/switch_port_usage_mtu"
+            "$ref": "#/components/schemas/switch_port_usage_mtu",
+            "description": "Only if `mode`!=`dynamic`. MTU for ports using this port usage"
           },
           "networks": {
-            "$ref": "#/components/schemas/switch_port_usage_networks"
+            "$ref": "#/components/schemas/switch_port_usage_networks",
+            "description": "Only if `mode`==`trunk`. Network or VLAN names to trunk"
           },
           "persist_mac": {
             "default": false,
@@ -3107,24 +3540,34 @@
             "description": "Only if `mode`!=`dynamic`. Whether PoE capabilities are disabled for a port",
             "type": "boolean"
           },
+          "poe_keep_state_when_reboot": {
+            "default": false,
+            "description": "Only if `mode`!=`dynamic`. Whether Perpetual PoE is enabled; keeps PoE state across reboots",
+            "type": "boolean"
+          },
           "poe_priority": {
-            "$ref": "#/components/schemas/poe_priority"
+            "$ref": "#/components/schemas/poe_priority",
+            "description": "Only if `mode`!=`dynamic`. PoE priority for ports using this port usage"
           },
           "port_auth": {
-            "$ref": "#/components/schemas/switch_port_usage_dot1x"
+            "$ref": "#/components/schemas/switch_port_usage_dot1x",
+            "description": "Only if `mode`!=`dynamic`. 802.1X authentication mode for this port usage"
           },
           "port_network": {
             "description": "Only if `mode`!=`dynamic`. Native network/vlan for untagged traffic",
             "type": "string"
           },
           "reauth_interval": {
-            "$ref": "#/components/schemas/switch_port_usage_reauth_interval"
+            "$ref": "#/components/schemas/switch_port_usage_reauth_interval",
+            "description": "Only if `mode`!=`dynamic` and `port_auth`==`dot1x`. RADIUS reauthentication interval for clients on the port"
           },
           "reset_default_when": {
-            "$ref": "#/components/schemas/switch_port_usage_dynamic_reset_default_when"
+            "$ref": "#/components/schemas/switch_port_usage_dynamic_reset_default_when",
+            "description": "Only if `mode`==`dynamic`. Condition that resets a dynamic port to the default port usage"
           },
           "rules": {
-            "$ref": "#/components/schemas/switch_port_usage_dynamic_rules"
+            "$ref": "#/components/schemas/switch_port_usage_dynamic_rules",
+            "description": "Only if `mode`==`dynamic`. Dynamic matching rules that select the port usage to apply"
           },
           "server_fail_network": {
             "description": "Only if `mode`!=`dynamic` and `port_auth`==`dot1x`. Sets server fail fallback vlan",
@@ -3133,18 +3576,27 @@
               "null"
             ]
           },
+          "server_fail_retry_interval": {
+            "default": 120,
+            "description": "Only if `mode`!=`dynamic` and `port_auth`==`dot1x`. Interval, in seconds. Sets the wait time before retrying authentication after RADIUS failure to reduce client flapping. Range 120-65535",
+            "maximum": 65535,
+            "minimum": 120,
+            "type": "integer"
+          },
           "server_reject_network": {
-            "description": "Only if `mode`!=`dynamic` and `port_auth`==`dot1x`. When radius server reject / fails",
+            "description": "Only if `mode`!=`dynamic` and `port_auth`==`dot1x`. When RADIUS server reject / fails",
             "type": [
               "string",
               "null"
             ]
           },
           "speed": {
-            "$ref": "#/components/schemas/switch_port_usage_speed"
+            "$ref": "#/components/schemas/switch_port_usage_speed",
+            "description": "Only if `mode`!=`dynamic`. Link speed for this port usage"
           },
           "storm_control": {
-            "$ref": "#/components/schemas/switch_port_usage_storm_control"
+            "$ref": "#/components/schemas/switch_port_usage_storm_control",
+            "description": "Only if `mode`!=`dynamic`. Storm-control settings for this port usage"
           },
           "stp_disable": {
             "default": false,
@@ -3225,26 +3677,30 @@
       },
       "switch_port_usage_dynamic_rule": {
         "additionalProperties": false,
+        "description": "Dynamic port usage rule evaluated against LLDP, RADIUS, or peer MAC attributes",
         "properties": {
           "description": {
             "description": "Optional description of the rule",
             "type": "string"
           },
           "equals": {
+            "description": "Exact value that the selected source attribute must match",
             "type": "string"
           },
           "equals_any": {
-            "$ref": "#/components/schemas/switch_port_usage_dynamic_rule_equals_any"
+            "$ref": "#/components/schemas/switch_port_usage_dynamic_rule_equals_any",
+            "description": "List of values where any match satisfies this dynamic rule"
           },
           "expression": {
             "description": "\"[0:3]\":\"abcdef\" -> \"abc\"\n\"split(.)[1]\": \"a.b.c\" -> \"b\"\n\"split(-)[1][0:3]: \"a1234-b5678-c90\" -> \"b56\"",
             "type": "string"
           },
           "src": {
-            "$ref": "#/components/schemas/switch_port_usage_dynamic_rule_src"
+            "$ref": "#/components/schemas/switch_port_usage_dynamic_rule_src",
+            "description": "Source attribute evaluated by this dynamic rule"
           },
           "usage": {
-            "description": "`port_usage` name",
+            "description": "Port usage name to apply when this dynamic rule matches",
             "type": "string"
           }
         },
@@ -3278,7 +3734,7 @@
         "type": "string"
       },
       "switch_port_usage_dynamic_rules": {
-        "description": "Only if `mode`==`dynamic`",
+        "description": "Only if `mode`==`dynamic`. Dynamic matching rules that select the port usage to apply",
         "items": {
           "$ref": "#/components/schemas/switch_port_usage_dynamic_rule"
         },
@@ -3319,7 +3775,7 @@
             "type": "string"
           }
         ],
-        "description": "Only if `mode`!=`dynamic`, max number of mac addresses, default is 0 for unlimited, otherwise range is 1 to 16383 (upper bound constrained by platform)"
+        "description": "Only if `mode`!=`dynamic`, max number of MAC addresses, default is 0 for unlimited, otherwise range is 1 to 16383 (upper bound constrained by platform)"
       },
       "switch_port_usage_mode": {
         "description": "`mode`==`dynamic` must only be used if the port usage name is `dynamic`. enum: `access`, `dynamic`, `inet`, `trunk`",
@@ -3366,7 +3822,7 @@
             "type": "string"
           }
         ],
-        "description": "Only if `mode`!=`dynamic` and `port_auth`=`dot1x` reauthentication interval range (min: 10, max: 65535, default: 3600)"
+        "description": "Only if `mode`!=`dynamic` and `port_auth`=`dot1x` reauthentication interval range (min: 10, max: 65535, default: 3600). Set to 0 to disable reauthentication (no-reauthentication)."
       },
       "switch_port_usage_speed": {
         "default": "auto",
@@ -3433,15 +3889,18 @@
       },
       "switch_radius": {
         "additionalProperties": false,
-        "description": "By default, `radius_config` will be used. if a different one has to be used set `use_different_radius",
+        "description": "Switch RADIUS override settings. By default, the switch `radius_config` is used; set `use_different_radius` to use alternate RADIUS settings.",
         "properties": {
           "enabled": {
+            "description": "Whether RADIUS is enabled for switch management authentication",
             "type": "boolean"
           },
           "radius_config": {
-            "$ref": "#/components/schemas/switch_radius_config"
+            "$ref": "#/components/schemas/switch_radius_config",
+            "description": "RADIUS configuration used when alternate RADIUS settings are required"
           },
           "use_different_radius": {
+            "description": "Selector for alternate RADIUS settings instead of the default switch `radius_config`",
             "type": "string"
           }
         },
@@ -3449,46 +3908,53 @@
       },
       "switch_radius_config": {
         "additionalProperties": false,
-        "description": "Junos Radius config",
+        "description": "Switch RADIUS authentication and accounting configuration",
         "properties": {
           "acct_immediate_update": {
+            "description": "Whether immediate RADIUS accounting updates are sent",
             "type": "boolean"
           },
           "acct_interim_interval": {
             "default": 0,
-            "description": "How frequently should interim accounting be reported, 60-65535. default is 0 (use one specified in Access-Accept request from RADIUS Server). Very frequent messages can affect the performance of the radius server, 600 and up is recommended when enabled",
+            "description": "How frequently should interim accounting be reported, 60-65535. default is 0 (use one specified in Access-Accept request from RADIUS Server). Very frequent messages can affect the performance of the RADIUS server, 600 and up is recommended when enabled",
             "maximum": 65535,
             "minimum": 0,
             "type": "integer"
           },
           "acct_servers": {
-            "$ref": "#/components/schemas/radius_acct_servers"
+            "$ref": "#/components/schemas/radius_acct_servers",
+            "description": "RADIUS accounting servers used by this switch configuration"
           },
           "auth_server_selection": {
-            "$ref": "#/components/schemas/switch_radius_config_auth_server_selection"
+            "$ref": "#/components/schemas/switch_radius_config_auth_server_selection",
+            "description": "Selection strategy for RADIUS authentication servers"
           },
           "auth_servers": {
-            "$ref": "#/components/schemas/radius_auth_servers"
+            "$ref": "#/components/schemas/radius_auth_servers",
+            "description": "RADIUS authentication servers used by this switch configuration"
           },
           "auth_servers_retries": {
             "default": 3,
-            "description": "Radius auth session retries",
+            "description": "RADIUS auth session retries",
             "type": "integer"
           },
           "auth_servers_timeout": {
             "default": 5,
-            "description": "Radius auth session timeout",
+            "description": "RADIUS auth session timeout",
             "type": "integer"
           },
           "coa_enabled": {
             "default": false,
+            "description": "Whether RADIUS Change of Authorization (CoA) is enabled",
             "type": "boolean"
           },
           "coa_port": {
-            "$ref": "#/components/schemas/radius_coa_port"
+            "$ref": "#/components/schemas/radius_coa_port",
+            "description": "UDP port used for RADIUS Change of Authorization (CoA)"
           },
           "fast_dot1x_timers": {
             "default": false,
+            "description": "Whether fast 802.1X timers are enabled for RADIUS authentication",
             "type": "boolean"
           },
           "network": {
@@ -3496,7 +3962,7 @@
             "type": "string"
           },
           "source_ip": {
-            "description": "Use `network`or `source_ip`",
+            "description": "Use `network` or `source_ip`. Explicit source IP address for RADIUS traffic",
             "type": "string"
           }
         },
@@ -3504,7 +3970,7 @@
       },
       "switch_radius_config_auth_server_selection": {
         "default": "ordered",
-        "description": "enum: `ordered`, `unordered`",
+        "description": "Selection strategy for RADIUS authentication servers. enum: `ordered`, `unordered`",
         "enum": [
           "ordered",
           "unordered"
@@ -3513,6 +3979,7 @@
       },
       "switch_stp_config": {
         "additionalProperties": false,
+        "description": "Switch spanning-tree protocol configuration",
         "properties": {
           "bridge_priority": {
             "default": "32k",
@@ -3527,6 +3994,7 @@
       },
       "switch_vrf_instance": {
         "additionalProperties": false,
+        "description": "Switch VRF instance routing and network membership settings",
         "examples": [
           {
             "extra_routes": {
@@ -3541,28 +4009,39 @@
         ],
         "properties": {
           "aggregate_routes": {
-            "$ref": "#/components/schemas/aggregate_routes"
+            "$ref": "#/components/schemas/aggregate_routes",
+            "description": "IPv4 aggregate routes configured for this VRF instance"
           },
           "aggregate_routes6": {
-            "$ref": "#/components/schemas/aggregate_routes6"
+            "$ref": "#/components/schemas/aggregate_routes6",
+            "description": "IPv6 aggregate routes configured for this VRF instance"
           },
           "evpn_auto_loopback_subnet": {
+            "description": "IPv4 subnet used for automatic EVPN loopback addresses in this VRF instance",
             "examples": [
               "100.101.0.0/24"
             ],
             "type": "string"
           },
           "evpn_auto_loopback_subnet6": {
+            "description": "IPv6 subnet used for automatic EVPN loopback addresses in this VRF instance",
             "type": "string"
           },
           "extra_routes": {
-            "$ref": "#/components/schemas/vrf_extra_routes"
+            "$ref": "#/components/schemas/vrf_extra_routes",
+            "description": "Additional IPv4 static routes configured for this VRF instance"
           },
           "extra_routes6": {
-            "$ref": "#/components/schemas/vrf_extra_routes6"
+            "$ref": "#/components/schemas/vrf_extra_routes6",
+            "description": "Additional IPv6 static routes configured for this VRF instance"
+          },
+          "multicast_config": {
+            "$ref": "#/components/schemas/switch_multicast_config",
+            "description": "Multicast configuration for this VRF instance. PIM is automatically enabled when any network in this VRF has `multicast.enabled`==`true`"
           },
           "networks": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Names of switch networks included in this VRF instance"
           }
         },
         "type": "object"
@@ -3590,46 +4069,58 @@
       },
       "tacacs": {
         "additionalProperties": false,
+        "description": "TACACS+ settings for switch management authentication and accounting",
         "properties": {
           "acct_servers": {
-            "$ref": "#/components/schemas/tacacs_acct_servers"
+            "$ref": "#/components/schemas/tacacs_acct_servers",
+            "description": "TACACS+ accounting servers used for switch management sessions"
           },
           "default_role": {
-            "$ref": "#/components/schemas/tacacs_default_role"
+            "$ref": "#/components/schemas/tacacs_default_role",
+            "description": "Default switch-management role to use for TACACS+ logins"
           },
           "enabled": {
+            "description": "Whether TACACS+ is enabled for switch management authentication",
             "type": "boolean"
           },
           "network": {
-            "description": "Which network the TACACS server resides",
+            "description": "Source network used for connectivity to the TACACS+ servers",
             "type": "string"
           },
           "tacplus_servers": {
-            "$ref": "#/components/schemas/tacacs_auth_servers"
+            "$ref": "#/components/schemas/tacacs_auth_servers",
+            "description": "TACACS+ authentication servers used for switch management logins"
           }
         },
         "type": "object"
       },
       "tacacs_acct_server": {
         "additionalProperties": false,
+        "description": "TACACS+ accounting server settings",
         "properties": {
           "host": {
+            "description": "Address or hostname of the TACACS+ accounting server",
             "type": "string"
           },
           "port": {
+            "description": "TCP port used by the TACACS+ accounting server",
             "type": "string"
           },
           "secret": {
+            "description": "Shared secret used with this TACACS+ accounting server",
+            "format": "password",
             "type": "string"
           },
           "timeout": {
             "default": 10,
+            "description": "TACACS+ accounting server timeout, in seconds",
             "type": "integer"
           }
         },
         "type": "object"
       },
       "tacacs_acct_servers": {
+        "description": "List of TACACS+ accounting servers",
         "items": {
           "$ref": "#/components/schemas/tacacs_acct_server"
         },
@@ -3637,24 +4128,31 @@
       },
       "tacacs_auth_server": {
         "additionalProperties": false,
+        "description": "TACACS+ authentication server settings",
         "properties": {
           "host": {
+            "description": "Address or hostname of the TACACS+ authentication server",
             "type": "string"
           },
           "port": {
+            "description": "TCP port used by the TACACS+ authentication server",
             "type": "string"
           },
           "secret": {
+            "description": "Shared secret used with this TACACS+ authentication server",
+            "format": "password",
             "type": "string"
           },
           "timeout": {
             "default": 10,
+            "description": "TACACS+ authentication server timeout, in seconds",
             "type": "integer"
           }
         },
         "type": "object"
       },
       "tacacs_auth_servers": {
+        "description": "List of TACACS+ authentication servers",
         "items": {
           "$ref": "#/components/schemas/tacacs_auth_server"
         },
@@ -3672,6 +4170,7 @@
         "type": "string"
       },
       "vlan_id_with_variable": {
+        "description": "VLAN ID, either numeric or expressed as a template variable string",
         "oneOf": [
           {
             "type": "string"
@@ -3685,6 +4184,7 @@
       },
       "vrf_config": {
         "additionalProperties": false,
+        "description": "VRF enablement settings applied when supported on the device",
         "properties": {
           "enabled": {
             "description": "Whether to enable VRF (when supported on the device)",
@@ -3695,9 +4195,10 @@
       },
       "vrf_extra_route": {
         "additionalProperties": false,
+        "description": "Additional IPv4 static route for a VRF instance",
         "properties": {
           "via": {
-            "description": "Next-hop address",
+            "description": "IPv4 next-hop address for this VRF extra route",
             "format": "ipv4",
             "type": "string"
           }
@@ -3706,9 +4207,10 @@
       },
       "vrf_extra_route6": {
         "additionalProperties": false,
+        "description": "Additional IPv6 static route for a VRF instance",
         "properties": {
           "via": {
-            "description": "Next-hop address",
+            "description": "IPv6 next-hop address for this VRF extra route",
             "format": "ipv6",
             "type": "string"
           }
@@ -4128,19 +4630,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

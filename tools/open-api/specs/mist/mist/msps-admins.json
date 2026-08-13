@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "MSPs Admins",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "get": {
-        "description": "Get List of MSP Admins",
+        "description": "List administrators that have privileges in this MSP hierarchy, including MSP, organization, organization group, site, or site group scopes.",
         "operationId": "listMspAdmins",
         "responses": {
           "200": {
@@ -118,7 +114,7 @@
         }
       ],
       "get": {
-        "description": "Get MSP Admins",
+        "description": "Return administrator details and privilege assignments for one administrator under this MSP.",
         "operationId": "getMspAdmin",
         "responses": {
           "200": {
@@ -146,7 +142,7 @@
         ]
       },
       "put": {
-        "description": "Update MSP Admin",
+        "description": "Update identity fields and privilege assignments for an existing administrator under this MSP.",
         "operationId": "updateMspAdmin",
         "requestBody": {
           "content": {
@@ -208,7 +204,7 @@
         ]
       },
       "delete": {
-        "description": "This removes all privileges this admin has against the MSP. This goes deep all the way to the sites",
+        "description": "Remove all privileges this administrator has through the MSP hierarchy, including inherited organization and site access. This does not delete the administrator account.",
         "operationId": "revokeMspAdmin",
         "responses": {
           "200": {
@@ -243,7 +239,7 @@
         }
       ],
       "post": {
-        "description": "Invite MSP Admin\n\n**Note**: An email will also be sent to the user with a link to https://manage.mist.com/verify/invite?token=:token",
+        "description": "Send an MSP administrator invitation with the requested identity fields and privilege assignments.\n\n**Note**: An email will also be sent to the user with a link to https://manage.mist.com/verify/invite?token=:token",
         "operationId": "inviteMspAdmin",
         "requestBody": {
           "content": {
@@ -318,7 +314,7 @@
         }
       ],
       "put": {
-        "description": "Update MSP admin invite",
+        "description": "Update the identity fields or privilege assignments on a pending MSP administrator invitation.",
         "operationId": "updateMspAdminInvite",
         "requestBody": {
           "content": {
@@ -383,7 +379,7 @@
         ]
       },
       "delete": {
-        "description": "Delete admin invite",
+        "description": "Cancel a pending MSP administrator invitation before the invitee accepts it.",
         "operationId": "uninviteMspAdmin",
         "responses": {
           "200": {
@@ -415,12 +411,15 @@
   "components": {
     "schemas": {
       "admin": {
+        "description": "Mist administrator account or organization API token details",
         "properties": {
           "admin_id": {
-            "$ref": "#/components/schemas/admin_id"
+            "$ref": "#/components/schemas/admin_id",
+            "description": "Unique identifier of the administrator"
           },
           "compliance_status": {
-            "$ref": "#/components/schemas/admin_compliance_status"
+            "$ref": "#/components/schemas/admin_compliance_status",
+            "description": "Trade compliance status for this administrator"
           },
           "email": {
             "description": "If admin account is not an Org API Token",
@@ -436,6 +435,7 @@
             "type": "boolean"
           },
           "expire_time": {
+            "description": "Expiration time for the admin invitation, in epoch seconds",
             "type": "integer"
           },
           "first_name": {
@@ -490,9 +490,11 @@
             "type": "string"
           },
           "privileges": {
-            "$ref": "#/components/schemas/admin_privileges"
+            "$ref": "#/components/schemas/admin_privileges",
+            "description": "Privilege assignments that define the admin's MSP, organization, site, or site group access"
           },
           "session_expiry": {
+            "description": "Session lifetime for the admin, in minutes",
             "examples": [
               1440
             ],
@@ -503,7 +505,8 @@
             "type": "integer"
           },
           "tags": {
-            "$ref": "#/components/schemas/admin_tags"
+            "$ref": "#/components/schemas/admin_tags",
+            "description": "Read-only tags associated with the admin account"
           },
           "two_factor_verified": {
             "description": "If admin account is not an Org API Token. Two factor status",
@@ -537,10 +540,11 @@
       },
       "admin_privilege": {
         "additionalProperties": false,
-        "description": "Privilieges settings",
+        "description": "Admin privilege scope, role, and UI access settings",
         "properties": {
           "msp_id": {
-            "$ref": "#/components/schemas/admin_privilege_msp_id"
+            "$ref": "#/components/schemas/admin_privilege_msp_id",
+            "description": "Required if `scope`==`msp`. MSP granted by this privilege"
           },
           "msp_logo_url": {
             "description": "Logo of the MSP (if the MSP belongs to an Advanced tier)",
@@ -561,12 +565,13 @@
             "type": "string"
           },
           "name": {
-            "description": "Name of the org/site/MSP depending on object scope",
+            "description": "Display name of the object for this privilege scope",
             "readOnly": true,
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/admin_privilege_org_id"
+            "$ref": "#/components/schemas/admin_privilege_org_id",
+            "description": "Required if `scope`==`org`. Organization granted by this privilege"
           },
           "org_name": {
             "description": "Name of the org (for a site belonging to org)",
@@ -574,22 +579,28 @@
             "type": "string"
           },
           "orggroup_ids": {
-            "$ref": "#/components/schemas/admin_privilege_orggroup_ids"
+            "$ref": "#/components/schemas/admin_privilege_orggroup_ids",
+            "description": "If `scope`==`orggroup`. Organization groups granted by this privilege"
           },
           "role": {
-            "$ref": "#/components/schemas/admin_privilege_role"
+            "$ref": "#/components/schemas/admin_privilege_role",
+            "description": "Access role granted by this privilege"
           },
           "scope": {
-            "$ref": "#/components/schemas/admin_privilege_scope"
+            "$ref": "#/components/schemas/admin_privilege_scope",
+            "description": "Object scope where this privilege applies"
           },
           "site_id": {
-            "$ref": "#/components/schemas/admin_privilege_site_id"
+            "$ref": "#/components/schemas/admin_privilege_site_id",
+            "description": "Required if `scope`==`site`. Site granted by this privilege"
           },
           "sitegroup_ids": {
-            "$ref": "#/components/schemas/admin_privilege_sitegroup_ids"
+            "$ref": "#/components/schemas/admin_privilege_sitegroup_ids",
+            "description": "If `scope`==`sitegroup`. Site groups granted by this privilege"
           },
           "views": {
-            "$ref": "#/components/schemas/admin_privilege_views"
+            "$ref": "#/components/schemas/admin_privilege_views",
+            "description": "UI view restrictions applied when custom roles limit this privilege"
           }
         },
         "required": [
@@ -599,7 +610,7 @@
         "type": "object"
       },
       "admin_privilege_msp_id": {
-        "description": "Required if `scope`==`msp`",
+        "description": "Required if `scope`==`msp`. MSP granted by this privilege",
         "examples": [
           "b9d42c2e-88ee-41f8-b798-f009ce7fe909"
         ],
@@ -607,7 +618,7 @@
         "type": "string"
       },
       "admin_privilege_org_id": {
-        "description": "Required if `scope`==`org`",
+        "description": "Required if `scope`==`org`. Organization granted by this privilege",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -615,7 +626,7 @@
         "type": "string"
       },
       "admin_privilege_orggroup_ids": {
-        "description": "If `scope`==`orggroup`",
+        "description": "If `scope`==`orggroup`. Organization groups granted by this privilege",
         "items": {
           "$ref": "#/components/schemas/orggroup_id"
         },
@@ -644,7 +655,7 @@
         "type": "string"
       },
       "admin_privilege_site_id": {
-        "description": "Required if `scope`==`site`",
+        "description": "Required if `scope`==`site`. Site granted by this privilege",
         "examples": [
           "441a1214-6928-442a-8e92-e1d34b8ec6a6"
         ],
@@ -652,12 +663,14 @@
         "type": "string"
       },
       "admin_privilege_sitegroup_ids": {
+        "description": "Site group identifiers granted by an admin privilege when scope is `sitegroup`",
         "items": {
           "$ref": "#/components/schemas/sitegroup_id"
         },
         "type": "array"
       },
       "admin_privilege_view": {
+        "description": "UI view name allowed by a custom admin role. enum: `lobby_admin`, `location`, `marketing`, `mxedge_admin`, `reporting`, `security`, `super_observer`, `switch_admin`",
         "enum": [
           "lobby_admin",
           "location",
@@ -687,6 +700,7 @@
         "uniqueItems": true
       },
       "admin_tags": {
+        "description": "Read-only tags associated with an administrator account",
         "items": {
           "type": "string"
         },
@@ -694,6 +708,7 @@
         "type": "array"
       },
       "admins": {
+        "description": "List of Mist administrator accounts",
         "items": {
           "$ref": "#/components/schemas/admin"
         },
@@ -701,6 +716,7 @@
         "uniqueItems": true
       },
       "orggroup_id": {
+        "description": "Unique identifier of an MSP organization group",
         "examples": [
           "832b1d74-9531-409b-ae37-4d7f3edbde92"
         ],
@@ -709,8 +725,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -721,8 +739,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -733,8 +753,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -745,8 +767,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -754,8 +778,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -765,6 +791,7 @@
         "type": "object"
       },
       "sitegroup_id": {
+        "description": "Unique identifier of a Mist site group",
         "examples": [
           "3c708be3-9422-4695-b729-babdbd2f7615"
         ],
@@ -1093,19 +1120,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Tickets",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -177,6 +173,7 @@
         "operationId": "countOrgTickets",
         "parameters": [
           {
+            "description": "Field used to group this count response. enum: `status`, `type`",
             "in": "query",
             "name": "distinct",
             "schema": {
@@ -469,8 +466,10 @@
         "additionalProperties": {
           "type": "string"
         },
+        "description": "Count result row with the matching distinct field values",
         "properties": {
           "count": {
+            "description": "Number of matching items for the distinct value or values in this result",
             "type": "integer"
           }
         },
@@ -480,6 +479,7 @@
         "type": "object"
       },
       "count_results": {
+        "description": "List of count result rows",
         "items": {
           "$ref": "#/components/schemas/count_result"
         },
@@ -497,7 +497,7 @@
       },
       "org_tickets_count_distinct": {
         "default": "status",
-        "description": "enum: `status`, `type`",
+        "description": "Distinct field used when counting organization tickets. enum: `status`, `type`",
         "enum": [
           "status",
           "type"
@@ -506,23 +506,30 @@
       },
       "response_count": {
         "additionalProperties": false,
+        "description": "Distinct count response for time-bounded search results",
         "properties": {
           "distinct": {
+            "description": "Field used to group the count results",
             "type": "string"
           },
           "end": {
+            "description": "Search window end timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of distinct count results requested",
             "type": "integer"
           },
           "results": {
-            "$ref": "#/components/schemas/count_results"
+            "$ref": "#/components/schemas/count_results",
+            "description": "Count results grouped by the distinct field"
           },
           "start": {
+            "description": "Search window start timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "total": {
+            "description": "Number of distinct result buckets returned",
             "type": "integer"
           }
         },
@@ -538,8 +545,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -550,8 +559,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -562,8 +573,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -574,8 +587,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -583,8 +598,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -594,23 +611,28 @@
         "type": "object"
       },
       "ticket": {
-        "description": "Support Ticket",
+        "description": "Support ticket record with status, comments, and metadata",
         "properties": {
           "case_number": {
+            "description": "Support case number associated with this ticket",
             "readOnly": true,
             "type": "string"
           },
           "comments": {
-            "$ref": "#/components/schemas/ticket_comments"
+            "$ref": "#/components/schemas/ticket_comments",
+            "description": "Discussion comments recorded on this support ticket"
           },
           "created_at": {
+            "description": "Time when this support ticket was created, in epoch seconds",
             "readOnly": true,
             "type": "integer"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier for this support ticket"
           },
           "requester": {
+            "description": "User who opened or requested this support ticket",
             "readOnly": true,
             "type": "string"
           },
@@ -620,9 +642,11 @@
             "type": "string"
           },
           "status": {
-            "$ref": "#/components/schemas/ticket_status"
+            "$ref": "#/components/schemas/ticket_status",
+            "description": "Current lifecycle status of this support ticket"
           },
           "subject": {
+            "description": "Short summary of the support request",
             "type": "string"
           },
           "type": {
@@ -630,6 +654,7 @@
             "type": "string"
           },
           "updated_at": {
+            "description": "Time when this support ticket was last updated, in epoch seconds",
             "readOnly": true,
             "type": "integer"
           }
@@ -642,8 +667,10 @@
       },
       "ticket_attachment": {
         "additionalProperties": false,
+        "description": "Download information for a support ticket attachment",
         "properties": {
           "content_url": {
+            "description": "Download URL for the support ticket attachment",
             "examples": [
               "https://api.mist.com/api/v1/forward/download?jwt=..."
             ],
@@ -654,21 +681,27 @@
         "type": "object"
       },
       "ticket_comment": {
+        "description": "Comment on a support ticket",
         "properties": {
           "attachment_ids": {
-            "$ref": "#/components/schemas/ticket_comments_attachment_ids"
+            "$ref": "#/components/schemas/ticket_comments_attachment_ids",
+            "description": "Identifiers of attachments linked to this ticket comment"
           },
           "attachments": {
-            "$ref": "#/components/schemas/ticket_comments_attachments"
+            "$ref": "#/components/schemas/ticket_comments_attachments",
+            "description": "Attachment metadata returned with this ticket comment"
           },
           "author": {
+            "description": "User who wrote this ticket comment",
             "readOnly": true,
             "type": "string"
           },
           "comment": {
+            "description": "Text body of this ticket comment",
             "type": "string"
           },
           "created_at": {
+            "description": "Time when this ticket comment was created, in epoch seconds",
             "readOnly": true,
             "type": "integer"
           }
@@ -682,8 +715,10 @@
       },
       "ticket_comment_import_file": {
         "additionalProperties": false,
+        "description": "Multipart payload for adding a ticket comment with an attachment",
         "properties": {
           "comment": {
+            "description": "Text body for the ticket comment submitted with the uploaded file",
             "examples": [
               "this is urgent"
             ],
@@ -691,12 +726,14 @@
           },
           "file": {
             "contentMediaType": "application/octet-stream",
+            "description": "Binary file payload to attach to the ticket comment",
             "type": "string"
           }
         },
         "type": "object"
       },
       "ticket_comments": {
+        "description": "List of comments on a support ticket",
         "items": {
           "$ref": "#/components/schemas/ticket_comment"
         },
@@ -704,14 +741,17 @@
       },
       "ticket_comments_attachment": {
         "additionalProperties": false,
+        "description": "Metadata for an attachment on a ticket comment",
         "properties": {
           "content_type": {
+            "description": "MIME type of the ticket comment attachment",
             "examples": [
               "image/png"
             ],
             "type": "string"
           },
           "content_url": {
+            "description": "Download URL for the ticket comment attachment",
             "examples": [
               "https://api.mist.com/api/v1/forward/download?jwt=..."
             ],
@@ -719,21 +759,25 @@
             "type": "string"
           },
           "created_at": {
+            "description": "Time when this ticket comment attachment was created, in epoch seconds",
             "examples": [
               1453908369
             ],
             "type": "integer"
           },
           "file_name": {
+            "description": "Original file name of the ticket comment attachment",
             "examples": [
               "crash.png"
             ],
             "type": "string"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier for this ticket comment attachment"
           },
           "size_in_bytes": {
+            "description": "Attachment file size, in bytes",
             "examples": [
               1943
             ],
@@ -743,6 +787,7 @@
         "type": "object"
       },
       "ticket_comments_attachment_id": {
+        "description": "Unique identifier for a ticket comment attachment",
         "examples": [
           "00000000-0000-0000-0000-15231a659c13"
         ],
@@ -751,6 +796,7 @@
         "type": "string"
       },
       "ticket_comments_attachment_ids": {
+        "description": "List of ticket comment attachment identifiers",
         "examples": [
           [
             "00000000-0000-0000-0000-15231a659c78"
@@ -763,6 +809,7 @@
         "type": "array"
       },
       "ticket_comments_attachments": {
+        "description": "List of attachment metadata objects for a ticket comment",
         "items": {
           "$ref": "#/components/schemas/ticket_comments_attachment"
         },
@@ -770,7 +817,7 @@
         "type": "array"
       },
       "ticket_status": {
-        "description": "Ticket status. enum: \n  * open: ticket is open, Mist is working on it\n  * pending: ticket is open and Requester attention is needed (e.g. Mist is asking for some more information)\n  * solved: ticket is marked as solved / considered by Mist (requester can update it, causing it to re-open; or rate it)\n  * closed: ticket is archived and cannot be changed.",
+        "description": "Ticket status. enum: `closed`, `open`, `pending`, `solved`. `open` means Mist is working on it, `pending` means requester attention is needed, `solved` means Mist considers it resolved but it can still be updated or rated, and `closed` means it is archived",
         "enum": [
           "closed",
           "open",
@@ -781,6 +828,7 @@
       },
       "ticket_upload_attachments_file": {
         "additionalProperties": false,
+        "description": "Multipart upload payload containing a ticket attachment file",
         "properties": {
           "file": {
             "contentMediaType": "application/octet-stream",
@@ -791,6 +839,7 @@
         "type": "object"
       },
       "tickets": {
+        "description": "Support ticket records returned by a ticket list response",
         "items": {
           "$ref": "#/components/schemas/ticket"
         },
@@ -1031,10 +1080,9 @@
         }
       },
       "duration": {
-        "description": "Duration like 7d, 2w",
+        "description": "Time range duration for the query, using relative units such as `10m`, `7d`, or `2w`",
         "in": "query",
         "name": "duration",
-        "required": false,
         "schema": {
           "default": "1d",
           "examples": [
@@ -1044,7 +1092,7 @@
         }
       },
       "end": {
-        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
         "in": "query",
         "name": "end",
         "schema": {
@@ -1052,9 +1100,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -1074,7 +1122,7 @@
         }
       },
       "start": {
-        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
         "in": "query",
         "name": "start",
         "schema": {
@@ -1188,19 +1236,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

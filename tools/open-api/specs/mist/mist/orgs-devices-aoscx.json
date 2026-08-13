@@ -1,8 +1,8 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Orgs Devices - AOS",
-    "version": "2602.1.1"
+    "title": "Orgs Devices - AOSCX",
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,32 +59,28 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
   "tags": [
     {
-      "description": "API Calls specific to AOS (Aruba Operating System) devices",
-      "name": "Orgs Devices - AOS"
+      "description": "API Calls specific to AOS-CX (Aruba Operating System - CX) devices",
+      "name": "Orgs Devices - AOSCX"
     }
   ],
   "paths": {
-    "/api/v1/orgs/{org_id}/aos/register_cmd": {
+    "/api/v1/orgs/{org_id}/aoscx/register_cmd": {
       "parameters": [
         {
           "$ref": "#/components/parameters/org_id"
         }
       ],
       "get": {
-        "description": "Generates a registration challenge token and AOS-specific CLI commands for TPM-based brownfield registration of AOS devices. The returned command string can be copied and pasted directly into an AOS device to register it with Mist.",
-        "operationId": "getOrgAosRegisterCmd",
+        "description": "Generates a registration challenge token for TPM-based brownfield registration of AOSCX devices. The returned command string can be copied and pasted directly into an AOSCX device to register it with Mist.",
+        "operationId": "getOrgAoscxRegisterCmd",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/AosRegisterCmd"
+            "$ref": "#/components/responses/AoscxRegisterCmd"
           },
           "400": {
             "$ref": "#/components/responses/HTTP400"
@@ -102,21 +98,21 @@
             "$ref": "#/components/responses/HTTP429"
           }
         },
-        "summary": "getOrgAosRegisterCmd",
+        "summary": "getOrgAoscxRegisterCmd",
         "tags": [
-          "Orgs Devices - AOS"
+          "Orgs Devices - AOSCX"
         ]
       }
     }
   },
   "components": {
     "schemas": {
-      "aos_register_cmd": {
+      "aoscx_register_cmd": {
         "additionalProperties": false,
-        "description": "AOS Brownfield Registration Commands",
+        "description": "AOSCX Brownfield Registration Commands",
         "properties": {
           "cli_commands": {
-            "description": "AOS-specific CLI commands that can be copied and pasted directly into an AOS device to register it with Mist. Includes registration code and configuration commands.",
+            "description": "AOSCX-specific CLI commands that can be copied and pasted directly into an AOSCX device to register it with Mist",
             "type": "string"
           }
         },
@@ -124,8 +120,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -136,8 +134,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -148,8 +148,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -160,8 +162,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -169,8 +173,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -181,20 +187,20 @@
       }
     },
     "responses": {
-      "AosRegisterCmd": {
+      "AoscxRegisterCmd": {
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/aos_register_cmd"
+              "$ref": "#/components/schemas/aoscx_register_cmd"
             }
           },
           "application/vnd.api+json": {
             "schema": {
-              "$ref": "#/components/schemas/aos_register_cmd"
+              "$ref": "#/components/schemas/aoscx_register_cmd"
             }
           }
         },
-        "description": "AOS Brownfield Registration Commands"
+        "description": "AOSCX Brownfield Registration Commands"
       },
       "HTTP400": {
         "content": {
@@ -350,19 +356,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

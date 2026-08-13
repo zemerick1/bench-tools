@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs JSI",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "get": {
-        "description": "Get List of Org devices that connected to JSI",
+        "description": "List organization devices connected to Juniper Support Insights (JSI), optionally filtered by model, serial number, or MAC address.",
         "operationId": "listOrgJsiDevices",
         "parameters": [
           {
@@ -90,7 +86,7 @@
             "$ref": "#/components/parameters/page"
           },
           {
-            "description": "Device model",
+            "description": "Filter results by device model",
             "in": "query",
             "name": "model",
             "schema": {
@@ -101,7 +97,7 @@
             }
           },
           {
-            "description": "Device serial",
+            "description": "Filter results by device serial number",
             "in": "query",
             "name": "serial",
             "schema": {
@@ -112,7 +108,7 @@
             }
           },
           {
-            "description": "Device MAC Address",
+            "description": "Filter results by MAC address",
             "in": "query",
             "name": "mac",
             "schema": {
@@ -156,7 +152,7 @@
         }
       ],
       "get": {
-        "description": "Adopt JSI devices",
+        "description": "Return the outbound SSH registration command used to onboard Junos devices to Juniper Support Insights (JSI).",
         "operationId": "adoptOrgJsiDevice",
         "responses": {
           "200": {
@@ -194,7 +190,7 @@
         }
       ],
       "post": {
-        "description": "Create Shell Session",
+        "description": "Create a WebSocket-backed shell session for a JSI-connected device identified by MAC address.",
         "operationId": "createOrgJsiDeviceShellSession",
         "responses": {
           "200": {
@@ -239,6 +235,7 @@
             "$ref": "#/components/parameters/page"
           },
           {
+            "description": "Filter results by one or more device models. Supports comma-separated values",
             "in": "query",
             "name": "model",
             "schema": {
@@ -249,6 +246,7 @@
             }
           },
           {
+            "description": "Filter results by device serial number",
             "in": "query",
             "name": "serial",
             "schema": {
@@ -296,7 +294,7 @@
         "operationId": "countOrgJsiAssetsAndContracts",
         "parameters": [
           {
-            "description": "Distinct attributes to count",
+            "description": "Field used to group this count response. enum: `account_id`, `claimed`, `has_support`, `end_of_sale_time`, `eos_time`, `version_time`, `model`, `sku`, `status`, `type`, `version`, `warranty_type`",
             "in": "query",
             "name": "distinct",
             "schema": {
@@ -344,51 +342,55 @@
         "operationId": "searchOrgJsiAssetsAndContracts",
         "parameters": [
           {
-            "description": "Device claim status, `true` for claimed devices, `false` for all devices",
+            "description": "Device claim status, `true` for claimed devices, `false` for all devices. Accepts multiple comma-separated boolean values.",
             "in": "query",
             "name": "claimed",
             "schema": {
               "examples": [
+                "true,false",
                 true
               ],
               "type": "boolean"
             }
           },
           {
-            "description": "Device model",
+            "description": "Filter results by device model. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "model",
             "schema": {
               "examples": [
+                "QFX10000-36Q,QFX10000-30C",
                 "AP43"
               ],
               "type": "string"
             }
           },
           {
-            "description": "Device serial",
+            "description": "Filter results by device serial number. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "serial",
             "schema": {
               "examples": [
+                "ACNP4666,ACNP6969",
                 "FXLH2015150025"
               ],
               "type": "string"
             }
           },
           {
-            "description": "SKU name of the device",
+            "description": "Filter results by SKU. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "sku",
             "schema": {
               "examples": [
+                "QFX10000-36Q,QFX10000-30C",
                 "EX2300"
               ],
               "type": "string"
             }
           },
           {
-            "description": "Device status",
+            "description": "Device status. enum: `all`, `connected`, `disconnected`",
             "in": "query",
             "name": "status",
             "schema": {
@@ -396,7 +398,7 @@
             }
           },
           {
-            "description": "Device warranty type",
+            "description": "Device warranty type used to filter Juniper Support Insight inventory. enum: `Standard Hardware Warranty`, `Enhanced Hardware Warranty`, `Dead On Arrival Warranty`, `Limited Lifetime Warranty`, `Software Warranty`, `Limited Lifetime Warranty for WLA`, `Warranty-JCPO EOL (DOA Not Included)`, `MIST Enhanced Hardware Warranty`, `MIST Standard Warranty`, `Determine Lifetime warranty`",
             "in": "query",
             "name": "warranty_type",
             "schema": {
@@ -404,40 +406,161 @@
             }
           },
           {
-            "description": "Device EOL duration in days",
+            "description": "Filter devices with End Of Sale date after this date",
             "in": "query",
-            "name": "eol_duration",
+            "name": "end_of_sale_after",
             "schema": {
               "examples": [
-                "30d"
+                "2024-01-01"
               ],
               "type": "string"
             }
           },
           {
-            "description": "Device EOS duration in days",
+            "description": "Filter devices with End Of Sale date before this date",
             "in": "query",
-            "name": "eos_duration",
+            "name": "end_of_sale_before",
             "schema": {
               "examples": [
-                "30d"
+                "2025-12-31"
               ],
               "type": "string"
             }
           },
           {
-            "description": "Indicates if the device is covered under active support contract",
+            "description": "Filter devices with End Of Support date after this date",
+            "in": "query",
+            "name": "eos_after",
+            "schema": {
+              "examples": [
+                "2024-01-01"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter devices with End Of Support date before this date",
+            "in": "query",
+            "name": "eos_before",
+            "schema": {
+              "examples": [
+                "2025-12-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter devices with OS Version End Of Support date after this date",
+            "in": "query",
+            "name": "version_eos_after",
+            "schema": {
+              "examples": [
+                "2024-01-01"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter devices with OS Version End Of Support date before this date",
+            "in": "query",
+            "name": "version_eos_before",
+            "schema": {
+              "examples": [
+                "2025-12-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter results by service contract end date before this date",
+            "in": "query",
+            "name": "contract_end_before",
+            "schema": {
+              "examples": [
+                "2025-12-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter results by service contract end date after this date",
+            "in": "query",
+            "name": "contract_end_after",
+            "schema": {
+              "examples": [
+                "2024-01-01"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter results by contract type",
+            "in": "query",
+            "name": "contract_type",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter results by contract SKU",
+            "in": "query",
+            "name": "contract_sku",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter results by end of service time",
+            "in": "query",
+            "name": "end_of_service_time",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter results by service contract status",
+            "in": "query",
+            "name": "support_contract_status",
+            "schema": {
+              "$ref": "#/components/schemas/support_contract_status"
+            }
+          },
+          {
+            "description": "Indicates if the device is covered under active support contract. Accepts multiple comma-separated boolean values.",
             "in": "query",
             "name": "has_support",
             "schema": {
               "examples": [
+                "true,false",
                 true
               ],
               "type": "boolean"
             }
           },
           {
-            "description": "Wildcards for `model`, `serial`, `account_id`, `status`, `warranty_type`",
+            "description": "To get the onboarded devices that are affected by the SIRT ID",
+            "in": "query",
+            "name": "sirt_id",
+            "schema": {
+              "examples": [
+                "JSA12345"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "To get the onboarded devices that are affected by the PBN ID",
+            "in": "query",
+            "name": "pbn_id",
+            "schema": {
+              "examples": [
+                "PBN67890"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Wildcard text search across `account_id`, `contract_id`, `contract_reseller`, `contract_sku`, `device_name`, `distributor`, `ia_address`, `ia_country`, `ia_region`, `ia_zip_postal`, `model`, `serial`, `sku`, `status`, `suggested_version`, `version`, `warranty`",
             "in": "query",
             "name": "text",
             "schema": {
@@ -546,7 +669,7 @@
         "operationId": "searchOrgJsiPbn",
         "parameters": [
           {
-            "description": "OS versions to search for",
+            "description": "Software versions affected by the PBN",
             "in": "query",
             "name": "versions",
             "schema": {
@@ -557,7 +680,7 @@
             }
           },
           {
-            "description": "Device models to search for",
+            "description": "Models affected by the PBN",
             "in": "query",
             "name": "models",
             "schema": {
@@ -565,7 +688,7 @@
             }
           },
           {
-            "description": "Customer risk level to filter by",
+            "description": "Filter results by customer risk. enum: `Critical`, `Major`, `Minor`",
             "in": "query",
             "name": "customer_risk",
             "schema": {
@@ -573,7 +696,7 @@
             }
           },
           {
-            "description": "PBN ID to search for",
+            "description": "ID of the PBN",
             "in": "query",
             "name": "id",
             "schema": {
@@ -584,9 +707,17 @@
             }
           },
           {
-            "description": "Bug type to filter by",
+            "description": "Filter results by bug type",
             "in": "query",
             "name": "bug_type",
+            "schema": {
+              "$ref": "#/components/schemas/jsi_pbn_bug_type"
+            }
+          },
+          {
+            "description": "Wildcard search across `versions`, `models`, `customer_risk`, `id`, `bug_type`",
+            "in": "query",
+            "name": "text",
             "schema": {
               "type": "string"
             }
@@ -596,6 +727,9 @@
           },
           {
             "$ref": "#/components/parameters/page"
+          },
+          {
+            "$ref": "#/components/parameters/sort"
           },
           {
             "$ref": "#/components/parameters/search_after"
@@ -695,38 +829,19 @@
         }
       ],
       "get": {
-        "description": "Text search for SIRT (Security Incident Response Team) advisories. Search can be done on versions, models, severity, and id fields.",
+        "description": "Search and get all the SIRT for the onboarded devices. Search can be done on severity, id, updated_after, updated_before, published_after, published_before, models, versions, and text fields.",
         "operationId": "searchOrgJsiSirt",
         "parameters": [
           {
-            "description": "OS versions to search for",
-            "in": "query",
-            "name": "versions",
-            "schema": {
-              "examples": [
-                "20.4R3"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "Device models to search for",
-            "in": "query",
-            "name": "models",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Severity level to filter by",
+            "description": "Filter results by SIRT severity",
             "in": "query",
             "name": "severity",
             "schema": {
-              "type": "string"
+              "$ref": "#/components/schemas/jsi_sirt_severity"
             }
           },
           {
-            "description": "SIRT ID to search for",
+            "description": "JSA number",
             "in": "query",
             "name": "id",
             "schema": {
@@ -737,10 +852,72 @@
             }
           },
           {
+            "description": "JSA Updated date to be filtered after this date",
+            "in": "query",
+            "name": "updated_after",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "JSA Updated date to be filtered before this date",
+            "in": "query",
+            "name": "updated_before",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "JSA Published date to be filtered after this date",
+            "in": "query",
+            "name": "published_after",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "JSA Published date to be filtered before this date",
+            "in": "query",
+            "name": "published_before",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Models affected by the SIRT",
+            "in": "query",
+            "name": "models",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Software versions affected by the SIRT",
+            "in": "query",
+            "name": "versions",
+            "schema": {
+              "examples": [
+                "20.4R3"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Wildcard search across `versions`, `models`, `severity`, `id`",
+            "in": "query",
+            "name": "text",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "$ref": "#/components/parameters/limit"
           },
           {
             "$ref": "#/components/parameters/page"
+          },
+          {
+            "$ref": "#/components/parameters/sort"
           },
           {
             "$ref": "#/components/parameters/search_after"
@@ -782,6 +959,7 @@
   "components": {
     "schemas": {
       "count_pbn_distinct": {
+        "description": "Fields that can be used to group PBN advisory count results. enum: `versions`, `models`, `customer_risk`, `bug_type`",
         "enum": [
           "versions",
           "models",
@@ -797,8 +975,10 @@
         "additionalProperties": {
           "type": "string"
         },
+        "description": "Count result row with the matching distinct field values",
         "properties": {
           "count": {
+            "description": "Number of matching items for the distinct value or values in this result",
             "type": "integer"
           }
         },
@@ -808,6 +988,7 @@
         "type": "object"
       },
       "count_results": {
+        "description": "List of count result rows",
         "items": {
           "$ref": "#/components/schemas/count_result"
         },
@@ -815,6 +996,7 @@
         "uniqueItems": true
       },
       "count_sirt_distinct": {
+        "description": "Fields that can be used to group SIRT advisory count results. enum: `versions`, `models`, `severity`, `jsa_updated_date`",
         "enum": [
           "versions",
           "models",
@@ -846,6 +1028,7 @@
         "type": "string"
       },
       "js_inventory": {
+        "description": "JSI inventory items returned for an organization",
         "items": {
           "$ref": "#/components/schemas/js_inventory_item"
         },
@@ -853,25 +1036,66 @@
       },
       "js_inventory_item": {
         "additionalProperties": false,
+        "description": "Juniper Support inventory item with entitlement, lifecycle, and software metadata",
         "properties": {
+          "availability": {
+            "description": "Current operational availability status of the device; only returned for onboarded (claimed) devices",
+            "type": "string"
+          },
           "claimed": {
             "description": "Indicates if the device is claimed by any org",
             "type": "boolean"
+          },
+          "contract_end_date": {
+            "description": "Expiration date of the service contract; only returned for onboarded (claimed) devices",
+            "type": "string"
+          },
+          "contract_id": {
+            "description": "Unique identifier of the service contract; only returned for onboarded (claimed) devices",
+            "type": "string"
+          },
+          "contract_reseller": {
+            "description": "Name of the reseller associated with the contract; only returned for onboarded (claimed) devices",
+            "type": "string"
+          },
+          "contract_sku": {
+            "description": "SKU associated with the service contract; only returned for onboarded (claimed) devices",
+            "type": "string"
+          },
+          "contract_start_date": {
+            "description": "Official commencement date of the service contract; only returned for onboarded (claimed) devices",
+            "type": "string"
+          },
+          "contract_type": {
+            "description": "General classification of the contract; only returned for onboarded (claimed) devices",
+            "type": "string"
+          },
+          "current_contract_flag": {
+            "description": "Current status of the contract (e.g., 'Active', 'Expired'); only returned for onboarded (claimed) devices",
+            "type": "string"
           },
           "device_name": {
             "description": "Name of the device",
             "type": "string"
           },
+          "distributor": {
+            "description": "Name of the distributor who provided the device; only returned for onboarded (claimed) devices",
+            "type": "string"
+          },
+          "end_of_sale_time": {
+            "description": "End of sale epoch timestamp",
+            "type": "integer"
+          },
+          "end_of_service_time": {
+            "description": "End of service epoch timestamp",
+            "type": "integer"
+          },
           "eol_psn": {
-            "description": "EOL PSN",
+            "description": "Product support notice associated with the device end-of-life milestone",
             "examples": [
               "TSB18097"
             ],
             "type": "string"
-          },
-          "eol_time": {
-            "description": "End of life time",
-            "type": "integer"
           },
           "eos_time": {
             "description": "End of support time",
@@ -881,42 +1105,84 @@
             "description": "Indicates if the device is covered under active support contract",
             "type": "boolean"
           },
+          "ia_address": {
+            "description": "Physical installation street address of the asset; only returned for onboarded (claimed) devices",
+            "type": "string"
+          },
+          "ia_country": {
+            "description": "Country of installation; only returned for onboarded (claimed) devices",
+            "type": "string"
+          },
+          "ia_region": {
+            "description": "Geographic region where the device is installed; only returned for onboarded (claimed) devices",
+            "type": "string"
+          },
+          "ia_zip_postal": {
+            "description": "ZIP or postal code of the installation site; only returned for onboarded (claimed) devices",
+            "type": "string"
+          },
           "master": {
             "description": "Indicates whether it is Master",
             "type": "boolean"
           },
           "model": {
-            "description": "Model of the install base inventory",
+            "description": "Hardware model recorded in the install base inventory",
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization identifier that has claimed the device, when applicable"
           },
           "serial": {
-            "description": "Serial Number of the inventory",
+            "description": "Device serial number recorded in the install base inventory",
+            "type": "string"
+          },
+          "service_contract_no": {
+            "description": "Unique identifier for the service contract; only returned for onboarded (claimed) devices",
+            "type": "string"
+          },
+          "service_contract_type": {
+            "description": "Specific service level or contract category for the device; only returned for onboarded (claimed) devices",
+            "type": "string"
+          },
+          "service_decline_flag": {
+            "description": "Indicates if the service offer was declined (e.g., 'Y'/'N'); only returned for onboarded (claimed) devices",
+            "type": "string"
+          },
+          "service_eligible": {
+            "description": "Indicator of whether the device is eligible for service coverage ('Yes', 'No'); only returned for onboarded (claimed) devices",
+            "type": "string"
+          },
+          "ship_date_calc": {
+            "description": "Calculated or actual date the device was shipped; only returned for onboarded (claimed) devices",
             "type": "string"
           },
           "sku": {
-            "description": "Serviceable device stock",
+            "description": "Serviceable SKU associated with the device",
             "type": "string"
           },
           "status": {
-            "description": "Status of the connected device",
+            "description": "Current inventory status reported for the device",
             "type": "string"
           },
           "suggested_version": {
-            "description": "Suggested SW version",
+            "description": "Recommended software version for the device",
             "type": "string"
           },
+          "support_contract_status": {
+            "$ref": "#/components/schemas/support_contract_status",
+            "description": "Service contract status; only returned for onboarded (claimed) devices"
+          },
           "type": {
-            "$ref": "#/components/schemas/device_type"
+            "$ref": "#/components/schemas/device_type",
+            "description": "Device category for the inventory item"
           },
           "version": {
-            "description": "SW version running",
+            "description": "Software version currently running on the device",
             "type": "string"
           },
           "version_description": {
-            "description": "Version description",
+            "description": "Release description associated with the reported software version",
             "type": "string"
           },
           "version_eos_time": {
@@ -928,21 +1194,31 @@
             "type": "integer"
           },
           "warranty": {
-            "description": "warranty description",
+            "description": "Coverage details associated with the device warranty",
+            "type": "string"
+          },
+          "warranty_end": {
+            "description": "Expiration date of the warranty period; only returned for onboarded (claimed) devices",
+            "type": "string"
+          },
+          "warranty_start": {
+            "description": "Start date of the manufacturer or secondary warranty; only returned for onboarded (claimed) devices",
             "type": "string"
           },
           "warranty_time": {
-            "description": "Time when warranty needs to be renewed",
+            "description": "Timestamp when warranty needs to be renewed",
             "type": "integer"
           },
           "warranty_type": {
-            "$ref": "#/components/schemas/jsi_warranty_type"
+            "$ref": "#/components/schemas/jsi_warranty_type",
+            "description": "Warranty category reported for the device"
           }
         },
         "type": "object"
       },
       "js_inventory_search": {
         "additionalProperties": false,
+        "description": "Paginated JSI inventory search response",
         "properties": {
           "end": {
             "description": "Offset to end at",
@@ -953,17 +1229,19 @@
             "type": "integer"
           },
           "next": {
+            "description": "URL for the next page of JSI inventory results",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/js_inventory"
+            "$ref": "#/components/schemas/js_inventory",
+            "description": "JSI inventory records returned by the search"
           },
           "start": {
             "description": "Offset to start from",
             "type": "integer"
           },
           "total": {
-            "description": "Total number of results",
+            "description": "Number of JSI inventory records matching the search",
             "type": "integer"
           }
         },
@@ -971,39 +1249,45 @@
       },
       "jse_device": {
         "additionalProperties": false,
+        "description": "JSE device reported for an organization",
         "properties": {
           "ext_ip": {
-            "description": "When available",
+            "description": "External IP address for the JSE device, when available",
             "type": "string"
           },
           "last_seen": {
-            "$ref": "#/components/schemas/last_seen"
+            "$ref": "#/components/schemas/last_seen",
+            "description": "Timestamp when the JSE device was last seen"
           },
           "mac": {
+            "description": "Device MAC address for the JSE device",
             "type": "string"
           },
           "model": {
+            "description": "Device model for the JSE device",
             "type": "string"
           },
           "serial": {
+            "description": "Device serial number for the JSE device",
             "type": "string"
           }
         },
         "type": "object"
       },
       "jse_devices": {
+        "description": "JSE devices returned for an organization",
         "items": {
           "$ref": "#/components/schemas/jse_device"
         },
         "type": "array"
       },
       "jsi_inventory_count_distinct": {
-        "description": "enum: `account_id`, `claimed`, `eol_time`, `eos_time`, `has_support`, `version_time`, `model`, `sku`, `status`, `type`, `version`, `warranty_type",
+        "description": "Distinct field used when counting Juniper Support Insight inventory records. enum: `account_id`, `claimed`, `has_support`, `end_of_sale_time`, `eos_time`, `version_time`, `model`, `sku`, `status`, `type`, `version`, `warranty_type`",
         "enum": [
           "account_id",
           "claimed",
           "has_support",
-          "eol_time",
+          "end_of_sale_time",
           "eos_time",
           "version_time",
           "model",
@@ -1015,16 +1299,23 @@
         ],
         "type": "string"
       },
+      "jsi_pbn_bug_type": {
+        "description": "Type of the bug. enum: `Day-1`, `Regression`",
+        "enum": [
+          "Day-1",
+          "Regression"
+        ],
+        "type": "string"
+      },
       "jsi_pbn_item": {
         "additionalProperties": false,
         "description": "PBN (Problem Bug Notification) advisory item",
         "properties": {
           "bug_type": {
-            "description": "Type of the bug (Day-1, Regression)",
-            "type": "string"
+            "$ref": "#/components/schemas/jsi_pbn_bug_type"
           },
           "customer_risk": {
-            "description": "Risk level",
+            "description": "Customer impact risk level for the PBN advisory",
             "type": "string"
           },
           "fixed_in": {
@@ -1032,56 +1323,59 @@
             "type": "string"
           },
           "id": {
-            "description": "ID of the PBN",
+            "description": "Unique PBN advisory identifier from Juniper Support Insights",
             "examples": [
               "1403338"
             ],
             "type": "string"
           },
           "introduced_in": {
-            "description": "Release introduced in",
+            "description": "Release where the PBN issue was introduced",
             "type": "string"
           },
           "models": {
-            "description": "OS models affected",
+            "description": "Device models affected by the PBN issue",
             "items": {
               "type": "string"
             },
             "type": "array"
           },
           "product_family": {
-            "description": "Product family affected",
-            "type": "string"
+            "description": "Product families affected by the PBN issue",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
           "release_notes": {
             "description": "Release notes for this PBN",
             "type": "string"
           },
           "restoration": {
-            "description": "Restoration steps",
+            "description": "Steps recommended to restore service or recover from the PBN issue",
             "type": "string"
           },
           "title": {
-            "description": "Title of the issue",
+            "description": "Summary title for the PBN issue",
             "type": "string"
           },
           "updated_date": {
-            "description": "PBN updated timestamp",
+            "description": "Time when the PBN advisory was last updated",
             "type": "integer"
           },
           "versions": {
-            "description": "OS versions affected",
+            "description": "Software versions affected by the PBN issue",
             "items": {
               "type": "string"
             },
             "type": "array"
           },
           "workaround": {
-            "description": "Workaround for this issue",
+            "description": "Mitigation or workaround guidance for the PBN issue",
             "type": "string"
           },
           "workaround_provided": {
-            "description": "Any workaround available",
+            "description": "Indicator of whether workaround guidance is available",
             "type": "string"
           }
         },
@@ -1089,10 +1383,10 @@
       },
       "jsi_pbn_search": {
         "additionalProperties": false,
-        "description": "PBN search response",
+        "description": "Juniper Security Intelligence PBN search response with result metadata",
         "properties": {
           "end": {
-            "description": "End timestamp",
+            "description": "Upper bound timestamp for the PBN search window",
             "type": "integer"
           },
           "limit": {
@@ -1100,7 +1394,7 @@
             "type": "integer"
           },
           "next": {
-            "description": "Next page URL",
+            "description": "Pagination URL for the next page of PBN advisories",
             "type": "string"
           },
           "results": {
@@ -1111,11 +1405,11 @@
             "type": "array"
           },
           "start": {
-            "description": "Start timestamp",
+            "description": "Lower bound timestamp for the PBN search window",
             "type": "integer"
           },
           "total": {
-            "description": "Total number of results",
+            "description": "Count of PBN advisories matching the search",
             "type": "integer"
           }
         },
@@ -1123,28 +1417,28 @@
       },
       "jsi_sirt_item": {
         "additionalProperties": false,
-        "description": "SIRT advisory item",
+        "description": "Juniper Security Intelligence SIRT advisory item",
         "properties": {
           "cvss_score": {
-            "description": "CVSS score",
+            "description": "Common Vulnerability Scoring System score for the SIRT advisory",
             "type": "number"
           },
           "id": {
-            "description": "ID of the SIRT",
+            "description": "Unique SIRT or JSA advisory identifier from Juniper Support Insights",
             "examples": [
               "JSA100053"
             ],
             "type": "string"
           },
           "models": {
-            "description": "OS models affected",
+            "description": "Device models affected by the SIRT advisory",
             "items": {
               "type": "string"
             },
             "type": "array"
           },
           "problem": {
-            "description": "Problem description",
+            "description": "Issue details described by the SIRT advisory",
             "type": "string"
           },
           "published_date": {
@@ -1156,30 +1450,29 @@
             "type": "string"
           },
           "severity": {
-            "description": "Severity of the issue",
-            "type": "string"
+            "$ref": "#/components/schemas/jsi_sirt_severity"
           },
           "solution": {
-            "description": "Solution for the security issue",
+            "description": "Recommended fix or remediation for the security issue",
             "type": "string"
           },
           "title": {
-            "description": "Title of the SIRT",
+            "description": "Summary title for the SIRT advisory",
             "type": "string"
           },
           "updated_date": {
-            "description": "JSA updated timestamp",
+            "description": "Time when the JSA advisory was last updated",
             "type": "integer"
           },
           "versions": {
-            "description": "OS versions affected",
+            "description": "Software versions affected by the SIRT advisory",
             "items": {
               "type": "string"
             },
             "type": "array"
           },
           "workaround": {
-            "description": "Workaround provided",
+            "description": "Mitigation or workaround guidance for the SIRT advisory",
             "type": "string"
           }
         },
@@ -1187,10 +1480,10 @@
       },
       "jsi_sirt_search": {
         "additionalProperties": false,
-        "description": "SIRT search response",
+        "description": "Juniper Security Intelligence SIRT search response with result metadata",
         "properties": {
           "end": {
-            "description": "End timestamp",
+            "description": "Upper bound timestamp for the SIRT search window",
             "type": "integer"
           },
           "limit": {
@@ -1198,7 +1491,7 @@
             "type": "integer"
           },
           "next": {
-            "description": "Next page URL",
+            "description": "Pagination URL for the next page of SIRT advisories",
             "type": "string"
           },
           "results": {
@@ -1209,18 +1502,28 @@
             "type": "array"
           },
           "start": {
-            "description": "Start timestamp",
+            "description": "Lower bound timestamp for the SIRT search window",
             "type": "integer"
           },
           "total": {
-            "description": "Total number of results",
+            "description": "Count of SIRT advisories matching the search",
             "type": "integer"
           }
         },
         "type": "object"
       },
+      "jsi_sirt_severity": {
+        "description": "Security severity assigned to the SIRT advisory. enum: `Critical`, `High`, `Low`, `Medium`",
+        "enum": [
+          "Critical",
+          "High",
+          "Low",
+          "Medium"
+        ],
+        "type": "string"
+      },
       "jsi_warranty_type": {
-        "description": "Warranty type for Juniper Support Insight (JSI) devices. The warranty type\nis used to determine the support level and duration of the warranty for the\ndevice. enum:\n  * WTY00001: Standard Hardware Warranty\n  * WTY00002: Enhanced Hardware Warranty\n  * WTY00003: Dead On Arrival Warranty\n  * WTY00004: Limited Lifetime Warranty\n  * WTY00005: Software Warranty\n  * WTY00006: Limited Lifetime Warranty for WLA\n  * WTY00007: Warranty-JCPO EOL (DOA Not Included)\n  * WTY00008: MIST Enhanced Hardware Warranty\n  * WTY00009: MIST Standard Warranty\n  * WTY00099: Determine Lifetime warranty\n",
+        "description": "Warranty type label for Juniper Support Insight (JSI) devices. enum: `Standard Hardware Warranty`, `Enhanced Hardware Warranty`, `Dead On Arrival Warranty`, `Limited Lifetime Warranty`, `Software Warranty`, `Limited Lifetime Warranty for WLA`, `Warranty-JCPO EOL (DOA Not Included)`, `MIST Enhanced Hardware Warranty`, `MIST Standard Warranty`, `Determine Lifetime warranty`",
         "enum": [
           "Standard Hardware Warranty",
           "Enhanced Hardware Warranty",
@@ -1236,7 +1539,7 @@
         "type": "string"
       },
       "last_seen": {
-        "description": "Last seen timestamp",
+        "description": "Timestamp indicating when the entity was last seen",
         "examples": [
           1470417522
         ],
@@ -1248,6 +1551,7 @@
         ]
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -1257,23 +1561,30 @@
       },
       "response_count": {
         "additionalProperties": false,
+        "description": "Distinct count response for time-bounded search results",
         "properties": {
           "distinct": {
+            "description": "Field used to group the count results",
             "type": "string"
           },
           "end": {
+            "description": "Search window end timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of distinct count results requested",
             "type": "integer"
           },
           "results": {
-            "$ref": "#/components/schemas/count_results"
+            "$ref": "#/components/schemas/count_results",
+            "description": "Count results grouped by the distinct field"
           },
           "start": {
+            "description": "Search window start timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "total": {
+            "description": "Number of distinct result buckets returned",
             "type": "integer"
           }
         },
@@ -1289,8 +1600,10 @@
       },
       "response_detail_string": {
         "additionalProperties": false,
+        "description": "Response containing a human-readable detail message",
         "properties": {
           "detail": {
+            "description": "Human-readable detail message returned by the API",
             "type": "string"
           }
         },
@@ -1298,8 +1611,10 @@
       },
       "response_device_config_cmd": {
         "additionalProperties": false,
+        "description": "Device configuration command response",
         "properties": {
           "cmd": {
+            "description": "Configuration command returned for the device",
             "type": "string"
           }
         },
@@ -1310,8 +1625,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -1322,8 +1639,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -1334,8 +1653,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -1346,8 +1667,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -1355,8 +1678,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -1365,16 +1690,29 @@
         },
         "type": "object"
       },
+      "support_contract_status": {
+        "description": "Service contract status. enum: `Active`, `Declined`, `EOL`, `Service Available`",
+        "enum": [
+          "Active",
+          "Declined",
+          "EOL",
+          "Service Available"
+        ],
+        "type": "string"
+      },
       "websocket_session_with_url": {
         "additionalProperties": false,
+        "description": "Response containing a WebSocket session handle and connection URL",
         "properties": {
           "session": {
+            "description": "Identifier used to correlate output on the WebSocket stream",
             "examples": [
               "19e73828-937f-05e6-f709-e29efdb0a82b"
             ],
             "type": "string"
           },
           "url": {
+            "description": "WebSocket URL returned for connecting to this session",
             "examples": [
               "wss://api-ws.mist.com/ssh?jwt=xxxx"
             ],
@@ -1647,11 +1985,21 @@
       "JsiPbnSearch": {
         "content": {
           "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/JsiPbnSearchExample"
+              }
+            },
             "schema": {
               "$ref": "#/components/schemas/jsi_pbn_search"
             }
           },
           "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/JsiPbnSearchExample"
+              }
+            },
             "schema": {
               "$ref": "#/components/schemas/jsi_pbn_search"
             }
@@ -1677,11 +2025,21 @@
       "JsiSirtSearch": {
         "content": {
           "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/JsiSirtSearchExample"
+              }
+            },
             "schema": {
               "$ref": "#/components/schemas/jsi_sirt_search"
             }
           },
           "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/JsiSirtSearchExample"
+              }
+            },
             "schema": {
               "$ref": "#/components/schemas/jsi_sirt_search"
             }
@@ -1744,7 +2102,7 @@
         }
       },
       "end": {
-        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
         "in": "query",
         "name": "end",
         "schema": {
@@ -1752,9 +2110,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -1774,9 +2132,9 @@
         }
       },
       "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
         "in": "query",
         "name": "page",
-        "required": false,
         "schema": {
           "default": 1,
           "minimum": 1,
@@ -1795,7 +2153,6 @@
         "description": "On which field the list should be sorted, -prefix represents DESC order",
         "in": "query",
         "name": "sort",
-        "required": false,
         "schema": {
           "default": "timestamp",
           "examples": [
@@ -1805,7 +2162,7 @@
         }
       },
       "start": {
-        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
         "in": "query",
         "name": "start",
         "schema": {
@@ -1869,7 +2226,7 @@
         "value": [
           {
             "device_name": "name1",
-            "eol_time": 1561507200,
+            "end_of_sale_time": 1561507200,
             "eos_time": 1672012800,
             "master": true,
             "model": "EX2300-24MP",
@@ -1894,29 +2251,116 @@
           "limit": 1000,
           "results": [
             {
+              "availability": "Yes",
               "claimed": true,
+              "contract_end_date": "2028-10-01",
+              "contract_id": "324343-234",
+              "contract_reseller": "Reseller1",
+              "contract_sku": "EX2300-24MP-AFO",
+              "contract_start_date": "2022-09-01",
+              "contract_type": "Maintenance",
+              "current_contract_flag": "No Contract",
               "device_name": "name1",
-              "eol_time": 1561507200,
+              "distributor": "Dist",
+              "end_of_sale_time": 1561507200,
+              "end_of_service_time": 1661507200,
+              "eol_psn": "TSB18097",
               "eos_time": 1672012800,
               "has_support": true,
+              "ia_address": "Address1",
+              "ia_country": "United States",
+              "ia_region": "Rhode Island",
+              "ia_zip_postal": "02865-3749",
               "master": true,
               "model": "EX2300-24MP",
               "org_id": "6e843b41-f953-4af9-80e5-e1a70f65754a",
               "serial": "XN3123300095",
+              "service_contract_no": "16036705",
+              "service_contract_type": "MS",
+              "service_decline_flag": "No",
+              "service_eligible": "Yes",
+              "ship_date_calc": "2022-08-31",
               "sku": "EX2300",
               "status": "connected",
               "suggested_version": "Latest 21.4R3-Sx",
+              "support_contract_status": "Active",
               "type": "switch",
               "version": "23.4R2-S4.11",
+              "version_description": "",
               "version_eos_time": 1672012800,
               "version_time": 1561507200,
               "warranty": "Enhanced Hardware Warranty",
+              "warranty_end": "2042-11-28",
+              "warranty_start": "2022-09-01",
               "warranty_time": 1672012800,
-              "warranty_type": "Enhanced Hardware Warranty"
+              "warranty_type": "WTY00002"
             }
           ],
           "start": 1748019708,
           "total": 1
+        }
+      },
+      "JsiPbnSearchExample": {
+        "value": {
+          "end": 1753415677,
+          "limit": 1,
+          "next": "/api/v1/orgs/bf105f5e-2490-453b-9dc0-81224ca295cf/jsi/pbn/search?end=1753415677&limit=1&search_after=%5B%221403338%22%5D&start=1753412077",
+          "results": [
+            {
+              "bug_type": "Day-1",
+              "customer_risk": "Major",
+              "id": "1403338",
+              "introduced_in": "",
+              "models": [
+                "MX10008",
+                "vMX"
+              ],
+              "product_family": [
+                "EX2200",
+                "QFX5210"
+              ],
+              "release_notes": "In aggregated interfaces and STP (Spanning Tree Protocol) scenario, the STP does not work.",
+              "restoration": "",
+              "title": "The STP does not work when aggregated interfaces number is \"ae1000\"",
+              "versions": [
+                "23.4R2-S1.1"
+              ],
+              "workaround": "Use the 'ae' number from 0 to 999 in QFX5000 and 0 to 479 in other QFXs / EX under STP.",
+              "workaround_provided": "yes"
+            }
+          ],
+          "start": 1753412077,
+          "total": 604
+        }
+      },
+      "JsiSirtSearchExample": {
+        "value": {
+          "end": 1753411849,
+          "limit": 1,
+          "next": "/api/v1/orgs/bf105f5e-2490-453b-9dc0-81224ca295cf/jsi/sirt/search?end=1753411849&limit=1&search_after=%5B%22JSA100053%22%5D&start=1753408249",
+          "results": [
+            {
+              "cvss_score": 6.5,
+              "id": "JSA100053",
+              "models": [
+                "MX10008",
+                "vMX"
+              ],
+              "problem": "An Improper Handling of Length Parameter Inconsistency vulnerability in the routing protocol daemon (rpd).\n",
+              "published_date": 1752019200,
+              "release_notes": "An Improper Handling of Length Parameter Inconsistency vulnerability in the routing protocol daemon (rpd).",
+              "severity": "Medium",
+              "solution": "false",
+              "title": "Junos OS and Junos OS Evolved: In an EVPN environment, receipt of a specifically malformed BGP update causes RPD crash",
+              "updated_date": 1752019200,
+              "versions": [
+                "23.4R2-S1.1"
+              ],
+              "workaround": ""
+            }
+          ],
+          "start": 1753408249,
+          "total": 14
         }
       },
       "JunosRegisterCmdExample": {
@@ -1927,19 +2371,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

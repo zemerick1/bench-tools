@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Authentication",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -87,7 +83,7 @@
   "paths": {
     "/api/v1/login": {
       "post": {
-        "description": "Log in with email/password.\nWhen 2FA is enabled, there are two ways to login:\n1. login with two_factor token (with Google Authenticator, etc) \n2. login with email/password, generate the token, and use /login/two_factor with the token",
+        "description": "Authenticate an administrator with email and password. A successful login creates the browser session cookies, including the `csrftoken` value used with the `X-CSRFToken` header on later API requests.\n\nWhen 2FA is enabled, either include the `two_factor` code in this request or submit the first factor here and complete the login with [Two Factor](/#operations/twoFactor).",
         "operationId": "login",
         "requestBody": {
           "content": {
@@ -121,6 +117,7 @@
             "$ref": "#/components/responses/LoginFailure"
           }
         },
+        "security": [],
         "summary": "login",
         "tags": [
           "Admins Login"
@@ -129,7 +126,7 @@
     },
     "/api/v1/login/lookup": {
       "post": {
-        "description": "Login Lookup",
+        "description": "Check the login method for an administrator email address. This public lookup is mainly used by UI clients to determine whether the user should continue with local login or be redirected to SSO.",
         "operationId": "lookup",
         "requestBody": {
           "content": {
@@ -168,6 +165,7 @@
             "$ref": "#/components/responses/HTTP429"
           }
         },
+        "security": [],
         "summary": "lookup",
         "tags": [
           "Admins Lookup"
@@ -190,11 +188,11 @@
         }
       ],
       "get": {
-        "description": "Obtain Authorization URL for Login",
+        "description": "Return the provider authorization URL used to start an OAuth2 login or account-linking flow. When `forward` is provided, the provider redirects back to that callback URL after authorization.",
         "operationId": "getOauth2AuthorizationUrlForLogin",
         "parameters": [
           {
-            "description": "Callback URL",
+            "description": "Callback URL used after completing the OAuth login flow",
             "in": "query",
             "name": "forward",
             "schema": {
@@ -225,13 +223,14 @@
             "$ref": "#/components/responses/HTTP429"
           }
         },
+        "security": [],
         "summary": "getOauth2AuthorizationUrlForLogin",
         "tags": [
           "Admins Login - OAuth2"
         ]
       },
       "post": {
-        "description": "Login via OAuth2",
+        "description": "Complete an OAuth2 login by exchanging the provider authorization code for a Mist administrator session.",
         "operationId": "loginOauth2",
         "requestBody": {
           "content": {
@@ -270,13 +269,14 @@
             "$ref": "#/components/responses/HTTP429"
           }
         },
+        "security": [],
         "summary": "loginOauth2",
         "tags": [
           "Admins Login - OAuth2"
         ]
       },
       "delete": {
-        "description": "Unlink OAuth2 Provider",
+        "description": "Unlink the specified OAuth2 provider from the authenticated administrator account so it can no longer be used for that account's OAuth login.",
         "operationId": "unlinkOauth2Provider",
         "responses": {
           "200": {
@@ -306,7 +306,7 @@
     },
     "/api/v1/login/two_factor": {
       "post": {
-        "description": "Send 2FA Code",
+        "description": "Complete a two-factor login by submitting the 2FA code after the initial email/password step has created a pending login session.",
         "operationId": "twoFactor",
         "requestBody": {
           "content": {
@@ -344,6 +344,7 @@
             "$ref": "#/components/responses/HTTP429"
           }
         },
+        "security": [],
         "summary": "twoFactor",
         "tags": [
           "Admins Login"
@@ -366,6 +367,7 @@
         "operationId": "getOauth2UrlForLinking",
         "parameters": [
           {
+            "description": "Callback URL to forward to after the OAuth login flow",
             "in": "query",
             "name": "forward",
             "schema": {
@@ -451,8 +453,10 @@
   "components": {
     "schemas": {
       "code_string": {
+        "description": "Request body containing a single authorization or claim code",
         "properties": {
           "code": {
+            "description": "Request-supplied authorization or claim code value",
             "type": "string"
           }
         },
@@ -462,8 +466,10 @@
         "type": "object"
       },
       "email_string": {
+        "description": "Request body containing an email address",
         "properties": {
           "email": {
+            "description": "Request email address provided in the payload",
             "format": "email",
             "type": "string"
           }
@@ -483,20 +489,24 @@
         "type": "string"
       },
       "login": {
+        "description": "Login request using email/password and an optional two-factor code",
         "properties": {
           "email": {
+            "description": "Administrator email address used to log in",
             "examples": [
               "test@mistsys.com"
             ],
             "type": "string"
           },
           "password": {
+            "description": "Administrator password used to log in",
             "examples": [
               "foryoureyesonly"
             ],
             "type": "string"
           },
           "two_factor": {
+            "description": "Optional two-factor authentication code for the login request",
             "examples": [
               "123456"
             ],
@@ -511,8 +521,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -523,8 +535,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -535,8 +549,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -547,8 +563,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -556,8 +574,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -568,11 +588,14 @@
       },
       "response_login_failure": {
         "additionalProperties": false,
+        "description": "Login failure response returned when authentication cannot continue locally",
         "properties": {
           "detail": {
+            "description": "Human-readable login failure message returned by the API",
             "type": "string"
           },
           "forward_url": {
+            "description": "SSO URL where the user should continue login, when provided",
             "type": "string"
           }
         },
@@ -583,8 +606,10 @@
       },
       "response_login_lookup": {
         "additionalProperties": false,
+        "description": "Login lookup response indicating whether SSO is available for the account",
         "properties": {
           "sso_url": {
+            "description": "URL for SSO login when the account must authenticate through an identity provider",
             "type": "string"
           }
         },
@@ -592,11 +617,14 @@
       },
       "response_login_oauth_url": {
         "additionalProperties": false,
+        "description": "OAuth2 authorization URL response for login",
         "properties": {
           "authorization_url": {
+            "description": "OAuth2 provider authorization URL to open for login",
             "type": "string"
           },
           "client_id": {
+            "description": "OAuth2 client identifier used for the authorization request",
             "type": "string"
           }
         },
@@ -608,14 +636,18 @@
       },
       "response_login_success": {
         "additionalProperties": false,
+        "description": "Login response body, empty on normal success or populated with two-factor state",
         "properties": {
           "email": {
+            "description": "Admin email address for a login flow that requires two-factor authentication",
             "type": "string"
           },
           "two_factor_passed": {
+            "description": "Whether the supplied two-factor code has been accepted for this login",
             "type": "boolean"
           },
           "two_factor_required": {
+            "description": "Whether this login requires a two-factor code before a session is established",
             "type": "boolean"
           }
         },
@@ -623,11 +655,14 @@
       },
       "response_self_oauth_link_failure": {
         "additionalProperties": false,
+        "description": "OAuth2 account-linking failure response",
         "properties": {
           "error": {
+            "description": "OAuth2 error code returned during account linking",
             "type": "string"
           },
           "error_description": {
+            "description": "Human-readable description of the OAuth2 account-linking failure",
             "type": "string"
           }
         },
@@ -639,12 +674,15 @@
       },
       "response_self_oauth_link_success": {
         "additionalProperties": false,
+        "description": "OAuth2 account-linking success response",
         "properties": {
           "action": {
+            "description": "Completed OAuth2 account-linking action",
             "type": "string"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Linked OAuth2 account identifier returned by the provider"
           }
         },
         "required": [
@@ -655,11 +693,14 @@
       },
       "response_self_oauth_url": {
         "additionalProperties": false,
+        "description": "OAuth2 authorization URL response for linking the current Mist account",
         "properties": {
           "authorization_url": {
+            "description": "OAuth2 provider authorization URL used to link the Mist account",
             "type": "string"
           },
           "linked": {
+            "description": "Whether the Mist account is already linked with this OAuth2 provider",
             "type": "boolean"
           }
         },
@@ -670,8 +711,10 @@
         "type": "object"
       },
       "two_factor_string": {
+        "description": "Request body for submitting a 2FA login code",
         "properties": {
           "two_factor": {
+            "description": "One-time 2FA login code generated by the user's authenticator app",
             "examples": [
               "123456"
             ],
@@ -1074,19 +1117,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

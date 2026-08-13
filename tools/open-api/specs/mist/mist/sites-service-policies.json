@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sites Service Policies",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -123,7 +119,7 @@
   "components": {
     "schemas": {
       "allow_deny": {
-        "description": "enum: `allow`, `deny`",
+        "description": "Policy action value that either allows or denies matching traffic. enum: `allow`, `deny`",
         "enum": [
           "allow",
           "deny"
@@ -147,12 +143,15 @@
       },
       "idp_config": {
         "additionalProperties": false,
+        "description": "Intrusion detection and prevention settings for a service policy",
         "properties": {
           "alert_only": {
+            "description": "Whether to alert without enforcing IDP prevention actions",
             "type": "boolean"
           },
           "enabled": {
             "default": false,
+            "description": "Whether IDP inspection is enabled for the policy",
             "type": "boolean"
           },
           "idpprofile_id": {
@@ -178,6 +177,7 @@
         "type": "number"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -186,73 +186,92 @@
         "type": "string"
       },
       "org_service_policies": {
+        "description": "List of organization-level service policies",
         "items": {
           "$ref": "#/components/schemas/org_service_policy"
         },
         "type": "array"
       },
       "org_service_policy": {
+        "description": "Organization-level service policy that allows or denies traffic for tenants and services",
         "properties": {
           "aamw": {
-            "$ref": "#/components/schemas/service_policy_aamw"
+            "$ref": "#/components/schemas/service_policy_aamw",
+            "description": "Advanced anti-malware settings applied by this service policy"
           },
           "action": {
-            "$ref": "#/components/schemas/allow_deny"
+            "$ref": "#/components/schemas/allow_deny",
+            "description": "Allow or deny action for traffic matched by this service policy"
           },
           "antivirus": {
-            "$ref": "#/components/schemas/service_policy_antivirus"
+            "$ref": "#/components/schemas/service_policy_antivirus",
+            "description": "Malware and virus inspection settings applied by this service policy"
           },
           "appqoe": {
-            "$ref": "#/components/schemas/service_policy_appqoe"
+            "$ref": "#/components/schemas/service_policy_appqoe",
+            "description": "Application QoE settings applied by this service policy"
           },
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Epoch timestamp when the service policy was created"
           },
           "ewf": {
-            "$ref": "#/components/schemas/service_policy_ewf"
+            "$ref": "#/components/schemas/service_policy_ewf",
+            "description": "Enhanced web filtering rules applied by this service policy"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the service policy"
           },
           "idp": {
-            "$ref": "#/components/schemas/idp_config"
+            "$ref": "#/components/schemas/idp_config",
+            "description": "Intrusion detection and prevention settings applied by this service policy"
           },
           "local_routing": {
-            "description": "access within the same VRF",
+            "description": "Whether the policy permits access within the same VRF",
             "type": "boolean"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Epoch timestamp when the service policy was last modified"
           },
           "name": {
+            "description": "Display name of the service policy",
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization that owns this service policy"
           },
           "path_preference": {
             "description": "By default, we derive all paths available and use them, optionally, you can customize by using `path_preference`",
             "type": "string"
           },
           "secintel": {
-            "$ref": "#/components/schemas/service_policy_secintel"
+            "$ref": "#/components/schemas/service_policy_secintel",
+            "description": "Juniper SecIntel threat intelligence settings applied by this service policy"
           },
           "services": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Application services or groups matched by this policy"
           },
           "ssl_proxy": {
-            "$ref": "#/components/schemas/service_policy_ssl_proxy"
+            "$ref": "#/components/schemas/service_policy_ssl_proxy",
+            "description": "SSL proxy inspection settings applied by this service policy"
           },
           "tenants": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Tenant names matched by this service policy"
           }
         },
         "type": "object"
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -263,8 +282,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -275,8 +296,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -287,8 +310,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -296,8 +321,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -308,19 +335,21 @@
       },
       "service_policy_aamw": {
         "additionalProperties": false,
-        "description": "SRX only",
+        "description": "SRX advanced anti-malware settings for a service policy",
         "properties": {
           "aamwprofile_id": {
-            "description": "org-level Advanced Advance Anti Malware Profile (SkyAtp) Profile can be used, this takes precedence over 'profile'",
+            "description": "Organization-level advanced anti-malware profile ID; takes precedence over inline `profile` settings",
             "format": "uuid",
             "type": "string"
           },
           "enabled": {
             "default": false,
+            "description": "Whether advanced anti-malware inspection is enabled for the service policy",
             "type": "boolean"
           },
           "profile": {
-            "$ref": "#/components/schemas/service_policy_aamw_profile"
+            "$ref": "#/components/schemas/service_policy_aamw_profile",
+            "description": "Built-in advanced anti-malware inspection profile to apply"
           }
         },
         "type": "object"
@@ -337,19 +366,20 @@
       },
       "service_policy_antivirus": {
         "additionalProperties": false,
-        "description": "For SRX-only",
+        "description": "SRX antivirus inspection settings for a service policy",
         "properties": {
           "avprofile_id": {
-            "description": "org-level AV Profile can be used, this takes precedence over 'profile'",
+            "description": "Organization-level antivirus profile ID; takes precedence over inline `profile` settings",
             "format": "uuid",
             "type": "string"
           },
           "enabled": {
             "default": false,
+            "description": "Whether antivirus inspection is enabled for the service policy",
             "type": "boolean"
           },
           "profile": {
-            "description": "Default / noftp / httponly / or keys from av_profiles",
+            "description": "Antivirus profile name to apply, such as `default`, `noftp`, `httponly`, or an AV profile key",
             "type": "string"
           }
         },
@@ -357,16 +387,18 @@
       },
       "service_policy_appqoe": {
         "additionalProperties": false,
-        "description": "SRX only",
+        "description": "SRX application QoE settings for a service policy",
         "properties": {
           "enabled": {
             "default": false,
+            "description": "Whether application QoE is enabled for the service policy",
             "type": "boolean"
           }
         },
         "type": "object"
       },
       "service_policy_ewf": {
+        "description": "Enhanced web filtering rules applied by a service policy",
         "items": {
           "$ref": "#/components/schemas/service_policy_ewf_rule"
         },
@@ -374,11 +406,14 @@
       },
       "service_policy_ewf_rule": {
         "additionalProperties": false,
+        "description": "Enhanced web filtering rule applied by a service policy",
         "properties": {
           "alert_only": {
+            "description": "Whether matching enhanced web filtering traffic is logged without being blocked",
             "type": "boolean"
           },
           "block_message": {
+            "description": "Message returned when enhanced web filtering blocks a request",
             "examples": [
               "Access to this URL Category has been blocked"
             ],
@@ -386,10 +421,12 @@
           },
           "enabled": {
             "default": false,
+            "description": "Whether this enhanced web filtering rule is enabled",
             "type": "boolean"
           },
           "profile": {
-            "$ref": "#/components/schemas/service_policy_ewf_rule_profile"
+            "$ref": "#/components/schemas/service_policy_ewf_rule_profile",
+            "description": "Enhanced web filtering profile applied by this rule"
           }
         },
         "type": "object"
@@ -406,17 +443,19 @@
       },
       "service_policy_secintel": {
         "additionalProperties": false,
-        "description": "SRX only",
+        "description": "SRX SecIntel settings for a service policy",
         "properties": {
           "enabled": {
             "default": false,
+            "description": "Whether SecIntel inspection is enabled for the service policy",
             "type": "boolean"
           },
           "profile": {
-            "$ref": "#/components/schemas/service_policy_secintel_profile"
+            "$ref": "#/components/schemas/service_policy_secintel_profile",
+            "description": "Protection level applied by SecIntel inspection"
           },
           "secintelprofile_id": {
-            "description": "org-level secintel Profile can be used, this takes precedence over 'profile'",
+            "description": "Organization-level SecIntel profile ID; takes precedence over inline `profile` settings",
             "type": "string"
           }
         },
@@ -434,13 +473,15 @@
       },
       "service_policy_ssl_proxy": {
         "additionalProperties": false,
-        "description": "For SRX-only",
+        "description": "SRX SSL proxy inspection settings for a service policy",
         "properties": {
           "ciphers_category": {
-            "$ref": "#/components/schemas/ssl_proxy_ciphers_category"
+            "$ref": "#/components/schemas/ssl_proxy_ciphers_category",
+            "description": "Allowed cipher strength category for SSL proxy inspection"
           },
           "enabled": {
             "default": false,
+            "description": "Whether SSL proxy inspection is enabled for the service policy",
             "type": "boolean"
           }
         },
@@ -457,6 +498,7 @@
         "type": "string"
       },
       "strings": {
+        "description": "Unique string values returned or accepted by this schema",
         "items": {
           "type": "string"
         },
@@ -662,19 +704,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

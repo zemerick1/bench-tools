@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Licenses",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "post": {
-        "description": "Claim Org licenses / activation codes",
+        "description": "Synchronously claims licenses and/or inventory devices from an activation code. All inventory devices are claimed immediately during the request.",
         "operationId": "claimOrgLicense",
         "requestBody": {
           "content": {
@@ -133,11 +129,11 @@
         }
       ],
       "get": {
-        "description": "Get Processing Status for Async Claim",
+        "description": "Return processing status for an asynchronous organization license claim, optionally including per-device license details.",
         "operationId": "GetOrgLicenseAsyncClaimStatus",
         "parameters": [
           {
-            "description": "Request license details",
+            "description": "Whether to include license details in the claim status response",
             "in": "query",
             "name": "detail",
             "schema": {
@@ -174,6 +170,158 @@
         ]
       }
     },
+    "/api/v1/orgs/{org_id}/claims": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "get": {
+        "description": "List all async inventory claim jobs for the organization, optionally including per-device details per claim.",
+        "operationId": "listOrgAsyncClaims",
+        "parameters": [
+          {
+            "description": "Whether to include per-device detail in each claim record",
+            "in": "query",
+            "name": "detail",
+            "schema": {
+              "examples": [
+                true
+              ],
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AsyncClaimsList"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "listOrgAsyncClaims",
+        "tags": [
+          "Orgs Licenses"
+        ]
+      },
+      "post": {
+        "description": "Schedules an async claim for inventory devices. Inventory claiming is queued and processed in the background; the response returns immediately with a `claim_id` for polling. Licenses (if `type=all`) are still claimed synchronously during the request.\n\nUse `GET /api/v1/orgs/{org_id}/claims/{claim_id}` to poll the result.",
+        "operationId": "createOrgAsyncClaim",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "code": "ZHT3K-H36DT-MG85D-M61AC",
+                    "type": "inventory"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/claim_activation_async"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AsyncClaimCreate"
+          },
+          "400": {
+            "description": "Invalid key (or already used)"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "createOrgAsyncClaim",
+        "tags": [
+          "Orgs Licenses"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_id}/claims/{claim_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        },
+        {
+          "description": "Unique identifier of the async claim job",
+          "in": "path",
+          "name": "claim_id",
+          "required": true,
+          "schema": {
+            "format": "uuid",
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "description": "Return the processing status for a specific async inventory claim job, optionally including per-device details.",
+        "operationId": "getOrgAsyncClaimStatus",
+        "parameters": [
+          {
+            "description": "Whether to include per-device detail in the claim status response",
+            "in": "query",
+            "name": "detail",
+            "schema": {
+              "examples": [
+                true
+              ],
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AsyncClaimStatus"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getOrgAsyncClaimStatus",
+        "tags": [
+          "Orgs Licenses"
+        ]
+      }
+    },
     "/api/v1/orgs/{org_id}/licenses": {
       "parameters": [
         {
@@ -181,7 +329,7 @@
         }
       ],
       "get": {
-        "description": "Get the list of licenses",
+        "description": "Return the organization license entitlement, subscription, amendment, consumption, and available-license summary.",
         "operationId": "getOrgLicensesSummary",
         "responses": {
           "200": {
@@ -315,21 +463,41 @@
   "components": {
     "schemas": {
       "claim_activation": {
+        "description": "Request to claim organization licenses or activation codes",
         "properties": {
-          "async": {
-            "default": false,
-            "description": "Whether to do a async claim process",
-            "type": "boolean"
-          },
           "code": {
-            "description": "Activation code",
+            "description": "Activation or license claim code to redeem",
             "type": "string"
           },
           "device_type": {
-            "$ref": "#/components/schemas/device_type_default_ap"
+            "$ref": "#/components/schemas/device_type_default_ap",
+            "description": "If only intended to claim a certain device type, specify it here"
           },
           "type": {
-            "$ref": "#/components/schemas/claim_type"
+            "$ref": "#/components/schemas/claim_type",
+            "description": "Claim scope, such as all, inventory, or license"
+          }
+        },
+        "required": [
+          "code",
+          "type"
+        ],
+        "type": "object"
+      },
+      "claim_activation_async": {
+        "description": "Request to schedule an asynchronous inventory claim",
+        "properties": {
+          "code": {
+            "description": "Activation code to claim",
+            "type": "string"
+          },
+          "device_type": {
+            "$ref": "#/components/schemas/device_type_default_ap",
+            "description": "If only intended to claim a certain device type, specify it here"
+          },
+          "type": {
+            "$ref": "#/components/schemas/claim_type_async",
+            "description": "Claim scope; `all` claims licenses synchronously and queues inventory, `inventory` queues inventory only"
           }
         },
         "required": [
@@ -345,6 +513,14 @@
           "all",
           "inventory",
           "license"
+        ],
+        "type": "string"
+      },
+      "claim_type_async": {
+        "description": "Claim scope for async inventory claiming. enum: `all`, `inventory`",
+        "enum": [
+          "all",
+          "inventory"
         ],
         "type": "string"
       },
@@ -375,10 +551,11 @@
       },
       "license": {
         "additionalProperties": false,
-        "description": "License",
+        "description": "Organization license entitlement, subscription, and usage summary",
         "properties": {
           "amendments": {
-            "$ref": "#/components/schemas/license_amendments"
+            "$ref": "#/components/schemas/license_amendments",
+            "description": "Read-only license amendments associated with the organization"
           },
           "entitled": {
             "additionalProperties": {
@@ -389,56 +566,70 @@
             "type": "object"
           },
           "fully_loaded": {
-            "$ref": "#/components/schemas/license_fully_loaded"
+            "$ref": "#/components/schemas/license_fully_loaded",
+            "description": "Maximum license demand by service if all organization devices use each service"
           },
           "licenses": {
-            "$ref": "#/components/schemas/licenses"
+            "$ref": "#/components/schemas/licenses",
+            "description": "Read-only license subscriptions for the organization"
           },
           "summary": {
-            "$ref": "#/components/schemas/license_summary"
+            "$ref": "#/components/schemas/license_summary",
+            "description": "Current license consumption by license type"
           },
           "usages": {
-            "$ref": "#/components/schemas/license_usages"
+            "$ref": "#/components/schemas/license_usages",
+            "description": "Available license counts by service"
           }
         },
         "type": "object"
       },
       "license_amendment": {
         "additionalProperties": false,
+        "description": "Read-only change applied to a license subscription",
         "properties": {
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Timestamp when the license amendment was created"
           },
           "end_time": {
+            "description": "End time of the license amendment",
             "readOnly": true,
             "type": "integer"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the license amendment"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Timestamp when the license amendment was last modified"
           },
           "quantity": {
+            "description": "License quantity associated with this amendment",
             "readOnly": true,
             "type": "integer"
           },
           "start_time": {
+            "description": "Start time of the license amendment",
             "readOnly": true,
             "type": "integer"
           },
           "subscription_id": {
+            "description": "Subscription identifier associated with this amendment",
             "readOnly": true,
             "type": "string"
           },
           "type": {
-            "$ref": "#/components/schemas/license_type"
+            "$ref": "#/components/schemas/license_type",
+            "description": "License type affected by this amendment"
           }
         },
         "readOnly": true,
         "type": "object"
       },
       "license_amendments": {
+        "description": "Read-only list of license amendments",
         "items": {
           "$ref": "#/components/schemas/license_amendment"
         },
@@ -457,9 +648,11 @@
       },
       "license_sub": {
         "additionalProperties": false,
+        "description": "Read-only license subscription record",
         "properties": {
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Timestamp when the license subscription was created"
           },
           "end_time": {
             "description": "End date of the license term",
@@ -467,17 +660,21 @@
             "type": "integer"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the license subscription"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Timestamp when the license subscription was last modified"
           },
           "order_id": {
+            "description": "Order identifier for this license subscription",
             "readOnly": true,
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization that owns this license subscription"
           },
           "quantity": {
             "description": "Number of devices entitled for this license",
@@ -494,11 +691,13 @@
             "type": "integer"
           },
           "subscription_id": {
+            "description": "Subscription identifier for this license subscription",
             "readOnly": true,
             "type": "string"
           },
           "type": {
-            "$ref": "#/components/schemas/license_type"
+            "$ref": "#/components/schemas/license_type",
+            "description": "License type for this subscription"
           }
         },
         "readOnly": true,
@@ -519,26 +718,33 @@
       },
       "license_usage_org": {
         "additionalProperties": false,
+        "description": "License usage record for an organization usage scope",
         "properties": {
           "for_site": {
+            "description": "Whether this license usage record is scoped to a site",
             "readOnly": true,
             "type": "boolean"
           },
           "fully_loaded": {
-            "$ref": "#/components/schemas/license_fully_loaded"
+            "$ref": "#/components/schemas/license_fully_loaded",
+            "description": "Maximum license demand by service if all organization devices use each service"
           },
           "num_devices": {
+            "description": "Number of devices counted in this license usage scope",
             "readOnly": true,
             "type": "integer"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site associated with this license usage record"
           },
           "summary": {
-            "$ref": "#/components/schemas/license_summary"
+            "$ref": "#/components/schemas/license_summary",
+            "description": "Current license consumption by license type for this usage scope"
           },
           "usages": {
-            "$ref": "#/components/schemas/license_usages"
+            "$ref": "#/components/schemas/license_usages",
+            "description": "Available license counts by service for this usage scope"
           }
         },
         "required": [
@@ -553,11 +759,12 @@
           "readOnly": true,
           "type": "integer"
         },
-        "description": "Number of available licenes. Property key is the service name (e.g. \"SUB-MAN\"). name (e.g. \"SUB-MAN\")",
+        "description": "Number of available licenses. Property key is the service name (e.g. \"SUB-MAN\").",
         "readOnly": true,
         "type": "object"
       },
       "licenses": {
+        "description": "License subscriptions for the organization",
         "items": {
           "$ref": "#/components/schemas/license_sub"
         },
@@ -570,6 +777,7 @@
         "type": "number"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -578,6 +786,7 @@
         "type": "string"
       },
       "org_license_action": {
+        "description": "Request to amend, annotate, delete, or unamend an organization license",
         "properties": {
           "amendment_id": {
             "description": "If `op`==`unamend`, the ID of the operation to cancel",
@@ -590,11 +799,12 @@
             "type": "string"
           },
           "notes": {
-            "description": "If `op`==`annotate`",
+            "description": "If `op`==`annotate`, note text to attach to the license",
             "type": "string"
           },
           "op": {
-            "$ref": "#/components/schemas/org_license_action_operation"
+            "$ref": "#/components/schemas/org_license_action_operation",
+            "description": "License action operation to perform"
           },
           "quantity": {
             "description": "If `op`==`amend`, the number of licenses to move",
@@ -620,48 +830,141 @@
         ],
         "type": "string"
       },
-      "response_async_license": {
+      "response_async_claim_create": {
         "additionalProperties": false,
+        "description": "Response to an async inventory claim request",
         "properties": {
+          "claim_id": {
+            "description": "Unique identifier for the async claim job, used to poll status",
+            "format": "uuid",
+            "type": "string"
+          },
+          "inventory_pending": {
+            "$ref": "#/components/schemas/response_claim_license_inventory_pending",
+            "description": "Inventory devices queued for async claim processing"
+          }
+        },
+        "type": "object"
+      },
+      "response_async_claim_status": {
+        "additionalProperties": false,
+        "description": "Async inventory claim job status",
+        "properties": {
+          "claim_id": {
+            "description": "Unique identifier of the async claim job",
+            "format": "uuid",
+            "type": "string"
+          },
           "completed": {
-            "$ref": "#/components/schemas/response_async_license_completed"
+            "$ref": "#/components/schemas/response_async_license_completed",
+            "description": "Device MAC addresses that completed async claim processing"
           },
           "details": {
-            "$ref": "#/components/schemas/response_async_license_details"
+            "$ref": "#/components/schemas/response_async_license_details",
+            "description": "Per-device status details for async claim processing; present when `detail=true`"
           },
           "failed": {
-            "description": "Current failed number of device",
+            "description": "Number of devices that failed claim processing",
             "type": "integer"
           },
           "incompleted": {
-            "$ref": "#/components/schemas/response_async_license_incompleted"
+            "$ref": "#/components/schemas/response_async_license_incompleted",
+            "description": "Device MAC addresses not yet completed in async claim processing"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization that owns the async claim job"
           },
           "processed": {
-            "description": "Current processed number of device",
+            "description": "Number of devices processed so far",
             "type": "integer"
           },
           "scheduled_at": {
-            "description": "epoch time of aysnc claim scheduled",
+            "description": "Epoch timestamp when the async claim was scheduled",
             "type": "integer"
           },
           "status": {
-            "$ref": "#/components/schemas/response_async_license_status"
+            "$ref": "#/components/schemas/response_async_license_status",
+            "description": "Current async claim processing state"
           },
           "succeed": {
-            "description": "Current succeed number of device",
+            "description": "Number of devices that successfully completed claim processing",
             "type": "integer"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Epoch timestamp of the last status report"
           },
           "total": {
-            "description": "total number of device included in claim",
+            "description": "Total number of devices included in the claim",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "response_async_claims_list": {
+        "additionalProperties": false,
+        "description": "List of async inventory claim jobs for the organization",
+        "properties": {
+          "claims": {
+            "description": "Async claim job status records",
+            "items": {
+              "$ref": "#/components/schemas/response_async_claim_status"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "response_async_license": {
+        "additionalProperties": false,
+        "description": "Asynchronous license claim progress response",
+        "properties": {
+          "completed": {
+            "$ref": "#/components/schemas/response_async_license_completed",
+            "description": "Device MAC addresses that completed asynchronous license claim processing"
+          },
+          "details": {
+            "$ref": "#/components/schemas/response_async_license_details",
+            "description": "Per-device status details for asynchronous license claim processing"
+          },
+          "failed": {
+            "description": "Number of devices that failed license claim processing",
+            "type": "integer"
+          },
+          "incompleted": {
+            "$ref": "#/components/schemas/response_async_license_incompleted",
+            "description": "Device MAC addresses not yet completed in asynchronous license claim processing"
+          },
+          "processed": {
+            "description": "Number of devices processed so far by asynchronous license claim",
+            "type": "integer"
+          },
+          "scheduled_at": {
+            "description": "Epoch timestamp when the asynchronous license claim was scheduled",
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/response_async_license_status",
+            "description": "Current asynchronous license claim processing state"
+          },
+          "succeed": {
+            "description": "Number of devices that successfully completed license claim processing",
+            "type": "integer"
+          },
+          "timestamp": {
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Epoch timestamp when this asynchronous license status was reported"
+          },
+          "total": {
+            "description": "Number of devices included in the license claim",
             "type": "integer"
           }
         },
         "type": "object"
       },
       "response_async_license_completed": {
+        "description": "Device MAC addresses that completed asynchronous license claim processing",
         "items": {
           "type": "string"
         },
@@ -669,36 +972,39 @@
       },
       "response_async_license_detail": {
         "additionalProperties": false,
-        "description": "detail claim status per device",
+        "description": "Per-device asynchronous license claim status",
         "properties": {
           "mac": {
-            "description": "Device MAC Address",
+            "description": "Device MAC address for this license claim detail",
             "type": "string"
           },
           "status": {
+            "description": "Claim processing state for this device",
             "type": "string"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Epoch timestamp when this device claim status was reported"
           }
         },
         "type": "object"
       },
       "response_async_license_details": {
+        "description": "Per-device asynchronous license claim status details",
         "items": {
           "$ref": "#/components/schemas/response_async_license_detail"
         },
         "type": "array"
       },
       "response_async_license_incompleted": {
-        "description": "Current incompleted lists (macs)",
+        "description": "Device MAC addresses not yet completed in asynchronous license claim processing",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
       "response_async_license_status": {
-        "description": "processing status of async. enum: `prepared`, `ongoing`, `done`",
+        "description": "Processing state for an asynchronous license claim. enum: `prepared`, `ongoing`, `done`",
         "enum": [
           "prepared",
           "ongoing",
@@ -708,24 +1014,31 @@
       },
       "response_claim_license": {
         "additionalProperties": false,
+        "description": "Result of claiming licenses or activation codes",
         "properties": {
           "inventory_added": {
-            "$ref": "#/components/schemas/response_claim_license_inventory_added"
+            "$ref": "#/components/schemas/response_claim_license_inventory_added",
+            "description": "Inventory devices added by the claim operation"
           },
           "inventory_duplicated": {
-            "$ref": "#/components/schemas/response_claim_license_inventory_duplicated"
+            "$ref": "#/components/schemas/response_claim_license_inventory_duplicated",
+            "description": "Inventory devices already present during the claim operation"
           },
           "inventory_pending": {
-            "$ref": "#/components/schemas/response_claim_license_inventory_pending"
+            "$ref": "#/components/schemas/response_claim_license_inventory_pending",
+            "description": "Inventory devices pending asynchronous claim processing"
           },
           "license_added": {
-            "$ref": "#/components/schemas/response_claim_license_license_added"
+            "$ref": "#/components/schemas/response_claim_license_license_added",
+            "description": "License entitlements added by the claim operation"
           },
           "license_duplicated": {
-            "$ref": "#/components/schemas/response_claim_license_license_duplicated"
+            "$ref": "#/components/schemas/response_claim_license_license_duplicated",
+            "description": "License entitlements already present during the claim operation"
           },
           "license_error": {
-            "$ref": "#/components/schemas/response_claim_license_license_error"
+            "$ref": "#/components/schemas/response_claim_license_license_error",
+            "description": "License claim errors returned by order number"
           }
         },
         "required": [
@@ -738,6 +1051,7 @@
         "type": "object"
       },
       "response_claim_license_inventory_added": {
+        "description": "Inventory devices added by the claim operation",
         "items": {
           "$ref": "#/components/schemas/response_claim_license_inventory_item"
         },
@@ -745,6 +1059,7 @@
         "uniqueItems": true
       },
       "response_claim_license_inventory_duplicated": {
+        "description": "Inventory devices already present during the claim operation",
         "items": {
           "$ref": "#/components/schemas/response_claim_license_inventory_item"
         },
@@ -752,20 +1067,26 @@
         "uniqueItems": true
       },
       "response_claim_license_inventory_item": {
+        "description": "Inventory device returned by a license claim",
         "properties": {
           "mac": {
+            "description": "Device MAC address for the claimed inventory item",
             "type": "string"
           },
           "magic": {
+            "description": "Activation code or claim code associated with the inventory item",
             "type": "string"
           },
           "model": {
+            "description": "Device model for the claimed inventory item",
             "type": "string"
           },
           "serial": {
+            "description": "Device serial number for the claimed inventory item",
             "type": "string"
           },
           "type": {
+            "description": "Device type for the claimed inventory item",
             "type": "string"
           }
         },
@@ -778,7 +1099,7 @@
         ]
       },
       "response_claim_license_inventory_pending": {
-        "description": "for async claim",
+        "description": "Inventory devices pending asynchronous claim processing",
         "items": {
           "$ref": "#/components/schemas/response_claim_license_inventory_pending_item"
         },
@@ -787,14 +1108,17 @@
       },
       "response_claim_license_inventory_pending_item": {
         "additionalProperties": false,
+        "description": "Inventory device pending asynchronous claim processing",
         "properties": {
           "mac": {
+            "description": "Device MAC address pending asynchronous inventory claim",
             "type": "string"
           }
         },
         "type": "object"
       },
       "response_claim_license_license_added": {
+        "description": "License entitlements added by the claim operation",
         "items": {
           "$ref": "#/components/schemas/response_claim_license_license_item"
         },
@@ -802,6 +1126,7 @@
         "uniqueItems": true
       },
       "response_claim_license_license_duplicated": {
+        "description": "License entitlements already present during the claim operation",
         "items": {
           "$ref": "#/components/schemas/response_claim_license_license_item"
         },
@@ -809,6 +1134,7 @@
         "uniqueItems": true
       },
       "response_claim_license_license_error": {
+        "description": "License claim errors returned by order number",
         "items": {
           "$ref": "#/components/schemas/response_claim_license_license_error_item"
         },
@@ -816,11 +1142,14 @@
         "uniqueItems": true
       },
       "response_claim_license_license_error_item": {
+        "description": "License order that could not be claimed",
         "properties": {
           "order": {
+            "description": "License order number or claim identifier that failed",
             "type": "string"
           },
           "reason": {
+            "description": "Explanation of why the license order could not be claimed",
             "type": "string"
           }
         },
@@ -830,17 +1159,22 @@
         ]
       },
       "response_claim_license_license_item": {
+        "description": "License entitlement returned by a claim operation",
         "properties": {
           "end": {
+            "description": "Epoch timestamp when the license entitlement ends",
             "type": "integer"
           },
           "quantity": {
+            "description": "Number of license units included in the entitlement",
             "type": "integer"
           },
           "start": {
+            "description": "Epoch timestamp when the license entitlement starts",
             "type": "integer"
           },
           "type": {
+            "description": "License SKU or subscription type",
             "type": "string"
           }
         },
@@ -853,8 +1187,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -865,8 +1201,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -877,8 +1215,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -889,8 +1229,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -898,8 +1240,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -909,6 +1253,7 @@
         "type": "object"
       },
       "site_id": {
+        "description": "Unique identifier of a Mist site",
         "examples": [
           "441a1214-6928-442a-8e92-e1d34b8ec6a6"
         ],
@@ -917,12 +1262,13 @@
         "type": "string"
       },
       "timestamp": {
-        "description": "Epoch (seconds)",
+        "description": "Epoch timestamp, in seconds",
         "format": "double",
         "readOnly": true,
         "type": "number"
       },
       "usage_org_licenses": {
+        "description": "Organization license usage records returned by a usage response",
         "items": {
           "$ref": "#/components/schemas/license_usage_org"
         },
@@ -931,6 +1277,87 @@
       }
     },
     "responses": {
+      "AsyncClaimCreate": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/AsyncClaimCreateExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_async_claim_create"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/AsyncClaimCreateExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_async_claim_create"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "AsyncClaimStatus": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/AsyncClaimStatusExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_async_claim_status"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/AsyncClaimStatusExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_async_claim_status"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "AsyncClaimsList": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Detail False": {
+                "$ref": "#/components/examples/AsyncClaimsListExample"
+              },
+              "Detail True": {
+                "$ref": "#/components/examples/AsyncClaimsListDetailExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_async_claims_list"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Detail False": {
+                "$ref": "#/components/examples/AsyncClaimsListExample"
+              },
+              "Detail True": {
+                "$ref": "#/components/examples/AsyncClaimsListDetailExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_async_claims_list"
+            }
+          }
+        },
+        "description": "OK"
+      },
       "AsyncLicense": {
         "content": {
           "application/json": {
@@ -1165,6 +1592,122 @@
       }
     },
     "examples": {
+      "AsyncClaimCreateExample": {
+        "value": {
+          "claim_id": "8e2a0c6f-6f3c-4c4e-9c72-8c5b1c1b6b9b",
+          "inventory_pending": [
+            {
+              "mac": "5c5b35000012"
+            },
+            {
+              "mac": "5c5b35000018"
+            }
+          ]
+        }
+      },
+      "AsyncClaimStatusExample": {
+        "value": {
+          "claim_id": "8e2a0c6f-6f3c-4c4e-9c72-8c5b1c1b6b9b",
+          "completed": [
+            "000000000022",
+            "000000000011"
+          ],
+          "details": [
+            {
+              "mac": "000000000022",
+              "status": "added",
+              "timestamp": 1709598053
+            },
+            {
+              "mac": "000000000011",
+              "status": "added",
+              "timestamp": 1709598053
+            }
+          ],
+          "failed": 0,
+          "incompleted": [],
+          "org_id": "44fe2c6b-7d7d-46e6-8d4f-5ce6a7c6b01a",
+          "processed": 2,
+          "scheduled_at": 1709598052,
+          "status": "done",
+          "succeed": 2,
+          "timestamp": 1709598053,
+          "total": 2
+        }
+      },
+      "AsyncClaimsListDetailExample": {
+        "value": {
+          "claims": [
+            {
+              "claim_id": "8e2a0c6f-6f3c-4c4e-9c72-8c5b1c1b6b9b",
+              "completed": [
+                "000000000022",
+                "000000000011"
+              ],
+              "details": [
+                {
+                  "mac": "000000000022",
+                  "status": "added",
+                  "timestamp": 1709598053
+                },
+                {
+                  "mac": "000000000011",
+                  "status": "added",
+                  "timestamp": 1709598053
+                }
+              ],
+              "failed": 0,
+              "incompleted": [],
+              "org_id": "44fe2c6b-7d7d-46e6-8d4f-5ce6a7c6b01a",
+              "processed": 2,
+              "scheduled_at": 1709598052,
+              "status": "done",
+              "succeed": 2,
+              "timestamp": 1709598053,
+              "total": 2
+            }
+          ]
+        }
+      },
+      "AsyncClaimsListExample": {
+        "value": {
+          "claims": [
+            {
+              "claim_id": "8e2a0c6f-6f3c-4c4e-9c72-8c5b1c1b6b9b",
+              "completed": [
+                "000000000022",
+                "000000000011"
+              ],
+              "failed": 0,
+              "incompleted": [],
+              "org_id": "44fe2c6b-7d7d-46e6-8d4f-5ce6a7c6b01a",
+              "processed": 2,
+              "scheduled_at": 1709598052,
+              "status": "done",
+              "succeed": 2,
+              "timestamp": 1709598053,
+              "total": 2
+            },
+            {
+              "claim_id": "3a7b6c1e-4e5a-4eaa-9c7f-9a9c62b7f402",
+              "completed": [
+                "000000000044"
+              ],
+              "failed": 0,
+              "incompleted": [
+                "000000000033"
+              ],
+              "org_id": "44fe2c6b-7d7d-46e6-8d4f-5ce6a7c6b01a",
+              "processed": 1,
+              "scheduled_at": 1709598070,
+              "status": "ongoing",
+              "succeed": 1,
+              "timestamp": 1709598075,
+              "total": 2
+            }
+          ]
+        }
+      },
       "AsyncLicenseExample": {
         "value": {
           "completed": [
@@ -1475,19 +2018,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

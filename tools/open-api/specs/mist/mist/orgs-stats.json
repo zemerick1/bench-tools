@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Stats",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,25 +76,8 @@
         }
       ],
       "get": {
-        "description": "Get Org Stats",
+        "description": "Return an organization statistics summary, including device, inventory, and site counts, connected and disconnected device counts, organization group membership, and SLE summaries.",
         "operationId": "getOrgStats",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/start"
-          },
-          {
-            "$ref": "#/components/parameters/end"
-          },
-          {
-            "$ref": "#/components/parameters/duration"
-          },
-          {
-            "$ref": "#/components/parameters/limit"
-          },
-          {
-            "$ref": "#/components/parameters/page"
-          }
-        ],
         "responses": {
           "200": {
             "$ref": "#/components/responses/OrgStats"
@@ -150,6 +129,7 @@
         "type": "number"
       },
       "msp_id": {
+        "description": "Managed service provider identifier",
         "examples": [
           "b9d42c2e-88ee-41f8-b798-f009ce7fe909"
         ],
@@ -159,8 +139,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -171,8 +153,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -183,8 +167,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -195,8 +181,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -204,8 +192,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -216,54 +206,69 @@
       },
       "stats_org": {
         "additionalProperties": false,
-        "description": "Org statistics",
+        "description": "Organization statistics summary returned by the org stats endpoint",
         "properties": {
           "alarmtemplate_id": {
+            "description": "Organization-level alarm template identifier used as the default for sites",
             "format": "uuid",
             "type": "string"
           },
           "allow_mist": {
+            "description": "Whether Mist support access is allowed for this organization",
             "type": "boolean"
           },
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Time when the organization was created, in epoch seconds"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the organization"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Time when the organization was last modified, in epoch seconds"
           },
           "msp_id": {
-            "$ref": "#/components/schemas/msp_id"
+            "$ref": "#/components/schemas/msp_id",
+            "description": "Managed service provider identifier associated with the organization"
           },
           "name": {
+            "description": "Display name of the organization",
             "type": "string"
           },
           "num_devices": {
+            "description": "Total number of devices in the organization",
             "type": "integer"
           },
           "num_devices_connected": {
+            "description": "Number of organization devices currently connected to Mist",
             "type": "integer"
           },
           "num_devices_disconnected": {
+            "description": "Number of organization devices currently disconnected from Mist",
             "type": "integer"
           },
           "num_inventory": {
+            "description": "Number of devices in the organization's inventory",
             "type": "integer"
           },
           "num_sites": {
+            "description": "Number of sites in the organization",
             "type": "integer"
           },
           "orggroup_ids": {
-            "$ref": "#/components/schemas/stats_org_orggroup_ids"
+            "$ref": "#/components/schemas/stats_org_orggroup_ids",
+            "description": "Organization group identifiers that include this organization"
           },
           "session_expiry": {
+            "description": "Admin session lifetime for the organization, in minutes",
             "format": "int64",
             "type": "integer"
           },
           "sle": {
-            "$ref": "#/components/schemas/stats_org_sles"
+            "$ref": "#/components/schemas/stats_org_sles",
+            "description": "Service level expectation summaries for the organization"
           }
         },
         "required": [
@@ -286,6 +291,7 @@
         "type": "object"
       },
       "stats_org_orggroup_ids": {
+        "description": "Organization group identifiers associated with an organization stats record",
         "items": {
           "format": "uuid",
           "type": "string"
@@ -294,12 +300,15 @@
       },
       "stats_org_sle": {
         "additionalProperties": false,
+        "description": "Organization SLE summary for a service path",
         "properties": {
           "path": {
+            "description": "SLE path represented by this organization summary",
             "type": "string"
           },
           "user_minutes": {
-            "$ref": "#/components/schemas/stats_org_sle_user_minutes"
+            "$ref": "#/components/schemas/stats_org_sle_user_minutes",
+            "description": "User-minute totals for this SLE path"
           }
         },
         "required": [
@@ -309,11 +318,14 @@
       },
       "stats_org_sle_user_minutes": {
         "additionalProperties": false,
+        "description": "User-minute totals for an organization SLE summary",
         "properties": {
           "ok": {
+            "description": "User minutes that met the SLE target",
             "type": "number"
           },
           "total": {
+            "description": "Observed total user minutes for the SLE path",
             "type": "number"
           }
         },
@@ -324,6 +336,7 @@
         "type": "object"
       },
       "stats_org_sles": {
+        "description": "Service level expectation summaries for an organization",
         "items": {
           "$ref": "#/components/schemas/stats_org_sle"
         },
@@ -474,37 +487,6 @@
       }
     },
     "parameters": {
-      "duration": {
-        "description": "Duration like 7d, 2w",
-        "in": "query",
-        "name": "duration",
-        "required": false,
-        "schema": {
-          "default": "1d",
-          "examples": [
-            "10m"
-          ],
-          "type": "string"
-        }
-      },
-      "end": {
-        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
-        "in": "query",
-        "name": "end",
-        "schema": {
-          "type": "string"
-        }
-      },
-      "limit": {
-        "in": "query",
-        "name": "limit",
-        "required": false,
-        "schema": {
-          "default": 100,
-          "minimum": 0,
-          "type": "integer"
-        }
-      },
       "org_id": {
         "in": "path",
         "name": "org_id",
@@ -514,24 +496,6 @@
             "000000ab-00ab-00ab-00ab-0000000000ab"
           ],
           "format": "uuid",
-          "type": "string"
-        }
-      },
-      "page": {
-        "in": "query",
-        "name": "page",
-        "required": false,
-        "schema": {
-          "default": 1,
-          "minimum": 1,
-          "type": "integer"
-        }
-      },
-      "start": {
-        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
-        "in": "query",
-        "name": "start",
-        "schema": {
           "type": "string"
         }
       }
@@ -589,19 +553,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

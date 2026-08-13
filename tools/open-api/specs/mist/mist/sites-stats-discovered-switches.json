@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sites Stats - Discovered Switches",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -84,7 +80,7 @@
         "operationId": "searchSiteDiscoveredSwitchesMetrics",
         "parameters": [
           {
-            "description": "Metric scope",
+            "description": "Filter results by scope. enum: `site`, `switch`",
             "in": "query",
             "name": "scope",
             "schema": {
@@ -92,7 +88,7 @@
             }
           },
           {
-            "description": "Metric type",
+            "description": "Metric type. enum: `inactive_wired_vlans`, `poe_compliance`, `switch_ap_affinity`, `version_compliance`",
             "in": "query",
             "name": "type",
             "schema": {
@@ -155,6 +151,7 @@
         "operationId": "countSiteDiscoveredSwitches",
         "parameters": [
           {
+            "description": "Field used to group this count response. enum: `mgmt_addr`, `model`, `system_name`, `version`",
             "in": "query",
             "name": "distinct",
             "schema": {
@@ -270,6 +267,7 @@
         "operationId": "searchSiteDiscoveredSwitches",
         "parameters": [
           {
+            "description": "Filter results by whether the device is adopted",
             "in": "query",
             "name": "adopted",
             "schema": {
@@ -280,6 +278,7 @@
             }
           },
           {
+            "description": "Filter discovered switch results by system name",
             "in": "query",
             "name": "system_name",
             "schema": {
@@ -290,6 +289,7 @@
             }
           },
           {
+            "description": "Filter results by hostname",
             "in": "query",
             "name": "hostname",
             "schema": {
@@ -300,6 +300,7 @@
             }
           },
           {
+            "description": "Filter results by vendor",
             "in": "query",
             "name": "vendor",
             "schema": {
@@ -310,6 +311,7 @@
             }
           },
           {
+            "description": "Filter results by device model",
             "in": "query",
             "name": "model",
             "schema": {
@@ -320,6 +322,7 @@
             }
           },
           {
+            "description": "Filter results by software version",
             "in": "query",
             "name": "version",
             "schema": {
@@ -379,17 +382,21 @@
     "schemas": {
       "ap_redundancy": {
         "additionalProperties": false,
+        "description": "AP switch redundancy coverage summary",
         "properties": {
           "modules": {
-            "$ref": "#/components/schemas/ap_redundancy_modules"
+            "$ref": "#/components/schemas/ap_redundancy_modules",
+            "description": "Per-module AP redundancy counts keyed by switch node ID"
           },
           "num_aps": {
+            "description": "Total number of APs considered for switch redundancy",
             "examples": [
               15
             ],
             "type": "integer"
           },
           "num_aps_with_switch_redundancy": {
+            "description": "Number of APs that have switch redundancy coverage",
             "examples": [
               8
             ],
@@ -400,14 +407,17 @@
       },
       "ap_redundancy_module": {
         "additionalProperties": false,
+        "description": "AP switch redundancy counts for one VC member",
         "properties": {
           "num_aps": {
+            "description": "Total number of APs connected through this VC member",
             "examples": [
               15
             ],
             "type": "integer"
           },
           "num_aps_with_switch_redundancy": {
+            "description": "Number of APs on this VC member with switch redundancy coverage",
             "examples": [
               8
             ],
@@ -427,8 +437,10 @@
         "additionalProperties": {
           "type": "string"
         },
+        "description": "Count result row with the matching distinct field values",
         "properties": {
           "count": {
+            "description": "Number of matching items for the distinct value or values in this result",
             "type": "integer"
           }
         },
@@ -438,6 +450,7 @@
         "type": "object"
       },
       "count_results": {
+        "description": "List of count result rows",
         "items": {
           "$ref": "#/components/schemas/count_result"
         },
@@ -446,48 +459,63 @@
       },
       "discovered_switch": {
         "additionalProperties": false,
+        "description": "Switch discovered from AP uplink LLDP data and site switch discovery",
         "properties": {
           "adopted": {
+            "description": "Whether the discovered switch has been adopted into Mist management",
             "type": "boolean"
           },
           "ap_redundancy": {
-            "$ref": "#/components/schemas/ap_redundancy"
+            "$ref": "#/components/schemas/ap_redundancy",
+            "description": "AP switch redundancy summary for APs connected through the discovered switch"
           },
           "aps": {
-            "$ref": "#/components/schemas/discovered_switch_aps"
+            "$ref": "#/components/schemas/discovered_switch_aps",
+            "description": "Connected APs observed on ports of the discovered switch"
           },
           "chassis_id": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "LLDP chassis identifier reported by the discovered switch"
           },
           "for_site": {
+            "description": "Whether the discovered switch is associated with the requested site",
             "readOnly": true,
             "type": "boolean"
           },
           "mgmt_addr": {
+            "description": "Management IP address advertised by the discovered switch",
             "type": "string"
           },
           "model": {
+            "description": "Switch model reported for the discovered switch",
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization that contains the discovered switch record"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site where the switch was discovered"
           },
           "system_desc": {
+            "description": "LLDP system description advertised by the discovered switch",
             "type": "string"
           },
           "system_name": {
+            "description": "LLDP system name advertised by the discovered switch",
             "type": "string"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Time when the discovered switch data was observed"
           },
           "vendor": {
+            "description": "Switch vendor reported for the discovered switch",
             "type": "string"
           },
           "version": {
+            "description": "Software version reported for the discovered switch",
             "type": "string"
           }
         },
@@ -495,35 +523,45 @@
       },
       "discovered_switch_ap": {
         "additionalProperties": false,
+        "description": "AP attachment details observed on a discovered switch",
         "properties": {
           "hostname": {
+            "description": "AP hostname observed on the discovered switch",
             "type": "string"
           },
           "inactive_wired_vlans": {
-            "$ref": "#/components/schemas/integers"
+            "$ref": "#/components/schemas/integers",
+            "description": "Inactive wired VLAN IDs reported for the AP attachment"
           },
           "mac": {
+            "description": "AP MAC address observed on the discovered switch",
             "type": "string"
           },
           "poe_status": {
+            "description": "Whether the upstream switch port provides PoE for the AP",
             "type": "boolean"
           },
           "port": {
+            "description": "Switch port name connected to the AP",
             "type": "string"
           },
           "port_id": {
+            "description": "LLDP port identifier for the AP uplink",
             "type": "string"
           },
           "power_draw": {
+            "description": "Power draw reported for the AP connection",
             "type": "number"
           },
           "when": {
+            "description": "Timestamp when this AP attachment was last observed",
             "type": "string"
           }
         },
         "type": "object"
       },
       "discovered_switch_aps": {
+        "description": "AP attachments observed on a discovered switch",
         "items": {
           "$ref": "#/components/schemas/discovered_switch_ap"
         },
@@ -532,74 +570,91 @@
       },
       "discovered_switch_metric": {
         "additionalProperties": false,
+        "description": "Time-series metric result for discovered switch health or compliance",
         "properties": {
           "adopted": {
+            "description": "Whether the discovered switch in this metric has been adopted into Mist management",
             "type": "boolean"
           },
           "aps": {
-            "$ref": "#/components/schemas/discovered_switch_metric_aps"
+            "$ref": "#/components/schemas/discovered_switch_metric_aps",
+            "description": "AP attachment details included with this discovered switch metric"
           },
           "chassis_id": {
-            "$ref": "#/components/schemas/discovered_switch_metric_chassis_id"
+            "$ref": "#/components/schemas/discovered_switch_metric_chassis_id",
+            "description": "LLDP chassis identifiers associated with this metric result"
           },
           "hostname": {
+            "description": "Switch hostname associated with this metric result",
             "examples": [
               "SW-HLAB-ea2e00"
             ],
             "type": "string"
           },
           "mgmt_addr": {
+            "description": "Management IP address associated with this metric result",
             "examples": [
               "10.10.20.42"
             ],
             "type": "string"
           },
           "model": {
+            "description": "Switch model associated with this metric result",
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization that contains the discovered switch metric"
           },
           "scope": {
+            "description": "Aggregation scope for the discovered switch metric result",
             "examples": [
               "site"
             ],
             "type": "string"
           },
           "score": {
+            "description": "Compliance or health score for the discovered switch metric",
             "examples": [
               100
             ],
             "type": "integer"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site associated with the discovered switch metric"
           },
           "system_desc": {
+            "description": "LLDP system description associated with this metric result",
             "examples": [
               "Juniper Networks, Inc. ex4100-f-12p Ethernet Switch, kernel JUNOS 22.4R3.25, Build date: 2024-02-10 00:49:09 UTC Copyright (c) 1996-2024 Juniper Networks, Inc."
             ],
             "type": "string"
           },
           "system_name": {
+            "description": "LLDP system name associated with this metric result",
             "examples": [
               "SW-HLAB-ea2e00"
             ],
             "type": "string"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Time bucket for the discovered switch metric result"
           },
           "type": {
+            "description": "Metric category represented by this discovered switch metric",
             "examples": [
               "inactive_wired_vlans"
             ],
             "type": "string"
           },
           "vendor": {
+            "description": "Switch vendor associated with this metric result",
             "type": "string"
           },
           "version": {
+            "description": "Software version associated with this metric result",
             "type": "string"
           }
         },
@@ -607,38 +662,48 @@
       },
       "discovered_switch_metric_ap": {
         "additionalProperties": false,
+        "description": "AP attachment details included in a discovered switch metric",
         "properties": {
           "hostname": {
+            "description": "AP hostname included in the discovered switch metric",
             "type": "string"
           },
           "mac": {
+            "description": "AP MAC address included in the discovered switch metric",
             "type": "string"
           },
           "poe_status": {
+            "description": "Whether the upstream switch port provides PoE for this AP",
             "type": "boolean"
           },
           "port": {
+            "description": "Switch port name connected to this AP",
             "type": "string"
           },
           "port_id": {
+            "description": "LLDP port identifier for this AP uplink",
             "type": "string"
           },
           "power_draw": {
+            "description": "Power draw reported for this AP connection",
             "type": "integer"
           },
           "when": {
+            "description": "Timestamp when this AP attachment metric was observed",
             "type": "string"
           }
         },
         "type": "object"
       },
       "discovered_switch_metric_aps": {
+        "description": "AP attachment details included in discovered switch metrics",
         "items": {
           "$ref": "#/components/schemas/discovered_switch_metric_ap"
         },
         "type": "array"
       },
       "discovered_switch_metric_chassis_id": {
+        "description": "LLDP chassis identifiers associated with a discovered switch metric",
         "items": {
           "type": "string"
         },
@@ -656,7 +721,7 @@
       },
       "discovered_switches_metric_scope": {
         "default": "site",
-        "description": "enum: `site`, `switch`",
+        "description": "Scope level used when querying discovered switch metrics. enum: `site`, `switch`",
         "enum": [
           "site",
           "switch"
@@ -665,15 +730,19 @@
       },
       "dswitches_compliance_major_version": {
         "additionalProperties": false,
+        "description": "Version-compliance grouping for one discovered switch model",
         "properties": {
           "major_count": {
+            "description": "Number of major software versions observed for this switch model",
             "type": "number"
           },
           "model": {
+            "description": "Switch model represented by this version-compliance grouping",
             "type": "string"
           },
           "system_names": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Discovered switch system names included in this version-compliance grouping"
           }
         },
         "required": [
@@ -683,6 +752,7 @@
         "type": "object"
       },
       "dswitches_compliance_major_versions": {
+        "description": "Version-compliance groupings by discovered switch model",
         "items": {
           "$ref": "#/components/schemas/dswitches_compliance_major_version"
         },
@@ -691,12 +761,15 @@
       },
       "dswitches_metrics_inactive_wired_vlans": {
         "additionalProperties": false,
+        "description": "Inactive wired VLAN metric for APs connected to discovered switches",
         "properties": {
           "details": {
             "additionalProperties": true,
+            "description": "Metric-specific details for inactive wired VLAN findings",
             "type": "object"
           },
           "score": {
+            "description": "Compliance score for the inactive wired VLAN metric",
             "type": "number"
           }
         },
@@ -708,11 +781,14 @@
       },
       "dswitches_metrics_poe_compliance": {
         "additionalProperties": false,
+        "description": "PoE compliance metric for APs connected to discovered switches",
         "properties": {
           "details": {
-            "$ref": "#/components/schemas/dswitches_metrics_poe_compliance_details"
+            "$ref": "#/components/schemas/dswitches_metrics_poe_compliance_details",
+            "description": "Counts and power totals used to calculate the PoE compliance score"
           },
           "score": {
+            "description": "Compliance score for the PoE compliance metric",
             "type": "number"
           }
         },
@@ -724,11 +800,14 @@
       },
       "dswitches_metrics_poe_compliance_details": {
         "additionalProperties": false,
+        "description": "Detail values used by the discovered-switch PoE compliance metric",
         "properties": {
           "total_aps": {
+            "description": "Number of APs evaluated for PoE compliance",
             "type": "integer"
           },
           "total_power": {
+            "description": "Aggregate AP PoE power demand across evaluated APs, in mW",
             "type": "number"
           }
         },
@@ -740,11 +819,14 @@
       },
       "dswitches_metrics_switch_ap_affinity": {
         "additionalProperties": false,
+        "description": "Switch/AP affinity metric for discovered switches",
         "properties": {
           "details": {
-            "$ref": "#/components/schemas/dswitches_metrics_switch_ap_affinity_details"
+            "$ref": "#/components/schemas/dswitches_metrics_switch_ap_affinity_details",
+            "description": "Switch names and threshold used to calculate the affinity score"
           },
           "score": {
+            "description": "Compliance score for the switch/AP affinity metric",
             "type": "number"
           }
         },
@@ -756,11 +838,14 @@
       },
       "dswitches_metrics_switch_ap_affinity_details": {
         "additionalProperties": false,
+        "description": "Detail values used by the switch/AP affinity metric",
         "properties": {
           "system_name": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Discovered switch system names reported for the affinity metric"
           },
           "threshold": {
+            "description": "APs-per-switch threshold used for the affinity metric",
             "type": "number"
           }
         },
@@ -772,11 +857,14 @@
       },
       "dswitches_metrics_version_compliance": {
         "additionalProperties": false,
+        "description": "Version compliance metric for discovered switches",
         "properties": {
           "details": {
-            "$ref": "#/components/schemas/dswitches_metrics_version_compliance_details"
+            "$ref": "#/components/schemas/dswitches_metrics_version_compliance_details",
+            "description": "Version grouping details used to calculate the compliance score"
           },
           "score": {
+            "description": "Compliance score for the discovered-switch version metric",
             "type": "number"
           }
         },
@@ -788,11 +876,14 @@
       },
       "dswitches_metrics_version_compliance_details": {
         "additionalProperties": false,
+        "description": "Detail values used by the discovered-switch version compliance metric",
         "properties": {
           "major_versions": {
-            "$ref": "#/components/schemas/dswitches_compliance_major_versions"
+            "$ref": "#/components/schemas/dswitches_compliance_major_versions",
+            "description": "Per-model major version groupings used for version compliance"
           },
           "total_switch_count": {
+            "description": "Number of discovered switches evaluated for version compliance",
             "type": "integer"
           }
         },
@@ -803,12 +894,14 @@
         "type": "object"
       },
       "integers": {
+        "description": "List of integer values",
         "items": {
           "type": "integer"
         },
         "type": "array"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -818,23 +911,30 @@
       },
       "response_count": {
         "additionalProperties": false,
+        "description": "Distinct count response for time-bounded search results",
         "properties": {
           "distinct": {
+            "description": "Field used to group the count results",
             "type": "string"
           },
           "end": {
+            "description": "Search window end timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of distinct count results requested",
             "type": "integer"
           },
           "results": {
-            "$ref": "#/components/schemas/count_results"
+            "$ref": "#/components/schemas/count_results",
+            "description": "Count results grouped by the distinct field"
           },
           "start": {
+            "description": "Search window start timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "total": {
+            "description": "Number of distinct result buckets returned",
             "type": "integer"
           }
         },
@@ -850,23 +950,30 @@
       },
       "response_discovered_switch_metrics": {
         "additionalProperties": false,
+        "description": "Paginated response for discovered switch metric search results",
         "properties": {
           "end": {
+            "description": "Epoch timestamp, in seconds, for the end of the metric search window",
             "type": "number"
           },
           "limit": {
+            "description": "Maximum number of discovered switch metric records returned in this page",
             "type": "integer"
           },
           "next": {
+            "description": "Pagination cursor or URL for retrieving the next page of discovered switch metric records",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/response_discovered_switch_metrics_results"
+            "$ref": "#/components/schemas/response_discovered_switch_metrics_results",
+            "description": "Discovered switch metric records matching the search filters"
           },
           "start": {
+            "description": "Epoch timestamp, in seconds, for the start of the metric search window",
             "type": "number"
           },
           "total": {
+            "description": "Number of discovered switch metric records matching the search filters across all pages",
             "type": "integer"
           }
         },
@@ -880,6 +987,7 @@
         "type": "object"
       },
       "response_discovered_switch_metrics_results": {
+        "description": "Discovered switch metric records returned by a search response",
         "items": {
           "$ref": "#/components/schemas/discovered_switch_metric"
         },
@@ -887,23 +995,30 @@
       },
       "response_discovered_switches": {
         "additionalProperties": false,
+        "description": "Paginated response for discovered switch search results",
         "properties": {
           "end": {
+            "description": "Epoch timestamp, in seconds, for the end of the discovered switch search window",
             "type": "number"
           },
           "limit": {
+            "description": "Maximum number of discovered switch records returned in this page",
             "type": "integer"
           },
           "next": {
+            "description": "Pagination cursor or URL for retrieving the next page of discovered switch records",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/response_discovered_switches_results"
+            "$ref": "#/components/schemas/response_discovered_switches_results",
+            "description": "Discovered switch records matching the search filters"
           },
           "start": {
+            "description": "Epoch timestamp, in seconds, for the start of the discovered switch search window",
             "type": "number"
           },
           "total": {
+            "description": "Number of discovered switch records matching the search filters across all pages",
             "type": "integer"
           }
         },
@@ -917,6 +1032,7 @@
         "type": "object"
       },
       "response_discovered_switches_results": {
+        "description": "Discovered switch records returned by a search response",
         "items": {
           "$ref": "#/components/schemas/discovered_switch"
         },
@@ -925,18 +1041,23 @@
       },
       "response_dswitches_metrics": {
         "additionalProperties": false,
+        "description": "Metrics summary returned for discovered switch compliance checks",
         "properties": {
           "inactive_wired_vlans": {
-            "$ref": "#/components/schemas/dswitches_metrics_inactive_wired_vlans"
+            "$ref": "#/components/schemas/dswitches_metrics_inactive_wired_vlans",
+            "description": "Metric for inactive wired VLANs on discovered switches"
           },
           "poe_compliance": {
-            "$ref": "#/components/schemas/dswitches_metrics_poe_compliance"
+            "$ref": "#/components/schemas/dswitches_metrics_poe_compliance",
+            "description": "Metric for PoE compliance across APs connected to discovered switches"
           },
           "switch_ap_affinity": {
-            "$ref": "#/components/schemas/dswitches_metrics_switch_ap_affinity"
+            "$ref": "#/components/schemas/dswitches_metrics_switch_ap_affinity",
+            "description": "Metric comparing AP counts against the switch affinity threshold"
           },
           "version_compliance": {
-            "$ref": "#/components/schemas/dswitches_metrics_version_compliance"
+            "$ref": "#/components/schemas/dswitches_metrics_version_compliance",
+            "description": "Metric for discovered switch software version compliance"
           }
         },
         "required": [
@@ -949,8 +1070,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -961,8 +1084,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -973,8 +1098,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -985,8 +1112,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -994,8 +1123,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -1016,6 +1147,7 @@
         "type": "string"
       },
       "site_id": {
+        "description": "Unique identifier of a Mist site",
         "examples": [
           "441a1214-6928-442a-8e92-e1d34b8ec6a6"
         ],
@@ -1024,6 +1156,7 @@
         "type": "string"
       },
       "strings": {
+        "description": "Unique string values returned or accepted by this schema",
         "items": {
           "type": "string"
         },
@@ -1031,7 +1164,7 @@
         "uniqueItems": true
       },
       "timestamp": {
-        "description": "Epoch (seconds)",
+        "description": "Epoch timestamp, in seconds",
         "format": "double",
         "readOnly": true,
         "type": "number"
@@ -1256,10 +1389,9 @@
     },
     "parameters": {
       "duration": {
-        "description": "Duration like 7d, 2w",
+        "description": "Time range duration for the query, using relative units such as `10m`, `7d`, or `2w`",
         "in": "query",
         "name": "duration",
-        "required": false,
         "schema": {
           "default": "1d",
           "examples": [
@@ -1269,7 +1401,7 @@
         }
       },
       "end": {
-        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
         "in": "query",
         "name": "end",
         "schema": {
@@ -1277,9 +1409,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -1310,7 +1442,6 @@
         "description": "On which field the list should be sorted, -prefix represents DESC order",
         "in": "query",
         "name": "sort",
-        "required": false,
         "schema": {
           "default": "timestamp",
           "examples": [
@@ -1320,7 +1451,7 @@
         }
       },
       "start": {
-        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
         "in": "query",
         "name": "start",
         "schema": {
@@ -1462,19 +1593,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

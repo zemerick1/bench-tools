@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Events",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -84,10 +80,13 @@
         "operationId": "searchOrgEvents",
         "parameters": [
           {
-            "description": "Event type",
+            "description": "Filter results by type. Accepts multiple comma-separated values.",
             "in": "query",
             "name": "type",
             "schema": {
+              "examples": [
+                "CRADLEPOINT_MAINTENANCE_COMPLETED,CRADLEPOINT_MAINTENANCE_STARTED"
+              ],
               "type": "string"
             }
           },
@@ -143,10 +142,11 @@
         }
       ],
       "get": {
-        "description": "Count Org System Events",
+        "description": "Count organization system event records, optionally grouped by `distinct` and filtered by time range.",
         "operationId": "countOrgSystemEvents",
         "parameters": [
           {
+            "description": "Field used to group this count response",
             "in": "query",
             "name": "distinct",
             "schema": {
@@ -202,7 +202,7 @@
         }
       ],
       "get": {
-        "description": "Search Org System Events",
+        "description": "Search organization system event records with time range, sorting, and pagination controls.",
         "operationId": "searchOrgSystemEvents",
         "parameters": [
           {
@@ -257,8 +257,10 @@
         "additionalProperties": {
           "type": "string"
         },
+        "description": "Count result row with the matching distinct field values",
         "properties": {
           "count": {
+            "description": "Number of matching items for the distinct value or values in this result",
             "type": "integer"
           }
         },
@@ -268,6 +270,7 @@
         "type": "object"
       },
       "count_results": {
+        "description": "List of count result rows",
         "items": {
           "$ref": "#/components/schemas/count_result"
         },
@@ -276,20 +279,25 @@
       },
       "org_event": {
         "additionalProperties": false,
+        "description": "Event record generated at the organization level",
         "properties": {
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization associated with this event"
           },
           "text": {
+            "description": "Detailed human-readable message for the organization event",
             "examples": [
               "authentication failed, API key invalid"
             ],
             "type": "string"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Time when the organization event occurred"
           },
           "type": {
+            "description": "Event type code for this organization event",
             "examples": [
               "CRADLEPOINT_SYNC_FAILED"
             ],
@@ -299,6 +307,7 @@
         "type": "object"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -308,32 +317,40 @@
       },
       "org_system_event": {
         "additionalProperties": false,
+        "description": "Organization system event record",
         "properties": {
           "change_cat": {
+            "description": "Category of configuration or administrative change for the event",
             "examples": [
               "admin_action"
             ],
             "type": "string"
           },
           "metadata": {
+            "description": "JSON-encoded event metadata, such as affected object IDs and admin details",
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization where the system event occurred"
           },
           "scope": {
+            "description": "Event scope, such as organization or site",
             "examples": [
               "org"
             ],
             "type": "string"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site associated with the event, when the event is site-scoped"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Epoch timestamp when the system event occurred"
           },
           "type": {
+            "description": "System event type, such as `add-wlan` or `delete-wlan`",
             "examples": [
               "delete-wlan"
             ],
@@ -344,23 +361,30 @@
       },
       "response_count": {
         "additionalProperties": false,
+        "description": "Distinct count response for time-bounded search results",
         "properties": {
           "distinct": {
+            "description": "Field used to group the count results",
             "type": "string"
           },
           "end": {
+            "description": "Search window end timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of distinct count results requested",
             "type": "integer"
           },
           "results": {
-            "$ref": "#/components/schemas/count_results"
+            "$ref": "#/components/schemas/count_results",
+            "description": "Count results grouped by the distinct field"
           },
           "start": {
+            "description": "Search window start timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "total": {
+            "description": "Number of distinct result buckets returned",
             "type": "integer"
           }
         },
@@ -376,38 +400,46 @@
       },
       "response_events_orgs_search": {
         "additionalProperties": false,
+        "description": "Paginated response for organization event search results",
         "properties": {
           "end": {
+            "description": "Epoch timestamp for the end of the organization event search window",
             "examples": [
               1688035193
             ],
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of organization event records returned in this page",
             "examples": [
               10
             ],
             "type": "integer"
           },
           "next": {
+            "description": "Pagination cursor or URL for retrieving the next page of organization event records",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/response_events_orgs_search_results"
+            "$ref": "#/components/schemas/response_events_orgs_search_results",
+            "description": "Organization event records matching the search filters"
           },
           "start": {
+            "description": "Epoch timestamp for the start of the organization event search window",
             "examples": [
               1687948793
             ],
             "type": "integer"
           },
           "total": {
+            "description": "Number of organization event records matching the search filters across all pages",
             "type": "integer"
           }
         },
         "type": "object"
       },
       "response_events_orgs_search_results": {
+        "description": "Organization event records returned by a search response",
         "items": {
           "$ref": "#/components/schemas/org_event"
         },
@@ -415,8 +447,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -427,8 +461,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -439,8 +475,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -451,8 +489,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -460,8 +500,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -472,23 +514,30 @@
       },
       "response_org_system_events_search": {
         "additionalProperties": false,
+        "description": "Paginated response for organization system event search results",
         "properties": {
           "end": {
+            "description": "Epoch timestamp, in seconds, for the end of the system event search window",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of system event records returned in this page",
             "type": "integer"
           },
           "next": {
+            "description": "URL for retrieving the next page of system event search results",
             "type": "string"
           },
           "results": {
-            "$ref": "#/components/schemas/response_org_system_events_search_results"
+            "$ref": "#/components/schemas/response_org_system_events_search_results",
+            "description": "Organization system event records matching the search filters"
           },
           "start": {
+            "description": "Epoch timestamp, in seconds, for the start of the system event search window",
             "type": "integer"
           },
           "total": {
+            "description": "Number of system event records matching the search filters across all pages",
             "type": "integer"
           }
         },
@@ -502,6 +551,7 @@
         "type": "object"
       },
       "response_org_system_events_search_results": {
+        "description": "Organization system event records returned by search",
         "items": {
           "$ref": "#/components/schemas/org_system_event"
         },
@@ -509,6 +559,7 @@
         "uniqueItems": true
       },
       "site_id": {
+        "description": "Unique identifier of a Mist site",
         "examples": [
           "441a1214-6928-442a-8e92-e1d34b8ec6a6"
         ],
@@ -517,7 +568,7 @@
         "type": "string"
       },
       "timestamp": {
-        "description": "Epoch (seconds)",
+        "description": "Epoch timestamp, in seconds",
         "format": "double",
         "readOnly": true,
         "type": "number"
@@ -707,10 +758,9 @@
     },
     "parameters": {
       "duration": {
-        "description": "Duration like 7d, 2w",
+        "description": "Time range duration for the query, using relative units such as `10m`, `7d`, or `2w`",
         "in": "query",
         "name": "duration",
-        "required": false,
         "schema": {
           "default": "1d",
           "examples": [
@@ -720,7 +770,7 @@
         }
       },
       "end": {
-        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
         "in": "query",
         "name": "end",
         "schema": {
@@ -728,9 +778,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -761,7 +811,6 @@
         "description": "On which field the list should be sorted, -prefix represents DESC order",
         "in": "query",
         "name": "sort",
-        "required": false,
         "schema": {
           "default": "timestamp",
           "examples": [
@@ -771,7 +820,7 @@
         }
       },
       "start": {
-        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
         "in": "query",
         "name": "start",
         "schema": {
@@ -854,19 +903,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

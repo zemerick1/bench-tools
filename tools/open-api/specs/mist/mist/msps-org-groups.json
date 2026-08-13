@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "MSPs Org Groups",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "get": {
-        "description": "Get List of MSP Org Groups",
+        "description": "List organization groups defined under this MSP. Organization groups contain related organization IDs and can be used in MSP privilege assignments.",
         "operationId": "listMspOrgGroups",
         "responses": {
           "200": {
@@ -108,7 +104,7 @@
         ]
       },
       "post": {
-        "description": "Create MSP Org Group",
+        "description": "Create an organization group under this MSP with a display name and optional list of member organization IDs.",
         "operationId": "createMspOrgGroup",
         "requestBody": {
           "content": {
@@ -166,7 +162,7 @@
         }
       ],
       "get": {
-        "description": "Get MSP Org Group Details",
+        "description": "Return the organization group details, including its name and member organization IDs.",
         "operationId": "getMspOrgGroup",
         "responses": {
           "200": {
@@ -194,7 +190,7 @@
         ]
       },
       "put": {
-        "description": "Update MSP Org Group",
+        "description": "Update an MSP organization group's display name or member organization IDs.",
         "operationId": "updateMspOrgGroup",
         "requestBody": {
           "content": {
@@ -232,7 +228,7 @@
         ]
       },
       "delete": {
-        "description": "Delete MSP Org Group",
+        "description": "Delete an MSP organization group. This removes the grouping object without deleting the organizations it referenced.",
         "operationId": "deleteMspOrgGroup",
         "responses": {
           "200": {
@@ -285,6 +281,7 @@
         "type": "number"
       },
       "msp_id": {
+        "description": "Managed service provider identifier",
         "examples": [
           "b9d42c2e-88ee-41f8-b798-f009ce7fe909"
         ],
@@ -293,25 +290,31 @@
         "type": "string"
       },
       "orggroup": {
-        "description": "Organizations Group",
+        "description": "MSP organization group containing related organizations",
         "properties": {
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Epoch timestamp when the organization group was created"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the organization group"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Epoch timestamp when the organization group was last modified"
           },
           "msp_id": {
-            "$ref": "#/components/schemas/msp_id"
+            "$ref": "#/components/schemas/msp_id",
+            "description": "MSP account that owns the organization group"
           },
           "name": {
+            "description": "Display name of the organization group",
             "type": "string"
           },
           "org_ids": {
-            "$ref": "#/components/schemas/orggroup_org_ids"
+            "$ref": "#/components/schemas/orggroup_org_ids",
+            "description": "Organizations included in this organization group"
           }
         },
         "required": [
@@ -320,12 +323,14 @@
         "type": "object"
       },
       "orggroup_list": {
+        "description": "List of MSP organization groups",
         "items": {
           "$ref": "#/components/schemas/orggroup"
         },
         "type": "array"
       },
       "orggroup_org_ids": {
+        "description": "List of organization identifiers included in an organization group",
         "items": {
           "format": "uuid",
           "type": "string"
@@ -334,8 +339,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -346,8 +353,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -358,8 +367,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -370,8 +381,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -379,8 +392,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -636,19 +651,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

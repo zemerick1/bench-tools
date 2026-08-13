@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Setting",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "get": {
-        "description": "Get Org Settings",
+        "description": "Return organization-wide settings, including feature flags, automatic device assignment rules, management connectivity, packet capture, security controls, and integration configuration.",
         "operationId": "getOrgSettings",
         "responses": {
           "200": {
@@ -108,7 +104,7 @@
         ]
       },
       "put": {
-        "description": "Update Org Settings",
+        "description": "Update organization-wide settings such as automatic device assignment rules, management connectivity, packet capture, password policy, security controls, tags, and integration options.",
         "operationId": "updateOrgSettings",
         "requestBody": {
           "content": {
@@ -268,7 +264,7 @@
         }
       ],
       "post": {
-        "description": "Create Org Blacklist Client List. \n\nIf there is already a blacklist, this API will replace it with the new one. \n\nMax number of blacklist clients is 1000. \n\nRetrieve the current blacklisted clients from `blacklist_url` under Org:Setting\n",
+        "description": "Replace the organization wireless client blocklist with the supplied client MAC addresses. The list can contain up to 1000 MAC addresses; retrieve the current list from the `blacklist_url` field in organization settings.",
         "operationId": "createOrgWirelessClientsBlocklist",
         "requestBody": {
           "content": {
@@ -316,7 +312,7 @@
         ]
       },
       "delete": {
-        "description": "Delete Org Blacklist Station Clients",
+        "description": "Clear the organization wireless client blocklist by removing all blocked client MAC addresses.",
         "operationId": "deleteOrgWirelessClientsBlocklist",
         "responses": {
           "200": {
@@ -351,7 +347,7 @@
         }
       ],
       "post": {
-        "description": "Provide Customer Bucket Name\n\nSetting up Custom PCAP Bucket Involves the following:\n* provide the bucket name\n* we’ll attempt to write a file MIST_TOKEN\n* you have to verify the ownership of the bucket by providing the content of the MIST_TOKEN",
+        "description": "Start custom packet capture bucket setup by saving the bucket name and having Mist write a `MIST_TOKEN` file to the bucket. Complete ownership verification with the verify endpoint by submitting the token contents.",
         "operationId": "setOrgCustomBucket",
         "requestBody": {
           "content": {
@@ -403,7 +399,7 @@
         }
       ],
       "post": {
-        "description": "Verify Customer PCAP Bucket\n\n**Note**: If successful, a \"VERIFIED\" file will be created in the bucket",
+        "description": "Verify ownership of a custom packet capture bucket by submitting the token read from the `MIST_TOKEN` file. If verification succeeds, Mist creates a `VERIFIED` file in the bucket.",
         "operationId": "verifyOrgCustomBucket",
         "requestBody": {
           "content": {
@@ -453,15 +449,32 @@
   "components": {
     "schemas": {
       "account_juniper_info": {
+        "description": "Linked Juniper account information returned by the integration",
         "properties": {
           "accounts": {
-            "$ref": "#/components/schemas/juniper_accounts"
+            "$ref": "#/components/schemas/juniper_accounts",
+            "description": "List of linked Juniper account records"
           }
         },
         "type": "object"
       },
+      "ap_auto_upgrade_custom_versions": {
+        "additionalProperties": {
+          "description": "Firmware version or channel to deploy on the specified AP model",
+          "type": "string"
+        },
+        "description": "Per-AP-model firmware versions or channels used for auto-upgrade. Property key is the AP model name (e.g. \"AP41\"), value is the firmware version or release channel (e.g. `stable`)",
+        "examples": [
+          {
+            "AP21": "alpha",
+            "AP41": "0.1.5135",
+            "AP61": "0.1.7215"
+          }
+        ],
+        "type": "object"
+      },
       "app_probing_apps": {
-        "description": "APp-keys from [List Applications](/#operations/listApplications)",
+        "description": "Application keys from [List Applications](/#operations/listApplications)",
         "examples": [
           [
             "facebook"
@@ -488,6 +501,20 @@
         "readOnly": true,
         "type": "number"
       },
+      "day_of_week": {
+        "description": "enum: `any`, `fri`, `mon`, `sat`, `sun`, `thu`, `tue`, `wed`",
+        "enum": [
+          "any",
+          "fri",
+          "mon",
+          "sat",
+          "sun",
+          "thu",
+          "tue",
+          "wed"
+        ],
+        "type": "string"
+      },
       "device_type_default_ap": {
         "default": "ap",
         "description": "enum: `ap`, `gateway`, `switch`",
@@ -500,8 +527,10 @@
       },
       "gateway_mgmt_host_out_policy": {
         "additionalProperties": false,
+        "description": "Host-out path policy for gateway-originated management traffic",
         "properties": {
           "path_preference": {
+            "description": "Preferred path name for this gateway-originated service traffic",
             "type": "string"
           }
         },
@@ -509,36 +538,42 @@
       },
       "gateway_mgmt_host_out_policy_syslog": {
         "additionalProperties": false,
+        "description": "Host-out path policy for gateway syslog traffic",
         "properties": {
           "path_preference": {
+            "description": "Preferred path name used by default for gateway syslog traffic",
             "examples": [
               "broadband_wans"
             ],
             "type": "string"
           },
           "servers": {
-            "$ref": "#/components/schemas/gateway_mgmt_host_out_policy_syslog_servers"
+            "$ref": "#/components/schemas/gateway_mgmt_host_out_policy_syslog_servers",
+            "description": "Per-server host-out path policies for gateway syslog traffic"
           }
         },
         "type": "object"
       },
       "gateway_mgmt_host_out_policy_syslog_server": {
         "additionalProperties": false,
-        "description": "Allows to define the host_out_policy per Syslog Server. The Property key is the Syslog name",
+        "description": "Per-syslog-server host-out path policy override",
         "properties": {
           "host": {
+            "description": "Syslog server hostname or IP address",
             "examples": [
               "103.35.3.5"
             ],
             "type": "string"
           },
           "path_preference": {
+            "description": "Preferred path name used for this syslog server",
             "examples": [
               "dc_only"
             ],
             "type": "string"
           },
           "server_name": {
+            "description": "Remote syslog server name referenced by the policy",
             "examples": [
               "dc_syslog_server"
             ],
@@ -548,6 +583,7 @@
         "type": "object"
       },
       "gateway_mgmt_host_out_policy_syslog_servers": {
+        "description": "Per-server host-out path policies for gateway syslog traffic",
         "items": {
           "$ref": "#/components/schemas/gateway_mgmt_host_out_policy_syslog_server"
         },
@@ -574,7 +610,7 @@
       },
       "idp_user_cert_lookup_field": {
         "default": "automatic",
-        "description": "allow customer to choose the EAP-TLS client certificate's field. To use for IDP User Groups lookup. enum: `automatic`, `cn`, `email`, `upn`",
+        "description": "allow customer to choose the EAP-TLS client certificate's field to use for IDP User Groups lookup. enum: `automatic`, `cn`, `email`, `upn`",
         "enum": [
           "automatic",
           "cn",
@@ -585,8 +621,10 @@
       },
       "juniper_account": {
         "additionalProperties": false,
+        "description": "Linked Juniper account available to the organization",
         "properties": {
           "linked_by": {
+            "description": "User who linked this Juniper account",
             "examples": [
               "John Smith (john@abccorp.com)"
             ],
@@ -594,6 +632,7 @@
             "type": "string"
           },
           "name": {
+            "description": "Display name of the linked Juniper account",
             "examples": [
               "ABC Corp"
             ],
@@ -604,6 +643,7 @@
         "type": "object"
       },
       "juniper_accounts": {
+        "description": "Linked Juniper accounts available to the organization",
         "items": {
           "$ref": "#/components/schemas/juniper_account"
         },
@@ -611,17 +651,20 @@
       },
       "juniper_srx_auto_upgrade": {
         "additionalProperties": false,
-        "description": "auto_upgrade device first time it is onboarded",
+        "description": "SRX firmware auto-upgrade settings applied when a device is first onboarded",
         "properties": {
           "custom_versions": {
-            "$ref": "#/components/schemas/juniper_srx_auto_upgrade_custom_versions"
+            "$ref": "#/components/schemas/juniper_srx_auto_upgrade_custom_versions",
+            "description": "Per-SRX-model firmware versions to deploy instead of the default version"
           },
           "enabled": {
             "default": false,
+            "description": "Whether SRX auto-upgrade is enabled for newly onboarded devices",
             "type": "boolean"
           },
           "snapshot": {
             "default": false,
+            "description": "Whether to take a snapshot during the SRX upgrade process",
             "type": "boolean"
           },
           "version": {
@@ -646,9 +689,11 @@
         "type": "object"
       },
       "mac_addresses": {
+        "description": "Request containing one or more MAC addresses",
         "properties": {
           "macs": {
-            "$ref": "#/components/schemas/mac_addresses_macs"
+            "$ref": "#/components/schemas/mac_addresses_macs",
+            "description": "List of MAC addresses included in the request"
           }
         },
         "required": [
@@ -657,6 +702,7 @@
         "type": "object"
       },
       "mac_addresses_macs": {
+        "description": "Unique MAC addresses included in a request",
         "examples": [
           [
             "683b679ac024"
@@ -669,52 +715,32 @@
         "type": "array",
         "uniqueItems": true
       },
-      "marvis": {
+      "marvis_self_driving": {
         "additionalProperties": false,
+        "description": "Self-driving network automation settings per domain",
         "properties": {
-          "auto_operations": {
-            "$ref": "#/components/schemas/marvis_auto_operations"
+          "wan": {
+            "$ref": "#/components/schemas/marvis_self_driving_domain",
+            "description": "Self-driving automation settings for the WAN domain"
+          },
+          "wired": {
+            "$ref": "#/components/schemas/marvis_self_driving_domain",
+            "description": "Self-driving automation settings for the wired domain"
+          },
+          "wireless": {
+            "$ref": "#/components/schemas/marvis_self_driving_domain",
+            "description": "Self-driving automation settings for the wireless domain"
           }
         },
         "type": "object"
       },
-      "marvis_auto_operations": {
+      "marvis_self_driving_domain": {
         "additionalProperties": false,
+        "description": "Self-driving automation settings for one Marvis domain",
         "properties": {
-          "ap_insufficient_capacity": {
+          "enabled": {
             "default": false,
-            "type": "boolean"
-          },
-          "ap_loop": {
-            "default": false,
-            "type": "boolean"
-          },
-          "ap_non_compliant": {
-            "default": false,
-            "type": "boolean"
-          },
-          "bounce_port_for_abnormal_poe_client": {
-            "default": false,
-            "type": "boolean"
-          },
-          "disable_port_when_ddos_protocol_violation": {
-            "default": false,
-            "type": "boolean"
-          },
-          "disable_port_when_rogue_dhcp_server_detected": {
-            "default": false,
-            "type": "boolean"
-          },
-          "gateway_non_compliant": {
-            "default": false,
-            "type": "boolean"
-          },
-          "switch_misconfigured_port": {
-            "default": false,
-            "type": "boolean"
-          },
-          "switch_port_stuck": {
-            "default": false,
+            "description": "Whether self-driving automation is enabled for this domain",
             "type": "boolean"
           }
         },
@@ -727,6 +753,7 @@
         "type": "number"
       },
       "msp_id": {
+        "description": "Managed service provider identifier",
         "examples": [
           "b9d42c2e-88ee-41f8-b798-f009ce7fe909"
         ],
@@ -736,31 +763,39 @@
       },
       "mxedge_mgmt": {
         "additionalProperties": false,
+        "description": "Management settings for a Mist Edge appliance",
         "properties": {
           "config_auto_revert": {
             "default": false,
+            "description": "Whether the Mist Edge automatically reverts configuration changes if connectivity is lost",
             "type": "boolean"
           },
           "fips_enabled": {
             "default": false,
+            "description": "Whether FIPS mode is enabled on the Mist Edge",
             "type": "boolean"
           },
           "mist_password": {
+            "description": "Password for the Mist service account on the Mist Edge",
             "examples": [
               "MIST_PASSWORD"
             ],
             "type": "string"
           },
           "oob_ip_type": {
-            "$ref": "#/components/schemas/mxedge_mgmt_oob_ip_type"
+            "$ref": "#/components/schemas/mxedge_mgmt_oob_ip_type",
+            "description": "IPv4 address assignment mode for out-of-band management"
           },
           "oob_ip_type6": {
-            "$ref": "#/components/schemas/mxedge_mgmt_oob_ip_type6"
+            "$ref": "#/components/schemas/mxedge_mgmt_oob_ip_type6",
+            "description": "IPv6 address assignment mode for out-of-band management"
           },
           "root_password": {
+            "description": "Root account password for the Mist Edge",
             "examples": [
               "ROOT_PASSWORD"
             ],
+            "format": "password",
             "type": "string"
           }
         },
@@ -787,6 +822,15 @@
         ],
         "type": "string"
       },
+      "nac_coa_type": {
+        "default": "reauth",
+        "description": "CoA type to send. enum: `reauth`, `disconnect`",
+        "enum": [
+          "reauth",
+          "disconnect"
+        ],
+        "type": "string"
+      },
       "optic_port_config": {
         "additionalProperties": {
           "$ref": "#/components/schemas/optic_port_config_port"
@@ -796,10 +840,11 @@
       },
       "optic_port_config_port": {
         "additionalProperties": false,
+        "description": "Per-interface optic port override settings",
         "properties": {
           "channelized": {
             "default": false,
-            "description": "Enable channelization",
+            "description": "Whether channelization is enabled on this optic port",
             "type": "boolean"
           },
           "speed": {
@@ -813,6 +858,7 @@
         "type": "object"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -821,8 +867,13 @@
         "type": "string"
       },
       "org_setting": {
-        "description": "Org Settings",
+        "description": "Organization-wide feature, integration, management, and security settings",
         "properties": {
+          "allow_mist": {
+            "default": false,
+            "description": "whether to allow Mist to look at this org",
+            "type": "boolean"
+          },
           "ap_updown_threshold": {
             "default": 0,
             "description": "Enable threshold-based device down delivery for AP devices only. When configured it takes effect for AP devices and `device_updown_threshold` is ignored.",
@@ -837,18 +888,27 @@
             ]
           },
           "api_policy": {
-            "$ref": "#/components/schemas/org_setting_api_policy"
+            "$ref": "#/components/schemas/org_setting_api_policy",
+            "description": "Policy for hiding API secrets and passwords in responses"
           },
           "auto_device_naming": {
-            "$ref": "#/components/schemas/org_setting_auto_device_naming"
+            "$ref": "#/components/schemas/org_setting_auto_device_naming",
+            "description": "Automatic device naming rules for claimed devices"
           },
           "auto_deviceprofile_assignment": {
-            "$ref": "#/components/schemas/org_setting_auto_deviceprofile_assignment"
+            "$ref": "#/components/schemas/org_setting_auto_deviceprofile_assignment",
+            "description": "Automatic device profile assignment rules for claimed devices"
           },
           "auto_site_assignment": {
-            "$ref": "#/components/schemas/org_setting_auto_site_assignment"
+            "$ref": "#/components/schemas/org_setting_auto_site_assignment",
+            "description": "Automatic site assignment rules for claimed devices"
+          },
+          "auto_upgrade": {
+            "$ref": "#/components/schemas/org_setting_auto_upgrade",
+            "description": "AP automatic firmware upgrade policy for the organization"
           },
           "blacklist_url": {
+            "description": "Read-only URL for the organization blacklist file",
             "examples": [
               "https://papi.s3.amazonaws.com/blacklist/xxx..."
             ],
@@ -856,22 +916,28 @@
             "type": "string"
           },
           "cacerts": {
-            "$ref": "#/components/schemas/radsec_certs_ap"
+            "$ref": "#/components/schemas/radsec_certs_ap",
+            "description": "Legacy CA certificate list used to verify client certificates. If `cacerts_configs` is provided and non-empty, this field is ignored."
+          },
+          "cacerts_configs": {
+            "$ref": "#/components/schemas/org_setting_cacerts_configs",
+            "description": "Preferred per-issuer CA certificate configuration with optional OCSP and CRL settings. When provided and non-empty, `cacerts` is ignored."
           },
           "celona": {
-            "$ref": "#/components/schemas/org_setting_celona"
+            "$ref": "#/components/schemas/org_setting_celona",
+            "description": "Integration settings for Celona"
           },
           "cloudshark": {
-            "$ref": "#/components/schemas/org_setting_cloudshark"
-          },
-          "cradlepoint": {
-            "$ref": "#/components/schemas/org_setting_cradlepoint"
+            "$ref": "#/components/schemas/org_setting_cloudshark",
+            "description": "Packet capture integration settings for CloudShark"
           },
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Epoch timestamp when the organization settings were created"
           },
           "device_cert": {
-            "$ref": "#/components/schemas/org_setting_device_cert"
+            "$ref": "#/components/schemas/org_setting_device_cert",
+            "description": "Common device certificate used by organization settings"
           },
           "device_updown_threshold": {
             "default": 0,
@@ -894,11 +960,24 @@
             "type": "boolean"
           },
           "for_site": {
+            "description": "Read-only indicator that the settings object is scoped to a site",
             "readOnly": true,
             "type": "boolean"
           },
           "gateway_mgmt": {
-            "$ref": "#/components/schemas/org_setting_gateway_mgmt"
+            "$ref": "#/components/schemas/org_setting_gateway_mgmt",
+            "description": "Gateway management defaults for the organization"
+          },
+          "gateway_tunnel_updown_threshold": {
+            "description": "enable threshold-based gateway tunnel (secure edge tunnels) up-down delivery.",
+            "examples": [
+              null
+            ],
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
           },
           "gateway_updown_threshold": {
             "default": 0,
@@ -914,74 +993,97 @@
             ]
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the organization settings object"
           },
           "installer": {
-            "$ref": "#/components/schemas/org_setting_installer"
+            "$ref": "#/components/schemas/org_setting_installer",
+            "description": "Access settings for organization installer workflows"
           },
           "jcloud": {
-            "$ref": "#/components/schemas/org_setting_jcloud"
+            "$ref": "#/components/schemas/org_setting_jcloud",
+            "description": "Integration settings for JCloud"
           },
           "jcloud_ra": {
-            "$ref": "#/components/schemas/org_setting_jcloud_ra"
+            "$ref": "#/components/schemas/org_setting_jcloud_ra",
+            "description": "Routing Assurance integration settings for JCloud"
           },
           "juniper": {
-            "$ref": "#/components/schemas/account_juniper_info"
+            "$ref": "#/components/schemas/account_juniper_info",
+            "description": "Linked Juniper account information for this organization"
           },
           "juniper_srx": {
-            "$ref": "#/components/schemas/org_setting_juniper_srx"
+            "$ref": "#/components/schemas/org_setting_juniper_srx",
+            "description": "SRX integration settings for Juniper devices"
           },
           "junos_shell_access": {
-            "$ref": "#/components/schemas/org_setting_junos_shell_access"
+            "$ref": "#/components/schemas/org_setting_junos_shell_access",
+            "description": "Role-based Junos web-shell access settings"
           },
           "marvis": {
-            "$ref": "#/components/schemas/marvis"
+            "$ref": "#/components/schemas/org_setting_marvis",
+            "description": "AI assistant and self-driving feature settings for Marvis"
           },
           "mgmt": {
-            "$ref": "#/components/schemas/org_setting_mgmt"
+            "$ref": "#/components/schemas/org_setting_mgmt",
+            "description": "Tunnel settings for organization management connectivity"
           },
           "mist_nac": {
-            "$ref": "#/components/schemas/org_setting_mist_nac"
+            "$ref": "#/components/schemas/org_setting_mist_nac",
+            "description": "NAC settings for Mist Access Assurance"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Epoch timestamp when the organization settings were last modified"
           },
           "msp_id": {
-            "$ref": "#/components/schemas/msp_id"
+            "$ref": "#/components/schemas/msp_id",
+            "description": "Managed service provider account associated with these settings"
           },
           "mxedge_mgmt": {
-            "$ref": "#/components/schemas/mxedge_mgmt"
+            "$ref": "#/components/schemas/mxedge_mgmt",
+            "description": "Management settings for Mist Edge devices"
           },
           "optic_port_config": {
-            "$ref": "#/components/schemas/optic_port_config"
+            "$ref": "#/components/schemas/optic_port_config",
+            "description": "Configuration defaults for optic ports"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization that owns these settings"
           },
           "password_policy": {
-            "$ref": "#/components/schemas/org_setting_password_policy"
+            "$ref": "#/components/schemas/org_setting_password_policy",
+            "description": "Admin credential policy settings for the organization"
           },
           "pcap": {
-            "$ref": "#/components/schemas/org_setting_pcap"
+            "$ref": "#/components/schemas/org_setting_pcap",
+            "description": "Packet capture settings for the organization"
           },
           "pcap_bucket_verified": {
+            "description": "Whether the configured packet capture bucket has been verified",
             "readOnly": true,
             "type": "boolean"
           },
           "security": {
-            "$ref": "#/components/schemas/org_setting_security"
+            "$ref": "#/components/schemas/org_setting_security",
+            "description": "Organization security controls such as local SSH restrictions"
           },
           "simple_alert": {
-            "$ref": "#/components/schemas/simple_alert"
+            "$ref": "#/components/schemas/simple_alert",
+            "description": "Basic alert delivery settings for the organization"
           },
           "ssr": {
-            "$ref": "#/components/schemas/setting_ssr"
+            "$ref": "#/components/schemas/setting_ssr",
+            "description": "Session Smart Router settings for the organization"
           },
           "switch": {
-            "$ref": "#/components/schemas/org_setting_switch"
+            "$ref": "#/components/schemas/org_setting_switch",
+            "description": "Configuration defaults for switches in this organization"
           },
           "switch_mgmt": {
-            "$ref": "#/components/schemas/org_setting_switch_mgmt"
+            "$ref": "#/components/schemas/org_setting_switch_mgmt",
+            "description": "Management settings for switches in this organization"
           },
           "switch_updown_threshold": {
             "default": 0,
@@ -995,10 +1097,12 @@
             ]
           },
           "synthetic_test": {
-            "$ref": "#/components/schemas/synthetictest_config"
+            "$ref": "#/components/schemas/synthetictest_config",
+            "description": "Configuration for organization synthetic tests"
           },
           "tags": {
-            "$ref": "#/components/schemas/org_setting_tags"
+            "$ref": "#/components/schemas/org_setting_tags",
+            "description": "Labels associated with these organization settings"
           },
           "ui_idle_timeout": {
             "default": 0,
@@ -1012,37 +1116,62 @@
           },
           "ui_no_tracking": {
             "default": false,
+            "description": "Whether UI usage tracking is disabled for the organization",
             "type": "boolean"
           },
           "vpn_options": {
-            "$ref": "#/components/schemas/org_setting_vpn_options"
+            "$ref": "#/components/schemas/org_setting_vpn_options",
+            "description": "Options for organization VPN behavior"
           },
           "wan_pma": {
-            "$ref": "#/components/schemas/org_setting_wan_pma"
+            "$ref": "#/components/schemas/org_setting_wan_pma",
+            "description": "PMA feature settings for WAN Assurance"
           },
           "wired_pma": {
-            "$ref": "#/components/schemas/org_setting_wired_pma"
+            "$ref": "#/components/schemas/org_setting_wired_pma",
+            "description": "PMA feature settings for Wired Assurance"
           },
           "wireless_pma": {
-            "$ref": "#/components/schemas/org_setting_wireless_pma"
+            "$ref": "#/components/schemas/org_setting_wireless_pma",
+            "description": "PMA feature settings for Wireless Assurance"
           }
         },
         "type": "object"
       },
       "org_setting_api_policy": {
         "additionalProperties": false,
+        "description": "Organization API response policy for hiding secrets and passwords",
         "properties": {
+          "enforce_src_ips_for_tokens": {
+            "default": false,
+            "description": "Optional. When `true`, Org API tokens without their own `src_ips` also respect the org policy `src_ips`. Default is `false`.",
+            "type": "boolean"
+          },
           "no_reveal": {
             "default": false,
             "description": "By default, API hides password/secrets when the user doesn't have write access\n  * `true`: API will hide passwords/secrets for all users\n  * `false`: API will hide passwords/secrets for read-only users",
             "type": "boolean"
+          },
+          "src_ips": {
+            "description": "Optional list of IP addresses or CIDR subnets from which org API access is allowed. At most 10 entries. The source IP of the request making this update must be within one of the specified subnets.",
+            "examples": [
+              [
+                "63.3.56.0/24",
+                "63.3.55.4"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "type": "array"
           }
         },
         "type": "object"
       },
       "org_setting_auto_assignment_rule": {
         "additionalProperties": false,
-        "description": "Auto_rules in org settings",
+        "description": "Automatic assignment rule used by org settings",
         "properties": {
           "create_new_site_if_needed": {
             "default": false,
@@ -1050,7 +1179,7 @@
             "type": "boolean"
           },
           "expression": {
-            "description": "If `src`==`name`, `src`==`lldp_system_name`,  `src`==`dns_suffix`  \n      \"[0:3]\"            // \"abcdef\" -> \"abc\"  \n      \"split(.)[1]\"      // \"a.b.c\" -> \"b\"  \n      \"split(-)[1][0:3]\" // \"a1234-b5678-c90\" -> \"b56\"'",
+            "description": "If `src`==`name`, `src`==`lldp_system_name`, `src`==`dns_suffix`  \n      \"[0:3]\"            // \"abcdef\" -> \"abc\"  \n      \"split(.)[1]\"      // \"a.b.c\" -> \"b\"  \n      \"split(-)[1][0:3]\" // \"a1234-b5678-c90\" -> \"b56\"'",
             "examples": [
               "split(.)[1]"
             ],
@@ -1064,22 +1193,23 @@
             "type": "string"
           },
           "match_country": {
-            "description": "If `src`==`geoip`",
+            "description": "If `src`==`geoip`, country or region value that must match the device location",
             "type": "string"
           },
           "match_device_type": {
-            "$ref": "#/components/schemas/device_type_default_ap"
+            "$ref": "#/components/schemas/device_type_default_ap",
+            "description": "Device type filter that limits which claimed devices this rule applies to"
           },
           "match_model": {
-            "description": "Optional/additional filter",
+            "description": "Optional additional device model filter for this assignment rule",
             "type": "string"
           },
           "model": {
-            "description": "If `src`==`model`",
+            "description": "If `src`==`model`, device model value to match",
             "type": "string"
           },
           "prefix": {
-            "description": "If `src`==`name`",
+            "description": "If `src`==`name`, prefix that must be present in the device name",
             "examples": [
               "XX-"
             ],
@@ -1089,14 +1219,15 @@
             ]
           },
           "src": {
-            "$ref": "#/components/schemas/org_setting_auto_site_assignment_src"
+            "$ref": "#/components/schemas/org_setting_auto_site_assignment_src",
+            "description": "Source attribute used to evaluate the automatic assignment rule"
           },
           "subnet": {
             "description": "If `src`==`subnet` or `ext_ip`==`ext_ip`",
             "type": "string"
           },
           "suffix": {
-            "description": "If `src`==`name`",
+            "description": "If `src`==`name`, suffix that must be present in the device name",
             "examples": [
               "-YY"
             ],
@@ -1117,18 +1248,22 @@
       },
       "org_setting_auto_device_naming": {
         "additionalProperties": false,
+        "description": "Automatic device naming configuration for claimed devices",
         "properties": {
           "enable": {
+            "description": "Whether automatic device naming is enabled",
             "type": "boolean"
           },
           "rules": {
-            "$ref": "#/components/schemas/org_setting_auto_device_naming_rules"
+            "$ref": "#/components/schemas/org_setting_auto_device_naming_rules",
+            "description": "List of rules used to derive device names automatically"
           }
         },
         "type": "object"
       },
       "org_setting_auto_device_naming_rule": {
         "additionalProperties": false,
+        "description": "Automatic device naming rule",
         "properties": {
           "expression": {
             "description": "\"[0:3]\"            // \"abcdef\" -> \"abc\"  \n      \"split(.)[1]\"      // \"a.b.c\" -> \"b\"  \n      \"split(-)[1][0:3]\" // \"a1234-b5678-c90\" -> \"b56\"'",
@@ -1138,24 +1273,26 @@
             "type": "string"
           },
           "match_device": {
-            "$ref": "#/components/schemas/device_type_default_ap"
+            "$ref": "#/components/schemas/device_type_default_ap",
+            "description": "Device type filter for this naming rule"
           },
           "prefix": {
-            "description": "Prefix to append to the device name",
+            "description": "Text prepended to the generated device name",
             "type": "string"
           },
           "src": {
-            "$ref": "#/components/schemas/org_setting_auto_device_naming_rule_src"
+            "$ref": "#/components/schemas/org_setting_auto_device_naming_rule_src",
+            "description": "Device attribute used to generate the name"
           },
           "suffix": {
-            "description": "Suffix to append to the device name",
+            "description": "Text appended to the generated device name",
             "type": "string"
           }
         },
         "type": "object"
       },
       "org_setting_auto_device_naming_rule_src": {
-        "description": "enum: `lldp_port_desc`, `mac`",
+        "description": "Device attribute used to generate the name. enum: `lldp_port_desc`, `mac`",
         "enum": [
           "lldp_port_desc",
           "mac"
@@ -1163,6 +1300,7 @@
         "type": "string"
       },
       "org_setting_auto_device_naming_rules": {
+        "description": "Automatic device naming rules, or null when automatic naming is not configured",
         "items": {
           "$ref": "#/components/schemas/org_setting_auto_device_naming_rule"
         },
@@ -1173,17 +1311,21 @@
       },
       "org_setting_auto_deviceprofile_assignment": {
         "additionalProperties": false,
+        "description": "Automatic device profile assignment configuration",
         "properties": {
           "enable": {
+            "description": "Whether automatic device profile assignment is enabled",
             "type": "boolean"
           },
           "rules": {
-            "$ref": "#/components/schemas/org_setting_auto_deviceprofile_assignment_rules"
+            "$ref": "#/components/schemas/org_setting_auto_deviceprofile_assignment_rules",
+            "description": "Assignment rules evaluated for automatic device profile selection"
           }
         },
         "type": "object"
       },
       "org_setting_auto_deviceprofile_assignment_rules": {
+        "description": "Automatic device profile assignment rules, or null when automatic assignment is not configured",
         "items": {
           "$ref": "#/components/schemas/org_setting_auto_assignment_rule"
         },
@@ -1194,17 +1336,21 @@
       },
       "org_setting_auto_site_assignment": {
         "additionalProperties": false,
+        "description": "Automatic site assignment configuration for claimed devices",
         "properties": {
           "enable": {
+            "description": "Whether automatic site assignment is enabled",
             "type": "boolean"
           },
           "rules": {
-            "$ref": "#/components/schemas/org_setting_auto_site_assignment_rules"
+            "$ref": "#/components/schemas/org_setting_auto_site_assignment_rules",
+            "description": "Assignment rules evaluated for automatic site selection"
           }
         },
         "type": "object"
       },
       "org_setting_auto_site_assignment_rules": {
+        "description": "Automatic site assignment rules, or null when automatic assignment is not configured",
         "items": {
           "$ref": "#/components/schemas/org_setting_auto_assignment_rule"
         },
@@ -1227,16 +1373,105 @@
         ],
         "type": "string"
       },
+      "org_setting_auto_upgrade": {
+        "additionalProperties": false,
+        "description": "Organization-wide AP automatic firmware upgrade policy",
+        "properties": {
+          "custom_versions": {
+            "$ref": "#/components/schemas/ap_auto_upgrade_custom_versions",
+            "description": "Per-AP-model firmware versions or channels used for auto-upgrade"
+          },
+          "day_of_week": {
+            "$ref": "#/components/schemas/day_of_week",
+            "description": "Day of the week for the AP auto-upgrade maintenance window"
+          },
+          "enabled": {
+            "default": false,
+            "description": "Whether AP auto-upgrade is enabled. Note that Mist may auto-upgrade APs if the running version is no longer supported.",
+            "type": "boolean"
+          },
+          "time_of_day": {
+            "description": "`any` or HH:MM (24-hour format). Upgrade will happen within up to 1 hour from this time.",
+            "examples": [
+              "12:00"
+            ],
+            "type": "string"
+          },
+          "version": {
+            "$ref": "#/components/schemas/site_auto_upgrade_version",
+            "description": "Firmware release channel or specific version used for AP auto-upgrade"
+          }
+        },
+        "type": "object"
+      },
+      "org_setting_cacerts_config": {
+        "additionalProperties": false,
+        "description": "Per-issuer CA certificate configuration used to verify client certificates",
+        "properties": {
+          "cert": {
+            "description": "PEM-encoded CA certificate",
+            "examples": [
+              "-----BEGIN CERTIFICATE-----\\nMIIFZjCCA06gAwIBAgIIP61/1qm/uDowDQYJKoZIhvcNAQELBQE\\n-----END CERTIFICATE-----"
+            ],
+            "type": "string"
+          },
+          "crl_enabled": {
+            "default": true,
+            "description": "Whether CRL checks are enabled. When true, CRL from AIA is used if available unless `crl_url` is set.",
+            "type": "boolean"
+          },
+          "crl_url": {
+            "description": "Optional override URL for the certificate CRL distribution point",
+            "examples": [
+              "https://crl.example.com/issuer1.crl"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Optional user-friendly label for the CA issuer configuration",
+            "examples": [
+              "Issuer 1"
+            ],
+            "type": "string"
+          },
+          "ocsp_enabled": {
+            "default": true,
+            "description": "Whether OCSP checks are enabled. When true, OCSP responder from AIA is used if available unless `ocsp_url` is set.",
+            "type": "boolean"
+          },
+          "ocsp_url": {
+            "description": "Optional override URL for the OCSP responder",
+            "examples": [
+              "https://ocsp.example.com"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "cert"
+        ],
+        "type": "object"
+      },
+      "org_setting_cacerts_configs": {
+        "description": "List of per-issuer CA certificate configurations. Preferred over `cacerts`.",
+        "items": {
+          "$ref": "#/components/schemas/org_setting_cacerts_config"
+        },
+        "type": "array"
+      },
       "org_setting_celona": {
         "additionalProperties": false,
+        "description": "Integration settings for Celona",
         "properties": {
           "api_key": {
+            "description": "Credential used by Mist for the Celona integration",
             "examples": [
               "REDACTED"
             ],
             "type": "string"
           },
           "api_prefix": {
+            "description": "Celona API prefix configured for the integration",
             "examples": [
               "cc3273fcb016470e"
             ],
@@ -1247,15 +1482,17 @@
       },
       "org_setting_cloudshark": {
         "additionalProperties": false,
+        "description": "Packet capture integration settings for CloudShark",
         "properties": {
           "apitoken": {
+            "description": "Token used by Mist to access the CloudShark integration",
             "examples": [
               "REDACTED"
             ],
             "type": "string"
           },
           "url": {
-            "description": "If using CS Enterprise",
+            "description": "CloudShark Enterprise URL, if using a self-hosted CS Enterprise instance",
             "examples": [
               "https://cloudshark.hosted.domain"
             ],
@@ -1264,56 +1501,19 @@
         },
         "type": "object"
       },
-      "org_setting_cradlepoint": {
-        "additionalProperties": false,
-        "properties": {
-          "cp_api_id": {
-            "examples": [
-              "84446d61-2206-4ea5-855a-0043f980be54"
-            ],
-            "readOnly": true,
-            "type": "string"
-          },
-          "cp_api_key": {
-            "examples": [
-              "REDACTED"
-            ],
-            "readOnly": true,
-            "type": "string"
-          },
-          "ecm_api_id": {
-            "examples": [
-              "73446d61-2206-4ea5-855a-0043f980be62"
-            ],
-            "readOnly": true,
-            "type": "string"
-          },
-          "ecm_api_key": {
-            "examples": [
-              "REDACTED"
-            ],
-            "readOnly": true,
-            "type": "string"
-          },
-          "enable_lldp": {
-            "readOnly": true,
-            "type": "boolean"
-          }
-        },
-        "readOnly": true,
-        "type": "object"
-      },
       "org_setting_device_cert": {
         "additionalProperties": false,
-        "description": "common device cert, optional",
+        "description": "Optional common device certificate configuration for organization settings",
         "properties": {
           "cert": {
+            "description": "PEM-encoded common device certificate used by organization settings",
             "examples": [
               "-----BEGIN CERTIFICATE-----\\nMIIFZjCCA06gAwIBAgIIP61/1qm/uDowDQYJKoZIhvcNAQELBQE\\n-----END CERTIFICATE-----"
             ],
             "type": "string"
           },
           "key": {
+            "description": "Private key paired with the common device certificate",
             "examples": [
               "-----BEGIN PRI..."
             ],
@@ -1324,78 +1524,95 @@
       },
       "org_setting_gateway_mgmt": {
         "additionalProperties": false,
+        "description": "Organization-level gateway management settings",
         "properties": {
           "app_probing": {
-            "$ref": "#/components/schemas/org_setting_gateway_mgmt_app_probing"
+            "$ref": "#/components/schemas/org_setting_gateway_mgmt_app_probing",
+            "description": "Application probing configuration applied to managed gateways"
           },
           "app_usage": {
-            "description": "consumes uplink bandwidth, requires WA license",
+            "description": "For SRX only, whether gateway application usage collection is enabled; requires App Track license",
             "type": "boolean"
           },
           "fips_enabled": {
             "default": false,
+            "description": "Whether FIPS mode is enabled for managed gateways",
             "type": "boolean"
           },
           "host_in_policies": {
-            "$ref": "#/components/schemas/org_setting_gateway_mgmt_host_in_policies"
+            "$ref": "#/components/schemas/org_setting_gateway_mgmt_host_in_policies",
+            "description": "Host-in access policies for gateway management services such as ICMP and SNMP"
           },
           "host_out_policies": {
-            "$ref": "#/components/schemas/org_setting_gateway_mgmt_host_out_policies"
+            "$ref": "#/components/schemas/org_setting_gateway_mgmt_host_out_policies",
+            "description": "Path preference policies for gateway-originated management traffic"
           },
           "overlay_ip": {
-            "$ref": "#/components/schemas/org_setting_gateway_mgmt_overlay_ip"
+            "$ref": "#/components/schemas/org_setting_gateway_mgmt_overlay_ip",
+            "description": "Overlay IP addresses used when gateway management traffic uses the overlay"
           }
         },
         "type": "object"
       },
       "org_setting_gateway_mgmt_app_probing": {
         "additionalProperties": false,
+        "description": "Application probing settings for organization gateway management",
         "properties": {
           "apps": {
-            "$ref": "#/components/schemas/app_probing_apps"
+            "$ref": "#/components/schemas/app_probing_apps",
+            "description": "Predefined application keys to probe from managed gateways"
           }
         },
         "type": "object"
       },
       "org_setting_gateway_mgmt_host_in_policies": {
         "additionalProperties": false,
+        "description": "Host-in access policies for gateway management services",
         "properties": {
           "icmp": {
-            "$ref": "#/components/schemas/org_setting_gateway_mgmt_host_in_policy"
+            "$ref": "#/components/schemas/org_setting_gateway_mgmt_host_in_policy",
+            "description": "Host-in access policy for ICMP traffic to managed gateways"
           },
           "snmp": {
-            "$ref": "#/components/schemas/org_setting_gateway_mgmt_host_in_policy"
+            "$ref": "#/components/schemas/org_setting_gateway_mgmt_host_in_policy",
+            "description": "Host-in access policy for SNMP traffic to managed gateways"
           }
         },
         "type": "object"
       },
       "org_setting_gateway_mgmt_host_in_policy": {
         "additionalProperties": false,
+        "description": "Host-in access policy for a gateway management service",
         "properties": {
           "tenants": {
-            "$ref": "#/components/schemas/strings"
+            "$ref": "#/components/schemas/strings",
+            "description": "Tenant names this host-in policy applies to"
           }
         },
         "type": "object"
       },
       "org_setting_gateway_mgmt_host_out_policies": {
         "additionalProperties": false,
-        "description": "optional, for some of the host-out traffic, the path preference can be specified by default, ECMP will be used from all available route/path available services: dns/mist/ntp/pim",
+        "description": "Optional path preferences for gateway-originated management traffic; ECMP is used across available paths when no preference is specified",
         "properties": {
           "dns": {
-            "$ref": "#/components/schemas/gateway_mgmt_host_out_policy"
+            "$ref": "#/components/schemas/gateway_mgmt_host_out_policy",
+            "description": "Path preference policy for gateway-originated DNS traffic"
           },
           "ntp": {
-            "$ref": "#/components/schemas/gateway_mgmt_host_out_policy"
+            "$ref": "#/components/schemas/gateway_mgmt_host_out_policy",
+            "description": "Path preference policy for gateway-originated NTP traffic"
           },
           "syslog": {
-            "$ref": "#/components/schemas/gateway_mgmt_host_out_policy_syslog"
+            "$ref": "#/components/schemas/gateway_mgmt_host_out_policy_syslog",
+            "description": "Path preference policy for gateway-originated syslog traffic"
           }
         },
         "type": "object"
       },
       "org_setting_gateway_mgmt_overlay_ip": {
         "additionalProperties": false,
+        "description": "Overlay IP configuration used for gateway management traffic",
         "properties": {
           "ip": {
             "description": "When it's going overlay, a routable IP to overlay will be required",
@@ -1410,23 +1627,29 @@
       },
       "org_setting_installer": {
         "additionalProperties": false,
+        "description": "Organization-level permissions and grace period for installer workflows",
         "properties": {
           "allow_all_devices": {
+            "description": "Whether installers may work with all eligible devices",
             "type": "boolean"
           },
           "allow_all_sites": {
+            "description": "Whether installers may work with all sites",
             "type": "boolean"
           },
           "extra_site_ids": {
-            "$ref": "#/components/schemas/org_setting_installer_extra_site_ids"
+            "$ref": "#/components/schemas/org_setting_installer_extra_site_ids",
+            "description": "Additional site IDs that installers may access"
           },
           "grace_period": {
+            "description": "Grace period, in days, during which installers can modify recent sites or devices",
             "type": "integer"
           }
         },
         "type": "object"
       },
       "org_setting_installer_extra_site_ids": {
+        "description": "Additional site IDs that installers may access",
         "items": {
           "examples": [
             "4ac1dcf4-9d8b-7211-65c4-057819f0862b"
@@ -1438,17 +1661,18 @@
       },
       "org_setting_jcloud": {
         "additionalProperties": false,
+        "description": "JCloud integration settings for this Mist organization",
         "properties": {
           "org_apitoken": {
-            "description": "JCloud Org Token",
+            "description": "JCloud organization API token used by this Mist organization",
             "type": "string"
           },
           "org_apitoken_name": {
-            "description": "JCloud Org Token Name",
+            "description": "Display name for the JCloud organization API token",
             "type": "string"
           },
           "org_id": {
-            "description": "JCloud Org ID",
+            "description": "JCloud organization identifier linked to this Mist organization",
             "type": "string"
           }
         },
@@ -1475,9 +1699,11 @@
       },
       "org_setting_juniper_srx": {
         "additionalProperties": false,
+        "description": "Organization settings for Juniper SRX devices",
         "properties": {
           "auto_upgrade": {
-            "$ref": "#/components/schemas/juniper_srx_auto_upgrade"
+            "$ref": "#/components/schemas/juniper_srx_auto_upgrade",
+            "description": "SRX auto-upgrade settings applied when Juniper SRX devices are first onboarded"
           }
         },
         "type": "object"
@@ -1487,16 +1713,20 @@
         "description": "junos_shell_access: Manages role-based web-shell access.  \nWhen junos_shell access is not defined (Default) - No additional users are configured and web-shell uses default `mist` user to login.  \nWhen junos_shell_access is defined - Additional users mist-web-admin (admin permission), mist-web-viewer(viewer permission) are configured on the device and web-shell logs in with the mist-web-admin/mist-web-viewer user depending upon the shell access level. Setting the shell access level to \"none\", disables web-shell access for that specific role.\n",
         "properties": {
           "admin": {
-            "$ref": "#/components/schemas/org_setting_junos_shell_access_admin"
+            "$ref": "#/components/schemas/org_setting_junos_shell_access_admin",
+            "description": "Shell access level used for administrator web-shell sessions"
           },
           "helpdesk": {
-            "$ref": "#/components/schemas/org_setting_junos_shell_access_helpdesk"
+            "$ref": "#/components/schemas/org_setting_junos_shell_access_helpdesk",
+            "description": "Shell access level used for helpdesk web-shell sessions"
           },
           "read": {
-            "$ref": "#/components/schemas/org_setting_junos_shell_access_read"
+            "$ref": "#/components/schemas/org_setting_junos_shell_access_read",
+            "description": "Shell access level used for read-only web-shell sessions"
           },
           "write": {
-            "$ref": "#/components/schemas/org_setting_junos_shell_access_write"
+            "$ref": "#/components/schemas/org_setting_junos_shell_access_write",
+            "description": "Shell access level used for write-role web-shell sessions"
           }
         },
         "type": "object"
@@ -1541,12 +1771,29 @@
         ],
         "type": "string"
       },
+      "org_setting_marvis": {
+        "additionalProperties": false,
+        "description": "Organization settings for Marvis automation",
+        "properties": {
+          "disable_proactive_monitoring": {
+            "default": false,
+            "description": "Disable proactive monitoring in Marvis. NOTE: support access must be enabled for the org (`allow_mist`=`true`) for proactive monitoring to function.",
+            "type": "boolean"
+          },
+          "self_driving": {
+            "$ref": "#/components/schemas/marvis_self_driving",
+            "description": "Self-driving network automation settings by domain"
+          }
+        },
+        "type": "object"
+      },
       "org_setting_mgmt": {
         "additionalProperties": false,
-        "description": "management-related properties",
+        "description": "Organization management connectivity settings",
         "properties": {
           "mxtunnel_ids": {
-            "$ref": "#/components/schemas/org_setting_mgmt_mxtunnel_ids"
+            "$ref": "#/components/schemas/org_setting_mgmt_mxtunnel_ids",
+            "description": "Mist Tunnel IDs selected for management connectivity"
           },
           "use_mxtunnel": {
             "default": false,
@@ -1562,7 +1809,7 @@
         "type": "object"
       },
       "org_setting_mgmt_mxtunnel_ids": {
-        "description": "List of Mist Tunnels",
+        "description": "Mist Tunnel IDs available for organization management connectivity",
         "items": {
           "examples": [
             "08cd7499-5841-51c8-e663-fb16b6f3b45e"
@@ -1574,9 +1821,16 @@
       },
       "org_setting_mist_nac": {
         "additionalProperties": false,
+        "description": "Organization-level Mist NAC configuration",
         "properties": {
+          "allow_teap_machine_auth_only": {
+            "default": false,
+            "description": "allow clients to connect even when the user cert failed. TEAP authenticates both Machine Cert and User Cert. When enabled, clients who only succeed Machine Cert authentication will be accepted.",
+            "type": "boolean"
+          },
           "cacerts": {
-            "$ref": "#/components/schemas/cacerts"
+            "$ref": "#/components/schemas/cacerts",
+            "description": "CA certificates trusted by Mist NAC for certificate-based authentication"
           },
           "default_idp_id": {
             "description": "use this IDP when no explicit realm present in the incoming username/CN OR when no IDP is explicitly mapped to the incoming realm.",
@@ -1594,28 +1848,43 @@
             "minimum": 1,
             "type": "integer"
           },
+          "enable_eap_md5_for_mab": {
+            "default": false,
+            "description": "Enable EAP-MD5 for MAB. WARNING: Not FIPS compliant, use only if required for legacy device support.",
+            "type": "boolean"
+          },
           "eu_only": {
             "default": false,
-            "description": "By default, NAC POD failover considers all NAC pods available around the globe, i.e. EU, US, or APAC based, failover happens based on geo IP of the originating site. For strict GDPR compliance NAC POD failover would only happen between the PODs located within the EU environment, and no authentication would take place outside of EU. This is an org setting that is applicable to WLANs, switch templates, mxedge clusters that have mist_nac enabled",
+            "description": "By default, NAC POD failover considers all NAC pods available around the globe, i.e. EU, US, or APAC based, failover happens based on geo IP of the originating site. For strict GDPR compliance NAC POD failover would only happen between the PODs located within the EU environment, and no authentication would take place outside of EU. This is an org setting that is applicable to WLANs, switch templates, Mist Edge clusters that have mist_nac enabled",
             "type": "boolean"
           },
           "fingerprinting": {
-            "$ref": "#/components/schemas/org_setting_mist_nac_fingerprinting"
+            "$ref": "#/components/schemas/org_setting_mist_nac_fingerprinting",
+            "description": "Client fingerprinting settings used by Mist NAC"
           },
           "idp_machine_cert_lookup_field": {
-            "$ref": "#/components/schemas/idp_machine_cert_lookup_field"
+            "$ref": "#/components/schemas/idp_machine_cert_lookup_field",
+            "description": "Client certificate field used to look up machine groups in identity providers"
           },
           "idp_user_cert_lookup_field": {
-            "$ref": "#/components/schemas/idp_user_cert_lookup_field"
+            "$ref": "#/components/schemas/idp_user_cert_lookup_field",
+            "description": "Client certificate field used to look up user groups in identity providers"
           },
           "idps": {
-            "$ref": "#/components/schemas/org_setting_mist_nac_idps"
+            "$ref": "#/components/schemas/org_setting_mist_nac_idps",
+            "description": "Identity provider mappings used by Mist NAC realm matching"
+          },
+          "mdm": {
+            "$ref": "#/components/schemas/org_setting_mist_nac_mdm",
+            "description": "Mobile Device Management CoA settings for Mist NAC"
           },
           "server_cert": {
-            "$ref": "#/components/schemas/org_setting_mist_nac_server_cert"
+            "$ref": "#/components/schemas/org_setting_mist_nac_server_cert",
+            "description": "RADIUS server certificate presented by Mist NAC during EAP-TLS"
           },
           "use_ip_version": {
-            "$ref": "#/components/schemas/org_setting_mist_nac_ip_version"
+            "$ref": "#/components/schemas/org_setting_mist_nac_ip_version",
+            "description": "IP version used by NAS devices and Mist Edge proxies to reach Mist NAC"
           },
           "use_ssl_port": {
             "default": false,
@@ -1624,7 +1893,7 @@
           },
           "usermac_expiry": {
             "default": 0,
-            "description": "Allow customer to configure an expiry time for usermacs by attaching a Quarantine label to those which have been inactive for the configured period of time (in days). 0 means no expiry",
+            "description": "Allow customer to configure an expiry time for usermacs by attaching an `inactive_endpoint` label to those which have been inactive for the configured period of time (in days). 0 means no expiry",
             "examples": [
               30
             ],
@@ -1637,7 +1906,7 @@
       },
       "org_setting_mist_nac_fingerprinting": {
         "additionalProperties": false,
-        "description": "Allows customer to enable client fingerprinting for policy enforcement",
+        "description": "Client fingerprinting settings used for Mist NAC policy enforcement",
         "properties": {
           "enabled": {
             "default": false,
@@ -1655,13 +1924,14 @@
             "type": "boolean"
           },
           "wireless_coa_type": {
-            "$ref": "#/components/schemas/org_setting_mist_nac_fingerprinting_wireless_coa"
+            "$ref": "#/components/schemas/org_setting_mist_nac_fingerprinting_wireless_coa",
+            "description": "Change of Authorization action sent to wireless clients when fingerprints change"
           }
         },
         "type": "object"
       },
       "org_setting_mist_nac_fingerprinting_wireless_coa": {
-        "description": "enum: `reauth`, `disconnect`",
+        "description": "Change of Authorization action sent to wireless clients when fingerprints change. enum: `reauth`, `disconnect`",
         "enum": [
           "reauth",
           "disconnect"
@@ -1670,15 +1940,19 @@
       },
       "org_setting_mist_nac_idp": {
         "additionalProperties": false,
+        "description": "Mist NAC identity provider realm mapping",
         "properties": {
           "exclude_realms": {
-            "$ref": "#/components/schemas/org_setting_mist_nac_idp_exclude_realms"
+            "$ref": "#/components/schemas/org_setting_mist_nac_idp_exclude_realms",
+            "description": "When the IDP is `mxedge_proxy` type, realms excluded from proxying in addition to other valid home realms in this org"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the identity provider referenced by this Mist NAC mapping"
           },
           "user_realms": {
-            "$ref": "#/components/schemas/org_setting_mist_nac_idp_user_realms"
+            "$ref": "#/components/schemas/org_setting_mist_nac_idp_user_realms",
+            "description": "User realms that select this identity provider"
           }
         },
         "type": "object"
@@ -1701,6 +1975,7 @@
         "type": "array"
       },
       "org_setting_mist_nac_idps": {
+        "description": "Identity provider realm mappings used by Mist NAC",
         "items": {
           "$ref": "#/components/schemas/org_setting_mist_nac_idp"
         },
@@ -1715,24 +1990,39 @@
         ],
         "type": "string"
       },
+      "org_setting_mist_nac_mdm": {
+        "additionalProperties": false,
+        "description": "MDM (Mobile Device Management) CoA configuration",
+        "properties": {
+          "coa_type": {
+            "$ref": "#/components/schemas/nac_coa_type",
+            "description": "Change of Authorization action sent for MDM posture changes"
+          }
+        },
+        "type": "object"
+      },
       "org_setting_mist_nac_server_cert": {
         "additionalProperties": false,
-        "description": "radius server cert to be presented in EAP TLS",
+        "description": "RADIUS server certificate presented by Mist NAC during EAP-TLS",
         "properties": {
           "cert": {
+            "description": "PEM-encoded RADIUS server certificate presented during EAP-TLS",
             "examples": [
               "-----BEGIN CERTIFICATE-----\\nMIIFZjCCA06gAwIBAgIIP61/1qm/uDowDQYJKoZIhvcNAQELBQE\\n-----END CERTIFICATE-----"
             ],
             "type": "string"
           },
           "key": {
+            "description": "Private key paired with the Mist NAC RADIUS server certificate",
             "examples": [
               "-----BEGIN PRI..."
             ],
+            "format": "password",
             "type": "string"
           },
           "password": {
-            "description": "private key password (optional)",
+            "description": "Optional password for the private key",
+            "format": "password",
             "type": "string"
           }
         },
@@ -1740,7 +2030,7 @@
       },
       "org_setting_password_policy": {
         "additionalProperties": false,
-        "description": "password policy",
+        "description": "Admin credential policy settings for the organization",
         "properties": {
           "enabled": {
             "default": false,
@@ -1758,7 +2048,7 @@
           },
           "min_length": {
             "default": 8,
-            "description": "Required password length",
+            "description": "Minimum number of characters required for passwords",
             "type": "integer"
           },
           "requires_special_char": {
@@ -1776,8 +2066,10 @@
       },
       "org_setting_pcap": {
         "additionalProperties": false,
+        "description": "Packet capture export settings for the organization",
         "properties": {
           "bucket": {
+            "description": "Storage bucket name used for organization packet capture files",
             "examples": [
               "myorg_pcap"
             ],
@@ -1785,7 +2077,7 @@
           },
           "max_pkt_len": {
             "default": 128,
-            "description": "Max_len of non-management packets to capture",
+            "description": "Maximum length of non-management packets to capture, in bytes",
             "examples": [
               128
             ],
@@ -1797,6 +2089,7 @@
       },
       "org_setting_security": {
         "additionalProperties": false,
+        "description": "Organization security controls for local SSH and FIPS zeroize access",
         "properties": {
           "disable_local_ssh": {
             "description": "Whether to disable local SSH (by default, local SSH is enabled with allow_mist in Org is enabled",
@@ -1819,15 +2112,18 @@
       },
       "org_setting_switch": {
         "additionalProperties": false,
+        "description": "Configuration defaults for switches in this organization",
         "properties": {
           "auto_upgrade": {
-            "$ref": "#/components/schemas/switch_auto_upgrade"
+            "$ref": "#/components/schemas/switch_auto_upgrade",
+            "description": "Auto-upgrade defaults for switches in this organization"
           }
         },
         "type": "object"
       },
       "org_setting_switch_mgmt": {
         "additionalProperties": false,
+        "description": "Organization-level switch management settings",
         "properties": {
           "ap_affinity_threshold": {
             "default": 12,
@@ -1841,7 +2137,7 @@
         "type": "object"
       },
       "org_setting_tags": {
-        "description": "List of tags",
+        "description": "Labels associated with these organization settings",
         "items": {
           "type": "string"
         },
@@ -1849,14 +2145,17 @@
       },
       "org_setting_vpn_options": {
         "additionalProperties": false,
+        "description": "Organization VPN behavior options",
         "properties": {
           "as_base": {
+            "description": "Base BGP autonomous system number used for generated VPN configurations",
             "maximum": 2147483647,
             "minimum": 1,
             "type": "integer"
           },
           "enable_ipv6": {
             "default": false,
+            "description": "Whether IPv6 is enabled for organization VPN configuration",
             "type": "boolean"
           },
           "st_subnet": {
@@ -1869,9 +2168,11 @@
       },
       "org_setting_wan_pma": {
         "additionalProperties": false,
+        "description": "PMA feature settings for WAN Assurance",
         "properties": {
           "enabled": {
             "default": false,
+            "description": "Whether PMA is enabled for WAN Assurance",
             "type": "boolean"
           }
         },
@@ -1879,9 +2180,11 @@
       },
       "org_setting_wired_pma": {
         "additionalProperties": false,
+        "description": "PMA feature settings for Wired Assurance",
         "properties": {
           "enabled": {
             "default": false,
+            "description": "Whether PMA is enabled for Wired Assurance",
             "type": "boolean"
           }
         },
@@ -1889,17 +2192,21 @@
       },
       "org_setting_wireless_pma": {
         "additionalProperties": false,
+        "description": "PMA feature settings for Wireless Assurance",
         "properties": {
           "enabled": {
             "default": true,
+            "description": "Whether PMA is enabled for Wireless Assurance",
             "type": "boolean"
           }
         },
         "type": "object"
       },
       "pcap_bucket": {
+        "description": "Request to configure a custom packet capture bucket",
         "properties": {
           "bucket": {
+            "description": "Customer bucket name to use for packet capture files",
             "examples": [
               "company-private-pcap"
             ],
@@ -1912,14 +2219,17 @@
         "type": "object"
       },
       "pcap_bucket_verify": {
+        "description": "Request to verify ownership of a custom packet capture bucket",
         "properties": {
           "bucket": {
+            "description": "Customer bucket name being verified for packet capture storage",
             "examples": [
               "company-private-pcap"
             ],
             "type": "string"
           },
           "verify_token": {
+            "description": "Token read from the MIST_TOKEN file written during bucket setup",
             "examples": [
               "REDACTED"
             ],
@@ -1944,8 +2254,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -1956,8 +2268,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -1968,8 +2282,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -1980,8 +2296,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -1989,8 +2307,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -2001,11 +2321,14 @@
       },
       "response_pcap_bucket_config": {
         "additionalProperties": false,
+        "description": "Result of a custom packet capture bucket setup or verification operation",
         "properties": {
           "bucket": {
+            "description": "Custom bucket name used for packet capture storage",
             "type": "string"
           },
           "detail": {
+            "description": "Status or error detail returned for the bucket operation",
             "type": "string"
           }
         },
@@ -2013,39 +2336,46 @@
       },
       "setting_ssr": {
         "additionalProperties": false,
+        "description": "SSR management settings for device onboarding and connectivity",
         "properties": {
           "auto_upgrade": {
-            "$ref": "#/components/schemas/setting_ssr_auto_upgrade"
+            "$ref": "#/components/schemas/setting_ssr_auto_upgrade",
+            "description": "Automatic SSR firmware upgrade settings for newly onboarded devices"
           },
           "conductor_hosts": {
-            "$ref": "#/components/schemas/setting_ssr_conductor_hosts"
+            "$ref": "#/components/schemas/setting_ssr_conductor_hosts",
+            "description": "IP addresses or hostnames of conductors used by SSR devices"
           },
           "conductor_token": {
-            "description": "Token to be used by the SSR Devices to connect to the Conductor",
+            "description": "Registration token used by SSR devices to connect to the conductor",
             "type": "string"
           },
           "disable_stats": {
-            "description": "Disable stats collection on SSR devices",
+            "description": "Whether stats collection is disabled on SSR devices",
             "type": "boolean"
           },
           "proxy": {
-            "$ref": "#/components/schemas/ssr_proxy"
+            "$ref": "#/components/schemas/ssr_proxy",
+            "description": "Network proxy settings used by SSR devices to reach Mist"
           }
         },
         "type": "object"
       },
       "setting_ssr_auto_upgrade": {
         "additionalProperties": false,
-        "description": "auto_upgrade device first time it is onboarded",
+        "description": "Automatic firmware upgrade settings applied when an SSR device is first onboarded",
         "properties": {
           "channel": {
-            "$ref": "#/components/schemas/ssr_upgrade_channel"
+            "$ref": "#/components/schemas/ssr_upgrade_channel",
+            "description": "Firmware release channel used for SSR auto-upgrade"
           },
           "custom_versions": {
-            "$ref": "#/components/schemas/setting_ssr_auto_upgrade_custom_versions"
+            "$ref": "#/components/schemas/setting_ssr_auto_upgrade_custom_versions",
+            "description": "Per-model SSR firmware versions used for auto-upgrade"
           },
           "enabled": {
             "default": false,
+            "description": "Whether SSR auto-upgrade is enabled for newly onboarded devices",
             "type": "boolean"
           },
           "version": {
@@ -2070,7 +2400,7 @@
         "type": "object"
       },
       "setting_ssr_conductor_hosts": {
-        "description": "List of Conductor IP Addresses or Hosts to be used by the SSR Devices",
+        "description": "Conductor IP addresses or hostnames used by SSR devices",
         "items": {
           "type": "string"
         },
@@ -2078,36 +2408,42 @@
       },
       "simple_alert": {
         "additionalProperties": false,
-        "description": "Set of heuristic rules will be enabled when marvis subscription is not available. It triggers when, in a Z minute window, there are more than Y distinct client encountering over X failures",
+        "description": "Heuristic alert thresholds used when a Marvis subscription is unavailable",
         "properties": {
           "arp_failure": {
-            "$ref": "#/components/schemas/simple_alert_arp_failure"
+            "$ref": "#/components/schemas/simple_alert_arp_failure",
+            "description": "Thresholds for ARP failure heuristic alerts"
           },
           "dhcp_failure": {
-            "$ref": "#/components/schemas/simple_alert_dhcp_failure"
+            "$ref": "#/components/schemas/simple_alert_dhcp_failure",
+            "description": "Thresholds for DHCP failure heuristic alerts"
           },
           "dns_failure": {
-            "$ref": "#/components/schemas/simple_alert_dns_failure"
+            "$ref": "#/components/schemas/simple_alert_dns_failure",
+            "description": "Thresholds for DNS failure heuristic alerts"
           }
         },
         "type": "object"
       },
       "simple_alert_arp_failure": {
         "additionalProperties": false,
+        "description": "Thresholds for ARP failure heuristic alerts",
         "properties": {
           "client_count": {
             "default": 10,
+            "description": "Number of distinct clients that must encounter ARP failures before alerting",
             "type": "integer"
           },
           "duration": {
             "default": 20,
-            "description": "failing within minutes",
+            "description": "Time window in minutes for evaluating ARP failures",
             "maximum": 60,
             "minimum": 5,
             "type": "integer"
           },
           "incident_count": {
             "default": 10,
+            "description": "Number of ARP failure incidents required within the duration window",
             "type": "integer"
           }
         },
@@ -2115,20 +2451,23 @@
       },
       "simple_alert_dhcp_failure": {
         "additionalProperties": false,
+        "description": "Thresholds for DHCP failure heuristic alerts",
         "properties": {
           "client_count": {
             "default": 10,
+            "description": "Number of distinct clients that must encounter DHCP failures before alerting",
             "type": "integer"
           },
           "duration": {
             "default": 10,
-            "description": "failing within minutes",
+            "description": "Time window in minutes for evaluating DHCP failures",
             "maximum": 60,
             "minimum": 5,
             "type": "integer"
           },
           "incident_count": {
             "default": 20,
+            "description": "Number of DHCP failure incidents required within the duration window",
             "type": "integer"
           }
         },
@@ -2136,24 +2475,40 @@
       },
       "simple_alert_dns_failure": {
         "additionalProperties": false,
+        "description": "Thresholds for DNS failure heuristic alerts",
         "properties": {
           "client_count": {
             "default": 20,
+            "description": "Number of distinct clients that must encounter DNS failures before alerting",
             "type": "integer"
           },
           "duration": {
             "default": 10,
-            "description": "failing within minutes",
+            "description": "Time window in minutes for evaluating DNS failures",
             "maximum": 60,
             "minimum": 5,
             "type": "integer"
           },
           "incident_count": {
             "default": 30,
+            "description": "Number of DNS failure incidents required within the duration window",
             "type": "integer"
           }
         },
         "type": "object"
+      },
+      "site_auto_upgrade_version": {
+        "default": "stable",
+        "description": "desired version. enum: `beta`, `custom`, `stable`",
+        "enum": [
+          "beta",
+          "custom",
+          "stable"
+        ],
+        "examples": [
+          "beta"
+        ],
+        "type": "string"
       },
       "ssr_proxy": {
         "additionalProperties": false,
@@ -2161,12 +2516,14 @@
         "properties": {
           "disabled": {
             "default": false,
+            "description": "Whether the SSR proxy configuration is disabled",
             "examples": [
               true
             ],
             "type": "boolean"
           },
           "url": {
+            "description": "Proxy URL that SSR devices use to reach Mist",
             "examples": [
               "https://proxy.corp.com:8080/"
             ],
@@ -2186,6 +2543,7 @@
         "type": "string"
       },
       "strings": {
+        "description": "Unique string values returned or accepted by this schema",
         "items": {
           "type": "string"
         },
@@ -2194,17 +2552,19 @@
       },
       "switch_auto_upgrade": {
         "additionalProperties": false,
+        "description": "Switch firmware auto-upgrade settings",
         "properties": {
           "custom_versions": {
-            "$ref": "#/components/schemas/switch_auto_upgrade_custom_versions"
+            "$ref": "#/components/schemas/switch_auto_upgrade_custom_versions",
+            "description": "Per-model switch firmware versions to use for auto-upgrade"
           },
           "enabled": {
-            "description": "Enable auto upgrade for the switch",
+            "description": "Whether switch auto-upgrade is enabled",
             "type": "boolean"
           },
           "snapshot": {
             "default": false,
-            "description": "Enable snapshot during the upgrade process",
+            "description": "Whether to create a recovery snapshot during the upgrade process",
             "type": "boolean"
           }
         },
@@ -2225,32 +2585,39 @@
       },
       "synthetictest_config": {
         "additionalProperties": false,
+        "description": "Synthetic test configuration for Marvis Minis",
         "properties": {
           "aggressiveness": {
-            "$ref": "#/components/schemas/synthetictest_config_aggressiveness"
+            "$ref": "#/components/schemas/synthetictest_config_aggressiveness",
+            "description": "Overall aggressiveness level for synthetic test probes"
           },
           "custom_probes": {
-            "$ref": "#/components/schemas/synthetictest_config_custom_probes"
+            "$ref": "#/components/schemas/synthetictest_config_custom_probes",
+            "description": "Custom synthetic probe definitions keyed by probe name"
           },
           "disabled": {
             "default": false,
+            "description": "Whether synthetic tests are disabled",
             "type": "boolean"
           },
           "lan_networks": {
-            "$ref": "#/components/schemas/synthetictest_config_lan_networks"
+            "$ref": "#/components/schemas/synthetictest_config_lan_networks",
+            "description": "LAN network probe groups used by synthetic tests"
           },
           "vlans": {
-            "$ref": "#/components/schemas/synthetictest_config_vlans"
+            "$ref": "#/components/schemas/synthetictest_config_vlans",
+            "description": "Deprecated VLAN-based synthetic test settings"
           },
           "wan_speedtest": {
-            "$ref": "#/components/schemas/synthetictest_config_wan_speedtest"
+            "$ref": "#/components/schemas/synthetictest_config_wan_speedtest",
+            "description": "WAN speedtest settings for synthetic tests"
           }
         },
         "type": "object"
       },
       "synthetictest_config_aggressiveness": {
         "default": "auto",
-        "description": "enum: `auto`, `high`, `low`",
+        "description": "Aggressiveness level for a synthetic test. enum: `auto`, `high`, `med`, `low`",
         "enum": [
           "auto",
           "high",
@@ -2261,9 +2628,11 @@
       },
       "synthetictest_config_custom_probe": {
         "additionalProperties": false,
+        "description": "Custom probe definition for synthetic tests",
         "properties": {
           "aggressiveness": {
-            "$ref": "#/components/schemas/synthetictest_config_aggressiveness"
+            "$ref": "#/components/schemas/synthetictest_config_aggressiveness",
+            "description": "Probe aggressiveness level for this custom synthetic probe"
           },
           "target": {
             "description": "Can be URL (e.g. http://x.com, https://x.com:8080/path/to/resource), IP address, or IP:port combination",
@@ -2273,14 +2642,15 @@
             "type": "string"
           },
           "threshold": {
-            "description": "In milliseconds",
+            "description": "Response-time threshold for this custom probe, in milliseconds",
             "examples": [
               100
             ],
             "type": "integer"
           },
           "type": {
-            "$ref": "#/components/schemas/synthetictest_config_custom_probe_type"
+            "$ref": "#/components/schemas/synthetictest_config_custom_probe_type",
+            "description": "Probe type used by this custom synthetic probe"
           }
         },
         "type": "object"
@@ -2309,10 +2679,12 @@
         "description": "configure minis probes to be tested on lan networks of gateways",
         "properties": {
           "networks": {
-            "$ref": "#/components/schemas/synthetictest_config_lan_networks_networks"
+            "$ref": "#/components/schemas/synthetictest_config_lan_networks_networks",
+            "description": "LAN network names where synthetic probes are run"
           },
           "probes": {
-            "$ref": "#/components/schemas/synthetictest_config_probes"
+            "$ref": "#/components/schemas/synthetictest_config_probes",
+            "description": "Synthetic probe names to run on the listed LAN networks"
           }
         },
         "type": "object"
@@ -2346,9 +2718,11 @@
       },
       "synthetictest_config_vlan": {
         "additionalProperties": false,
+        "description": "Deprecated VLAN-based synthetic test settings",
         "properties": {
           "custom_test_urls": {
-            "$ref": "#/components/schemas/synthetictest_config_vlan_custom_test_urls"
+            "$ref": "#/components/schemas/synthetictest_config_vlan_custom_test_urls",
+            "description": "Deprecated custom URLs tested by VLAN-based synthetic probes"
           },
           "disabled": {
             "default": false,
@@ -2356,16 +2730,19 @@
             "type": "boolean"
           },
           "probes": {
-            "$ref": "#/components/schemas/synthetictest_config_probes"
+            "$ref": "#/components/schemas/synthetictest_config_probes",
+            "description": "Synthetic probe names to run for the listed VLANs"
           },
           "vlan_ids": {
-            "$ref": "#/components/schemas/synthetictest_config_vlan_vlan_ids"
+            "$ref": "#/components/schemas/synthetictest_config_vlan_vlan_ids",
+            "description": "VLAN identifiers where synthetic probes are run"
           }
         },
         "type": "object"
       },
       "synthetictest_config_vlan_custom_test_urls": {
         "deprecated": true,
+        "description": "Deprecated custom URLs tested by VLAN-based synthetic probes",
         "examples": [
           [
             "https://www.abc.com/",
@@ -2378,6 +2755,7 @@
         "type": "array"
       },
       "synthetictest_config_vlan_vlan_ids": {
+        "description": "VLAN identifiers where deprecated VLAN-based synthetic probes run",
         "examples": [
           [
             10,
@@ -2392,6 +2770,7 @@
       },
       "synthetictest_config_vlans": {
         "deprecated": true,
+        "description": "Deprecated VLAN-based synthetic test configurations",
         "items": {
           "$ref": "#/components/schemas/synthetictest_config_vlan"
         },
@@ -2399,12 +2778,15 @@
       },
       "synthetictest_config_wan_speedtest": {
         "additionalProperties": false,
+        "description": "WAN speedtest scheduling settings for synthetic tests",
         "properties": {
           "enabled": {
+            "description": "Whether scheduled WAN speedtests are enabled",
             "type": "boolean"
           },
           "time_of_day": {
-            "$ref": "#/components/schemas/time_of_day"
+            "$ref": "#/components/schemas/time_of_day",
+            "description": "Scheduled time of day for WAN speedtests"
           }
         },
         "type": "object"
@@ -2418,6 +2800,7 @@
         "type": "string"
       },
       "vlan_id_with_variable": {
+        "description": "VLAN ID, either numeric or expressed as a template variable string",
         "oneOf": [
           {
             "type": "string"
@@ -2910,19 +3293,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

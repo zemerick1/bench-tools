@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Alarm Templates",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -80,7 +76,7 @@
         }
       ],
       "get": {
-        "description": "Get List of Org Alarm Templates",
+        "description": "List alarm templates defined for the organization, including default delivery settings and per-alarm rule configuration.",
         "operationId": "listOrgAlarmTemplates",
         "parameters": [
           {
@@ -116,7 +112,7 @@
         ]
       },
       "post": {
-        "description": "Available rules can be found in [List Alarm Definitions#](/#operations/listAlarmDefinitions)\n\nThe delivery dict is only required if different from the template delivery settings.",
+        "description": "Create an organization alarm template that defines default delivery settings and per-alarm rule overrides.\nAvailable rules can be found in [List Alarm Definitions](/#operations/listAlarmDefinitions)\n\nThe `delivery` object is only required when it differs from the template delivery settings.\nTo assign an Alarm template to a site, use the [Update Site](/#operations/updateSiteInfo) endpoint and specify the Alarm template ID in the `alarmtemplate_id` field of the request body.",
         "operationId": "createOrgAlarmTemplate",
         "requestBody": {
           "content": {
@@ -161,11 +157,11 @@
         }
       ],
       "get": {
-        "description": "Get List of Org Alarms Currently Suppressed",
+        "description": "List alarm suppression entries currently configured for this organization, optionally filtered by organization-wide or site-specific scope.",
         "operationId": "listOrgSuppressedAlarms",
         "parameters": [
           {
-            "description": "Returns both scopes if not specified",
+            "description": "Filter results by scope. enum: `org`, `site`",
             "in": "query",
             "name": "scope",
             "schema": {
@@ -199,7 +195,7 @@
         ]
       },
       "post": {
-        "description": "In certain situations, for example, scheduled maintenance, you may want to suspend alarms to be triggered against Sites for a period of time.",
+        "description": "Create or schedule an alarm suppression window for the organization or selected sites, for example during planned maintenance.",
         "operationId": "suppressOrgAlarm",
         "requestBody": {
           "content": {
@@ -262,7 +258,7 @@
         ]
       },
       "delete": {
-        "description": "Un-Suppress Suppressed Alarms",
+        "description": "Remove alarm suppression entries currently configured for this organization.",
         "operationId": "unsuppressOrgSuppressedAlarms",
         "responses": {
           "200": {
@@ -300,7 +296,7 @@
         }
       ],
       "get": {
-        "description": "Get Org Alarm Template Details",
+        "description": "Return one organization alarm template, including default delivery settings and per-alarm rule overrides.",
         "operationId": "getOrgAlarmTemplate",
         "responses": {
           "200": {
@@ -328,7 +324,7 @@
         ]
       },
       "put": {
-        "description": "Update Org Alarm Template",
+        "description": "Update an organization alarm template's default delivery settings or per-alarm rule overrides.",
         "operationId": "updateOrgAlarmTemplate",
         "requestBody": {
           "content": {
@@ -815,7 +811,7 @@
         ]
       },
       "delete": {
-        "description": "Delete Org Alarm Template",
+        "description": "Delete an organization alarm template by template ID from this organization.",
         "operationId": "deleteOrgAlarmTemplate",
         "responses": {
           "200": {
@@ -847,19 +843,23 @@
   "components": {
     "schemas": {
       "alarm_template": {
-        "description": "Alarm Template",
+        "description": "Alarm template defining default delivery and per-alarm rules",
         "properties": {
           "created_time": {
-            "$ref": "#/components/schemas/created_time"
+            "$ref": "#/components/schemas/created_time",
+            "description": "Timestamp when the alarm template was created"
           },
           "delivery": {
-            "$ref": "#/components/schemas/delivery"
+            "$ref": "#/components/schemas/delivery",
+            "description": "Default alarm delivery settings for rules in this template"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the alarm template"
           },
           "modified_time": {
-            "$ref": "#/components/schemas/modified_time"
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Timestamp when the alarm template was last modified"
           },
           "name": {
             "description": "Some string to name the alarm template",
@@ -869,7 +869,8 @@
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization that owns this alarm template"
           },
           "rules": {
             "additionalProperties": {
@@ -913,17 +914,21 @@
       },
       "alarm_template_rule": {
         "additionalProperties": false,
+        "description": "Per-alarm enablement and delivery override in an alarm template",
         "properties": {
           "delivery": {
-            "$ref": "#/components/schemas/delivery"
+            "$ref": "#/components/schemas/delivery",
+            "description": "Overrides for the alarm template delivery defaults for this alarm rule"
           },
           "enabled": {
+            "description": "Whether this alarm rule is enabled in the template",
             "type": "boolean"
           }
         },
         "type": "object"
       },
       "alarm_templates": {
+        "description": "List of alarm templates",
         "items": {
           "$ref": "#/components/schemas/alarm_template"
         },
@@ -940,7 +945,8 @@
         "description": "Delivery object to configure the alarm delivery",
         "properties": {
           "additional_emails": {
-            "$ref": "#/components/schemas/delivery_additional_emails"
+            "$ref": "#/components/schemas/delivery_additional_emails",
+            "description": "Additional email recipients for alarm delivery"
           },
           "enabled": {
             "description": "Whether to enable the alarm delivery via emails or not",
@@ -995,6 +1001,7 @@
         "type": "number"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -1004,8 +1011,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -1016,8 +1025,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -1028,8 +1039,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -1040,8 +1053,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -1049,8 +1064,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -1061,42 +1078,51 @@
       },
       "response_org_suppress_alarm": {
         "additionalProperties": false,
+        "description": "Response containing currently suppressed organization alarm entries",
         "properties": {
           "results": {
-            "$ref": "#/components/schemas/response_org_suppress_alarm_results"
+            "$ref": "#/components/schemas/response_org_suppress_alarm_results",
+            "description": "Suppressed alarm entries currently configured for the organization"
           }
         },
         "type": "object"
       },
       "response_org_suppress_alarm_item": {
         "additionalProperties": false,
+        "description": "Suppressed alarm entry for an organization or site alarm scope",
         "properties": {
           "duration": {
-            "description": "Duration, in seconds. Maximum duration is 86400 * 14 (14 days). 0 is to un-suppress alarms.",
+            "description": "Number of seconds that alarms remain suppressed. Maximum duration is 86400 * 14 (14 days). Use 0 to remove suppression.",
             "type": "integer"
           },
           "expire_time": {
+            "description": "Epoch timestamp, in seconds, when the alarm suppression expires",
             "type": "integer"
           },
           "scheduled_time": {
+            "description": "Epoch timestamp, in seconds, when the alarm suppression starts",
             "type": "integer"
           },
           "scope": {
-            "$ref": "#/components/schemas/suppressed_alarm_scope"
+            "$ref": "#/components/schemas/suppressed_alarm_scope",
+            "description": "Alarm suppression scope, either organization-wide or site-specific"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site identifier for a site-scoped alarm suppression entry"
           }
         },
         "type": "object"
       },
       "response_org_suppress_alarm_results": {
+        "description": "Suppressed alarm entries returned for the organization",
         "items": {
           "$ref": "#/components/schemas/response_org_suppress_alarm_item"
         },
         "type": "array"
       },
       "site_id": {
+        "description": "Unique identifier of a Mist site",
         "examples": [
           "441a1214-6928-442a-8e92-e1d34b8ec6a6"
         ],
@@ -1105,23 +1131,26 @@
         "type": "string"
       },
       "suppressed_alarm": {
+        "description": "Request body for suppressing organization alarms",
         "properties": {
           "applies": {
-            "$ref": "#/components/schemas/suppressed_alarm_applies"
+            "$ref": "#/components/schemas/suppressed_alarm_applies",
+            "description": "If `scope`==`site`. Site and site-group targets where alarms are suppressed"
           },
           "duration": {
             "default": 3600,
-            "description": "Duration, in seconds. Maximum duration is 86400 * 180 (180 days). 0 is to un-suppress alarms",
+            "description": "Suppression length, in seconds. Maximum duration is 86400 * 180 (180 days). 0 is to un-suppress alarms",
             "maximum": 15552000,
             "minimum": 0,
             "type": "number"
           },
           "scheduled_time": {
-            "description": "Epoch_time in seconds, Default as now, accepted time range is from now to now + 7 days",
+            "description": "Time when alarm suppression starts, in epoch seconds. Defaults to now; accepted range is from now to now + 7 days",
             "type": "integer"
           },
           "scope": {
-            "$ref": "#/components/schemas/suppressed_alarm_scope"
+            "$ref": "#/components/schemas/suppressed_alarm_scope",
+            "description": "Alarm suppression target level"
           }
         },
         "type": "object"
@@ -1136,10 +1165,12 @@
             "type": "string"
           },
           "site_ids": {
-            "$ref": "#/components/schemas/suppressed_alarm_applies_site_ids"
+            "$ref": "#/components/schemas/suppressed_alarm_applies_site_ids",
+            "description": "Site identifiers included in the suppression scope. If provided, alarms are suppressed for the listed sites."
           },
           "sitegroup_ids": {
-            "$ref": "#/components/schemas/suppressed_alarm_applies_sitegroup_ids"
+            "$ref": "#/components/schemas/suppressed_alarm_applies_sitegroup_ids",
+            "description": "Site group identifiers included in the suppression scope. If provided, alarms are suppressed for all sites in the listed site groups."
           }
         },
         "type": "object"
@@ -1359,9 +1390,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -1381,9 +1412,9 @@
         }
       },
       "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
         "in": "query",
         "name": "page",
-        "required": false,
         "schema": {
           "default": 1,
           "minimum": 1,
@@ -1435,19 +1466,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"

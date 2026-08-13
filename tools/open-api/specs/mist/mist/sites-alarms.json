@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sites Alarms",
-    "version": "2602.1.1"
+    "version": "2607.1.0"
   },
   "servers": [
     {
@@ -59,10 +59,6 @@
       "apiToken": []
     },
     {
-      "basicAuth": []
-    },
-    {
-      "basicAuth": [],
       "csrfToken": []
     }
   ],
@@ -169,11 +165,11 @@
         }
       ],
       "get": {
-        "description": "Count by Distinct Attributes of Site Alarms",
+        "description": "Count alarms for a site, optionally grouped by the `distinct` field and filtered by time range. Use [Count Org Alarms](/#operations/countOrgAlarms) to count alarms across the organization.",
         "operationId": "countSiteAlarms",
         "parameters": [
           {
-            "description": "Group by and count the alarms by some distinct field",
+            "description": "Field used to group this count response. enum: `acked`, `group`, `severity`, `type`",
             "in": "query",
             "name": "distinct",
             "schema": {
@@ -189,6 +185,7 @@
             }
           },
           {
+            "description": "Filter alarm results by whether the alarm has been acknowledged",
             "in": "query",
             "name": "acked",
             "schema": {
@@ -265,7 +262,7 @@
         }
       ],
       "get": {
-        "description": "Search Site Alarms",
+        "description": "Search alarms for a site with filters for alarm group, severity, type, acknowledgement state, acknowledgement admin, and time range. Use [Search Org Alarms](/#operations/searchOrgAlarms) to search alarms across the organization.",
         "operationId": "searchSiteAlarms",
         "parameters": [
           {
@@ -275,7 +272,7 @@
             "$ref": "#/components/parameters/alarm_severity"
           },
           {
-            "description": "Type of the alarm. Accepts multiple values separated by comma. Use [List Alarm Definitions](/#operations/listAlarmDefinitions) to get the list of possible alarm types.",
+            "description": "Filter alarms by alarm type. Accepts multiple values separated by comma. Use [List Alarm Definitions](/#operations/listAlarmDefinitions) to get the list of possible alarm types",
             "in": "query",
             "name": "type",
             "schema": {
@@ -294,6 +291,7 @@
             }
           },
           {
+            "description": "Filter alarm results by whether the alarm has been acknowledged",
             "in": "query",
             "name": "acked",
             "schema": {
@@ -640,10 +638,12 @@
             "type": "integer"
           },
           "aps": {
-            "$ref": "#/components/schemas/alarm_aps"
+            "$ref": "#/components/schemas/alarm_aps",
+            "description": "Access point MAC addresses related to this alarm"
           },
           "bssids": {
-            "$ref": "#/components/schemas/alarm_bssids"
+            "$ref": "#/components/schemas/alarm_bssids",
+            "description": "Wireless BSSIDs related to this alarm"
           },
           "count": {
             "description": "Number of incident within an alarm window",
@@ -654,20 +654,23 @@
             "type": "integer"
           },
           "gateways": {
-            "$ref": "#/components/schemas/alarm_gateways"
+            "$ref": "#/components/schemas/alarm_gateways",
+            "description": "Gateway MAC addresses related to this alarm"
           },
           "group": {
-            "description": "Group of the alarm",
+            "description": "Category group for this alarm, such as certificate_expiry, infrastructure, marvis, or security",
             "examples": [
               "security"
             ],
             "type": "string"
           },
           "hostnames": {
-            "$ref": "#/components/schemas/alarm_hostnames"
+            "$ref": "#/components/schemas/alarm_hostnames",
+            "description": "Device hostnames related to this alarm"
           },
           "id": {
-            "$ref": "#/components/schemas/id"
+            "$ref": "#/components/schemas/id",
+            "description": "Unique identifier of the alarm"
           },
           "last_seen": {
             "description": "Epoch (seconds) of the last incident/alarm within an alarm window",
@@ -683,33 +686,39 @@
             "type": "string"
           },
           "org_id": {
-            "$ref": "#/components/schemas/org_id"
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization associated with this alarm"
           },
           "resolved_time": {
             "description": "Epoch (seconds) of the resolved_time for the alarm",
             "type": "integer"
           },
           "severity": {
-            "description": "Severity of the alarm",
+            "description": "Impact level assigned to this alarm, such as critical, warn, or info",
             "examples": [
               "critical"
             ],
             "type": "string"
           },
           "site_id": {
-            "$ref": "#/components/schemas/site_id"
+            "$ref": "#/components/schemas/site_id",
+            "description": "Site associated with this alarm"
           },
           "ssids": {
-            "$ref": "#/components/schemas/alarm_ssids"
+            "$ref": "#/components/schemas/alarm_ssids",
+            "description": "Wireless SSIDs related to this alarm"
           },
           "status": {
-            "$ref": "#/components/schemas/alarm_status"
+            "$ref": "#/components/schemas/alarm_status",
+            "description": "Current lifecycle status of this alarm"
           },
           "switches": {
-            "$ref": "#/components/schemas/alarm_switches"
+            "$ref": "#/components/schemas/alarm_switches",
+            "description": "Switch MAC addresses related to this alarm"
           },
           "timestamp": {
-            "$ref": "#/components/schemas/timestamp"
+            "$ref": "#/components/schemas/timestamp",
+            "description": "Time when the alarm was raised, in epoch seconds"
           },
           "type": {
             "description": "Key-name of the alarm type",
@@ -732,9 +741,11 @@
         "type": "object"
       },
       "alarm_ack": {
+        "description": "Request body for acknowledging or unacknowledging alarms",
         "properties": {
           "alarm_ids": {
-            "$ref": "#/components/schemas/alarm_ack_alarm_ids"
+            "$ref": "#/components/schemas/alarm_ack_alarm_ids",
+            "description": "Alarm identifiers to acknowledge or unacknowledge"
           },
           "note": {
             "description": "Some text note describing the intent",
@@ -750,6 +761,7 @@
         "type": "object"
       },
       "alarm_ack_alarm_ids": {
+        "description": "Alarm identifiers included in an alarm acknowledgement request",
         "examples": [
           [
             "ccb8c94d-ca56-4075-932f-1f2ab444ff2c",
@@ -776,7 +788,7 @@
         "type": "array"
       },
       "alarm_bssids": {
-        "description": "List of BSSIDs",
+        "description": "Wireless BSSIDs related to this alarm",
         "items": {
           "examples": [
             "Corp SSID"
@@ -810,8 +822,9 @@
         "type": "array"
       },
       "alarm_group": {
-        "description": "Alarm group. enum: `infrastructure`, `marvis`, `security`",
+        "description": "Alarm group. enum: `certificate_expiry`, `infrastructure`, `marvis`, `security`",
         "enum": [
+          "certificate_expiry",
           "infrastructure",
           "marvis",
           "security"
@@ -833,45 +846,53 @@
       },
       "alarm_search_result": {
         "additionalProperties": false,
+        "description": "Paginated response returned by an alarm search",
         "properties": {
           "component": {
-            "description": "Component of the alarm",
+            "description": "Alarm component matched by the search result",
             "type": "string"
           },
           "end": {
+            "description": "Upper bound of the alarm search window, in epoch seconds",
             "examples": [
               1711035686
             ],
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of alarm results returned",
             "examples": [
               10
             ],
             "type": "integer"
           },
           "next": {
+            "description": "URL for the next page of alarm search results",
             "examples": [
               "/api/v1/orgs/b3b9f5e6-67b1-4112-9b4c-6824c565eaeb/alarms/search?end=1711035686&limit=10&search_after=%5B1711031354000%2C+%2256bfa7af-b2db-43ee-a4c8-9b820bbba0e1%22%5D&start=1710949286"
             ],
             "type": "string"
           },
           "page": {
+            "description": "Current page number for paginated alarm search results",
             "examples": [
               1
             ],
             "type": "integer"
           },
           "results": {
-            "$ref": "#/components/schemas/alarm_search_results"
+            "$ref": "#/components/schemas/alarm_search_results",
+            "description": "Alarm records returned for this search"
           },
           "start": {
+            "description": "Lower bound of the alarm search window, in epoch seconds",
             "examples": [
               1710949286
             ],
             "type": "integer"
           },
           "total": {
+            "description": "Number of alarm records matching the search",
             "examples": [
               232
             ],
@@ -888,6 +909,7 @@
         "type": "object"
       },
       "alarm_search_results": {
+        "description": "Alarm records returned by an alarm search response",
         "items": {
           "$ref": "#/components/schemas/alarm"
         },
@@ -903,14 +925,14 @@
         "type": "string"
       },
       "alarm_ssids": {
-        "description": "List of SSIDs",
+        "description": "Wireless SSIDs related to this alarm",
         "items": {
           "type": "string"
         },
         "type": "array"
       },
       "alarm_status": {
-        "description": "enum: `open`, `resolved`",
+        "description": "Current lifecycle status of this alarm. enum: `open`, `resolved`",
         "enum": [
           "open",
           "resolved"
@@ -934,8 +956,10 @@
         "additionalProperties": {
           "type": "string"
         },
+        "description": "Count result row with the matching distinct field values",
         "properties": {
           "count": {
+            "description": "Number of matching items for the distinct value or values in this result",
             "type": "integer"
           }
         },
@@ -945,6 +969,7 @@
         "type": "object"
       },
       "count_results": {
+        "description": "List of count result rows",
         "items": {
           "$ref": "#/components/schemas/count_result"
         },
@@ -961,6 +986,7 @@
         "type": "string"
       },
       "note_string": {
+        "description": "Request body containing a note value",
         "properties": {
           "note": {
             "description": "Some text note describing the intent",
@@ -973,6 +999,7 @@
         "type": "object"
       },
       "org_id": {
+        "description": "Unique identifier of a Mist organization",
         "examples": [
           "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
         ],
@@ -982,23 +1009,30 @@
       },
       "response_count": {
         "additionalProperties": false,
+        "description": "Distinct count response for time-bounded search results",
         "properties": {
           "distinct": {
+            "description": "Field used to group the count results",
             "type": "string"
           },
           "end": {
+            "description": "Search window end timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "limit": {
+            "description": "Maximum number of distinct count results requested",
             "type": "integer"
           },
           "results": {
-            "$ref": "#/components/schemas/count_results"
+            "$ref": "#/components/schemas/count_results",
+            "description": "Count results grouped by the distinct field"
           },
           "start": {
+            "description": "Search window start timestamp for the count request, in epoch seconds",
             "type": "integer"
           },
           "total": {
+            "description": "Number of distinct result buckets returned",
             "type": "integer"
           }
         },
@@ -1014,8 +1048,10 @@
       },
       "response_http400": {
         "additionalProperties": false,
+        "description": "Standard HTTP 400 bad request error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the bad request error",
             "examples": [
               "JSON parse error - Expecting value: line 5 column 8 (char 56)"
             ],
@@ -1026,8 +1062,10 @@
       },
       "response_http401": {
         "additionalProperties": false,
+        "description": "Standard HTTP 401 authentication error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the authentication error",
             "examples": [
               "Authentication credentials were not provided."
             ],
@@ -1038,8 +1076,10 @@
       },
       "response_http403": {
         "additionalProperties": false,
+        "description": "Standard HTTP 403 permission error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the permission error",
             "examples": [
               "You do not have permission to perform this action."
             ],
@@ -1050,8 +1090,10 @@
       },
       "response_http404": {
         "additionalProperties": false,
+        "description": "Standard HTTP 404 not found error response",
         "properties": {
           "id": {
+            "description": "Missing resource identifier, when the API includes one",
             "type": "string"
           }
         },
@@ -1059,8 +1101,10 @@
       },
       "response_http429": {
         "additionalProperties": false,
+        "description": "Standard HTTP 429 rate limit error response",
         "properties": {
           "detail": {
+            "description": "Human-readable explanation of the rate limit error",
             "examples": [
               "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
             ],
@@ -1070,6 +1114,7 @@
         "type": "object"
       },
       "site_id": {
+        "description": "Unique identifier of a Mist site",
         "examples": [
           "441a1214-6928-442a-8e92-e1d34b8ec6a6"
         ],
@@ -1078,7 +1123,7 @@
         "type": "string"
       },
       "timestamp": {
-        "description": "Epoch (seconds)",
+        "description": "Epoch timestamp, in seconds",
         "format": "double",
         "readOnly": true,
         "type": "number"
@@ -1246,7 +1291,7 @@
     },
     "parameters": {
       "alarm_group": {
-        "description": "Alarm group. enum: `infrastructure`, `marvis`, `security`. \nThe `marvis` group is used to retrieve AI-driven network issue detections. \nKnown Marvis alarm types include: `bad_cable`, `bad_wan_uplink`, `dns_failure`, \n`arp_failure`, `auth_failure`, `dhcp_failure`, `missing_vlan`, \n`negotiation_mismatch`, `port_flap`. Results include resolution status \n(`status`, `resolved_time`) and affected entity details.\"",
+        "description": "Alarm group used to filter alarm results. enum: `certificate_expiry`, `infrastructure`, `marvis`, `security`. The `marvis` group is used to retrieve AI-driven network issue detections. Known Marvis alarm types include: `bad_cable`, `bad_wan_uplink`, `dns_failure`, `arp_failure`, `auth_failure`, `dhcp_failure`, `missing_vlan`, `negotiation_mismatch`, `port_flap`. Results include resolution status (`status`, `resolved_time`) and affected entity details.",
         "in": "query",
         "name": "group",
         "schema": {
@@ -1266,7 +1311,7 @@
         }
       },
       "alarm_severity": {
-        "description": "Severity of the alarm. enum: `critical`, `info`, `warn`",
+        "description": "Alarm severity used to filter results. enum: `critical`, `info`, `warn`",
         "in": "query",
         "name": "severity",
         "schema": {
@@ -1274,10 +1319,9 @@
         }
       },
       "duration": {
-        "description": "Duration like 7d, 2w",
+        "description": "Time range duration for the query, using relative units such as `10m`, `7d`, or `2w`",
         "in": "query",
         "name": "duration",
-        "required": false,
         "schema": {
           "default": "1d",
           "examples": [
@@ -1287,7 +1331,7 @@
         }
       },
       "end": {
-        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
         "in": "query",
         "name": "end",
         "schema": {
@@ -1295,9 +1339,9 @@
         }
       },
       "limit": {
+        "description": "Maximum number of results to return per page",
         "in": "query",
         "name": "limit",
-        "required": false,
         "schema": {
           "default": 100,
           "minimum": 0,
@@ -1328,7 +1372,6 @@
         "description": "On which field the list should be sorted, -prefix represents DESC order",
         "in": "query",
         "name": "sort",
-        "required": false,
         "schema": {
           "default": "timestamp",
           "examples": [
@@ -1338,7 +1381,7 @@
         }
       },
       "start": {
-        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
         "in": "query",
         "name": "start",
         "schema": {
@@ -1385,19 +1428,14 @@
     },
     "securitySchemes": {
       "apiToken": {
-        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "description": "Preferred authentication method for automation and integrations. Send the API token in the HTTP `Authorization` header.\n\n**Format**:\n  `Authorization: Token {apitoken}`\n\n**Notes**:\n* An API token generated for a specific admin has the same privileges as that admin\n* An API token is automatically removed if it is not used for more than 90 days\n* SSO admins cannot generate admin API tokens. Use organization API tokens when scoped Org/Site privileges are needed.",
         "in": "header",
         "name": "Authorization",
         "type": "apiKey",
         "x-scalar-secret-token": "Token YOUR_API_TOKEN"
       },
-      "basicAuth": {
-        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
-        "scheme": "basic",
-        "type": "http"
-      },
       "csrfToken": {
-        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "description": "Session-based authentication for browser or login/password flows. After a successful [Login](/#operations/login) request, Mist returns a `csrftoken` cookie. Send that value in the `X-CSRFToken` header on later API requests that use the login session.\n\n**Format**:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```\n\nFor automation, API Token authentication is preferred.",
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"
