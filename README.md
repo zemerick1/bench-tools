@@ -156,6 +156,7 @@ See [tools/show-tech/README.md](./tools/show-tech/README.md) for personas, PuTTY
 ### Hardware Platform Support / MAC Lookup
 
 - Data files ship with the tool; maintainer refresh scripts live alongside each tool
+- MAC / OUI: `tools/mac-lookup/update_oui.py` pulls IEEE MA-L / MA-M / MA-S CSVs. GitHub Actions runs it weekly and commits `oui-data.json` only when the assignment tables change (the `updated` date is not enough to trigger a commit)
 - Juniper EX / QFX / Mist APs: `tools/hardware-platform-support/update_juniper.py` (merges Pathfinder catalog into `platforms.json` without rewriting Aruba rows)
 
 ### CLI Explorer
