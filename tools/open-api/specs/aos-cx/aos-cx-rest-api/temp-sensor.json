@@ -1,0 +1,496 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Temp_sensor",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Temp_sensor"
+    }
+  ],
+  "paths": {
+    "/system/subsystems/{Subsystem.type},{Subsystem.name}/temp_sensors": {
+      "get": {
+        "tags": [
+          "Temp_sensor"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "": {
+                      "type": "string",
+                      "description": "Reference Resource: [Temp_sensor](#/Temp_sensor)<br>References to the temperature sensors which are part of this subsystem.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "fan_state": {
+                      "type": "string",
+                      "description": "Recommended minimum fan setting based on current temperature: 'normal': normal fan speed recommended 'medium': medium fan speed recommended 'fast':   fast fan speed recommended 'max':    recommend using the maximum fan speed The fan control process chooses the worst-case sensor when determining this value.",
+                      "enum": [
+                        "normal",
+                        "medium",
+                        "fast",
+                        "max"
+                      ]
+                    },
+                    "location": {
+                      "type": "string",
+                      "description": "Descriptive text for the physical location of the temperature sensor relative to the subsystem."
+                    },
+                    "max": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Historic maximum, in millidegrees Celsius."
+                    },
+                    "min": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Historic minimum, in millidegrees Celsius."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Temp_sensor](#/Temp_sensor)<br>Logical name of the temperature sensor, including the subsystem name and numeric identifier of the temperature sensor."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Results of evaluation of the current temperature against the sensor's threshold values: 'absent':        Sensor is not present or not accessible 'uninitialized': Sensor is not initialized 'initializing':  Sensor is initializing 'warning':       Sensor has encountered a non-critical fault event 'fault':         Sensor has encountered a fault event 'low_emergency': Sensor temperature is below the lowest expected threshold and will result in hardware shutdown 'low_critical':  Sensor temperature is below the lowest expected threshold 'low':           Sensor temperature is below the normal expected range but above the lowest expected threshold 'normal':        Sensor temperature is within the expected range 'overtemp':      Sensor temperature is above the normal expected range but below the highest expected threshold 'critical':      Sensor temperature is above the highest expected threshold 'emergency':     Sensor temperature is above the highest expected threshold and will result in hardware shutdown 'min':           **Deprecated** 'max':           **Deprecated**",
+                      "enum": [
+                        "absent",
+                        "uninitialized",
+                        "initializing",
+                        "warning",
+                        "fault",
+                        "low_emergency",
+                        "low_critical",
+                        "low",
+                        "normal",
+                        "overtemp",
+                        "critical",
+                        "emergency",
+                        "min",
+                        "max"
+                      ]
+                    },
+                    "temperature": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Current temperature reading, in millidegrees Celsius."
+                    }
+                  },
+                  "required": [
+                    ""
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Subsystem.type",
+            "in": "path",
+            "description": "Reference Resource: [Subsystem](#/Subsystem)<br>",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "uninitialized",
+                "system",
+                "chassis",
+                "line_card",
+                "mezz_card",
+                "fabric_card",
+                "management_module",
+                "rear_display_card",
+                "fan_tray",
+                "services_card",
+                "io_module"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "Subsystem.name",
+            "in": "path",
+            "description": "Reference Resource: [Subsystem](#/Subsystem)<br>",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "temperature",
+                  "name",
+                  "min",
+                  "max",
+                  "status",
+                  "fan_state",
+                  "location"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/subsystems/{Subsystem.type},{Subsystem.name}/temp_sensors/{Temp_sensor.name}": {
+      "get": {
+        "tags": [
+          "Temp_sensor"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "": {
+                      "type": "string",
+                      "description": "Reference Resource: [Temp_sensor](#/Temp_sensor)<br>References to the temperature sensors which are part of this subsystem.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "fan_state": {
+                      "type": "string",
+                      "description": "Recommended minimum fan setting based on current temperature: 'normal': normal fan speed recommended 'medium': medium fan speed recommended 'fast':   fast fan speed recommended 'max':    recommend using the maximum fan speed The fan control process chooses the worst-case sensor when determining this value.",
+                      "enum": [
+                        "normal",
+                        "medium",
+                        "fast",
+                        "max"
+                      ]
+                    },
+                    "location": {
+                      "type": "string",
+                      "description": "Descriptive text for the physical location of the temperature sensor relative to the subsystem."
+                    },
+                    "max": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Historic maximum, in millidegrees Celsius."
+                    },
+                    "min": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Historic minimum, in millidegrees Celsius."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Temp_sensor](#/Temp_sensor)<br>Logical name of the temperature sensor, including the subsystem name and numeric identifier of the temperature sensor."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Results of evaluation of the current temperature against the sensor's threshold values: 'absent':        Sensor is not present or not accessible 'uninitialized': Sensor is not initialized 'initializing':  Sensor is initializing 'warning':       Sensor has encountered a non-critical fault event 'fault':         Sensor has encountered a fault event 'low_emergency': Sensor temperature is below the lowest expected threshold and will result in hardware shutdown 'low_critical':  Sensor temperature is below the lowest expected threshold 'low':           Sensor temperature is below the normal expected range but above the lowest expected threshold 'normal':        Sensor temperature is within the expected range 'overtemp':      Sensor temperature is above the normal expected range but below the highest expected threshold 'critical':      Sensor temperature is above the highest expected threshold 'emergency':     Sensor temperature is above the highest expected threshold and will result in hardware shutdown 'min':           **Deprecated** 'max':           **Deprecated**",
+                      "enum": [
+                        "absent",
+                        "uninitialized",
+                        "initializing",
+                        "warning",
+                        "fault",
+                        "low_emergency",
+                        "low_critical",
+                        "low",
+                        "normal",
+                        "overtemp",
+                        "critical",
+                        "emergency",
+                        "min",
+                        "max"
+                      ]
+                    },
+                    "temperature": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Current temperature reading, in millidegrees Celsius."
+                    }
+                  },
+                  "required": [
+                    ""
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Subsystem.type",
+            "in": "path",
+            "description": "Reference Resource: [Subsystem](#/Subsystem)<br>",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "uninitialized",
+                "system",
+                "chassis",
+                "line_card",
+                "mezz_card",
+                "fabric_card",
+                "management_module",
+                "rear_display_card",
+                "fan_tray",
+                "services_card",
+                "io_module"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "Subsystem.name",
+            "in": "path",
+            "description": "Reference Resource: [Subsystem](#/Subsystem)<br>",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Temp_sensor.name",
+            "in": "path",
+            "description": "Reference Resource: [Temp_sensor](#/Temp_sensor)<br>Logical name of the temperature sensor, including the subsystem name and numeric identifier of the temperature sensor.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "min",
+                  "max",
+                  "status",
+                  "fan_state",
+                  "location",
+                  "temperature",
+                  "name"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

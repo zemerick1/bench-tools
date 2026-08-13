@@ -1,0 +1,1488 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Firewall Session",
+    "version": "1.0.0",
+    "description": "API to retrieve VSX (Virtual Switching Extension) information for switches."
+  },
+  "servers": [
+    {
+      "url": "https://de1.api.central.arubanetworks.com",
+      "description": "eu"
+    },
+    {
+      "url": "https://de2.api.central.arubanetworks.com",
+      "description": "eucentral2"
+    },
+    {
+      "url": "https://de3.api.central.arubanetworks.com",
+      "description": "eucentral3"
+    },
+    {
+      "url": "https://gb1.api.central.arubanetworks.com",
+      "description": "ukwest2"
+    },
+    {
+      "url": "https://us1.api.central.arubanetworks.com",
+      "description": "prod"
+    },
+    {
+      "url": "https://us2.api.central.arubanetworks.com",
+      "description": "central-prod2"
+    },
+    {
+      "url": "https://us4.api.central.arubanetworks.com",
+      "description": "uswest4"
+    },
+    {
+      "url": "https://us5.api.central.arubanetworks.com",
+      "description": "uswest5"
+    },
+    {
+      "url": "https://us6.api.central.arubanetworks.com",
+      "description": "us-east-1"
+    },
+    {
+      "url": "https://ca1.api.central.arubanetworks.com",
+      "description": "starman"
+    },
+    {
+      "url": "https://in1.api.central.arubanetworks.com",
+      "description": "apac"
+    },
+    {
+      "url": "https://jp1.api.central.arubanetworks.com",
+      "description": "apaceast"
+    },
+    {
+      "url": "https://au1.api.central.arubanetworks.com",
+      "description": "apacsouth"
+    },
+    {
+      "url": "https://ae1.api.central.arubanetworks.com",
+      "description": "uaenorth1"
+    },
+    {
+      "url": "https://cn1.api.central.arubanetworks.com.cn",
+      "description": "china-prod"
+    },
+    {
+      "url": "https://internal.api.central.arubanetworks.com",
+      "description": "internal2"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Firewall Session",
+      "description": "Firewall Session Monitoring APIs to retrieve firewall session logs from a site."
+    }
+  ],
+  "paths": {
+    "/network-monitoring/v1/client-firewall-sessions": {
+      "get": {
+        "tags": [
+          "Firewall Session"
+        ],
+        "operationId": "listClientFirewallSessionLogsV1",
+        "description": "This API endpoint retrieves sessions logs from access points, CX switches and gateways in a site based on the given client MAC and the filter.\n",
+        "summary": "Get client firewall session logs\n",
+        "parameters": [
+          {
+            "name": "site-id",
+            "in": "query",
+            "required": true,
+            "description": "The ID of the site from which to retrieve the firewall session logs.\n",
+            "schema": {
+              "type": "string",
+              "format": "const",
+              "maxLength": 20,
+              "example": "2778382"
+            }
+          },
+          {
+            "name": "start-at",
+            "in": "query",
+            "required": true,
+            "description": "The start time for the query in RFC 3339 format, must be less than end-at.\n",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 27,
+              "example": "2024-11-20T14:14:33Z"
+            }
+          },
+          {
+            "name": "end-at",
+            "in": "query",
+            "required": true,
+            "description": "The end time for the query in RFC 3339 format, must be greater than start-at.\n",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 27,
+              "example": "2024-11-20T14:14:33Z"
+            }
+          },
+          {
+            "name": "client-mac",
+            "in": "query",
+            "required": true,
+            "description": "The client MAC of the source device.\n",
+            "schema": {
+              "type": "string",
+              "format": "const",
+              "maxLength": 17,
+              "example": "00:00:00:00:00:00"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": true,
+            "description": "OData Version 4.0 filter string (limited functionality). Supports only 'and' conjunction ('or' and 'not' are NOT supported). Supported fields and operators are in the below given table.\n\n| Field | Operators | Required | Type | Default Value | Summary |\n| --------- | -------- | -------- | -------- | -------- | -------- |\n| `applicationCategory` | `eq` | `Yes` | `String` | `N\\A` | `Format is string. Only applicationCategory or webCategory must be set but not both. Also cannot have both applicationCategory and webCategory empty.`|\n| `webCategory` | `eq` | `Yes` | `String` | `N\\A` | `Format is string. Only applicationCategory or webCategory must be set but not both. Also cannot have both applicationCategory and webCategory empty.`| \n| `deviceType` | `eq` and `in` | `No` | `String` | `('DEVICE_TYPE_AP','DEVICE_TYPE_GATEWAY','DEVICE_TYPE_SWITCH'`) | `Format is a tuple that contains string. Example: ('DEVICE_TYPE_AP','DEVICE_TYPE_GATEWAY','DEVICE_TYPE_SWITCH')` | \n| `deduplication` | `eq` | `No` | `String` | `true` | `Format is string but should only contain values true or false. Returns unique session logs if set to true` |\n\n**The operators are implemented as follows:**\n\n* `eq`: Only values exactly matching the given value are returned.\n\n* `in`: Only values present in the given list are returned.\n\n",
+            "example": "'applicationCategory' eq 'Web' and 'deviceType' in ('DEVICE_TYPE_AP','DEVICE_TYPE_GATEWAY','DEVICE_TYPE_SWITCH') and 'deduplication' eq 'true'",
+            "schema": {
+              "type": "string",
+              "format": "const"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "description": "The maximum number of items to return.\n",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "$ref": "#/components/schemas/Limit"
+            }
+          },
+          {
+            "name": "next",
+            "in": "query",
+            "required": false,
+            "description": "Cursor for the next page of results. Use the value returned in the `next` response field to retrieve the next page. Providing both `next` and `offset` in the same request returns `400 Bad Request`.\n",
+            "schema": {
+              "type": "string",
+              "example": "NyBErRdk6czGUyDAX5Cp"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "The offset of the item at which to begin the response. Providing both `offset` and `next` in the same request returns `400 Bad Request`.\n",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "example": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/XRateLimitLimitHeader"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/XRateLimitRemainingHeader"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/XRateLimitResetHeader"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientSessionLogResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-monitoring/v1/firewall-clients": {
+      "get": {
+        "tags": [
+          "Firewall Session"
+        ],
+        "operationId": "listFirewallClientsV1",
+        "description": "This API endpoint retrieves the list of clients from access points, CX switches, and/or gateways in a site based on the filter given.\n",
+        "summary": "Get clients list\n",
+        "parameters": [
+          {
+            "name": "site-id",
+            "in": "query",
+            "required": true,
+            "description": "The ID of the site from which to retrieve the firewall session logs.\n",
+            "schema": {
+              "type": "string",
+              "format": "const",
+              "maxLength": 20,
+              "example": "2778382"
+            }
+          },
+          {
+            "name": "start-at",
+            "in": "query",
+            "required": true,
+            "description": "The start time for the query in RFC 3339 format, must be less than end-at.\n",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 27,
+              "example": "2024-11-20T14:14:33Z"
+            }
+          },
+          {
+            "name": "end-at",
+            "in": "query",
+            "required": true,
+            "description": "The end time for the query in RFC 3339 format, must be greater than start-at.\n",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 27,
+              "example": "2024-11-20T14:14:33Z"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": true,
+            "description": "OData Version 4.0 filter string (limited functionality). Supports only 'and' conjunction ('or' and 'not' are NOT supported). Supported fields and operators are in the below given table.\n\n| Field | Operators | Required | Type | Default Value | Summary |\n| --------- | -------- | -------- | -------- | -------- | -------- |\n| `applicationCategory` | `eq` | `Yes` | `String` | `N\\A` | `Format is string. Only applicationCategory or webCategory must be set but not both. Also cannot have both applicationCategory and webCategory empty.` |\n| `webCategory` | `eq` | `Yes` | `String` | `N\\A` | `Format is string. Only applicationCategory or webCategory must be set but not both. Also cannot have both applicationCategory and webCategory empty.` |\n| `deviceType` | `eq` and `in`  | `No` | `String` | `('DEVICE_TYPE_AP','DEVICE_TYPE_GATEWAY','DEVICE_TYPE_SWITCH')` | `Format is a tuple that contains string. Example: ('DEVICE_TYPE_AP','DEVICE_TYPE_GATEWAY','DEVICE_TYPE_SWITCH')` |\n\n**The operators are implemented as follows:**\n\n* `eq`: Only values exactly matching the given value are returned.\n\n* `in`: Only values present in the given list are returned.\n\n",
+            "example": "'applicationCategory' eq 'Web' and 'deviceType' in ('DEVICE_TYPE_AP','DEVICE_TYPE_GATEWAY','DEVICE_TYPE_SWITCH') and 'deduplication' eq 'true'",
+            "schema": {
+              "type": "string",
+              "format": "const"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "The maximum number of items to return.\n",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "$ref": "#/components/schemas/Limit"
+            }
+          },
+          {
+            "name": "next",
+            "in": "query",
+            "required": false,
+            "description": "Cursor for the next page of results. Use the value returned in the `next` response field to retrieve the next page. Providing both `next` and `offset` in the same request returns `400 Bad Request`.\n",
+            "schema": {
+              "type": "string",
+              "example": "NyBErRdk6czGUyDAX5Cp"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "The offset of the item at which to begin the response. Providing both `offset` and `next` in the same request returns `400 Bad Request`.\n",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "example": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/XRateLimitLimitHeader"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/XRateLimitRemainingHeader"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/XRateLimitResetHeader"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-monitoring/v1/site-firewall-sessions": {
+      "get": {
+        "tags": [
+          "Firewall Session"
+        ],
+        "operationId": "listSiteFirewallSessionLogsV1",
+        "description": "This API endpoint retrieves blocked/denied sessions logs from access points, CX switches, gateways in a site.\n",
+        "summary": "Get blocked firewall session logs\n",
+        "parameters": [
+          {
+            "name": "site-id",
+            "in": "query",
+            "required": true,
+            "description": "The ID of the site from which to retrieve the firewall session logs.\n",
+            "schema": {
+              "type": "string",
+              "format": "const",
+              "maxLength": 20,
+              "example": "2778382"
+            }
+          },
+          {
+            "name": "start-at",
+            "in": "query",
+            "required": true,
+            "description": "The start time for the query in RFC 3339 format, must be less than end-at.\n",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 27,
+              "example": "2024-11-20T14:14:33Z"
+            }
+          },
+          {
+            "name": "end-at",
+            "in": "query",
+            "required": true,
+            "description": "The end time for the query in RFC 3339 format, must be greater than start-at.\n",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 27,
+              "example": "2024-11-20T14:14:33Z"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "description": "OData Version 4.0 filter string (limited functionality). Supports only 'and' conjunction ('or' and 'not' are NOT supported). Supported fields and operators are in the below given table.\n\n| Field | Operators | Required | Type | Default Value | Summary |\n| --------- | -------- | -------- | -------- | -------- | -------- |\n| `deviceType` | `eq` and `in` | `No` | `String` | `('DEVICE_TYPE_AP','DEVICE_TYPE_GATEWAY','DEVICE_TYPE_SWITCH')` | `Format is a tuple that contains string. Example: ('DEVICE_TYPE_AP','DEVICE_TYPE_GATEWAY')` |\n| `deduplication` | `eq` | `No` | `String` | `true` | `Format is string but should only contain values true or false. Returns unique session logs if set to true` | \n\n**The operators are implemented as follows:**\n\n* `eq`: Only values exactly matching the given value are returned.\n\n* `in`: Only values present in the given list are returned.\n\n",
+            "example": "'deviceType' in ('DEVICE_TYPE_AP','DEVICE_TYPE_GATEWAY','DEVICE_TYPE_SWITCH') and 'deduplication' eq 'true'",
+            "schema": {
+              "type": "string",
+              "format": "const"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "The maximum number of items to return.\n",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "$ref": "#/components/schemas/Limit"
+            }
+          },
+          {
+            "name": "next",
+            "in": "query",
+            "required": false,
+            "description": "Cursor for the next page of results. Use the value returned in the `next` response field to retrieve the next page. Providing both `next` and `offset` in the same request returns `400 Bad Request`.\n",
+            "schema": {
+              "type": "string",
+              "example": "NyBErRdk6czGUyDAX5Cp"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "The offset of the item at which to begin the response. Providing both `offset` and `next` in the same request returns `400 Bad Request`.\n",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "example": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/XRateLimitLimitHeader"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/XRateLimitRemainingHeader"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/XRateLimitResetHeader"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionLogResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BadRequestError": {
+        "type": "object",
+        "description": "Bad request error details returned from the server.",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 400,
+            "maximum": 400,
+            "description": "HTTP status code.",
+            "example": 400
+          },
+          "errorCode": {
+            "type": "string",
+            "enum": [
+              "HPE_GL_NETWORK_MONITORING_INVALID_INPUT"
+            ],
+            "maxLength": 128,
+            "description": "Error code",
+            "example": "HPE_GL_NETWORK_MONITORING_INVALID_INPUT"
+          },
+          "message": {
+            "$ref": "#/components/schemas/ErrorMessage"
+          },
+          "debugId": {
+            "$ref": "#/components/schemas/DebugId"
+          }
+        }
+      },
+      "ClientItems": {
+        "required": [
+          "type",
+          "id"
+        ],
+        "type": "object",
+        "description": "This object gives details about the firewall session log.\n",
+        "example": {
+          "type": "network-monitoring/site-firewall-sessions",
+          "id": "1699550427000-10.53.110.142-00:00:00:00:00:00-13.107.42.14",
+          "clientUsername": "aruba-test@hpe.com",
+          "clientMac": "00:00:00:00:00:00"
+        },
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 13,
+            "example": "network-monitoring/site-firewall-sessions",
+            "description": "Resource type.\n"
+          },
+          "id": {
+            "type": "string",
+            "format": "string",
+            "maxLength": 50,
+            "example": "1699550427000-10.53.110.142-b8:27:eb:61:34:f0-13.107.42.14",
+            "description": "Resource ID: session_timestamp-src_ip-client_mac-dest_ip.\n"
+          },
+          "clientUsername": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 256,
+            "example": "aruba-test@hpe.com",
+            "description": "The logged-in username of the client.\n"
+          },
+          "clientMac": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 17,
+            "example": "b8:27:eb:61:34:f0",
+            "description": "The MAC address of the client.\n"
+          }
+        }
+      },
+      "ClientResponse": {
+        "type": "object",
+        "description": "List of clients.\n",
+        "maxItems": 1000,
+        "required": [
+          "items",
+          "next",
+          "count",
+          "total"
+        ],
+        "example": {
+          "items": [
+            {
+              "clientUsername": "aruba-test@hpe.com",
+              "clientMac": "00:00:00:00:00:00"
+            }
+          ],
+          "count": 1,
+          "next": "NyBErRdk6czGUyDAX5Cp",
+          "total": 101
+        },
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClientItems"
+            }
+          },
+          "next": {
+            "$ref": "#/components/schemas/Next"
+          },
+          "offset": {
+            "$ref": "#/components/schemas/Offset"
+          },
+          "count": {
+            "$ref": "#/components/schemas/Count"
+          },
+          "total": {
+            "$ref": "#/components/schemas/Total"
+          }
+        }
+      },
+      "ClientSessionLogResponse": {
+        "type": "object",
+        "description": "List of client firewall session logs.\n",
+        "maxItems": 1000,
+        "required": [
+          "items",
+          "next",
+          "count",
+          "total"
+        ],
+        "example": {
+          "items": [
+            {
+              "type": "network-monitoring/client-firewall-sessions",
+              "id": "1699550427000-10.53.110.142-b8:27:eb:61:34:f0-13.107.42.14",
+              "timestamp": "1699551447000",
+              "serialNumber": "CN00000000",
+              "clientUsername": "aruba-test@hpe.com",
+              "clientIp": "10.53.110.142",
+              "destinationIp": "13.107.42.14",
+              "clientRole": "guest",
+              "ssidName": "guestWifi",
+              "tunneledTraffic": false,
+              "clientConnectionType": "wireless",
+              "vlanId": 12,
+              "txBytes": 5433,
+              "rxBytes": 572522496,
+              "sessionType": "blocked",
+              "applicationName": "Netflix",
+              "applicationCategories": [
+                "Streaming"
+              ],
+              "webUrl": "netflix.com",
+              "webCategories": "Streaming Media",
+              "webReputation": "Trustworthy",
+              "blockedSessionReason": "Web Classification",
+              "deviceType": "DEVICE_TYPE_AP",
+              "sessionCount": 100,
+              "clientHostname": "host1"
+            }
+          ],
+          "count": 1,
+          "next": "NyBErRdk6czGUyDAX5Cp",
+          "total": 101
+        },
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SessionItems"
+            }
+          },
+          "next": {
+            "$ref": "#/components/schemas/Next"
+          },
+          "offset": {
+            "$ref": "#/components/schemas/Offset"
+          },
+          "count": {
+            "$ref": "#/components/schemas/Count"
+          },
+          "total": {
+            "$ref": "#/components/schemas/Total"
+          }
+        }
+      },
+      "Count": {
+        "type": "integer",
+        "format": "int32",
+        "example": 0,
+        "description": "The count of items returned in the response.\n"
+      },
+      "DebugId": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 512,
+        "description": "A unique identifier used for troubleshooting purposes.",
+        "example": "78f002e32e0cefba3d8cc94fa8179342"
+      },
+      "Error404": {
+        "type": "object",
+        "description": "Error details returned from the server.",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 404,
+            "maximum": 404,
+            "example": 404,
+            "description": "HTTP status code."
+          },
+          "errorCode": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 32,
+            "description": "Internal error code.",
+            "example": "HPE_GL_ERROR_NOT_FOUND"
+          },
+          "message": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 512,
+            "description": "Not Found.",
+            "example": "Not Found"
+          },
+          "debugId": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 50,
+            "description": "This can be used to help with troubleshooting",
+            "example": "abc-123-456"
+          }
+        }
+      },
+      "ErrorMessage": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 512,
+        "description": "Error message indicating the cause of the failure.",
+        "example": "Error Message"
+      },
+      "ForbiddenRequest": {
+        "type": "object",
+        "description": "Forbidden error details returned from the server.",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 403,
+            "maximum": 403,
+            "example": 403,
+            "description": "HTTP status code."
+          },
+          "errorCode": {
+            "type": "string",
+            "description": "* A unique machine-friendly, but human-readable identifier for the error. It has prefix HPE_GL_.* For more details regarding error please refer to error message",
+            "example": "HPE_GL_ERROR_FORBIDDEN",
+            "maxLength": 256
+          },
+          "message": {
+            "$ref": "#/components/schemas/ErrorMessage"
+          },
+          "debugId": {
+            "$ref": "#/components/schemas/DebugId"
+          }
+        }
+      },
+      "InternalServerError": {
+        "type": "object",
+        "description": "Error details returned from the server.",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 500,
+            "maximum": 500,
+            "example": 500,
+            "description": "HTTP status code."
+          },
+          "errorCode": {
+            "type": "string",
+            "enum": [
+              "HPE_GL_NETWORK_MONITORING_INTERNAL_SERVER_ERROR"
+            ],
+            "format": "const",
+            "maxLength": 128,
+            "description": "* A unique machine-friendly, but human-readable identifier for the error. It has a prefix HPE_GL_.* For more details regarding error, please refer to the error message",
+            "example": "HPE_GL_NETWORK_MONITORING_INTERNAL_SERVER_ERROR"
+          },
+          "message": {
+            "$ref": "#/components/schemas/ErrorMessage"
+          },
+          "debugId": {
+            "$ref": "#/components/schemas/DebugId"
+          }
+        }
+      },
+      "Limit": {
+        "type": "integer",
+        "description": "The maximum number of items to return per page.\n",
+        "format": "int32",
+        "minimum": 0,
+        "maximum": 1000,
+        "default": 1000
+      },
+      "Next": {
+        "type": "string",
+        "description": "Specifies the pagination cursor for the next page of resources.",
+        "example": "2"
+      },
+      "Offset": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 0,
+        "example": 0,
+        "description": "The offset of the first item in the response.\n"
+      },
+      "ServiceUnavailableErrorDetails": {
+        "type": "object",
+        "description": "Error details.\n",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 400,
+            "maximum": 600,
+            "example": 503,
+            "description": "The HTTP status code.\n"
+          },
+          "errorCode": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 128,
+            "description": "An internal error code.\n",
+            "example": "HPE_GL_ERROR_SERVICE_UNAVAILABLE"
+          },
+          "message": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 512,
+            "description": "Error message indicating the cause of the failure.\n",
+            "example": "Service unavailable"
+          },
+          "debugId": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 128,
+            "description": "Used for troubleshooting.\n",
+            "example": "abc-123-456"
+          }
+        }
+      },
+      "SessionItems": {
+        "required": [
+          "type",
+          "id"
+        ],
+        "type": "object",
+        "description": "This object gives details about the firewall session log.\n",
+        "example": {
+          "type": "network-monitoring/site-firewall-sessions",
+          "id": "1699550427000-10.53.110.142-b8:27:eb:61:34:f0-13.107.42.14",
+          "timestamp": "1699551447000",
+          "serialNumber": "CN00000000",
+          "clientUsername": "aruba-test@hpe.com",
+          "clientMac": "b8:27:eb:61:34:f0",
+          "sourceIp": "10.53.110.142",
+          "destinationIp": "13.107.42.14",
+          "clientRole": "guest",
+          "ssidName": "guestWifi",
+          "tunneledTraffic": false,
+          "clientConnectionType": "wireless",
+          "vlanId": 12,
+          "txBytes": 5433,
+          "rxBytes": 572522496,
+          "sessionType": "blocked",
+          "applicationName": "Netflix",
+          "applicationCategories": [
+            "Streaming"
+          ],
+          "webUrl": "netflix.com",
+          "webCategories": "Streaming Media",
+          "webReputation": "Trustworthy",
+          "blockedSessionReason": "Web Classification",
+          "deviceType": "DEVICE_TYPE_AP",
+          "tlsServerVersion": "tls_v1.2",
+          "certificateExpiryDate": 1907231844072,
+          "destinationLocation": "United States"
+        },
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 13,
+            "example": "network-monitoring/site-firewall-sessions",
+            "description": "Resource type.\n"
+          },
+          "id": {
+            "type": "string",
+            "format": "string",
+            "maxLength": 50,
+            "example": "1699550427000-10.53.110.142-b8:27:eb:61:34:f0-13.107.42.14",
+            "description": "Resource ID: session_timestamp-src_ip-client_mac-dest_ip.\n"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 13,
+            "example": "1699550427000",
+            "description": "The timestamp of the session in epoch milliseconds.\n"
+          },
+          "serialNumber": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 20,
+            "example": "CN00000000",
+            "description": "The serial number of the device reporting the session.\n"
+          },
+          "clientUsername": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 256,
+            "example": "aruba-test@hpe.com",
+            "description": "The logged in username of the client.\n"
+          },
+          "clientMac": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 17,
+            "example": "b8:27:eb:61:34:f0",
+            "description": "The MAC address of the client.\n"
+          },
+          "sourceIp": {
+            "type": "string",
+            "format": "ipv4",
+            "maxLength": 15,
+            "example": "10.53.110.142",
+            "description": "The IP address of the client.\n"
+          },
+          "destinationIp": {
+            "type": "string",
+            "format": "ipv4",
+            "maxLength": 15,
+            "example": "13.107.42.14",
+            "description": "The IP address of the destination.\n"
+          },
+          "clientRole": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 256,
+            "example": "guest",
+            "description": "The role assigned to the client.\n"
+          },
+          "ssidName": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 256,
+            "example": "guestWifi",
+            "description": "The SSID that the client was connected to.\n"
+          },
+          "tunneledTraffic": {
+            "type": "boolean",
+            "format": "const",
+            "example": "false",
+            "description": "Boolean value indicating whether the client traffic was tunneled to the gateway or not.\n"
+          },
+          "clientConnectionType": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 10,
+            "example": "wireless",
+            "description": "This represents whether the client is wireless or wired.\n"
+          },
+          "vlanId": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 10000,
+            "example": "12",
+            "description": "The client VLAN.\n"
+          },
+          "txBytes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9223372036854776000,
+            "example": 123456789,
+            "description": "The transmitted bytes.\n"
+          },
+          "rxBytes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9223372036854776000,
+            "example": 123456789,
+            "description": "The received bytes.\n"
+          },
+          "sessionType": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 7,
+            "example": "allowed",
+            "description": "String representing whether the session was permitted or denied.\n"
+          },
+          "applicationName": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 256,
+            "example": "Spotify",
+            "description": "The application that the client was accessing.\n"
+          },
+          "applicationCategories": {
+            "type": "array",
+            "description": "List of categories that applications belong to.\n",
+            "example": [
+              "Streaming"
+            ],
+            "maxItems": 2147483647,
+            "items": {
+              "type": "string",
+              "format": "const",
+              "maxLength": 256
+            }
+          },
+          "webUrl": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 256,
+            "example": "netflix.com",
+            "description": "The URL of the application that was accessed by the client.\n"
+          },
+          "webCategories": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 256,
+            "description": "The category that the web URL belongs to.\n",
+            "example": "Web"
+          },
+          "webReputation": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 256,
+            "example": "Trustworthy",
+            "description": "Value representing the risk level of the web URL.\n"
+          },
+          "blockedSessionReason": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 256,
+            "example": "Web Classification",
+            "description": "A string representing the reason of a blocked/denied session.\n"
+          },
+          "deviceType": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 256,
+            "example": "DEVICE_TYPE_AP",
+            "description": "A string representing the device type that pertains to the current entry.\n"
+          },
+          "sessionCount": {
+            "type": "integer",
+            "format": "int32",
+            "maxLength": 256,
+            "example": 100,
+            "description": "The number of blocked sessions.\n"
+          },
+          "clientHostname": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 256,
+            "example": "host1",
+            "description": "A string representing the source client hostname.\n"
+          },
+          "tlsServerVersion": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 256,
+            "example": "tls_v1.2",
+            "description": "A string representing the TLS version.\n"
+          },
+          "certificateExpiryDate": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 256,
+            "example": 1907231844072,
+            "description": "A string representing the timestamp of the certificate expiry date.\n"
+          },
+          "destinationLocation": {
+            "type": "string",
+            "format": "const",
+            "maxLength": 256,
+            "example": "United States",
+            "description": "The country name of the destination.\n"
+          }
+        }
+      },
+      "SessionLogResponse": {
+        "type": "object",
+        "description": "List of firewall session logs.\n",
+        "maxItems": 1000,
+        "required": [
+          "items",
+          "next",
+          "count",
+          "total"
+        ],
+        "example": {
+          "items": [
+            {
+              "type": "network-monitoring/site-firewall-sessions",
+              "id": "1699550427000-10.53.110.142-b8:27:eb:61:34:f0-13.107.42.14",
+              "timestamp": "1699551447000",
+              "serialNumber": "CN00000000",
+              "clientUsername": "aruba-test@hpe.com",
+              "clientMac": "b8:27:eb:61:34:f0",
+              "sourceIp": "10.53.110.142",
+              "destinationIp": "13.107.42.14",
+              "clientRole": "guest",
+              "ssidName": "guestWifi",
+              "tunneledTraffic": false,
+              "clientConnectionType": "wireless",
+              "vlanId": 12,
+              "txBytes": 5433,
+              "rxBytes": 572522496,
+              "sessionType": "blocked",
+              "applicationName": "Netflix",
+              "applicationCategories": [
+                "Streaming"
+              ],
+              "webUrl": "netflix.com",
+              "webCategories": "Streaming Media",
+              "webReputation": "Trustworthy",
+              "blockedSessionReason": "Web Classification",
+              "deviceType": "DEVICE_TYPE_AP",
+              "tlsServerVersion": "tls_v1.2",
+              "certificateExpiryDate": 1907231844072,
+              "destinationLocation": "United States"
+            }
+          ],
+          "count": 1,
+          "next": "NyBErRdk6czGUyDAX5Cp",
+          "total": 101
+        },
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SessionItems"
+            }
+          },
+          "next": {
+            "$ref": "#/components/schemas/Next"
+          },
+          "offset": {
+            "$ref": "#/components/schemas/Offset"
+          },
+          "count": {
+            "$ref": "#/components/schemas/Count"
+          },
+          "total": {
+            "$ref": "#/components/schemas/Total"
+          }
+        }
+      },
+      "TooManyRequest": {
+        "type": "object",
+        "description": "Too many requests error details returned from the server.",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 429,
+            "maximum": 429,
+            "example": 429,
+            "description": "HTTP status code."
+          },
+          "errorCode": {
+            "type": "string",
+            "description": "* A unique machine-friendly, but human-readable identifier for the error. It has prefix HPE_GL_.* For more details regarding error please refer to error message",
+            "example": "HPE_GL_ERROR_TOO_MANY_REQUESTS",
+            "maxLength": 256
+          },
+          "message": {
+            "$ref": "#/components/schemas/ErrorMessage"
+          },
+          "debugId": {
+            "$ref": "#/components/schemas/DebugId"
+          }
+        }
+      },
+      "Total": {
+        "type": "integer",
+        "format": "int64",
+        "example": 0,
+        "description": "The total number of items that meet the API request parameters.\n"
+      },
+      "Unauthorized": {
+        "type": "object",
+        "description": "Unauthorized error details returned from the server.",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 401,
+            "maximum": 401,
+            "description": "HTTP status code.",
+            "example": 401
+          },
+          "errorCode": {
+            "type": "string",
+            "description": "* A unique machine-friendly, but human-readable identifier for the error. It has prefix HPE_GL_.* For more details regarding error please refer to error message",
+            "example": "HPE_GL_ERROR_UNAUTHORIZED",
+            "maxLength": 256
+          },
+          "message": {
+            "$ref": "#/components/schemas/ErrorMessage"
+          },
+          "debugId": {
+            "$ref": "#/components/schemas/DebugId"
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequestError": {
+        "description": "Bad Request",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/X-RateLimit-Limit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/X-RateLimit-Remaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/X-RateLimit-Reset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BadRequestError"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Forbidden: Access is denied.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/X-RateLimit-Limit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/X-RateLimit-Remaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/X-RateLimit-Reset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ForbiddenRequest"
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/X-RateLimit-Limit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/X-RateLimit-Remaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/X-RateLimit-Reset"
+          }
+        },
+        "description": "Internal server error.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/InternalServerError"
+            }
+          }
+        }
+      },
+      "NotFoundError": {
+        "description": "Not Found error",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimitHeader"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemainingHeader"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitResetHeader"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error404"
+            }
+          }
+        }
+      },
+      "ServiceUnavailable": {
+        "description": "Service unavailable.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimitHeader"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemainingHeader"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitResetHeader"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ServiceUnavailableErrorDetails"
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "Too Many Requests. Rate limit exceeded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/X-RateLimit-Limit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/X-RateLimit-Remaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/X-RateLimit-Reset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TooManyRequest"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized request.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/X-RateLimit-Limit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/X-RateLimit-Remaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/X-RateLimit-Reset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Unauthorized"
+            }
+          }
+        }
+      }
+    },
+    "headers": {
+      "X-RateLimit-Limit": {
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0,
+          "maximum": 9223372036854776000
+        },
+        "description": "Request limit per hour."
+      },
+      "X-RateLimit-Remaining": {
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0,
+          "maximum": 9223372036854776000
+        },
+        "description": "The number of requests left for the time window."
+      },
+      "X-RateLimit-Reset": {
+        "schema": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 20
+        },
+        "description": "The date-time (RFC 3339 timestamp in UTC+0) at which the current rate limit window resets."
+      },
+      "XRateLimitLimitHeader": {
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0,
+          "maximum": 9223372036854776000,
+          "description": "The request limit per hour."
+        }
+      },
+      "XRateLimitRemainingHeader": {
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0,
+          "maximum": 9223372036854776000,
+          "description": "The number of requests left for the time window."
+        }
+      },
+      "XRateLimitResetHeader": {
+        "schema": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 20
+        },
+        "description": "The UTC date/time at which the current rate limit window resets."
+      }
+    },
+    "securitySchemes": {
+      "OAuth2": {
+        "type": "oauth2",
+        "description": "OAuth 2.0 authentication with client credentials flow. You can also use your own access token.",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://sso.common.cloud.hpe.com/as/token.oauth2",
+            "scopes": {}
+          }
+        }
+      }
+    }
+  }
+}

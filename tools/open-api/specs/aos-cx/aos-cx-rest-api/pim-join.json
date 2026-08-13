@@ -1,0 +1,528 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "PIM_Join",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "PIM_Join"
+    }
+  ],
+  "paths": {
+    "/system/pim_joins": {
+      "get": {
+        "tags": [
+          "PIM_Join"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "address_family": {
+                      "type": "string",
+                      "description": "Multicast stream's IP version.",
+                      "enum": [
+                        "ipv4",
+                        "ipv6"
+                      ]
+                    },
+                    "creation_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time in seconds since epoch when this upstream join was instantiated in the system."
+                    },
+                    "creation_time_micro_seconds": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time in micro seconds since epoch when this upstream join was instantiated in the system."
+                    },
+                    "downstream_interfaces": {
+                      "type": "array",
+                      "description": "Reference Resource: [Port](#/Port)<br>List of downstream interfaces participating in this flow.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "downstream_l3_vni": {
+                      "type": "string",
+                      "description": "Reference Resource: [Virtual_Network_ID](#/Virtual_Network_ID)<br>Virtual Network Identifier of the downstream L3VNI interface that is part of the Olist."
+                    },
+                    "from": {
+                      "type": "string",
+                      "description": "Multicast protocol that owns this entry.",
+                      "enum": [
+                        "pim"
+                      ]
+                    },
+                    "group_address": {
+                      "type": "string",
+                      "description": "Reference Resource: [PIM_Join](#/PIM_Join)<br>Multicast stream group address.",
+                      "maxLength": 45
+                    },
+                    "is_l3_vni_join": {
+                      "type": "boolean",
+                      "description": "Indicates if this contains L3VNI interface as upstream or downstream interface"
+                    },
+                    "pim_router": {
+                      "type": "string",
+                      "description": "Reference Resource: [PIM_Join](#/PIM_Join)<br>The [PIM_Router](#/PIM_Router) on which this join is learnt."
+                    },
+                    "rpf_neighbor": {
+                      "type": "string",
+                      "description": "Upstream RPF neighbor for the specified flow.",
+                      "maxLength": 45
+                    },
+                    "source_address": {
+                      "type": "string",
+                      "description": "Reference Resource: [PIM_Join](#/PIM_Join)<br>Source address of the multicast stream. For PIM (*, G) joins, this is set to 0.0.0.0 for IPv4 flows and :: for IPv6 flows.",
+                      "maxLength": 45
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Reference Resource: [PIM_Join](#/PIM_Join)<br>Type of this join/prune sent to upstream interface.",
+                      "enum": [
+                        "starg",
+                        "sg",
+                        "sgrpt"
+                      ]
+                    },
+                    "upstream_interface": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>Upstream Interface for this join."
+                    },
+                    "upstream_l3_vni": {
+                      "type": "string",
+                      "description": "Reference Resource: [Virtual_Network_ID](#/Virtual_Network_ID)<br>Virtual Network Identifier of the upstream L3VNI interface."
+                    },
+                    "upstream_state": {
+                      "type": "string",
+                      "description": "Upstream state for this flow.",
+                      "enum": [
+                        "joined",
+                        "not-joined",
+                        "spt-joined",
+                        "pruned"
+                      ]
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "upstream_interface",
+                  "upstream_state",
+                  "downstream_l3_vni",
+                  "is_l3_vni_join",
+                  "creation_time_micro_seconds",
+                  "pim_router",
+                  "group_address",
+                  "type",
+                  "from",
+                  "rpf_neighbor",
+                  "downstream_interfaces",
+                  "source_address",
+                  "address_family",
+                  "upstream_l3_vni",
+                  "creation_time"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/pim_joins/{PIM_Join.pim_router},{PIM_Join.group_address},{PIM_Join.source_address},{PIM_Join.type}": {
+      "get": {
+        "tags": [
+          "PIM_Join"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "address_family": {
+                      "type": "string",
+                      "description": "Multicast stream's IP version.",
+                      "enum": [
+                        "ipv4",
+                        "ipv6"
+                      ]
+                    },
+                    "creation_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time in seconds since epoch when this upstream join was instantiated in the system."
+                    },
+                    "creation_time_micro_seconds": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time in micro seconds since epoch when this upstream join was instantiated in the system."
+                    },
+                    "downstream_interfaces": {
+                      "type": "array",
+                      "description": "Reference Resource: [Port](#/Port)<br>List of downstream interfaces participating in this flow.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "downstream_l3_vni": {
+                      "type": "string",
+                      "description": "Reference Resource: [Virtual_Network_ID](#/Virtual_Network_ID)<br>Virtual Network Identifier of the downstream L3VNI interface that is part of the Olist."
+                    },
+                    "from": {
+                      "type": "string",
+                      "description": "Multicast protocol that owns this entry.",
+                      "enum": [
+                        "pim"
+                      ]
+                    },
+                    "group_address": {
+                      "type": "string",
+                      "description": "Reference Resource: [PIM_Join](#/PIM_Join)<br>Multicast stream group address.",
+                      "maxLength": 45
+                    },
+                    "is_l3_vni_join": {
+                      "type": "boolean",
+                      "description": "Indicates if this contains L3VNI interface as upstream or downstream interface"
+                    },
+                    "pim_router": {
+                      "type": "string",
+                      "description": "Reference Resource: [PIM_Join](#/PIM_Join)<br>The [PIM_Router](#/PIM_Router) on which this join is learnt."
+                    },
+                    "rpf_neighbor": {
+                      "type": "string",
+                      "description": "Upstream RPF neighbor for the specified flow.",
+                      "maxLength": 45
+                    },
+                    "source_address": {
+                      "type": "string",
+                      "description": "Reference Resource: [PIM_Join](#/PIM_Join)<br>Source address of the multicast stream. For PIM (*, G) joins, this is set to 0.0.0.0 for IPv4 flows and :: for IPv6 flows.",
+                      "maxLength": 45
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Reference Resource: [PIM_Join](#/PIM_Join)<br>Type of this join/prune sent to upstream interface.",
+                      "enum": [
+                        "starg",
+                        "sg",
+                        "sgrpt"
+                      ]
+                    },
+                    "upstream_interface": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>Upstream Interface for this join."
+                    },
+                    "upstream_l3_vni": {
+                      "type": "string",
+                      "description": "Reference Resource: [Virtual_Network_ID](#/Virtual_Network_ID)<br>Virtual Network Identifier of the upstream L3VNI interface."
+                    },
+                    "upstream_state": {
+                      "type": "string",
+                      "description": "Upstream state for this flow.",
+                      "enum": [
+                        "joined",
+                        "not-joined",
+                        "spt-joined",
+                        "pruned"
+                      ]
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "PIM_Join.pim_router",
+            "in": "path",
+            "description": "Reference Resource: [PIM_Join](#/PIM_Join)<br>The [PIM_Router](#/PIM_Router) on which this join is learnt.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "PIM_Join.group_address",
+            "in": "path",
+            "description": "Reference Resource: [PIM_Join](#/PIM_Join)<br>Multicast stream group address.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "PIM_Join.source_address",
+            "in": "path",
+            "description": "Reference Resource: [PIM_Join](#/PIM_Join)<br>Source address of the multicast stream. For PIM (*, G) joins, this is set to 0.0.0.0 for IPv4 flows and :: for IPv6 flows.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "PIM_Join.type",
+            "in": "path",
+            "description": "Reference Resource: [PIM_Join](#/PIM_Join)<br>Type of this join/prune sent to upstream interface.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "starg",
+                "sg",
+                "sgrpt"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "group_address",
+                  "type",
+                  "from",
+                  "rpf_neighbor",
+                  "downstream_interfaces",
+                  "source_address",
+                  "address_family",
+                  "upstream_l3_vni",
+                  "creation_time",
+                  "pim_router",
+                  "upstream_interface",
+                  "upstream_state",
+                  "downstream_l3_vni",
+                  "is_l3_vni_join",
+                  "creation_time_micro_seconds"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

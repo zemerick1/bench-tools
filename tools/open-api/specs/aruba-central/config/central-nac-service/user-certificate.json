@@ -1,0 +1,832 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "User Certificate",
+    "version": "1.0.0",
+    "description": "The Central NAC Service APIs are used for managing network access control policies."
+  },
+  "servers": [
+    {
+      "description": "eu",
+      "url": "https://de1.api.central.arubanetworks.com"
+    },
+    {
+      "description": "eucentral2",
+      "url": "https://de2.api.central.arubanetworks.com"
+    },
+    {
+      "description": "eucentral3",
+      "url": "https://de3.api.central.arubanetworks.com"
+    },
+    {
+      "description": "ukwest2",
+      "url": "https://gb1.api.central.arubanetworks.com"
+    },
+    {
+      "description": "prod",
+      "url": "https://us1.api.central.arubanetworks.com"
+    },
+    {
+      "description": "central-prod2",
+      "url": "https://us2.api.central.arubanetworks.com"
+    },
+    {
+      "description": "uswest4",
+      "url": "https://us4.api.central.arubanetworks.com"
+    },
+    {
+      "description": "uswest5",
+      "url": "https://us5.api.central.arubanetworks.com"
+    },
+    {
+      "description": "us-east-1",
+      "url": "https://us6.api.central.arubanetworks.com"
+    },
+    {
+      "description": "starman",
+      "url": "https://ca1.api.central.arubanetworks.com"
+    },
+    {
+      "description": "apac",
+      "url": "https://in1.api.central.arubanetworks.com"
+    },
+    {
+      "description": "apaceast",
+      "url": "https://jp1.api.central.arubanetworks.com"
+    },
+    {
+      "description": "apacsouth",
+      "url": "https://au1.api.central.arubanetworks.com"
+    },
+    {
+      "description": "uaenorth1",
+      "url": "https://ae1.api.central.arubanetworks.com"
+    },
+    {
+      "description": "china-prod",
+      "url": "https://cn1.api.central.arubanetworks.com.cn"
+    },
+    {
+      "description": "internal2",
+      "url": "https://internal.api.central.arubanetworks.com"
+    }
+  ],
+  "security": [
+    {
+      "AccessToken": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "To manage user certificate operations",
+      "name": "User Certificate"
+    }
+  ],
+  "paths": {
+    "/network-config/v1alpha1/cnac-certificate": {
+      "get": {
+        "description": "This API retrieves a list of all user certificates based on the UPN. It requires a UPN as query parameter, which is a required input parameter.",
+        "operationId": "certificates",
+        "parameters": [
+          {
+            "description": "A User Principal Name (UPN) used to uniquely identify a user. (e.g. john.smith@demo.onmicrosoft.com, john.smith@okta.com)",
+            "in": "query",
+            "name": "upn",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CdaUserCertsResponse"
+                }
+              }
+            },
+            "description": "Success: The user certificates have been retrieved."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestError"
+                }
+              }
+            },
+            "description": "Bad request: The request is malformed or invalid input was received."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                }
+              }
+            },
+            "description": "Unauthorized access."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenError"
+                }
+              }
+            },
+            "description": "Forbidden. Access is denied."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictError"
+                }
+              }
+            },
+            "description": "Conflict. The resource already exists."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsError"
+                }
+              }
+            },
+            "description": "Too many requests. Rate limit exceeded."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            },
+            "description": "Internal server error."
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableError"
+                }
+              }
+            },
+            "description": "Service unavailable. The server is temporarily unavailable."
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "summary": "List user certificates",
+        "tags": [
+          "User Certificate"
+        ]
+      }
+    },
+    "/network-config/v1alpha1/cnac-certificate/revoke": {
+      "post": {
+        "description": "This API revokes one or more certificates based on certificate details or a UPN (User Principal Name).\nIf certificate details are provided, each certificate must include the issuer, serial number, and subject,\nand only the specified certificates will be revoked. Alternatively, if a UPN is provided, all certificates\nassociated with that UPN will be revoked.\n",
+        "operationId": "revokeCertificates",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/revokeCertificates_request"
+              }
+            }
+          },
+          "description": "The input object containing either the certificate details or UPN. Provide either the list of certificate\ndetails (e.g., issuer: \"CN=RootCA\", serial: \"1234567890ABCDEF\", subject: \"CN=john.doe@example.com\") to\nrevoke specific certificates or the UPN (e.g., \"john.doe@example.com\") to revoke all certificates\nassociated with that UPN. Only one of these should be provided per request.\n",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CdaRevokeCertsResponse"
+                }
+              }
+            },
+            "description": "Success. The user certificates have been revoked."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestError"
+                }
+              }
+            },
+            "description": "Bad request: The request is malformed or invalid input was received."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                }
+              }
+            },
+            "description": "Unauthorized access."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenError"
+                }
+              }
+            },
+            "description": "Forbidden. Access is denied."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictError"
+                }
+              }
+            },
+            "description": "Conflict. The resource already exists."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TooManyRequestsError"
+                }
+              }
+            },
+            "description": "Too many requests. Rate limit exceeded."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            },
+            "description": "Internal server error."
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableError"
+                }
+              }
+            },
+            "description": "Service unavailable. The server is temporarily unavailable."
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "summary": "Revoke user certificates",
+        "tags": [
+          "User Certificate"
+        ],
+        "x-codegen-request-body-name": "body"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BadRequestError": {
+        "properties": {
+          "debugId": {
+            "description": "A unique identifier used for troubleshooting and debugging purposes.",
+            "example": "78f002e32e0cefba3d8cc94fa8179342",
+            "maxLength": 512,
+            "type": "string",
+            "x-go-name": "DebugID"
+          },
+          "errorCode": {
+            "description": "Error code representing the specific error condition.",
+            "enum": [
+              "HPE_GL_ERROR_BAD_REQUEST",
+              "HPE_GL_ERROR_MISSING_IDENTIFIER",
+              "HPE_GL_ERROR_INSUFFICIENT_PARAMS"
+            ],
+            "example": "HPE_GL_ERROR_BAD_REQUEST",
+            "maxLength": 128,
+            "type": "string",
+            "x-go-name": "ErrorCode"
+          },
+          "httpStatusCode": {
+            "description": "The HTTP status code indicating the error type (e.g., 400 for Bad Request).",
+            "example": 400,
+            "format": "int64",
+            "maximum": 400,
+            "minimum": 400,
+            "type": "integer",
+            "x-go-name": "HTTPStatusCode"
+          },
+          "message": {
+            "description": "Error message providing more details about the error.",
+            "example": "Reason for the error",
+            "maxLength": 512,
+            "type": "string",
+            "x-go-name": "Message"
+          }
+        },
+        "required": [
+          "debugId",
+          "errorCode",
+          "httpStatusCode",
+          "message"
+        ],
+        "type": "object",
+        "x-go-package": "cdaservice/nbapi"
+      },
+      "CdaCertInfoObj": {
+        "properties": {
+          "certIssuerDer": {
+            "description": "Certificate Issuer Der",
+            "type": "string",
+            "x-go-name": "CertIssuerDer"
+          },
+          "certSerialNum": {
+            "description": "Certificate serial num",
+            "type": "string",
+            "x-go-name": "CertSerialNum"
+          },
+          "certSubjectDer": {
+            "description": "Certificate subject Der",
+            "type": "string",
+            "x-go-name": "CertSubjectDer"
+          }
+        },
+        "type": "object",
+        "x-go-package": "cdaservice/graphql/models"
+      },
+      "CdaRevokeCertInput": {
+        "properties": {
+          "certs": {
+            "description": "List of certs having single or more than one cert objects",
+            "items": {
+              "$ref": "#/components/schemas/CdaCertInfoObj"
+            },
+            "type": "array",
+            "x-go-name": "Certs"
+          },
+          "upn": {
+            "description": "User principal name",
+            "type": "string",
+            "x-go-name": "Upn"
+          }
+        },
+        "title": "Input type for revokeCert.",
+        "type": "object",
+        "x-go-package": "cdaservice/graphql/models"
+      },
+      "CdaRevokeCertResponse": {
+        "description": "Represents the response for revoking a single cert",
+        "properties": {
+          "certIssuerDer": {
+            "description": "Certificate Issuer Der",
+            "type": "string",
+            "x-go-name": "CertIssuerDer"
+          },
+          "certSerialNum": {
+            "description": "Certificate serial num",
+            "type": "string",
+            "x-go-name": "CertSerialNum"
+          },
+          "certSubjectDer": {
+            "description": "Certificate subject Der",
+            "type": "string",
+            "x-go-name": "CertSubjectDer"
+          },
+          "revoked": {
+            "description": "revoked is true if the cert was freshly revoked. Will be false if the cert was already revoked.",
+            "type": "boolean",
+            "x-go-name": "Revoked"
+          }
+        },
+        "type": "object",
+        "x-go-package": "cdaservice/graphql/models"
+      },
+      "CdaRevokeCertsResponse": {
+        "description": "Represents the response for revoking a list of certs",
+        "properties": {
+          "count": {
+            "description": "Count of items returned.",
+            "format": "int64",
+            "type": "integer",
+            "x-go-name": "Count"
+          },
+          "items": {
+            "description": "List of revoke cert responses",
+            "items": {
+              "$ref": "#/components/schemas/CdaRevokeCertResponse"
+            },
+            "type": "array",
+            "x-go-name": "Items"
+          }
+        },
+        "type": "object",
+        "x-go-package": "cdaservice/graphql/models"
+      },
+      "CdaUserCertResponse": {
+        "description": "Represents the response for query listCdaUserCerts",
+        "properties": {
+          "deviceDescription": {
+            "description": "A short description of the device this certificate was issued to.",
+            "type": "string",
+            "x-go-name": "DeviceDescription"
+          },
+          "deviceIdentifier": {
+            "description": "Unique identifier for the device this certificate was issued to.",
+            "type": "string",
+            "x-go-name": "DeviceIdentifier"
+          },
+          "id": {
+            "description": "ID of the certificate.",
+            "type": "string",
+            "x-go-name": "ID"
+          },
+          "issuer": {
+            "description": "User certificate issuer name.",
+            "type": "string",
+            "x-go-name": "Issuer"
+          },
+          "issuerDer": {
+            "description": "User certificate issuer in DER form, hex encoded.",
+            "type": "string",
+            "x-go-name": "IssuerDer"
+          },
+          "revokedAt": {
+            "description": "Time when the user certificate was revoked",
+            "type": "string",
+            "x-go-name": "RevokedAt"
+          },
+          "revokedBy": {
+            "description": "User certificate revoked by whom.",
+            "type": "string",
+            "x-go-name": "RevokedBy"
+          },
+          "serial": {
+            "description": "User certificate serial number.",
+            "type": "string",
+            "x-go-name": "Serial"
+          },
+          "subject": {
+            "description": "User certificate subject name.",
+            "type": "string",
+            "x-go-name": "Subject"
+          },
+          "subjectDer": {
+            "description": "User certificate subject in DER form, hex encoded.",
+            "type": "string",
+            "x-go-name": "SubjectDer"
+          },
+          "validFrom": {
+            "description": "User certificate valid from.",
+            "type": "string",
+            "x-go-name": "ValidFrom"
+          },
+          "validTo": {
+            "description": "User certificate valid till.",
+            "type": "string",
+            "x-go-name": "ValidTo"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object",
+        "x-go-package": "cdaservice/graphql/models"
+      },
+      "CdaUserCertsResponse": {
+        "description": "Represents the response for query listCdaUserCerts",
+        "properties": {
+          "count": {
+            "description": "Count of items returned.",
+            "format": "int64",
+            "type": "integer",
+            "x-go-name": "Count"
+          },
+          "items": {
+            "description": "List of User Certificates.",
+            "items": {
+              "$ref": "#/components/schemas/CdaUserCertResponse"
+            },
+            "type": "array",
+            "x-go-name": "Items"
+          }
+        },
+        "required": [
+          "count",
+          "items"
+        ],
+        "type": "object",
+        "x-go-package": "cdaservice/graphql/models"
+      },
+      "ConflictError": {
+        "properties": {
+          "debugId": {
+            "description": "A unique identifier used for troubleshooting and debugging purposes.",
+            "example": "78f002e32e0cefba3d8cc94fa8179342",
+            "maxLength": 512,
+            "type": "string",
+            "x-go-name": "DebugID"
+          },
+          "errorCode": {
+            "description": "Error code representing the specific error condition.",
+            "enum": [
+              "HPE_GL_ERROR_CONFLICT"
+            ],
+            "example": "HPE_GL_ERROR_CONFLICT",
+            "maxLength": 128,
+            "type": "string",
+            "x-go-name": "ErrorCode"
+          },
+          "httpStatusCode": {
+            "description": "The HTTP status code indicating the error type (e.g., 400 for Bad Request).",
+            "example": 409,
+            "format": "int64",
+            "maximum": 409,
+            "minimum": 409,
+            "type": "integer",
+            "x-go-name": "HTTPStatusCode"
+          },
+          "message": {
+            "description": "Error message providing more details about the error.",
+            "example": "Reason for the error",
+            "maxLength": 512,
+            "type": "string",
+            "x-go-name": "Message"
+          }
+        },
+        "required": [
+          "debugId",
+          "errorCode",
+          "httpStatusCode",
+          "message"
+        ],
+        "type": "object",
+        "x-go-package": "cdaservice/nbapi"
+      },
+      "ForbiddenError": {
+        "properties": {
+          "debugId": {
+            "description": "A unique identifier used for troubleshooting and debugging purposes.",
+            "example": "78f002e32e0cefba3d8cc94fa8179342",
+            "maxLength": 512,
+            "type": "string",
+            "x-go-name": "DebugID"
+          },
+          "errorCode": {
+            "description": "Error code representing the specific error condition.",
+            "enum": [
+              "HPE_GL_ERROR_FORBIDDEN"
+            ],
+            "example": "HPE_GL_ERROR_FORBIDDEN",
+            "maxLength": 256,
+            "type": "string",
+            "x-go-name": "ErrorCode"
+          },
+          "httpStatusCode": {
+            "description": "The HTTP status code indicating the error type (e.g., 403 for Forbidden).",
+            "example": 403,
+            "format": "int64",
+            "maximum": 403,
+            "minimum": 403,
+            "type": "integer",
+            "x-go-name": "HTTPStatusCode"
+          },
+          "message": {
+            "description": "Error message providing more details about the error.",
+            "example": "Reason for the error",
+            "maxLength": 512,
+            "type": "string",
+            "x-go-name": "Message"
+          }
+        },
+        "required": [
+          "debugId",
+          "errorCode",
+          "httpStatusCode",
+          "message"
+        ],
+        "type": "object",
+        "x-go-package": "cdaservice/nbapi"
+      },
+      "InternalServerError": {
+        "properties": {
+          "debugId": {
+            "description": "A unique identifier used for troubleshooting and debugging purposes.",
+            "example": "78f002e32e0cefba3d8cc94fa8179342",
+            "maxLength": 512,
+            "type": "string",
+            "x-go-name": "DebugID"
+          },
+          "errorCode": {
+            "description": "Error code representing the specific error condition.",
+            "enum": [
+              "HPE_GL_ERROR_INTERNAL_SERVER_ERROR"
+            ],
+            "example": "HPE_GL_ERROR_INTERNAL_SERVER_ERROR",
+            "maxLength": 256,
+            "type": "string",
+            "x-go-name": "ErrorCode"
+          },
+          "httpStatusCode": {
+            "description": "The HTTP status code indicating the error type (e.g., 500 for InternalServerError).",
+            "example": 500,
+            "format": "int64",
+            "maximum": 500,
+            "minimum": 500,
+            "type": "integer",
+            "x-go-name": "HTTPStatusCode"
+          },
+          "message": {
+            "description": "Error message providing more details about the error.",
+            "example": "Reason for the error",
+            "maxLength": 512,
+            "type": "string",
+            "x-go-name": "Message"
+          }
+        },
+        "required": [
+          "debugId",
+          "errorCode",
+          "httpStatusCode",
+          "message"
+        ],
+        "type": "object",
+        "x-go-package": "cdaservice/nbapi"
+      },
+      "ServiceUnavailableError": {
+        "properties": {
+          "debugId": {
+            "description": "A unique identifier used for troubleshooting and debugging purposes.",
+            "example": "78f002e32e0cefba3d8cc94fa8179342",
+            "maxLength": 512,
+            "type": "string",
+            "x-go-name": "DebugID"
+          },
+          "errorCode": {
+            "description": "Error code representing the specific error condition.",
+            "enum": [
+              "HPE_GL_ERROR_SERVICE_UNAVAILABLE"
+            ],
+            "example": "HPE_GL_ERROR_SERVICE_UNAVAILABLE",
+            "maxLength": 256,
+            "type": "string",
+            "x-go-name": "ErrorCode"
+          },
+          "httpStatusCode": {
+            "description": "The HTTP status code indicating the error type (e.g., 503 for ServiceUnavailableError).",
+            "example": 503,
+            "format": "int64",
+            "maximum": 503,
+            "minimum": 503,
+            "type": "integer",
+            "x-go-name": "HTTPStatusCode"
+          },
+          "message": {
+            "description": "Error message providing more details about the error.",
+            "example": "Reason for the error",
+            "maxLength": 512,
+            "type": "string",
+            "x-go-name": "Message"
+          }
+        },
+        "required": [
+          "debugId",
+          "errorCode",
+          "httpStatusCode",
+          "message"
+        ],
+        "type": "object",
+        "x-go-package": "cdaservice/nbapi"
+      },
+      "TooManyRequestsError": {
+        "properties": {
+          "debugId": {
+            "description": "A unique identifier used for troubleshooting and debugging purposes.",
+            "example": "78f002e32e0cefba3d8cc94fa8179342",
+            "maxLength": 512,
+            "type": "string",
+            "x-go-name": "DebugID"
+          },
+          "errorCode": {
+            "description": "Error code representing the specific error condition.",
+            "enum": [
+              "HPE_GL_ERROR_TOO_MANY_REQUESTS"
+            ],
+            "example": "HPE_GL_ERROR_TOO_MANY_REQUESTS",
+            "maxLength": 256,
+            "type": "string",
+            "x-go-name": "ErrorCode"
+          },
+          "httpStatusCode": {
+            "description": "The HTTP status code indicating the error type (e.g., 429 for TooManyRequests).",
+            "example": 429,
+            "format": "int64",
+            "maximum": 429,
+            "minimum": 429,
+            "type": "integer",
+            "x-go-name": "HTTPStatusCode"
+          },
+          "message": {
+            "description": "Error message providing more details about the error.",
+            "example": "Reason for the error",
+            "maxLength": 512,
+            "type": "string",
+            "x-go-name": "Message"
+          }
+        },
+        "required": [
+          "debugId",
+          "errorCode",
+          "httpStatusCode",
+          "message"
+        ],
+        "type": "object",
+        "x-go-package": "cdaservice/nbapi"
+      },
+      "UnauthorizedError": {
+        "properties": {
+          "debugId": {
+            "description": "A unique identifier used for troubleshooting and debugging purposes.",
+            "example": "78f002e32e0cefba3d8cc94fa8179342",
+            "maxLength": 512,
+            "type": "string",
+            "x-go-name": "DebugID"
+          },
+          "errorCode": {
+            "description": "Error code representing the specific error condition.",
+            "enum": [
+              "HPE_GL_ERROR_UNAUTHORIZED"
+            ],
+            "example": "HPE_GL_ERROR_UNAUTHORIZED",
+            "maxLength": 256,
+            "type": "string",
+            "x-go-name": "ErrorCode"
+          },
+          "httpStatusCode": {
+            "description": "The HTTP status code indicating the error type (e.g., 401 for Unauthorized).",
+            "example": 401,
+            "format": "int64",
+            "maximum": 401,
+            "minimum": 401,
+            "type": "integer",
+            "x-go-name": "HTTPStatusCode"
+          },
+          "message": {
+            "description": "Error message providing more details about the error.",
+            "example": "Reason for the error",
+            "maxLength": 512,
+            "type": "string",
+            "x-go-name": "Message"
+          }
+        },
+        "required": [
+          "debugId",
+          "errorCode",
+          "httpStatusCode",
+          "message"
+        ],
+        "type": "object",
+        "x-go-package": "cdaservice/nbapi"
+      },
+      "revokeCertificates_request": {
+        "properties": {
+          "input": {
+            "$ref": "#/components/schemas/CdaRevokeCertInput"
+          }
+        },
+        "required": [
+          "input"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "OAuth2": {
+        "description": "OAuth 2.0 authentication with client credentials flow. You can also use your own access token.",
+        "flows": {
+          "clientCredentials": {
+            "scopes": {},
+            "tokenUrl": "https://sso.common.cloud.hpe.com/as/token.oauth2"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  }
+}

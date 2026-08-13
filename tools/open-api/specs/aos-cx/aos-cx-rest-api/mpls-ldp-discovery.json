@@ -1,0 +1,514 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "MPLS_LDP_Discovery",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "MPLS_LDP_Discovery"
+    }
+  ],
+  "paths": {
+    "/system/mpls_ldp_discoveries": {
+      "get": {
+        "tags": [
+          "MPLS_LDP_Discovery"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "adjacency_type": {
+                      "type": "string",
+                      "description": "Type of Hello message that initiated adjacency",
+                      "enum": [
+                        "link",
+                        "targeted"
+                      ]
+                    },
+                    "bfd_status": {
+                      "type": "string",
+                      "description": "BFD session status",
+                      "enum": [
+                        "none",
+                        "initial",
+                        "activating",
+                        "active",
+                        "inactive",
+                        "admin_down",
+                        "no_contact"
+                      ]
+                    },
+                    "distribution_method": {
+                      "type": "string",
+                      "description": "Label distribution method",
+                      "enum": [
+                        "downstream-on-demand",
+                        "downstream-unsolicited"
+                      ]
+                    },
+                    "hold_time": {
+                      "type": "object",
+                      "properties": {
+                        "arbitrated": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Keepalive time that is currently in use"
+                        },
+                        "configured": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Locally configured keepalive time"
+                        },
+                        "peer_advertised": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Keepalive time advertised by peer"
+                        },
+                        "remaining": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Keepalive time to receive next Hello message"
+                        }
+                      }
+                    },
+                    "out_port": {
+                      "type": "string",
+                      "description": "Reference Resource: [MPLS_LDP_Discovery](#/MPLS_LDP_Discovery)<br>Egress port"
+                    },
+                    "peer_path_vector_limit": {
+                      "type": "integer",
+                      "description": "Peer path vector limit",
+                      "maximum": 255,
+                      "minimum": 0
+                    },
+                    "peer_router_id": {
+                      "type": "string",
+                      "description": "Reference Resource: [MPLS_LDP_Discovery](#/MPLS_LDP_Discovery)<br>IP address of the peer router ID",
+                      "maxLength": 21
+                    },
+                    "peer_transport_address": {
+                      "type": "object",
+                      "description": "IP address advertised by peer",
+                      "properties": {
+                        "address": {
+                          "type": "string",
+                          "description": "IP address",
+                          "maxLength": 16
+                        },
+                        "address_type": {
+                          "type": "string",
+                          "description": "IP address type",
+                          "enum": [
+                            "IPv4",
+                            "IPv6"
+                          ]
+                        }
+                      }
+                    },
+                    "router_id": {
+                      "type": "string",
+                      "description": "Reference Resource: [MPLS_LDP_Discovery](#/MPLS_LDP_Discovery)<br>IP address of the local router ID",
+                      "maxLength": 21
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "router_id",
+                  "distribution_method",
+                  "peer_transport_address",
+                  "hold_time",
+                  "adjacency_type",
+                  "peer_router_id",
+                  "out_port",
+                  "peer_path_vector_limit",
+                  "bfd_status"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/mpls_ldp_discoveries/{MPLS_LDP_Discovery.router_id},{MPLS_LDP_Discovery.peer_router_id},{MPLS_LDP_Discovery.out_port}": {
+      "get": {
+        "tags": [
+          "MPLS_LDP_Discovery"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "adjacency_type": {
+                      "type": "string",
+                      "description": "Type of Hello message that initiated adjacency",
+                      "enum": [
+                        "link",
+                        "targeted"
+                      ]
+                    },
+                    "bfd_status": {
+                      "type": "string",
+                      "description": "BFD session status",
+                      "enum": [
+                        "none",
+                        "initial",
+                        "activating",
+                        "active",
+                        "inactive",
+                        "admin_down",
+                        "no_contact"
+                      ]
+                    },
+                    "distribution_method": {
+                      "type": "string",
+                      "description": "Label distribution method",
+                      "enum": [
+                        "downstream-on-demand",
+                        "downstream-unsolicited"
+                      ]
+                    },
+                    "hold_time": {
+                      "type": "object",
+                      "properties": {
+                        "arbitrated": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Keepalive time that is currently in use"
+                        },
+                        "configured": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Locally configured keepalive time"
+                        },
+                        "peer_advertised": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Keepalive time advertised by peer"
+                        },
+                        "remaining": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Keepalive time to receive next Hello message"
+                        }
+                      }
+                    },
+                    "out_port": {
+                      "type": "string",
+                      "description": "Reference Resource: [MPLS_LDP_Discovery](#/MPLS_LDP_Discovery)<br>Egress port"
+                    },
+                    "peer_path_vector_limit": {
+                      "type": "integer",
+                      "description": "Peer path vector limit",
+                      "maximum": 255,
+                      "minimum": 0
+                    },
+                    "peer_router_id": {
+                      "type": "string",
+                      "description": "Reference Resource: [MPLS_LDP_Discovery](#/MPLS_LDP_Discovery)<br>IP address of the peer router ID",
+                      "maxLength": 21
+                    },
+                    "peer_transport_address": {
+                      "type": "object",
+                      "description": "IP address advertised by peer",
+                      "properties": {
+                        "address": {
+                          "type": "string",
+                          "description": "IP address",
+                          "maxLength": 16
+                        },
+                        "address_type": {
+                          "type": "string",
+                          "description": "IP address type",
+                          "enum": [
+                            "IPv4",
+                            "IPv6"
+                          ]
+                        }
+                      }
+                    },
+                    "router_id": {
+                      "type": "string",
+                      "description": "Reference Resource: [MPLS_LDP_Discovery](#/MPLS_LDP_Discovery)<br>IP address of the local router ID",
+                      "maxLength": 21
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "MPLS_LDP_Discovery.router_id",
+            "in": "path",
+            "description": "Reference Resource: [MPLS_LDP_Discovery](#/MPLS_LDP_Discovery)<br>IP address of the local router ID",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "MPLS_LDP_Discovery.peer_router_id",
+            "in": "path",
+            "description": "Reference Resource: [MPLS_LDP_Discovery](#/MPLS_LDP_Discovery)<br>IP address of the peer router ID",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "MPLS_LDP_Discovery.out_port",
+            "in": "path",
+            "description": "Reference Resource: [MPLS_LDP_Discovery](#/MPLS_LDP_Discovery)<br>Egress port",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "distribution_method",
+                  "peer_transport_address",
+                  "hold_time",
+                  "adjacency_type",
+                  "router_id",
+                  "out_port",
+                  "peer_path_vector_limit",
+                  "bfd_status",
+                  "peer_router_id"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

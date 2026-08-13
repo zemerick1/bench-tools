@@ -1,0 +1,892 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Firmware Management",
+    "version": "0.0.1",
+    "description": "Serves Wi-Fi client locations with filtering options available."
+  },
+  "servers": [
+    {
+      "url": "https://de1.api.central.arubanetworks.com",
+      "description": "eu"
+    },
+    {
+      "url": "https://de2.api.central.arubanetworks.com",
+      "description": "eucentral2"
+    },
+    {
+      "url": "https://de3.api.central.arubanetworks.com",
+      "description": "eucentral3"
+    },
+    {
+      "url": "https://gb1.api.central.arubanetworks.com",
+      "description": "ukwest2"
+    },
+    {
+      "url": "https://us1.api.central.arubanetworks.com",
+      "description": "prod"
+    },
+    {
+      "url": "https://us2.api.central.arubanetworks.com",
+      "description": "central-prod2"
+    },
+    {
+      "url": "https://us4.api.central.arubanetworks.com",
+      "description": "uswest4"
+    },
+    {
+      "url": "https://us5.api.central.arubanetworks.com",
+      "description": "uswest5"
+    },
+    {
+      "url": "https://us6.api.central.arubanetworks.com",
+      "description": "us-east-1"
+    },
+    {
+      "url": "https://ca1.api.central.arubanetworks.com",
+      "description": "starman"
+    },
+    {
+      "url": "https://in1.api.central.arubanetworks.com",
+      "description": "apac"
+    },
+    {
+      "url": "https://jp1.api.central.arubanetworks.com",
+      "description": "apaceast"
+    },
+    {
+      "url": "https://au1.api.central.arubanetworks.com",
+      "description": "apacsouth"
+    },
+    {
+      "url": "https://ae1.api.central.arubanetworks.com",
+      "description": "uaenorth1"
+    },
+    {
+      "url": "https://cn1.api.central.arubanetworks.com.cn",
+      "description": "china-prod"
+    },
+    {
+      "url": "https://internal.api.central.arubanetworks.com",
+      "description": "internal2"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Firmware Management",
+      "description": "Firmware management APIs"
+    }
+  ],
+  "paths": {
+    "/network-services/v1/firmware-details": {
+      "get": {
+        "tags": [
+          "Firmware Management"
+        ],
+        "operationId": "getFirmwareDetailsListV1",
+        "summary": "Get device list with firmware details",
+        "description": "This API endpoint retrieves list of device's firmware details such as firmware version, upgrade status, recommended version, firmware classification and last upgraded timestamp.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/SortV1"
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Denotes the maximum number of items returned in the response. Maximum value is 1000.\n",
+            "schema": {
+              "$ref": "#/components/schemas/Limitfirmware"
+            }
+          },
+          {
+            "name": "next",
+            "required": false,
+            "in": "query",
+            "description": "Specifies the pagination cursor for the next page of resources. The minimum value is 1.\n",
+            "schema": {
+              "$ref": "#/components/schemas/Next"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/FirmwareDetailsListResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BadRequestsErrorSchema": {
+        "type": "object",
+        "description": "Error details returned from the server.\n",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 400,
+            "maximum": 400,
+            "description": "HTTP status code.\n",
+            "example": 400
+          },
+          "errorCode": {
+            "type": "string",
+            "enum": [
+              "HPE_GL_NETWORK_SERVICES_INVALID_INPUT"
+            ],
+            "maxLength": 128,
+            "description": "Error code\n",
+            "example": "HPE_GL_NETWORK_SERVICES_INVALID_INPUT"
+          },
+          "message": {
+            "$ref": "#/components/schemas/ErrorMessagewebhooks"
+          },
+          "debugId": {
+            "$ref": "#/components/schemas/DebugId"
+          },
+          "errorDetails": {
+            "$ref": "#/components/schemas/ErrorDetails400"
+          }
+        }
+      },
+      "Count": {
+        "type": "integer",
+        "format": "int32",
+        "description": "Number of items in the response.\n",
+        "example": 1
+      },
+      "DebugId": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 512,
+        "description": "A unique identifier used for troubleshooting and debugging purposes.\n",
+        "example": "78f002e32e0cefba3d8cc94fa8179342"
+      },
+      "DeviceName": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 256,
+        "description": "The name of the device.\n",
+        "example": "ap_1"
+      },
+      "DeviceTypefirmware": {
+        "type": "string",
+        "enum": [
+          "ACCESS_POINT",
+          "SWITCH",
+          "GATEWAY"
+        ],
+        "description": "The type of network device.\n",
+        "example": "ACCESS_POINT"
+      },
+      "ErrorDetails400": {
+        "type": "array",
+        "description": "A list of detailed error information for bad requests.",
+        "items": {
+          "type": "object",
+          "description": "Details about a specific error.",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "The type of the error.",
+              "example": "validation_error"
+            },
+            "issues": {
+              "type": "array",
+              "description": "A list of issues related to the error.",
+              "items": {
+                "type": "object",
+                "description": "Details about a specific issue.",
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "description": "The source of the issue.",
+                    "example": "requestBody"
+                  },
+                  "subject": {
+                    "type": "string",
+                    "description": "The subject of the issue.",
+                    "example": "name"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "A detailed description of the issue.",
+                    "example": "The 'name' field is required."
+                  }
+                },
+                "required": [
+                  "source",
+                  "subject"
+                ]
+              }
+            }
+          },
+          "required": [
+            "type",
+            "issues"
+          ]
+        }
+      },
+      "ErrorDetails500": {
+        "type": "array",
+        "description": "A list of detailed error information.",
+        "items": {
+          "type": "object",
+          "description": "Details about a specific error.",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "The type of the error.",
+              "example": "validation_error"
+            },
+            "retryAfterSeconds": {
+              "type": "integer",
+              "description": "The number of seconds to wait before retrying the request.",
+              "example": 30
+            },
+            "source": {
+              "type": "string",
+              "description": "The source of the issue.",
+              "example": "requestBody"
+            },
+            "metadata": {
+              "type": "object",
+              "description": "Additional metadata about the error.",
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "description": "The field related to the error.",
+                  "example": "name"
+                },
+                "reason": {
+                  "type": "string",
+                  "description": "The reason for the error.",
+                  "example": "Field is required."
+                }
+              },
+              "additionalProperties": true
+            },
+            "issues": {
+              "type": "array",
+              "description": "A list of issues related to the error.",
+              "items": {
+                "type": "object",
+                "description": "Details about a specific issue.",
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "description": "The source of the issue.",
+                    "example": "requestBody"
+                  },
+                  "subject": {
+                    "type": "string",
+                    "description": "The subject of the issue.",
+                    "example": "name"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "A detailed description of the issue.",
+                    "example": "The 'name' field is required."
+                  }
+                },
+                "required": [
+                  "source",
+                  "subject"
+                ]
+              }
+            }
+          },
+          "required": [
+            "type",
+            "retryAfterSeconds"
+          ]
+        }
+      },
+      "ErrorMessagewebhooks": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 512,
+        "description": "Error message indicating the cause of the failure.\n",
+        "example": "Reason for the error"
+      },
+      "FirmwareClassification": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 32,
+        "description": "The classification of the firmware version.\n",
+        "example": "Bug Fix"
+      },
+      "FirmwareDetailsListResponse": {
+        "example": {
+          "items": [
+            {
+              "serialNumber": "AP00000001",
+              "deviceType": "ACCESS_POINT",
+              "deviceName": "AP00000001",
+              "siteId": "1120972196",
+              "siteName": "Site1",
+              "id": "AP00000001",
+              "type": "network-services/firmware-management",
+              "recommendedVersion": "8.6.0.6_77023",
+              "upgradeStatus": "Up To Date",
+              "firmwareClassification": "",
+              "lastUpgradedTimeAt": "2024-04-30T06:52:18.712Z",
+              "firmwareVersion": "8.5.2.0_59123"
+            }
+          ],
+          "count": 1,
+          "total": 4,
+          "next": "2"
+        },
+        "allOf": [
+          {
+            "type": "object",
+            "required": [
+              "items"
+            ],
+            "properties": {
+              "items": {
+                "type": "array",
+                "maxItems": 1000,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "serialNumber",
+                    "deviceName",
+                    "recommendedVersion",
+                    "upgradeStatus",
+                    "firmwareClassification",
+                    "lastUpgradedTimeAt",
+                    "deviceType",
+                    "siteId",
+                    "siteName",
+                    "id",
+                    "type",
+                    "firmwareVersion"
+                  ],
+                  "properties": {
+                    "serialNumber": {
+                      "$ref": "#/components/schemas/SerialNumber"
+                    },
+                    "deviceName": {
+                      "$ref": "#/components/schemas/DeviceName"
+                    },
+                    "recommendedVersion": {
+                      "$ref": "#/components/schemas/RecommendedVersion"
+                    },
+                    "upgradeStatus": {
+                      "$ref": "#/components/schemas/UpgradeStatus"
+                    },
+                    "firmwareClassification": {
+                      "$ref": "#/components/schemas/FirmwareClassification"
+                    },
+                    "lastUpgradedTimeAt": {
+                      "$ref": "#/components/schemas/LastUpgradedTimeAt"
+                    },
+                    "deviceType": {
+                      "$ref": "#/components/schemas/DeviceTypefirmware"
+                    },
+                    "siteId": {
+                      "$ref": "#/components/schemas/SiteIDfirmware"
+                    },
+                    "siteName": {
+                      "$ref": "#/components/schemas/SiteName"
+                    },
+                    "id": {
+                      "$ref": "#/components/schemas/ID"
+                    },
+                    "type": {
+                      "$ref": "#/components/schemas/Type"
+                    },
+                    "firmwareVersion": {
+                      "$ref": "#/components/schemas/FirmwareVersion"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/PaginatedResponse"
+          }
+        ]
+      },
+      "FirmwareVersion": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 32,
+        "description": "Firmware version currently running on the device.\n",
+        "example": "8.5.2.0_59123"
+      },
+      "Forbidden": {
+        "type": "object",
+        "description": "Forbidden, request not authorized",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 403,
+            "maximum": 403,
+            "example": "403",
+            "description": "HTTP status code.\n"
+          },
+          "errorCode": {
+            "type": "string",
+            "description": "* A unique machine-friendly, but human-readable identifier for the error. It has prefix HPE_GL_.\n* For more details regarding error please refer to error message\n",
+            "example": "HPE_GL_ERROR_FORBIDDEN",
+            "maxLength": 256
+          },
+          "message": {
+            "$ref": "#/components/schemas/message"
+          },
+          "debugId": {
+            "$ref": "#/components/schemas/debugIdwifi"
+          }
+        }
+      },
+      "ID": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 36,
+        "description": "Primary identifier for the resource.\n",
+        "example": "AP00000001"
+      },
+      "InternalServerErrorSchema": {
+        "type": "object",
+        "description": "Internal server error details returned from the server.\n",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 500,
+            "maximum": 500,
+            "example": 500,
+            "description": "HTTP status code."
+          },
+          "errorCode": {
+            "type": "string",
+            "enum": [
+              "HPE_GL_NETWORK_SERVICES_INTERNAL_SERVER_ERROR"
+            ],
+            "format": "const",
+            "maxLength": 128,
+            "description": "* A unique machine-friendly, but human-readable identifier for the error. It has prefix HPE_GL_.\n* For more details regarding errors, please refer to the error message\n",
+            "example": "HPE_GL_NETWORK_SERVICES_INTERNAL_SERVER_ERROR"
+          },
+          "message": {
+            "$ref": "#/components/schemas/ErrorMessagewebhooks"
+          },
+          "debugId": {
+            "$ref": "#/components/schemas/DebugId"
+          },
+          "errorDetails": {
+            "$ref": "#/components/schemas/ErrorDetails500"
+          }
+        }
+      },
+      "LastUpgradedTimeAt": {
+        "type": "string",
+        "format": "date-time",
+        "maxLength": 32,
+        "description": "The timestamp of the last firmware upgrade on the device.\n",
+        "example": "2023-10-10T10:10:10Z"
+      },
+      "Limitfirmware": {
+        "type": "integer",
+        "format": "int32",
+        "default": 20,
+        "maximum": 1000,
+        "example": 20,
+        "description": "Specifies the number of results to be returned.\n"
+      },
+      "Next": {
+        "type": "string",
+        "format": "int32",
+        "description": "Specifies the pagination cursor for the next page of resources.\n",
+        "example": "2"
+      },
+      "PaginatedResponse": {
+        "type": "object",
+        "required": [
+          "count",
+          "next"
+        ],
+        "properties": {
+          "count": {
+            "$ref": "#/components/schemas/Count"
+          },
+          "total": {
+            "$ref": "#/components/schemas/Total"
+          },
+          "next": {
+            "type": "string",
+            "format": "int32",
+            "description": "Indicate the next page number, null if there are no further pages.\n",
+            "example": "2"
+          }
+        }
+      },
+      "RecommendedVersion": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 32,
+        "description": "The recommended firmware version for the device.\n",
+        "example": "8.5.2.0_59123"
+      },
+      "SerialNumber": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 16,
+        "description": "The device serial number.\n",
+        "example": "AP00000001"
+      },
+      "SiteIDfirmware": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 128,
+        "description": "ID of the Site in which the device is present.\n",
+        "example": "24833497"
+      },
+      "SiteName": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 256,
+        "description": "Name of the Site in which the device is present.\n",
+        "example": "Site1"
+      },
+      "SortV1": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 256,
+        "example": "deviceType,upgradeStatus desc"
+      },
+      "TooManyRequests": {
+        "type": "object",
+        "description": "Too many requests based on rate limit",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 429,
+            "maximum": 429,
+            "example": "429",
+            "description": "HTTP status code.\n"
+          },
+          "errorCode": {
+            "type": "string",
+            "description": "* A unique machine-friendly, but human-readable identifier for the error. It has prefix HPE_GL_.\n* For more details regarding error please refer to error message\n",
+            "example": "HPE_GL_ERROR_TOO_MANY_REQUESTS",
+            "maxLength": 256
+          },
+          "message": {
+            "$ref": "#/components/schemas/message"
+          },
+          "debugId": {
+            "$ref": "#/components/schemas/debugIdwifi"
+          }
+        }
+      },
+      "Total": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Specifies the total number of items available for a given filter query.\n",
+        "example": 10
+      },
+      "Type": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 36,
+        "description": "The type of the resource.\n",
+        "example": "network-services/firmware-management"
+      },
+      "Unauthorized": {
+        "type": "object",
+        "description": "Missing authorization in request",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 401,
+            "maximum": 401,
+            "example": "401",
+            "description": "HTTP status code.\n"
+          },
+          "errorCode": {
+            "type": "string",
+            "description": "* A unique machine-friendly, but human-readable identifier for the error. It has prefix HPE_GL_.\n* For more details regarding error please refer to error message\n",
+            "example": "HPE_GL_ERROR_UNAUTHORIZED",
+            "maxLength": 256
+          },
+          "message": {
+            "$ref": "#/components/schemas/message"
+          },
+          "debugId": {
+            "$ref": "#/components/schemas/debugIdwifi"
+          }
+        }
+      },
+      "UpgradeStatus": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 32,
+        "description": "The current upgrade status of the device.\n",
+        "example": "Up To Date"
+      },
+      "debugIdwifi": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 1024,
+        "description": "Debug id of the failed request. This can be used to help with troubleshooting.",
+        "example": "a53ea9f0efeb99b2a9a52ef9c7e3093b"
+      },
+      "message": {
+        "type": "string",
+        "format": "const",
+        "maxLength": 1024,
+        "description": "Error message indicating the cause of the failure.",
+        "example": "Error message"
+      }
+    },
+    "responses": {
+      "BadRequestError": {
+        "description": "Bad Request",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BadRequestsErrorSchema"
+            }
+          }
+        }
+      },
+      "FirmwareDetailsListResponse": {
+        "description": "List of device's firmware details, including Access Points, Switches, Gateways and associated pagination information.\n",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/FirmwareDetailsListResponse"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Forbidden: Access is denied.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Forbidden"
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "description": "Internal server error.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/InternalServerErrorSchema"
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "Too Many Requests. Rate limit exceeded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TooManyRequests"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized request.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Unauthorized"
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "Filter": {
+        "name": "filter",
+        "in": "query",
+        "required": false,
+        "description": "OData Version 4.0 filter string (limited functionality). Supports only 'and' conjunction ('or' and 'not' are NOT supported). Supported fields and operators are in the below given table.\n| Field | Operators |\n| --------- | -------- |\n| `siteId` | `eq` and `in` |\n| `siteName` | `eq` and `in` |\n| `serialNumber` | `eq` and `in` |\n| `deviceName` | `eq` and `in` |\n| `deviceType` | `eq` and `in` |\n| `upgradeStatus` | `eq` and `in` |\n| `firmwareClassification` | `eq` and `in` |\n| `firmwareVersion` | `eq` and `in` |\n\n**The operators are implemented as follows:**\n\n* `eq`: Only values exactly matching the given value are returned.\n\n* `in`: Only values present in the given list are returned.\n\n",
+        "example": "siteId eq '12345' and deviceType in ('ACCESS_POINT', 'GATEWAY')",
+        "schema": {
+          "type": "string",
+          "format": "const",
+          "maxLength": 256
+        }
+      },
+      "SortV1": {
+        "name": "sort",
+        "in": "query",
+        "required": false,
+        "description": "Comma separated list of sort expressions. Each sort expression is a property name optionally followed by a direction indicator asc(ascending) or desc (descending).\nThe first sort expression in the list defines the primary sort order, the second defines the secondary sort order, and so on. If a direction indicator is omitted the default direction is ascending.\nSupported fields are `siteId`, `serialNumber`, `deviceName`, `deviceType`, `upgradeStatus`, `firmwareClassification`, and `firmwareVersion`.\n",
+        "schema": {
+          "$ref": "#/components/schemas/SortV1"
+        }
+      }
+    },
+    "headers": {
+      "XRateLimitLimit": {
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0,
+          "maximum": 9223372036854776000
+        },
+        "description": "Request limit per hour."
+      },
+      "XRateLimitRemaining": {
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0,
+          "maximum": 9223372036854776000
+        },
+        "description": "The number of requests left for the time window."
+      },
+      "XRateLimitReset": {
+        "schema": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 20
+        },
+        "description": "The date-time (RFC 3339 timestamp in UTC+0) at which the current rate limit window resets."
+      }
+    },
+    "securitySchemes": {
+      "OAuth2": {
+        "type": "oauth2",
+        "description": "OAuth 2.0 authentication with client credentials flow. You can also use your own access token.",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://sso.common.cloud.hpe.com/as/token.oauth2",
+            "scopes": {}
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,1026 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Container",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Container"
+    }
+  ],
+  "paths": {
+    "/system/containers": {
+      "get": {
+        "tags": [
+          "Container"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "allow_unsigned_image": {
+                      "type": "boolean",
+                      "description": "Indicate if unsigned images are allowed for the container."
+                    },
+                    "container_mounts": {},
+                    "container_networks": {},
+                    "enable": {
+                      "type": "boolean",
+                      "description": "Indicate if container is enabled or disabled."
+                    },
+                    "encrypted_environment_variables": {
+                      "type": "object",
+                      "description": "Encrypted environment variables to be exposed in container when it is started. Any updates to environment variables will result in the container being restarted.",
+                      "properties": {
+                        "string": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "environment_variables": {
+                      "type": "object",
+                      "description": "Environment variables to be exposed in container when it is started. Any updates to environment variables will result in the container being restarted.",
+                      "properties": {
+                        "string": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "error_message": {
+                      "type": "string",
+                      "description": "Message describing a possible error in the container configuration."
+                    },
+                    "image_download_vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [VRF](#/VRF)<br>VRF on which container image should be downloaded."
+                    },
+                    "image_location": {
+                      "type": "string",
+                      "description": "URL through which the image can be obtained.",
+                      "maxLength": 1024
+                    },
+                    "image_status": {
+                      "type": "string",
+                      "description": "State of the container Image: no_image                        : Image is not available. download_in_progress            : Image is being downloaded. download_failed                 : Image download failed. image_size_exceeded             : Image size exceeds the maximum allowed. downloaded                      : Image downloaded successfully. verified                        : Image verified successfully. verification_failed             : Image verification failed. allowed_without_signature       : Image is unsigned, but unsigned images are allowed. unpack_failed                   : Image unpacking failed. load_failed                     : Image load failed. compatibility_check_failed      : Image compatibility check failed. incompatible_with_host_platform : Image incompatible with host CPU architecture.",
+                      "enum": [
+                        "no_image",
+                        "download_in_progress",
+                        "download_failed",
+                        "downloaded",
+                        "image_size_exceeded",
+                        "verified",
+                        "verification_failed",
+                        "allowed_without_signature",
+                        "unpack_failed",
+                        "load_failed",
+                        "compatibility_check_failed",
+                        "incompatible_with_host_platform"
+                      ]
+                    },
+                    "image_version": {
+                      "type": "string",
+                      "description": "Version of the image."
+                    },
+                    "manifest": {
+                      "type": "string",
+                      "description": "Reference Resource: [Container_Manifest](#/Container_Manifest)<br>Metadata found in the container's manifest file."
+                    },
+                    "manifest_status": {
+                      "type": "string",
+                      "description": "State of the container manifest: missing : Container does not have a manifest file. success : Container has a manifest file and was successfully parsed. error   : Container has a manifest file but there was an error parsing it. pending : Container image has not been mounted, so it is not possible to know if there is a manifest.",
+                      "enum": [
+                        "missing",
+                        "success",
+                        "error",
+                        "pending"
+                      ]
+                    },
+                    "manifest_status_reason": {
+                      "type": "string",
+                      "description": "Message describing details about the manifest status for the container."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Container](#/Container)<br>Name of the container.",
+                      "maxLength": 40,
+                      "minLength": 1
+                    },
+                    "runtime_constraints": {
+                      "type": "object",
+                      "description": "Constraints to be applied on the container to avoid impact on the base operation of the switch.",
+                      "properties": {
+                        "cpu": {
+                          "type": "integer",
+                          "description": "Maximum percent of the CPU capacity to be permitted for the container.",
+                          "maximum": 20,
+                          "minimum": 1
+                        },
+                        "memory": {
+                          "type": "integer",
+                          "description": "Maximum amount of DRAM (in MB) to be permitted for the container.",
+                          "maximum": 1024,
+                          "minimum": 1
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "State of the container: down                          : Container is down. initializing                  : Container is initializing. operational                   : Container is up and running. network_failed                : Network provisioning failed. failed                        : Container failed to execute. configuration_failed          : User-applied configuration failed. container_waiting             : Container is waiting for config pre-requisites. container_acquiring           : Container is acquiring an image. container_deploying           : Container is deploying. container_deployed            : Container is deployed. container_exited              : Container has exited. acquire_failed                : Container failed to acquire image. deploy_failed                 : Container failed to deploy. run_failed                    : Container failed while running.",
+                      "enum": [
+                        "down",
+                        "disabled",
+                        "initializing",
+                        "operational",
+                        "network_failed",
+                        "failed",
+                        "configuration_failed",
+                        "container_waiting",
+                        "container_acquiring",
+                        "container_deploying",
+                        "container_deployed",
+                        "container_exited",
+                        "acquire_failed",
+                        "deploy_failed",
+                        "run_failed"
+                      ]
+                    },
+                    "vrfs": {
+                      "type": "array",
+                      "description": "Reference Resource: [VRF](#/VRF)<br>Deprecated. Please refer to the Container_Network table to define the network configurations used by the container.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "encrypted_environment_variables",
+                  "runtime_constraints",
+                  "image_version",
+                  "error_message",
+                  "manifest",
+                  "enable",
+                  "environment_variables",
+                  "image_download_vrf",
+                  "status",
+                  "image_status",
+                  "manifest_status_reason",
+                  "name",
+                  "vrfs",
+                  "image_location",
+                  "allow_unsigned_image",
+                  "manifest_status",
+                  "container_networks",
+                  "container_mounts"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Container"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "allow_unsigned_image": {
+                    "type": "boolean",
+                    "description": "Indicate if unsigned images are allowed for the container."
+                  },
+                  "container_mounts": {},
+                  "container_networks": {},
+                  "enable": {
+                    "type": "boolean",
+                    "description": "Indicate if container is enabled or disabled."
+                  },
+                  "encrypted_environment_variables": {
+                    "type": "object",
+                    "description": "Encrypted environment variables to be exposed in container when it is started. Any updates to environment variables will result in the container being restarted.",
+                    "properties": {
+                      "string": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "environment_variables": {
+                    "type": "object",
+                    "description": "Environment variables to be exposed in container when it is started. Any updates to environment variables will result in the container being restarted.",
+                    "properties": {
+                      "string": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "image_download_vrf": {
+                    "type": "string",
+                    "description": "Reference Resource: [VRF](#/VRF)<br>VRF on which container image should be downloaded."
+                  },
+                  "image_location": {
+                    "type": "string",
+                    "description": "URL through which the image can be obtained.",
+                    "maxLength": 1024
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [Container](#/Container)<br>Name of the container.",
+                    "maxLength": 40,
+                    "minLength": 1
+                  },
+                  "runtime_constraints": {
+                    "type": "object",
+                    "description": "Constraints to be applied on the container to avoid impact on the base operation of the switch.",
+                    "properties": {
+                      "cpu": {
+                        "type": "integer",
+                        "description": "Maximum percent of the CPU capacity to be permitted for the container.",
+                        "maximum": 20,
+                        "minimum": 1
+                      },
+                      "memory": {
+                        "type": "integer",
+                        "description": "Maximum amount of DRAM (in MB) to be permitted for the container.",
+                        "maximum": 1024,
+                        "minimum": 1
+                      }
+                    }
+                  },
+                  "vrfs": {
+                    "type": "array",
+                    "description": "Reference Resource: [VRF](#/VRF)<br>Deprecated. Please refer to the Container_Network table to define the network configurations used by the container.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 9223372036854776000
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/system/containers/{Container.name}": {
+      "get": {
+        "tags": [
+          "Container"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "allow_unsigned_image": {
+                      "type": "boolean",
+                      "description": "Indicate if unsigned images are allowed for the container."
+                    },
+                    "container_mounts": {},
+                    "container_networks": {},
+                    "enable": {
+                      "type": "boolean",
+                      "description": "Indicate if container is enabled or disabled."
+                    },
+                    "encrypted_environment_variables": {
+                      "type": "object",
+                      "description": "Encrypted environment variables to be exposed in container when it is started. Any updates to environment variables will result in the container being restarted.",
+                      "properties": {
+                        "string": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "environment_variables": {
+                      "type": "object",
+                      "description": "Environment variables to be exposed in container when it is started. Any updates to environment variables will result in the container being restarted.",
+                      "properties": {
+                        "string": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "error_message": {
+                      "type": "string",
+                      "description": "Message describing a possible error in the container configuration."
+                    },
+                    "image_download_vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [VRF](#/VRF)<br>VRF on which container image should be downloaded."
+                    },
+                    "image_location": {
+                      "type": "string",
+                      "description": "URL through which the image can be obtained.",
+                      "maxLength": 1024
+                    },
+                    "image_status": {
+                      "type": "string",
+                      "description": "State of the container Image: no_image                        : Image is not available. download_in_progress            : Image is being downloaded. download_failed                 : Image download failed. image_size_exceeded             : Image size exceeds the maximum allowed. downloaded                      : Image downloaded successfully. verified                        : Image verified successfully. verification_failed             : Image verification failed. allowed_without_signature       : Image is unsigned, but unsigned images are allowed. unpack_failed                   : Image unpacking failed. load_failed                     : Image load failed. compatibility_check_failed      : Image compatibility check failed. incompatible_with_host_platform : Image incompatible with host CPU architecture.",
+                      "enum": [
+                        "no_image",
+                        "download_in_progress",
+                        "download_failed",
+                        "downloaded",
+                        "image_size_exceeded",
+                        "verified",
+                        "verification_failed",
+                        "allowed_without_signature",
+                        "unpack_failed",
+                        "load_failed",
+                        "compatibility_check_failed",
+                        "incompatible_with_host_platform"
+                      ]
+                    },
+                    "image_version": {
+                      "type": "string",
+                      "description": "Version of the image."
+                    },
+                    "manifest": {
+                      "type": "string",
+                      "description": "Reference Resource: [Container_Manifest](#/Container_Manifest)<br>Metadata found in the container's manifest file."
+                    },
+                    "manifest_status": {
+                      "type": "string",
+                      "description": "State of the container manifest: missing : Container does not have a manifest file. success : Container has a manifest file and was successfully parsed. error   : Container has a manifest file but there was an error parsing it. pending : Container image has not been mounted, so it is not possible to know if there is a manifest.",
+                      "enum": [
+                        "missing",
+                        "success",
+                        "error",
+                        "pending"
+                      ]
+                    },
+                    "manifest_status_reason": {
+                      "type": "string",
+                      "description": "Message describing details about the manifest status for the container."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Container](#/Container)<br>Name of the container.",
+                      "maxLength": 40,
+                      "minLength": 1
+                    },
+                    "runtime_constraints": {
+                      "type": "object",
+                      "description": "Constraints to be applied on the container to avoid impact on the base operation of the switch.",
+                      "properties": {
+                        "cpu": {
+                          "type": "integer",
+                          "description": "Maximum percent of the CPU capacity to be permitted for the container.",
+                          "maximum": 20,
+                          "minimum": 1
+                        },
+                        "memory": {
+                          "type": "integer",
+                          "description": "Maximum amount of DRAM (in MB) to be permitted for the container.",
+                          "maximum": 1024,
+                          "minimum": 1
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "State of the container: down                          : Container is down. initializing                  : Container is initializing. operational                   : Container is up and running. network_failed                : Network provisioning failed. failed                        : Container failed to execute. configuration_failed          : User-applied configuration failed. container_waiting             : Container is waiting for config pre-requisites. container_acquiring           : Container is acquiring an image. container_deploying           : Container is deploying. container_deployed            : Container is deployed. container_exited              : Container has exited. acquire_failed                : Container failed to acquire image. deploy_failed                 : Container failed to deploy. run_failed                    : Container failed while running.",
+                      "enum": [
+                        "down",
+                        "disabled",
+                        "initializing",
+                        "operational",
+                        "network_failed",
+                        "failed",
+                        "configuration_failed",
+                        "container_waiting",
+                        "container_acquiring",
+                        "container_deploying",
+                        "container_deployed",
+                        "container_exited",
+                        "acquire_failed",
+                        "deploy_failed",
+                        "run_failed"
+                      ]
+                    },
+                    "vrfs": {
+                      "type": "array",
+                      "description": "Reference Resource: [VRF](#/VRF)<br>Deprecated. Please refer to the Container_Network table to define the network configurations used by the container.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Container.name",
+            "in": "path",
+            "description": "Reference Resource: [Container](#/Container)<br>Name of the container.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "image_version",
+                  "encrypted_environment_variables",
+                  "runtime_constraints",
+                  "image_download_vrf",
+                  "status",
+                  "image_status",
+                  "error_message",
+                  "manifest",
+                  "enable",
+                  "environment_variables",
+                  "image_location",
+                  "allow_unsigned_image",
+                  "manifest_status",
+                  "manifest_status_reason",
+                  "name",
+                  "vrfs",
+                  "container_mounts",
+                  "container_networks"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Container"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "allow_unsigned_image": {
+                    "type": "boolean",
+                    "description": "Indicate if unsigned images are allowed for the container."
+                  },
+                  "container_mounts": {},
+                  "container_networks": {},
+                  "enable": {
+                    "type": "boolean",
+                    "description": "Indicate if container is enabled or disabled."
+                  },
+                  "encrypted_environment_variables": {
+                    "type": "object",
+                    "description": "Encrypted environment variables to be exposed in container when it is started. Any updates to environment variables will result in the container being restarted.",
+                    "properties": {
+                      "string": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "environment_variables": {
+                    "type": "object",
+                    "description": "Environment variables to be exposed in container when it is started. Any updates to environment variables will result in the container being restarted.",
+                    "properties": {
+                      "string": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "image_download_vrf": {
+                    "type": "string",
+                    "description": "Reference Resource: [VRF](#/VRF)<br>VRF on which container image should be downloaded."
+                  },
+                  "image_location": {
+                    "type": "string",
+                    "description": "URL through which the image can be obtained.",
+                    "maxLength": 1024
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [Container](#/Container)<br>Name of the container.",
+                    "maxLength": 40,
+                    "minLength": 1
+                  },
+                  "runtime_constraints": {
+                    "type": "object",
+                    "description": "Constraints to be applied on the container to avoid impact on the base operation of the switch.",
+                    "properties": {
+                      "cpu": {
+                        "type": "integer",
+                        "description": "Maximum percent of the CPU capacity to be permitted for the container.",
+                        "maximum": 20,
+                        "minimum": 1
+                      },
+                      "memory": {
+                        "type": "integer",
+                        "description": "Maximum amount of DRAM (in MB) to be permitted for the container.",
+                        "maximum": 1024,
+                        "minimum": 1
+                      }
+                    }
+                  },
+                  "vrfs": {
+                    "type": "array",
+                    "description": "Reference Resource: [VRF](#/VRF)<br>Deprecated. Please refer to the Container_Network table to define the network configurations used by the container.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 9223372036854776000
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Container.name",
+            "in": "path",
+            "description": "Reference Resource: [Container](#/Container)<br>Name of the container.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Container"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Container.name",
+            "in": "path",
+            "description": "Reference Resource: [Container](#/Container)<br>Name of the container.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Container"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "allow_unsigned_image": {
+                    "type": "boolean",
+                    "description": "Indicate if unsigned images are allowed for the container."
+                  },
+                  "container_mounts": {},
+                  "container_networks": {},
+                  "enable": {
+                    "type": "boolean",
+                    "description": "Indicate if container is enabled or disabled."
+                  },
+                  "encrypted_environment_variables": {
+                    "type": "object",
+                    "description": "Encrypted environment variables to be exposed in container when it is started. Any updates to environment variables will result in the container being restarted.",
+                    "properties": {
+                      "string": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "environment_variables": {
+                    "type": "object",
+                    "description": "Environment variables to be exposed in container when it is started. Any updates to environment variables will result in the container being restarted.",
+                    "properties": {
+                      "string": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "image_download_vrf": {
+                    "type": "string",
+                    "description": "Reference Resource: [VRF](#/VRF)<br>VRF on which container image should be downloaded."
+                  },
+                  "image_location": {
+                    "type": "string",
+                    "description": "URL through which the image can be obtained.",
+                    "maxLength": 1024
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [Container](#/Container)<br>Name of the container.",
+                    "maxLength": 40,
+                    "minLength": 1
+                  },
+                  "runtime_constraints": {
+                    "type": "object",
+                    "description": "Constraints to be applied on the container to avoid impact on the base operation of the switch.",
+                    "properties": {
+                      "cpu": {
+                        "type": "integer",
+                        "description": "Maximum percent of the CPU capacity to be permitted for the container.",
+                        "maximum": 20,
+                        "minimum": 1
+                      },
+                      "memory": {
+                        "type": "integer",
+                        "description": "Maximum amount of DRAM (in MB) to be permitted for the container.",
+                        "maximum": 1024,
+                        "minimum": 1
+                      }
+                    }
+                  },
+                  "vrfs": {
+                    "type": "array",
+                    "description": "Reference Resource: [VRF](#/VRF)<br>Deprecated. Please refer to the Container_Network table to define the network configurations used by the container.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 9223372036854776000
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Container.name",
+            "in": "path",
+            "description": "Reference Resource: [Container](#/Container)<br>Name of the container.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

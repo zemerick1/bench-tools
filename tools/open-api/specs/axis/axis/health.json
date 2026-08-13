@@ -1,0 +1,124 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Health",
+    "version": "1.0"
+  },
+  "host": "admin-api.axissecurity.com",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "servers": [
+    {
+      "url": "https://admin-api.axissecurity.com"
+    }
+  ],
+  "security": [
+    {
+      "OAuthBearerToken": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Health"
+    }
+  ],
+  "paths": {
+    "/api/v1.0/Health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Health Check",
+        "operationId": "Health_Get",
+        "responses": {
+          "200": {
+            "x-nullable": true,
+            "description": "Service health status with dependency checks retrieved successfully",
+            "schema": {
+              "$ref": "#/definitions/HealthResponseModel"
+            }
+          },
+          "503": {
+            "x-nullable": true,
+            "description": "Service or dependencies are unhealthy",
+            "schema": {
+              "$ref": "#/definitions/HealthResponseModel"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ComponentHealth": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "details": {
+          "type": "string"
+        },
+        "errorMessage": {
+          "type": "string"
+        }
+      }
+    },
+    "HealthResponseModel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "timestamp"
+      ],
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/HealthStatus"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "service": {
+          "type": "string"
+        },
+        "components": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/ComponentHealth"
+          }
+        }
+      }
+    },
+    "HealthStatus": {
+      "type": "string",
+      "description": "",
+      "x-enumNames": [
+        "Unhealthy",
+        "Degraded",
+        "Healthy"
+      ],
+      "enum": [
+        "Unhealthy",
+        "Degraded",
+        "Healthy"
+      ]
+    }
+  },
+  "securityDefinitions": {
+    "OAuthBearerToken": {
+      "type": "apiKey",
+      "description": "Copy 'Bearer ' + valid JWT token into field",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+}

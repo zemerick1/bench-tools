@@ -1,0 +1,810 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Orgs Maps",
+    "version": "2602.1.1"
+  },
+  "servers": [
+    {
+      "description": "Mist Global 01",
+      "url": "https://api.mist.com"
+    },
+    {
+      "description": "Mist Global 02",
+      "url": "https://api.gc1.mist.com"
+    },
+    {
+      "description": "Mist Global 03",
+      "url": "https://api.ac2.mist.com"
+    },
+    {
+      "description": "Mist Global 04",
+      "url": "https://api.gc2.mist.com"
+    },
+    {
+      "description": "Mist Global 05",
+      "url": "https://api.gc4.mist.com"
+    },
+    {
+      "description": "Mist EMEA 01",
+      "url": "https://api.eu.mist.com"
+    },
+    {
+      "description": "Mist EMEA 02",
+      "url": "https://api.gc3.mist.com"
+    },
+    {
+      "description": "Mist EMEA 03",
+      "url": "https://api.ac6.mist.com"
+    },
+    {
+      "description": "Mist EMEA 04",
+      "url": "https://api.gc6.mist.com"
+    },
+    {
+      "description": "Mist APAC 01",
+      "url": "https://api.ac5.mist.com"
+    },
+    {
+      "description": "Mist APAC 02",
+      "url": "https://api.gc5.mist.com"
+    },
+    {
+      "description": "Mist APAC 03",
+      "url": "https://api.gc7.mist.com"
+    }
+  ],
+  "security": [
+    {
+      "apiToken": []
+    },
+    {
+      "basicAuth": []
+    },
+    {
+      "basicAuth": [],
+      "csrfToken": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "These API Calls to import Site Maps at the Org level",
+      "name": "Orgs Maps"
+    }
+  ],
+  "paths": {
+    "/api/v1/orgs/{org_id}/maps/import": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "post": {
+        "description": "Import data from files is a multipart POST which has a file, an optional json, and an optional csv, to create floorplan, assign matching inventory to specific site, place ap if name or mac matches\n\n### CSV File Format\n```csv\nVendor AP name,Mist AP Mac\nUS Office AP-2 - 5c:5b:35:00:00:02,5c5b35000002\n```",
+        "operationId": "importOrgMaps",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/map_org_import_file"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MapImport"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "importOrgMaps",
+        "tags": [
+          "Orgs Maps"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_id}/sites/{site_name}/maps/import": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        },
+        {
+          "$ref": "#/components/parameters/site_name"
+        }
+      ],
+      "post": {
+        "description": "Import data from files is a multipart POST which has a file, an optional json, and an optional csv, to create floorplan, assign matching inventory to specific site, place ap if name or mac matches\n\n#### Request\n\n```\n\"json\": a JSON string describing your upload\n\"file\": a binary file\n```",
+        "operationId": "importOrgMapToSite",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/map_site_import_file"
+              }
+            }
+          },
+          "description": "a JSON string, site id required, vendor option: ekahau, ibwave, etc., import_all_floorplans: optional, default: false, import_height: optional, default: true, import_orientation: optional, default: true\n\"file\": a binary file, option: .esx\n\"csv\": a csv file for ap name mapping, optional"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MapImport"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "importOrgMapToSite",
+        "tags": [
+          "Orgs Maps"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "id": {
+        "description": "Unique ID of the object instance in the Mist Organization",
+        "examples": [
+          "53f10664-3ce8-4c27-b382-0ef66432349f"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "map_import_json": {
+        "additionalProperties": false,
+        "properties": {
+          "import_all_floorplans": {
+            "default": false,
+            "type": "boolean"
+          },
+          "import_height": {
+            "default": true,
+            "type": "boolean"
+          },
+          "import_orientation": {
+            "default": true,
+            "type": "boolean"
+          },
+          "vendor_name": {
+            "$ref": "#/components/schemas/map_import_json_vendor_name"
+          }
+        },
+        "required": [
+          "vendor_name"
+        ],
+        "type": "object"
+      },
+      "map_import_json_vendor_name": {
+        "description": "enum: `ekahau`, `ibwave`",
+        "enum": [
+          "ekahau",
+          "ibwave"
+        ],
+        "examples": [
+          "ekahau"
+        ],
+        "type": "string"
+      },
+      "map_org_import_file": {
+        "additionalProperties": false,
+        "properties": {
+          "auto_deviceprofile_assignment": {
+            "description": "Whether to auto assign device to deviceprofile by name",
+            "examples": [
+              true
+            ],
+            "type": "boolean"
+          },
+          "csv": {
+            "contentMediaType": "application/octet-stream",
+            "description": "CSV file for ap name mapping, optional",
+            "type": "string"
+          },
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "description": "Ekahau or ibwave file",
+            "type": "string"
+          },
+          "json": {
+            "$ref": "#/components/schemas/map_org_import_file_json"
+          }
+        },
+        "type": "object"
+      },
+      "map_org_import_file_json": {
+        "additionalProperties": false,
+        "properties": {
+          "import_all_floorplans": {
+            "default": false,
+            "type": "boolean"
+          },
+          "import_height": {
+            "default": true,
+            "type": "boolean"
+          },
+          "import_orientation": {
+            "default": true,
+            "type": "boolean"
+          },
+          "site_id": {
+            "$ref": "#/components/schemas/site_id"
+          },
+          "vendor_name": {
+            "$ref": "#/components/schemas/map_org_import_file_json_vendor_name"
+          }
+        },
+        "required": [
+          "vendor_name"
+        ],
+        "type": "object"
+      },
+      "map_org_import_file_json_vendor_name": {
+        "description": "enum: `ekahau`, `ibwave`",
+        "enum": [
+          "ekahau",
+          "ibwave"
+        ],
+        "examples": [
+          "ekahau"
+        ],
+        "type": "string"
+      },
+      "map_site_import_file": {
+        "additionalProperties": false,
+        "properties": {
+          "auto_deviceprofile_assignment": {
+            "description": "Whether to auto assign device to deviceprofile by name",
+            "examples": [
+              true
+            ],
+            "type": "boolean"
+          },
+          "csv": {
+            "contentMediaType": "application/octet-stream",
+            "description": "CSV file for ap name mapping, optional",
+            "type": "string"
+          },
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "description": "Ekahau or ibwave file",
+            "type": "string"
+          },
+          "json": {
+            "$ref": "#/components/schemas/map_import_json"
+          }
+        },
+        "type": "object"
+      },
+      "response_http400": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http401": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Authentication credentials were not provided."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http403": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "You do not have permission to perform this action."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http404": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http429": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_map_import": {
+        "additionalProperties": false,
+        "properties": {
+          "aps": {
+            "$ref": "#/components/schemas/response_map_import_aps"
+          },
+          "floorplans": {
+            "$ref": "#/components/schemas/response_map_import_floorplans"
+          },
+          "for_site": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "site_id": {
+            "$ref": "#/components/schemas/site_id"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/response_map_import_summary"
+          }
+        },
+        "required": [
+          "site_id",
+          "aps",
+          "floorplans",
+          "summary"
+        ],
+        "type": "object"
+      },
+      "response_map_import_ap": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/response_map_import_ap_action"
+          },
+          "floorplan_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "height": {
+            "format": "double",
+            "type": "number"
+          },
+          "mac": {
+            "type": "string"
+          },
+          "map_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "orientation": {
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "mac",
+          "action",
+          "map_id",
+          "floorplan_id",
+          "orientation"
+        ],
+        "type": "object"
+      },
+      "response_map_import_ap_action": {
+        "description": "enum: `assigned-named-placed`, `assigned-placed`, `ignored`, `named-placed`, `placed`",
+        "enum": [
+          "assigned-named-placed",
+          "assigned-placed",
+          "ignored",
+          "named-placed",
+          "placed"
+        ],
+        "type": "string"
+      },
+      "response_map_import_aps": {
+        "items": {
+          "$ref": "#/components/schemas/response_map_import_ap"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "response_map_import_floorplan": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/components/schemas/id"
+          },
+          "map_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "action",
+          "map_id"
+        ],
+        "type": "object"
+      },
+      "response_map_import_floorplans": {
+        "items": {
+          "$ref": "#/components/schemas/response_map_import_floorplan"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "response_map_import_summary": {
+        "additionalProperties": false,
+        "properties": {
+          "num_ap_assigned": {
+            "type": "integer"
+          },
+          "num_inv_assigned": {
+            "type": "integer"
+          },
+          "num_map_assigned": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "num_ap_assigned",
+          "num_map_assigned",
+          "num_inv_assigned"
+        ],
+        "type": "object"
+      },
+      "site_id": {
+        "examples": [
+          "441a1214-6928-442a-8e92-e1d34b8ec6a6"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      }
+    },
+    "responses": {
+      "HTTP400": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          }
+        },
+        "description": "Bad Syntax"
+      },
+      "HTTP401": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          }
+        },
+        "description": "Unauthorized"
+      },
+      "HTTP403": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          }
+        },
+        "description": "Permission Denied"
+      },
+      "HTTP404": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          }
+        },
+        "description": "Not found. The API endpoint doesn’t exist or resource doesn’ t exist"
+      },
+      "HTTP429": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          }
+        },
+        "description": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+      },
+      "MapImport": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Assigned And Placed": {
+                "$ref": "#/components/examples/MapImportAssignedAndPlaced"
+              },
+              "Assigned Named And Placed": {
+                "$ref": "#/components/examples/MapImportAssignedNamedAndPlaced"
+              },
+              "Placed": {
+                "$ref": "#/components/examples/MapImportPlaced"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_map_import"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Assigned And Placed": {
+                "$ref": "#/components/examples/MapImportAssignedAndPlaced"
+              },
+              "Assigned Named And Placed": {
+                "$ref": "#/components/examples/MapImportAssignedNamedAndPlaced"
+              },
+              "Placed": {
+                "$ref": "#/components/examples/MapImportPlaced"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_map_import"
+            }
+          }
+        },
+        "description": "OK"
+      }
+    },
+    "parameters": {
+      "org_id": {
+        "in": "path",
+        "name": "org_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "site_name": {
+        "in": "path",
+        "name": "site_name",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "examples": {
+      "HTTP400Example": {
+        "value": {
+          "detail": "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+        }
+      },
+      "HTTP401Example": {
+        "value": {
+          "detail": "Authentication credentials were not provided."
+        }
+      },
+      "HTTP403Example": {
+        "value": {
+          "detail": "You do not have permission to perform this action."
+        }
+      },
+      "HTTP429Example": {
+        "value": {
+          "detail": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+        }
+      },
+      "MapImportAssignedAndPlaced": {
+        "value": {
+          "aps": [
+            {
+              "action": "assigned-placed",
+              "floorplan_id": "6f4bf402-45f9-2a56-6c8b-7f83d3bc98e9",
+              "height": 3,
+              "mac": "5c5b35000001",
+              "map_id": "845a23bf-bed9-e43c-4c86-6fa474be7ae5",
+              "orientation": 45
+            }
+          ],
+          "floorplans": [
+            {
+              "action": "imported",
+              "id": "cbdb7f0b-3be0-4872-88f9-58790b509c23",
+              "map_id": "845a23bf-bed9-e43c-4c86-6fa474be7ae5",
+              "name": "map1"
+            }
+          ],
+          "site_id": "4ac1dcf4-9d8b-7211-65c4-057819f0862b",
+          "summary": {
+            "num_ap_assigned": 1,
+            "num_inv_assigned": 1,
+            "num_map_assigned": 1
+          }
+        }
+      },
+      "MapImportAssignedNamedAndPlaced": {
+        "value": {
+          "aps": [
+            {
+              "action": "assigned-named-placed",
+              "floorplan_id": "6f4bf402-45f9-2a56-6c8b-7f83d3bc98e9",
+              "mac": "5c5b35000001",
+              "map_id": "845a23bf-bed9-e43c-4c86-6fa474be7ae5",
+              "orientation": 45
+            }
+          ],
+          "floorplans": [
+            {
+              "action": "imported",
+              "id": "cbdb7f0b-3be0-4872-88f9-58790b509c23",
+              "map_id": "845a23bf-bed9-e43c-4c86-6fa474be7ae5",
+              "name": "map1"
+            }
+          ],
+          "site_id": "4ac1dcf4-9d8b-7211-65c4-057819f0862b",
+          "summary": {
+            "num_ap_assigned": 1,
+            "num_inv_assigned": 1,
+            "num_map_assigned": 1
+          }
+        }
+      },
+      "MapImportPlaced": {
+        "value": {
+          "aps": [
+            {
+              "action": "placed",
+              "floorplan_id": "b069b358-4c97-5319-1f8c-7c5ca64d6ab1",
+              "height": 3,
+              "mac": "5c5b35000001",
+              "map_id": "845a23bf-bed9-e43c-4c86-6fa474be7ae5",
+              "orientation": 45
+            }
+          ],
+          "floorplans": [
+            {
+              "action": "imported",
+              "id": "b069b358-4c97-5319-1f8c-7c5ca64d6ab1",
+              "map_id": "845a23bf-bed9-e43c-4c86-6fa474be7ae5",
+              "name": "map1"
+            }
+          ],
+          "site_id": "4ac1dcf4-9d8b-7211-65c4-057819f0862b",
+          "summary": {
+            "num_ap_assigned": 1,
+            "num_inv_assigned": 1,
+            "num_map_assigned": 1
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "apiToken": {
+        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      },
+      "basicAuth": {
+        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
+        "scheme": "basic",
+        "type": "http"
+      },
+      "csrfToken": {
+        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "in": "header",
+        "name": "X-CSRFToken",
+        "type": "apiKey"
+      }
+    }
+  }
+}

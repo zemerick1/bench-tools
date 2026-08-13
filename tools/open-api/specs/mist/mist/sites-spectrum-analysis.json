@@ -1,0 +1,834 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Sites Spectrum Analysis",
+    "version": "2602.1.1"
+  },
+  "servers": [
+    {
+      "description": "Mist Global 01",
+      "url": "https://api.mist.com"
+    },
+    {
+      "description": "Mist Global 02",
+      "url": "https://api.gc1.mist.com"
+    },
+    {
+      "description": "Mist Global 03",
+      "url": "https://api.ac2.mist.com"
+    },
+    {
+      "description": "Mist Global 04",
+      "url": "https://api.gc2.mist.com"
+    },
+    {
+      "description": "Mist Global 05",
+      "url": "https://api.gc4.mist.com"
+    },
+    {
+      "description": "Mist EMEA 01",
+      "url": "https://api.eu.mist.com"
+    },
+    {
+      "description": "Mist EMEA 02",
+      "url": "https://api.gc3.mist.com"
+    },
+    {
+      "description": "Mist EMEA 03",
+      "url": "https://api.ac6.mist.com"
+    },
+    {
+      "description": "Mist EMEA 04",
+      "url": "https://api.gc6.mist.com"
+    },
+    {
+      "description": "Mist APAC 01",
+      "url": "https://api.ac5.mist.com"
+    },
+    {
+      "description": "Mist APAC 02",
+      "url": "https://api.gc5.mist.com"
+    },
+    {
+      "description": "Mist APAC 03",
+      "url": "https://api.gc7.mist.com"
+    }
+  ],
+  "security": [
+    {
+      "apiToken": []
+    },
+    {
+      "basicAuth": []
+    },
+    {
+      "basicAuth": [],
+      "csrfToken": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "The Spectrum Analysis feature provides insights into the radio frequency environment, helping to identify interference and optimize wireless network performance. It allows users to monitor and analyze the spectrum usage in their vicinity.",
+      "name": "Sites Spectrum Analysis"
+    }
+  ],
+  "paths": {
+    "/api/v1/sites/{site_id}/analyze_spectrum": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        }
+      ],
+      "get": {
+        "description": "Get the running spectrum analysis for a site",
+        "operationId": "getSiteRunningSpectrumAnalysis",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/RunningSpectrumAnalysis"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getSiteRunningSpectrumAnalysis",
+        "tags": [
+          "Sites Spectrum Analysis"
+        ]
+      },
+      "post": {
+        "description": "Initiate a spectrum analysis for a site\n\n\nThe output will be available through websocket. As there can be multiple command\nissued against the same device at the same time and the output all goes through\nthe same websocket stream, session is introduced for demux.\n\n\n\n#### Subscribe to Device Command outputs\n\n`WS /api-ws/v1/stream`\n\n\n```json { \"subscribe\": \"/sites/{site_id}/analyze_spectrum\" } ```\n\n#### Example output from ws stream\n\n```json\n{\n  \"event\": \"data\",\n  \"channel\": \"/sites/4ac1dcf4-9d8b-7211-65c4-057819f0862b/analyze_spectrum\",\n  \"data\": {\n      \"session\": \"session_id\",\n\n      \"fft_samples\": [\n          {\n              \"frequency\": 2437.0,\n              \"rssi / signal ?\": -93\n          },\n          ...\n      ],\n\n      \"channel_usage\": [\n          {\n              \"channel\": 36,\n              \"noise\": -78,\n\n              \"wifi\": 0.13,\n              \"non_wifi\": 0.08\n          },\n          ...\n      ]\n  }\n}     \n```\n",
+        "operationId": "initiateSiteAnalyzeSpectrum",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "band": "5",
+                    "device_id": "00000000-0000-0000-1000-5c5b35bd76bb",
+                    "duration": 600,
+                    "format": "stream"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/spectrum_analysis"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/WebsocketSession"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "initiateSiteAnalyzeSpectrum",
+        "tags": [
+          "Sites Spectrum Analysis"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/stats/analyze_spectrum": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        }
+      ],
+      "get": {
+        "description": "List the past spectrum analysis for a site",
+        "operationId": "listSiteSpectrumAnalysis",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/start"
+          },
+          {
+            "$ref": "#/components/parameters/end"
+          },
+          {
+            "$ref": "#/components/parameters/duration"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PastSpectrumAnalysis"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "listSiteSpectrumAnalysis",
+        "tags": [
+          "Sites Spectrum Analysis"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "org_id": {
+        "examples": [
+          "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "response_http400": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http401": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Authentication credentials were not provided."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http403": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "You do not have permission to perform this action."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http404": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http429": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_past_spectrum_analysis": {
+        "additionalProperties": false,
+        "properties": {
+          "end": {
+            "description": "End time of the spectrum analysis in epoch seconds",
+            "type": "integer"
+          },
+          "limit": {
+            "description": "Limit of the number of results returned",
+            "type": "integer"
+          },
+          "page": {
+            "description": "Page number of the results returned",
+            "type": "integer"
+          },
+          "results": {
+            "$ref": "#/components/schemas/response_past_spectrum_analysis_results"
+          },
+          "start": {
+            "description": "Start time of the spectrum analysis in epoch seconds",
+            "type": "integer"
+          },
+          "total": {
+            "description": "Total number of results available for the given time range",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "response_past_spectrum_analysis_channel_usage": {
+        "additionalProperties": false,
+        "description": "Channel usage data for a specific channel",
+        "properties": {
+          "channel": {
+            "description": "Channel number",
+            "examples": [
+              36
+            ],
+            "type": "integer"
+          },
+          "noise": {
+            "description": "Noise level in dBm",
+            "examples": [
+              -90.0
+            ],
+            "type": "number"
+          },
+          "non_wifi": {
+            "description": "Percentage of channel usage by non-WiFi signals in the range [0, 1]",
+            "examples": [
+              0.87
+            ],
+            "type": "number"
+          },
+          "wifi": {
+            "description": "Percentage of channel usage by WiFi in the range [0, 1]",
+            "examples": [
+              0.13
+            ],
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "response_past_spectrum_analysis_channel_usages": {
+        "items": {
+          "$ref": "#/components/schemas/response_past_spectrum_analysis_channel_usage"
+        },
+        "type": "array"
+      },
+      "response_past_spectrum_analysis_fft_sample": {
+        "additionalProperties": false,
+        "description": "FFT sample data for a specific frequency",
+        "properties": {
+          "frequency": {
+            "description": "Frequency in MHz",
+            "examples": [
+              2437.0
+            ],
+            "type": "number"
+          },
+          "rssi": {
+            "description": "RSSI in dBm",
+            "examples": [
+              -70.0
+            ],
+            "type": "number"
+          },
+          "signal7": {
+            "description": "RSSI in dBm",
+            "examples": [
+              -70.0
+            ],
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "response_past_spectrum_analysis_fft_samples": {
+        "description": "List of FFT samples for the spectrum analysis",
+        "items": {
+          "$ref": "#/components/schemas/response_past_spectrum_analysis_fft_sample"
+        },
+        "type": "array"
+      },
+      "response_past_spectrum_analysis_result": {
+        "additionalProperties": false,
+        "description": "Result of a past spectrum analysis",
+        "properties": {
+          "band": {
+            "description": "Band on which the spectrum analysis was run (e.g., 24, 5, 6)",
+            "type": "string"
+          },
+          "channel_usage": {
+            "$ref": "#/components/schemas/response_past_spectrum_analysis_channel_usages"
+          },
+          "fft_samples": {
+            "$ref": "#/components/schemas/response_past_spectrum_analysis_fft_samples"
+          },
+          "mac": {
+            "description": "MAC Address of the AP that ran the spectrum analysis",
+            "type": "string"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/org_id"
+          },
+          "timestamp": {
+            "description": "Timestamp when the spectrum analysis was run in epoch seconds",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "response_past_spectrum_analysis_results": {
+        "items": {
+          "$ref": "#/components/schemas/response_past_spectrum_analysis_result"
+        },
+        "type": "array"
+      },
+      "response_running_spectrum_analysis": {
+        "additionalProperties": false,
+        "properties": {
+          "band": {
+            "description": "Band on which the spectrum analysis is running (e.g., 24, 5, 6)",
+            "type": "string"
+          },
+          "device_id": {
+            "description": "Device ID of the AP that is running spectrum analysis",
+            "format": "uuid",
+            "type": "string"
+          },
+          "duration": {
+            "description": "Duration of the spectrum analysis in seconds",
+            "type": "integer"
+          },
+          "format": {
+            "description": "Format of the spectrum analysis data (e.g., json, stream)",
+            "type": "string"
+          },
+          "started_time": {
+            "description": "Time when the spectrum analysis was started",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "spectrum_analysis": {
+        "properties": {
+          "band": {
+            "$ref": "#/components/schemas/spectrum_analysis_band"
+          },
+          "channels": {
+            "description": "Optional list of channels to scan. If not specified, all supported channels will be scanned",
+            "examples": [
+              [
+                "36",
+                "40",
+                "44",
+                "48"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "device_id": {
+            "description": "Device ID of the AP that is performing spectrum analysis",
+            "format": "uuid",
+            "type": "string"
+          },
+          "duration": {
+            "default": 300,
+            "description": "Duration of the spectrum analysis in seconds",
+            "maximum": 600,
+            "minimum": 60,
+            "type": "integer"
+          },
+          "format": {
+            "$ref": "#/components/schemas/spectrum_analysis_format"
+          }
+        },
+        "required": [
+          "band"
+        ],
+        "type": "object"
+      },
+      "spectrum_analysis_band": {
+        "description": "Band for spectrum analysis. enum: `24`, `5`, `6`",
+        "enum": [
+          "24",
+          "5",
+          "6"
+        ],
+        "type": "string"
+      },
+      "spectrum_analysis_format": {
+        "default": "json",
+        "description": "Format of the spectrum analysis data. enum: `json`, `stream`",
+        "enum": [
+          "json",
+          "stream"
+        ],
+        "type": "string"
+      },
+      "websocket_session": {
+        "additionalProperties": false,
+        "properties": {
+          "session": {
+            "examples": [
+              "19e73828-937f-05e6-f709-e29efdb0a82b"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "session"
+        ],
+        "type": "object"
+      }
+    },
+    "responses": {
+      "HTTP400": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          }
+        },
+        "description": "Bad Syntax"
+      },
+      "HTTP401": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          }
+        },
+        "description": "Unauthorized"
+      },
+      "HTTP403": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          }
+        },
+        "description": "Permission Denied"
+      },
+      "HTTP404": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          }
+        },
+        "description": "Not found. The API endpoint doesn’t exist or resource doesn’ t exist"
+      },
+      "HTTP429": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          }
+        },
+        "description": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+      },
+      "PastSpectrumAnalysis": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/PastSpectrumAnalysis"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_past_spectrum_analysis"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/PastSpectrumAnalysis"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_past_spectrum_analysis"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "RunningSpectrumAnalysis": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/RunningSpectrumAnalysis"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_running_spectrum_analysis"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/RunningSpectrumAnalysis"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_running_spectrum_analysis"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "WebsocketSession": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/websocket_session"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/websocket_session"
+            }
+          }
+        },
+        "description": "OK"
+      }
+    },
+    "parameters": {
+      "duration": {
+        "description": "Duration like 7d, 2w",
+        "in": "query",
+        "name": "duration",
+        "required": false,
+        "schema": {
+          "default": "1d",
+          "examples": [
+            "10m"
+          ],
+          "type": "string"
+        }
+      },
+      "end": {
+        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "in": "query",
+        "name": "end",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "limit": {
+        "in": "query",
+        "name": "limit",
+        "required": false,
+        "schema": {
+          "default": 100,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "site_id": {
+        "in": "path",
+        "name": "site_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "start": {
+        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "in": "query",
+        "name": "start",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "examples": {
+      "HTTP400Example": {
+        "value": {
+          "detail": "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+        }
+      },
+      "HTTP401Example": {
+        "value": {
+          "detail": "Authentication credentials were not provided."
+        }
+      },
+      "HTTP403Example": {
+        "value": {
+          "detail": "You do not have permission to perform this action."
+        }
+      },
+      "HTTP429Example": {
+        "value": {
+          "detail": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+        }
+      },
+      "PastSpectrumAnalysis": {
+        "value": {
+          "end": 1694708579,
+          "limit": 10,
+          "results": [
+            {
+              "band": "5",
+              "channel_usage": [
+                {
+                  "channel": 36,
+                  "noise": -78,
+                  "non_wifi": 0.08,
+                  "wifi": 0.13
+                }
+              ],
+              "fft_samples": [
+                {
+                  "frequency": 2437,
+                  "rssi": -92,
+                  "signal7": -93
+                }
+              ],
+              "mac": "5c5b35bd76bb",
+              "org_id": "f2695c32-0e83-4936-b1b2-96fc88051213",
+              "timestamp": 1694098696
+            }
+          ],
+          "start": 1694622179,
+          "total": 4
+        }
+      },
+      "RunningSpectrumAnalysis": {
+        "value": {
+          "band": "5",
+          "device_id": "00000000-0000-0000-1000-5c5b35bd76bb",
+          "duration": 600,
+          "format": "stream",
+          "started_time": 1435080709
+        }
+      }
+    },
+    "securitySchemes": {
+      "apiToken": {
+        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      },
+      "basicAuth": {
+        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
+        "scheme": "basic",
+        "type": "http"
+      },
+      "csrfToken": {
+        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "in": "header",
+        "name": "X-CSRFToken",
+        "type": "apiKey"
+      }
+    }
+  }
+}

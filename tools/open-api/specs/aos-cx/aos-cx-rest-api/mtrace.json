@@ -1,0 +1,649 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "MTrace",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "MTrace"
+    }
+  ],
+  "paths": {
+    "/system/mtraces": {
+      "get": {
+        "tags": [
+          "MTrace"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "extended_trace": {
+                      "type": "boolean",
+                      "description": "Indicates that this is an extended trace. An extended trace will include path latency for the given flow."
+                    },
+                    "group_address": {
+                      "type": "string",
+                      "description": "Reference Resource: [MTrace](#/MTrace)<br>IP multicast group address of the stream whose path is to be traced.",
+                      "maxLength": 45
+                    },
+                    "last_hop_router_address": {
+                      "type": "string",
+                      "description": "IP address of the gateway router to which the hosts are connected.",
+                      "maxLength": 45
+                    },
+                    "source_address": {
+                      "type": "string",
+                      "description": "Reference Resource: [MTrace](#/MTrace)<br>Source address of the IP multicast stream whose path is to be traced.",
+                      "maxLength": 45
+                    },
+                    "source_port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>Source interface to be used to initiate mtrace."
+                    },
+                    "time_to_live": {
+                      "type": "integer",
+                      "description": "TTL value to be used when generating the Multicast trace packet.",
+                      "maximum": 255,
+                      "minimum": 0
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Reference Resource: [MTrace](#/MTrace)<br>Time since epoch when this mtrace request was instantiated."
+                    },
+                    "traced_path": {
+                      "type": "object",
+                      "description": "Traced path corresponding to this Multicast traffic stream. This is  ordered from the farthest to the nearest hop relative to the last_hop  router.",
+                      "properties": {
+                        "integer": {
+                          "type": "object",
+                          "properties": {
+                            "error_status": {
+                              "type": "string"
+                            },
+                            "multicast_protocol": {
+                              "type": "string"
+                            },
+                            "path_latency": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "router_ip": {
+                              "type": "string"
+                            },
+                            "rx_timestamp": {
+                              "type": "integer",
+                              "format": "int64"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [MTrace](#/MTrace)<br>Specifies the VRF corresponding to the stream whose path is  to be traced."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "source_address",
+                  "source_port",
+                  "vrf",
+                  "group_address",
+                  "timestamp",
+                  "last_hop_router_address",
+                  "time_to_live",
+                  "extended_trace",
+                  "traced_path"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/mtraces/{MTrace.source_address},{MTrace.group_address},{MTrace.vrf},{MTrace.timestamp}": {
+      "get": {
+        "tags": [
+          "MTrace"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "extended_trace": {
+                      "type": "boolean",
+                      "description": "Indicates that this is an extended trace. An extended trace will include path latency for the given flow."
+                    },
+                    "group_address": {
+                      "type": "string",
+                      "description": "Reference Resource: [MTrace](#/MTrace)<br>IP multicast group address of the stream whose path is to be traced.",
+                      "maxLength": 45
+                    },
+                    "last_hop_router_address": {
+                      "type": "string",
+                      "description": "IP address of the gateway router to which the hosts are connected.",
+                      "maxLength": 45
+                    },
+                    "source_address": {
+                      "type": "string",
+                      "description": "Reference Resource: [MTrace](#/MTrace)<br>Source address of the IP multicast stream whose path is to be traced.",
+                      "maxLength": 45
+                    },
+                    "source_port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>Source interface to be used to initiate mtrace."
+                    },
+                    "time_to_live": {
+                      "type": "integer",
+                      "description": "TTL value to be used when generating the Multicast trace packet.",
+                      "maximum": 255,
+                      "minimum": 0
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Reference Resource: [MTrace](#/MTrace)<br>Time since epoch when this mtrace request was instantiated."
+                    },
+                    "traced_path": {
+                      "type": "object",
+                      "description": "Traced path corresponding to this Multicast traffic stream. This is  ordered from the farthest to the nearest hop relative to the last_hop  router.",
+                      "properties": {
+                        "integer": {
+                          "type": "object",
+                          "properties": {
+                            "error_status": {
+                              "type": "string"
+                            },
+                            "multicast_protocol": {
+                              "type": "string"
+                            },
+                            "path_latency": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "router_ip": {
+                              "type": "string"
+                            },
+                            "rx_timestamp": {
+                              "type": "integer",
+                              "format": "int64"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [MTrace](#/MTrace)<br>Specifies the VRF corresponding to the stream whose path is  to be traced."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "MTrace.source_address",
+            "in": "path",
+            "description": "Reference Resource: [MTrace](#/MTrace)<br>Source address of the IP multicast stream whose path is to be traced.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "MTrace.group_address",
+            "in": "path",
+            "description": "Reference Resource: [MTrace](#/MTrace)<br>IP multicast group address of the stream whose path is to be traced.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "MTrace.vrf",
+            "in": "path",
+            "description": "Reference Resource: [MTrace](#/MTrace)<br>Specifies the VRF corresponding to the stream whose path is  to be traced.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "MTrace.timestamp",
+            "in": "path",
+            "description": "Reference Resource: [MTrace](#/MTrace)<br>Time since epoch when this mtrace request was instantiated.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "source_address",
+                  "source_port",
+                  "vrf",
+                  "extended_trace",
+                  "traced_path",
+                  "group_address",
+                  "timestamp",
+                  "last_hop_router_address",
+                  "time_to_live"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "MTrace"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "source_port": {
+                    "type": "string",
+                    "description": "Reference Resource: [Port](#/Port)<br>Source interface to be used to initiate mtrace."
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "MTrace.source_address",
+            "in": "path",
+            "description": "Reference Resource: [MTrace](#/MTrace)<br>Source address of the IP multicast stream whose path is to be traced.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "MTrace.group_address",
+            "in": "path",
+            "description": "Reference Resource: [MTrace](#/MTrace)<br>IP multicast group address of the stream whose path is to be traced.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "MTrace.vrf",
+            "in": "path",
+            "description": "Reference Resource: [MTrace](#/MTrace)<br>Specifies the VRF corresponding to the stream whose path is  to be traced.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "MTrace.timestamp",
+            "in": "path",
+            "description": "Reference Resource: [MTrace](#/MTrace)<br>Time since epoch when this mtrace request was instantiated.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "MTrace"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "source_port": {
+                    "type": "string",
+                    "description": "Reference Resource: [Port](#/Port)<br>Source interface to be used to initiate mtrace."
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "MTrace.source_address",
+            "in": "path",
+            "description": "Reference Resource: [MTrace](#/MTrace)<br>Source address of the IP multicast stream whose path is to be traced.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "MTrace.group_address",
+            "in": "path",
+            "description": "Reference Resource: [MTrace](#/MTrace)<br>IP multicast group address of the stream whose path is to be traced.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "MTrace.vrf",
+            "in": "path",
+            "description": "Reference Resource: [MTrace](#/MTrace)<br>Specifies the VRF corresponding to the stream whose path is  to be traced.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "MTrace.timestamp",
+            "in": "path",
+            "description": "Reference Resource: [MTrace](#/MTrace)<br>Time since epoch when this mtrace request was instantiated.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

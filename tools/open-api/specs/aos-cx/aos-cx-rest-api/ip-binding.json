@@ -1,0 +1,537 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "IP_Binding",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "IP_Binding"
+    }
+  ],
+  "paths": {
+    "/system/ip_bindings": {
+      "get": {
+        "tags": [
+          "IP_Binding"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "address_family": {
+                      "type": "string",
+                      "description": "Address family of the ip binding entry.",
+                      "enum": [
+                        "ipv4",
+                        "ipv6"
+                      ]
+                    },
+                    "clear_requested": {
+                      "type": "boolean",
+                      "description": "Set to `true` to delete the IP Binding entry."
+                    },
+                    "dhcp_attributes": {
+                      "type": "object",
+                      "description": "The option values sent to client from DHCP-Server.  Outer key: The `dhcp_option_type` is the type of the DHCP option            sent to the client by DHCP-Server.             Example: Option : 6 - domain name servers                     Option : 3 - default router                     Option : 54 - DHCP server ID  Inner key: The `dhcp_option_value` stores the one or more values            associated with the DHCP option type. Values are stored            in ASCII format.             Example: Option : 6 - 192.168.1.8,192.168.5.3                     Option : 3 - 192.168.1.1                     Option : 54 - 192.168.1.100",
+                      "properties": {
+                        "integer": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "maxItems": 9223372036854776000
+                        }
+                      }
+                    },
+                    "dhcp_complete_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time (in microseconds) since Epoch at which client completed DHCP handshake.",
+                      "minimum": 0
+                    },
+                    "dhcp_start_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time (in microseconds) since Epoch at which client intiated DHCP handshake.",
+                      "minimum": 0
+                    },
+                    "from": {
+                      "type": "string",
+                      "description": "Source of the binding entry: 'dhcp': binding entry learned through DHCP snooping. 'static': binding is configured statically. 'nd': binding entry learned through ND snooping.",
+                      "enum": [
+                        "dhcp",
+                        "static",
+                        "nd"
+                      ]
+                    },
+                    "ia_id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Interface identifier of the client. Set only for IPv6 binding entries.",
+                      "maximum": 4294967295,
+                      "minimum": 1
+                    },
+                    "ip_address": {
+                      "type": "string",
+                      "description": "Reference Resource: [IP_Binding](#/IP_Binding)<br>An IP address that has been leased to or statically configured for this client.",
+                      "maxLength": 45
+                    },
+                    "ip_binding_state": {
+                      "type": "string",
+                      "description": "State of the IP binding entry: 'valid':     IP binding entry is in 'valid' state.This is              applicable for both DHCP snooping and ND snooping              entries. 'tentative': IP binding entry is in 'tentative' state and DAD is               in progress. This is applicable for ND snooping               entries only. 'testing':   IP binding entry is in 'testing' state,An entry              is in this state when the client is changing its              its association from one port to another.              This is applicable for ND snooping entries only.",
+                      "enum": [
+                        "valid",
+                        "tentative",
+                        "testing"
+                      ]
+                    },
+                    "ip_source_lockdown_enabled": {
+                      "type": "boolean",
+                      "description": "Indicates whether IP Lockdown is enabled on this binding. IP packets from the client are forwarded only if IP address, MAC address  and Port match the binding."
+                    },
+                    "lease_expiration_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Lease expiration time in seconds from epoch for learned bindings.",
+                      "minimum": 1
+                    },
+                    "mac": {
+                      "type": "string",
+                      "description": "The MAC address of the DHCP client that this binding applies to.",
+                      "maxLength": 17,
+                      "minLength": 17
+                    },
+                    "new_port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>Indicates the new port that the client is associating itself with, triggered by MAC move event. This causes the IP binding entry corresponding to this client to move to the 'testing' state and upon expiry of the 'testing' state timer this binding entry will be updated with the actual port the client is associated with."
+                    },
+                    "port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>The port that this client is associated with."
+                    },
+                    "version": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Version used to identify the existing binding entry.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "vlan": {
+                      "type": "string",
+                      "description": "Reference Resource: [IP_Binding](#/IP_Binding)<br>The VLAN ID on which this binding was learnt."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "lease_expiration_time",
+                  "ip_source_lockdown_enabled",
+                  "version",
+                  "dhcp_complete_time",
+                  "address_family",
+                  "port",
+                  "ia_id",
+                  "from",
+                  "vlan",
+                  "clear_requested",
+                  "ip_binding_state",
+                  "mac",
+                  "ip_address",
+                  "dhcp_attributes",
+                  "dhcp_start_time",
+                  "new_port"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/ip_bindings/{IP_Binding.vlan},{IP_Binding.ip_address}": {
+      "get": {
+        "tags": [
+          "IP_Binding"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "address_family": {
+                      "type": "string",
+                      "description": "Address family of the ip binding entry.",
+                      "enum": [
+                        "ipv4",
+                        "ipv6"
+                      ]
+                    },
+                    "clear_requested": {
+                      "type": "boolean",
+                      "description": "Set to `true` to delete the IP Binding entry."
+                    },
+                    "dhcp_attributes": {
+                      "type": "object",
+                      "description": "The option values sent to client from DHCP-Server.  Outer key: The `dhcp_option_type` is the type of the DHCP option            sent to the client by DHCP-Server.             Example: Option : 6 - domain name servers                     Option : 3 - default router                     Option : 54 - DHCP server ID  Inner key: The `dhcp_option_value` stores the one or more values            associated with the DHCP option type. Values are stored            in ASCII format.             Example: Option : 6 - 192.168.1.8,192.168.5.3                     Option : 3 - 192.168.1.1                     Option : 54 - 192.168.1.100",
+                      "properties": {
+                        "integer": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "maxItems": 9223372036854776000
+                        }
+                      }
+                    },
+                    "dhcp_complete_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time (in microseconds) since Epoch at which client completed DHCP handshake.",
+                      "minimum": 0
+                    },
+                    "dhcp_start_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time (in microseconds) since Epoch at which client intiated DHCP handshake.",
+                      "minimum": 0
+                    },
+                    "from": {
+                      "type": "string",
+                      "description": "Source of the binding entry: 'dhcp': binding entry learned through DHCP snooping. 'static': binding is configured statically. 'nd': binding entry learned through ND snooping.",
+                      "enum": [
+                        "dhcp",
+                        "static",
+                        "nd"
+                      ]
+                    },
+                    "ia_id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Interface identifier of the client. Set only for IPv6 binding entries.",
+                      "maximum": 4294967295,
+                      "minimum": 1
+                    },
+                    "ip_address": {
+                      "type": "string",
+                      "description": "Reference Resource: [IP_Binding](#/IP_Binding)<br>An IP address that has been leased to or statically configured for this client.",
+                      "maxLength": 45
+                    },
+                    "ip_binding_state": {
+                      "type": "string",
+                      "description": "State of the IP binding entry: 'valid':     IP binding entry is in 'valid' state.This is              applicable for both DHCP snooping and ND snooping              entries. 'tentative': IP binding entry is in 'tentative' state and DAD is               in progress. This is applicable for ND snooping               entries only. 'testing':   IP binding entry is in 'testing' state,An entry              is in this state when the client is changing its              its association from one port to another.              This is applicable for ND snooping entries only.",
+                      "enum": [
+                        "valid",
+                        "tentative",
+                        "testing"
+                      ]
+                    },
+                    "ip_source_lockdown_enabled": {
+                      "type": "boolean",
+                      "description": "Indicates whether IP Lockdown is enabled on this binding. IP packets from the client are forwarded only if IP address, MAC address  and Port match the binding."
+                    },
+                    "lease_expiration_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Lease expiration time in seconds from epoch for learned bindings.",
+                      "minimum": 1
+                    },
+                    "mac": {
+                      "type": "string",
+                      "description": "The MAC address of the DHCP client that this binding applies to.",
+                      "maxLength": 17,
+                      "minLength": 17
+                    },
+                    "new_port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>Indicates the new port that the client is associating itself with, triggered by MAC move event. This causes the IP binding entry corresponding to this client to move to the 'testing' state and upon expiry of the 'testing' state timer this binding entry will be updated with the actual port the client is associated with."
+                    },
+                    "port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>The port that this client is associated with."
+                    },
+                    "version": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Version used to identify the existing binding entry.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "vlan": {
+                      "type": "string",
+                      "description": "Reference Resource: [IP_Binding](#/IP_Binding)<br>The VLAN ID on which this binding was learnt."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "IP_Binding.vlan",
+            "in": "path",
+            "description": "Reference Resource: [IP_Binding](#/IP_Binding)<br>The VLAN ID on which this binding was learnt.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "IP_Binding.ip_address",
+            "in": "path",
+            "description": "Reference Resource: [IP_Binding](#/IP_Binding)<br>An IP address that has been leased to or statically configured for this client.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "dhcp_complete_time",
+                  "address_family",
+                  "port",
+                  "ia_id",
+                  "lease_expiration_time",
+                  "ip_source_lockdown_enabled",
+                  "version",
+                  "from",
+                  "vlan",
+                  "clear_requested",
+                  "ip_binding_state",
+                  "mac",
+                  "ip_address",
+                  "new_port",
+                  "dhcp_attributes",
+                  "dhcp_start_time"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

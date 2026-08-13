@@ -1,0 +1,1122 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "NAE_Script_Generate",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "NAE_Script_Generate"
+    }
+  ],
+  "paths": {
+    "/system/nae_script_generates": {
+      "get": {
+        "tags": [
+          "NAE_Script_Generate"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "conditions": {
+                      "type": "object",
+                      "description": "Reference Resource: [NAE_Script_Condition](#/NAE_Script_Condition)<br>Reference to the conditions. If clear-condition is not defined, then the active condition is always active. If clear condition is defined, then an active condition once triggered will be suspended until the corresponding clear-condition has been triggered.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "string": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "NAE Script description. This column value can be empty.",
+                      "maxLength": 255,
+                      "minLength": 3
+                    },
+                    "disabled": {
+                      "type": "boolean",
+                      "description": "Disable this script from being deployed."
+                    },
+                    "monitors": {
+                      "type": "object",
+                      "description": "Monitor configuration",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "aggregate_by": {
+                              "type": "string",
+                              "description": "The function used to aggregate the data of the monitored resource. If not set then no aggregation is applied to the monitored resource.",
+                              "enum": [
+                                "Rate",
+                                "Count",
+                                "CountOverTime",
+                                "Sum",
+                                "SumOverTime",
+                                "Min",
+                                "MinOverTime",
+                                "Max",
+                                "MaxOverTime",
+                                "Average",
+                                "AverageOverTime"
+                              ]
+                            },
+                            "alias": {
+                              "type": "string",
+                              "description": "Alias that identifies the resource to be monitored. Either the *alias* or the *resource* has to be defined. If both are defined, then *resource* takes higher precedence."
+                            },
+                            "resource": {
+                              "type": "string",
+                              "description": "Monitor resource string that identifies the resource to be monitored."
+                            },
+                            "time_interval": {
+                              "type": "string",
+                              "description": "The time interval used by the aggregation function The format is 'number <unit>' The <unit> can be: seconds, minutes, days, hours. For example: '5 minutes', '2 days', '3 hours' If set then the aggregation happens over the past value for the specified time If not set then the aggregation happens over the current value of the resources pointed to by expanding the wildcards."
+                            },
+                            "type": {
+                              "type": "string",
+                              "description": "Type of the monitor.",
+                              "enum": [
+                                "resource"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [NAE_Script_Generate](#/NAE_Script_Generate)<br>Name of the NAE Script.",
+                      "maxLength": 80,
+                      "minLength": 3
+                    },
+                    "ready": {
+                      "type": "boolean",
+                      "description": "NAE Script configuration is ready for generation."
+                    },
+                    "status": {
+                      "type": "object",
+                      "properties": {
+                        "error_at": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Timestamp, in epoch, of the last error.",
+                          "minimum": 0
+                        },
+                        "error_description": {
+                          "type": "string",
+                          "description": "Provides a more detailed description of the error during that last execution."
+                        },
+                        "state": {
+                          "type": "string",
+                          "description": "Last state of the Script: * `PENDING`: NAE Script generation is pending. * `ERROR`: Script generation failed due to an error.            The script and its policy agents have been            invalidated. The `error_description` is updated            with the error information * `SCRIPT_GENERATED`: Script was successfully generated. * `SCRIPT_VALIDATED`: Script syntax and internal components     checks done and no issues found. * `AGENT_CREATED`: Default agent created for the generated script",
+                          "enum": [
+                            "PENDING",
+                            "ERROR",
+                            "SCRIPT_GENERATED",
+                            "SCRIPT_VALIDATED",
+                            "AGENT_CREATED"
+                          ]
+                        }
+                      }
+                    },
+                    "tags": {
+                      "type": "array",
+                      "description": "The list of tags assigned to the NAE Script",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 16
+                    },
+                    "watches": {
+                      "type": "object",
+                      "description": "Watch configuration",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "event_id": {
+                              "type": "string",
+                              "description": "List of one or more comma seperated Event IDs."
+                            },
+                            "type": {
+                              "type": "string",
+                              "description": "Type of the watch.",
+                              "enum": [
+                                "event_log"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "disabled",
+                  "monitors",
+                  "status",
+                  "ready",
+                  "description",
+                  "watches",
+                  "conditions",
+                  "tags",
+                  "name"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "NAE_Script_Generate"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "conditions": {
+                    "type": "object",
+                    "description": "Reference Resource: [NAE_Script_Condition](#/NAE_Script_Condition)<br>Reference to the conditions. If clear-condition is not defined, then the active condition is always active. If clear condition is defined, then an active condition once triggered will be suspended until the corresponding clear-condition has been triggered.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "string": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "NAE Script description. This column value can be empty.",
+                    "maxLength": 255,
+                    "minLength": 3
+                  },
+                  "disabled": {
+                    "type": "boolean",
+                    "description": "Disable this script from being deployed."
+                  },
+                  "monitors": {
+                    "type": "object",
+                    "description": "Monitor configuration",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "aggregate_by": {
+                            "type": "string",
+                            "description": "The function used to aggregate the data of the monitored resource. If not set then no aggregation is applied to the monitored resource.",
+                            "enum": [
+                              "Rate",
+                              "Count",
+                              "CountOverTime",
+                              "Sum",
+                              "SumOverTime",
+                              "Min",
+                              "MinOverTime",
+                              "Max",
+                              "MaxOverTime",
+                              "Average",
+                              "AverageOverTime"
+                            ]
+                          },
+                          "alias": {
+                            "type": "string",
+                            "description": "Alias that identifies the resource to be monitored. Either the *alias* or the *resource* has to be defined. If both are defined, then *resource* takes higher precedence."
+                          },
+                          "resource": {
+                            "type": "string",
+                            "description": "Monitor resource string that identifies the resource to be monitored."
+                          },
+                          "time_interval": {
+                            "type": "string",
+                            "description": "The time interval used by the aggregation function The format is 'number <unit>' The <unit> can be: seconds, minutes, days, hours. For example: '5 minutes', '2 days', '3 hours' If set then the aggregation happens over the past value for the specified time If not set then the aggregation happens over the current value of the resources pointed to by expanding the wildcards."
+                          },
+                          "type": {
+                            "type": "string",
+                            "description": "Type of the monitor.",
+                            "enum": [
+                              "resource"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [NAE_Script_Generate](#/NAE_Script_Generate)<br>Name of the NAE Script.",
+                    "maxLength": 80,
+                    "minLength": 3
+                  },
+                  "ready": {
+                    "type": "boolean",
+                    "description": "NAE Script configuration is ready for generation."
+                  },
+                  "tags": {
+                    "type": "array",
+                    "description": "The list of tags assigned to the NAE Script",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 16
+                  },
+                  "watches": {
+                    "type": "object",
+                    "description": "Watch configuration",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "event_id": {
+                            "type": "string",
+                            "description": "List of one or more comma seperated Event IDs."
+                          },
+                          "type": {
+                            "type": "string",
+                            "description": "Type of the watch.",
+                            "enum": [
+                              "event_log"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/system/nae_script_generates/{NAE_Script_Generate.name}": {
+      "get": {
+        "tags": [
+          "NAE_Script_Generate"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "conditions": {
+                      "type": "object",
+                      "description": "Reference Resource: [NAE_Script_Condition](#/NAE_Script_Condition)<br>Reference to the conditions. If clear-condition is not defined, then the active condition is always active. If clear condition is defined, then an active condition once triggered will be suspended until the corresponding clear-condition has been triggered.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "string": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "NAE Script description. This column value can be empty.",
+                      "maxLength": 255,
+                      "minLength": 3
+                    },
+                    "disabled": {
+                      "type": "boolean",
+                      "description": "Disable this script from being deployed."
+                    },
+                    "monitors": {
+                      "type": "object",
+                      "description": "Monitor configuration",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "aggregate_by": {
+                              "type": "string",
+                              "description": "The function used to aggregate the data of the monitored resource. If not set then no aggregation is applied to the monitored resource.",
+                              "enum": [
+                                "Rate",
+                                "Count",
+                                "CountOverTime",
+                                "Sum",
+                                "SumOverTime",
+                                "Min",
+                                "MinOverTime",
+                                "Max",
+                                "MaxOverTime",
+                                "Average",
+                                "AverageOverTime"
+                              ]
+                            },
+                            "alias": {
+                              "type": "string",
+                              "description": "Alias that identifies the resource to be monitored. Either the *alias* or the *resource* has to be defined. If both are defined, then *resource* takes higher precedence."
+                            },
+                            "resource": {
+                              "type": "string",
+                              "description": "Monitor resource string that identifies the resource to be monitored."
+                            },
+                            "time_interval": {
+                              "type": "string",
+                              "description": "The time interval used by the aggregation function The format is 'number <unit>' The <unit> can be: seconds, minutes, days, hours. For example: '5 minutes', '2 days', '3 hours' If set then the aggregation happens over the past value for the specified time If not set then the aggregation happens over the current value of the resources pointed to by expanding the wildcards."
+                            },
+                            "type": {
+                              "type": "string",
+                              "description": "Type of the monitor.",
+                              "enum": [
+                                "resource"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [NAE_Script_Generate](#/NAE_Script_Generate)<br>Name of the NAE Script.",
+                      "maxLength": 80,
+                      "minLength": 3
+                    },
+                    "ready": {
+                      "type": "boolean",
+                      "description": "NAE Script configuration is ready for generation."
+                    },
+                    "status": {
+                      "type": "object",
+                      "properties": {
+                        "error_at": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Timestamp, in epoch, of the last error.",
+                          "minimum": 0
+                        },
+                        "error_description": {
+                          "type": "string",
+                          "description": "Provides a more detailed description of the error during that last execution."
+                        },
+                        "state": {
+                          "type": "string",
+                          "description": "Last state of the Script: * `PENDING`: NAE Script generation is pending. * `ERROR`: Script generation failed due to an error.            The script and its policy agents have been            invalidated. The `error_description` is updated            with the error information * `SCRIPT_GENERATED`: Script was successfully generated. * `SCRIPT_VALIDATED`: Script syntax and internal components     checks done and no issues found. * `AGENT_CREATED`: Default agent created for the generated script",
+                          "enum": [
+                            "PENDING",
+                            "ERROR",
+                            "SCRIPT_GENERATED",
+                            "SCRIPT_VALIDATED",
+                            "AGENT_CREATED"
+                          ]
+                        }
+                      }
+                    },
+                    "tags": {
+                      "type": "array",
+                      "description": "The list of tags assigned to the NAE Script",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 16
+                    },
+                    "watches": {
+                      "type": "object",
+                      "description": "Watch configuration",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "event_id": {
+                              "type": "string",
+                              "description": "List of one or more comma seperated Event IDs."
+                            },
+                            "type": {
+                              "type": "string",
+                              "description": "Type of the watch.",
+                              "enum": [
+                                "event_log"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "NAE_Script_Generate.name",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Script_Generate](#/NAE_Script_Generate)<br>Name of the NAE Script.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "monitors",
+                  "status",
+                  "ready",
+                  "disabled",
+                  "watches",
+                  "conditions",
+                  "tags",
+                  "name",
+                  "description"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "NAE_Script_Generate"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "conditions": {
+                    "type": "object",
+                    "description": "Reference Resource: [NAE_Script_Condition](#/NAE_Script_Condition)<br>Reference to the conditions. If clear-condition is not defined, then the active condition is always active. If clear condition is defined, then an active condition once triggered will be suspended until the corresponding clear-condition has been triggered.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "string": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "NAE Script description. This column value can be empty.",
+                    "maxLength": 255,
+                    "minLength": 3
+                  },
+                  "disabled": {
+                    "type": "boolean",
+                    "description": "Disable this script from being deployed."
+                  },
+                  "monitors": {
+                    "type": "object",
+                    "description": "Monitor configuration",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "aggregate_by": {
+                            "type": "string",
+                            "description": "The function used to aggregate the data of the monitored resource. If not set then no aggregation is applied to the monitored resource.",
+                            "enum": [
+                              "Rate",
+                              "Count",
+                              "CountOverTime",
+                              "Sum",
+                              "SumOverTime",
+                              "Min",
+                              "MinOverTime",
+                              "Max",
+                              "MaxOverTime",
+                              "Average",
+                              "AverageOverTime"
+                            ]
+                          },
+                          "alias": {
+                            "type": "string",
+                            "description": "Alias that identifies the resource to be monitored. Either the *alias* or the *resource* has to be defined. If both are defined, then *resource* takes higher precedence."
+                          },
+                          "resource": {
+                            "type": "string",
+                            "description": "Monitor resource string that identifies the resource to be monitored."
+                          },
+                          "time_interval": {
+                            "type": "string",
+                            "description": "The time interval used by the aggregation function The format is 'number <unit>' The <unit> can be: seconds, minutes, days, hours. For example: '5 minutes', '2 days', '3 hours' If set then the aggregation happens over the past value for the specified time If not set then the aggregation happens over the current value of the resources pointed to by expanding the wildcards."
+                          },
+                          "type": {
+                            "type": "string",
+                            "description": "Type of the monitor.",
+                            "enum": [
+                              "resource"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "ready": {
+                    "type": "boolean",
+                    "description": "NAE Script configuration is ready for generation."
+                  },
+                  "tags": {
+                    "type": "array",
+                    "description": "The list of tags assigned to the NAE Script",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 16
+                  },
+                  "watches": {
+                    "type": "object",
+                    "description": "Watch configuration",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "event_id": {
+                            "type": "string",
+                            "description": "List of one or more comma seperated Event IDs."
+                          },
+                          "type": {
+                            "type": "string",
+                            "description": "Type of the watch.",
+                            "enum": [
+                              "event_log"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "NAE_Script_Generate.name",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Script_Generate](#/NAE_Script_Generate)<br>Name of the NAE Script.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "NAE_Script_Generate"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "NAE_Script_Generate.name",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Script_Generate](#/NAE_Script_Generate)<br>Name of the NAE Script.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "NAE_Script_Generate"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "conditions": {
+                    "type": "object",
+                    "description": "Reference Resource: [NAE_Script_Condition](#/NAE_Script_Condition)<br>Reference to the conditions. If clear-condition is not defined, then the active condition is always active. If clear condition is defined, then an active condition once triggered will be suspended until the corresponding clear-condition has been triggered.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "string": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "NAE Script description. This column value can be empty.",
+                    "maxLength": 255,
+                    "minLength": 3
+                  },
+                  "disabled": {
+                    "type": "boolean",
+                    "description": "Disable this script from being deployed."
+                  },
+                  "monitors": {
+                    "type": "object",
+                    "description": "Monitor configuration",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "aggregate_by": {
+                            "type": "string",
+                            "description": "The function used to aggregate the data of the monitored resource. If not set then no aggregation is applied to the monitored resource.",
+                            "enum": [
+                              "Rate",
+                              "Count",
+                              "CountOverTime",
+                              "Sum",
+                              "SumOverTime",
+                              "Min",
+                              "MinOverTime",
+                              "Max",
+                              "MaxOverTime",
+                              "Average",
+                              "AverageOverTime"
+                            ]
+                          },
+                          "alias": {
+                            "type": "string",
+                            "description": "Alias that identifies the resource to be monitored. Either the *alias* or the *resource* has to be defined. If both are defined, then *resource* takes higher precedence."
+                          },
+                          "resource": {
+                            "type": "string",
+                            "description": "Monitor resource string that identifies the resource to be monitored."
+                          },
+                          "time_interval": {
+                            "type": "string",
+                            "description": "The time interval used by the aggregation function The format is 'number <unit>' The <unit> can be: seconds, minutes, days, hours. For example: '5 minutes', '2 days', '3 hours' If set then the aggregation happens over the past value for the specified time If not set then the aggregation happens over the current value of the resources pointed to by expanding the wildcards."
+                          },
+                          "type": {
+                            "type": "string",
+                            "description": "Type of the monitor.",
+                            "enum": [
+                              "resource"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "ready": {
+                    "type": "boolean",
+                    "description": "NAE Script configuration is ready for generation."
+                  },
+                  "tags": {
+                    "type": "array",
+                    "description": "The list of tags assigned to the NAE Script",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 16
+                  },
+                  "watches": {
+                    "type": "object",
+                    "description": "Watch configuration",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "event_id": {
+                            "type": "string",
+                            "description": "List of one or more comma seperated Event IDs."
+                          },
+                          "type": {
+                            "type": "string",
+                            "description": "Type of the watch.",
+                            "enum": [
+                              "event_log"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "NAE_Script_Generate.name",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Script_Generate](#/NAE_Script_Generate)<br>Name of the NAE Script.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

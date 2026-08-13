@@ -1,0 +1,960 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "DB_Observer_Rules",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "DB_Observer_Rules"
+    }
+  ],
+  "paths": {
+    "/system/db_observer_rules": {
+      "get": {
+        "tags": [
+          "DB_Observer_Rules"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "column_names": {
+                      "type": "array",
+                      "description": "Name of the columns from the database table to monitor. This column value can be empty. If this column is left empty, the rule will not be activated and an error will be shown under status['error'].",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "count": {
+                      "type": "object",
+                      "description": "Indicates the count result of each operation type.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "delete": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "insert": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "mutate": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "update": {
+                              "type": "integer",
+                              "format": "int64"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "enabled": {
+                      "type": "boolean",
+                      "description": "Indicates whether the user has explicitly enabled this db observer rule."
+                    },
+                    "filter_condition": {
+                      "type": "object",
+                      "description": "This column value can be empty. Filter conditions are not mandatory, if they are not added, no filters will be applied to the rule.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "filter_value": {
+                              "type": "string",
+                              "description": "Value that must be present in the column or referenced column for the condition to evaluate to 'true'"
+                            },
+                            "referenced_column": {
+                              "type": "string",
+                              "description": "Column from the referenced table used to evaluate the value given for the condition."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "last_n_limit": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Indicates the amount of changes to be stored in the monitor type 'last-n'."
+                    },
+                    "monitor_type": {
+                      "type": "string",
+                      "description": "For DB Observer 3 types of operations are allowed: * `last-n`: Keep track of the last transactions going to the database.    Unlike `journal`, this just keeps a finite, well-known number of    transactions. * `count`: Make a count of the number of operations going to the    database. * `journal`: Register all the operations going to the database in a    buffer. The content can be dumped in a file later. This column value can be empty. If this column is left empty, the rule will not be activated and an error will be shown under status['error'].",
+                      "enum": [
+                        "last-n",
+                        "count",
+                        "journal"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [DB_Observer_Rules](#/DB_Observer_Rules)<br>Name used to identify each rule."
+                    },
+                    "operations": {
+                      "type": "array",
+                      "description": "Indicates the operation types that must be monitored. This column value can be empty. If this column is left empty, the rule will not be activated and an error will be shown under status['error'].",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "insert",
+                          "update",
+                          "delete",
+                          "mutate"
+                        ]
+                      },
+                      "maxItems": 4
+                    },
+                    "status": {
+                      "type": "object",
+                      "description": "Indicates if the db observer rule configured by the user is valid and has been succesfully activated by the OVSDB Observer daemon.",
+                      "properties": {
+                        "error": {
+                          "type": "string",
+                          "description": "This value will contain an error in case the rule could not be activated explaining the reason."
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "Indicates the current status of the rule.",
+                          "enum": [
+                            "active",
+                            "inactive"
+                          ]
+                        }
+                      }
+                    },
+                    "table_name": {
+                      "type": "string",
+                      "description": "Name of the the database table to monitor. This column value can be empty. If this column is left empty, the rule will not be activated and an error will be shown under status['error']."
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "status",
+                  "name",
+                  "column_names",
+                  "last_n_limit",
+                  "count",
+                  "enabled",
+                  "table_name",
+                  "monitor_type",
+                  "operations",
+                  "filter_condition"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "DB_Observer_Rules"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "column_names": {
+                    "type": "array",
+                    "description": "Name of the columns from the database table to monitor. This column value can be empty. If this column is left empty, the rule will not be activated and an error will be shown under status['error'].",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 9223372036854776000
+                  },
+                  "enabled": {
+                    "type": "boolean",
+                    "description": "Indicates whether the user has explicitly enabled this db observer rule."
+                  },
+                  "filter_condition": {
+                    "type": "object",
+                    "description": "This column value can be empty. Filter conditions are not mandatory, if they are not added, no filters will be applied to the rule.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "filter_value": {
+                            "type": "string",
+                            "description": "Value that must be present in the column or referenced column for the condition to evaluate to 'true'"
+                          },
+                          "referenced_column": {
+                            "type": "string",
+                            "description": "Column from the referenced table used to evaluate the value given for the condition."
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "last_n_limit": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Indicates the amount of changes to be stored in the monitor type 'last-n'."
+                  },
+                  "monitor_type": {
+                    "type": "string",
+                    "description": "For DB Observer 3 types of operations are allowed: * `last-n`: Keep track of the last transactions going to the database.    Unlike `journal`, this just keeps a finite, well-known number of    transactions. * `count`: Make a count of the number of operations going to the    database. * `journal`: Register all the operations going to the database in a    buffer. The content can be dumped in a file later. This column value can be empty. If this column is left empty, the rule will not be activated and an error will be shown under status['error'].",
+                    "enum": [
+                      "last-n",
+                      "count",
+                      "journal"
+                    ]
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [DB_Observer_Rules](#/DB_Observer_Rules)<br>Name used to identify each rule."
+                  },
+                  "operations": {
+                    "type": "array",
+                    "description": "Indicates the operation types that must be monitored. This column value can be empty. If this column is left empty, the rule will not be activated and an error will be shown under status['error'].",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "insert",
+                        "update",
+                        "delete",
+                        "mutate"
+                      ]
+                    },
+                    "maxItems": 4
+                  },
+                  "table_name": {
+                    "type": "string",
+                    "description": "Name of the the database table to monitor. This column value can be empty. If this column is left empty, the rule will not be activated and an error will be shown under status['error']."
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/system/db_observer_rules/{DB_Observer_Rules.name}": {
+      "get": {
+        "tags": [
+          "DB_Observer_Rules"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "column_names": {
+                      "type": "array",
+                      "description": "Name of the columns from the database table to monitor. This column value can be empty. If this column is left empty, the rule will not be activated and an error will be shown under status['error'].",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "count": {
+                      "type": "object",
+                      "description": "Indicates the count result of each operation type.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "delete": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "insert": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "mutate": {
+                              "type": "integer",
+                              "format": "int64"
+                            },
+                            "update": {
+                              "type": "integer",
+                              "format": "int64"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "enabled": {
+                      "type": "boolean",
+                      "description": "Indicates whether the user has explicitly enabled this db observer rule."
+                    },
+                    "filter_condition": {
+                      "type": "object",
+                      "description": "This column value can be empty. Filter conditions are not mandatory, if they are not added, no filters will be applied to the rule.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "filter_value": {
+                              "type": "string",
+                              "description": "Value that must be present in the column or referenced column for the condition to evaluate to 'true'"
+                            },
+                            "referenced_column": {
+                              "type": "string",
+                              "description": "Column from the referenced table used to evaluate the value given for the condition."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "last_n_limit": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Indicates the amount of changes to be stored in the monitor type 'last-n'."
+                    },
+                    "monitor_type": {
+                      "type": "string",
+                      "description": "For DB Observer 3 types of operations are allowed: * `last-n`: Keep track of the last transactions going to the database.    Unlike `journal`, this just keeps a finite, well-known number of    transactions. * `count`: Make a count of the number of operations going to the    database. * `journal`: Register all the operations going to the database in a    buffer. The content can be dumped in a file later. This column value can be empty. If this column is left empty, the rule will not be activated and an error will be shown under status['error'].",
+                      "enum": [
+                        "last-n",
+                        "count",
+                        "journal"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [DB_Observer_Rules](#/DB_Observer_Rules)<br>Name used to identify each rule."
+                    },
+                    "operations": {
+                      "type": "array",
+                      "description": "Indicates the operation types that must be monitored. This column value can be empty. If this column is left empty, the rule will not be activated and an error will be shown under status['error'].",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "insert",
+                          "update",
+                          "delete",
+                          "mutate"
+                        ]
+                      },
+                      "maxItems": 4
+                    },
+                    "status": {
+                      "type": "object",
+                      "description": "Indicates if the db observer rule configured by the user is valid and has been succesfully activated by the OVSDB Observer daemon.",
+                      "properties": {
+                        "error": {
+                          "type": "string",
+                          "description": "This value will contain an error in case the rule could not be activated explaining the reason."
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "Indicates the current status of the rule.",
+                          "enum": [
+                            "active",
+                            "inactive"
+                          ]
+                        }
+                      }
+                    },
+                    "table_name": {
+                      "type": "string",
+                      "description": "Name of the the database table to monitor. This column value can be empty. If this column is left empty, the rule will not be activated and an error will be shown under status['error']."
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "DB_Observer_Rules.name",
+            "in": "path",
+            "description": "Reference Resource: [DB_Observer_Rules](#/DB_Observer_Rules)<br>Name used to identify each rule.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "filter_condition",
+                  "enabled",
+                  "table_name",
+                  "monitor_type",
+                  "operations",
+                  "count",
+                  "status",
+                  "name",
+                  "column_names",
+                  "last_n_limit"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "DB_Observer_Rules"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "column_names": {
+                    "type": "array",
+                    "description": "Name of the columns from the database table to monitor. This column value can be empty. If this column is left empty, the rule will not be activated and an error will be shown under status['error'].",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 9223372036854776000
+                  },
+                  "enabled": {
+                    "type": "boolean",
+                    "description": "Indicates whether the user has explicitly enabled this db observer rule."
+                  },
+                  "filter_condition": {
+                    "type": "object",
+                    "description": "This column value can be empty. Filter conditions are not mandatory, if they are not added, no filters will be applied to the rule.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "filter_value": {
+                            "type": "string",
+                            "description": "Value that must be present in the column or referenced column for the condition to evaluate to 'true'"
+                          },
+                          "referenced_column": {
+                            "type": "string",
+                            "description": "Column from the referenced table used to evaluate the value given for the condition."
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "last_n_limit": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Indicates the amount of changes to be stored in the monitor type 'last-n'."
+                  },
+                  "monitor_type": {
+                    "type": "string",
+                    "description": "For DB Observer 3 types of operations are allowed: * `last-n`: Keep track of the last transactions going to the database.    Unlike `journal`, this just keeps a finite, well-known number of    transactions. * `count`: Make a count of the number of operations going to the    database. * `journal`: Register all the operations going to the database in a    buffer. The content can be dumped in a file later. This column value can be empty. If this column is left empty, the rule will not be activated and an error will be shown under status['error'].",
+                    "enum": [
+                      "last-n",
+                      "count",
+                      "journal"
+                    ]
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [DB_Observer_Rules](#/DB_Observer_Rules)<br>Name used to identify each rule."
+                  },
+                  "operations": {
+                    "type": "array",
+                    "description": "Indicates the operation types that must be monitored. This column value can be empty. If this column is left empty, the rule will not be activated and an error will be shown under status['error'].",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "insert",
+                        "update",
+                        "delete",
+                        "mutate"
+                      ]
+                    },
+                    "maxItems": 4
+                  },
+                  "table_name": {
+                    "type": "string",
+                    "description": "Name of the the database table to monitor. This column value can be empty. If this column is left empty, the rule will not be activated and an error will be shown under status['error']."
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "DB_Observer_Rules.name",
+            "in": "path",
+            "description": "Reference Resource: [DB_Observer_Rules](#/DB_Observer_Rules)<br>Name used to identify each rule.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "DB_Observer_Rules"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "DB_Observer_Rules.name",
+            "in": "path",
+            "description": "Reference Resource: [DB_Observer_Rules](#/DB_Observer_Rules)<br>Name used to identify each rule.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "DB_Observer_Rules"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "column_names": {
+                    "type": "array",
+                    "description": "Name of the columns from the database table to monitor. This column value can be empty. If this column is left empty, the rule will not be activated and an error will be shown under status['error'].",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 9223372036854776000
+                  },
+                  "enabled": {
+                    "type": "boolean",
+                    "description": "Indicates whether the user has explicitly enabled this db observer rule."
+                  },
+                  "filter_condition": {
+                    "type": "object",
+                    "description": "This column value can be empty. Filter conditions are not mandatory, if they are not added, no filters will be applied to the rule.",
+                    "properties": {
+                      "string": {
+                        "type": "object",
+                        "properties": {
+                          "filter_value": {
+                            "type": "string",
+                            "description": "Value that must be present in the column or referenced column for the condition to evaluate to 'true'"
+                          },
+                          "referenced_column": {
+                            "type": "string",
+                            "description": "Column from the referenced table used to evaluate the value given for the condition."
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "last_n_limit": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Indicates the amount of changes to be stored in the monitor type 'last-n'."
+                  },
+                  "monitor_type": {
+                    "type": "string",
+                    "description": "For DB Observer 3 types of operations are allowed: * `last-n`: Keep track of the last transactions going to the database.    Unlike `journal`, this just keeps a finite, well-known number of    transactions. * `count`: Make a count of the number of operations going to the    database. * `journal`: Register all the operations going to the database in a    buffer. The content can be dumped in a file later. This column value can be empty. If this column is left empty, the rule will not be activated and an error will be shown under status['error'].",
+                    "enum": [
+                      "last-n",
+                      "count",
+                      "journal"
+                    ]
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [DB_Observer_Rules](#/DB_Observer_Rules)<br>Name used to identify each rule."
+                  },
+                  "operations": {
+                    "type": "array",
+                    "description": "Indicates the operation types that must be monitored. This column value can be empty. If this column is left empty, the rule will not be activated and an error will be shown under status['error'].",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "insert",
+                        "update",
+                        "delete",
+                        "mutate"
+                      ]
+                    },
+                    "maxItems": 4
+                  },
+                  "table_name": {
+                    "type": "string",
+                    "description": "Name of the the database table to monitor. This column value can be empty. If this column is left empty, the rule will not be activated and an error will be shown under status['error']."
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "DB_Observer_Rules.name",
+            "in": "path",
+            "description": "Reference Resource: [DB_Observer_Rules](#/DB_Observer_Rules)<br>Name used to identify each rule.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

@@ -1,0 +1,1169 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Events",
+    "version": "0.0.1",
+    "description": "API service to run troubleshooting tests on devices - Access Points (APs), CX Switches, AOS-S Switches, and Gateways (GWs)."
+  },
+  "servers": [
+    {
+      "url": "https://de1.api.central.arubanetworks.com",
+      "description": "eu"
+    },
+    {
+      "url": "https://de2.api.central.arubanetworks.com",
+      "description": "eucentral2"
+    },
+    {
+      "url": "https://de3.api.central.arubanetworks.com",
+      "description": "eucentral3"
+    },
+    {
+      "url": "https://gb1.api.central.arubanetworks.com",
+      "description": "ukwest2"
+    },
+    {
+      "url": "https://us1.api.central.arubanetworks.com",
+      "description": "prod"
+    },
+    {
+      "url": "https://us2.api.central.arubanetworks.com",
+      "description": "central-prod2"
+    },
+    {
+      "url": "https://us4.api.central.arubanetworks.com",
+      "description": "uswest4"
+    },
+    {
+      "url": "https://us5.api.central.arubanetworks.com",
+      "description": "uswest5"
+    },
+    {
+      "url": "https://us6.api.central.arubanetworks.com",
+      "description": "us-east-1"
+    },
+    {
+      "url": "https://ca1.api.central.arubanetworks.com",
+      "description": "starman"
+    },
+    {
+      "url": "https://in1.api.central.arubanetworks.com",
+      "description": "apac"
+    },
+    {
+      "url": "https://jp1.api.central.arubanetworks.com",
+      "description": "apaceast"
+    },
+    {
+      "url": "https://au1.api.central.arubanetworks.com",
+      "description": "apacsouth"
+    },
+    {
+      "url": "https://ae1.api.central.arubanetworks.com",
+      "description": "uaenorth1"
+    },
+    {
+      "url": "https://cn1.api.central.arubanetworks.com.cn",
+      "description": "china-prod"
+    },
+    {
+      "url": "https://internal.api.central.arubanetworks.com",
+      "description": "internal2"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Events",
+      "description": "APIs to manage and retrieve network events"
+    }
+  ],
+  "paths": {
+    "/network-troubleshooting/v1/event-extra-attributes": {
+      "get": {
+        "summary": "Get Event Extra Attributes",
+        "description": "This API endpoint retrieves extra attributes of the event. The response includes event attributes as key-value pairs.",
+        "tags": [
+          "Events"
+        ],
+        "operationId": "EventExtraAttributesV1",
+        "parameters": [
+          {
+            "name": "event-identifier",
+            "in": "query",
+            "description": "Unique identifier of the event to retrieve details for.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "example": "b451eff1-cff0f-4b1c-8f3d-2a5e6f7d8e9a"
+          },
+          {
+            "name": "site-id",
+            "in": "query",
+            "description": "Site ID to filter the event details for a specific site.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "example": "9219985648"
+          },
+          {
+            "name": "time-at",
+            "in": "query",
+            "required": true,
+            "description": "Timestamp of when the event occurred, provided in RFC 3339 (and ISO 8601) format in the UTC timezone with milliseconds.",
+            "schema": {
+              "$ref": "#/components/schemas/DateTime"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/EventDetailsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/event-filters": {
+      "get": {
+        "summary": "Get Event Filters",
+        "description": "This endpoint returns available filter options for network events, including categories, source types, and event names with their respective counts. Use this information to construct filters for the List Events API.",
+        "tags": [
+          "Events"
+        ],
+        "operationId": "EventFiltersV1",
+        "parameters": [
+          {
+            "name": "context-type",
+            "in": "query",
+            "description": "Type of context (SITE, ACCESS_POINT, SWITCH, GATEWAY, WIRELESS_CLIENT, WIRED_CLIENT, BRIDGE).",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SITE",
+                "ACCESS_POINT",
+                "SWITCH",
+                "GATEWAY",
+                "WIRELESS_CLIENT",
+                "WIRED_CLIENT",
+                "BRIDGE"
+              ]
+            },
+            "example": "SITE"
+          },
+          {
+            "name": "context-identifier",
+            "in": "query",
+            "description": "Context Identifier (site ID, device serial number or client MAC address).",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "example": "9219985648"
+          },
+          {
+            "name": "start-at",
+            "in": "query",
+            "description": "Data is required starting from this timestamp, provided in RFC 3339 (and ISO 8601) format in the UTC timezone with milliseconds. The difference between *end-at* and *start-at* should be less than 30 days.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/DateTime"
+            }
+          },
+          {
+            "name": "end-at",
+            "in": "query",
+            "description": "Data is required up to this timestamp, provided in RFC 3339 (and ISO 8601) format in the UTC timezone with milliseconds. The timestamp must be earlier than the current time and later than the start-at.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/DateTime"
+            }
+          },
+          {
+            "name": "site-id",
+            "in": "query",
+            "description": "Site ID to filter the event details for a specific site.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "example": "9219985648"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/EventFiltersResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/events": {
+      "get": {
+        "summary": "List Events",
+        "description": "This API endpoint retrieves a list of Network Events, based on the query parameters provided. Each Event in the returned list includes details like event name, category, source type, severity, etc. The query parameters allow you to narrow down the results that meet specific criteria, ensuring you receive only the relevant data.",
+        "tags": [
+          "Events"
+        ],
+        "operationId": "EventListV1",
+        "parameters": [
+          {
+            "name": "context-type",
+            "in": "query",
+            "description": "Type of context (SITE, ACCESS_POINT, SWITCH, GATEWAY, WIRELESS_CLIENT, WIRED_CLIENT, BRIDGE).",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SITE",
+                "ACCESS_POINT",
+                "SWITCH",
+                "GATEWAY",
+                "WIRELESS_CLIENT",
+                "WIRED_CLIENT",
+                "BRIDGE"
+              ]
+            },
+            "example": "SITE"
+          },
+          {
+            "name": "context-identifier",
+            "in": "query",
+            "description": "Context Identifier (site ID, device serial number or client MAC address).",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "example": "9219985648"
+          },
+          {
+            "name": "start-at",
+            "in": "query",
+            "description": "Data is required starting from this timestamp, provided in RFC 3339 (and ISO 8601) format in the UTC timezone with milliseconds. The difference between *end-at* and *start-at* should be less than 30 days.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/DateTime"
+            }
+          },
+          {
+            "name": "end-at",
+            "in": "query",
+            "description": "Data is required up to this timestamp, provided in RFC 3339 (and ISO 8601) format in the UTC timezone with milliseconds. The timestamp must be earlier than the current time and later than the start-at.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/DateTime"
+            }
+          },
+          {
+            "name": "site-id",
+            "in": "query",
+            "description": "Site ID to filter the event details for a specific site.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "example": "9219985648"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search events by name, serial number, host name, client MAC address or device MAC address. Full text search is not supported. Search is restricted to the metadata.",
+            "schema": {
+              "type": "string",
+              "maxLength": 256
+            },
+            "example": "Client 802.1x Radius Timeout"
+          },
+          {
+            "name": "filter",
+            "description": "OData Version 4.0 filter string (limited functionality). Supports only 'and' conjunction ('or' and 'not' are NOT supported). Supported fields and operators are in the below given table.\n\n| Field | Operators |\n| --------- | -------- |\n| `eventId` | `eq` and `in` |\n| `category` |`eq` and `in` |\n| `sourceType` |`eq` and `in` |\n\n**The operators are implemented as follows:**\n\n* `eq`: Only values exactly matching the given value are returned.\n\n* `in`: Only values present in the given list are returned.\n\n",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 512
+            },
+            "example": "eventId eq '12' and category in ('Connectivity', 'Client')"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sort expressions. A sort expression is a property name optionally followed by a direction indicator asc (ascending) or desc (descending).\n\nIf a direction indicator is omitted, the default direction is descending.\n\nSupported fields are \n\n| Sort Field                          | Description                          |\n| ----------------------------------- | ------------------------------------ |\n| `timeAt`                              | The field `timeAt` denotes event timestamp. |\n\n",
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "example": "timeAt desc"
+          },
+          {
+            "name": "next",
+            "in": "query",
+            "description": "Specifies the pagination cursor for the next page of resources. Minimum value is 1.",
+            "schema": {
+              "$ref": "#/components/schemas/Next"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of events to be retrieved. Allowed range is 1 to 1000.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "default": 100,
+              "minimum": 1,
+              "maximum": 1000,
+              "example": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ListEventsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BadRequestError": {
+        "type": "object",
+        "description": "Bad request error details returned from the server.",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 400,
+            "maximum": 400,
+            "example": 400,
+            "description": "HTTP status code."
+          },
+          "errorCode": {
+            "type": "string",
+            "description": "Error code for the specific error.",
+            "example": "HPE_GL_NETWORK_EVENTS_INVALID_INPUT",
+            "maxLength": 256
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message describing the issue.",
+            "example": "Invalid input parameters provided",
+            "maxLength": 1024
+          },
+          "debugId": {
+            "type": "string",
+            "description": "Debug identifier for troubleshooting.",
+            "example": "abc-123-456",
+            "maxLength": 256
+          },
+          "serviceName": {
+            "type": "string",
+            "description": "The name of the service where the error originated.",
+            "example": "Events",
+            "maxLength": 256
+          },
+          "code": {
+            "type": "string",
+            "description": "Internal service error code.",
+            "example": "DOWNSTREAM_SERVICE_ERROR",
+            "maxLength": 256
+          },
+          "errorType": {
+            "type": "string",
+            "description": "Classification of the error type.",
+            "example": "BAD_REQUEST",
+            "maxLength": 256
+          }
+        }
+      },
+      "CategoryFilterItem": {
+        "type": "object",
+        "description": "Event category filter item with count information.",
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "Event category name.",
+            "example": "Connectivity"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of events in this category.",
+            "example": 45,
+            "minimum": 0
+          }
+        },
+        "required": [
+          "category",
+          "count"
+        ]
+      },
+      "DateTime": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Date-time in RFC 3339 format (ISO 8601) in UTC timezone with milliseconds.",
+        "example": "2025-08-06T12:34:56.124Z",
+        "maxLength": 30
+      },
+      "ErrorResponse": {
+        "title": "Error Response",
+        "type": "object",
+        "properties": {
+          "errorCode": {
+            "type": "string",
+            "description": "A unique code identifying the error type."
+          },
+          "message": {
+            "type": "string",
+            "description": "A human-readable description of the error."
+          }
+        }
+      },
+      "Event": {
+        "type": "object",
+        "description": "Network event details.",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "description": "The event type identifier",
+            "example": "55"
+          },
+          "eventIdentifier": {
+            "type": "string",
+            "description": "Unique identifier for the event.",
+            "example": "c0975762-4662-463a-b35a-c0126f6ff052"
+          },
+          "serialNumber": {
+            "type": "string",
+            "description": "Device serial number",
+            "example": "CNW7DXQ123"
+          },
+          "timeAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the event occurred at the source, in RFC 3339 format with milliseconds.",
+            "example": "2025-08-06T12:34:56.124Z"
+          },
+          "eventName": {
+            "type": "string",
+            "description": "Name of the event.",
+            "example": "Client 802.1x Radius Timeout"
+          },
+          "category": {
+            "type": "string",
+            "description": "Event category.",
+            "example": "Connectivity"
+          },
+          "sourceType": {
+            "type": "string",
+            "description": "Type of source that generated the event.",
+            "example": "Access Point",
+            "enum": [
+              "Access Point",
+              "Switch",
+              "Gateway",
+              "Wireless Client",
+              "Wired Client",
+              "Bridge"
+            ]
+          },
+          "sourceName": {
+            "type": "string",
+            "description": "Name of the device or client that generated the event.",
+            "example": "AP-Floor1-001"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the event.",
+            "example": "Client authentication timeout occurred during 802.1x authentication process"
+          },
+          "clientMacAddress": {
+            "type": "string",
+            "description": "MAC address of the client involved in the event.",
+            "example": "aa:bb:cc:dd:ee:ff"
+          },
+          "deviceMacAddress": {
+            "type": "string",
+            "description": "MAC address of the device that generated the event.",
+            "example": "11:22:33:44:55:66"
+          },
+          "stackId": {
+            "type": "string",
+            "description": "Stack identifier for stack-capable devices.",
+            "example": "stack-001"
+          },
+          "bssid": {
+            "type": "string",
+            "description": "Basic Service Set Identifier for wireless events.",
+            "example": "aa:bb:cc:dd:ee:11"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Reason or cause of the event.",
+            "example": "Authentication timeout"
+          },
+          "severity": {
+            "type": "string",
+            "description": "Severity level of the event.",
+            "example": "negative",
+            "enum": [
+              "positive",
+              "negative",
+              "neutral"
+            ]
+          }
+        },
+        "required": [
+          "eventId",
+          "eventIdentifier",
+          "timeAt",
+          "eventName",
+          "category",
+          "sourceType",
+          "sourceName",
+          "reason",
+          "description",
+          "severity"
+        ]
+      },
+      "EventDetails": {
+        "type": "object",
+        "description": "Detailed information about a specific network event.",
+        "properties": {
+          "eventExtraAttributes": {
+            "type": "array",
+            "description": "Additional event attributes as key-value pairs.",
+            "items": {
+              "$ref": "#/components/schemas/KeyValuePair"
+            }
+          }
+        },
+        "required": [
+          "eventExtraAttributes"
+        ]
+      },
+      "EventFilters": {
+        "type": "object",
+        "description": "Available filter options for network events with their respective counts.",
+        "properties": {
+          "categories": {
+            "type": "array",
+            "description": "Available event categories with their counts.",
+            "items": {
+              "$ref": "#/components/schemas/CategoryFilterItem"
+            }
+          },
+          "sourceTypes": {
+            "type": "array",
+            "description": "Available source types with their counts.",
+            "items": {
+              "$ref": "#/components/schemas/SourceTypeFilterItem"
+            }
+          },
+          "eventNames": {
+            "type": "array",
+            "description": "Available event names and their corresponding event IDs with their counts.",
+            "items": {
+              "$ref": "#/components/schemas/EventNameFilterItem"
+            }
+          }
+        },
+        "required": [
+          "categories",
+          "sourceTypes",
+          "eventNames"
+        ]
+      },
+      "EventList": {
+        "type": "object",
+        "description": "List of network events with pagination information.",
+        "properties": {
+          "events": {
+            "type": "array",
+            "description": "Array of network events",
+            "items": {
+              "$ref": "#/components/schemas/Event"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of events in current response.",
+            "example": 1,
+            "minimum": 0
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of events matching the query criteria.",
+            "example": 2,
+            "minimum": 0
+          },
+          "next": {
+            "$ref": "#/components/schemas/NextResponse"
+          }
+        },
+        "required": [
+          "events",
+          "count",
+          "total"
+        ]
+      },
+      "EventNameFilterItem": {
+        "type": "object",
+        "description": "Event name filter item with count and identifier information.",
+        "properties": {
+          "eventName": {
+            "type": "string",
+            "description": "Name of the event.",
+            "example": "Client 802.1x Radius Timeout"
+          },
+          "eventId": {
+            "type": "integer",
+            "description": "Unique identifier for the event type.",
+            "example": 10,
+            "minimum": 1
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of events with this event name.",
+            "example": 18,
+            "minimum": 0
+          }
+        },
+        "required": [
+          "eventName",
+          "eventId",
+          "count"
+        ]
+      },
+      "ForbiddenError": {
+        "type": "object",
+        "description": "Forbidden error details returned from the server.",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 403,
+            "maximum": 403,
+            "example": 403,
+            "description": "HTTP status code."
+          },
+          "errorCode": {
+            "type": "string",
+            "description": "Error code for the specific error.",
+            "maxLength": 256,
+            "example": "HPE_GL_ERROR_FORBIDDEN"
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message describing the issue.",
+            "maxLength": 1024,
+            "example": "Insufficient permissions to access this resource"
+          },
+          "debugId": {
+            "type": "string",
+            "description": "Debug identifier for troubleshooting.",
+            "maxLength": 256,
+            "example": "abc-123-456"
+          }
+        }
+      },
+      "KeyValuePair": {
+        "type": "object",
+        "description": "Key-value pair for additional event attributes.",
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Label or key for the attribute.",
+            "example": "New EIRP"
+          },
+          "value": {
+            "type": "string",
+            "description": "Value of the attribute.",
+            "example": "90 dBm"
+          }
+        },
+        "required": [
+          "label",
+          "value"
+        ]
+      },
+      "Next": {
+        "type": "string",
+        "description": "Specifies the pagination cursor for the next page of resources.",
+        "example": "1",
+        "default": "1",
+        "minimum": 1
+      },
+      "NextResponse": {
+        "type": "string",
+        "description": "Specifies the pagination cursor for the next page of resources.",
+        "example": "2",
+        "default": "1",
+        "minimum": 1
+      },
+      "NotFoundError": {
+        "type": "object",
+        "description": "Not Found error details returned from the server.",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 404,
+            "maximum": 404,
+            "description": "HTTP status code.",
+            "example": 404
+          },
+          "errorCode": {
+            "type": "string",
+            "description": "Error code for the specific error.",
+            "maxLength": 256,
+            "example": "HPE_GL_NETWORK_EVENTS_NOT_FOUND"
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message describing the issue.",
+            "maxLength": 1024,
+            "example": "Resource not found"
+          },
+          "debugId": {
+            "type": "string",
+            "description": "Debug identifier for troubleshooting.",
+            "maxLength": 256,
+            "example": "abc-123-456"
+          },
+          "serviceName": {
+            "type": "string",
+            "description": "The name of the service where the error originated.",
+            "example": "Events",
+            "maxLength": 256
+          },
+          "code": {
+            "type": "string",
+            "description": "Internal service error code.",
+            "example": "DOWNSTREAM_SERVICE_ERROR",
+            "maxLength": 256
+          },
+          "errorType": {
+            "type": "string",
+            "description": "Classification of the error type.",
+            "example": "NOT_FOUND",
+            "maxLength": 256
+          }
+        }
+      },
+      "SourceTypeFilterItem": {
+        "type": "object",
+        "description": "Source type filter item with count information.",
+        "properties": {
+          "sourceType": {
+            "type": "string",
+            "description": "Source type that generated the events.",
+            "example": "Access Point",
+            "enum": [
+              "Access Point",
+              "Switch",
+              "Gateway",
+              "Wireless Client",
+              "Wired Client",
+              "Bridge"
+            ]
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of events from this source type.",
+            "example": 32,
+            "minimum": 0
+          }
+        },
+        "required": [
+          "sourceType",
+          "count"
+        ]
+      }
+    },
+    "responses": {
+      "BadRequestError": {
+        "description": "Invalid input received.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BadRequestError"
+            }
+          }
+        }
+      },
+      "EventDetailsResponse": {
+        "description": "Response schema for event details",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/EventDetails"
+            }
+          }
+        }
+      },
+      "EventFiltersResponse": {
+        "description": "Response schema for event filters",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/EventFilters"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Forbidden: Access is denied.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ForbiddenError"
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Internal Server Error. An unexpected error occurred on the server.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "errorCode": "HPE_GL_ERROR_INTERNAL_SERVER_ERROR",
+              "message": "An unexpected error occurred."
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "Request limit per hour."
+          },
+          "X-RateLimit-Remaining": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "The number of requests left for the time window."
+          },
+          "X-RateLimit-Reset": {
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 20
+            },
+            "description": "The date-time (RFC 3339 timestamp in UTC+0) at which the current rate limit window resets."
+          }
+        }
+      },
+      "ListEventsResponse": {
+        "description": "Response schema for listing events",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/EventList"
+            }
+          }
+        }
+      },
+      "NotFoundError": {
+        "description": "Not Found error.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/NotFoundError"
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "Too Many Requests. The user has sent too many requests in a given amount of time.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "errorCode": "HPE_GL_ERROR_TOO_MANY_REQUESTS",
+              "message": "Rate limit exceeded."
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "Request limit per hour."
+          },
+          "X-RateLimit-Remaining": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "The number of requests left for the time window."
+          },
+          "X-RateLimit-Reset": {
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 20
+            },
+            "description": "The date-time (RFC 3339 timestamp in UTC+0) at which the current rate limit window resets."
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized. Authentication credentials are required or invalid.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "errorCode": "HPE_GL_ERROR_UNAUTHORIZED",
+              "message": "Authentication required."
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "Request limit per hour."
+          },
+          "X-RateLimit-Remaining": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "The number of requests left for the time window."
+          },
+          "X-RateLimit-Reset": {
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 20
+            },
+            "description": "The date-time (RFC 3339 timestamp in UTC+0) at which the current rate limit window resets."
+          }
+        }
+      }
+    },
+    "headers": {
+      "XRateLimitLimit": {
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0,
+          "maximum": 9223372036854776000
+        },
+        "description": "The request limit per hour."
+      },
+      "XRateLimitRemaining": {
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0,
+          "maximum": 9223372036854776000
+        },
+        "description": "The number of requests left for the time window."
+      },
+      "XRateLimitReset": {
+        "schema": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 20
+        },
+        "description": "The date-time (RFC 3339 timestamp in UTC) at which the current rate limit window resets."
+      }
+    },
+    "securitySchemes": {
+      "OAuth2": {
+        "type": "oauth2",
+        "description": "OAuth 2.0 authentication with client credentials flow. You can also use your own access token.",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://sso.common.cloud.hpe.com/as/token.oauth2",
+            "scopes": {}
+          }
+        }
+      }
+    }
+  }
+}

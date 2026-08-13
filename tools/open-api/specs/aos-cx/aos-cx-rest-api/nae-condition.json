@@ -1,0 +1,524 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "NAE_Condition",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "NAE_Condition"
+    }
+  ],
+  "paths": {
+    "/system/nae_scripts/{NAE_Script.name}/nae_agents/{NAE_Agent.name}/nae_rules/{NAE_Rule.name}/nae_conditions": {
+      "get": {
+        "tags": [
+          "NAE_Condition"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "actions": {
+                      "type": "object",
+                      "description": "Reference Resource: [NAE_Action](#/NAE_Action)<br>Actions that need to be executed when condition is satisfied.",
+                      "properties": {
+                        "string": {
+                          "type": "string",
+                          "description": "Reference resource URI of NAE_Action"
+                        }
+                      }
+                    },
+                    "condition_type": {
+                      "type": "string",
+                      "description": "Reference Resource: [NAE_Condition](#/NAE_Condition)<br>Conditions associated with the rule CONDITION : Condition associated with the rule CLEAR_CONDITION : Optional clear condition associated with the rule"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Number of times this condition is met."
+                    },
+                    "expression": {
+                      "type": "string",
+                      "description": "Expression associated with the NAE Condition. There are two types of NAE conditions *watch_event_log* and *monitor_resource* and the grammar for each is described as below: Grammar for expression type *monitor_resource*:  operand    = integer | enum operator   = \"<\" | \">\" | \"==\" | \"!=\" for        = \"for\" , integer , time time       = \"second\" | \"minute\" | \"hour\" | \"day\" | \"seconds\" | \"minutes\" | \"hours\" | \"days\" operation1 = uri , operator, operand , [ for ] operation2 = \"sum\" , uri , operator , integer operation3 = \"rate\" , uri , operator , float , \"per\" , time operation4 = \"transition\" , uri , \"from\" , operand2 , \"to\" , operand2 Here are some examples: transition /v1/system/vrfs/red/bgp_routers/101/bgp_neighbors/10.0.0.1/conn_state from \"up\" to \"down /v1/system/vrfs/red/bgp_routers/*/bgp_neighbors/count < 5 for 3 minutes sum /v1/system/vrfs/red/bgp_routers/*/bgp_neighbors/count < 5 for 2 minutes rate /v1/system/vlan/1/spanning_tree/tcn_count > 3 per hour sum /v1/system/vrfs/red/bgp_routers/*/bgp_neighbors/count < {} for {} minutes every {} would be substituted by the value from arguments. Grammar for expression type *watch_event_log*:  regex          = Extended Posix Regular Expression list_element = '\"' , ( string | regex ) , '\"' list           = list_element , { \",\" , list_element } operand        = integer | enum count          = \"count\" , integer operation1     = resource , [ count ] operation2     = resource \"include\" ( \"any\" | \"all\" ) list operation3     = resource \"exclude\" list Here are some examples: {} {} count 10 {} include all \"servername\",\"error\" {} include any \"hpe-cardd\",\"log-mgmtd\" count 5 {} include any \"\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\" {} exclude \"Ok\" {} exclude \"(keyword1|keyword2)\""
+                    },
+                    "expression_arguments": {
+                      "type": "object",
+                      "description": "Reference Resource: [NAE_Parameter](#/NAE_Parameter)<br>References to the Monitoring Parameters used on the expression. The map key contains a position in the condition expression and the map value contains the parameter name of the argument in that position.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "description": "Reference resource URI of NAE_Parameter"
+                        }
+                      }
+                    },
+                    "nae_baselines": {
+                      "type": "object",
+                      "description": "Reference Resource: [NAE_Baseline](#/NAE_Baseline)<br>Reference to the baseline used in the condition. The map key contains a position in the expression the map value contains a reference to the Baseline in that position.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "description": "Reference resource URI of NAE_Baseline"
+                        }
+                      }
+                    },
+                    "nae_condition_events": {},
+                    "nae_monitors": {
+                      "type": "object",
+                      "description": "Reference Resource: [NAE_Monitor](#/NAE_Monitor)<br>References the NAE Monitors used on a specific expression The map key contains a position in the condition expression and the map value contains a reference to Monitor in that position.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "description": "Reference resource URI of NAE_Monitor"
+                        }
+                      }
+                    },
+                    "nae_watches": {
+                      "type": "object",
+                      "description": "Reference Resource: [NAE_Watch](#/NAE_Watch)<br>References the NAE Watches used on a specific expression The map key contains a position in the condition expression and the map value contains a reference to Watch in that position.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "description": "Reference resource URI of NAE_Watch"
+                        }
+                      }
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Name of the NAE Condition. This has to be a CNAME starting with NAE Agent name followed by its own name (i.e com.arubanetworks.bgp_monitor.agent1.condition1)."
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Type of the expression associated with the NAE Condition. Set to `monitor_resource` when the expression uses nae_monitors for evaluting time-series based conditions. Set to `watch_event_log` when the expression uses nae_watches of type event_log for evaluting event_log based conditions.",
+                      "enum": [
+                        "watch_event_log",
+                        "monitor_resource"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "condition_type"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "NAE_Script.name",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Script](#/NAE_Script)<br>Name of a NAE Script. This has to be a valid canonical name (CNAME) (i.e com.arubanetworks.bgp_monitor).",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "NAE_Agent.name",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Agent](#/NAE_Agent)<br>Name of a NAE Agent. This has to be a CNAME starting with NAE Script name followed by its own name (i.e com.arubanetworks.bgp_monitor.agent1).",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "NAE_Rule.name",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Rule](#/NAE_Rule)<br>Rules created by the particular NAE Agent.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "type",
+                  "expression",
+                  "expression_arguments",
+                  "count",
+                  "name",
+                  "nae_monitors",
+                  "nae_watches",
+                  "actions",
+                  "nae_baselines",
+                  "nae_condition_events"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/nae_scripts/{NAE_Script.name}/nae_agents/{NAE_Agent.name}/nae_rules/{NAE_Rule.name}/nae_conditions/{NAE_Condition.condition_type}": {
+      "get": {
+        "tags": [
+          "NAE_Condition"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "actions": {
+                      "type": "object",
+                      "description": "Reference Resource: [NAE_Action](#/NAE_Action)<br>Actions that need to be executed when condition is satisfied.",
+                      "properties": {
+                        "string": {
+                          "type": "string",
+                          "description": "Reference resource URI of NAE_Action"
+                        }
+                      }
+                    },
+                    "condition_type": {
+                      "type": "string",
+                      "description": "Reference Resource: [NAE_Condition](#/NAE_Condition)<br>Conditions associated with the rule CONDITION : Condition associated with the rule CLEAR_CONDITION : Optional clear condition associated with the rule"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Number of times this condition is met."
+                    },
+                    "expression": {
+                      "type": "string",
+                      "description": "Expression associated with the NAE Condition. There are two types of NAE conditions *watch_event_log* and *monitor_resource* and the grammar for each is described as below: Grammar for expression type *monitor_resource*:  operand    = integer | enum operator   = \"<\" | \">\" | \"==\" | \"!=\" for        = \"for\" , integer , time time       = \"second\" | \"minute\" | \"hour\" | \"day\" | \"seconds\" | \"minutes\" | \"hours\" | \"days\" operation1 = uri , operator, operand , [ for ] operation2 = \"sum\" , uri , operator , integer operation3 = \"rate\" , uri , operator , float , \"per\" , time operation4 = \"transition\" , uri , \"from\" , operand2 , \"to\" , operand2 Here are some examples: transition /v1/system/vrfs/red/bgp_routers/101/bgp_neighbors/10.0.0.1/conn_state from \"up\" to \"down /v1/system/vrfs/red/bgp_routers/*/bgp_neighbors/count < 5 for 3 minutes sum /v1/system/vrfs/red/bgp_routers/*/bgp_neighbors/count < 5 for 2 minutes rate /v1/system/vlan/1/spanning_tree/tcn_count > 3 per hour sum /v1/system/vrfs/red/bgp_routers/*/bgp_neighbors/count < {} for {} minutes every {} would be substituted by the value from arguments. Grammar for expression type *watch_event_log*:  regex          = Extended Posix Regular Expression list_element = '\"' , ( string | regex ) , '\"' list           = list_element , { \",\" , list_element } operand        = integer | enum count          = \"count\" , integer operation1     = resource , [ count ] operation2     = resource \"include\" ( \"any\" | \"all\" ) list operation3     = resource \"exclude\" list Here are some examples: {} {} count 10 {} include all \"servername\",\"error\" {} include any \"hpe-cardd\",\"log-mgmtd\" count 5 {} include any \"\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\" {} exclude \"Ok\" {} exclude \"(keyword1|keyword2)\""
+                    },
+                    "expression_arguments": {
+                      "type": "object",
+                      "description": "Reference Resource: [NAE_Parameter](#/NAE_Parameter)<br>References to the Monitoring Parameters used on the expression. The map key contains a position in the condition expression and the map value contains the parameter name of the argument in that position.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "description": "Reference resource URI of NAE_Parameter"
+                        }
+                      }
+                    },
+                    "nae_baselines": {
+                      "type": "object",
+                      "description": "Reference Resource: [NAE_Baseline](#/NAE_Baseline)<br>Reference to the baseline used in the condition. The map key contains a position in the expression the map value contains a reference to the Baseline in that position.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "description": "Reference resource URI of NAE_Baseline"
+                        }
+                      }
+                    },
+                    "nae_condition_events": {},
+                    "nae_monitors": {
+                      "type": "object",
+                      "description": "Reference Resource: [NAE_Monitor](#/NAE_Monitor)<br>References the NAE Monitors used on a specific expression The map key contains a position in the condition expression and the map value contains a reference to Monitor in that position.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "description": "Reference resource URI of NAE_Monitor"
+                        }
+                      }
+                    },
+                    "nae_watches": {
+                      "type": "object",
+                      "description": "Reference Resource: [NAE_Watch](#/NAE_Watch)<br>References the NAE Watches used on a specific expression The map key contains a position in the condition expression and the map value contains a reference to Watch in that position.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "description": "Reference resource URI of NAE_Watch"
+                        }
+                      }
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Name of the NAE Condition. This has to be a CNAME starting with NAE Agent name followed by its own name (i.e com.arubanetworks.bgp_monitor.agent1.condition1)."
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Type of the expression associated with the NAE Condition. Set to `monitor_resource` when the expression uses nae_monitors for evaluting time-series based conditions. Set to `watch_event_log` when the expression uses nae_watches of type event_log for evaluting event_log based conditions.",
+                      "enum": [
+                        "watch_event_log",
+                        "monitor_resource"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "condition_type"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "NAE_Script.name",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Script](#/NAE_Script)<br>Name of a NAE Script. This has to be a valid canonical name (CNAME) (i.e com.arubanetworks.bgp_monitor).",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "NAE_Agent.name",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Agent](#/NAE_Agent)<br>Name of a NAE Agent. This has to be a CNAME starting with NAE Script name followed by its own name (i.e com.arubanetworks.bgp_monitor.agent1).",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "NAE_Rule.name",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Rule](#/NAE_Rule)<br>Rules created by the particular NAE Agent.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "NAE_Condition.condition_type",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Condition](#/NAE_Condition)<br>Conditions associated with the rule CONDITION : Condition associated with the rule CLEAR_CONDITION : Optional clear condition associated with the rule",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "name",
+                  "nae_monitors",
+                  "nae_watches",
+                  "actions",
+                  "nae_baselines",
+                  "count",
+                  "type",
+                  "expression",
+                  "expression_arguments",
+                  "nae_condition_events"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

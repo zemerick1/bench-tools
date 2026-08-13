@@ -1,0 +1,1537 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Sites Webhooks",
+    "version": "2602.1.1"
+  },
+  "servers": [
+    {
+      "description": "Mist Global 01",
+      "url": "https://api.mist.com"
+    },
+    {
+      "description": "Mist Global 02",
+      "url": "https://api.gc1.mist.com"
+    },
+    {
+      "description": "Mist Global 03",
+      "url": "https://api.ac2.mist.com"
+    },
+    {
+      "description": "Mist Global 04",
+      "url": "https://api.gc2.mist.com"
+    },
+    {
+      "description": "Mist Global 05",
+      "url": "https://api.gc4.mist.com"
+    },
+    {
+      "description": "Mist EMEA 01",
+      "url": "https://api.eu.mist.com"
+    },
+    {
+      "description": "Mist EMEA 02",
+      "url": "https://api.gc3.mist.com"
+    },
+    {
+      "description": "Mist EMEA 03",
+      "url": "https://api.ac6.mist.com"
+    },
+    {
+      "description": "Mist EMEA 04",
+      "url": "https://api.gc6.mist.com"
+    },
+    {
+      "description": "Mist APAC 01",
+      "url": "https://api.ac5.mist.com"
+    },
+    {
+      "description": "Mist APAC 02",
+      "url": "https://api.gc5.mist.com"
+    },
+    {
+      "description": "Mist APAC 03",
+      "url": "https://api.gc7.mist.com"
+    }
+  ],
+  "security": [
+    {
+      "apiToken": []
+    },
+    {
+      "basicAuth": []
+    },
+    {
+      "basicAuth": [],
+      "csrfToken": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "A Site Webhook is a configuration that allows real-time events and data from a specific site to be pushed to a provided url.\n\nIt enables the collection of information about various topics such as device events, alarms, audits, client sessions and location updates at the site level.\n\nThe Webhook can be set up and customized using the Mist API, allowing users to receive and analyze specific data from a particular site.",
+      "name": "Sites Webhooks"
+    }
+  ],
+  "paths": {
+    "/api/v1/sites/{site_id}/webhooks": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        }
+      ],
+      "get": {
+        "description": "Get List of Site Webhooks",
+        "operationId": "listSiteWebhooks",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/WebhooksArray"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "listSiteWebhooks",
+        "tags": [
+          "Sites Webhooks"
+        ]
+      },
+      "post": {
+        "description": "Webhook defines a webhook, modeled after [github\\u2019s model](https://developer.github.com/webhooks/).\n\n\nThere is two types of webhooks:\n* webhooks ([examples](https://www.postman.com/juniper-mist/workspace/mist-systems-s-public-workspace/folder/224925-be01e694-7253-4195-8563-78e2a745e114))        \n* raw data webhooks ([examples](https://www.postman.com/juniper-mist/workspace/mist-systems-s-public-workspace/folder/224925-e2d5d5f8-4bdb-4efc-93e4-90f4b33d0b2b))\n\n\n##### Webhooks\nWebhooks can be configured at the org level (subset of topics only) and at the site level. It is possible to have multiple topics in the same webhook configuration and/or to have multiple webhooks configured at the same time.\n\n##### Client Raw Data Webhooks\nRaw data webhooks are a special subset of webhooks that provide insight into raw data packets emitted by a client, identified by their advertising MAC address (assets, discovered BLE, connected Wi-Fi, unconnected Wi-Fi). The data that client raw data webhooks encompasses are reporting AP information, RSSI Data, and any special packets/telemetry packets that the client may emit. Note that client raw webhooks are the raw data coming from the client and do not contain the X,Y location data of the client. In order to get the location data for a client please see our location webhooks. Clients can be identified uniquely across these client raw data topics and location webhook topic using MAC address as the Unique identifier (client identifier).\n\n###### Client Raw Data Webhooks Topics\nTopics that correspond to client raw data for different client types. \n* `asset-raw-rssi` - Raw data from packets emitted by named and filtered assets \n* `discovered-raw-rssi` - Raw data from packets emitted by passive BLE devices \n* `wifi-conn-raw` - Raw data from packets emitted by connected devices \n* `wifi-unconn-raw` - Raw data from packets emitted by unconnected devices (passive)\n\n### Asset Filtering for Client Raw Data Webhooks\n\nThe `asset-raw-rssi` webhook topic supports filtering of raw data by incorporating asset filters in the webhook payload.  \nThe filter topic allows multiple Webhooks to receive a subset of the a`asset-raw-rssi` data by assigning asset filters to a given webhook. The `asset-raw-rssi` filter topic is filtered-asset-rssi.\n\n\nA webhook assigned to a filter topic can take a list of AssetFilter IDs, which act as inclusive filters to determine which named asset and filtered asset data is sent to the assigned filter topic. Filters can be applied to multiple webhooks, and the same data can be sent to multiple filter topics.\n\n### Rules for Configuring Client Raw Data Webhooks\n\n1. Only four instances of a webhook object can contain a specific filter topic. - A site-level entry will override an org-level entry for the same client raw data webhook topic.\n2. An assigned asset filter must exist and belong to the same site as the webhook it is assigned to.\n",
+        "operationId": "createSiteWebhook",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "enabled": true,
+                    "headers": {},
+                    "name": "string",
+                    "secret": "string",
+                    "splunk_token": "string",
+                    "topics": [
+                      "location"
+                    ],
+                    "type": "http-post",
+                    "url": "string",
+                    "verify_cert": true
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/webhook"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Webhook"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400Webhook"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "createSiteWebhook",
+        "tags": [
+          "Sites Webhooks"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/webhooks/{webhook_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/webhook_id"
+        }
+      ],
+      "get": {
+        "description": "Get Site Webhook Details",
+        "operationId": "getSiteWebhook",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Webhook"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getSiteWebhook",
+        "tags": [
+          "Sites Webhooks"
+        ]
+      },
+      "put": {
+        "description": "Update Site Webhook",
+        "operationId": "updateSiteWebhook",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "enabled": true,
+                    "headers": {},
+                    "name": "string",
+                    "secret": "string",
+                    "splunk_token": "string",
+                    "topics": [
+                      "location"
+                    ],
+                    "type": "http-post",
+                    "url": "string",
+                    "verify_cert": true
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/webhook"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Webhook"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "updateSiteWebhook",
+        "tags": [
+          "Sites Webhooks"
+        ]
+      },
+      "delete": {
+        "description": "Delete Site Webhook",
+        "operationId": "deleteSiteWebhook",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "deleteSiteWebhook",
+        "tags": [
+          "Sites Webhooks"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/webhooks/{webhook_id}/events/count": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/webhook_id"
+        }
+      ],
+      "get": {
+        "description": "Count Site Webhooks deliveries\n\n\nTopics Supported:\n- alarms\n- audits\n- device-updowns\n- occupancy-alerts\n- ping",
+        "operationId": "countSiteWebhooksDeliveries",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "error",
+            "schema": {
+              "examples": [
+                "Webhook delivery failed"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status_code",
+            "schema": {
+              "examples": [
+                200
+              ],
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Webhook delivery status",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "$ref": "#/components/schemas/webhook_delivery_status"
+            }
+          },
+          {
+            "description": "Webhook topic",
+            "in": "query",
+            "name": "topic",
+            "schema": {
+              "$ref": "#/components/schemas/webhook_delivery_topic"
+            }
+          },
+          {
+            "in": "query",
+            "name": "distinct",
+            "schema": {
+              "$ref": "#/components/schemas/webhook_delivery_distinct"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/start"
+          },
+          {
+            "$ref": "#/components/parameters/end"
+          },
+          {
+            "$ref": "#/components/parameters/duration"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Count"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "countSiteWebhooksDeliveries",
+        "tags": [
+          "Sites Webhooks"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/webhooks/{webhook_id}/events/search": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/webhook_id"
+        }
+      ],
+      "get": {
+        "description": "Search Site Webhooks deliveries\n\n\nTopics Supported:\n- alarms\n- audits\n- device-updowns\n- occupancy-alerts\n- ping",
+        "operationId": "searchSiteWebhooksDeliveries",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "error",
+            "schema": {
+              "examples": [
+                "Webhook delivery failed"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status_code",
+            "schema": {
+              "examples": [
+                200
+              ],
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Webhook delivery status",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "$ref": "#/components/schemas/webhook_delivery_status"
+            }
+          },
+          {
+            "description": "Webhook topic",
+            "in": "query",
+            "name": "topic",
+            "schema": {
+              "$ref": "#/components/schemas/webhook_delivery_topic"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/start"
+          },
+          {
+            "$ref": "#/components/parameters/end"
+          },
+          {
+            "$ref": "#/components/parameters/duration"
+          },
+          {
+            "$ref": "#/components/parameters/sort"
+          },
+          {
+            "$ref": "#/components/parameters/search_after"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/WebhookDeliverySearch"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "searchSiteWebhooksDeliveries",
+        "tags": [
+          "Sites Webhooks"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/webhooks/{webhook_id}/ping": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/webhook_id"
+        }
+      ],
+      "post": {
+        "description": "Send a Ping event to the webhook",
+        "operationId": "pingSiteWebhook",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "pingSiteWebhook",
+        "tags": [
+          "Sites Webhooks"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "count_result": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "properties": {
+          "count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count"
+        ],
+        "type": "object"
+      },
+      "count_results": {
+        "items": {
+          "$ref": "#/components/schemas/count_result"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "created_time": {
+        "description": "When the object has been created, in epoch",
+        "format": "double",
+        "readOnly": true,
+        "type": "number"
+      },
+      "id": {
+        "description": "Unique ID of the object instance in the Mist Organization",
+        "examples": [
+          "53f10664-3ce8-4c27-b382-0ef66432349f"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "modified_time": {
+        "description": "When the object has been modified for the last time, in epoch",
+        "format": "double",
+        "readOnly": true,
+        "type": "number"
+      },
+      "org_id": {
+        "examples": [
+          "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "response_count": {
+        "additionalProperties": false,
+        "properties": {
+          "distinct": {
+            "type": "string"
+          },
+          "end": {
+            "type": "integer"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "results": {
+            "$ref": "#/components/schemas/count_results"
+          },
+          "start": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "distinct",
+          "end",
+          "limit",
+          "results",
+          "start",
+          "total"
+        ],
+        "type": "object"
+      },
+      "response_http400": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http400_webhook": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "invalid field: assetfilter_ids"
+            ],
+            "type": "string"
+          },
+          "reason": {
+            "examples": [
+              "contains duplicate uuids"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http401": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Authentication credentials were not provided."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http403": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "You do not have permission to perform this action."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http404": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http429": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "search_webhook_delivery": {
+        "additionalProperties": false,
+        "properties": {
+          "end": {
+            "examples": [
+              1688035193
+            ],
+            "type": "integer"
+          },
+          "limit": {
+            "examples": [
+              10
+            ],
+            "type": "integer"
+          },
+          "next": {
+            "type": "string"
+          },
+          "results": {
+            "$ref": "#/components/schemas/search_webhook_delivery_results"
+          },
+          "start": {
+            "examples": [
+              1687948793
+            ],
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "search_webhook_delivery_results": {
+        "items": {
+          "$ref": "#/components/schemas/webhook_delivery"
+        },
+        "type": "array"
+      },
+      "site_id": {
+        "examples": [
+          "441a1214-6928-442a-8e92-e1d34b8ec6a6"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "timestamp": {
+        "description": "Epoch (seconds)",
+        "format": "double",
+        "readOnly": true,
+        "type": "number"
+      },
+      "webhook": {
+        "properties": {
+          "assetfilter_ids": {
+            "$ref": "#/components/schemas/webhook_assetfilter_ids"
+          },
+          "created_time": {
+            "$ref": "#/components/schemas/created_time"
+          },
+          "enabled": {
+            "default": true,
+            "description": "Whether webhook is enabled",
+            "type": "boolean"
+          },
+          "for_site": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "headers": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "If `type`=`http-post`, additional custom HTTP headers to add. The headers name and value must be string, total bytes of headers name and value must be less than 1000",
+            "examples": [
+              {
+                "x-custom-1": "your_custom_header_value1",
+                "x-custom-2": "your_custom_header_value2"
+              }
+            ],
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "id": {
+            "$ref": "#/components/schemas/id"
+          },
+          "modified_time": {
+            "$ref": "#/components/schemas/modified_time"
+          },
+          "name": {
+            "description": "Name of the webhook",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "oauth2_client_id": {
+            "description": "Required when `oauth2_grant_type`==`client_credentials`",
+            "type": "string"
+          },
+          "oauth2_client_secret": {
+            "description": "Required when `oauth2_grant_type`==`client_credentials`",
+            "type": "string"
+          },
+          "oauth2_grant_type": {
+            "$ref": "#/components/schemas/webhook_oauth2_grant_type"
+          },
+          "oauth2_password": {
+            "description": "Required when `oauth2_grant_type`==`password`",
+            "type": "string"
+          },
+          "oauth2_scopes": {
+            "$ref": "#/components/schemas/webhook_oauth2_scopes"
+          },
+          "oauth2_token_url": {
+            "description": "Required when `type`==`oauth2`",
+            "type": "string"
+          },
+          "oauth2_username": {
+            "description": "Required when `oauth2_grant_type`==`password`",
+            "type": "string"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/org_id"
+          },
+          "secret": {
+            "description": "Only if `type`=`http-post` \n\nwhen `secret` is provided, two  HTTP headers will be added: \n  * X-Mist-Signature-v2: HMAC_SHA256(secret, body)\n  * X-Mist-Signature: HMAC_SHA1(secret, body)",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "single_event_per_message": {
+            "default": false,
+            "description": "Some solutions may not be able to parse multiple events from a single message (e.g. IBM Qradar, DSM). When set to `true`, only a single event will be sent per message. this feature is only available on certain topics (see [List Webhook Topics](/#operations/listWebhookTopics))",
+            "type": "boolean"
+          },
+          "site_id": {
+            "$ref": "#/components/schemas/site_id"
+          },
+          "splunk_token": {
+            "description": "Required if `type`=`splunk`. If splunk_token is not defined for a type Splunk webhook, it will not send, regardless if the webhook receiver is configured to accept it.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "topics": {
+            "$ref": "#/components/schemas/webhook_topics"
+          },
+          "type": {
+            "$ref": "#/components/schemas/webhook_type"
+          },
+          "url": {
+            "type": "string"
+          },
+          "verify_cert": {
+            "default": true,
+            "description": "When url uses HTTPS, whether to verify the certificate",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "webhook_assetfilter_ids": {
+        "description": "Only if `type`==`asset-raw-rssi`. List of ids to associated asset filters. These filters will be applied to messages routed to a filtered-asset-rssi webhook",
+        "items": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "webhook_delivery": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "description": "Error message, if there is one",
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/components/schemas/id"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/org_id"
+          },
+          "req_headers": {
+            "description": "HTTP request headers",
+            "examples": [
+              "{\\\"Content-Type\\\":[\\\"application/json\\\"],\\\"User-Agent\\\":[\\\"Mist-webhook\\\"]}"
+            ],
+            "type": "string"
+          },
+          "req_payload": {
+            "description": "HTTP request payload",
+            "examples": [
+              "{\\\"topic\\\":\\\"audits\\\",\\\"events\\\":[{\\\"admin_name\\\":\\\"John Doe john.doe@juniper.net\\\",\\\"after\\\":\\\"{\\\\\"radio_config\\\\\": {\\\\\"band_24\\\\\": {\\\\\"disabled\\\\\": false, \\\\\"allow_rrm_disable\\\\\": false, \\\\\"power_min\\\\\": null, \\\\\"power_max\\\\\": null, \\\\\"power\\\\\": 10, \\\\\"preamble\\\\\": \\\\\"short\\\\\", \\\\\"channels\\\\\": [1, 10], \\\\\"bandwidth\\\\\": 20}}}\\\",\\\"before\\\":\\\"{\\\\\"radio_config\\\\\": {\\\\\"band_24\\\\\": {\\\\\"disabled\\\\\": false, \\\\\"allow_rrm_disable\\\\\": false, \\\\\"power_min\\\\\": 8, \\\\\"power_max\\\\\": 18, \\\\\"power\\\\\": null, \\\\\"preamble\\\\\": \\\\\"long\\\\\", \\\\\"channels\\\\\": [1, 10], \\\\\"bandwidth\\\\\": 20}}}\\\",\\\"id\\\":\\\"737909a2-04ff-4aeb-b9da-cc924e74a4dd\\\",\\\"message\\\":\\\"Update Site Settings\\\",\\\"org_id\\\":\\\"fc7e2967-e7ef-41e6-b007-1217713de05a\\\",\\\"site_id\\\":\\\"256c3a35-9cb7-436e-bc6d-314972645d95\\\",\\\"site_name\\\":\\\"Test Site\\\",\\\"src_ip\\\":\\\"1.2.3.4\\\",\\\"timestamp\\\":1685956576.923601,\\\"user_agent\\\":\\\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36\\\"}]}"
+            ],
+            "type": "string"
+          },
+          "req_url": {
+            "description": "HTTP request URL",
+            "examples": [
+              "https://example.com"
+            ],
+            "type": "string"
+          },
+          "resp_body": {
+            "description": "HTTP response body",
+            "examples": [
+              "Ok"
+            ],
+            "type": "string"
+          },
+          "resp_headers": {
+            "description": "HTTP response headers",
+            "type": "string"
+          },
+          "site_id": {
+            "$ref": "#/components/schemas/site_id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/webhook_delivery_status"
+          },
+          "status_code": {
+            "examples": [
+              200
+            ],
+            "type": "integer"
+          },
+          "timestamp": {
+            "$ref": "#/components/schemas/timestamp"
+          },
+          "topic": {
+            "$ref": "#/components/schemas/webhook_delivery_topic"
+          },
+          "webhook_id": {
+            "examples": [
+              "7a11b901-f719-4c91-8aef-deb8699a6364"
+            ],
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "webhook_delivery_distinct": {
+        "description": "webhook topic. enum: `status`, `status_code`, `topic`, `webhook_id`",
+        "enum": [
+          "status",
+          "status_code",
+          "topic",
+          "webhook_id"
+        ],
+        "examples": [
+          "webhook_id"
+        ],
+        "type": "string"
+      },
+      "webhook_delivery_status": {
+        "description": "webhook delivery status. enum: `failure`, `success`",
+        "enum": [
+          "failure",
+          "success"
+        ],
+        "examples": [
+          "failure"
+        ],
+        "type": "string"
+      },
+      "webhook_delivery_topic": {
+        "description": "webhook topic. enum: `alarms`, `audits`, `device-updowns`, `occupancy-alerts`, `ping`",
+        "enum": [
+          "alarms",
+          "audits",
+          "device-updowns",
+          "occupancy-alerts",
+          "ping"
+        ],
+        "examples": [
+          "audits"
+        ],
+        "type": "string"
+      },
+      "webhook_oauth2_grant_type": {
+        "description": "required when `type`==`oauth2`. enum: `client_credentials`, `password`",
+        "enum": [
+          "client_credentials",
+          "password"
+        ],
+        "type": "string"
+      },
+      "webhook_oauth2_scopes": {
+        "description": "Required when `type`==`oauth2`, if provided, will be used in the token request",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "webhook_topics": {
+        "description": "List of supported webhook topics available with the API Call [List Webhook Topics](/#operations/listWebhookTopics)",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "webhook_type": {
+        "default": "http-post",
+        "description": "enum: `aws-sns`, `google-pubsub`, `http-post`, `oauth2`, `splunk`",
+        "enum": [
+          "aws-sns",
+          "google-pubsub",
+          "http-post",
+          "oauth2",
+          "splunk"
+        ],
+        "type": "string"
+      },
+      "webhooks": {
+        "items": {
+          "$ref": "#/components/schemas/webhook"
+        },
+        "type": "array"
+      }
+    },
+    "responses": {
+      "Count": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/CountExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_count"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/CountExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_count"
+            }
+          }
+        },
+        "description": "Result of Count"
+      },
+      "HTTP400": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          }
+        },
+        "description": "Bad Syntax"
+      },
+      "HTTP400Webhook": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Duplicate_assetfilter_id": {
+                "$ref": "#/components/examples/HTTP400WebhookDuplicateassetfilterid"
+              },
+              "Invalid_assetfilter_id": {
+                "$ref": "#/components/examples/HTTP400WebhookInvalidassetfilterid"
+              },
+              "Malformed_assetfilter_id": {
+                "$ref": "#/components/examples/HTTP400WebhookMalformedassetfilterid"
+              },
+              "RawDataWebhook_already_created": {
+                "$ref": "#/components/examples/HTTP400WebhookRawDataWebhookalreadycreated"
+              },
+              "RawDataWebhook_multiple_topics": {
+                "$ref": "#/components/examples/HTTP400WebhookRawDataWebhookmultipletopics"
+              },
+              "org_level_filter_webhook": {
+                "$ref": "#/components/examples/HTTP400Webhookorglevelfilterwebhook"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400_webhook"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Duplicate_assetfilter_id": {
+                "$ref": "#/components/examples/HTTP400WebhookDuplicateassetfilterid"
+              },
+              "Invalid_assetfilter_id": {
+                "$ref": "#/components/examples/HTTP400WebhookInvalidassetfilterid"
+              },
+              "Malformed_assetfilter_id": {
+                "$ref": "#/components/examples/HTTP400WebhookMalformedassetfilterid"
+              },
+              "RawDataWebhook_already_created": {
+                "$ref": "#/components/examples/HTTP400WebhookRawDataWebhookalreadycreated"
+              },
+              "RawDataWebhook_multiple_topics": {
+                "$ref": "#/components/examples/HTTP400WebhookRawDataWebhookmultipletopics"
+              },
+              "org_level_filter_webhook": {
+                "$ref": "#/components/examples/HTTP400Webhookorglevelfilterwebhook"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400_webhook"
+            }
+          }
+        },
+        "description": "Bad Syntax"
+      },
+      "HTTP401": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          }
+        },
+        "description": "Unauthorized"
+      },
+      "HTTP403": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          }
+        },
+        "description": "Permission Denied"
+      },
+      "HTTP404": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          }
+        },
+        "description": "Not found. The API endpoint doesn’t exist or resource doesn’ t exist"
+      },
+      "HTTP429": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          }
+        },
+        "description": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+      },
+      "OK": {
+        "description": "OK"
+      },
+      "Webhook": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/WebhookExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/webhook"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/WebhookExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/webhook"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "WebhookDeliverySearch": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Webhook Deliveries": {
+                "$ref": "#/components/examples/WebhookDeliverySearchWebhookDeliveries"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/search_webhook_delivery"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Webhook Deliveries": {
+                "$ref": "#/components/examples/WebhookDeliverySearchWebhookDeliveries"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/search_webhook_delivery"
+            }
+          }
+        },
+        "description": "Example response"
+      },
+      "WebhooksArray": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/WebhooksArrayExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/webhooks"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/WebhooksArrayExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/webhooks"
+            }
+          }
+        },
+        "description": "OK"
+      }
+    },
+    "parameters": {
+      "duration": {
+        "description": "Duration like 7d, 2w",
+        "in": "query",
+        "name": "duration",
+        "required": false,
+        "schema": {
+          "default": "1d",
+          "examples": [
+            "10m"
+          ],
+          "type": "string"
+        }
+      },
+      "end": {
+        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "in": "query",
+        "name": "end",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "limit": {
+        "in": "query",
+        "name": "limit",
+        "required": false,
+        "schema": {
+          "default": 100,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "page": {
+        "in": "query",
+        "name": "page",
+        "required": false,
+        "schema": {
+          "default": 1,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "search_after": {
+        "description": "Pagination cursor for retrieving subsequent pages of results. This value is automatically populated by Mist in the `next` URL from the previous response and should not be manually constructed.",
+        "in": "query",
+        "name": "search_after",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "site_id": {
+        "in": "path",
+        "name": "site_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "sort": {
+        "description": "On which field the list should be sorted, -prefix represents DESC order",
+        "in": "query",
+        "name": "sort",
+        "required": false,
+        "schema": {
+          "default": "timestamp",
+          "examples": [
+            "-site_id"
+          ],
+          "type": "string"
+        }
+      },
+      "start": {
+        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "in": "query",
+        "name": "start",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "webhook_id": {
+        "in": "path",
+        "name": "webhook_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      }
+    },
+    "examples": {
+      "CountExample": {
+        "value": {
+          "distinct": "string",
+          "end": 0,
+          "limit": 0,
+          "results": [
+            {
+              "count": 0,
+              "property": "string"
+            }
+          ],
+          "start": 0,
+          "total": 0
+        }
+      },
+      "HTTP400Example": {
+        "value": {
+          "detail": "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+        }
+      },
+      "HTTP400WebhookDuplicateassetfilterid": {
+        "value": {
+          "detail": "invalid field: assetfilter_ids",
+          "reason": "contains duplicate uuids"
+        }
+      },
+      "HTTP400WebhookInvalidassetfilterid": {
+        "value": {
+          "detail": "invalid field: assetfilter_ids"
+        }
+      },
+      "HTTP400WebhookMalformedassetfilterid": {
+        "value": {
+          "detail": "invalid field: assetfilter_ids"
+        }
+      },
+      "HTTP400WebhookRawDataWebhookalreadycreated": {
+        "value": {
+          "detail": "Webhook already configured for special location topic"
+        }
+      },
+      "HTTP400WebhookRawDataWebhookmultipletopics": {
+        "value": {
+          "detail": "Only one location topic can be configured per URL"
+        }
+      },
+      "HTTP400Webhookorglevelfilterwebhook": {
+        "value": {
+          "detail": "invalid field: topics",
+          "reason": "filtered asset webhooks must be associated with a site"
+        }
+      },
+      "HTTP401Example": {
+        "value": {
+          "detail": "Authentication credentials were not provided."
+        }
+      },
+      "HTTP403Example": {
+        "value": {
+          "detail": "You do not have permission to perform this action."
+        }
+      },
+      "HTTP429Example": {
+        "value": {
+          "detail": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+        }
+      },
+      "WebhookDeliverySearchWebhookDeliveries": {
+        "value": {
+          "end": 1688035193,
+          "limit": 10,
+          "results": [
+            {
+              "error": "string",
+              "id": "55b0f02f-ebf6-4ad2-8b10-200508a97581",
+              "org_id": "fc7e2967-e7ef-41e6-b007-1217713de05a",
+              "req_headers": "{\\\"Content-Type\\\":[\\\"application/json\\\"],\\\"User-Agent\\\":[\\\"Mist-webhook\\\"]}",
+              "req_payload": "{\\\"topic\\\":\\\"audits\\\",\\\"events\\\":[{\\\"admin_name\\\":\\\"John Doe john.doe@juniper.net\\\",\\\"after\\\":\\\"{\\\\\"radio_config\\\\\": {\\\\\"band_24\\\\\": {\\\\\"disabled\\\\\": false, \\\\\"allow_rrm_disable\\\\\": false, \\\\\"power_min\\\\\": null, \\\\\"power_max\\\\\": null, \\\\\"power\\\\\": 10, \\\\\"preamble\\\\\": \\\\\"short\\\\\", \\\\\"channels\\\\\": [1, 10], \\\\\"bandwidth\\\\\": 20}}}\\\",\\\"before\\\":\\\"{\\\\\"radio_config\\\\\": {\\\\\"band_24\\\\\": {\\\\\"disabled\\\\\": false, \\\\\"allow_rrm_disable\\\\\": false, \\\\\"power_min\\\\\": 8, \\\\\"power_max\\\\\": 18, \\\\\"power\\\\\": null, \\\\\"preamble\\\\\": \\\\\"long\\\\\", \\\\\"channels\\\\\": [1, 10], \\\\\"bandwidth\\\\\": 20}}}\\\",\\\"id\\\":\\\"737909a2-04ff-4aeb-b9da-cc924e74a4dd\\\",\\\"message\\\":\\\"Update Site Settings\\\",\\\"org_id\\\":\\\"fc7e2967-e7ef-41e6-b007-1217713de05a\\\",\\\"site_id\\\":\\\"256c3a35-9cb7-436e-bc6d-314972645d95\\\",\\\"site_name\\\":\\\"Test Site\\\",\\\"src_ip\\\":\\\"1.2.3.4\\\",\\\"timestamp\\\":1685956576.923601,\\\"user_agent\\\":\\\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36\\\"}]}",
+              "req_url": "https://example.com",
+              "resp_body": "Ok",
+              "resp_headers": "string",
+              "site_id": "256c3a35-9cb7-436e-bc6d-314972645d95",
+              "status": "success",
+              "status_code": 200,
+              "timestamp": 1687962508.583656,
+              "topic": "audits",
+              "webhook_id": "7a11b901-f719-4c91-8aef-deb8699a6364"
+            }
+          ],
+          "start": 1687948793,
+          "total": 0
+        }
+      },
+      "WebhookExample": {
+        "value": {
+          "created_time": 0,
+          "enabled": true,
+          "headers": {},
+          "id": "b069b358-4c97-5319-1f8c-7c5ca64d6ab1",
+          "modified_time": 0,
+          "name": "string",
+          "org_id": "b069b358-4c97-5319-1f8c-7c5ca64d6ab1",
+          "secret": "string",
+          "site_id": "b069b358-4c97-5319-1f8c-7c5ca64d6ab1",
+          "splunk_token": "string",
+          "topics": [
+            "location"
+          ],
+          "type": "http-post",
+          "url": "string",
+          "verify_cert": true
+        }
+      },
+      "WebhooksArrayExample": {
+        "value": [
+          {
+            "created_time": 0,
+            "enabled": true,
+            "headers": {},
+            "id": "b069b358-4c97-5319-1f8c-7c5ca64d6ab1",
+            "modified_time": 0,
+            "name": "string",
+            "org_id": "b069b358-4c97-5319-1f8c-7c5ca64d6ab1",
+            "secret": "string",
+            "site_id": "b069b358-4c97-5319-1f8c-7c5ca64d6ab1",
+            "splunk_token": "string",
+            "topics": [
+              "location"
+            ],
+            "type": "http-post",
+            "url": "string",
+            "verify_cert": true
+          }
+        ]
+      }
+    },
+    "securitySchemes": {
+      "apiToken": {
+        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      },
+      "basicAuth": {
+        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
+        "scheme": "basic",
+        "type": "http"
+      },
+      "csrfToken": {
+        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "in": "header",
+        "name": "X-CSRFToken",
+        "type": "apiKey"
+      }
+    }
+  }
+}

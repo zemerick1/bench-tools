@@ -1,0 +1,1339 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "UBT_Zone",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "UBT_Zone"
+    }
+  ],
+  "paths": {
+    "/system/vrfs/{VRF.name}/ubt_zones": {
+      "get": {
+        "tags": [
+          "UBT_Zone"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "bucket_map": {
+                      "type": "object",
+                      "description": "Bucket map information as provided by the SAC node.",
+                      "properties": {
+                        "integer": {
+                          "type": "object",
+                          "properties": {
+                            "active_uac": {
+                              "type": "string",
+                              "description": "IP address of the active node for this bucket-id.",
+                              "maxLength": 45
+                            },
+                            "connectivity_type": {
+                              "type": "string",
+                              "description": "Connectivity type.  `L2`: active and standby controller nodes are on the same IP         subnet.  `L3`: active and standby controller nodes are not part on the         same IP subnet.",
+                              "enum": [
+                                "L2",
+                                "L3"
+                              ]
+                            },
+                            "standby_uac": {
+                              "type": "string",
+                              "description": "IP address of the stand-by node for this bucket-id.",
+                              "maxLength": 45
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "cluster_alias": {
+                      "type": "string",
+                      "description": "User provided name for the cluster. This is advertised to the switch as part of the cluster-switch handshake.",
+                      "maxLength": 32
+                    },
+                    "cluster_name": {
+                      "type": "string",
+                      "description": "Name of the UBT cluster.",
+                      "maxLength": 32
+                    },
+                    "controller_nodes": {
+                      "type": "object",
+                      "description": "IP address of the primary and backup controller nodes.",
+                      "properties": {
+                        "string": {
+                          "type": "string",
+                          "maxLength": 45
+                        }
+                      }
+                    },
+                    "controller_nodes_handshake_state": {
+                      "type": "object",
+                      "description": " `not_started`:            handshake with the controller has not                             started yet.  `in_progress`:            handshake with the controller is                             in progress.  `compatibility_mismatch`: controller node not capable of supporting client                            based UBT functionality.  `ready_for_bootstrap`:    handshake complete and ready for next phase of the                            control plane sequence.",
+                      "properties": {
+                        "string": {
+                          "type": "string",
+                          "enum": [
+                            "not_started",
+                            "in_progress",
+                            "compatibility_mismatch",
+                            "ready_for_bootstrap"
+                          ]
+                        }
+                      }
+                    },
+                    "controller_nodes_operational_role": {
+                      "type": "object",
+                      "properties": {
+                        "string": {
+                          "type": "string",
+                          "enum": [
+                            "operational_primary",
+                            "operational_secondary"
+                          ]
+                        }
+                      }
+                    },
+                    "enable": {
+                      "type": "boolean",
+                      "description": "Enables UBT functionality for this zone."
+                    },
+                    "failure_reason": {
+                      "type": "string",
+                      "description": "Failure reason. Only applicable when operational_state is 'down'.",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [UBT_Zone](#/UBT_Zone)<br>Zone name.",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "node_list": {
+                      "type": "array",
+                      "description": "IP address of the controller nodes in the UBT cluster.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 12
+                    },
+                    "operational_state": {
+                      "type": "string",
+                      "description": "Operational state of this zone.",
+                      "enum": [
+                        "up",
+                        "down"
+                      ]
+                    },
+                    "papi_security_key": {
+                      "type": "string",
+                      "description": "Shared security key that will be used to encrypt UBT PAPI messages exchanged between this switch and the controller cluster corresponding to this zone. when not set, shared security key is not used for encrypting papi messages.",
+                      "minLength": 10
+                    },
+                    "sac_heartbeat_interval": {
+                      "type": "integer",
+                      "description": "Time interval (in seconds) between successive  heartbeat messages to the switch anchor node.",
+                      "maximum": 8,
+                      "minimum": 1
+                    },
+                    "sac_node_statistics": {
+                      "type": "object",
+                      "description": "Statistics of various control plane packets exchanged between the switch and  the active and standby switch anchor controllers.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "bootstrap_rx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of bootstrap packets received."
+                            },
+                            "bootstrap_tx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of bootstrap packets transmitted."
+                            },
+                            "bucketmap_ack_rx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of bucket map acknowledgment packets received."
+                            },
+                            "bucketmap_rx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of bucket map packets transmitted."
+                            },
+                            "failover_ack_rx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of failover acknowledgment packets received."
+                            },
+                            "failover_tx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of failover packets transmitted."
+                            },
+                            "heartbeat_rx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of heartbeat packets received."
+                            },
+                            "heartbeat_tx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of heartbeat packets transmitted."
+                            },
+                            "nodelist_ack_rx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of nodelist acknowledgment packets received."
+                            },
+                            "nodelist_rx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of nodelist packets transmitted."
+                            },
+                            "unbootstrap_ack_rx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of unbootstrap acknowledgment packets received."
+                            },
+                            "unbootstrap_tx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of unbootstrap packets transmitted."
+                            },
+                            "wol_bootstrap_ack_rx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of Wake-on-LAN bootstrap acknowledgment packets received."
+                            },
+                            "wol_bootstrap_tx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of Wake-on-LAN bootstrap packets transmitted."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "sac_nodes": {
+                      "type": "object",
+                      "description": "IP address, Ethernet MAC address and bootstrap state of the  active and standby switch anchor controller nodes.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "ip_address": {
+                              "type": "string",
+                              "description": "IP address of the node.",
+                              "maxLength": 45
+                            },
+                            "mac_address": {
+                              "type": "string",
+                              "description": "Ethernet MAC address of the node.",
+                              "maxLength": 17
+                            },
+                            "state": {
+                              "type": "string",
+                              "description": "Switch bootstrap state of the node:  `registering`:   bootstrap process is on-going.  `registered`:    device has bootstrapped with the node.  `unregistering`: device de-registering from the node.",
+                              "enum": [
+                                "registering",
+                                "registered",
+                                "unregistering"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "switch_bootstrap_state": {
+                      "type": "string",
+                      "description": " `not_started`:            bootstrap process has not started.  `bootstrapping`:          bootstrap process is on-going.  `standalone`:             device has bootstrapped with the SAC node.  `redundant`:              device has bootstrapped with the SAC and                             the Standby-SAC nodes.  `failover`:               heartbeat to the SAC node timedout and                             the device is failing over to the Standby-SAC.  `unbootstrapping`:        de-registering from the SAC and Standby-SAC nodes.",
+                      "enum": [
+                        "not_started",
+                        "bootstrapping",
+                        "standalone",
+                        "redundant",
+                        "failover",
+                        "unbootstrapping"
+                      ]
+                    },
+                    "uac_keepalive_interval": {
+                      "type": "integer",
+                      "description": "Time interval (in seconds) between successive  keep-alive messages sent to the user anchor node.",
+                      "maximum": 60,
+                      "minimum": 1
+                    },
+                    "ubt_uacs": {},
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [UBT_Zone](#/UBT_Zone)<br>VRF associated with this zone."
+                    },
+                    "wol_bootstrap_state": {
+                      "type": "object",
+                      "description": "IP address, Wake-on-LAN VLAN bootstrap state, registered and failed VLAN list of the active and standby switch anchor  controller nodes.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "failed_vlans": {
+                              "type": "string",
+                              "description": "Wake-on-LAN failed VLAN list (comma seperated)."
+                            },
+                            "ip_address": {
+                              "type": "string",
+                              "description": "IP address of the node.",
+                              "maxLength": 45
+                            },
+                            "registered_vlans": {
+                              "type": "string",
+                              "description": "Wake-on-LAN registered VLAN list (comma seperated)."
+                            },
+                            "state": {
+                              "type": "string",
+                              "description": "Wake-on-LAN bootstrap state of the node:  `registering`:  bootstrap process is on-going.  `registered`:   bootstrap is successful with the node.  `failed`:       bootstrap failed or partially succeeded with the node.  `timed_out`:    bootstrap process timed out.  `incompatible`: controller is not capable of supporting WoL                  VLAN bootstrap functionality.",
+                              "enum": [
+                                "registering",
+                                "registered",
+                                "failed",
+                                "timed_out"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "wol_vlans": {
+                      "type": "array",
+                      "description": "Wake-on-LAN VLAN configuration. This is applicable only for VLAN Extend mode.",
+                      "items": {
+                        "type": "integer"
+                      },
+                      "maxItems": 100
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "vrf"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "controller_nodes",
+                  "controller_nodes_handshake_state",
+                  "controller_nodes_operational_role",
+                  "wol_vlans",
+                  "sac_nodes",
+                  "papi_security_key",
+                  "uac_keepalive_interval",
+                  "wol_bootstrap_state",
+                  "cluster_name",
+                  "bucket_map",
+                  "enable",
+                  "switch_bootstrap_state",
+                  "sac_node_statistics",
+                  "name",
+                  "sac_heartbeat_interval",
+                  "cluster_alias",
+                  "node_list",
+                  "operational_state",
+                  "failure_reason",
+                  "ubt_uacs"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "UBT_Zone"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "controller_nodes": {
+                    "type": "object",
+                    "description": "IP address of the primary and backup controller nodes.",
+                    "properties": {
+                      "string": {
+                        "type": "string",
+                        "maxLength": 45
+                      }
+                    }
+                  },
+                  "enable": {
+                    "type": "boolean",
+                    "description": "Enables UBT functionality for this zone."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [UBT_Zone](#/UBT_Zone)<br>Zone name.",
+                    "maxLength": 64,
+                    "minLength": 1
+                  },
+                  "papi_security_key": {
+                    "type": "string",
+                    "description": "Shared security key that will be used to encrypt UBT PAPI messages exchanged between this switch and the controller cluster corresponding to this zone. when not set, shared security key is not used for encrypting papi messages.",
+                    "minLength": 10
+                  },
+                  "sac_heartbeat_interval": {
+                    "type": "integer",
+                    "description": "Time interval (in seconds) between successive  heartbeat messages to the switch anchor node.",
+                    "maximum": 8,
+                    "minimum": 1
+                  },
+                  "uac_keepalive_interval": {
+                    "type": "integer",
+                    "description": "Time interval (in seconds) between successive  keep-alive messages sent to the user anchor node.",
+                    "maximum": 60,
+                    "minimum": 1
+                  },
+                  "vrf": {
+                    "type": "string",
+                    "description": "Reference Resource: [UBT_Zone](#/UBT_Zone)<br>VRF associated with this zone."
+                  },
+                  "wol_vlans": {
+                    "type": "array",
+                    "description": "Wake-on-LAN VLAN configuration. This is applicable only for VLAN Extend mode.",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "maxItems": 100
+                  }
+                },
+                "required": [
+                  "name",
+                  "vrf"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    },
+    "/system/vrfs/{VRF.name}/ubt_zones/{UBT_Zone.name}": {
+      "get": {
+        "tags": [
+          "UBT_Zone"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "bucket_map": {
+                      "type": "object",
+                      "description": "Bucket map information as provided by the SAC node.",
+                      "properties": {
+                        "integer": {
+                          "type": "object",
+                          "properties": {
+                            "active_uac": {
+                              "type": "string",
+                              "description": "IP address of the active node for this bucket-id.",
+                              "maxLength": 45
+                            },
+                            "connectivity_type": {
+                              "type": "string",
+                              "description": "Connectivity type.  `L2`: active and standby controller nodes are on the same IP         subnet.  `L3`: active and standby controller nodes are not part on the         same IP subnet.",
+                              "enum": [
+                                "L2",
+                                "L3"
+                              ]
+                            },
+                            "standby_uac": {
+                              "type": "string",
+                              "description": "IP address of the stand-by node for this bucket-id.",
+                              "maxLength": 45
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "cluster_alias": {
+                      "type": "string",
+                      "description": "User provided name for the cluster. This is advertised to the switch as part of the cluster-switch handshake.",
+                      "maxLength": 32
+                    },
+                    "cluster_name": {
+                      "type": "string",
+                      "description": "Name of the UBT cluster.",
+                      "maxLength": 32
+                    },
+                    "controller_nodes": {
+                      "type": "object",
+                      "description": "IP address of the primary and backup controller nodes.",
+                      "properties": {
+                        "string": {
+                          "type": "string",
+                          "maxLength": 45
+                        }
+                      }
+                    },
+                    "controller_nodes_handshake_state": {
+                      "type": "object",
+                      "description": " `not_started`:            handshake with the controller has not                             started yet.  `in_progress`:            handshake with the controller is                             in progress.  `compatibility_mismatch`: controller node not capable of supporting client                            based UBT functionality.  `ready_for_bootstrap`:    handshake complete and ready for next phase of the                            control plane sequence.",
+                      "properties": {
+                        "string": {
+                          "type": "string",
+                          "enum": [
+                            "not_started",
+                            "in_progress",
+                            "compatibility_mismatch",
+                            "ready_for_bootstrap"
+                          ]
+                        }
+                      }
+                    },
+                    "controller_nodes_operational_role": {
+                      "type": "object",
+                      "properties": {
+                        "string": {
+                          "type": "string",
+                          "enum": [
+                            "operational_primary",
+                            "operational_secondary"
+                          ]
+                        }
+                      }
+                    },
+                    "enable": {
+                      "type": "boolean",
+                      "description": "Enables UBT functionality for this zone."
+                    },
+                    "failure_reason": {
+                      "type": "string",
+                      "description": "Failure reason. Only applicable when operational_state is 'down'.",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [UBT_Zone](#/UBT_Zone)<br>Zone name.",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "node_list": {
+                      "type": "array",
+                      "description": "IP address of the controller nodes in the UBT cluster.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 12
+                    },
+                    "operational_state": {
+                      "type": "string",
+                      "description": "Operational state of this zone.",
+                      "enum": [
+                        "up",
+                        "down"
+                      ]
+                    },
+                    "papi_security_key": {
+                      "type": "string",
+                      "description": "Shared security key that will be used to encrypt UBT PAPI messages exchanged between this switch and the controller cluster corresponding to this zone. when not set, shared security key is not used for encrypting papi messages.",
+                      "minLength": 10
+                    },
+                    "sac_heartbeat_interval": {
+                      "type": "integer",
+                      "description": "Time interval (in seconds) between successive  heartbeat messages to the switch anchor node.",
+                      "maximum": 8,
+                      "minimum": 1
+                    },
+                    "sac_node_statistics": {
+                      "type": "object",
+                      "description": "Statistics of various control plane packets exchanged between the switch and  the active and standby switch anchor controllers.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "bootstrap_rx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of bootstrap packets received."
+                            },
+                            "bootstrap_tx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of bootstrap packets transmitted."
+                            },
+                            "bucketmap_ack_rx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of bucket map acknowledgment packets received."
+                            },
+                            "bucketmap_rx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of bucket map packets transmitted."
+                            },
+                            "failover_ack_rx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of failover acknowledgment packets received."
+                            },
+                            "failover_tx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of failover packets transmitted."
+                            },
+                            "heartbeat_rx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of heartbeat packets received."
+                            },
+                            "heartbeat_tx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of heartbeat packets transmitted."
+                            },
+                            "nodelist_ack_rx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of nodelist acknowledgment packets received."
+                            },
+                            "nodelist_rx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of nodelist packets transmitted."
+                            },
+                            "unbootstrap_ack_rx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of unbootstrap acknowledgment packets received."
+                            },
+                            "unbootstrap_tx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of unbootstrap packets transmitted."
+                            },
+                            "wol_bootstrap_ack_rx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of Wake-on-LAN bootstrap acknowledgment packets received."
+                            },
+                            "wol_bootstrap_tx": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of Wake-on-LAN bootstrap packets transmitted."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "sac_nodes": {
+                      "type": "object",
+                      "description": "IP address, Ethernet MAC address and bootstrap state of the  active and standby switch anchor controller nodes.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "ip_address": {
+                              "type": "string",
+                              "description": "IP address of the node.",
+                              "maxLength": 45
+                            },
+                            "mac_address": {
+                              "type": "string",
+                              "description": "Ethernet MAC address of the node.",
+                              "maxLength": 17
+                            },
+                            "state": {
+                              "type": "string",
+                              "description": "Switch bootstrap state of the node:  `registering`:   bootstrap process is on-going.  `registered`:    device has bootstrapped with the node.  `unregistering`: device de-registering from the node.",
+                              "enum": [
+                                "registering",
+                                "registered",
+                                "unregistering"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "switch_bootstrap_state": {
+                      "type": "string",
+                      "description": " `not_started`:            bootstrap process has not started.  `bootstrapping`:          bootstrap process is on-going.  `standalone`:             device has bootstrapped with the SAC node.  `redundant`:              device has bootstrapped with the SAC and                             the Standby-SAC nodes.  `failover`:               heartbeat to the SAC node timedout and                             the device is failing over to the Standby-SAC.  `unbootstrapping`:        de-registering from the SAC and Standby-SAC nodes.",
+                      "enum": [
+                        "not_started",
+                        "bootstrapping",
+                        "standalone",
+                        "redundant",
+                        "failover",
+                        "unbootstrapping"
+                      ]
+                    },
+                    "uac_keepalive_interval": {
+                      "type": "integer",
+                      "description": "Time interval (in seconds) between successive  keep-alive messages sent to the user anchor node.",
+                      "maximum": 60,
+                      "minimum": 1
+                    },
+                    "ubt_uacs": {},
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [UBT_Zone](#/UBT_Zone)<br>VRF associated with this zone."
+                    },
+                    "wol_bootstrap_state": {
+                      "type": "object",
+                      "description": "IP address, Wake-on-LAN VLAN bootstrap state, registered and failed VLAN list of the active and standby switch anchor  controller nodes.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "failed_vlans": {
+                              "type": "string",
+                              "description": "Wake-on-LAN failed VLAN list (comma seperated)."
+                            },
+                            "ip_address": {
+                              "type": "string",
+                              "description": "IP address of the node.",
+                              "maxLength": 45
+                            },
+                            "registered_vlans": {
+                              "type": "string",
+                              "description": "Wake-on-LAN registered VLAN list (comma seperated)."
+                            },
+                            "state": {
+                              "type": "string",
+                              "description": "Wake-on-LAN bootstrap state of the node:  `registering`:  bootstrap process is on-going.  `registered`:   bootstrap is successful with the node.  `failed`:       bootstrap failed or partially succeeded with the node.  `timed_out`:    bootstrap process timed out.  `incompatible`: controller is not capable of supporting WoL                  VLAN bootstrap functionality.",
+                              "enum": [
+                                "registering",
+                                "registered",
+                                "failed",
+                                "timed_out"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "wol_vlans": {
+                      "type": "array",
+                      "description": "Wake-on-LAN VLAN configuration. This is applicable only for VLAN Extend mode.",
+                      "items": {
+                        "type": "integer"
+                      },
+                      "maxItems": 100
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "vrf"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "UBT_Zone.name",
+            "in": "path",
+            "description": "Reference Resource: [UBT_Zone](#/UBT_Zone)<br>Zone name.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "enable",
+                  "switch_bootstrap_state",
+                  "sac_node_statistics",
+                  "name",
+                  "sac_heartbeat_interval",
+                  "cluster_alias",
+                  "node_list",
+                  "operational_state",
+                  "failure_reason",
+                  "controller_nodes",
+                  "controller_nodes_handshake_state",
+                  "controller_nodes_operational_role",
+                  "wol_vlans",
+                  "sac_nodes",
+                  "papi_security_key",
+                  "uac_keepalive_interval",
+                  "wol_bootstrap_state",
+                  "cluster_name",
+                  "bucket_map",
+                  "ubt_uacs"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "UBT_Zone"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "controller_nodes": {
+                    "type": "object",
+                    "description": "IP address of the primary and backup controller nodes.",
+                    "properties": {
+                      "string": {
+                        "type": "string",
+                        "maxLength": 45
+                      }
+                    }
+                  },
+                  "enable": {
+                    "type": "boolean",
+                    "description": "Enables UBT functionality for this zone."
+                  },
+                  "papi_security_key": {
+                    "type": "string",
+                    "description": "Shared security key that will be used to encrypt UBT PAPI messages exchanged between this switch and the controller cluster corresponding to this zone. when not set, shared security key is not used for encrypting papi messages.",
+                    "minLength": 10
+                  },
+                  "sac_heartbeat_interval": {
+                    "type": "integer",
+                    "description": "Time interval (in seconds) between successive  heartbeat messages to the switch anchor node.",
+                    "maximum": 8,
+                    "minimum": 1
+                  },
+                  "uac_keepalive_interval": {
+                    "type": "integer",
+                    "description": "Time interval (in seconds) between successive  keep-alive messages sent to the user anchor node.",
+                    "maximum": 60,
+                    "minimum": 1
+                  },
+                  "vrf": {
+                    "type": "string",
+                    "description": "Reference Resource: [UBT_Zone](#/UBT_Zone)<br>VRF associated with this zone."
+                  },
+                  "wol_vlans": {
+                    "type": "array",
+                    "description": "Wake-on-LAN VLAN configuration. This is applicable only for VLAN Extend mode.",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "maxItems": 100
+                  }
+                },
+                "required": [
+                  "vrf"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "UBT_Zone.name",
+            "in": "path",
+            "description": "Reference Resource: [UBT_Zone](#/UBT_Zone)<br>Zone name.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "UBT_Zone"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "UBT_Zone.name",
+            "in": "path",
+            "description": "Reference Resource: [UBT_Zone](#/UBT_Zone)<br>Zone name.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "UBT_Zone"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "controller_nodes": {
+                    "type": "object",
+                    "description": "IP address of the primary and backup controller nodes.",
+                    "properties": {
+                      "string": {
+                        "type": "string",
+                        "maxLength": 45
+                      }
+                    }
+                  },
+                  "enable": {
+                    "type": "boolean",
+                    "description": "Enables UBT functionality for this zone."
+                  },
+                  "papi_security_key": {
+                    "type": "string",
+                    "description": "Shared security key that will be used to encrypt UBT PAPI messages exchanged between this switch and the controller cluster corresponding to this zone. when not set, shared security key is not used for encrypting papi messages.",
+                    "minLength": 10
+                  },
+                  "sac_heartbeat_interval": {
+                    "type": "integer",
+                    "description": "Time interval (in seconds) between successive  heartbeat messages to the switch anchor node.",
+                    "maximum": 8,
+                    "minimum": 1
+                  },
+                  "uac_keepalive_interval": {
+                    "type": "integer",
+                    "description": "Time interval (in seconds) between successive  keep-alive messages sent to the user anchor node.",
+                    "maximum": 60,
+                    "minimum": 1
+                  },
+                  "vrf": {
+                    "type": "string",
+                    "description": "Reference Resource: [UBT_Zone](#/UBT_Zone)<br>VRF associated with this zone."
+                  },
+                  "wol_vlans": {
+                    "type": "array",
+                    "description": "Wake-on-LAN VLAN configuration. This is applicable only for VLAN Extend mode.",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "maxItems": 100
+                  }
+                },
+                "required": [
+                  "vrf"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "UBT_Zone.name",
+            "in": "path",
+            "description": "Reference Resource: [UBT_Zone](#/UBT_Zone)<br>Zone name.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

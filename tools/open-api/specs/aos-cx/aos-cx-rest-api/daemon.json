@@ -1,0 +1,544 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Daemon",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Daemon"
+    }
+  ],
+  "paths": {
+    "/system/subsystems/{Subsystem.type},{Subsystem.name}/daemons": {
+      "get": {
+        "tags": [
+          "Daemon"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "heartbeat_timeout": {
+                      "type": "integer",
+                      "description": "Specifies the time limit for starting a service. It's specified in seconds. The maximum time after which a timeout will be declared for obtaining the  status of the daemon. Its equivalent to `TimeoutStartSec` in service file. Eg: 60 - systemd should wait up to 60 seconds for the service to start.",
+                      "maximum": 600,
+                      "minimum": 0
+                    },
+                    "hotpatch_ready": {
+                      "type": "string",
+                      "description": "Indicates whether daemon is prepared to install a hot-patch.  `ready`:   Daemon prepared successfully and is ready for hot-patching. 'failed':  Daemon failed to prepare. The system will not continue with            hot-patching. `unknown`: Daemon has not completed preparations for hot-patching.",
+                      "enum": [
+                        "ready",
+                        "failed",
+                        "unknown"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Daemon](#/Daemon)<br>The name of the daemon."
+                    },
+                    "plugins": {
+                      "type": "object",
+                      "description": "Reference Resource: [Plugin](#/Plugin)<br>",
+                      "properties": {
+                        "string": {
+                          "type": "string",
+                          "description": "Reference resource URI of Plugin"
+                        }
+                      }
+                    },
+                    "resource_utilization": {
+                      "type": "object",
+                      "description": "Specifies the resource utilization of the daemon",
+                      "properties": {
+                        "cpu": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Specifies the percentage of CPU utilization of the daemon  averaged across all the CPUs of the system"
+                        },
+                        "memory": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Specifies the memory usage of daemon in percentage."
+                        },
+                        "open_fds": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Specifies the total number of open file descriptors of daemon."
+                        }
+                      }
+                    },
+                    "restart_count": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Number of times the daemon was restarted (gracefully or not) since system boot. The value might be missing if daemon doesn't support restart counting."
+                    },
+                    "restarts_allowed": {
+                      "type": "integer",
+                      "description": "Number of times the daemon is allowed to be restarted within time interval defined by restarts_timeinterval. Its equivalent to `StartLimitBurst` in the service file.",
+                      "maximum": 10,
+                      "minimum": 0
+                    },
+                    "restarts_timeinterval": {
+                      "type": "integer",
+                      "description": "The time interval during which systemd will count the number of times daemon has been restarted. It's specified in seconds. Its equivalent to `StartLimitIntervalSec` in the service file.",
+                      "maximum": 3600,
+                      "minimum": 0
+                    },
+                    "state": {
+                      "type": "string",
+                      "description": "The state of the daemon.  `running`: Daemon is running on the subsystem. `down`:    Daemon is not running currently. `stopped`: Daemon is paused and is not currently executing.",
+                      "enum": [
+                        "running",
+                        "down",
+                        "stopped"
+                      ]
+                    },
+                    "subsystem": {
+                      "type": "string",
+                      "description": "Reference Resource: [Daemon](#/Daemon)<br>The reference to the subsystem on which daemon is running."
+                    },
+                    "time_started": {
+                      "type": "string",
+                      "description": "The timestamp indicates a time when the daemon was last started. Eg: Sun May  5 06:23:59 2024.",
+                      "maxLength": 50
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Subsystem.type",
+            "in": "path",
+            "description": "Reference Resource: [Subsystem](#/Subsystem)<br>",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "uninitialized",
+                "system",
+                "chassis",
+                "line_card",
+                "mezz_card",
+                "fabric_card",
+                "management_module",
+                "rear_display_card",
+                "fan_tray",
+                "services_card",
+                "io_module"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "Subsystem.name",
+            "in": "path",
+            "description": "Reference Resource: [Subsystem](#/Subsystem)<br>",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "hotpatch_ready",
+                  "restarts_allowed",
+                  "heartbeat_timeout",
+                  "name",
+                  "time_started",
+                  "resource_utilization",
+                  "plugins",
+                  "state",
+                  "restart_count",
+                  "restarts_timeinterval"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/subsystems/{Subsystem.type},{Subsystem.name}/daemons/{Daemon.name}": {
+      "get": {
+        "tags": [
+          "Daemon"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "heartbeat_timeout": {
+                      "type": "integer",
+                      "description": "Specifies the time limit for starting a service. It's specified in seconds. The maximum time after which a timeout will be declared for obtaining the  status of the daemon. Its equivalent to `TimeoutStartSec` in service file. Eg: 60 - systemd should wait up to 60 seconds for the service to start.",
+                      "maximum": 600,
+                      "minimum": 0
+                    },
+                    "hotpatch_ready": {
+                      "type": "string",
+                      "description": "Indicates whether daemon is prepared to install a hot-patch.  `ready`:   Daemon prepared successfully and is ready for hot-patching. 'failed':  Daemon failed to prepare. The system will not continue with            hot-patching. `unknown`: Daemon has not completed preparations for hot-patching.",
+                      "enum": [
+                        "ready",
+                        "failed",
+                        "unknown"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Daemon](#/Daemon)<br>The name of the daemon."
+                    },
+                    "plugins": {
+                      "type": "object",
+                      "description": "Reference Resource: [Plugin](#/Plugin)<br>",
+                      "properties": {
+                        "string": {
+                          "type": "string",
+                          "description": "Reference resource URI of Plugin"
+                        }
+                      }
+                    },
+                    "resource_utilization": {
+                      "type": "object",
+                      "description": "Specifies the resource utilization of the daemon",
+                      "properties": {
+                        "cpu": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Specifies the percentage of CPU utilization of the daemon  averaged across all the CPUs of the system"
+                        },
+                        "memory": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Specifies the memory usage of daemon in percentage."
+                        },
+                        "open_fds": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Specifies the total number of open file descriptors of daemon."
+                        }
+                      }
+                    },
+                    "restart_count": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Number of times the daemon was restarted (gracefully or not) since system boot. The value might be missing if daemon doesn't support restart counting."
+                    },
+                    "restarts_allowed": {
+                      "type": "integer",
+                      "description": "Number of times the daemon is allowed to be restarted within time interval defined by restarts_timeinterval. Its equivalent to `StartLimitBurst` in the service file.",
+                      "maximum": 10,
+                      "minimum": 0
+                    },
+                    "restarts_timeinterval": {
+                      "type": "integer",
+                      "description": "The time interval during which systemd will count the number of times daemon has been restarted. It's specified in seconds. Its equivalent to `StartLimitIntervalSec` in the service file.",
+                      "maximum": 3600,
+                      "minimum": 0
+                    },
+                    "state": {
+                      "type": "string",
+                      "description": "The state of the daemon.  `running`: Daemon is running on the subsystem. `down`:    Daemon is not running currently. `stopped`: Daemon is paused and is not currently executing.",
+                      "enum": [
+                        "running",
+                        "down",
+                        "stopped"
+                      ]
+                    },
+                    "subsystem": {
+                      "type": "string",
+                      "description": "Reference Resource: [Daemon](#/Daemon)<br>The reference to the subsystem on which daemon is running."
+                    },
+                    "time_started": {
+                      "type": "string",
+                      "description": "The timestamp indicates a time when the daemon was last started. Eg: Sun May  5 06:23:59 2024.",
+                      "maxLength": 50
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Subsystem.type",
+            "in": "path",
+            "description": "Reference Resource: [Subsystem](#/Subsystem)<br>",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "uninitialized",
+                "system",
+                "chassis",
+                "line_card",
+                "mezz_card",
+                "fabric_card",
+                "management_module",
+                "rear_display_card",
+                "fan_tray",
+                "services_card",
+                "io_module"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "Subsystem.name",
+            "in": "path",
+            "description": "Reference Resource: [Subsystem](#/Subsystem)<br>",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Daemon.name",
+            "in": "path",
+            "description": "Reference Resource: [Daemon](#/Daemon)<br>The name of the daemon.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "heartbeat_timeout",
+                  "hotpatch_ready",
+                  "restarts_allowed",
+                  "name",
+                  "time_started",
+                  "resource_utilization",
+                  "plugins",
+                  "restarts_timeinterval",
+                  "state",
+                  "restart_count"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

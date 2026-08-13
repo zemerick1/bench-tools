@@ -1,0 +1,345 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "CertificateManager",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "CertificateManager"
+    }
+  ],
+  "paths": {
+    "/certificates": {
+      "get": {
+        "description": "Get all certificates",
+        "summary": "Get all certificates",
+        "tags": [
+          "CertificateManager"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "certificate_name": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "description": "Generate CSR or create self-signed certificate",
+        "summary": "Create a certificate",
+        "tags": [
+          "CertificateManager"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "cert_type": {
+                    "description": "Type of the certificate",
+                    "type": "string"
+                  },
+                  "certificate_name": {
+                    "description": "Name of the certificate",
+                    "type": "string"
+                  },
+                  "key_size": {
+                    "description": "Key size of the certificate. Default Value:2048",
+                    "type": "integer"
+                  },
+                  "key_type": {
+                    "description": "Key type of the certificate. Default Value:RSA",
+                    "type": "string"
+                  },
+                  "subject": {
+                    "properties": {
+                      "common_name": {
+                        "description": "Common name of the certificate request",
+                        "type": "string"
+                      },
+                      "country": {
+                        "description": "Country of the certificate request",
+                        "type": "string"
+                      },
+                      "locality": {
+                        "description": "Locality of the certificate request",
+                        "type": "string"
+                      },
+                      "org": {
+                        "description": "Organization of the certificate request",
+                        "type": "string"
+                      },
+                      "org_unit": {
+                        "description": "Organization Unit of the certificate request",
+                        "type": "string"
+                      },
+                      "state": {
+                        "description": "State of the certificate request",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "common_name",
+                      "country"
+                    ]
+                  }
+                },
+                "required": [
+                  "cert_type",
+                  "certificate_name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "description": "Bad Gateway"
+          }
+        }
+      }
+    },
+    "/certificates/{certificate_name}": {
+      "get": {
+        "description": "Get a certificate",
+        "summary": "Get a certificate",
+        "tags": [
+          "CertificateManager"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "cert_status": {
+                      "description": "Status of the certificate",
+                      "type": "string"
+                    },
+                    "cert_type": {
+                      "description": "Type of the certificate",
+                      "type": "string"
+                    },
+                    "certificate_name": {
+                      "description": "Name of the certificate",
+                      "type": "string"
+                    },
+                    "key_size": {
+                      "description": "Key size of the certificate",
+                      "type": "integer"
+                    },
+                    "key_type": {
+                      "description": "Key type of the certificate",
+                      "type": "string"
+                    },
+                    "subject": {
+                      "description": "Subject of the certificate",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "description": "Bad Gateway"
+          }
+        },
+        "parameters": [
+          {
+            "name": "certificate_name",
+            "in": "path",
+            "description": "certificate name",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "description": "Install signed certificate",
+        "summary": "Install signed certificate",
+        "tags": [
+          "CertificateManager"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "certificate": {
+                    "description": "Certificate in PEM format. This may contain a private key if it was generated outside of the switch",
+                    "type": "string"
+                  },
+                  "password": {
+                    "description": "Password for private key if it is password-protected",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ok"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "description": "Bad Gateway"
+          }
+        },
+        "parameters": [
+          {
+            "name": "certificate_name",
+            "in": "path",
+            "description": "certificate name",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "description": "Delete a certificate",
+        "summary": "Delete a certificate",
+        "tags": [
+          "CertificateManager"
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "description": "Bad Gateway"
+          }
+        },
+        "parameters": [
+          {
+            "name": "certificate_name",
+            "in": "path",
+            "description": "certificate name",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  }
+}

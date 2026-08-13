@@ -1,0 +1,1588 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Sites Maps - Auto-placement",
+    "version": "2602.1.1"
+  },
+  "servers": [
+    {
+      "description": "Mist Global 01",
+      "url": "https://api.mist.com"
+    },
+    {
+      "description": "Mist Global 02",
+      "url": "https://api.gc1.mist.com"
+    },
+    {
+      "description": "Mist Global 03",
+      "url": "https://api.ac2.mist.com"
+    },
+    {
+      "description": "Mist Global 04",
+      "url": "https://api.gc2.mist.com"
+    },
+    {
+      "description": "Mist Global 05",
+      "url": "https://api.gc4.mist.com"
+    },
+    {
+      "description": "Mist EMEA 01",
+      "url": "https://api.eu.mist.com"
+    },
+    {
+      "description": "Mist EMEA 02",
+      "url": "https://api.gc3.mist.com"
+    },
+    {
+      "description": "Mist EMEA 03",
+      "url": "https://api.ac6.mist.com"
+    },
+    {
+      "description": "Mist EMEA 04",
+      "url": "https://api.gc6.mist.com"
+    },
+    {
+      "description": "Mist APAC 01",
+      "url": "https://api.ac5.mist.com"
+    },
+    {
+      "description": "Mist APAC 02",
+      "url": "https://api.gc5.mist.com"
+    },
+    {
+      "description": "Mist APAC 03",
+      "url": "https://api.gc7.mist.com"
+    }
+  ],
+  "security": [
+    {
+      "apiToken": []
+    },
+    {
+      "basicAuth": []
+    },
+    {
+      "basicAuth": [],
+      "csrfToken": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "### AP Auto-Placement\nAP Auto-Placement is a feature in Juniper Mist wireless assurance that automatically determines and sets the positions of Access Points (APs) on a floorplan.\n\nIt saves time and simplifies the deployment process by eliminating the need for manual placement. \n\nThe autoplacement algorithm calculates the most probable location for each AP based on factors such as signal strength and coverage requirements. \n\nThe confidence level of the autoplacement is indicated by colors, with green representing high certainty, orange indicating medium certainty, and red suggesting low certainty. \nIn cases where aps are isolated or cannot communicate with nearby aps, they cannot be placed automatically and must be [manually positioned on the floorplan](/#operations/updateSiteDevice). \n\nAfter the autoplacement process is complete, the results can be evaluated and accepted of rejected with the API Call [Confirm Site AP Localization Data](/#operations/confirmSiteApLocalizationData)\n\n\n### AP Auto-Orientation\nAp Auto-Orientation is a feature in juniper mist wireless assurance that allows users to check and correct the orientation of Access Points (APs) on a floorplan. \n\nThis feature is supported by specific ap models and requires a firmware dependency of version 0.14.28310 or higher and does not require a maintenance window and can be used after performing autoplacement. \n\nTo use auto-orientation, physically install the APs, claim or adopt them into the Juniper Mist organization, place them on the floorplan, and perform auto-placement, then trigger the [Start Site Ap Auto Orientation API call](/#operations/startSiteApAutoOrientation)\n\nAfter 24 hours, the rotation in degrees of the AP(s) will be updated. users can accept or deny the changes made by the auto-orientation feature with the API Call [Confirm Site AP Localization Data](/#operations/confirmSiteApLocalizationData).",
+      "name": "Sites Maps - Auto-placement"
+    }
+  ],
+  "paths": {
+    "/api/v1/sites/{site_id}/maps/{map_id}/auto_orient": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/map_id"
+        },
+        {
+          "$ref": "#/components/parameters/site_id"
+        }
+      ],
+      "get": {
+        "description": "This API is called to view the current status of auto orient for a given map.",
+        "operationId": "getSiteApAutoOrientation",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AutoOrientationInfo"
+          },
+          "400": {
+            "description": "Autoplacement was not triggered"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getSiteApAutoOrientation",
+        "tags": [
+          "Sites Maps - Auto-placement"
+        ]
+      },
+      "post": {
+        "description": "This API is called to trigger a map for auto orient. For auto orient feature to work, BLE data needs to be collected from the APs on the map. This precess is not disruptive unlike FTM collection. Repeated POST requests to this endpoint while a map is still running will be rejected.\n\n\n`force_collection` is set to `false` by default. If `force_collection`==`false`, the API attempts to start orientation with existing data. If no data exists, the API attempts to start collecting orientation data. If `force_collection`==`true`, the API attempts to start collecting orientation data.\n\n\nProviding a list of device macs is optional. If provided, auto orientation suggestions will be made only for the specified devices. If no list is provided, all APs associated with the map are considered by default.",
+        "operationId": "startSiteApAutoOrientation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/auto_orient"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AutoOrientation"
+          },
+          "400": {
+            "$ref": "#/components/responses/AutoOrientationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "startSiteApAutoOrientation",
+        "tags": [
+          "Sites Maps - Auto-placement"
+        ]
+      },
+      "delete": {
+        "description": "This API is called to force stop auto placement for a given map",
+        "operationId": "deleteSiteApAutoOrientation",
+        "responses": {
+          "200": {
+            "description": "Auto orient process has stopped for this map"
+          },
+          "400": {
+            "description": "Autoplacement was not triggered"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "deleteSiteApAutoOrientation",
+        "tags": [
+          "Sites Maps - Auto-placement"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/maps/{map_id}/auto_placement": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/map_id"
+        }
+      ],
+      "get": {
+        "description": "This API is called to view the current status of auto placement for a given map.\n\n\n#### Status Descriptions\n\n| Status | Description |\n| --- | --- |\n| `pending` | Autoplacement has not been requested for this map |\n| `inprogress` | Autoplacement is currently processing |\n| `done` | The autoplacement process has completed |\n| `data_needed` | Additional position data is required for autoplacement. Users should verify the requested anchor APs have a position on the map |\n| `invalid_model` | Autoplacement is not supported on the model of the APs on the map |\n| `invalid_version` | Autoplacement is not supported with the APs current firmware version |\n| `error` | There was an error in the autoplacement process |",
+        "operationId": "getSiteApAutoPlacement",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AutoPlacementInfo"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getSiteApAutoplacement",
+        "tags": [
+          "Sites Maps - Auto-placement"
+        ]
+      },
+      "post": {
+        "description": "This API is called to trigger auto placement for a map. For the auto placement feature to work, RTT-FTM data needs to be collected from the APs on the map.  \nThis scan is disruptive, and users must be notified of service disruption during the auto placement process. Repeated POST requests to this endpoint while a map is still running will be rejected.\n\n\n`force_collection` is set to `false` by default. If `force_collection` is set to `false`, the API attempts to start localization with existing data. If no data exists, the API attempts to start orchestration.  \nIf `force_collection` is set to `true`, the API attempts to start orchestration.\n\n\nProviding a list of devices is optional. If provided, autoplacement suggestions will be made only for the specified devices. If no list is provided, all APs associated with the map are considered by default.",
+        "operationId": "runSiteApAutoplacement",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/auto_placement"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HTTP200AutoPlacement"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "runSiteApAutoplacement",
+        "tags": [
+          "Sites Maps - Auto-placement"
+        ]
+      },
+      "delete": {
+        "description": "This API is called to force stop auto placement for a given map",
+        "operationId": "deleteSiteApAutoplacement",
+        "responses": {
+          "200": {
+            "description": "Autoplacement Process has stopped for this map"
+          },
+          "400": {
+            "description": "Autoplacement was not triggered"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "deleteSiteApAutoplacement",
+        "tags": [
+          "Sites Maps - Auto-placement"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/maps/{map_id}/clear_auto_orient": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/map_id"
+        }
+      ],
+      "post": {
+        "description": "This API is used to destroy the autoorientations of a map or subset of APs on a map.",
+        "operationId": "clearSiteApAutoOrient",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mac_addresses"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "clearSiteApAutoOrient",
+        "tags": [
+          "Sites Maps - Auto-placement"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/maps/{map_id}/clear_autoplacement": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/map_id"
+        }
+      ],
+      "post": {
+        "description": "This API is used to destroy the cached autoplacement locations of a map or subset of APs on a map.",
+        "operationId": "clearSiteApAutoplacement",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mac_addresses"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "clearSiteApAutoplacement",
+        "tags": [
+          "Sites Maps - Auto-placement"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/maps/{map_id}/use_auto_ap_values": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/map_id"
+        }
+      ],
+      "post": {
+        "description": "This API is used to accept or reject the cached autoplacement and auto-orientation values of a map or subset of APs on a map. Any APs that have autoplacement values are stored in cache for up to 7 days while awaiting acceptance or rejection.\n\n```\nAccepting the autoplacement values overwrites the existing X, Y, and orientation of the accepted APs with their cached autoplacement values.\nRejecting the autoplacement values causes the APs to retain their current X, Y, and orientation.\n```\n\nOnce a decision (accept or reject) is made, or the 7-day time-to-live (TTL) expires, the cached values are deleted.",
+        "operationId": "confirmSiteApLocalizationData",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "accept": false,
+                    "device_macs": [
+                      "string"
+                    ],
+                    "for": "placement"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/use_auto_ap_values"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Map does not exist or belong to specified site / Invalid localization service. Expected [placement, orientation]"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "confirmSiteApLocalizationData",
+        "tags": [
+          "Sites Maps - Auto-placement"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "auto_orient": {
+        "properties": {
+          "dryrun": {
+            "description": "Set to `true` to perform an invalid AP check and provide an estimated run time without enqueuing the run into the auto orient service.",
+            "type": "boolean"
+          },
+          "force_collection": {
+            "default": false,
+            "description": "If `force_collection`==`false`, the API attempts to start auto orientation with existing BLE data. \nIf `force_collection`==`true`, the API attempts to start BLE orchestration.",
+            "type": "boolean"
+          },
+          "macs": {
+            "$ref": "#/components/schemas/auto_orient_macs"
+          },
+          "override": {
+            "description": "Set to `true` to run auto orient even if there are invalid APs in the selected APs.",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "auto_orient_macs": {
+        "description": "List of device macs",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "auto_placement": {
+        "properties": {
+          "dryrun": {
+            "default": false,
+            "description": "Set to `true` to perform an invalid AP check and provide an estimated run time without enqueuing the run into the auto placement service.",
+            "type": "boolean"
+          },
+          "force_collection": {
+            "default": false,
+            "description": "* If `force_collection`==`false`: the API attempts to start localization with existing data. \n* If `force_collection`==`true`: maintenance the API attempts to start orchestration.",
+            "type": "boolean"
+          },
+          "macs": {
+            "$ref": "#/components/schemas/auto_placement_macs"
+          },
+          "override": {
+            "default": false,
+            "description": "Set to `true` to run auto placement even if there are invalid APs in the selected APs.",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "auto_placement_info_status": {
+        "description": "the status of autoplacement for a given map. enum: `done`, `error`, `inprogress`, `pending`",
+        "enum": [
+          "done",
+          "error",
+          "inprogress",
+          "pending"
+        ],
+        "type": "string"
+      },
+      "auto_placement_macs": {
+        "description": "List of device macs",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "mac_addresses": {
+        "properties": {
+          "macs": {
+            "$ref": "#/components/schemas/mac_addresses_macs"
+          }
+        },
+        "required": [
+          "macs"
+        ],
+        "type": "object"
+      },
+      "mac_addresses_macs": {
+        "examples": [
+          [
+            "683b679ac024"
+          ]
+        ],
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array",
+        "uniqueItems": true
+      },
+      "response_auto_orientation": {
+        "additionalProperties": false,
+        "properties": {
+          "devices": {
+            "$ref": "#/components/schemas/response_auto_orientation_devices"
+          },
+          "estimated_runtime": {
+            "description": "Estimated runtime for the process in seconds",
+            "type": "integer"
+          },
+          "reason": {
+            "description": "Provides the reason for the status.",
+            "type": "string"
+          },
+          "started": {
+            "description": "Indicates whether the auto orient process has started.",
+            "type": "boolean"
+          },
+          "valid": {
+            "description": "Indicates whether the auto orient request is valid.",
+            "type": "boolean"
+          },
+          "wifi_interrupting": {
+            "description": "Indicates whether the auto orient process will interrupt WiFi traffic.",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "response_auto_orientation_device": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "description": "Provides the reason for the status if the AP is invalid.",
+            "type": "string"
+          },
+          "valid": {
+            "description": "Indicates whether the auto orient request is valid for the device.",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "response_auto_orientation_devices": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/response_auto_orientation_device"
+        },
+        "description": "Contains the validation status of each device. The Property Key is the device MAC Address.",
+        "type": "object"
+      },
+      "response_auto_orientation_info": {
+        "additionalProperties": false,
+        "properties": {
+          "est_time_left": {
+            "description": "Only when `status`==`inprogress`, estimate of the time to completion",
+            "type": "number"
+          },
+          "start_time": {
+            "description": "time when auto orient process was last queued for this map",
+            "type": "number"
+          },
+          "status": {
+            "$ref": "#/components/schemas/response_auto_orientation_info_status"
+          },
+          "stop_time": {
+            "description": "time when auto orient completed or was manually stopped",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "response_auto_orientation_info_status": {
+        "description": "The status of auto orient for a given map. enum:\n  * `pending`: Auto orient has not been requested for this map\n  * `inprogress`: Auto orient is currently processing\n  * `done`: The auto orient process has completed\n  * `error`: There was an error in the auto orient process",
+        "enum": [
+          "pending",
+          "inprogress",
+          "done",
+          "error"
+        ],
+        "type": "string"
+      },
+      "response_auto_placement_info": {
+        "additionalProperties": false,
+        "properties": {
+          "end_time": {
+            "description": "Time when autoplacement completed or was manually stopped",
+            "type": "number"
+          },
+          "est_time_left": {
+            "description": "(Only when inprogress) estimate of the time to completion",
+            "type": "number"
+          },
+          "start_time": {
+            "description": "Time when autoplacement process was last queued for this map",
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/auto_placement_info_status"
+          }
+        },
+        "type": "object"
+      },
+      "response_autoplacement": {
+        "additionalProperties": false,
+        "properties": {
+          "devices": {
+            "$ref": "#/components/schemas/response_autoplacement_devices"
+          },
+          "estimated_runtime": {
+            "description": "Estimated runtime for the process in seconds.",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "reason": {
+            "description": "Provides the reason for the status.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "started": {
+            "description": "Indicates whether the autoplacement process has started.",
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "valid": {
+            "description": "Indicates whether the autoplacement request is valid.",
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "wifi_interrupting": {
+            "description": "Indicates whether the auto placement process will interrupt WiFi traffic.",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "response_autoplacement_device": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "description": "Provides the reason for the status if the AP is invalid.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "valid": {
+            "description": "Indicates whether the ap is valid.",
+            "readOnly": true,
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "response_autoplacement_devices": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/response_autoplacement_device"
+        },
+        "description": "Property key is the AP MAC Address. Contains the validation status of each device.",
+        "readOnly": true,
+        "type": "object"
+      },
+      "response_detail_string": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http400": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http401": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Authentication credentials were not provided."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http403": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "You do not have permission to perform this action."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http404": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http429": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "use_auto_ap_values": {
+        "properties": {
+          "accept": {
+            "default": false,
+            "description": "If accept is true, accepts placement for devices in list otherwise. If false, reject for devices in list.",
+            "type": "boolean"
+          },
+          "for": {
+            "$ref": "#/components/schemas/use_auto_ap_values_for"
+          },
+          "macs": {
+            "$ref": "#/components/schemas/use_auto_ap_values_macs"
+          }
+        },
+        "type": "object"
+      },
+      "use_auto_ap_values_for": {
+        "default": "placement",
+        "description": "The selector to choose auto placement or auto orientation. enum: `orientation`, `placement`",
+        "enum": [
+          "orientation",
+          "placement"
+        ],
+        "type": "string"
+      },
+      "use_auto_ap_values_macs": {
+        "description": "A list of macs to accept/reject. If a list is not provided the API will accept/reject for the full map.",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      }
+    },
+    "responses": {
+      "AutoOrientation": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Dryrun For Map Completed": {
+                "$ref": "#/components/examples/AutoOrientationDryrunForMapCompleted"
+              },
+              "Map Failed To Start As It Had Less Than 3 APs Associated With It": {
+                "$ref": "#/components/examples/AutoOrientationMapFailedToStartAsItHadLessThan3APsAssociatedWithIt"
+              },
+              "Service Failed To Start Due Containing Invalid APs": {
+                "$ref": "#/components/examples/AutoOrientationServiceFailedToStartDueContainingInvalidAPs"
+              },
+              "Service Started After Override For Localization / Orient Collection": {
+                "$ref": "#/components/examples/AutoOrientationServiceStartedAfterOverrideForLocalizationOrientCollection"
+              },
+              "Service Started Successfully For Localization / Orient Collection": {
+                "$ref": "#/components/examples/AutoOrientationServiceStartedSuccessfullyForLocalizationOrientCollection"
+              },
+              "Unable To Reach The Orient Service": {
+                "$ref": "#/components/examples/AutoOrientationUnableToReachTheOrientService"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_auto_orientation"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Dryrun For Map Completed": {
+                "$ref": "#/components/examples/AutoOrientationDryrunForMapCompleted"
+              },
+              "Map Failed To Start As It Had Less Than 3 APs Associated With It": {
+                "$ref": "#/components/examples/AutoOrientationMapFailedToStartAsItHadLessThan3APsAssociatedWithIt"
+              },
+              "Service Failed To Start Due Containing Invalid APs": {
+                "$ref": "#/components/examples/AutoOrientationServiceFailedToStartDueContainingInvalidAPs"
+              },
+              "Service Started After Override For Localization / Orient Collection": {
+                "$ref": "#/components/examples/AutoOrientationServiceStartedAfterOverrideForLocalizationOrientCollection"
+              },
+              "Service Started Successfully For Localization / Orient Collection": {
+                "$ref": "#/components/examples/AutoOrientationServiceStartedSuccessfullyForLocalizationOrientCollection"
+              },
+              "Unable To Reach The Orient Service": {
+                "$ref": "#/components/examples/AutoOrientationUnableToReachTheOrientService"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_auto_orientation"
+            }
+          }
+        },
+        "description": "Map queued for auto orientation"
+      },
+      "AutoOrientationFailed": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/AutoOrientationFailedExample"
+              },
+              "Example-2": {
+                "$ref": "#/components/examples/AutoOrientationFailedExample2"
+              },
+              "Example-3": {
+                "$ref": "#/components/examples/AutoOrientationFailedExample3"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_detail_string"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/AutoOrientationFailedExample"
+              },
+              "Example-2": {
+                "$ref": "#/components/examples/AutoOrientationFailedExample2"
+              },
+              "Example-3": {
+                "$ref": "#/components/examples/AutoOrientationFailedExample3"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_detail_string"
+            }
+          }
+        },
+        "description": "Bad Request"
+      },
+      "AutoOrientationInfo": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Completed": {
+                "$ref": "#/components/examples/AutoOrientationInfoCompleted"
+              },
+              "In Progress": {
+                "$ref": "#/components/examples/AutoOrientationInfoInProgress"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_auto_orientation_info"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Completed": {
+                "$ref": "#/components/examples/AutoOrientationInfoCompleted"
+              },
+              "In Progress": {
+                "$ref": "#/components/examples/AutoOrientationInfoInProgress"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_auto_orientation_info"
+            }
+          }
+        },
+        "description": "Map queued for auto orientation"
+      },
+      "AutoPlacementInfo": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Done": {
+                "$ref": "#/components/examples/AutoPlacementInfoDone"
+              },
+              "Error": {
+                "$ref": "#/components/examples/AutoPlacementInfoError"
+              },
+              "In Progress": {
+                "$ref": "#/components/examples/AutoPlacementInfoInProgress"
+              },
+              "Pending": {
+                "$ref": "#/components/examples/AutoPlacementInfoPending"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_auto_placement_info"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Done": {
+                "$ref": "#/components/examples/AutoPlacementInfoDone"
+              },
+              "Error": {
+                "$ref": "#/components/examples/AutoPlacementInfoError"
+              },
+              "In Progress": {
+                "$ref": "#/components/examples/AutoPlacementInfoInProgress"
+              },
+              "Pending": {
+                "$ref": "#/components/examples/AutoPlacementInfoPending"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_auto_placement_info"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "HTTP200AutoPlacement": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Auto placement is already in progress for this map": {
+                "$ref": "#/components/examples/HTTP200AutoPlacementAutoplacementisalreadyinprogressforthismap"
+              },
+              "Dryrun for map completed": {
+                "$ref": "#/components/examples/HTTP200AutoPlacementDryrunformapcompleted"
+              },
+              "Map failed to start as it had less than 3 APs associated with it": {
+                "$ref": "#/components/examples/HTTP200AutoPlacementMapfailedtostartasithadlessthan3APsassociatedwithit"
+              },
+              "Service failed to start due containing invalid APs": {
+                "$ref": "#/components/examples/HTTP200AutoPlacementServicefailedtostartduecontaininginvalidAPs"
+              },
+              "Service started after override for localization": {
+                "$ref": "#/components/examples/HTTP200AutoPlacementServicestartedafteroverrideforlocalization"
+              },
+              "Service started after override for orchestration": {
+                "$ref": "#/components/examples/HTTP200AutoPlacementServicestartedafteroverridefororchestration"
+              },
+              "Service started successfully for localization": {
+                "$ref": "#/components/examples/HTTP200AutoPlacementServicestartedsuccessfullyforlocalization"
+              },
+              "Service started successfully for orchestration": {
+                "$ref": "#/components/examples/HTTP200AutoPlacementServicestartedsuccessfullyfororchestration"
+              },
+              "Unable to reach the autoplacement service": {
+                "$ref": "#/components/examples/HTTP200AutoPlacementUnabletoreachtheautoplacementservice"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_autoplacement"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Auto placement is already in progress for this map": {
+                "$ref": "#/components/examples/HTTP200AutoPlacementAutoplacementisalreadyinprogressforthismap"
+              },
+              "Dryrun for map completed": {
+                "$ref": "#/components/examples/HTTP200AutoPlacementDryrunformapcompleted"
+              },
+              "Map failed to start as it had less than 3 APs associated with it": {
+                "$ref": "#/components/examples/HTTP200AutoPlacementMapfailedtostartasithadlessthan3APsassociatedwithit"
+              },
+              "Service failed to start due containing invalid APs": {
+                "$ref": "#/components/examples/HTTP200AutoPlacementServicefailedtostartduecontaininginvalidAPs"
+              },
+              "Service started after override for localization": {
+                "$ref": "#/components/examples/HTTP200AutoPlacementServicestartedafteroverrideforlocalization"
+              },
+              "Service started after override for orchestration": {
+                "$ref": "#/components/examples/HTTP200AutoPlacementServicestartedafteroverridefororchestration"
+              },
+              "Service started successfully for localization": {
+                "$ref": "#/components/examples/HTTP200AutoPlacementServicestartedsuccessfullyforlocalization"
+              },
+              "Service started successfully for orchestration": {
+                "$ref": "#/components/examples/HTTP200AutoPlacementServicestartedsuccessfullyfororchestration"
+              },
+              "Unable to reach the autoplacement service": {
+                "$ref": "#/components/examples/HTTP200AutoPlacementUnabletoreachtheautoplacementservice"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_autoplacement"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "HTTP400": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          }
+        },
+        "description": "Bad Syntax"
+      },
+      "HTTP401": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          }
+        },
+        "description": "Unauthorized"
+      },
+      "HTTP403": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          }
+        },
+        "description": "Permission Denied"
+      },
+      "HTTP404": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          }
+        },
+        "description": "Not found. The API endpoint doesn’t exist or resource doesn’ t exist"
+      },
+      "HTTP429": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          }
+        },
+        "description": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+      },
+      "OK": {
+        "description": "OK"
+      }
+    },
+    "parameters": {
+      "map_id": {
+        "in": "path",
+        "name": "map_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "site_id": {
+        "in": "path",
+        "name": "site_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      }
+    },
+    "examples": {
+      "AutoOrientationDryrunForMapCompleted": {
+        "value": {
+          "devices": {
+            "00000000001": {
+              "reason": "Device meets the minimum requirements for auto orient",
+              "valid": true
+            },
+            "00000000002": {
+              "reason": "Device meets the minimum requirements for auto orient",
+              "valid": true
+            },
+            "00000000003": {
+              "reason": "Device meets the minimum requirements for auto orient",
+              "valid": true
+            }
+          },
+          "estimated_runtime": 300,
+          "reason": "Map has met the minimum requirements for auto orient",
+          "valid": true,
+          "wifi_interrupting": true
+        }
+      },
+      "AutoOrientationFailedExample": {
+        "value": {
+          "detail": "Map has less than 3 APs associated with it to perform auto orient"
+        }
+      },
+      "AutoOrientationFailedExample2": {
+        "value": {
+          "detail": "Auto AP orient is already in progress for this Map"
+        }
+      },
+      "AutoOrientationFailedExample3": {
+        "value": {
+          "detail": "Auto orient data does not exist or has gone stale"
+        }
+      },
+      "AutoOrientationInfoCompleted": {
+        "value": {
+          "start_time": 1678900062,
+          "status": "done",
+          "stop_time": 1678900362
+        }
+      },
+      "AutoOrientationInfoInProgress": {
+        "value": {
+          "est_time_left": 300.0,
+          "start_time": 1678900062,
+          "status": "inprogress"
+        }
+      },
+      "AutoOrientationMapFailedToStartAsItHadLessThan3APsAssociatedWithIt": {
+        "value": {
+          "devices": {
+            "00000000001": {
+              "valid": true
+            },
+            "00000000002": {
+              "valid": true
+            },
+            "00000000003": {
+              "valid": true
+            }
+          },
+          "estimated_runtime": 300,
+          "reason": "Map Already Enqueued",
+          "started": false,
+          "valid": true,
+          "wifi_interrupting": true
+        }
+      },
+      "AutoOrientationServiceFailedToStartDueContainingInvalidAPs": {
+        "value": {
+          "devices": {
+            "00000000001": {
+              "valid": true
+            },
+            "00000000002": {
+              "valid": true
+            },
+            "00000000003": {
+              "valid": true
+            },
+            "00000000004": {
+              "reason": "Device model AP41 is not supported for auto orient",
+              "valid": false
+            },
+            "00000000005": {
+              "reason": "Device firmware 0.14.28300 does not meet the minimum requirement 0.14.28310",
+              "valid": false
+            }
+          },
+          "reason": "Map has APs that do not meet the minimum requirements for auto orient",
+          "started": false,
+          "valid": false
+        }
+      },
+      "AutoOrientationServiceStartedAfterOverrideForLocalizationOrientCollection": {
+        "value": {
+          "devices": {
+            "00000000001": {
+              "valid": true
+            },
+            "00000000002": {
+              "valid": true
+            },
+            "00000000003": {
+              "valid": true
+            },
+            "00000000004": {
+              "reason": "Device model AP32 is not supported for auto orient",
+              "valid": false
+            },
+            "00000000005": {
+              "reason": "Device firmware 0.14.28300 does not meet the minimum requirement 0.14.28310",
+              "valid": false
+            }
+          },
+          "estimated_runtime": 300,
+          "reason": "Started collection for auto orient",
+          "started": true,
+          "valid": false
+        }
+      },
+      "AutoOrientationServiceStartedSuccessfullyForLocalizationOrientCollection": {
+        "value": {
+          "devices": {
+            "00000000001": {
+              "valid": true
+            },
+            "00000000002": {
+              "valid": true
+            },
+            "00000000003": {
+              "valid": true
+            }
+          },
+          "estimated_runtime": 300,
+          "reason": "Started collection for auto orient",
+          "started": true,
+          "valid": true
+        }
+      },
+      "AutoOrientationUnableToReachTheOrientService": {
+        "value": {
+          "devices": {
+            "00000000001": {
+              "valid": true
+            },
+            "00000000002": {
+              "valid": true
+            },
+            "00000000003": {
+              "valid": true
+            }
+          },
+          "estimated_runtime": 300,
+          "reason": "Unable to reach auto orient service",
+          "started": false,
+          "valid": true,
+          "wifi_interrupting": true
+        }
+      },
+      "AutoPlacementInfoDone": {
+        "value": {
+          "end_time": 1678900362,
+          "start_time": 1678900062,
+          "status": "done"
+        }
+      },
+      "AutoPlacementInfoError": {
+        "value": {
+          "end_time": 1678900362,
+          "start_time": 1678900062,
+          "status": "error"
+        }
+      },
+      "AutoPlacementInfoInProgress": {
+        "value": {
+          "est_time_left": 300,
+          "start_time": 1678900062,
+          "status": "inprogress"
+        }
+      },
+      "AutoPlacementInfoPending": {
+        "value": {
+          "status": "pending"
+        }
+      },
+      "HTTP200AutoPlacementAutoplacementisalreadyinprogressforthismap": {
+        "value": {
+          "devices": {
+            "00000000001": {
+              "valid": true
+            },
+            "00000000002": {
+              "valid": true
+            },
+            "00000000003": {
+              "valid": true
+            }
+          },
+          "estimated_runtime": 30,
+          "reason": "Map Already Enqueued",
+          "started": false,
+          "valid": true,
+          "wifi_interrupting": true
+        }
+      },
+      "HTTP200AutoPlacementDryrunformapcompleted": {
+        "value": {
+          "devices": {
+            "00000000001": {
+              "valid": true
+            },
+            "00000000002": {
+              "valid": true
+            },
+            "00000000003": {
+              "valid": true
+            }
+          },
+          "estimated_runtime": 30,
+          "reason": "Map has met the minimum requirements for auto placement",
+          "valid": true,
+          "wifi_interrupting": true
+        }
+      },
+      "HTTP200AutoPlacementMapfailedtostartasithadlessthan3APsassociatedwithit": {
+        "value": {
+          "devices": {},
+          "reason": "Map has less than 3 APs associated with it to perform auto placement",
+          "started": false,
+          "valid": false
+        }
+      },
+      "HTTP200AutoPlacementServicefailedtostartduecontaininginvalidAPs": {
+        "value": {
+          "devices": {
+            "00000000001": {
+              "valid": true
+            },
+            "00000000002": {
+              "valid": true
+            },
+            "00000000003": {
+              "valid": true
+            },
+            "00000000004": {
+              "reason": "Device model AP41 is not supported for auto placement",
+              "valid": false
+            },
+            "00000000005": {
+              "reason": "Device firmware 0.14.28300 does not meet the minimum requirement 0.14.28310",
+              "valid": false
+            }
+          },
+          "reason": "Map has APs that do not meet the minimum requirements for auto placement",
+          "started": false,
+          "valid": false
+        }
+      },
+      "HTTP200AutoPlacementServicestartedafteroverrideforlocalization": {
+        "value": {
+          "devices": {
+            "00000000001": {
+              "valid": true
+            },
+            "00000000002": {
+              "valid": true
+            },
+            "00000000003": {
+              "valid": true
+            },
+            "00000000004": {
+              "reason": "Device model AP41 is not supported for auto placement",
+              "valid": false
+            },
+            "00000000005": {
+              "reason": "Device firmware 0.14.28300 does not meet the minimum requirement 0.14.28310",
+              "valid": false
+            }
+          },
+          "reason": "Started localization for auto placement",
+          "started": true,
+          "valid": false
+        }
+      },
+      "HTTP200AutoPlacementServicestartedafteroverridefororchestration": {
+        "value": {
+          "devices": {
+            "00000000001": {
+              "valid": true
+            },
+            "00000000002": {
+              "valid": true
+            },
+            "00000000003": {
+              "valid": true
+            },
+            "00000000004": {
+              "reason": "Device model AP41 is not supported for auto placement",
+              "valid": false
+            },
+            "00000000005": {
+              "reason": "Device firmware 0.14.28300 does not meet the minimum requirement 0.14.28310",
+              "valid": false
+            }
+          },
+          "estimated_runtime": 30,
+          "reason": "Started collection for auto placement",
+          "started": true,
+          "valid": false,
+          "wifi_interrupting": true
+        }
+      },
+      "HTTP200AutoPlacementServicestartedsuccessfullyforlocalization": {
+        "value": {
+          "devices": {
+            "00000000001": {
+              "valid": true
+            },
+            "00000000002": {
+              "valid": true
+            },
+            "00000000003": {
+              "valid": true
+            }
+          },
+          "reason": "Started localization for auto placement",
+          "started": true,
+          "valid": true
+        }
+      },
+      "HTTP200AutoPlacementServicestartedsuccessfullyfororchestration": {
+        "value": {
+          "devices": {
+            "00000000001": {
+              "valid": true
+            },
+            "00000000002": {
+              "valid": true
+            },
+            "00000000003": {
+              "valid": true
+            }
+          },
+          "estimated_runtime": 30,
+          "reason": "Started collection for auto placement",
+          "started": true,
+          "valid": true,
+          "wifi_interrupting": true
+        }
+      },
+      "HTTP200AutoPlacementUnabletoreachtheautoplacementservice": {
+        "value": {
+          "devices": {
+            "00000000001": {
+              "valid": true
+            },
+            "00000000002": {
+              "valid": true
+            },
+            "00000000003": {
+              "valid": true
+            }
+          },
+          "estimated_runtime": 30,
+          "reason": "Unable to reach auto placement service",
+          "started": false,
+          "valid": true,
+          "wifi_interrupting": true
+        }
+      },
+      "HTTP400Example": {
+        "value": {
+          "detail": "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+        }
+      },
+      "HTTP401Example": {
+        "value": {
+          "detail": "Authentication credentials were not provided."
+        }
+      },
+      "HTTP403Example": {
+        "value": {
+          "detail": "You do not have permission to perform this action."
+        }
+      },
+      "HTTP429Example": {
+        "value": {
+          "detail": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+        }
+      }
+    },
+    "securitySchemes": {
+      "apiToken": {
+        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      },
+      "basicAuth": {
+        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
+        "scheme": "basic",
+        "type": "http"
+      },
+      "csrfToken": {
+        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "in": "header",
+        "name": "X-CSRFToken",
+        "type": "apiKey"
+      }
+    }
+  }
+}

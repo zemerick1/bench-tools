@@ -1,0 +1,536 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Fan",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Fan"
+    }
+  ],
+  "paths": {
+    "/system/subsystems/{Subsystem.type},{Subsystem.name}/fans": {
+      "get": {
+        "tags": [
+          "Fan"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "": {
+                      "type": "string",
+                      "description": "Reference Resource: [Fan](#/Fan)<br>References to the fans which are part of this subsystem.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "direction": {
+                      "type": "string",
+                      "description": "Air flow direction for the fan (if fan supports monitoring). The valid values are: 'b2f': Air flows from the back of the system to the front 'f2b': Air flows from the front of the system to the back 'l2b': Air flows from the left of the system to the back 'r2b': Air flows from the right of the system to the back 'l2r': Air flows from the left of the system to the right",
+                      "enum": [
+                        "b2f",
+                        "f2b",
+                        "l2b",
+                        "r2b",
+                        "l2r"
+                      ]
+                    },
+                    "fand_issu_status": {
+                      "type": "string",
+                      "description": "Indicates whether fan in member is done with pre-ISSU preparation.  `ready`:   Fand pre-ISSU prepared successfully and is ready for next ISSU sequence. 'failed':  Fand failed to prepare. The system will not continue with            ISSU sequence. `unknown`: Fand has not completed ISSU preparation.",
+                      "enum": [
+                        "ready",
+                        "failed",
+                        "unknown"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Fan](#/Fan)<br>"
+                    },
+                    "product_info": {
+                      "type": "object",
+                      "description": "Fan product information.",
+                      "properties": {
+                        "device_version": {
+                          "type": "string",
+                          "description": "Revision number of the hardware for the fan."
+                        },
+                        "manufacturer": {
+                          "type": "string",
+                          "description": "Manufacturer of the fan."
+                        },
+                        "part_number": {
+                          "type": "string",
+                          "description": "Fan model number identification."
+                        },
+                        "serial_number": {
+                          "type": "string",
+                          "description": "Fan serial number to uniquely identify the fan."
+                        }
+                      }
+                    },
+                    "rpm": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Current Fan RPM (if fan supports monitoring).",
+                      "minimum": 0
+                    },
+                    "speed": {
+                      "type": "string",
+                      "description": "Relative fan speed based on nominal speed range for the fan. When fan speed is not monitored for a fan, this column is not updated with any value. The valid values are: 'slow':   0-24% 'normal': 25-49% 'medium': 50-74% 'fast':   75-99% 'max':    100%",
+                      "enum": [
+                        "slow",
+                        "normal",
+                        "medium",
+                        "fast",
+                        "max"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Current state of the fan: 'ok':    Fan is operating normally 'fault': Fan is in a fault event 'empty': Fan is not installed in the system",
+                      "enum": [
+                        "uninitialized",
+                        "ok",
+                        "fault",
+                        "empty"
+                      ]
+                    }
+                  },
+                  "required": [
+                    ""
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Subsystem.type",
+            "in": "path",
+            "description": "Reference Resource: [Subsystem](#/Subsystem)<br>",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "uninitialized",
+                "system",
+                "chassis",
+                "line_card",
+                "mezz_card",
+                "fabric_card",
+                "management_module",
+                "rear_display_card",
+                "fan_tray",
+                "services_card",
+                "io_module"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "Subsystem.name",
+            "in": "path",
+            "description": "Reference Resource: [Subsystem](#/Subsystem)<br>",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "speed",
+                  "direction",
+                  "product_info",
+                  "name",
+                  "rpm",
+                  "status",
+                  "fand_issu_status"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/subsystems/{Subsystem.type},{Subsystem.name}/fans/{Fan.name}": {
+      "get": {
+        "tags": [
+          "Fan"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "": {
+                      "type": "string",
+                      "description": "Reference Resource: [Fan](#/Fan)<br>References to the fans which are part of this subsystem.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "direction": {
+                      "type": "string",
+                      "description": "Air flow direction for the fan (if fan supports monitoring). The valid values are: 'b2f': Air flows from the back of the system to the front 'f2b': Air flows from the front of the system to the back 'l2b': Air flows from the left of the system to the back 'r2b': Air flows from the right of the system to the back 'l2r': Air flows from the left of the system to the right",
+                      "enum": [
+                        "b2f",
+                        "f2b",
+                        "l2b",
+                        "r2b",
+                        "l2r"
+                      ]
+                    },
+                    "fand_issu_status": {
+                      "type": "string",
+                      "description": "Indicates whether fan in member is done with pre-ISSU preparation.  `ready`:   Fand pre-ISSU prepared successfully and is ready for next ISSU sequence. 'failed':  Fand failed to prepare. The system will not continue with            ISSU sequence. `unknown`: Fand has not completed ISSU preparation.",
+                      "enum": [
+                        "ready",
+                        "failed",
+                        "unknown"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Fan](#/Fan)<br>"
+                    },
+                    "product_info": {
+                      "type": "object",
+                      "description": "Fan product information.",
+                      "properties": {
+                        "device_version": {
+                          "type": "string",
+                          "description": "Revision number of the hardware for the fan."
+                        },
+                        "manufacturer": {
+                          "type": "string",
+                          "description": "Manufacturer of the fan."
+                        },
+                        "part_number": {
+                          "type": "string",
+                          "description": "Fan model number identification."
+                        },
+                        "serial_number": {
+                          "type": "string",
+                          "description": "Fan serial number to uniquely identify the fan."
+                        }
+                      }
+                    },
+                    "rpm": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Current Fan RPM (if fan supports monitoring).",
+                      "minimum": 0
+                    },
+                    "speed": {
+                      "type": "string",
+                      "description": "Relative fan speed based on nominal speed range for the fan. When fan speed is not monitored for a fan, this column is not updated with any value. The valid values are: 'slow':   0-24% 'normal': 25-49% 'medium': 50-74% 'fast':   75-99% 'max':    100%",
+                      "enum": [
+                        "slow",
+                        "normal",
+                        "medium",
+                        "fast",
+                        "max"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Current state of the fan: 'ok':    Fan is operating normally 'fault': Fan is in a fault event 'empty': Fan is not installed in the system",
+                      "enum": [
+                        "uninitialized",
+                        "ok",
+                        "fault",
+                        "empty"
+                      ]
+                    }
+                  },
+                  "required": [
+                    ""
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Subsystem.type",
+            "in": "path",
+            "description": "Reference Resource: [Subsystem](#/Subsystem)<br>",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "uninitialized",
+                "system",
+                "chassis",
+                "line_card",
+                "mezz_card",
+                "fabric_card",
+                "management_module",
+                "rear_display_card",
+                "fan_tray",
+                "services_card",
+                "io_module"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "Subsystem.name",
+            "in": "path",
+            "description": "Reference Resource: [Subsystem](#/Subsystem)<br>",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Fan.name",
+            "in": "path",
+            "description": "Reference Resource: [Fan](#/Fan)<br>",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "status",
+                  "fand_issu_status",
+                  "name",
+                  "rpm",
+                  "product_info",
+                  "speed",
+                  "direction"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

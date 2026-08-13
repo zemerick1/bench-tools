@@ -1,0 +1,905 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Configuration",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Configuration"
+    }
+  ],
+  "paths": {
+    "/configs": {
+      "get": {
+        "description": "Retrieve a list of current configurations (including running-config).<br><br>  This URI is not supported by Notifications or NAE.",
+        "summary": "Retrieve a list of current configurations",
+        "tags": [
+          "Configuration"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "cli_hash": "fe85cc63a1da51b2d303c07d49e4ab80ee85a83b36a3c521995a9947a207e079",
+                    "date": "2021-08-19T15:21:44Z",
+                    "name": "running-config",
+                    "schema_version": "HEAD",
+                    "type": "running",
+                    "unix_date": 1629386504,
+                    "version": "Virtual.10.08.0010H",
+                    "writer": "User"
+                  }
+                ],
+                "schema": {
+                  "items": {
+                    "properties": {
+                      "cli_hash": {
+                        "description": "Hash value for the configuration in CLI format",
+                        "type": "string"
+                      },
+                      "date": {
+                        "description": "UTC configuration creation time",
+                        "type": "string"
+                      },
+                      "name": {
+                        "description": "Name of the configuration",
+                        "type": "string"
+                      },
+                      "schema_version": {
+                        "description": "Schema version when the configuration was created",
+                        "type": "string"
+                      },
+                      "type": {
+                        "description": "Configuration type (startup, running, latest, checkpoint)",
+                        "type": "string"
+                      },
+                      "unix_date": {
+                        "description": "Unix Epoch configuration creation time",
+                        "type": "integer"
+                      },
+                      "version": {
+                        "description": "System version on which the configuration was created",
+                        "type": "string"
+                      },
+                      "writer": {
+                        "description": "Agent who created the configuration",
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "description": "Start time in Unix Epoch format",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "description": "End time in Unix Epoch format",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "details",
+            "in": "query",
+            "description": "Show configuration metadata (defaults to true)",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "required": true
+          }
+        ]
+      }
+    },
+    "/configs/autocheckpoint": {
+      "put": {
+        "description": "Ends the auto-checkpoint background timer and creates a permanent checkpoint.<br><br>  This URI is not supported by Notifications or NAE.",
+        "summary": "Acknowledge auto-checkpoint timer interval",
+        "tags": [
+          "Configuration"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "description": "Set the auto-checkpoint timer interval.<br><br>  This URI is not supported by Notifications or NAE.",
+        "summary": "Set auto-checkpoint timer interval",
+        "tags": [
+          "Configuration"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "minutes": {
+                    "description": "Auto-checkpoint timer interval in minutes (1 - 60)",
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/configs/{name}": {
+      "get": {
+        "description": "Retrieve a configuration in JSON or CLI format, or the difference between this and another configuration.<br><br>  This URI is not supported by Notifications or NAE.",
+        "summary": "Retrieve a configuration information by name",
+        "tags": [
+          "Configuration"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "Port": {
+                    "1%2F1%2F1": {
+                      "interfaces": [
+                        "1%2F1%2F1"
+                      ],
+                      "name": "1/1/1"
+                    }
+                  },
+                  "System": {
+                    "bfd_enable": true,
+                    "cli_session": {
+                      "timeout": 0
+                    },
+                    "mgmt_intf": {
+                      "ip": "172.25.0.2",
+                      "mode": "static",
+                      "name": "eth0",
+                      "subnet_mask": 24
+                    }
+                  },
+                  "schema_version": "HEAD"
+                },
+                "schema": {
+                  "properties": {
+                    "tableName1": {
+                      "properties": {
+                        "configuration": {
+                          "type": "object"
+                        }
+                      }
+                    },
+                    "tableName2": {
+                      "properties": {
+                        "configuration": {
+                          "type": "object"
+                        }
+                      }
+                    },
+                    "tableName3": {
+                      "properties": {
+                        "configuration": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "text/plain": {
+                "example": "!\n! Version AOS-CX Virtual.10.08.0010H\n! export-password: default\nuser admin group administrators password ciphertext AQBapXBUPNTHhIf/7BjUp/x/Lkp8+TniWsxU/qGNyKdrQ+L+YgAAAM/Bk1yoXDidxN6gK9dCr2O4vwqEL1K8s4iEINnBQeaOunwdPAjtwrJ15IwmHxAvYf4IQiEncyY3+FoStyUscG7TLerafGNZ5xxyt1gVeLtMtC0EJT7QZMHA1+S8tl8G8ytp\nbfd\nntp server pool.ntp.org minpoll 4 maxpoll 4 iburst\nntp enable\ncli-session\ntimeout 0\nssh server vrf mgmt\nvlan 1\ninterface mgmt\n\tno shutdown\n\tip static 172.25.0.2/24\nhttps-server vrf mgmt",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Configuration name. Possible values are: 'running-config', 'startup-config' or any other checkpoint configuration name",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "diff",
+            "in": "query",
+            "description": "Configuration name for the other configuration when getting the diff, as a full URL (i.e. /rest/'version'/configs/startup-config, where 'version' matches the current API version) it also allows for a remote URL (i.e. tftp URL) of a remote file in CLI format",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "description": "Mode to use when performing the diff comparison between two configs (empty defaults to unified)",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "deep"
+              ]
+            }
+          },
+          {
+            "name": "vrf",
+            "in": "query",
+            "description": "VRF Name if using a remote URL in the diff parameter",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "description": "Upload a new configuration using JSON format.<br><br>  This URI is not supported by Notifications or NAE.",
+        "summary": "Upload a new configuration",
+        "tags": [
+          "Configuration"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "configuration": {
+                    "description": "Configuration content in JSON format",
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Configuration name",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "running-config",
+                "startup-config"
+              ]
+            },
+            "required": true
+          }
+        ]
+      }
+    },
+    "/configs/{to}": {
+      "put": {
+        "description": "Copy a configuration to another one on the device.<br><br>  This URI is not supported by Notifications or NAE.",
+        "summary": "Copy a local configuration",
+        "tags": [
+          "Configuration"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "to",
+            "in": "path",
+            "description": "Destination configuration name. Possible values are: 'running-config', 'startup-config' or any non-existing checkpoint configuration name",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Source configuration name as a full URL (i.e. /rest/'version'/configs/startup-config, where 'version' matches the current API version). Possible valures are 'running-config', 'startup-config' or any other checkpoint name. Having the same origin and destination results in failure. Note: it's not possible to have two checkpoints with the same configuration",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    },
+    "/fullconfigs": {
+      "get": {
+        "description": "Retrieve a list of current configurations.<br><br>  This URI is not supported by Notifications or NAE.",
+        "summary": "Retrieve a list of current configurations",
+        "tags": [
+          "Configuration"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": [
+                  "/rest/<version>/fullconfigs/CPC20210819152144_X86-64",
+                  "/rest/<version>/fullconfigs/running-config",
+                  "/rest/<version>/fullconfigs/my_check",
+                  "/rest/<version>/fullconfigs/startup-config"
+                ],
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Service Unavailable"
+          }
+        },
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "description": "Start time in Unix Epoch format",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "description": "End time in Unix Epoch format",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/fullconfigs/hash/{name}": {
+      "get": {
+        "description": "Retrieve a configuration's hash by name and format.<br><br>  This URI is not supported by Notifications or NAE.",
+        "summary": "Retrieve a configuration's hash by name",
+        "tags": [
+          "Configuration"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "checkpoint_name": {
+                      "type": "string"
+                    },
+                    "sha_256_hash": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Service Unavailable"
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Configuration name. Possible values are: 'running-config', 'startup-config' or any other checkpoint configuration name",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "Configuration format (defaults to CLI)",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cli",
+                "json"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/fullconfigs/{local-config}": {
+      "get": {
+        "description": "Copy local configuration (e.g., 'running-config', 'startup-config') to remote.<br><br>  This URI is not supported by Notifications or NAE.",
+        "summary": "Copy local configuration to remote",
+        "tags": [
+          "Configuration"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Service Unavailable"
+          }
+        },
+        "parameters": [
+          {
+            "name": "local-config",
+            "in": "path",
+            "description": "Configuration name",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "running-config",
+                "startup-config"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "Destination location (e.g., tftp URL)",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "cli"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "vrf",
+            "in": "query",
+            "description": "VRF Name",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "put": {
+        "description": "Copy remote configuration to local (e.g., 'running-config', 'startup-config').<br><br>  This URI is not supported by Notifications or NAE.",
+        "summary": "Copy remote configuration to local",
+        "tags": [
+          "Configuration"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Service Unavailable"
+          }
+        },
+        "parameters": [
+          {
+            "name": "local-config",
+            "in": "path",
+            "description": "Configuration name",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "running-config",
+                "startup-config"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Source location (e.g., tftp URL)",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "vrf",
+            "in": "query",
+            "description": "VRF Name",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    },
+    "/fullconfigs/{name}": {
+      "get": {
+        "description": "Retrieve a configuration in JSON format.<br><br>  This URI is not supported by Notifications or NAE.",
+        "summary": "Retrieve a configuration by name",
+        "tags": [
+          "Configuration"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "tableName1": {
+                      "properties": {
+                        "configuration": {
+                          "properties": {}
+                        }
+                      }
+                    },
+                    "tableName2": {
+                      "properties": {
+                        "configuration": {
+                          "properties": {}
+                        }
+                      }
+                    },
+                    "tableName3": {
+                      "properties": {
+                        "configuration": {
+                          "properties": {}
+                        }
+                      }
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Service Unavailable"
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Configuration name. Possible values are: 'running-config', 'startup-config' or any other checkpoint configuration name",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "put": {
+        "description": "Upload a new configuration using JSON format.<br><br>  This URI is not supported by Notifications or NAE.",
+        "summary": "Upload a new configuration",
+        "tags": [
+          "Configuration"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "configuration": {
+                    "description": "Configuration content in JSON format",
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Service Unavailable"
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "Configuration name",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "running-config",
+                "startup-config"
+              ]
+            },
+            "required": true
+          }
+        ]
+      }
+    },
+    "/fullconfigs/{to}": {
+      "put": {
+        "description": "Copy local configurations.<br><br>  This URI is not supported by Notifications or NAE.",
+        "summary": "Copy to/from running-config or startup-config",
+        "tags": [
+          "Configuration"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Service Unavailable"
+          }
+        },
+        "parameters": [
+          {
+            "name": "to",
+            "in": "path",
+            "description": "Destination configuration name. Possible values are 'running-config', 'startup-config', or any non-existing checkpoint configuration name",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Source configuration name as full URL (i.e. /rest/'version'/fullconfigs/startup-config, where 'version' matches the current API version). Possible values are 'runnig-config', 'startup-config' or any other checkpoint name. Having the same origin and destination results in failure. Note: it's not possible to have two checkpoints with the same configuration",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  }
+}

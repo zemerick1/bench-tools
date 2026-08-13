@@ -1,0 +1,430 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Nexthop",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Nexthop"
+    }
+  ],
+  "paths": {
+    "/system/nexthops": {
+      "get": {
+        "tags": [
+          "Nexthop"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Reference Resource: [Nexthop](#/Nexthop)<br>Abstracted value which is generated to identify each of the  Nexthops.",
+                      "maximum": 4294967295,
+                      "minimum": 1
+                    },
+                    "ip_address": {
+                      "type": "string",
+                      "description": "IP address of the nexthop device.",
+                      "maxLength": 45
+                    },
+                    "label_switch_path": {
+                      "type": "string",
+                      "description": "Reference Resource: [Label_Switch_Path](#/Label_Switch_Path)<br>Nexthop pointing to the corresponding Label switch path."
+                    },
+                    "port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>List of outgoing ports. Nexthop entries of type `unicast` can have atmost 1 port."
+                    },
+                    "selected": {
+                      "type": "boolean",
+                      "description": "Indicates if this nexthop is actively participating in forwarding.  Multiple nexthops can exist for each route entry but the routing protocol can indicate if a particular nexthop should not be used in forwarding. "
+                    },
+                    "status": {
+                      "type": "object",
+                      "properties": {
+                        "arp_resolved": {
+                          "type": "boolean",
+                          "description": "Indicate if ARP is resolved for this entry. If the ARP entry is missing, this value is `false`"
+                        },
+                        "error": {
+                          "type": "string",
+                          "description": "Human readable error string."
+                        },
+                        "hw_configured": {
+                          "type": "boolean",
+                          "description": "Indicate if nexthop programmed in the asic. If the ARP entry is missing, this value is `false`"
+                        }
+                      }
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Type of the Nexthop: 'mpls-nexthop':  Nexthop is used by MPLS.",
+                      "enum": [
+                        "legacy-nexthop",
+                        "mpls-nexthop"
+                      ]
+                    },
+                    "vni": {
+                      "type": "string",
+                      "description": "Reference Resource: [Virtual_Network_ID](#/Virtual_Network_ID)<br>The L3VNI associated with the tunnel next-hop for the VRF."
+                    },
+                    "weight": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Weight is used to differentially balance the packets.  Example: For a route if there are 2 nexthops nh1 with weight 5 and nh2 with weight 1, then for every 5 packets that uses nh1, one packet will use nh2.  In the first release, the above case is not supported.  Only ECMP is supported. ",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "type",
+                  "selected",
+                  "status",
+                  "label_switch_path",
+                  "ip_address",
+                  "vni",
+                  "id",
+                  "port",
+                  "weight"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/nexthops/{Nexthop.id}": {
+      "get": {
+        "tags": [
+          "Nexthop"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Reference Resource: [Nexthop](#/Nexthop)<br>Abstracted value which is generated to identify each of the  Nexthops.",
+                      "maximum": 4294967295,
+                      "minimum": 1
+                    },
+                    "ip_address": {
+                      "type": "string",
+                      "description": "IP address of the nexthop device.",
+                      "maxLength": 45
+                    },
+                    "label_switch_path": {
+                      "type": "string",
+                      "description": "Reference Resource: [Label_Switch_Path](#/Label_Switch_Path)<br>Nexthop pointing to the corresponding Label switch path."
+                    },
+                    "port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>List of outgoing ports. Nexthop entries of type `unicast` can have atmost 1 port."
+                    },
+                    "selected": {
+                      "type": "boolean",
+                      "description": "Indicates if this nexthop is actively participating in forwarding.  Multiple nexthops can exist for each route entry but the routing protocol can indicate if a particular nexthop should not be used in forwarding. "
+                    },
+                    "status": {
+                      "type": "object",
+                      "properties": {
+                        "arp_resolved": {
+                          "type": "boolean",
+                          "description": "Indicate if ARP is resolved for this entry. If the ARP entry is missing, this value is `false`"
+                        },
+                        "error": {
+                          "type": "string",
+                          "description": "Human readable error string."
+                        },
+                        "hw_configured": {
+                          "type": "boolean",
+                          "description": "Indicate if nexthop programmed in the asic. If the ARP entry is missing, this value is `false`"
+                        }
+                      }
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Type of the Nexthop: 'mpls-nexthop':  Nexthop is used by MPLS.",
+                      "enum": [
+                        "legacy-nexthop",
+                        "mpls-nexthop"
+                      ]
+                    },
+                    "vni": {
+                      "type": "string",
+                      "description": "Reference Resource: [Virtual_Network_ID](#/Virtual_Network_ID)<br>The L3VNI associated with the tunnel next-hop for the VRF."
+                    },
+                    "weight": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Weight is used to differentially balance the packets.  Example: For a route if there are 2 nexthops nh1 with weight 5 and nh2 with weight 1, then for every 5 packets that uses nh1, one packet will use nh2.  In the first release, the above case is not supported.  Only ECMP is supported. ",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Nexthop.id",
+            "in": "path",
+            "description": "Reference Resource: [Nexthop](#/Nexthop)<br>Abstracted value which is generated to identify each of the  Nexthops.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "label_switch_path",
+                  "ip_address",
+                  "vni",
+                  "type",
+                  "selected",
+                  "status",
+                  "port",
+                  "weight",
+                  "id"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

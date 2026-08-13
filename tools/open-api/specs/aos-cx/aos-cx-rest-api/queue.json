@@ -1,0 +1,795 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Queue",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Queue"
+    }
+  ],
+  "paths": {
+    "/system/qos/{QoS.name}/queues": {
+      "get": {
+        "tags": [
+          "Queue"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "algorithm": {
+                      "type": "string",
+                      "description": "This parameter selects the scheduling behavior of the queue:  * `strict` - Strict Priority will service all packets in the queue before any packets in lower numbered queues as long as there are no packets in any higher number queue. `dwrr` - Deficit Weighted Round Robin will apportion available bandwidth among all non-empty dwrr queues in relation to their queue weights. `wfq` - Weighted Fair Queuing will apportion available bandwidth among all non-empty wfq queues in relation to their queue weights.  If this parameter is missing, it is assumed to be 'strict'.",
+                      "enum": [
+                        "strict",
+                        "dwrr",
+                        "wfq"
+                      ]
+                    },
+                    "bandwidth": {
+                      "type": "integer",
+                      "description": "The bandwidth limit to apply to egress queue traffic. If no bandwidth value is applied, the bandwidth will not be limited per queue. If the algorithm configured on this queue does not support a bandwidth limit, this  value will be ignored. Bandwidth limits to configure per-queue shaping are  supported on queues which use the following algorithms: - Strict Configuration can be validated by referring to [egress_shape_hw_rate] (Port.rate_limits_status.egress_shape_hw_rate).",
+                      "maximum": 400000000,
+                      "minimum": 1
+                    },
+                    "bandwidth_units": {
+                      "type": "string",
+                      "description": "Units of the egress queue bandwidth: kbps: kilobits per second. percent - the units are in percentage of port speed.",
+                      "enum": [
+                        "kbps",
+                        "percent"
+                      ]
+                    },
+                    "burst": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "The burst size (in kilobytes) allowed per bandwidth-limited queue. If no burst is specified, the default burst of 32 KB will be applied. Per-queue burst is supported on queues which use the following algorithms: - Strict Configuration can be validated by referring to [egress_burst_hw_rate] (Port.rate_limits_status.egress_burst_hw_rate).",
+                      "maximum": 4294967295,
+                      "minimum": 1
+                    },
+                    "hw_default": {
+                      "type": "boolean",
+                      "description": "When true, this row contains the hardware default schedule profile parameters for this queue."
+                    },
+                    "queue_number": {
+                      "type": "integer",
+                      "description": "Reference Resource: [Queue](#/Queue)<br>Schedule parameters for individual queues.  Queues are numbered in *priority order*, with zero being the lowest priority. The maximum number of queues is hardware dependent."
+                    },
+                    "weight": {
+                      "type": "integer",
+                      "description": "The weight value for this queue. The maximum weight is hardware dependent.",
+                      "maximum": 127,
+                      "minimum": 1
+                    }
+                  },
+                  "required": [
+                    "queue_number"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "QoS.name",
+            "in": "path",
+            "description": "Reference Resource: [QoS](#/QoS)<br>There must be a user-defined name of the schedule profile.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "hw_default",
+                  "algorithm",
+                  "weight",
+                  "bandwidth_units",
+                  "burst",
+                  "bandwidth"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Queue"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "algorithm": {
+                    "type": "string",
+                    "description": "This parameter selects the scheduling behavior of the queue:  * `strict` - Strict Priority will service all packets in the queue before any packets in lower numbered queues as long as there are no packets in any higher number queue. `dwrr` - Deficit Weighted Round Robin will apportion available bandwidth among all non-empty dwrr queues in relation to their queue weights. `wfq` - Weighted Fair Queuing will apportion available bandwidth among all non-empty wfq queues in relation to their queue weights.  If this parameter is missing, it is assumed to be 'strict'.",
+                    "enum": [
+                      "strict",
+                      "dwrr",
+                      "wfq"
+                    ]
+                  },
+                  "bandwidth": {
+                    "type": "integer",
+                    "description": "The bandwidth limit to apply to egress queue traffic. If no bandwidth value is applied, the bandwidth will not be limited per queue. If the algorithm configured on this queue does not support a bandwidth limit, this  value will be ignored. Bandwidth limits to configure per-queue shaping are  supported on queues which use the following algorithms: - Strict Configuration can be validated by referring to [egress_shape_hw_rate] (Port.rate_limits_status.egress_shape_hw_rate).",
+                    "maximum": 400000000,
+                    "minimum": 1
+                  },
+                  "bandwidth_units": {
+                    "type": "string",
+                    "description": "Units of the egress queue bandwidth: kbps: kilobits per second. percent - the units are in percentage of port speed.",
+                    "enum": [
+                      "kbps",
+                      "percent"
+                    ]
+                  },
+                  "burst": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "The burst size (in kilobytes) allowed per bandwidth-limited queue. If no burst is specified, the default burst of 32 KB will be applied. Per-queue burst is supported on queues which use the following algorithms: - Strict Configuration can be validated by referring to [egress_burst_hw_rate] (Port.rate_limits_status.egress_burst_hw_rate).",
+                    "maximum": 4294967295,
+                    "minimum": 1
+                  },
+                  "hw_default": {
+                    "type": "boolean",
+                    "description": "When true, this row contains the hardware default schedule profile parameters for this queue."
+                  },
+                  "queue_number": {
+                    "type": "integer",
+                    "description": "Reference Resource: [Queue](#/Queue)<br>Schedule parameters for individual queues.  Queues are numbered in *priority order*, with zero being the lowest priority. The maximum number of queues is hardware dependent."
+                  },
+                  "weight": {
+                    "type": "integer",
+                    "description": "The weight value for this queue. The maximum weight is hardware dependent.",
+                    "maximum": 127,
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "queue_number"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "QoS.name",
+            "in": "path",
+            "description": "Reference Resource: [QoS](#/QoS)<br>There must be a user-defined name of the schedule profile.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    },
+    "/system/qos/{QoS.name}/queues/{Queue.queue_number}": {
+      "get": {
+        "tags": [
+          "Queue"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "algorithm": {
+                      "type": "string",
+                      "description": "This parameter selects the scheduling behavior of the queue:  * `strict` - Strict Priority will service all packets in the queue before any packets in lower numbered queues as long as there are no packets in any higher number queue. `dwrr` - Deficit Weighted Round Robin will apportion available bandwidth among all non-empty dwrr queues in relation to their queue weights. `wfq` - Weighted Fair Queuing will apportion available bandwidth among all non-empty wfq queues in relation to their queue weights.  If this parameter is missing, it is assumed to be 'strict'.",
+                      "enum": [
+                        "strict",
+                        "dwrr",
+                        "wfq"
+                      ]
+                    },
+                    "bandwidth": {
+                      "type": "integer",
+                      "description": "The bandwidth limit to apply to egress queue traffic. If no bandwidth value is applied, the bandwidth will not be limited per queue. If the algorithm configured on this queue does not support a bandwidth limit, this  value will be ignored. Bandwidth limits to configure per-queue shaping are  supported on queues which use the following algorithms: - Strict Configuration can be validated by referring to [egress_shape_hw_rate] (Port.rate_limits_status.egress_shape_hw_rate).",
+                      "maximum": 400000000,
+                      "minimum": 1
+                    },
+                    "bandwidth_units": {
+                      "type": "string",
+                      "description": "Units of the egress queue bandwidth: kbps: kilobits per second. percent - the units are in percentage of port speed.",
+                      "enum": [
+                        "kbps",
+                        "percent"
+                      ]
+                    },
+                    "burst": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "The burst size (in kilobytes) allowed per bandwidth-limited queue. If no burst is specified, the default burst of 32 KB will be applied. Per-queue burst is supported on queues which use the following algorithms: - Strict Configuration can be validated by referring to [egress_burst_hw_rate] (Port.rate_limits_status.egress_burst_hw_rate).",
+                      "maximum": 4294967295,
+                      "minimum": 1
+                    },
+                    "hw_default": {
+                      "type": "boolean",
+                      "description": "When true, this row contains the hardware default schedule profile parameters for this queue."
+                    },
+                    "queue_number": {
+                      "type": "integer",
+                      "description": "Reference Resource: [Queue](#/Queue)<br>Schedule parameters for individual queues.  Queues are numbered in *priority order*, with zero being the lowest priority. The maximum number of queues is hardware dependent."
+                    },
+                    "weight": {
+                      "type": "integer",
+                      "description": "The weight value for this queue. The maximum weight is hardware dependent.",
+                      "maximum": 127,
+                      "minimum": 1
+                    }
+                  },
+                  "required": [
+                    "queue_number"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "QoS.name",
+            "in": "path",
+            "description": "Reference Resource: [QoS](#/QoS)<br>There must be a user-defined name of the schedule profile.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Queue.queue_number",
+            "in": "path",
+            "description": "Reference Resource: [Queue](#/Queue)<br>Schedule parameters for individual queues.  Queues are numbered in *priority order*, with zero being the lowest priority. The maximum number of queues is hardware dependent.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "algorithm",
+                  "weight",
+                  "bandwidth_units",
+                  "hw_default",
+                  "bandwidth",
+                  "burst"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Queue"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "algorithm": {
+                    "type": "string",
+                    "description": "This parameter selects the scheduling behavior of the queue:  * `strict` - Strict Priority will service all packets in the queue before any packets in lower numbered queues as long as there are no packets in any higher number queue. `dwrr` - Deficit Weighted Round Robin will apportion available bandwidth among all non-empty dwrr queues in relation to their queue weights. `wfq` - Weighted Fair Queuing will apportion available bandwidth among all non-empty wfq queues in relation to their queue weights.  If this parameter is missing, it is assumed to be 'strict'.",
+                    "enum": [
+                      "strict",
+                      "dwrr",
+                      "wfq"
+                    ]
+                  },
+                  "bandwidth": {
+                    "type": "integer",
+                    "description": "The bandwidth limit to apply to egress queue traffic. If no bandwidth value is applied, the bandwidth will not be limited per queue. If the algorithm configured on this queue does not support a bandwidth limit, this  value will be ignored. Bandwidth limits to configure per-queue shaping are  supported on queues which use the following algorithms: - Strict Configuration can be validated by referring to [egress_shape_hw_rate] (Port.rate_limits_status.egress_shape_hw_rate).",
+                    "maximum": 400000000,
+                    "minimum": 1
+                  },
+                  "bandwidth_units": {
+                    "type": "string",
+                    "description": "Units of the egress queue bandwidth: kbps: kilobits per second. percent - the units are in percentage of port speed.",
+                    "enum": [
+                      "kbps",
+                      "percent"
+                    ]
+                  },
+                  "burst": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "The burst size (in kilobytes) allowed per bandwidth-limited queue. If no burst is specified, the default burst of 32 KB will be applied. Per-queue burst is supported on queues which use the following algorithms: - Strict Configuration can be validated by referring to [egress_burst_hw_rate] (Port.rate_limits_status.egress_burst_hw_rate).",
+                    "maximum": 4294967295,
+                    "minimum": 1
+                  },
+                  "queue_number": {
+                    "type": "integer",
+                    "description": "Reference Resource: [Queue](#/Queue)<br>Schedule parameters for individual queues.  Queues are numbered in *priority order*, with zero being the lowest priority. The maximum number of queues is hardware dependent."
+                  },
+                  "weight": {
+                    "type": "integer",
+                    "description": "The weight value for this queue. The maximum weight is hardware dependent.",
+                    "maximum": 127,
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "queue_number"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "QoS.name",
+            "in": "path",
+            "description": "Reference Resource: [QoS](#/QoS)<br>There must be a user-defined name of the schedule profile.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Queue.queue_number",
+            "in": "path",
+            "description": "Reference Resource: [Queue](#/Queue)<br>Schedule parameters for individual queues.  Queues are numbered in *priority order*, with zero being the lowest priority. The maximum number of queues is hardware dependent.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Queue"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "QoS.name",
+            "in": "path",
+            "description": "Reference Resource: [QoS](#/QoS)<br>There must be a user-defined name of the schedule profile.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Queue.queue_number",
+            "in": "path",
+            "description": "Reference Resource: [Queue](#/Queue)<br>Schedule parameters for individual queues.  Queues are numbered in *priority order*, with zero being the lowest priority. The maximum number of queues is hardware dependent.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Queue"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "algorithm": {
+                    "type": "string",
+                    "description": "This parameter selects the scheduling behavior of the queue:  * `strict` - Strict Priority will service all packets in the queue before any packets in lower numbered queues as long as there are no packets in any higher number queue. `dwrr` - Deficit Weighted Round Robin will apportion available bandwidth among all non-empty dwrr queues in relation to their queue weights. `wfq` - Weighted Fair Queuing will apportion available bandwidth among all non-empty wfq queues in relation to their queue weights.  If this parameter is missing, it is assumed to be 'strict'.",
+                    "enum": [
+                      "strict",
+                      "dwrr",
+                      "wfq"
+                    ]
+                  },
+                  "bandwidth": {
+                    "type": "integer",
+                    "description": "The bandwidth limit to apply to egress queue traffic. If no bandwidth value is applied, the bandwidth will not be limited per queue. If the algorithm configured on this queue does not support a bandwidth limit, this  value will be ignored. Bandwidth limits to configure per-queue shaping are  supported on queues which use the following algorithms: - Strict Configuration can be validated by referring to [egress_shape_hw_rate] (Port.rate_limits_status.egress_shape_hw_rate).",
+                    "maximum": 400000000,
+                    "minimum": 1
+                  },
+                  "bandwidth_units": {
+                    "type": "string",
+                    "description": "Units of the egress queue bandwidth: kbps: kilobits per second. percent - the units are in percentage of port speed.",
+                    "enum": [
+                      "kbps",
+                      "percent"
+                    ]
+                  },
+                  "burst": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "The burst size (in kilobytes) allowed per bandwidth-limited queue. If no burst is specified, the default burst of 32 KB will be applied. Per-queue burst is supported on queues which use the following algorithms: - Strict Configuration can be validated by referring to [egress_burst_hw_rate] (Port.rate_limits_status.egress_burst_hw_rate).",
+                    "maximum": 4294967295,
+                    "minimum": 1
+                  },
+                  "queue_number": {
+                    "type": "integer",
+                    "description": "Reference Resource: [Queue](#/Queue)<br>Schedule parameters for individual queues.  Queues are numbered in *priority order*, with zero being the lowest priority. The maximum number of queues is hardware dependent."
+                  },
+                  "weight": {
+                    "type": "integer",
+                    "description": "The weight value for this queue. The maximum weight is hardware dependent.",
+                    "maximum": 127,
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "queue_number"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "QoS.name",
+            "in": "path",
+            "description": "Reference Resource: [QoS](#/QoS)<br>There must be a user-defined name of the schedule profile.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Queue.queue_number",
+            "in": "path",
+            "description": "Reference Resource: [Queue](#/Queue)<br>Schedule parameters for individual queues.  Queues are numbered in *priority order*, with zero being the lowest priority. The maximum number of queues is hardware dependent.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

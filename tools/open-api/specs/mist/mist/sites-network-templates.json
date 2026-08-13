@@ -1,0 +1,4149 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Sites Network Templates",
+    "version": "2602.1.1"
+  },
+  "servers": [
+    {
+      "description": "Mist Global 01",
+      "url": "https://api.mist.com"
+    },
+    {
+      "description": "Mist Global 02",
+      "url": "https://api.gc1.mist.com"
+    },
+    {
+      "description": "Mist Global 03",
+      "url": "https://api.ac2.mist.com"
+    },
+    {
+      "description": "Mist Global 04",
+      "url": "https://api.gc2.mist.com"
+    },
+    {
+      "description": "Mist Global 05",
+      "url": "https://api.gc4.mist.com"
+    },
+    {
+      "description": "Mist EMEA 01",
+      "url": "https://api.eu.mist.com"
+    },
+    {
+      "description": "Mist EMEA 02",
+      "url": "https://api.gc3.mist.com"
+    },
+    {
+      "description": "Mist EMEA 03",
+      "url": "https://api.ac6.mist.com"
+    },
+    {
+      "description": "Mist EMEA 04",
+      "url": "https://api.gc6.mist.com"
+    },
+    {
+      "description": "Mist APAC 01",
+      "url": "https://api.ac5.mist.com"
+    },
+    {
+      "description": "Mist APAC 02",
+      "url": "https://api.gc5.mist.com"
+    },
+    {
+      "description": "Mist APAC 03",
+      "url": "https://api.gc7.mist.com"
+    }
+  ],
+  "security": [
+    {
+      "apiToken": []
+    },
+    {
+      "basicAuth": []
+    },
+    {
+      "basicAuth": [],
+      "csrfToken": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "The API Endpoints for the Network Templates at the site level can be used to get the site derived networks, meaning the org level configuration with the site variables resolved.",
+      "name": "Sites Network Templates"
+    }
+  ],
+  "paths": {
+    "/api/v1/sites/{site_id}/networktemplates/derived": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        }
+      ],
+      "get": {
+        "description": "Get the list of derived Network Templates a Site",
+        "operationId": "listSiteNetworkTemplatesDerived",
+        "parameters": [
+          {
+            "description": "Whether resolve the site variables",
+            "in": "query",
+            "name": "resolve",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Networktemplate"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "listSiteNetworkTemplatesDerived",
+        "tags": [
+          "Sites Network Templates"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "acl_policies": {
+        "items": {
+          "$ref": "#/components/schemas/acl_policy"
+        },
+        "type": "array"
+      },
+      "acl_policy": {
+        "additionalProperties": false,
+        "description": "ACL Policy:\n  - for GBP-based policy, all src_tags and dst_tags have to be gbp-based\n  - for ACL-based policy, `network` is required in either the source or destination so that we know where to attach the policy to",
+        "properties": {
+          "actions": {
+            "$ref": "#/components/schemas/acl_policy_actions"
+          },
+          "name": {
+            "examples": [
+              "guest access"
+            ],
+            "type": "string"
+          },
+          "src_tags": {
+            "$ref": "#/components/schemas/acl_policy_src_tags"
+          }
+        },
+        "type": "object"
+      },
+      "acl_policy_action": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/allow_deny"
+          },
+          "dst_tag": {
+            "examples": [
+              "corp"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "dst_tag"
+        ],
+        "type": "object"
+      },
+      "acl_policy_actions": {
+        "description": "ACL Policy Actions:\n  - for GBP-based policy, all src_tags and dst_tags have to be gbp-based\n  - for ACL-based policy, `network` is required in either the source or destination so that we know where to attach the policy to",
+        "items": {
+          "$ref": "#/components/schemas/acl_policy_action"
+        },
+        "type": "array"
+      },
+      "acl_policy_src_tags": {
+        "description": "ACL Policy Source Tags:\n  - for GBP-based policy, all src_tags and dst_tags have to be gbp-based\n  - for ACL-based policy, `network` is required in either the source or destination so that we know where to attach the policy to",
+        "items": {
+          "examples": [
+            "macs"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "acl_tag": {
+        "additionalProperties": false,
+        "description": "Resource tags (`type`==`resource` or `type`==`gbp_resource`) can only be used in `dst_tags`",
+        "properties": {
+          "ether_types": {
+            "$ref": "#/components/schemas/acl_tag_ether_types"
+          },
+          "gbp_tag": {
+            "description": "Required if\n  - `type`==`dynamic_gbp` (gbp_tag received from RADIUS)\n  - `type`==`gbp_resource`\n  - `type`==`static_gbp` (applying gbp tag against matching conditions)",
+            "type": "integer"
+          },
+          "macs": {
+            "$ref": "#/components/schemas/acl_tag_macs"
+          },
+          "network": {
+            "description": "If:\n  * `type`==`mac` (optional. default is `any`)\n  * `type`==`subnet` (optional. default is `any`)\n  * `type`==`network`\n  * `type`==`resource` (optional. default is `any`)\n  * `type`==`static_gbp` if from matching network (vlan)",
+            "type": "string"
+          },
+          "port_usage": {
+            "description": "Required if `type`==`port_usage`",
+            "type": "string"
+          },
+          "radius_group": {
+            "description": "Required if:\n  * `type`==`radius_group`\n  * `type`==`static_gbp`\nif from matching radius_group",
+            "type": "string"
+          },
+          "specs": {
+            "$ref": "#/components/schemas/acl_tag_specs"
+          },
+          "subnets": {
+            "$ref": "#/components/schemas/acl_tag_subnets"
+          },
+          "type": {
+            "$ref": "#/components/schemas/acl_tag_type"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "acl_tag_ether_types": {
+        "default": [
+          "any"
+        ],
+        "description": "ARP / IPv6. Default is `any`",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "acl_tag_macs": {
+        "description": "Required if \n- `type`==`mac`\n- `type`==`static_gbp` if from matching mac",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "acl_tag_spec": {
+        "additionalProperties": false,
+        "properties": {
+          "port_range": {
+            "default": "0",
+            "description": "Matched dst port, \"0\" means any",
+            "type": "string"
+          },
+          "protocol": {
+            "default": "any",
+            "description": "`tcp` / `udp` / `icmp` / `icmp6` / `gre` / `any` / `:protocol_number`, `protocol_number` is between 1-254, default is `any` `protocol_number` is between 1-254",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "acl_tag_specs": {
+        "description": "If `type`==`resource`, `type`==`radius_group`, `type`==`port_usage` or `type`==`gbp_resource`. Empty means unrestricted, i.e. any",
+        "items": {
+          "$ref": "#/components/schemas/acl_tag_spec"
+        },
+        "type": "array"
+      },
+      "acl_tag_subnets": {
+        "description": "If \n- `type`==`subnet` \n- `type`==`resource` (optional. default is `any`)\n- `type`==`static_gbp` if from matching subnet",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "acl_tag_type": {
+        "description": "enum: \n  * `any`: matching anything not identified\n  * `dynamic_gbp`: from the gbp_tag received from RADIUS\n  * `gbp_resource`: can only be used in `dst_tags`\n  * `mac`\n  * `network`\n  * `port_usage`\n  * `radius_group`\n  * `resource`: can only be used in `dst_tags`\n  * `static_gbp`: applying gbp tag against matching conditions\n  * `subnet`'",
+        "enum": [
+          "any",
+          "dynamic_gbp",
+          "gbp_resource",
+          "mac",
+          "network",
+          "port_usage",
+          "radius_group",
+          "resource",
+          "static_gbp",
+          "subnet"
+        ],
+        "type": "string"
+      },
+      "acl_tags": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/acl_tag"
+        },
+        "description": "ACL Tags to identify traffic source or destination. Key name is the tag name",
+        "type": "object"
+      },
+      "additional_config_cmds": {
+        "description": "additional CLI commands to append to the generated Junos config. **Note**: no check is done",
+        "items": {
+          "description": "JUNOS \"set\" command to add to the generated configuration",
+          "examples": [
+            "set snmp community public"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "aggregate_route": {
+        "additionalProperties": false,
+        "properties": {
+          "discard": {
+            "default": false,
+            "type": "boolean"
+          },
+          "metric": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "preference": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "aggregate_routes": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/aggregate_route"
+        },
+        "description": "Property key is the destination subnet (e.g. \"172.16.3.0/24\")",
+        "examples": [
+          {
+            "172.16.3.0/24": {
+              "discard": false,
+              "metric": null,
+              "preference": 30
+            }
+          }
+        ],
+        "type": "object"
+      },
+      "aggregate_routes6": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/aggregate_route"
+        },
+        "description": "Property key is the destination subnet (e.g. \"2a02:1234:420a:10c9::/64\")",
+        "example": {
+          "2a02:1234:420a:10c9::/64": {
+            "discard": false,
+            "metric": null,
+            "preference": 30
+          }
+        },
+        "type": "object"
+      },
+      "allow_deny": {
+        "description": "enum: `allow`, `deny`",
+        "enum": [
+          "allow",
+          "deny"
+        ],
+        "type": "string"
+      },
+      "bgp_as": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "maximum": 4294967294,
+            "minimum": 1,
+            "type": "integer"
+          }
+        ],
+        "description": "BGP AS, value in range 1-4294967294. Can be a Variable (e.g. `{{bgp_as}}` )",
+        "examples": [
+          65000
+        ]
+      },
+      "config_switch_local_accounts": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/config_switch_local_accounts_user"
+        },
+        "description": "Property key is the user name. For Local user authentication",
+        "type": "object"
+      },
+      "config_switch_local_accounts_user": {
+        "additionalProperties": false,
+        "properties": {
+          "password": {
+            "examples": [
+              "Juniper123"
+            ],
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/config_switch_local_accounts_user_role"
+          }
+        },
+        "type": "object"
+      },
+      "config_switch_local_accounts_user_role": {
+        "default": "none",
+        "description": "enum: `admin`, `helpdesk`, `none`, `read`",
+        "enum": [
+          "admin",
+          "helpdesk",
+          "none",
+          "read"
+        ],
+        "type": "string"
+      },
+      "created_time": {
+        "description": "When the object has been created, in epoch",
+        "format": "double",
+        "readOnly": true,
+        "type": "number"
+      },
+      "dhcp_snooping": {
+        "additionalProperties": false,
+        "properties": {
+          "all_networks": {
+            "type": "boolean"
+          },
+          "enable_arp_spoof_check": {
+            "description": "Enable for dynamic ARP inspection check",
+            "type": "boolean"
+          },
+          "enable_ip_source_guard": {
+            "description": "Enable for check for forging source IP address",
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "networks": {
+            "$ref": "#/components/schemas/dhcp_snooping_networks"
+          }
+        },
+        "type": "object"
+      },
+      "dhcp_snooping_networks": {
+        "description": "If `all_networks`==`false`, list of network with DHCP snooping enabled",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "dns_servers": {
+        "description": "Global dns settings. To keep compatibility, dns settings in `ip_config` and `oob_ip_config` will overwrite this setting",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "dns_suffix": {
+        "description": "Global dns settings. To keep compatibility, dns settings in `ip_config` and `oob_ip_config` will overwrite this setting",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "extra_route": {
+        "additionalProperties": false,
+        "properties": {
+          "discard": {
+            "default": false,
+            "description": "This takes precedence",
+            "type": "boolean"
+          },
+          "metric": {
+            "examples": [
+              null
+            ],
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "next_qualified": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/extra_route_next_qualified_properties"
+            },
+            "examples": [
+              {
+                "10.3.1.1": {
+                  "metric": null,
+                  "preference": 40
+                }
+              }
+            ],
+            "type": "object"
+          },
+          "no_resolve": {
+            "default": false,
+            "type": "boolean"
+          },
+          "preference": {
+            "examples": [
+              30
+            ],
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "via": {
+            "description": "Next-hop IP Address",
+            "examples": [
+              "10.2.1.1"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "extra_route6": {
+        "additionalProperties": false,
+        "properties": {
+          "discard": {
+            "default": false,
+            "description": "This takes precedence",
+            "type": "boolean"
+          },
+          "metric": {
+            "examples": [
+              null
+            ],
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "next_qualified": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/extra_route6_next_qualified_properties"
+            },
+            "examples": [
+              {
+                "2a02:1234:200a::100": {
+                  "metric": null,
+                  "preference": 40
+                }
+              }
+            ],
+            "type": "object"
+          },
+          "no_resolve": {
+            "default": false,
+            "type": "boolean"
+          },
+          "preference": {
+            "examples": [
+              30
+            ],
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "via": {
+            "description": "Next-hop IP Address",
+            "examples": [
+              "2a02:1234:200a::100"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "extra_route6_next_qualified_properties": {
+        "additionalProperties": false,
+        "properties": {
+          "metric": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "preference": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "extra_route_next_qualified_properties": {
+        "additionalProperties": false,
+        "properties": {
+          "metric": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "preference": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "extra_routes": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/extra_route"
+        },
+        "description": "Property key is the destination CIDR (e.g. \"10.0.0.0/8\")",
+        "examples": [
+          {
+            "0.0.0.0/0": {
+              "via": "192.168.1.10"
+            }
+          }
+        ],
+        "type": "object"
+      },
+      "extra_routes6": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/extra_route6"
+        },
+        "description": "Property key is the destination CIDR (e.g. \"2a02:1234:420a:10c9::/64\")",
+        "examples": [
+          {
+            "2a02:1234:420a:10c9::/64": {
+              "via": "2a02:1234:200a::100"
+            }
+          }
+        ],
+        "type": "object"
+      },
+      "id": {
+        "description": "Unique ID of the object instance in the Mist Organization",
+        "examples": [
+          "53f10664-3ce8-4c27-b382-0ef66432349f"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "ip_type": {
+        "default": "dhcp",
+        "description": "enum: `dhcp`, `static`",
+        "enum": [
+          "dhcp",
+          "static"
+        ],
+        "examples": [
+          "static"
+        ],
+        "type": "string"
+      },
+      "junos_port_config": {
+        "additionalProperties": false,
+        "description": "Switch port config",
+        "properties": {
+          "ae_disable_lacp": {
+            "description": "To disable LACP support for the AE interface",
+            "type": "boolean"
+          },
+          "ae_idx": {
+            "description": "Users could force to use the designated AE name",
+            "type": "integer"
+          },
+          "ae_lacp_slow": {
+            "description": "To use fast timeout",
+            "type": "boolean"
+          },
+          "aggregated": {
+            "default": false,
+            "type": "boolean"
+          },
+          "critical": {
+            "default": false,
+            "description": "To generate port up/down alarm",
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "disable_autoneg": {
+            "default": false,
+            "description": "If `speed` and `duplex` are specified, whether to disable autonegotiation",
+            "type": "boolean"
+          },
+          "duplex": {
+            "$ref": "#/components/schemas/junos_port_config_duplex"
+          },
+          "dynamic_usage": {
+            "description": "Enable dynamic usage for this port. Set to `dynamic` to enable.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "esilag": {
+            "type": "boolean"
+          },
+          "mtu": {
+            "default": 1514,
+            "description": "Media maximum transmission unit (MTU) is the largest data unit that can be forwarded without fragmentation",
+            "type": "integer"
+          },
+          "networks": {
+            "description": "List of network names. Required if `usage`==`inet`",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "no_local_overwrite": {
+            "default": true,
+            "description": "Prevent helpdesk to override the port config",
+            "type": "boolean"
+          },
+          "poe_disabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "port_network": {
+            "description": "Required if `usage`==`vlan_tunnel`. Q-in-Q tunneling using All-in-one bundling. This also enables standard L2PT for interfaces that are not encapsulation tunnel interfaces and uses MAC rewrite operation. [View more information](https://www.juniper.net/documentation/us/en/software/junos/multicast-l2/topics/topic-map/q-in-q.html#id-understanding-qinq-tunneling-and-vlan-translation)",
+            "type": "string"
+          },
+          "speed": {
+            "$ref": "#/components/schemas/junos_port_config_speed"
+          },
+          "usage": {
+            "description": "Port usage name. For Q-in-Q, use `vlan_tunnel`. If EVPN is used, use `evpn_uplink`or `evpn_downlink`",
+            "type": "string"
+          }
+        },
+        "required": [
+          "usage"
+        ],
+        "type": "object"
+      },
+      "junos_port_config_duplex": {
+        "default": "auto",
+        "description": "enum: `auto`, `full`, `half`",
+        "enum": [
+          "auto",
+          "full",
+          "half"
+        ],
+        "type": "string"
+      },
+      "junos_port_config_speed": {
+        "default": "auto",
+        "description": "enum: `100m`, `10m`, `1g`, `2.5g`, `5g`, `10g`, `25g`, `40g`, `100g`,`auto`",
+        "enum": [
+          "10m",
+          "100m",
+          "1g",
+          "2.5g",
+          "5g",
+          "10g",
+          "25g",
+          "40g",
+          "100g",
+          "auto"
+        ],
+        "type": "string"
+      },
+      "modified_time": {
+        "description": "When the object has been modified for the last time, in epoch",
+        "format": "double",
+        "readOnly": true,
+        "type": "number"
+      },
+      "network_template": {
+        "description": "Network Template",
+        "properties": {
+          "acl_policies": {
+            "$ref": "#/components/schemas/acl_policies"
+          },
+          "acl_tags": {
+            "$ref": "#/components/schemas/acl_tags"
+          },
+          "additional_config_cmds": {
+            "$ref": "#/components/schemas/additional_config_cmds"
+          },
+          "bgp_config": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/switch_bgp_config"
+            },
+            "type": "object"
+          },
+          "created_time": {
+            "$ref": "#/components/schemas/created_time"
+          },
+          "dhcp_snooping": {
+            "$ref": "#/components/schemas/dhcp_snooping"
+          },
+          "dns_servers": {
+            "$ref": "#/components/schemas/dns_servers"
+          },
+          "dns_suffix": {
+            "$ref": "#/components/schemas/dns_suffix"
+          },
+          "extra_routes": {
+            "$ref": "#/components/schemas/extra_routes"
+          },
+          "extra_routes6": {
+            "$ref": "#/components/schemas/extra_routes6"
+          },
+          "id": {
+            "$ref": "#/components/schemas/id"
+          },
+          "import_org_networks": {
+            "$ref": "#/components/schemas/network_template_import_org_networks"
+          },
+          "mist_nac": {
+            "$ref": "#/components/schemas/switch_mist_nac"
+          },
+          "modified_time": {
+            "$ref": "#/components/schemas/modified_time"
+          },
+          "name": {
+            "type": "string"
+          },
+          "networks": {
+            "$ref": "#/components/schemas/switch_networks"
+          },
+          "ntp_servers": {
+            "$ref": "#/components/schemas/ntp_servers"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/org_id"
+          },
+          "ospf_areas": {
+            "$ref": "#/components/schemas/ospf_areas"
+          },
+          "port_mirroring": {
+            "$ref": "#/components/schemas/switch_port_mirroring"
+          },
+          "port_usages": {
+            "$ref": "#/components/schemas/switch_port_usages"
+          },
+          "radius_config": {
+            "$ref": "#/components/schemas/switch_radius_config"
+          },
+          "remote_syslog": {
+            "$ref": "#/components/schemas/remote_syslog"
+          },
+          "remove_existing_configs": {
+            "default": false,
+            "description": "By default, only the configuration generated by Mist is cleaned up during the configuration process. If `true`, all the existing configuration will be removed.",
+            "type": "boolean"
+          },
+          "routing_policies": {
+            "$ref": "#/components/schemas/sw_routing_policies"
+          },
+          "snmp_config": {
+            "$ref": "#/components/schemas/snmp_config"
+          },
+          "switch_matching": {
+            "$ref": "#/components/schemas/switch_matching"
+          },
+          "switch_mgmt": {
+            "$ref": "#/components/schemas/switch_mgmt"
+          },
+          "vrf_config": {
+            "$ref": "#/components/schemas/vrf_config"
+          },
+          "vrf_instances": {
+            "$ref": "#/components/schemas/switch_vrf_instances"
+          }
+        },
+        "type": "object"
+      },
+      "network_template_import_org_networks": {
+        "description": "Org Networks that we'd like to import",
+        "items": {
+          "examples": [
+            "ap"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "ntp_servers": {
+        "description": "List of NTP servers specific to this device. By default, those in Site Settings will be used",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "org_id": {
+        "examples": [
+          "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "ospf_area": {
+        "additionalProperties": false,
+        "description": "Property key is the OSPF Area (Area should be a number (0-255) / IP address)",
+        "properties": {
+          "include_loopback": {
+            "default": false,
+            "type": "boolean"
+          },
+          "networks": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ospf_areas_network"
+            },
+            "examples": [
+              {
+                "corp": {
+                  "auth_keys": {
+                    "1": "auth-key-1"
+                  },
+                  "auth_type": "md5",
+                  "bfd_minimum_interval": 500,
+                  "dead_interval": 40,
+                  "hello_interval": 10,
+                  "interface_type": "nbma",
+                  "metric": 10000
+                },
+                "guest": {
+                  "passive": true
+                }
+              }
+            ],
+            "type": "object"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ospf_area_type"
+          }
+        },
+        "type": "object"
+      },
+      "ospf_area_network_auth_type": {
+        "default": "none",
+        "description": "auth type. enum: `md5`, `none`, `password`",
+        "enum": [
+          "md5",
+          "none",
+          "password"
+        ],
+        "examples": [
+          "md5"
+        ],
+        "type": "string"
+      },
+      "ospf_area_network_interface_type": {
+        "default": "broadcast",
+        "description": "interface type (nbma = non-broadcast multi-access). enum: `broadcast`, `nbma`, `p2mp`, `p2p`",
+        "enum": [
+          "broadcast",
+          "nbma",
+          "p2mp",
+          "p2p"
+        ],
+        "type": "string"
+      },
+      "ospf_area_type": {
+        "default": "default",
+        "description": "OSPF type. enum: `default`, `nssa`, `stub`",
+        "enum": [
+          "default",
+          "nssa",
+          "stub"
+        ],
+        "examples": [
+          "default"
+        ],
+        "type": "string"
+      },
+      "ospf_areas": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/ospf_area"
+        },
+        "description": "Junos OSPF areas. Property key is the OSPF Area (Area should be a number (0-255) / IP address)",
+        "type": "object"
+      },
+      "ospf_areas_network": {
+        "additionalProperties": false,
+        "description": "Property key is the network name. Networks to participate in an OSPF area",
+        "properties": {
+          "auth_keys": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Required if `auth_type`==`md5`. Property key is the key number",
+            "examples": [
+              {
+                "1": "auth-key-1"
+              }
+            ],
+            "type": "object"
+          },
+          "auth_password": {
+            "description": "Required if `auth_type`==`password`, the password, max length is 8",
+            "examples": [
+              "simple"
+            ],
+            "type": "string"
+          },
+          "auth_type": {
+            "$ref": "#/components/schemas/ospf_area_network_auth_type"
+          },
+          "bfd_minimum_interval": {
+            "examples": [
+              500
+            ],
+            "maximum": 255000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "dead_interval": {
+            "examples": [
+              40
+            ],
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "export_policy": {
+            "examples": [
+              "export_policy"
+            ],
+            "type": "string"
+          },
+          "hello_interval": {
+            "maximum": 255,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "import_policy": {
+            "examples": [
+              "import_policy"
+            ],
+            "type": "string"
+          },
+          "interface_type": {
+            "$ref": "#/components/schemas/ospf_area_network_interface_type"
+          },
+          "metric": {
+            "examples": [
+              10000
+            ],
+            "maximum": 65535,
+            "minimum": 1,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "no_readvertise_to_overlay": {
+            "default": false,
+            "description": "By default, we'll re-advertise all learned OSPF routes toward overlay",
+            "type": "boolean"
+          },
+          "passive": {
+            "default": false,
+            "description": "Whether to send OSPF-Hello",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "poe_priority": {
+        "description": "PoE priority. enum: `low`, `high`",
+        "enum": [
+          "low",
+          "high"
+        ],
+        "type": "string"
+      },
+      "protect_re": {
+        "additionalProperties": false,
+        "description": "Restrict inbound-traffic to host\nwhen enabled, all traffic that is not essential to our operation will be dropped \ne.g. ntp / dns / traffic to mist will be allowed by default, if dhcpd is enabled, we'll make sure it works",
+        "properties": {
+          "allowed_services": {
+            "$ref": "#/components/schemas/protect_re_allowed_services"
+          },
+          "custom": {
+            "$ref": "#/components/schemas/protect_re_customs"
+          },
+          "enabled": {
+            "default": false,
+            "description": "When enabled, all traffic that is not essential to our operation will be dropped\ne.g. ntp / dns / traffic to mist will be allowed by default\n     if dhcpd is enabled, we'll make sure it works",
+            "type": "boolean"
+          },
+          "hit_count": {
+            "default": false,
+            "description": "Whether to enable hit count for Protect_RE policy",
+            "type": "boolean"
+          },
+          "trusted_hosts": {
+            "$ref": "#/components/schemas/protect_re_trusted_hosts"
+          }
+        },
+        "type": "object"
+      },
+      "protect_re_allowed_service": {
+        "description": "enum: `icmp`, `ssh`",
+        "enum": [
+          "icmp",
+          "ssh"
+        ],
+        "type": "string"
+      },
+      "protect_re_allowed_services": {
+        "description": "Optionally, services we'll allow",
+        "examples": [
+          [
+            "icmp",
+            "ssh"
+          ]
+        ],
+        "items": {
+          "$ref": "#/components/schemas/protect_re_allowed_service"
+        },
+        "type": "array"
+      },
+      "protect_re_custom": {
+        "additionalProperties": false,
+        "description": "Custom acls",
+        "properties": {
+          "port_range": {
+            "default": "0",
+            "description": "Matched dst port, \"0\" means any",
+            "examples": [
+              "80,1035-1040"
+            ],
+            "type": "string"
+          },
+          "protocol": {
+            "$ref": "#/components/schemas/protect_re_custom_protocol"
+          },
+          "subnets": {
+            "$ref": "#/components/schemas/protect_re_custom_subnet"
+          }
+        },
+        "type": "object"
+      },
+      "protect_re_custom_protocol": {
+        "default": "any",
+        "description": "enum: `any`, `icmp`, `tcp`, `udp`",
+        "enum": [
+          "any",
+          "icmp",
+          "tcp",
+          "udp"
+        ],
+        "type": "string"
+      },
+      "protect_re_custom_subnet": {
+        "items": {
+          "examples": [
+            "10.1.2.0/24"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "protect_re_customs": {
+        "items": {
+          "$ref": "#/components/schemas/protect_re_custom"
+        },
+        "type": "array"
+      },
+      "protect_re_trusted_hosts": {
+        "description": "host/subnets we'll allow traffic to/from",
+        "items": {
+          "examples": [
+            "10.242.3.0/24"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "radius_acct_port": {
+        "anyOf": [
+          {
+            "maximum": 65545,
+            "minimum": 1,
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "description": "Radius Auth Port, value from 1 to 65535, default is 1813"
+      },
+      "radius_acct_server": {
+        "additionalProperties": false,
+        "properties": {
+          "host": {
+            "description": "IP/ hostname of RADIUS server",
+            "examples": [
+              "1.2.3.4"
+            ],
+            "type": "string"
+          },
+          "keywrap_enabled": {
+            "type": "boolean"
+          },
+          "keywrap_format": {
+            "$ref": "#/components/schemas/radius_keywrap_format"
+          },
+          "keywrap_kek": {
+            "examples": [
+              "1122334455"
+            ],
+            "type": "string"
+          },
+          "keywrap_mack": {
+            "examples": [
+              "1122334455"
+            ],
+            "type": "string"
+          },
+          "port": {
+            "$ref": "#/components/schemas/radius_acct_port"
+          },
+          "secret": {
+            "description": "Secret of RADIUS server",
+            "examples": [
+              "testing123"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "host",
+          "secret"
+        ],
+        "type": "object"
+      },
+      "radius_acct_servers": {
+        "items": {
+          "$ref": "#/components/schemas/radius_acct_server"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "radius_auth_port": {
+        "anyOf": [
+          {
+            "maximum": 65545,
+            "minimum": 1,
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "description": "Radius Auth Port, value from 1 to 65535, default is 1812"
+      },
+      "radius_auth_server": {
+        "additionalProperties": false,
+        "description": "Authentication Server",
+        "properties": {
+          "host": {
+            "description": "IP/ hostname of RADIUS server",
+            "examples": [
+              "1.2.3.4"
+            ],
+            "type": "string"
+          },
+          "keywrap_enabled": {
+            "type": "boolean"
+          },
+          "keywrap_format": {
+            "$ref": "#/components/schemas/radius_keywrap_format"
+          },
+          "keywrap_kek": {
+            "examples": [
+              "1122334455"
+            ],
+            "type": "string"
+          },
+          "keywrap_mack": {
+            "examples": [
+              "1122334455"
+            ],
+            "type": "string"
+          },
+          "port": {
+            "$ref": "#/components/schemas/radius_auth_port"
+          },
+          "require_message_authenticator": {
+            "default": false,
+            "description": "Whether to require Message-Authenticator in requests",
+            "type": "boolean"
+          },
+          "secret": {
+            "description": "Secret of RADIUS server",
+            "examples": [
+              "testing123"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "host",
+          "secret"
+        ],
+        "type": "object"
+      },
+      "radius_auth_servers": {
+        "items": {
+          "$ref": "#/components/schemas/radius_auth_server"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "radius_coa_port": {
+        "anyOf": [
+          {
+            "maximum": 65545,
+            "minimum": 1,
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "description": "Radius CoA Port, value from 1 to 65535, default is 3799"
+      },
+      "radius_keywrap_format": {
+        "description": "enum: `ascii`, `hex`",
+        "enum": [
+          "ascii",
+          "hex"
+        ],
+        "type": "string"
+      },
+      "remote_syslog": {
+        "additionalProperties": false,
+        "properties": {
+          "archive": {
+            "$ref": "#/components/schemas/remote_syslog_archive"
+          },
+          "cacerts": {
+            "$ref": "#/components/schemas/remote_syslog_cacerts"
+          },
+          "console": {
+            "$ref": "#/components/schemas/remote_syslog_console"
+          },
+          "enabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "files": {
+            "$ref": "#/components/schemas/remote_syslog_files"
+          },
+          "network": {
+            "description": "If source_address is configured, will use the vlan firstly otherwise use source_ip",
+            "examples": [
+              "default"
+            ],
+            "type": "string"
+          },
+          "send_to_all_servers": {
+            "default": false,
+            "type": "boolean"
+          },
+          "servers": {
+            "$ref": "#/components/schemas/remote_syslog_servers"
+          },
+          "time_format": {
+            "$ref": "#/components/schemas/remote_syslog_time_format"
+          },
+          "users": {
+            "$ref": "#/components/schemas/remote_syslog_users"
+          }
+        },
+        "type": "object"
+      },
+      "remote_syslog_archive": {
+        "additionalProperties": false,
+        "properties": {
+          "files": {
+            "$ref": "#/components/schemas/remote_syslog_archive_files"
+          },
+          "size": {
+            "examples": [
+              "5m"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "remote_syslog_archive_files": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer"
+          }
+        ],
+        "examples": [
+          20
+        ]
+      },
+      "remote_syslog_cacerts": {
+        "examples": [
+          [
+            "-----BEGIN CERTIFICATE-----\\nMIIFZjCCA06gAwIBAgIIP61/1qm/uDowDQYJKoZIhvcNAQELBQE\\n-----END CERTIFICATE-----",
+            "-----BEGIN CERTIFICATE-----\\nBhMCRVMxFDASBgNVBAoMC1N0YXJ0Q29tIENBMSwwKgYDVn-----END CERTIFICATE-----"
+          ]
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "remote_syslog_console": {
+        "additionalProperties": false,
+        "properties": {
+          "contents": {
+            "$ref": "#/components/schemas/remote_syslog_contents"
+          }
+        },
+        "type": "object"
+      },
+      "remote_syslog_content": {
+        "additionalProperties": false,
+        "properties": {
+          "facility": {
+            "$ref": "#/components/schemas/remote_syslog_facility"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/remote_syslog_severity"
+          }
+        },
+        "type": "object"
+      },
+      "remote_syslog_contents": {
+        "items": {
+          "$ref": "#/components/schemas/remote_syslog_content"
+        },
+        "type": "array"
+      },
+      "remote_syslog_facility": {
+        "default": "any",
+        "description": "enum: `any`, `authorization`, `change-log`, `config`, `conflict-log`, `daemon`, `dfc`, `external`, `firewall`, `ftp`, `interactive-commands`, `kernel`, `ntp`, `pfe`, `security`, `user`",
+        "enum": [
+          "any",
+          "authorization",
+          "change-log",
+          "config",
+          "conflict-log",
+          "daemon",
+          "dfc",
+          "external",
+          "firewall",
+          "ftp",
+          "interactive-commands",
+          "kernel",
+          "ntp",
+          "pfe",
+          "security",
+          "user"
+        ],
+        "examples": [
+          "config"
+        ],
+        "type": "string"
+      },
+      "remote_syslog_file_config": {
+        "additionalProperties": false,
+        "properties": {
+          "archive": {
+            "$ref": "#/components/schemas/remote_syslog_archive"
+          },
+          "contents": {
+            "$ref": "#/components/schemas/remote_syslog_contents"
+          },
+          "enable_tls": {
+            "description": "Only if `protocol`==`tcp`",
+            "type": "boolean"
+          },
+          "explicit_priority": {
+            "type": "boolean"
+          },
+          "file": {
+            "examples": [
+              "file-name"
+            ],
+            "type": "string"
+          },
+          "match": {
+            "examples": [
+              "!alarm|ntp|errors.crc_error[chan]"
+            ],
+            "type": "string"
+          },
+          "structured_data": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "remote_syslog_files": {
+        "items": {
+          "$ref": "#/components/schemas/remote_syslog_file_config"
+        },
+        "type": "array"
+      },
+      "remote_syslog_server": {
+        "additionalProperties": false,
+        "properties": {
+          "contents": {
+            "$ref": "#/components/schemas/remote_syslog_contents"
+          },
+          "explicit_priority": {
+            "type": "boolean"
+          },
+          "facility": {
+            "$ref": "#/components/schemas/remote_syslog_facility"
+          },
+          "host": {
+            "examples": [
+              "syslogd.internal"
+            ],
+            "type": "string"
+          },
+          "match": {
+            "examples": [
+              "!alarm|ntp|errors.crc_error[chan]"
+            ],
+            "type": "string"
+          },
+          "port": {
+            "$ref": "#/components/schemas/remote_syslog_server_port"
+          },
+          "protocol": {
+            "$ref": "#/components/schemas/remote_syslog_server_protocol"
+          },
+          "routing_instance": {
+            "examples": [
+              "routing-instance-name"
+            ],
+            "type": "string"
+          },
+          "server_name": {
+            "description": "Name of the server",
+            "examples": [
+              "syslogd.internal"
+            ],
+            "type": "string"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/remote_syslog_severity"
+          },
+          "source_address": {
+            "description": "If source_address is configured, will use the vlan firstly otherwise use source_ip",
+            "type": "string"
+          },
+          "structured_data": {
+            "type": "boolean"
+          },
+          "tag": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "remote_syslog_server_port": {
+        "anyOf": [
+          {
+            "default": 514,
+            "maximum": 65545,
+            "minimum": 1,
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "description": "Syslog Service Port, value from 1 to 65535"
+      },
+      "remote_syslog_server_protocol": {
+        "default": "udp",
+        "description": "enum: `tcp`, `udp`",
+        "enum": [
+          "tcp",
+          "udp"
+        ],
+        "type": "string"
+      },
+      "remote_syslog_servers": {
+        "examples": [
+          [
+            {
+              "facility": "config",
+              "host": "syslogd.internal",
+              "port": 514,
+              "protocol": "udp",
+              "severity": "info",
+              "tag": ""
+            }
+          ]
+        ],
+        "items": {
+          "$ref": "#/components/schemas/remote_syslog_server"
+        },
+        "type": "array"
+      },
+      "remote_syslog_severity": {
+        "default": "any",
+        "description": "enum: `alert`, `any`, `critical`, `emergency`, `error`, `info`, `notice`, `warning`",
+        "enum": [
+          "alert",
+          "any",
+          "critical",
+          "emergency",
+          "error",
+          "info",
+          "notice",
+          "warning"
+        ],
+        "type": "string"
+      },
+      "remote_syslog_time_format": {
+        "description": "enum: `millisecond`, `year`, `year millisecond`",
+        "enum": [
+          "millisecond",
+          "year",
+          "year millisecond"
+        ],
+        "examples": [
+          "millisecond"
+        ],
+        "type": "string"
+      },
+      "remote_syslog_user": {
+        "additionalProperties": false,
+        "properties": {
+          "contents": {
+            "$ref": "#/components/schemas/remote_syslog_contents"
+          },
+          "match": {
+            "examples": [
+              "\"!alarm|ntp|errors.crc_error[chan]\""
+            ],
+            "type": "string"
+          },
+          "user": {
+            "examples": [
+              "*"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "remote_syslog_users": {
+        "items": {
+          "$ref": "#/components/schemas/remote_syslog_user"
+        },
+        "type": "array"
+      },
+      "response_http400": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http401": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Authentication credentials were not provided."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http403": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "You do not have permission to perform this action."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http404": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http429": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "routing_policy_local_preference": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "maximum": 4294967295,
+            "minimum": 1,
+            "type": "integer"
+          }
+        ],
+        "description": "Optional, for an import policy, local_preference can be changed, value in range 1-4294967294. Can be a Variable (e.g. `{{bgp_as}}`)"
+      },
+      "routing_policy_term_action_community": {
+        "description": "When used as export policy, optional",
+        "items": {
+          "examples": [
+            "3900190"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "routing_policy_term_action_prepend_as_path": {
+        "description": "When used as export policy, optional. By default, the local AS will be prepended, to change it. Can be a Variable (e.g. `{{as_path}}`)",
+        "items": {
+          "examples": [
+            "65000 400"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "routing_policy_term_matching_as_path": {
+        "items": {
+          "$ref": "#/components/schemas/bgp_as"
+        },
+        "type": "array"
+      },
+      "routing_policy_term_matching_community": {
+        "items": {
+          "examples": [
+            "3900062"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "routing_policy_term_matching_prefix": {
+        "description": "zero or more criteria/filter can be specified to match the term, all criteria have to be met",
+        "items": {
+          "examples": [
+            "192.168.0.0/16-30"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "snmp_config": {
+        "additionalProperties": false,
+        "properties": {
+          "client_list": {
+            "$ref": "#/components/schemas/snmp_config_client_lists"
+          },
+          "contact": {
+            "examples": [
+              "cns@juniper.net"
+            ],
+            "type": "string"
+          },
+          "description": {
+            "examples": [
+              "Juniper QFX Series Switch - 1K_5LA"
+            ],
+            "type": "string"
+          },
+          "enabled": {
+            "default": true,
+            "type": "boolean"
+          },
+          "engine_id": {
+            "$ref": "#/components/schemas/snmp_config_engine_id"
+          },
+          "engine_id_type": {
+            "$ref": "#/components/schemas/snmp_config_engine_id_type"
+          },
+          "location": {
+            "examples": [
+              "Las Vegas, NV"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "examples": [
+              "TGH-1K-QFX10K"
+            ],
+            "type": "string"
+          },
+          "network": {
+            "default": "default",
+            "type": "string"
+          },
+          "trap_groups": {
+            "$ref": "#/components/schemas/snmp_config_trap_groups"
+          },
+          "v2c_config": {
+            "$ref": "#/components/schemas/snmp_config_v2c_configs"
+          },
+          "v3_config": {
+            "$ref": "#/components/schemas/snmpv3_config"
+          },
+          "views": {
+            "$ref": "#/components/schemas/snmp_config_views"
+          }
+        },
+        "type": "object"
+      },
+      "snmp_config_client_list": {
+        "additionalProperties": false,
+        "properties": {
+          "client_list_name": {
+            "examples": [
+              "clist-1"
+            ],
+            "type": "string"
+          },
+          "clients": {
+            "$ref": "#/components/schemas/snmp_config_client_list_clients"
+          }
+        },
+        "type": "object"
+      },
+      "snmp_config_client_list_clients": {
+        "items": {
+          "examples": [
+            "151.140.101.218/32"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "snmp_config_client_lists": {
+        "items": {
+          "$ref": "#/components/schemas/snmp_config_client_list"
+        },
+        "type": "array"
+      },
+      "snmp_config_engine_id": {
+        "maxLength": 27,
+        "type": "string"
+      },
+      "snmp_config_engine_id_type": {
+        "default": "local",
+        "description": "enum: `local`, `use_mac_address`",
+        "enum": [
+          "local",
+          "use_mac_address"
+        ],
+        "type": "string"
+      },
+      "snmp_config_trap_group": {
+        "additionalProperties": false,
+        "properties": {
+          "categories": {
+            "$ref": "#/components/schemas/snmp_config_trap_group_categories"
+          },
+          "group_name": {
+            "description": "Categories list can refer to https://www.juniper.net/documentation/software/topics/task/configuration/snmp_trap-groups-configuring-junos-nm.html",
+            "examples": [
+              "profiler"
+            ],
+            "type": "string"
+          },
+          "targets": {
+            "$ref": "#/components/schemas/snmp_config_trap_group_targets"
+          },
+          "version": {
+            "$ref": "#/components/schemas/snmp_config_trap_version"
+          }
+        },
+        "type": "object"
+      },
+      "snmp_config_trap_group_categories": {
+        "items": {
+          "examples": [
+            "authentication"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "snmp_config_trap_group_targets": {
+        "items": {
+          "examples": [
+            "172.29.158.19"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "snmp_config_trap_groups": {
+        "items": {
+          "$ref": "#/components/schemas/snmp_config_trap_group"
+        },
+        "type": "array"
+      },
+      "snmp_config_trap_version": {
+        "default": "v2",
+        "description": "enum: `all`, `v1`, `v2`",
+        "enum": [
+          "all",
+          "v1",
+          "v2"
+        ],
+        "type": "string"
+      },
+      "snmp_config_v2c_config": {
+        "additionalProperties": false,
+        "properties": {
+          "authorization": {
+            "examples": [
+              "read-only"
+            ],
+            "type": "string"
+          },
+          "client_list_name": {
+            "description": "Client_list_name here should refer to client_list above",
+            "examples": [
+              "clist-1"
+            ],
+            "type": "string"
+          },
+          "community_name": {
+            "examples": [
+              "abc123"
+            ],
+            "type": "string"
+          },
+          "view": {
+            "description": "View name here should be defined in views above",
+            "examples": [
+              "all"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "snmp_config_v2c_configs": {
+        "items": {
+          "$ref": "#/components/schemas/snmp_config_v2c_config"
+        },
+        "type": "array"
+      },
+      "snmp_config_view": {
+        "additionalProperties": false,
+        "properties": {
+          "include": {
+            "description": "If the root oid configured is included",
+            "type": "boolean"
+          },
+          "oid": {
+            "examples": [
+              "1.3.6.1"
+            ],
+            "type": "string"
+          },
+          "view_name": {
+            "examples": [
+              "all"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "snmp_config_views": {
+        "items": {
+          "$ref": "#/components/schemas/snmp_config_view"
+        },
+        "type": "array"
+      },
+      "snmp_usm": {
+        "additionalProperties": false,
+        "properties": {
+          "engine_type": {
+            "$ref": "#/components/schemas/snmp_usm_engine_type"
+          },
+          "remote_engine_id": {
+            "description": "Required only if `engine_type`==`remote_engine`",
+            "examples": [
+              "00:00:00:0b:00:00:70:10:6f:08:b6:3f"
+            ],
+            "type": "string"
+          },
+          "users": {
+            "$ref": "#/components/schemas/snmp_usm_users"
+          }
+        },
+        "type": "object"
+      },
+      "snmp_usm_engine_type": {
+        "description": "enum: `local_engine`, `remote_engine`",
+        "enum": [
+          "local_engine",
+          "remote_engine"
+        ],
+        "type": "string"
+      },
+      "snmp_usm_user": {
+        "additionalProperties": false,
+        "properties": {
+          "authentication_password": {
+            "description": "Not required if `authentication_type`==`authentication-none`. Include alphabetic, numeric, and special characters, but it cannot include control characters.",
+            "minLength": 7,
+            "type": "string"
+          },
+          "authentication_type": {
+            "$ref": "#/components/schemas/snmp_usm_user_authentication_type"
+          },
+          "encryption_password": {
+            "description": "Not required if `encryption_type`==`privacy-none`. Include alphabetic, numeric, and special characters, but it cannot include control characters",
+            "minLength": 8,
+            "type": "string"
+          },
+          "encryption_type": {
+            "$ref": "#/components/schemas/snmp_usm_user_encryption_type"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "snmp_usm_user_authentication_type": {
+        "description": "sha224, sha256, sha384, sha512 are supported in 21.1 and newer release. enum: `authentication-md5`, `authentication-none`, `authentication-sha`, `authentication-sha224`, `authentication-sha256`, `authentication-sha384`, `authentication-sha512`",
+        "enum": [
+          "authentication-md5",
+          "authentication-none",
+          "authentication-sha",
+          "authentication-sha224",
+          "authentication-sha256",
+          "authentication-sha384",
+          "authentication-sha512"
+        ],
+        "type": "string"
+      },
+      "snmp_usm_user_encryption_type": {
+        "description": "enum: `privacy-3des`, `privacy-aes128`, `privacy-des`, `privacy-none`",
+        "enum": [
+          "privacy-3des",
+          "privacy-aes128",
+          "privacy-des",
+          "privacy-none"
+        ],
+        "type": "string"
+      },
+      "snmp_usm_users": {
+        "items": {
+          "$ref": "#/components/schemas/snmp_usm_user"
+        },
+        "type": "array"
+      },
+      "snmp_usms": {
+        "items": {
+          "$ref": "#/components/schemas/snmp_usm"
+        },
+        "type": "array"
+      },
+      "snmp_vacm": {
+        "additionalProperties": false,
+        "properties": {
+          "access": {
+            "$ref": "#/components/schemas/snmp_vacm_access"
+          },
+          "security_to_group": {
+            "$ref": "#/components/schemas/snmp_vacm_security_to_group"
+          }
+        },
+        "type": "object"
+      },
+      "snmp_vacm_access": {
+        "items": {
+          "$ref": "#/components/schemas/snmp_vacm_access_item"
+        },
+        "type": "array"
+      },
+      "snmp_vacm_access_item": {
+        "additionalProperties": false,
+        "properties": {
+          "group_name": {
+            "type": "string"
+          },
+          "prefix_list": {
+            "$ref": "#/components/schemas/snmp_vacm_access_item_prefix_list"
+          }
+        },
+        "type": "object"
+      },
+      "snmp_vacm_access_item_prefix_list": {
+        "items": {
+          "$ref": "#/components/schemas/snmp_vacm_access_item_prefix_list_item"
+        },
+        "type": "array"
+      },
+      "snmp_vacm_access_item_prefix_list_item": {
+        "additionalProperties": false,
+        "properties": {
+          "context_prefix": {
+            "description": "Only required if `type`==`context_prefix`",
+            "examples": [
+              "iil"
+            ],
+            "type": "string"
+          },
+          "notify_view": {
+            "description": "Refer to view name",
+            "examples": [
+              "all"
+            ],
+            "type": "string"
+          },
+          "read_view": {
+            "description": "Refer to view name",
+            "examples": [
+              "all"
+            ],
+            "type": "string"
+          },
+          "security_level": {
+            "$ref": "#/components/schemas/snmp_vacm_access_item_prefix_list_item_level"
+          },
+          "security_model": {
+            "$ref": "#/components/schemas/snmp_vacm_access_item_prefix_list_item_model"
+          },
+          "type": {
+            "$ref": "#/components/schemas/snmp_vacm_access_item_type"
+          },
+          "write_view": {
+            "description": "Refer to view name",
+            "examples": [
+              "all"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "snmp_vacm_access_item_prefix_list_item_level": {
+        "description": "enum: `authentication`, `none`, `privacy`",
+        "enum": [
+          "authentication",
+          "none",
+          "privacy"
+        ],
+        "type": "string"
+      },
+      "snmp_vacm_access_item_prefix_list_item_model": {
+        "description": "enum: `any`, `usm`, `v1`, `v2c`",
+        "enum": [
+          "any",
+          "usm",
+          "v1",
+          "v2c"
+        ],
+        "type": "string"
+      },
+      "snmp_vacm_access_item_type": {
+        "description": "enum: `context_prefix`, `default_context_prefix`",
+        "enum": [
+          "context_prefix",
+          "default_context_prefix"
+        ],
+        "type": "string"
+      },
+      "snmp_vacm_security_model": {
+        "description": "enum: `usm`, `v1`, `v2c`",
+        "enum": [
+          "usm",
+          "v1",
+          "v2c"
+        ],
+        "type": "string"
+      },
+      "snmp_vacm_security_to_group": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "$ref": "#/components/schemas/snmp_vacm_security_to_group_content"
+          },
+          "security_model": {
+            "$ref": "#/components/schemas/snmp_vacm_security_model"
+          }
+        },
+        "type": "object"
+      },
+      "snmp_vacm_security_to_group_content": {
+        "items": {
+          "$ref": "#/components/schemas/snmp_vacm_security_to_group_content_item"
+        },
+        "type": "array"
+      },
+      "snmp_vacm_security_to_group_content_item": {
+        "additionalProperties": false,
+        "properties": {
+          "group": {
+            "description": "Refer to group_name under access",
+            "type": "string"
+          },
+          "security_name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "snmpv3_config": {
+        "additionalProperties": false,
+        "properties": {
+          "notify": {
+            "$ref": "#/components/schemas/snmpv3_config_notify"
+          },
+          "notify_filter": {
+            "$ref": "#/components/schemas/snmpv3_config_notify_filter"
+          },
+          "target_address": {
+            "$ref": "#/components/schemas/snmpv3_config_target_address"
+          },
+          "target_parameters": {
+            "$ref": "#/components/schemas/snmpv3_config_target_params"
+          },
+          "usm": {
+            "$ref": "#/components/schemas/snmp_usms"
+          },
+          "vacm": {
+            "$ref": "#/components/schemas/snmp_vacm"
+          }
+        },
+        "type": "object"
+      },
+      "snmpv3_config_notify": {
+        "items": {
+          "$ref": "#/components/schemas/snmpv3_config_notify_items"
+        },
+        "type": "array"
+      },
+      "snmpv3_config_notify_filter": {
+        "items": {
+          "$ref": "#/components/schemas/snmpv3_config_notify_filter_item"
+        },
+        "type": "array"
+      },
+      "snmpv3_config_notify_filter_item": {
+        "additionalProperties": false,
+        "properties": {
+          "contents": {
+            "$ref": "#/components/schemas/snmpv3_config_notify_filter_item_contents"
+          },
+          "profile_name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "snmpv3_config_notify_filter_item_content": {
+        "additionalProperties": false,
+        "properties": {
+          "include": {
+            "type": "boolean"
+          },
+          "oid": {
+            "examples": [
+              "1.3.6.1.4.1"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "snmpv3_config_notify_filter_item_contents": {
+        "items": {
+          "$ref": "#/components/schemas/snmpv3_config_notify_filter_item_content"
+        },
+        "type": "array"
+      },
+      "snmpv3_config_notify_items": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/snmpv3_config_notify_type"
+          }
+        },
+        "type": "object"
+      },
+      "snmpv3_config_notify_type": {
+        "description": "enum: `inform`, `trap`",
+        "enum": [
+          "inform",
+          "trap"
+        ],
+        "type": "string"
+      },
+      "snmpv3_config_target_address": {
+        "items": {
+          "$ref": "#/components/schemas/snmpv3_config_target_address_item"
+        },
+        "type": "array"
+      },
+      "snmpv3_config_target_address_item": {
+        "additionalProperties": false,
+        "properties": {
+          "address": {
+            "examples": [
+              "10.11.0.2"
+            ],
+            "type": "string"
+          },
+          "address_mask": {
+            "examples": [
+              "255.255.255.0"
+            ],
+            "type": "string"
+          },
+          "port": {
+            "default": "161",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tag_list": {
+            "description": "Refer to notify tag, can be multiple with blank",
+            "type": "string"
+          },
+          "target_address_name": {
+            "examples": [
+              "target_address_name"
+            ],
+            "type": "string"
+          },
+          "target_parameters": {
+            "description": "Refer to notify target parameters name",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "snmpv3_config_target_param": {
+        "additionalProperties": false,
+        "properties": {
+          "message_processing_model": {
+            "$ref": "#/components/schemas/snmpv3_config_target_param_mess_process_model"
+          },
+          "name": {
+            "type": "string"
+          },
+          "notify_filter": {
+            "description": "Refer to profile-name in notify_filter",
+            "type": "string"
+          },
+          "security_level": {
+            "$ref": "#/components/schemas/snmpv3_config_target_param_security_level"
+          },
+          "security_model": {
+            "$ref": "#/components/schemas/snmpv3_config_target_param_security_model"
+          },
+          "security_name": {
+            "description": "Refer to security_name in usm",
+            "examples": [
+              "m01620"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "snmpv3_config_target_param_mess_process_model": {
+        "description": "enum: `v1`, `v2c`, `v3`",
+        "enum": [
+          "v1",
+          "v2c",
+          "v3"
+        ],
+        "type": "string"
+      },
+      "snmpv3_config_target_param_security_level": {
+        "description": "enum: `authentication`, `none`, `privacy`",
+        "enum": [
+          "authentication",
+          "none",
+          "privacy"
+        ],
+        "type": "string"
+      },
+      "snmpv3_config_target_param_security_model": {
+        "description": "enum: `usm`, `v1`, `v2c`",
+        "enum": [
+          "usm",
+          "v1",
+          "v2c"
+        ],
+        "type": "string"
+      },
+      "snmpv3_config_target_params": {
+        "items": {
+          "$ref": "#/components/schemas/snmpv3_config_target_param"
+        },
+        "type": "array"
+      },
+      "strings": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "sw_routing_policies": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/sw_routing_policy"
+        },
+        "description": "Property key is the routing policy name",
+        "type": "object"
+      },
+      "sw_routing_policy": {
+        "additionalProperties": false,
+        "properties": {
+          "terms": {
+            "$ref": "#/components/schemas/sw_routing_policy_terms"
+          }
+        },
+        "type": "object"
+      },
+      "sw_routing_policy_term": {
+        "additionalProperties": false,
+        "properties": {
+          "actions": {
+            "$ref": "#/components/schemas/sw_routing_policy_term_action"
+          },
+          "matching": {
+            "$ref": "#/components/schemas/sw_routing_policy_term_matching"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "sw_routing_policy_term_action": {
+        "additionalProperties": false,
+        "description": "When used as import policy",
+        "properties": {
+          "accept": {
+            "type": "boolean"
+          },
+          "community": {
+            "$ref": "#/components/schemas/routing_policy_term_action_community"
+          },
+          "local_preference": {
+            "$ref": "#/components/schemas/routing_policy_local_preference"
+          },
+          "prepend_as_path": {
+            "$ref": "#/components/schemas/routing_policy_term_action_prepend_as_path"
+          }
+        },
+        "type": "object"
+      },
+      "sw_routing_policy_term_matching": {
+        "additionalProperties": false,
+        "description": "zero or more criteria/filter can be specified to match the term, all criteria have to be met",
+        "properties": {
+          "as_path": {
+            "$ref": "#/components/schemas/routing_policy_term_matching_as_path"
+          },
+          "community": {
+            "$ref": "#/components/schemas/routing_policy_term_matching_community"
+          },
+          "prefix": {
+            "$ref": "#/components/schemas/routing_policy_term_matching_prefix"
+          },
+          "protocol": {
+            "$ref": "#/components/schemas/sw_routing_policy_term_matching_protocol"
+          }
+        },
+        "type": "object"
+      },
+      "sw_routing_policy_term_matching_protocol": {
+        "items": {
+          "$ref": "#/components/schemas/sw_routing_policy_term_matching_protocol_enum"
+        },
+        "type": "array"
+      },
+      "sw_routing_policy_term_matching_protocol_enum": {
+        "description": "enum: `bgp`, `direct`, `evpn`, `ospf`, `static`",
+        "enum": [
+          "bgp",
+          "direct",
+          "evpn",
+          "ospf",
+          "static"
+        ],
+        "type": "string"
+      },
+      "sw_routing_policy_terms": {
+        "description": "at least criteria/filter must be specified to match the term, all criteria have to be met",
+        "items": {
+          "$ref": "#/components/schemas/sw_routing_policy_term"
+        },
+        "minItems": 1,
+        "type": "array",
+        "uniqueItems": true
+      },
+      "switch_bgp_config": {
+        "additionalProperties": false,
+        "properties": {
+          "auth_key": {
+            "type": "string"
+          },
+          "bfd_minimum_interval": {
+            "description": "Minimum interval in milliseconds for BFD hello packets. A neighbor is considered failed when the device stops receiving replies after the specified interval. Value must be between 1 and 255000.",
+            "maximum": 255000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "export_policy": {
+            "description": "Export policy must match one of the policy names defined in the `routing_policies` property.",
+            "type": "string"
+          },
+          "hold_time": {
+            "$ref": "#/components/schemas/switch_bgp_config_hold_time"
+          },
+          "import_policy": {
+            "description": "Import policy must match one of the policy names defined in the `routing_policies` property.",
+            "type": "string"
+          },
+          "local_as": {
+            "$ref": "#/components/schemas/bgp_as"
+          },
+          "neighbors": {
+            "$ref": "#/components/schemas/switch_bgp_config_neighbors"
+          },
+          "networks": {
+            "$ref": "#/components/schemas/switch_bgp_config_networks"
+          },
+          "type": {
+            "$ref": "#/components/schemas/switch_bgp_config_type"
+          }
+        },
+        "required": [
+          "type",
+          "local_as"
+        ],
+        "type": "object"
+      },
+      "switch_bgp_config_hold_time": {
+        "description": "Hold time is three times the interval at which keepalive messages are sent. It indicates to the peer the length of time that it should consider the sender valid. Must be 0 or a number in the range 3-65535.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/switch_bgp_config_hold_time_zero"
+          },
+          {
+            "$ref": "#/components/schemas/switch_bgp_config_hold_time_integer"
+          }
+        ]
+      },
+      "switch_bgp_config_hold_time_integer": {
+        "maximum": 65535,
+        "minimum": 3,
+        "type": "integer"
+      },
+      "switch_bgp_config_hold_time_zero": {
+        "enum": [
+          0
+        ],
+        "type": "integer"
+      },
+      "switch_bgp_config_neighbor": {
+        "additionalProperties": false,
+        "properties": {
+          "export_policy": {
+            "description": "Export policy must match one of the policy names defined in the `routing_policies` property.",
+            "type": "string"
+          },
+          "hold_time": {
+            "$ref": "#/components/schemas/switch_bgp_config_hold_time"
+          },
+          "import_policy": {
+            "description": "Import policy must match one of the policy names defined in the `routing_policies` property.",
+            "type": "string"
+          },
+          "multihop_ttl": {
+            "maximum": 255,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "neighbor_as": {
+            "$ref": "#/components/schemas/bgp_as",
+            "description": "Autonomous System (AS) number of the BGP neighbor. For internal BGP, this must match `local_as`. For external BGP, this must differ from `local_as`."
+          }
+        },
+        "required": [
+          "neighbor_as"
+        ],
+        "type": "object"
+      },
+      "switch_bgp_config_neighbors": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/switch_bgp_config_neighbor"
+        },
+        "description": "Property key is the BGP Neighbor IP Address.",
+        "type": "object"
+      },
+      "switch_bgp_config_networks": {
+        "description": "List of network names for BGP configuration. When a network is specified, a BGP group will be added to the VRF that network is part of.",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "switch_bgp_config_type": {
+        "description": "enum: `external`, `internal`",
+        "enum": [
+          "external",
+          "internal"
+        ],
+        "type": "string"
+      },
+      "switch_matching": {
+        "additionalProperties": false,
+        "description": "Defines custom switch configuration based on different criteria",
+        "properties": {
+          "enable": {
+            "type": "boolean"
+          },
+          "rules": {
+            "$ref": "#/components/schemas/switch_matching_rules"
+          }
+        },
+        "type": "object"
+      },
+      "switch_matching_rule": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "Property key defines the type of matching, value is the string to match. e.g:\n  * `match_name[0:3]`: switch name must match the first 3 letters of the property value\n  * `match_name[2:6]`: switch name must match the property value from the 2nd to the 6th letter\n  * `match_model[0-8]`: switch model must match the first 8 letters of the property value\n  * `match_role`: switch role must match the property value",
+        "examples": [
+          {
+            "match_model": "EX4300",
+            "match_name[0:3]": "abc"
+          }
+        ],
+        "properties": {
+          "additional_config_cmds": {
+            "$ref": "#/components/schemas/additional_config_cmds"
+          },
+          "default_port_usage": {
+            "default": "default",
+            "description": "Port usage to assign to switch ports without any port usage assigned. Default: `default` to preserve default behavior",
+            "type": "string"
+          },
+          "ip_config": {
+            "$ref": "#/components/schemas/switch_matching_rule_ip_config"
+          },
+          "name": {
+            "description": "Rule name. WARNING: the name `default` is reserved and can only be used for the last rule in the list",
+            "maxLength": 32,
+            "minLength": 1,
+            "type": "string"
+          },
+          "oob_ip_config": {
+            "$ref": "#/components/schemas/switch_matching_rule_oob_ip_config"
+          },
+          "port_config": {
+            "$ref": "#/components/schemas/wired_port_config"
+          },
+          "port_mirroring": {
+            "$ref": "#/components/schemas/switch_port_mirroring"
+          },
+          "stp_config": {
+            "$ref": "#/components/schemas/switch_stp_config"
+          },
+          "switch_mgmt": {
+            "$ref": "#/components/schemas/switch_mgmt"
+          }
+        },
+        "type": "object"
+      },
+      "switch_matching_rule_ip_config": {
+        "additionalProperties": false,
+        "description": "In-Band Management interface configuration",
+        "properties": {
+          "network": {
+            "description": "VLAN Name for the management interface",
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ip_type"
+          }
+        },
+        "type": "object"
+      },
+      "switch_matching_rule_oob_ip_config": {
+        "additionalProperties": false,
+        "description": "Out-of-Band Management interface configuration",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ip_type"
+          },
+          "use_mgmt_vrf": {
+            "default": false,
+            "description": "If supported on the platform. If enabled, DNS will be using this routing-instance, too",
+            "type": "boolean"
+          },
+          "use_mgmt_vrf_for_host_out": {
+            "default": false,
+            "description": "For host-out traffic (NTP/TACPLUS/RADIUS/SYSLOG/SNMP), if alternative source network/ip is desired",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "switch_matching_rules": {
+        "items": {
+          "$ref": "#/components/schemas/switch_matching_rule"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "switch_mgmt": {
+        "additionalProperties": false,
+        "description": "Switch settings",
+        "properties": {
+          "ap_affinity_threshold": {
+            "default": 10,
+            "description": "AP_affinity_threshold ap_affinity_threshold can be added as a field under site/setting. By default, this value is set to 12. If the field is set in both site/setting and org/setting, the value from site/setting will be used.",
+            "type": "integer"
+          },
+          "cli_banner": {
+            "description": "Set Banners for switches. Allows markup formatting",
+            "examples": [
+              "\\t\\tWELCOME!"
+            ],
+            "type": "string"
+          },
+          "cli_idle_timeout": {
+            "description": "Sets timeout for switches",
+            "maximum": 60,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "config_revert_timer": {
+            "default": 10,
+            "description": "Rollback timer for commit confirmed",
+            "maximum": 30,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "dhcp_option_fqdn": {
+            "default": false,
+            "description": "Enable to provide the FQDN with DHCP option 81",
+            "type": "boolean"
+          },
+          "disable_oob_down_alarm": {
+            "type": "boolean"
+          },
+          "fips_enabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "local_accounts": {
+            "$ref": "#/components/schemas/config_switch_local_accounts"
+          },
+          "mxedge_proxy_host": {
+            "description": "IP Address or FQDN of the Mist Edge used to proxy the switch management traffic to the Mist Cloud",
+            "type": "string"
+          },
+          "mxedge_proxy_port": {
+            "$ref": "#/components/schemas/switch_mgmt_mxedge_proxy_port"
+          },
+          "protect_re": {
+            "$ref": "#/components/schemas/protect_re"
+          },
+          "radius": {
+            "$ref": "#/components/schemas/switch_radius"
+          },
+          "remove_existing_configs": {
+            "default": false,
+            "description": "By default, only the configuration generated by Mist is cleaned up during the configuration process. If `true`, all the existing configuration will be removed.",
+            "type": "boolean"
+          },
+          "root_password": {
+            "type": "string"
+          },
+          "tacacs": {
+            "$ref": "#/components/schemas/tacacs"
+          },
+          "use_mxedge_proxy": {
+            "description": "To use mxedge as proxy",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "switch_mgmt_mxedge_proxy_port": {
+        "anyOf": [
+          {
+            "default": 2222,
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "description": "Mist Edge port used to proxy the switch management traffic to the Mist Cloud. Value in range 1-65535"
+      },
+      "switch_mist_nac": {
+        "additionalProperties": false,
+        "description": "Enable mist_nac to use RadSec",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "network": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "switch_network": {
+        "additionalProperties": false,
+        "description": "A network represents a network segment. It can either represent a VLAN (then usually ties to a L3 subnet), optionally associate it with a subnet which can later be used to create addition routes. Used for ports doing `family ethernet-switching`. It can also be a pure L3-subnet that can then be used against a port that with `family inet`.",
+        "properties": {
+          "gateway": {
+            "description": "Only required for EVPN-VXLAN networks, IPv4 Virtual Gateway",
+            "type": "string"
+          },
+          "gateway6": {
+            "description": "Only required for EVPN-VXLAN networks, IPv6 Virtual Gateway",
+            "type": "string"
+          },
+          "isolation": {
+            "default": false,
+            "description": "whether to stop clients to talk to each other, default is false (when enabled, a unique isolation_vlan_id is required). NOTE: this features requires uplink device to also a be Juniper device and `inter_switch_link` to be set. See also `inter_isolation_network_link` and `community_vlan_id` in port_usage",
+            "type": "boolean"
+          },
+          "isolation_vlan_id": {
+            "examples": [
+              "3070"
+            ],
+            "type": "string"
+          },
+          "subnet": {
+            "description": "Optional for pure switching, required when L3 / routing features are used",
+            "type": "string"
+          },
+          "subnet6": {
+            "description": "Optional for pure switching, required when L3 / routing features are used",
+            "type": "string"
+          },
+          "vlan_id": {
+            "$ref": "#/components/schemas/vlan_id_with_variable"
+          }
+        },
+        "required": [
+          "vlan_id"
+        ],
+        "type": "object"
+      },
+      "switch_networks": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/switch_network"
+        },
+        "description": "Property key is network name",
+        "type": "object"
+      },
+      "switch_port_mirroring": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/switch_port_mirroring_property"
+        },
+        "description": "Property key is the port mirroring instance name. `port_mirroring` can be added under device/site settings. It takes interface and ports as input for ingress, interface as input for egress and can take interface and port as output. A maximum 4 mirroring ports is allowed",
+        "type": "object"
+      },
+      "switch_port_mirroring_egress_port_ids": {
+        "description": "At least one of the `input_port_ids_ingress`, `input_port_ids_egress` or `input_networks_ingress ` should be specified",
+        "items": {
+          "examples": [
+            "ge-0/0/3"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "switch_port_mirroring_ingress_networks": {
+        "description": "At least one of the `input_port_ids_ingress`, `input_port_ids_egress` or `input_networks_ingress ` should be specified",
+        "items": {
+          "examples": [
+            "corp"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "switch_port_mirroring_ingress_port_ids": {
+        "description": "At least one of the `input_port_ids_ingress`, `input_port_ids_egress` or `input_networks_ingress ` should be specified",
+        "items": {
+          "examples": [
+            "ge-0/0/3"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "switch_port_mirroring_property": {
+        "additionalProperties": false,
+        "properties": {
+          "input_networks_ingress": {
+            "$ref": "#/components/schemas/switch_port_mirroring_ingress_networks"
+          },
+          "input_port_ids_egress": {
+            "$ref": "#/components/schemas/switch_port_mirroring_egress_port_ids"
+          },
+          "input_port_ids_ingress": {
+            "$ref": "#/components/schemas/switch_port_mirroring_ingress_port_ids"
+          },
+          "output_ip_address": {
+            "description": "Exactly one of the `output_ip_address`, `output_port_id` or `output_network` should be provided",
+            "examples": [
+              "1.2.3.4"
+            ],
+            "type": "string"
+          },
+          "output_network": {
+            "description": "Exactly one of the `output_ip_address`, `output_port_id` or `output_network` should be provided",
+            "examples": [
+              "analyze"
+            ],
+            "type": "string"
+          },
+          "output_port_id": {
+            "description": "Exactly one of the `output_ip_address`, `output_port_id` or `output_network` should be provided",
+            "examples": [
+              "ge-0/0/5"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "switch_port_usage": {
+        "additionalProperties": false,
+        "description": "Junos port usages",
+        "properties": {
+          "all_networks": {
+            "default": false,
+            "description": "Only if `mode`==`trunk`. Whether to trunk all network/vlans",
+            "type": "boolean"
+          },
+          "allow_dhcpd": {
+            "description": "Only applies when `mode`!=`dynamic`. Controls whether DHCP server traffic is allowed on ports using this configuration if DHCP snooping is enabled. This is a tri-state setting; `true`: ports become trusted ports allowing DHCP server traffic, `false`: ports become untrusted blocking DHCP server traffic, undefined: use system defaults (access ports default to untrusted, trunk ports default to trusted).",
+            "type": "boolean"
+          },
+          "allow_multiple_supplicants": {
+            "default": false,
+            "description": "Only if `mode`!=`dynamic`",
+            "type": "boolean"
+          },
+          "bypass_auth_when_server_down": {
+            "default": false,
+            "description": "Only if `mode`!=`dynamic` and `port_auth`==`dot1x`. Bypass auth for known clients if set to true when RADIUS server is down",
+            "type": "boolean"
+          },
+          "bypass_auth_when_server_down_for_unknown_client": {
+            "default": false,
+            "description": "Only if `mode`!=`dynamic` and `port_auth`=`dot1x`. Bypass auth for all (including unknown clients) if set to true when RADIUS server is down",
+            "type": "boolean"
+          },
+          "bypass_auth_when_server_down_for_voip": {
+            "default": false,
+            "description": "Only if `mode`!=`dynamic` and `port_auth`==`dot1x`. Bypass auth for VOIP if set to true when RADIUS server is down",
+            "type": "boolean"
+          },
+          "community_vlan_id": {
+            "description": "Only if `mode`!=`dynamic`. To be used together with `isolation` under networks. Signaling that this port connects to the networks isolated but wired clients belong to the same community can talk to each other",
+            "type": "integer"
+          },
+          "description": {
+            "description": "Only if `mode`!=`dynamic`",
+            "type": "string"
+          },
+          "disable_autoneg": {
+            "default": false,
+            "description": "Only if `mode`!=`dynamic`. If speed and duplex are specified, whether to disable autonegotiation",
+            "type": "boolean"
+          },
+          "disabled": {
+            "default": false,
+            "description": "Only if `mode`!=`dynamic`. Whether the port is disabled",
+            "type": "boolean"
+          },
+          "duplex": {
+            "$ref": "#/components/schemas/switch_port_usage_duplex"
+          },
+          "dynamic_vlan_networks": {
+            "$ref": "#/components/schemas/switch_port_usage_dynamic_vlan_networks"
+          },
+          "enable_mac_auth": {
+            "default": false,
+            "description": "Only if `mode`!=`dynamic` and `port_auth`==`dot1x`. Whether to enable MAC Auth",
+            "type": "boolean"
+          },
+          "enable_qos": {
+            "default": false,
+            "description": "Only if `mode`!=`dynamic`",
+            "type": "boolean"
+          },
+          "guest_network": {
+            "description": "Only if `mode`!=`dynamic` and `port_auth`==`dot1x`. Which network to put the device into if the device cannot do dot1x. default is null (i.e. not allowed)",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "inter_isolation_network_link": {
+            "default": false,
+            "description": "Only if `mode`!=`dynamic`. `inter_isolation_network_link` is used together with `isolation` under networks, signaling that this port connects to isolated networks",
+            "type": "boolean"
+          },
+          "inter_switch_link": {
+            "default": false,
+            "description": "Only if `mode`!=`dynamic`. `inter_switch_link` is used together with `isolation` under networks. NOTE: `inter_switch_link` works only between Juniper devices. This has to be applied to both ports connected together",
+            "type": "boolean"
+          },
+          "mac_auth_only": {
+            "description": "Only if `mode`!=`dynamic` and `enable_mac_auth`==`true`",
+            "type": "boolean"
+          },
+          "mac_auth_preferred": {
+            "description": "Only if `mode`!=`dynamic` + `enable_mac_auth`==`true` + `mac_auth_only`==`false`, dot1x will be given priority then mac_auth. Enable this to prefer mac_auth over dot1x.",
+            "type": "boolean"
+          },
+          "mac_auth_protocol": {
+            "$ref": "#/components/schemas/switch_port_usage_mac_auth_protocol"
+          },
+          "mac_limit": {
+            "$ref": "#/components/schemas/switch_port_usage_mac_limit"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/switch_port_usage_mode"
+          },
+          "mtu": {
+            "$ref": "#/components/schemas/switch_port_usage_mtu"
+          },
+          "networks": {
+            "$ref": "#/components/schemas/switch_port_usage_networks"
+          },
+          "persist_mac": {
+            "default": false,
+            "description": "Only if `mode`==`access` and `port_auth`!=`dot1x`. Whether the port should retain dynamically learned MAC addresses",
+            "type": "boolean"
+          },
+          "poe_disabled": {
+            "default": false,
+            "description": "Only if `mode`!=`dynamic`. Whether PoE capabilities are disabled for a port",
+            "type": "boolean"
+          },
+          "poe_priority": {
+            "$ref": "#/components/schemas/poe_priority"
+          },
+          "port_auth": {
+            "$ref": "#/components/schemas/switch_port_usage_dot1x"
+          },
+          "port_network": {
+            "description": "Only if `mode`!=`dynamic`. Native network/vlan for untagged traffic",
+            "type": "string"
+          },
+          "reauth_interval": {
+            "$ref": "#/components/schemas/switch_port_usage_reauth_interval"
+          },
+          "reset_default_when": {
+            "$ref": "#/components/schemas/switch_port_usage_dynamic_reset_default_when"
+          },
+          "rules": {
+            "$ref": "#/components/schemas/switch_port_usage_dynamic_rules"
+          },
+          "server_fail_network": {
+            "description": "Only if `mode`!=`dynamic` and `port_auth`==`dot1x`. Sets server fail fallback vlan",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "server_reject_network": {
+            "description": "Only if `mode`!=`dynamic` and `port_auth`==`dot1x`. When radius server reject / fails",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "speed": {
+            "$ref": "#/components/schemas/switch_port_usage_speed"
+          },
+          "storm_control": {
+            "$ref": "#/components/schemas/switch_port_usage_storm_control"
+          },
+          "stp_disable": {
+            "default": false,
+            "description": "Only if `mode`!=`dynamic` and `stp_required`==`false`. Drop bridge protocol data units (BPDUs ) that enter any interface or a specified interface",
+            "type": "boolean"
+          },
+          "stp_edge": {
+            "default": false,
+            "description": "Only if `mode`!=`dynamic`. When enabled, the port is not expected to receive BPDU frames",
+            "type": "boolean"
+          },
+          "stp_no_root_port": {
+            "default": false,
+            "description": "Only if `mode`!=`dynamic`",
+            "type": "boolean"
+          },
+          "stp_p2p": {
+            "default": false,
+            "description": "Only if `mode`!=`dynamic`",
+            "type": "boolean"
+          },
+          "stp_required": {
+            "default": false,
+            "description": "Only if `mode`!=`dynamic`. Whether to remain in block state if no BPDU is received",
+            "type": "boolean"
+          },
+          "ui_evpntopo_id": {
+            "description": "Optional for Campus Fabric Core-Distribution ESI-LAG profile. Helper used by the UI to select this port profile as the ESI-Lag between Distribution and Access switches",
+            "format": "uuid",
+            "type": "string"
+          },
+          "use_vstp": {
+            "default": false,
+            "description": "If this is connected to a vstp network",
+            "type": "boolean"
+          },
+          "voip_network": {
+            "description": "Only if `mode`!=`dynamic`. Network/vlan for voip traffic, must also set port_network. to authenticate device, set port_auth",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "switch_port_usage_dot1x": {
+        "description": "Only if `mode`!=`dynamic`. If dot1x is desired, set to dot1x. enum: `dot1x`",
+        "enum": [
+          "dot1x"
+        ],
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "switch_port_usage_duplex": {
+        "default": "auto",
+        "description": "Only if `mode`!=`dynamic`. Link connection mode. enum: `auto`, `full`, `half`",
+        "enum": [
+          "auto",
+          "full",
+          "half"
+        ],
+        "type": "string"
+      },
+      "switch_port_usage_dynamic_reset_default_when": {
+        "default": "link_down",
+        "description": "Only if `mode`==`dynamic` Control when the DPC port should be changed to the default port usage. enum: `link_down`, `none` (let the DPC port keep at the current port usage)",
+        "enum": [
+          "link_down",
+          "none"
+        ],
+        "examples": [
+          "link_down"
+        ],
+        "type": "string"
+      },
+      "switch_port_usage_dynamic_rule": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "description": "Optional description of the rule",
+            "type": "string"
+          },
+          "equals": {
+            "type": "string"
+          },
+          "equals_any": {
+            "$ref": "#/components/schemas/switch_port_usage_dynamic_rule_equals_any"
+          },
+          "expression": {
+            "description": "\"[0:3]\":\"abcdef\" -> \"abc\"\n\"split(.)[1]\": \"a.b.c\" -> \"b\"\n\"split(-)[1][0:3]: \"a1234-b5678-c90\" -> \"b56\"",
+            "type": "string"
+          },
+          "src": {
+            "$ref": "#/components/schemas/switch_port_usage_dynamic_rule_src"
+          },
+          "usage": {
+            "description": "`port_usage` name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "src"
+        ],
+        "type": "object"
+      },
+      "switch_port_usage_dynamic_rule_equals_any": {
+        "description": "Use `equals_any` to match any item in a list",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "switch_port_usage_dynamic_rule_src": {
+        "description": "enum: `link_peermac`, `lldp_chassis_id`, `lldp_hardware_revision`, `lldp_manufacturer_name`, `lldp_oui`, `lldp_serial_number`, `lldp_system_description`, `lldp_system_name`, `radius_dynamicfilter`, `radius_usermac`, `radius_username`",
+        "enum": [
+          "link_peermac",
+          "lldp_chassis_id",
+          "lldp_hardware_revision",
+          "lldp_manufacturer_name",
+          "lldp_oui",
+          "lldp_serial_number",
+          "lldp_system_description",
+          "lldp_system_name",
+          "radius_dynamicfilter",
+          "radius_usermac",
+          "radius_username"
+        ],
+        "type": "string"
+      },
+      "switch_port_usage_dynamic_rules": {
+        "description": "Only if `mode`==`dynamic`",
+        "items": {
+          "$ref": "#/components/schemas/switch_port_usage_dynamic_rule"
+        },
+        "type": "array"
+      },
+      "switch_port_usage_dynamic_vlan_networks": {
+        "description": "Only if `mode`!=`dynamic` and `port_auth`==`dot1x`, if dynamic vlan is used, specify the possible networks/vlans RADIUS can return",
+        "examples": [
+          [
+            "corp",
+            "user"
+          ]
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "switch_port_usage_mac_auth_protocol": {
+        "default": "eap-md5",
+        "description": "Only if `mode`!=`dynamic` and `enable_mac_auth` ==`true`. This type is ignored if mist_nac is enabled. enum: `eap-md5`, `eap-peap`, `pap`",
+        "enum": [
+          "eap-md5",
+          "eap-peap",
+          "pap"
+        ],
+        "type": "string"
+      },
+      "switch_port_usage_mac_limit": {
+        "anyOf": [
+          {
+            "default": 0,
+            "maximum": 16383,
+            "minimum": 0,
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "description": "Only if `mode`!=`dynamic`, max number of mac addresses, default is 0 for unlimited, otherwise range is 1 to 16383 (upper bound constrained by platform)"
+      },
+      "switch_port_usage_mode": {
+        "description": "`mode`==`dynamic` must only be used if the port usage name is `dynamic`. enum: `access`, `dynamic`, `inet`, `trunk`",
+        "enum": [
+          "access",
+          "dynamic",
+          "inet",
+          "trunk"
+        ],
+        "type": "string"
+      },
+      "switch_port_usage_mtu": {
+        "anyOf": [
+          {
+            "maximum": 9216,
+            "minimum": 256,
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Only if `mode`!=`dynamic` media maximum transmission unit (MTU) is the largest data unit that can be forwarded without fragmentation. The default value is 1514."
+      },
+      "switch_port_usage_networks": {
+        "description": "Only if `mode`==`trunk`, the list of network/vlans",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "switch_port_usage_reauth_interval": {
+        "anyOf": [
+          {
+            "default": 3600,
+            "maximum": 65535,
+            "minimum": 10,
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "description": "Only if `mode`!=`dynamic` and `port_auth`=`dot1x` reauthentication interval range (min: 10, max: 65535, default: 3600)"
+      },
+      "switch_port_usage_speed": {
+        "default": "auto",
+        "description": "Only if `mode`!=`dynamic`, Port speed, default is auto to automatically negotiate speed enum: `100m`, `10m`, `1g`, `2.5g`, `5g`, `10g`, `25g`, `40g`, `100g`,`auto`",
+        "enum": [
+          "10m",
+          "100m",
+          "1g",
+          "2.5g",
+          "5g",
+          "10g",
+          "25g",
+          "40g",
+          "100g",
+          "auto"
+        ],
+        "type": "string"
+      },
+      "switch_port_usage_storm_control": {
+        "additionalProperties": false,
+        "description": "Switch storm control. Only if `mode`!=`dynamic`",
+        "properties": {
+          "disable_port": {
+            "default": false,
+            "description": "Whether to disable the port when storm control is triggered",
+            "type": "boolean"
+          },
+          "no_broadcast": {
+            "default": false,
+            "description": "Whether to disable storm control on broadcast traffic",
+            "type": "boolean"
+          },
+          "no_multicast": {
+            "default": false,
+            "description": "Whether to disable storm control on multicast traffic",
+            "type": "boolean"
+          },
+          "no_registered_multicast": {
+            "default": false,
+            "description": "Whether to disable storm control on registered multicast traffic",
+            "type": "boolean"
+          },
+          "no_unknown_unicast": {
+            "default": false,
+            "description": "Whether to disable storm control on unknown unicast traffic",
+            "type": "boolean"
+          },
+          "percentage": {
+            "default": 80,
+            "description": "Bandwidth-percentage, configures the storm control level as a percentage of the available bandwidth",
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "switch_port_usages": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/switch_port_usage"
+        },
+        "description": "Property key is the port usage name. Defines the profiles of port configuration configured on the switch",
+        "type": "object"
+      },
+      "switch_radius": {
+        "additionalProperties": false,
+        "description": "By default, `radius_config` will be used. if a different one has to be used set `use_different_radius",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "radius_config": {
+            "$ref": "#/components/schemas/switch_radius_config"
+          },
+          "use_different_radius": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "switch_radius_config": {
+        "additionalProperties": false,
+        "description": "Junos Radius config",
+        "properties": {
+          "acct_immediate_update": {
+            "type": "boolean"
+          },
+          "acct_interim_interval": {
+            "default": 0,
+            "description": "How frequently should interim accounting be reported, 60-65535. default is 0 (use one specified in Access-Accept request from RADIUS Server). Very frequent messages can affect the performance of the radius server, 600 and up is recommended when enabled",
+            "maximum": 65535,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "acct_servers": {
+            "$ref": "#/components/schemas/radius_acct_servers"
+          },
+          "auth_server_selection": {
+            "$ref": "#/components/schemas/switch_radius_config_auth_server_selection"
+          },
+          "auth_servers": {
+            "$ref": "#/components/schemas/radius_auth_servers"
+          },
+          "auth_servers_retries": {
+            "default": 3,
+            "description": "Radius auth session retries",
+            "type": "integer"
+          },
+          "auth_servers_timeout": {
+            "default": 5,
+            "description": "Radius auth session timeout",
+            "type": "integer"
+          },
+          "coa_enabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "coa_port": {
+            "$ref": "#/components/schemas/radius_coa_port"
+          },
+          "fast_dot1x_timers": {
+            "default": false,
+            "type": "boolean"
+          },
+          "network": {
+            "description": "Use `network`or `source_ip`. Which network the RADIUS server resides, if there's static IP for this network, we'd use it as source-ip",
+            "type": "string"
+          },
+          "source_ip": {
+            "description": "Use `network`or `source_ip`",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "switch_radius_config_auth_server_selection": {
+        "default": "ordered",
+        "description": "enum: `ordered`, `unordered`",
+        "enum": [
+          "ordered",
+          "unordered"
+        ],
+        "type": "string"
+      },
+      "switch_stp_config": {
+        "additionalProperties": false,
+        "properties": {
+          "bridge_priority": {
+            "default": "32k",
+            "description": "Switch STP priority. Range [0, 4k, 8k.. 60k] in steps of 4k. Bridge priority applies to both VSTP and RSTP.",
+            "examples": [
+              "40k"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "switch_vrf_instance": {
+        "additionalProperties": false,
+        "examples": [
+          {
+            "extra_routes": {
+              "0.0.0.0/0": {
+                "via": "192.168.31.1"
+              }
+            },
+            "networks": [
+              "guest"
+            ]
+          }
+        ],
+        "properties": {
+          "aggregate_routes": {
+            "$ref": "#/components/schemas/aggregate_routes"
+          },
+          "aggregate_routes6": {
+            "$ref": "#/components/schemas/aggregate_routes6"
+          },
+          "evpn_auto_loopback_subnet": {
+            "examples": [
+              "100.101.0.0/24"
+            ],
+            "type": "string"
+          },
+          "evpn_auto_loopback_subnet6": {
+            "type": "string"
+          },
+          "extra_routes": {
+            "$ref": "#/components/schemas/vrf_extra_routes"
+          },
+          "extra_routes6": {
+            "$ref": "#/components/schemas/vrf_extra_routes6"
+          },
+          "networks": {
+            "$ref": "#/components/schemas/strings"
+          }
+        },
+        "type": "object"
+      },
+      "switch_vrf_instances": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/switch_vrf_instance"
+        },
+        "description": "Property key is the network name",
+        "examples": [
+          {
+            "guest": {
+              "extra_routes": {
+                "0.0.0.0/0": {
+                  "via": "192.168.31.1"
+                }
+              },
+              "networks": [
+                "guest"
+              ]
+            }
+          }
+        ],
+        "type": "object"
+      },
+      "tacacs": {
+        "additionalProperties": false,
+        "properties": {
+          "acct_servers": {
+            "$ref": "#/components/schemas/tacacs_acct_servers"
+          },
+          "default_role": {
+            "$ref": "#/components/schemas/tacacs_default_role"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "network": {
+            "description": "Which network the TACACS server resides",
+            "type": "string"
+          },
+          "tacplus_servers": {
+            "$ref": "#/components/schemas/tacacs_auth_servers"
+          }
+        },
+        "type": "object"
+      },
+      "tacacs_acct_server": {
+        "additionalProperties": false,
+        "properties": {
+          "host": {
+            "type": "string"
+          },
+          "port": {
+            "type": "string"
+          },
+          "secret": {
+            "type": "string"
+          },
+          "timeout": {
+            "default": 10,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "tacacs_acct_servers": {
+        "items": {
+          "$ref": "#/components/schemas/tacacs_acct_server"
+        },
+        "type": "array"
+      },
+      "tacacs_auth_server": {
+        "additionalProperties": false,
+        "properties": {
+          "host": {
+            "type": "string"
+          },
+          "port": {
+            "type": "string"
+          },
+          "secret": {
+            "type": "string"
+          },
+          "timeout": {
+            "default": 10,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "tacacs_auth_servers": {
+        "items": {
+          "$ref": "#/components/schemas/tacacs_auth_server"
+        },
+        "type": "array"
+      },
+      "tacacs_default_role": {
+        "default": "none",
+        "description": "enum: `admin`, `helpdesk`, `none`, `read`",
+        "enum": [
+          "admin",
+          "helpdesk",
+          "none",
+          "read"
+        ],
+        "type": "string"
+      },
+      "vlan_id_with_variable": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "maximum": 4094,
+            "minimum": 1,
+            "type": "integer"
+          }
+        ]
+      },
+      "vrf_config": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "description": "Whether to enable VRF (when supported on the device)",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "vrf_extra_route": {
+        "additionalProperties": false,
+        "properties": {
+          "via": {
+            "description": "Next-hop address",
+            "format": "ipv4",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "vrf_extra_route6": {
+        "additionalProperties": false,
+        "properties": {
+          "via": {
+            "description": "Next-hop address",
+            "format": "ipv6",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "vrf_extra_routes": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/vrf_extra_route"
+        },
+        "description": "Property key is the destination CIDR (e.g. \"10.0.0.0/8\")",
+        "examples": [
+          {
+            "0.0.0.0/0": {
+              "via": "192.168.1.10"
+            }
+          }
+        ],
+        "type": "object"
+      },
+      "vrf_extra_routes6": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/vrf_extra_route6"
+        },
+        "description": "Property key is the destination CIDR (e.g. \"2a02:1234:420a:10c9::/64\")",
+        "examples": [
+          {
+            "2a02:1234:420a:10c9::/64": {
+              "via": "2a02:1234:200a::100"
+            }
+          }
+        ],
+        "type": "object"
+      },
+      "wired_port_config": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/junos_port_config"
+        },
+        "description": "Property key is the port name or range (e.g. \"ge-0/0/0-10\")",
+        "type": "object"
+      }
+    },
+    "responses": {
+      "HTTP400": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          }
+        },
+        "description": "Bad Syntax"
+      },
+      "HTTP401": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          }
+        },
+        "description": "Unauthorized"
+      },
+      "HTTP403": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          }
+        },
+        "description": "Permission Denied"
+      },
+      "HTTP404": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          }
+        },
+        "description": "Not found. The API endpoint doesn’t exist or resource doesn’ t exist"
+      },
+      "HTTP429": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          }
+        },
+        "description": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+      },
+      "Networktemplate": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/NetworktemplateExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/network_template"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/NetworktemplateExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/network_template"
+            }
+          }
+        },
+        "description": "OK"
+      }
+    },
+    "parameters": {
+      "site_id": {
+        "in": "path",
+        "name": "site_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      }
+    },
+    "examples": {
+      "HTTP400Example": {
+        "value": {
+          "detail": "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+        }
+      },
+      "HTTP401Example": {
+        "value": {
+          "detail": "Authentication credentials were not provided."
+        }
+      },
+      "HTTP403Example": {
+        "value": {
+          "detail": "You do not have permission to perform this action."
+        }
+      },
+      "HTTP429Example": {
+        "value": {
+          "detail": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+        }
+      },
+      "NetworktemplateExample": {
+        "value": {
+          "additional_config_cmds": [
+            "set snmp community public"
+          ],
+          "created_time": 0,
+          "dhcp_snooping": {
+            "all_networks": true,
+            "enable_arp_spoof_check": true,
+            "enable_ip_source_guard": true,
+            "enabled": true,
+            "networks": [
+              "string"
+            ]
+          },
+          "dns_servers": [
+            "string"
+          ],
+          "dns_suffix": [
+            "string"
+          ],
+          "extra_routes": {
+            "property1": {
+              "via": "string"
+            },
+            "property2": {
+              "via": "string"
+            }
+          },
+          "group_tags": {},
+          "id": "497f6eca-6276-4993-bfeb-53cbbbba6708",
+          "import_org_networks": [
+            "ap"
+          ],
+          "mist_nac": {
+            "enabled": true,
+            "network": "string"
+          },
+          "modified_time": 0,
+          "name": "string",
+          "networks": {
+            "property1": {
+              "subnet": "192.168.1.0/24",
+              "vlan_id": 10
+            },
+            "property2": {
+              "subnet": "192.168.1.0/24",
+              "vlan_id": 10
+            }
+          },
+          "ntp_servers": [
+            "string"
+          ],
+          "org_id": "a40f5d1f-d889-42e9-94ea-b9b33585fc6b",
+          "port_usages": {
+            "dynamic": {
+              "mode": "dynamic",
+              "reset_default_when": "link_down",
+              "rules": [
+                {
+                  "equals": "string",
+                  "equals_any": [
+                    "string"
+                  ],
+                  "expression": "string",
+                  "src": "lldp_chassis_id",
+                  "usage": "string"
+                }
+              ]
+            },
+            "property1": {
+              "all_networks": false,
+              "allow_dhcpd": true,
+              "bypass_auth_when_server_down": true,
+              "description": "string",
+              "disable_autoneg": false,
+              "disabled": false,
+              "duplex": "auto",
+              "enable_mac_auth": true,
+              "enable_qos": true,
+              "guest_network": "string",
+              "mac_auth_only": true,
+              "mac_auth_protocol": "pap",
+              "mac_limit": 0,
+              "networks": [
+                "string"
+              ],
+              "persist_mac": false,
+              "poe_disabled": false,
+              "port_auth": "dot1x",
+              "port_network": "string",
+              "server_reject_network": null,
+              "speed": "auto",
+              "storm_control": {
+                "no_broadcast": false,
+                "no_multicast": false,
+                "no_registered_multicast": false,
+                "no_unknown_unicast": false,
+                "percentage": 80
+              },
+              "stp_edge": true,
+              "voip_network": "string"
+            },
+            "property2": {
+              "all_networks": false,
+              "allow_dhcpd": true,
+              "bypass_auth_when_server_down": true,
+              "description": "string",
+              "disable_autoneg": false,
+              "disabled": false,
+              "duplex": "auto",
+              "enable_mac_auth": true,
+              "enable_qos": true,
+              "guest_network": "string",
+              "mac_auth_only": true,
+              "mac_auth_protocol": "pap",
+              "mac_limit": 0,
+              "mode": "access",
+              "networks": [
+                "string"
+              ],
+              "persist_mac": false,
+              "poe_disabled": false,
+              "port_network": "string",
+              "server_reject_network": null,
+              "speed": "auto",
+              "storm_control": {
+                "no_broadcast": false,
+                "no_multicast": false,
+                "no_registered_multicast": false,
+                "no_unknown_unicast": false,
+                "percentage": 80
+              },
+              "stp_edge": true,
+              "voip_network": "string"
+            }
+          },
+          "switch_mgmt": {
+            "config_revert_timer": 10,
+            "protect_re": {
+              "enabled": false
+            },
+            "root_password": "string",
+            "tacacs": {
+              "acct_servers": [
+                {
+                  "host": "198.51.100.1",
+                  "port": "49",
+                  "secret": "string",
+                  "timeout": 10
+                }
+              ],
+              "enabled": true,
+              "network": "string",
+              "tacplus_servers": [
+                {
+                  "host": "198.51.100.1",
+                  "port": "49",
+                  "secret": "string",
+                  "timeout": 10
+                }
+              ]
+            }
+          },
+          "vrf_config": {
+            "enabled": false
+          },
+          "vrf_instances": {
+            "property1": {
+              "extra_routes": {
+                "property1": {
+                  "via": "198.51.100.1"
+                },
+                "property2": {
+                  "via": "198.51.100.10"
+                }
+              },
+              "networks": [
+                "string"
+              ]
+            },
+            "property2": {
+              "extra_routes": {
+                "property1": {
+                  "via": "198.51.100.1"
+                },
+                "property2": {
+                  "via": "198.51.100.10"
+                }
+              },
+              "networks": [
+                "string"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "apiToken": {
+        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      },
+      "basicAuth": {
+        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
+        "scheme": "basic",
+        "type": "http"
+      },
+      "csrfToken": {
+        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "in": "header",
+        "name": "X-CSRFToken",
+        "type": "apiKey"
+      }
+    }
+  }
+}

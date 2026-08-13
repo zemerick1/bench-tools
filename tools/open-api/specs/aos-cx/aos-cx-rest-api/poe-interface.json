@@ -1,0 +1,804 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "PoE_Interface",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "PoE_Interface"
+    }
+  ],
+  "paths": {
+    "/system/interfaces/{Interface.name}/poe_interface": {
+      "get": {
+        "tags": [
+          "PoE_Interface"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "": {
+                      "type": "string",
+                      "description": "Reference Resource: [PoE_Interface](#/PoE_Interface)<br>Reference to the [PoE interface](#/PoE_Interface) associated with this [Interface](#/Interface)."
+                    },
+                    "config": {
+                      "type": "object",
+                      "description": "All PoE configuration made at a per-[Interface](#/Interface) level are listed here as a series of key-value pairs.",
+                      "properties": {
+                        "admin_disable": {
+                          "type": "boolean",
+                          "description": "Configurable flag to control PoE power delivery on this [Interface](Interface). A value of `true` would disable PoE power delivery on this [Interface](Interface). By default, the flag is set to `false` for all PoE capable [Interfaces](Interface), i.e., PoE is enabled."
+                        },
+                        "allocate_by_method": {
+                          "type": "string",
+                          "description": "Allows control over the power allocation strategy used for this [PoE Interface](PoE_Interface). Two power allocation strategies are supported: `class` and `usage`. When allocating by `usage`, power is delivered as requested by a PD. When allocating by `class`, the PSE uses the power ramp-up signature of the PD to identify the PD's power class, and use the power level for the specified class.",
+                          "enum": [
+                            "class",
+                            "usage"
+                          ]
+                        },
+                        "cfg_assigned_class": {
+                          "type": "string",
+                          "description": "Allows the user to limit the power delivered to a PD connected on this [Interface](Interface). If configured, the power delivered to a PD would be restricted to the limit of the configured class, rather than the class advertised by the PD itself. Possible values are: 'class3': PD would be limited to 13W 'class4': PD would be limited to 25.5W",
+                          "enum": [
+                            "class3",
+                            "class4",
+                            "class6",
+                            "class7",
+                            "class8"
+                          ]
+                        },
+                        "cfg_power_pairs": {
+                          "type": "string",
+                          "description": "Allows the user to limit power delivery for Single signature PDs of classes 4 and  below to ALT-A only on this interface  'alt-a': Power delivery should be limited ALT-A only 'alt-a-and-alt-b': Power delivery should be allowed on ALT-A and ALT-B both These are only applicable for single signature PDs of class 4 and below.",
+                          "enum": [
+                            "alt-a",
+                            "alt-a-and-alt-b"
+                          ]
+                        },
+                        "pd_class_override": {
+                          "type": "boolean",
+                          "description": "A configurable flag to control PoE class override on this  [Interface](Interface). When set to 'true' the switch will  ignore the PD class advertised by the device and allow it  to draw more power.  Warning: Allowing a device to exceed its advertised limit  could result in a non-compliant device drawing more power  than it is designed to handle and possibly cause damage to  the device.  Warning: allocate_by_method should be set to 'class' when  override is enabled to prevent the device from drawing  unlimited power. Failure to do so could exceed the total  power capacity of the switch and cause it to reboot.  'true': Ignore the PD class advertised by the device. 'false': Use the PD class advertised by the device.  The default value is `false`."
+                        },
+                        "pre_standard_detect": {
+                          "type": "boolean",
+                          "description": "Some PoE powered devices hit the market before the PoE 802.3af standard was ratified. These devices are technically non-compliant with the standard, but we do have the capability to detect these devices and supply power to them. This capability needs to be enabled individually on each [PoE Interface](PoE_Interface). This boolean value specifies the pre-standard detect configuration on this interface.  'true':  Pre-802.3af-standard devices are detected and powered. 'false': Only 802.3af compliant devices are powered.  The default value is `false`."
+                        },
+                        "priority": {
+                          "type": "string",
+                          "description": "If a power-sourcing equipment (PSE) can supply power to all connected powered devices (PD), the priority configuration is unused. The priority configuration comes into play when there is more power requested by PDs than available on the PSE. In such a scenario, power allocation is prioritized to [PoE Interfaces](PoE_Interface) that have a higher priority. This can potentially cause loss of power on one or more lower-priority [PoE Interfaces](PoE_Interface) to meet the power demand on other higher-priority [PoE Interfaces](PoE_Interface). This operation occurs regardless of the order in which PDs connect to the PSE's [PoE Interfaces](PoE_Interface). Possible values:  'critical': Highest priority. 'high':     High priority. 'low':      Low priority  There are two ways in which PoE power is prioritized. In addition to the PoE priority configured here, a lower-numbered [Interface](Interface) has higher priority than a higher-numbered one.",
+                          "enum": [
+                            "critical",
+                            "high",
+                            "low"
+                          ]
+                        }
+                      }
+                    },
+                    "effective_allocate_by_method": {
+                      "type": "string",
+                      "description": "Arbitrated value of PoE power allocation method associated with this interface. When multiple sources request for an update to the interface's POE allocation method, the order of evaluation will be port_access assigned method followed by the user configured value of POE allocation method. The possible values are: 'class': Power is delivered based on PD's power class. 'usage': Power is delivered as requested by PD.",
+                      "enum": [
+                        "class",
+                        "usage"
+                      ]
+                    },
+                    "effective_priority": {
+                      "type": "string",
+                      "description": "Arbitrated value of PoE priority associated with this interface. When multiple sources request for an update to the interface's POE priority, the order of evaluation will be port_access assigned priority followed by LLDP MED priority and then the user configured value of POE priority. The possible values are: 'critical': Highest priority. 'high':     High priority. 'low':      Low priority.",
+                      "enum": [
+                        "critical",
+                        "high",
+                        "low"
+                      ]
+                    },
+                    "measurements": {
+                      "type": "object",
+                      "description": "Power measurements made at this [PoE Interface](#/PoE_Interface).",
+                      "properties": {
+                        "average_power": {
+                          "type": "number",
+                          "format": "float",
+                          "description": "This field specifies the average power, in Watts drawn by the powered device (PD) on this [PoE Interface](PoE_Interface)."
+                        },
+                        "current": {
+                          "type": "number",
+                          "format": "float",
+                          "description": "Numeric value indicating the current, in amperes (A), supplied at this [PoE Interface](PoE_Interface)."
+                        },
+                        "peak_power": {
+                          "type": "number",
+                          "format": "float",
+                          "description": "This field specifies the peak power supplied, in Watts, to the powered device (PD) connected to this [PoE Interface](PoE_Interface)."
+                        },
+                        "power_drawn": {
+                          "type": "number",
+                          "format": "float",
+                          "description": "Numeric value indicating the actual power, in Watts, drawn by the powered device (PD) on this [PoE Interface](PoE_Interface). This field is not valid when powering_status is absent."
+                        },
+                        "voltage": {
+                          "type": "number",
+                          "format": "float",
+                          "description": "Numeric value indicating the Voltage supplied at this [PoE Interface](PoE_Interface). This value is specified in volts (V)."
+                        }
+                      }
+                    },
+                    "pd_information": {
+                      "type": "object",
+                      "description": "Powered device (PD) specific information for PD connected at this [PoE Interface](#/PoE_Interface). If the PD is either a 2-pair compliant device, or is a single-signature device, PD information is specified with key `port`. If the PD is a 4-pair dual signature compliant device, the PD information is specified independently for each pair with keys of `pair-a` and `pair-b`.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "power_classification": {
+                              "type": "string",
+                              "description": "Indicates the class detected on the PD connected to this [PoE Interface](PoE_Interface).  The powered device (PD) is classified based on a combination of physical layer classification (PLC) and data layer classification (DLC), the latter of which is done through LLDP protocol.  The result of the classification process indicates the power limits that the PD is capable of drawing. When the power allocation mode is set to 'allocate by class', the classification is used to set the limits for the power that can be drawn by the PD. The limits, in Watts, are:               PSE     PD 'class 0':    15.4    13 'class 1':    4       3.84 'class 2':    7       6.49 'class 3':    15.4    13 'class 4':    30      25.5 'class 5':    45      35.5 'class 6':    60      51 'class 7':    75      60 'class 8':    90      71  For single-signature devices, the power_classification will be specified with the key of `port`. For dual-signature power devices, the power_classification will be specified independently for each pair, with keys of `pair-a` and `pair-b`.",
+                              "enum": [
+                                "Class0",
+                                "Class1",
+                                "Class2",
+                                "Class3",
+                                "Class4",
+                                "Class5",
+                                "Class6",
+                                "Class7",
+                                "Class8"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "pd_signature": {
+                      "type": "string",
+                      "description": "In 802.3af and 802.3at standards, the power controller on the PSE uses two of the four pairs of wires in the RJ45 connector to supply power to a power controller on the PD. With 802.3bt standard, the controller on the PSE uses all four pairs. On the PD side, there can either be single power controller, or two distinct power controllers connected to each of the two pairs, and each of the two controllers would negotiate and draw power independently from the PSE.  The Controller on the PSE is capable of detecting the PD signature, which will indicate whether the PD comprises a single controller, or two independent controllers. Possible values:  not set : 2-pair mode 'single': 4-pair mode, and one controller on the PD side 'dual':   4-pair mode, and two contollers on the PD side",
+                      "enum": [
+                        "single",
+                        "dual"
+                      ]
+                    },
+                    "pd_type": {
+                      "type": "string",
+                      "description": "Indicates the powered device (PD) type detected on this port.  PDs are categorized into different types based on the PoE standard adhered to. The power supplied by the power sourcing equipment (PSE) shall typically be higher than the power requested at PD side to accommodate for line losses & as per standard, maximum of 100m cable is supported.  'Type1': 802.3af standard. PSE supplies up to 15.4W, and PD draws up to 13W 'Type2': 802.3at standard. PSE supplies up to 30W, and PD draws up to 25.5W 'Type3': 802.3bt standard. PSE supplies up to 60W, and PD draws up to 51W 'Type4': 802.3bt standard. PSE supplies up to 90W, and PD draws up to 71W  Type 2 and higher PDs support LLDP classification. If LLDP is enabled on PSE & a Type 2 PD is connected, PD is allowed to draw maximum power of 13W only. This is called Physical Layer Classification (PLC). Any further power needs to be negotiated through LLDP & this is called Data Link Layer Classification (DLC).",
+                      "enum": [
+                        "Type1",
+                        "Type2",
+                        "Type3",
+                        "Type4"
+                      ]
+                    },
+                    "poe_cycle_timeout": {
+                      "type": "integer",
+                      "description": "Configurable timeout value in units of seconds to control PoE power delivery on this [Interface](#/Interface). This would disable PoE power delivery on this [Interface](#/Interface). Then after a timeout of the value, the PoE is enabled on this [Interface](#/Interface), i.e., PoE is disabled and enabled with a timeout.",
+                      "maximum": 60,
+                      "minimum": 0
+                    },
+                    "poe_port_power_consumed_average": {
+                      "type": "number",
+                      "format": "float",
+                      "description": "Specifies the average power in Watts consumed by the powered device (PD) on this [PoE Interface](#/PoE_Interface) for a configured period of time."
+                    },
+                    "port_access_allocate_by_method": {
+                      "type": "string",
+                      "description": "Policy based assignment of PoE power allocation method. When set, this will override user configured 'config.allocate_by_method'. The possible values are: 'class': Power is delivered based on PD's power class. 'usage': Power is delivered as requested by PD.",
+                      "enum": [
+                        "class",
+                        "usage"
+                      ]
+                    },
+                    "port_access_priority": {
+                      "type": "string",
+                      "description": "Policy based assignment of PoE priority. When set, this will override user configured 'config.priority': `critical`: Highest priority. `high`:     High priority. `low`:      Low priority",
+                      "enum": [
+                        "critical",
+                        "high",
+                        "low"
+                      ]
+                    },
+                    "power_down": {
+                      "type": "object",
+                      "description": "Power down related information on this [PoE Interface](#/PoE_Interface).",
+                      "properties": {
+                        "power_down_request_type": {
+                          "type": "string",
+                          "description": "This indicates the current power down request of port. `poe_cycle`- PoE cycle requested `pd_power_down` - LLDP PD Power down requested.",
+                          "enum": [
+                            "poe_cycle",
+                            "pd_power_down"
+                          ]
+                        },
+                        "request_timestamp": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Specifies the time in seconds from Epoch when PSE has processed the power down request."
+                        },
+                        "state": {
+                          "type": "string",
+                          "description": "This indicates the current state of port in Power Down Request. `inactive`- Not in power down state. `request` - Power down requested. `active`  - Power down active `timeout` - Power down timeout. `remove`  - Power down remove.",
+                          "enum": [
+                            "inactive",
+                            "request",
+                            "active",
+                            "timeout",
+                            "remove"
+                          ]
+                        },
+                        "timeout": {
+                          "type": "integer",
+                          "description": "Specifies the power down timeout request in seconds.",
+                          "maximum": 262143,
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "power_mgmt": {
+                      "type": "object",
+                      "description": "Power management information, used to control the power delivery to the powered device (PD) which is connected on this `port` or pair.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "cutoff_power": {
+                              "type": "number",
+                              "format": "float",
+                              "description": "This is the quantum of power which will be used to calculate the over-current threshold on this `port`, or pair. The numeric value indicates the cutoff power in Watts."
+                            },
+                            "pse_allocated_power": {
+                              "type": "number",
+                              "format": "float",
+                              "description": "Numeric value indicating the power allocated, in Watts, to the PD on this [Poe Interface](PoE_Interface). This value is published to the PD via LLDP, indicating to the PD the quantum of power available to be drawn. This allows the PD to change its class based on the available power."
+                            },
+                            "pse_assigned_class": {
+                              "type": "string",
+                              "description": "Class demotion allows the PSE to allocate less than the PD requested power based on the PD requested power and PSE available power. This field indicates the actual class assigned by PSE to the PD. This information is published to the PD via the LLDP protocol. Depending on whether the PD is single or dual signature, the key used will be either `port`, or `pair-a`/`pair-b` respectively.",
+                              "enum": [
+                                "Class0",
+                                "Class1",
+                                "Class2",
+                                "Class3",
+                                "Class4",
+                                "Class5",
+                                "Class6",
+                                "Class7",
+                                "Class8"
+                              ]
+                            },
+                            "reserved_power": {
+                              "type": "number",
+                              "format": "float",
+                              "description": "This is the quantum of power which has been reserved for the PD at this `port`, or pair, by the PSE. The numeric value is specified in Watts."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "pre_std_device_status": {
+                      "type": "string",
+                      "description": "This indicates the current status of pre-standard detection on the port. This is designed  to also accommodate any powered device which is powered through pre standard detect process. 'not_pre_std' :   The Powered device on [PoE Interface](#/PoE_Interface) is not a pre-standard. 'pre_std'     :   The Powered device on [PoE Interface](#/PoE_Interface) is a pre-standard. 'pwr_on_verif_fault_pd' :   The Powered device on [PoE Interface](#/PoE_Interface) exhibited  power on verification fault initially, was then powered on through pre-standard detect process 'class_oc_pd' :   The Powered device on [PoE Interface](#/PoE_Interface) exhibited class overcurrent and was then powered on through pre-standard detect.",
+                      "enum": [
+                        "not_pre_std",
+                        "pre_std",
+                        "pwr_on_verif_fault_pd",
+                        "class_oc_pd"
+                      ]
+                    },
+                    "rpd_status": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Rapid Power Down is executed by the hardware in the event of a power-supply failure. It quickly cuts power to a PD to prevent an over-current scenario in the PSE. This field indicates whether the interface will go down in the event of any PSU failure or not. If this field is non-zero, it indicates that a power supply failure will cause the power delivery to be cut on supply failure. A value of zero indicates this [PoE Interface](#/PoE_Interface) is unaffected by the failure of any single PSU."
+                    },
+                    "self_test_status": {
+                      "type": "string",
+                      "description": "The PoE subsystem runs self tests on the [PoE Interface](#/PoE_Interface) on boot. This field, when set, indicates the results of the self test.",
+                      "enum": [
+                        "passed",
+                        "failed"
+                      ]
+                    },
+                    "statistics": {
+                      "type": "object",
+                      "description": "PoE statistics information on the `port` or pair.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "invalid_sig": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of times the PSE detected a PD with an invalid signature."
+                            },
+                            "mps_absent": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of times a detected PD has skipped request for power."
+                            },
+                            "overload": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of times the PD attempted to draw more than the reserved power."
+                            },
+                            "power_denied": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of times the PD has been denied requested power due to insufficient available power."
+                            },
+                            "short": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Number of times the switch provided less than the requested power to the PD."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "object",
+                      "description": "State of [PoE Interface](#/PoE_Interface). For single-signature devices, the state will be specified with the key of `port`. For dual-signature power devices, the state fields will be specified independently for each pair, with keys of `pair-a` and `pair-b`.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "fault_reason": {
+                              "type": "string",
+                              "description": "Fault status for the port, valid only if powering_status is `fault`.",
+                              "enum": [
+                                "No Fault",
+                                "DC Disconnect",
+                                "Current/Power Cutoff (Icut)",
+                                "Current Limit (Ilim)",
+                                "Inrush Current Limit (Tstart)",
+                                "Power On Verification",
+                                "FETBAD Condition 1",
+                                "FETBAD Condition 2",
+                                "Over temperature",
+                                "An external Supply FET has likely failed",
+                                "UVLO3 Digital Supply Under Voltage Lockout (UVLO)",
+                                "UVLO48 Analog Supply Under Voltage Lockout (UVLO)",
+                                "Init incomplete",
+                                "SW detect incomplete",
+                                "HW fault",
+                                "Port Non-compliant",
+                                "Short Circuit",
+                                "Cpd too High",
+                                "Rsig Low",
+                                "Rsig High",
+                                "Open circuit",
+                                "Voltage outside detect range",
+                                "Connection Check Invalid"
+                              ]
+                            },
+                            "powering_status": {
+                              "type": "string",
+                              "description": "This indicates the current state of port in PoE state machine. 'disabled':   The admin_status of the [PoE Interface](PoE_Interface) is `false`. 'searching':  The [PoE Interface](PoE_Interface) is enabled, but no PD is connected yet. 'delivering': A PD is connected, and the PSE is supplying power. 'denied':     A PD is connected, but the PSE does not have sufficient power balance               to power this port. 'power_down': A PD is connected and it requested the PSE to disable power. 'fault':      A PD is connected, but the PSE detected a fault. 'absent':     Interface is not physically present or its not active interface.",
+                              "enum": [
+                                "disabled",
+                                "searching",
+                                "delivering",
+                                "denied",
+                                "power_down",
+                                "fault",
+                                "absent"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    ""
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Interface.name",
+            "in": "path",
+            "description": "Reference Resource: [Interface](#/Interface)<br>The interface name. For non-bonded ports, the interface name is the same as the associated port name. The name must otherwise be unique across all ports and interfaces of the system.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "effective_priority",
+                  "effective_allocate_by_method",
+                  "status",
+                  "poe_port_power_consumed_average",
+                  "pd_signature",
+                  "pd_type",
+                  "measurements",
+                  "config",
+                  "pre_std_device_status",
+                  "power_mgmt",
+                  "port_access_priority",
+                  "statistics",
+                  "poe_cycle_timeout",
+                  "rpd_status",
+                  "power_down",
+                  "self_test_status",
+                  "pd_information",
+                  "port_access_allocate_by_method"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "PoE_Interface"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "config": {
+                    "type": "object",
+                    "description": "All PoE configuration made at a per-[Interface](#/Interface) level are listed here as a series of key-value pairs.",
+                    "properties": {
+                      "admin_disable": {
+                        "type": "boolean",
+                        "description": "Configurable flag to control PoE power delivery on this [Interface](Interface). A value of `true` would disable PoE power delivery on this [Interface](Interface). By default, the flag is set to `false` for all PoE capable [Interfaces](Interface), i.e., PoE is enabled."
+                      },
+                      "allocate_by_method": {
+                        "type": "string",
+                        "description": "Allows control over the power allocation strategy used for this [PoE Interface](PoE_Interface). Two power allocation strategies are supported: `class` and `usage`. When allocating by `usage`, power is delivered as requested by a PD. When allocating by `class`, the PSE uses the power ramp-up signature of the PD to identify the PD's power class, and use the power level for the specified class.",
+                        "enum": [
+                          "class",
+                          "usage"
+                        ]
+                      },
+                      "cfg_assigned_class": {
+                        "type": "string",
+                        "description": "Allows the user to limit the power delivered to a PD connected on this [Interface](Interface). If configured, the power delivered to a PD would be restricted to the limit of the configured class, rather than the class advertised by the PD itself. Possible values are: 'class3': PD would be limited to 13W 'class4': PD would be limited to 25.5W",
+                        "enum": [
+                          "class3",
+                          "class4",
+                          "class6",
+                          "class7",
+                          "class8"
+                        ]
+                      },
+                      "cfg_power_pairs": {
+                        "type": "string",
+                        "description": "Allows the user to limit power delivery for Single signature PDs of classes 4 and  below to ALT-A only on this interface  'alt-a': Power delivery should be limited ALT-A only 'alt-a-and-alt-b': Power delivery should be allowed on ALT-A and ALT-B both These are only applicable for single signature PDs of class 4 and below.",
+                        "enum": [
+                          "alt-a",
+                          "alt-a-and-alt-b"
+                        ]
+                      },
+                      "pd_class_override": {
+                        "type": "boolean",
+                        "description": "A configurable flag to control PoE class override on this  [Interface](Interface). When set to 'true' the switch will  ignore the PD class advertised by the device and allow it  to draw more power.  Warning: Allowing a device to exceed its advertised limit  could result in a non-compliant device drawing more power  than it is designed to handle and possibly cause damage to  the device.  Warning: allocate_by_method should be set to 'class' when  override is enabled to prevent the device from drawing  unlimited power. Failure to do so could exceed the total  power capacity of the switch and cause it to reboot.  'true': Ignore the PD class advertised by the device. 'false': Use the PD class advertised by the device.  The default value is `false`."
+                      },
+                      "pre_standard_detect": {
+                        "type": "boolean",
+                        "description": "Some PoE powered devices hit the market before the PoE 802.3af standard was ratified. These devices are technically non-compliant with the standard, but we do have the capability to detect these devices and supply power to them. This capability needs to be enabled individually on each [PoE Interface](PoE_Interface). This boolean value specifies the pre-standard detect configuration on this interface.  'true':  Pre-802.3af-standard devices are detected and powered. 'false': Only 802.3af compliant devices are powered.  The default value is `false`."
+                      },
+                      "priority": {
+                        "type": "string",
+                        "description": "If a power-sourcing equipment (PSE) can supply power to all connected powered devices (PD), the priority configuration is unused. The priority configuration comes into play when there is more power requested by PDs than available on the PSE. In such a scenario, power allocation is prioritized to [PoE Interfaces](PoE_Interface) that have a higher priority. This can potentially cause loss of power on one or more lower-priority [PoE Interfaces](PoE_Interface) to meet the power demand on other higher-priority [PoE Interfaces](PoE_Interface). This operation occurs regardless of the order in which PDs connect to the PSE's [PoE Interfaces](PoE_Interface). Possible values:  'critical': Highest priority. 'high':     High priority. 'low':      Low priority  There are two ways in which PoE power is prioritized. In addition to the PoE priority configured here, a lower-numbered [Interface](Interface) has higher priority than a higher-numbered one.",
+                        "enum": [
+                          "critical",
+                          "high",
+                          "low"
+                        ]
+                      }
+                    }
+                  },
+                  "poe_cycle_timeout": {
+                    "type": "integer",
+                    "description": "Configurable timeout value in units of seconds to control PoE power delivery on this [Interface](#/Interface). This would disable PoE power delivery on this [Interface](#/Interface). Then after a timeout of the value, the PoE is enabled on this [Interface](#/Interface), i.e., PoE is disabled and enabled with a timeout.",
+                    "maximum": 60,
+                    "minimum": 0
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Interface.name",
+            "in": "path",
+            "description": "Reference Resource: [Interface](#/Interface)<br>The interface name. For non-bonded ports, the interface name is the same as the associated port name. The name must otherwise be unique across all ports and interfaces of the system.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "PoE_Interface"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "config": {
+                    "type": "object",
+                    "description": "All PoE configuration made at a per-[Interface](#/Interface) level are listed here as a series of key-value pairs.",
+                    "properties": {
+                      "admin_disable": {
+                        "type": "boolean",
+                        "description": "Configurable flag to control PoE power delivery on this [Interface](Interface). A value of `true` would disable PoE power delivery on this [Interface](Interface). By default, the flag is set to `false` for all PoE capable [Interfaces](Interface), i.e., PoE is enabled."
+                      },
+                      "allocate_by_method": {
+                        "type": "string",
+                        "description": "Allows control over the power allocation strategy used for this [PoE Interface](PoE_Interface). Two power allocation strategies are supported: `class` and `usage`. When allocating by `usage`, power is delivered as requested by a PD. When allocating by `class`, the PSE uses the power ramp-up signature of the PD to identify the PD's power class, and use the power level for the specified class.",
+                        "enum": [
+                          "class",
+                          "usage"
+                        ]
+                      },
+                      "cfg_assigned_class": {
+                        "type": "string",
+                        "description": "Allows the user to limit the power delivered to a PD connected on this [Interface](Interface). If configured, the power delivered to a PD would be restricted to the limit of the configured class, rather than the class advertised by the PD itself. Possible values are: 'class3': PD would be limited to 13W 'class4': PD would be limited to 25.5W",
+                        "enum": [
+                          "class3",
+                          "class4",
+                          "class6",
+                          "class7",
+                          "class8"
+                        ]
+                      },
+                      "cfg_power_pairs": {
+                        "type": "string",
+                        "description": "Allows the user to limit power delivery for Single signature PDs of classes 4 and  below to ALT-A only on this interface  'alt-a': Power delivery should be limited ALT-A only 'alt-a-and-alt-b': Power delivery should be allowed on ALT-A and ALT-B both These are only applicable for single signature PDs of class 4 and below.",
+                        "enum": [
+                          "alt-a",
+                          "alt-a-and-alt-b"
+                        ]
+                      },
+                      "pd_class_override": {
+                        "type": "boolean",
+                        "description": "A configurable flag to control PoE class override on this  [Interface](Interface). When set to 'true' the switch will  ignore the PD class advertised by the device and allow it  to draw more power.  Warning: Allowing a device to exceed its advertised limit  could result in a non-compliant device drawing more power  than it is designed to handle and possibly cause damage to  the device.  Warning: allocate_by_method should be set to 'class' when  override is enabled to prevent the device from drawing  unlimited power. Failure to do so could exceed the total  power capacity of the switch and cause it to reboot.  'true': Ignore the PD class advertised by the device. 'false': Use the PD class advertised by the device.  The default value is `false`."
+                      },
+                      "pre_standard_detect": {
+                        "type": "boolean",
+                        "description": "Some PoE powered devices hit the market before the PoE 802.3af standard was ratified. These devices are technically non-compliant with the standard, but we do have the capability to detect these devices and supply power to them. This capability needs to be enabled individually on each [PoE Interface](PoE_Interface). This boolean value specifies the pre-standard detect configuration on this interface.  'true':  Pre-802.3af-standard devices are detected and powered. 'false': Only 802.3af compliant devices are powered.  The default value is `false`."
+                      },
+                      "priority": {
+                        "type": "string",
+                        "description": "If a power-sourcing equipment (PSE) can supply power to all connected powered devices (PD), the priority configuration is unused. The priority configuration comes into play when there is more power requested by PDs than available on the PSE. In such a scenario, power allocation is prioritized to [PoE Interfaces](PoE_Interface) that have a higher priority. This can potentially cause loss of power on one or more lower-priority [PoE Interfaces](PoE_Interface) to meet the power demand on other higher-priority [PoE Interfaces](PoE_Interface). This operation occurs regardless of the order in which PDs connect to the PSE's [PoE Interfaces](PoE_Interface). Possible values:  'critical': Highest priority. 'high':     High priority. 'low':      Low priority  There are two ways in which PoE power is prioritized. In addition to the PoE priority configured here, a lower-numbered [Interface](Interface) has higher priority than a higher-numbered one.",
+                        "enum": [
+                          "critical",
+                          "high",
+                          "low"
+                        ]
+                      }
+                    }
+                  },
+                  "poe_cycle_timeout": {
+                    "type": "integer",
+                    "description": "Configurable timeout value in units of seconds to control PoE power delivery on this [Interface](#/Interface). This would disable PoE power delivery on this [Interface](#/Interface). Then after a timeout of the value, the PoE is enabled on this [Interface](#/Interface), i.e., PoE is disabled and enabled with a timeout.",
+                    "maximum": 60,
+                    "minimum": 0
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Interface.name",
+            "in": "path",
+            "description": "Reference Resource: [Interface](#/Interface)<br>The interface name. For non-bonded ports, the interface name is the same as the associated port name. The name must otherwise be unique across all ports and interfaces of the system.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

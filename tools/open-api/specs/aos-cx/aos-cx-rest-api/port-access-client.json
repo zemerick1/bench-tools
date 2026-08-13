@@ -1,0 +1,1086 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Port_Access_Client",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Port_Access_Client"
+    }
+  ],
+  "paths": {
+    "/system/interfaces/{Interface.name}/port_access_clients": {
+      "get": {
+        "tags": [
+          "Port_Access_Client"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "access_vlan": {
+                      "type": "string",
+                      "description": "Reference Resource: [VLAN](#/VLAN)<br>The access VLAN assigned to this client."
+                    },
+                    "accounting_session_id": {
+                      "type": "string",
+                      "description": "Accounting session identifier associated with this client's session.",
+                      "maxLength": 32,
+                      "minLength": 1
+                    },
+                    "accounting_session_start_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time (in seconds) since system boot at which the client accounting session was started."
+                    },
+                    "applied_role": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_Role](#/Port_Access_Role)<br>Access Role applied for the client."
+                    },
+                    "applied_role_type": {
+                      "type": "string",
+                      "description": "Type of role applied for the client:  `preauth`:         applied for clients that are yet to be                     authenticated.  `auth`:            applied for clients that have been                     authenticated but have not received any                     specific role or attribute from the                     authentication server.  `reject`:          applied for clients that failed                     authentication.  `critical`:        applied for clients that failed                     authentication due to unreachable.                     authentication servers.  `fallback`:        applied for clients that failed                     to onboard, and no role is derived.  `radius-assigned`: applied for clients that have been                     authenticated and received specific role or                     attribute from the authentication server.  `cached-critical`: applied for clients that failed                     authentication due to unreachable                     authentication servers. This role is                     the previously assigned role for the client                     as provided by the server post authentication.  `critical-voice`:  applied to 'voice' clients that failed                      re-authentication due to server                      unreachability   `ubt-fallback`:    applied for clients on an UBT role that failed                      due to UBT zone unreachability.",
+                      "enum": [
+                        "preauth",
+                        "auth",
+                        "reject",
+                        "critical",
+                        "fallback",
+                        "radius-assigned",
+                        "cached-critical",
+                        "critical-voice",
+                        "ubt-fallback"
+                      ]
+                    },
+                    "auth_attributes": {
+                      "type": "object",
+                      "description": "Reference Resource: [Port_Access_Client_Auth_Attribute](#/Port_Access_Client_Auth_Attribute)<br>Authentication method specific port access client attributes.",
+                      "properties": {
+                        "string": {
+                          "type": "string",
+                          "description": "Reference resource URI of Port_Access_Client_Auth_Attribute"
+                        }
+                      }
+                    },
+                    "auth_history": {
+                      "type": "object",
+                      "description": "The authentication history associated with the client.",
+                      "properties": {
+                        "integer": {
+                          "type": "object",
+                          "properties": {
+                            "auth_failure_reason": {
+                              "type": "string",
+                              "description": "One instance of recorded information about the authentication failure reason, if any, associated with this client.  `server-timeout`:             authentication server was not reachable.  `supplicant-timeout`:         supplicant was not reachable.  `server-reject`:              authentication server rejected the client.  `no-server`:                  no authentication servers configured  `attribute-processing-error`: error processing attributes received from                                authentication server.",
+                              "enum": [
+                                "server-timeout",
+                                "supplicant-timeout",
+                                "reject",
+                                "no-server",
+                                "attribute-processing-error"
+                              ]
+                            },
+                            "auth_method": {
+                              "type": "string",
+                              "description": "One instance of recorded information about the authentication method used by this client.  `dot1x`:     Client authentication was triggerd via 802.1X.  `mac-auth`:  Client authentication was triggerd via MAC-authentication.",
+                              "enum": [
+                                "dot1x",
+                                "mac-auth"
+                              ]
+                            },
+                            "auth_state": {
+                              "type": "string",
+                              "description": "One instance of recorded information about the authentication state associated with this client.  `authenticated`:   Client authenticated successfully..  `unauthenticated`: Client authentication failed.  `attempted`:       Client authentication was attempted but never completed.",
+                              "enum": [
+                                "unauthenticated",
+                                "authenticated",
+                                "attempted"
+                              ]
+                            },
+                            "auth_time": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Time (in seconds) since system boot when this authentication state was updated."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "authenticating_radius_server": {
+                      "type": "string",
+                      "description": "Reference Resource: [Radius_Server](#/Radius_Server)<br>Radius server that authenticated the client."
+                    },
+                    "authorization_failure_reason": {
+                      "type": "string",
+                      "description": "Reason for authorization failure:  `failed-to-apply-pa-policy`:         Failed to apply Port Access Policy. failed-to-apply-gbp`: Failed to apply Group Based Policy.  `failed-to-assign-mac-based-vlan`:   Failed to assign MAC based VLAN.  `failed-to-assign-vlan`:             Failed to assign VLAN.  `failed-to-assign-vlan-group`:       Failed to assign VLAN group.  `failed-to-assign-ubt-vlan`:         Failed to assign UBT VLAN.  `failed-to-assign-ubt-vlan-to-non-ubt-client`: Failed to assign VLAN - Attempt to assign UBT-VLAN to a non-UBT-client.  `failed-to-setup-user-based-tunnel`: Failed to setup User Based Tunnel.  `failed-due-to-vlan-limit-violation`: Failed to assign VLANs - VLAN limit per role exceeded.  `failed-due-to-pvlan-violation` :    Failed due to Private-VLAN violation.  `failed-to-assign-voice-vlan`:       Failed to assign voice VLAN.  `current-auth-mode-not-allowed-on-lag-interface`: Current Auth-Mode is not allowed on a LAG interface.  `failed-to-apply-macsec-policy`:         Failed to apply MACsec Policy.  `pa-policy-not-allowed-on-mclag-interface`: Port Access Policy is not allowed on a MCLAG interface.  `current-auth-mode-not-allowed-on-mclag-interface`: Current Auth-Mode is not allowed on a MCLAG interface.",
+                      "enum": [
+                        "failed-to-apply-pa-policy",
+                        "failed-to-apply-gbp",
+                        "failed-to-assign-mac-based-vlan",
+                        "role-id-not-configured-for-gbp-policy",
+                        "failed-to-assign-vlan",
+                        "failed-to-setup-user-based-tunnel",
+                        "failed-due-to-vlan-limit-violation",
+                        "failed-to-assign-vlan-group",
+                        "failed-to-assign-ubt-vlan",
+                        "failed-to-assign-ubt-vlan-to-non-ubt-client",
+                        "failed-due-to-user-based-tunnel-resource-exhaustion",
+                        "failed-due-to-pvlan-violation",
+                        "failed-to-assign-voice-vlan",
+                        "failed-to-apply-macsec-policy",
+                        "pa-policy-not-allowed-on-mclag-interface",
+                        "current-auth-mode-not-allowed-on-mclag-interface"
+                      ]
+                    },
+                    "client_state": {
+                      "type": "string",
+                      "description": "Port client access state:  `initialized`:                new client request recieved.  `no-authentication-required`: client authentication is not required.  `authenticating`:             client authentication is in progress.  `interim-authenticated`:      client authenticated via a lower priority method.  `interim-authentication-failed`: client authentication failed by one of the method.  `authenticated`:              client authentication completed successfully.  `authentication-failed`:      client authentication failed.  `authorized`:                 client with a valid and allowed MAC.  `sticky-authorized`:          sticky client with a valid and allowed MAC.  `proxy-authorized`:           client authorized via RADIUS proxy.",
+                      "enum": [
+                        "initialized",
+                        "no-authentication-needed",
+                        "authenticating",
+                        "interim-authenticated",
+                        "interim-authentication-failed",
+                        "authenticated",
+                        "authentication-failed",
+                        "authorized",
+                        "sticky-authorized"
+                      ]
+                    },
+                    "device_profile": {
+                      "type": "string",
+                      "description": "Reference Resource: [Device_Profile](#/Device_Profile)<br>Device Profile that matched this client."
+                    },
+                    "device_profile_matched_cdp_group": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_CDP_Group](#/Port_Access_CDP_Group)<br>CDP group in the device profile that matched this client."
+                    },
+                    "device_profile_matched_lldp_group": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_LLDP_Group](#/Port_Access_LLDP_Group)<br>LLDP group in the device profile that matched this client."
+                    },
+                    "device_profile_matched_mac_group": {
+                      "type": "string",
+                      "description": "Reference Resource: [MAC_Group](#/MAC_Group)<br>MAC group in the device profile that matched this client."
+                    },
+                    "device_traffic_class": {
+                      "type": "string",
+                      "description": "Specifies the traffic class of the client.",
+                      "enum": [
+                        "data",
+                        "voice"
+                      ]
+                    },
+                    "gbp_in_applied": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_GBP](#/Port_Access_GBP)<br>Current, successfully applied group based policy to this client as identified in the [Port_Access_GBP](#/Port_Access_GBP)."
+                    },
+                    "gbp_in_data_plane_states": {
+                      "type": "object",
+                      "description": "Reference Resource: [Data_Plane](#/Data_Plane)<br>Application status for each data_plane (Line card or VSF member).",
+                      "properties": {
+                        "URI": {
+                          "type": "string",
+                          "enum": [
+                            "applied",
+                            "failed"
+                          ]
+                        }
+                      }
+                    },
+                    "gbp_in_status": {
+                      "type": "object",
+                      "description": "The status of the last version of 'gbp_in_cfg' column as programmed in hardware.",
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Numeric error code. Expected to be 0 when state is 'applied'."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Detailed reason for error state.  Expected empty when state is 'applied'."
+                        },
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "applied",
+                            "in_progress",
+                            "rejected"
+                          ]
+                        },
+                        "version": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The version of 'gbp_in_cfg' that corresponds to this status."
+                        }
+                      }
+                    },
+                    "mac": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_Client](#/Port_Access_Client)<br>MAC address of the client.",
+                      "maxLength": 17,
+                      "minLength": 17
+                    },
+                    "macsec_policy": {
+                      "type": "string",
+                      "description": "Reference Resource: [MACsec_Policy](#/MACsec_Policy)<br>MACsec policy associated with the 802.1X client."
+                    },
+                    "macsec_status": {
+                      "type": "string",
+                      "description": "MACsec status for the client.  `in-progress`: MACsec setup is in-progress for the client.  `success`:     MACsec setup completed successfully for the client.  `failed`:      MACsec setup failed for the client.",
+                      "enum": [
+                        "in-progress",
+                        "success",
+                        "failed"
+                      ]
+                    },
+                    "mka_policy": {
+                      "type": "string",
+                      "description": "Reference Resource: [MKA_Policy](#/MKA_Policy)<br>MKA policy associated with the client."
+                    },
+                    "onboarded_method": {
+                      "type": "string",
+                      "description": "Client on-boarded method:  `device-profile`: Client was onboarded via the device-profile method.  `dot1x`:          Client was authenticated and onboarded via dot1x method.  `mac-auth`:       Client was authenticated and onboarded via mac-auth method.  `port-security`:  Client was onboarded via the port-security method.",
+                      "enum": [
+                        "device-profile",
+                        "dot1x",
+                        "mac-auth",
+                        "port-security"
+                      ]
+                    },
+                    "policy_in_applied": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_Policy](#/Port_Access_Policy)<br>Current, successfully applied ingress user policy to this client, as identified in the [Port_Access_Policy](#/Port_Access_Policy)."
+                    },
+                    "policy_in_status": {
+                      "type": "object",
+                      "description": "The status of the last version of 'policy_in_cfg' column as programmed in hardware.",
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Numeric error code.  Expected to be 0 when state is 'applied'"
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Detailed reason for error state.  Expected empty when state is 'applied'."
+                        },
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "applied",
+                            "in_progress",
+                            "rejected"
+                          ]
+                        },
+                        "version": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The version of 'policy_in_cfg' that corresponds to this status."
+                        }
+                      }
+                    },
+                    "port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_Client](#/Port_Access_Client)<br>Port of the client."
+                    },
+                    "previously_applied_role": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_Role](#/Port_Access_Role)<br>Previously applied role for the client."
+                    },
+                    "previously_applied_role_type": {
+                      "type": "string",
+                      "description": "Type of role previously applied for the client:  `preauth`:         previously applied role is preauth   `auth`:            previously applied role is auth   `reject`:          previously applied role is reject   `critical`:        previously applied role is critical   `fallback`:        previously applied role is fallback   `radius-assigned`: previously applied role is radius-assigned   `cached-critical`: previously applied role is cached-critical   `critical-voice`:  previously applied role is critical-voice   `ubt-fallback`:    previously applied role is ubt-fallback.",
+                      "enum": [
+                        "preauth",
+                        "auth",
+                        "reject",
+                        "critical",
+                        "fallback",
+                        "radius-assigned",
+                        "cached-critical",
+                        "critical-voice",
+                        "ubt-fallback"
+                      ]
+                    },
+                    "radius_coa_attributes": {
+                      "type": "object",
+                      "description": "The RADIUS attributes received for the client via a Change Of Authorization (CoA) request.  Outer key: the `attribute_id` is derived from a combination of            RADIUS attribute type, vendor ID and the monotonic            clock time when the CoA request was processed            separated by a `:`.            For standard attribute types, the vendor ID is 0.             Example: For standard attribute `Egress-VLAN-Name`            with type 58, attribute_id will be 58:0:167602531114996.            For vendor specific attributes from Aruba (Vendor-ID            14823) such as `aruba-user-role` and            `aruba-cppm-user-role` the attribute_id will be            26:14823:167602531114996.  Inner key: the `vendor_type_instance` is derived from a            combination of the vendor type associated with a            RADIUS attribute and the nth instance of the            attribute appearing in the same RADIUS message            separated by a `:`.            The value associated with this key is the value            received for that instance of the vendor type.            For standard attributes, the vendor_type is 0.             Example: For standard attribute `Egress-VLAN-Name`,            the first instance of this attribute in a RADIUS            message will have vendor_type_instance as 0:1, the            second instance (if exists) as 0:2 and so on.            For vendor specific attribute `aruba-user-role` with            vendor type 1, the first instance of this attribute in            a RADIUS message will have vendor_type_instance as            1:1, the second instance as 1:2 and so on.            For vendor specific attribute `aruba-cppm-user-role`            with vendor type 23, the first instance of this            attribute in a RADIUS message will have            vendor_type_instance as 23:1, the second instance as            23:2 and so on.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "string": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "reauthentication_performed": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Number of times re-authentication is performed for this client.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "reauthentication_requested": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Number of times re-authentication is requested for this client.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "role_state": {
+                      "type": "string",
+                      "description": "Per client role state status.  `not-ready`:                role is not ready for client.  `download-failed`           role download failed.  `not-valid`:                role is not valid for client.  `applied`:                  role has been applied successfully for client.  `application-in-progress`:  role update is in progress for client.  `application-failed`:       role failed to apply for client.",
+                      "enum": [
+                        "not-ready",
+                        "download-failed",
+                        "not-valid",
+                        "applied",
+                        "application-in-progress",
+                        "application-failed"
+                      ]
+                    },
+                    "session_creation_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time (in seconds) since system boot at which the client session was created."
+                    },
+                    "ubt_client_state": {
+                      "type": "string",
+                      "description": " `bootstrapping`:                client bootstrapping with the UBT cluster.  `bootstrap_timedout`:           client bootstrap timed out.  `bootstrap_failed`:             client bootstrap failed.  `registered`:                   client registered with the UBT cluster.  `unbootstrapping`:              client de-registering from the UBT cluster.  `unbootstrap_timedout`:         client de-registration process timed out.  `deregistered`:                 client de-registered from the UBT cluster.  `resource_unavailable`:         client bootstrapped failed - resource unavailable.",
+                      "enum": [
+                        "bootstrapping",
+                        "bootstrap_timedout",
+                        "bootstrap_failed",
+                        "registered",
+                        "unbootstrapping",
+                        "unbootstrap_timedout",
+                        "deregistered",
+                        "resource_unavailable"
+                      ]
+                    },
+                    "ubt_tunnel_hw_programmed": {
+                      "type": "boolean",
+                      "description": " `true`:  Hardware has been programmed to tunnel client traffic           to the UBT cluster.  `false`: Hardware programming error, client traffic is not being           tunneled."
+                    },
+                    "ubt_uac_tunnel": {
+                      "type": "string",
+                      "description": "Reference Resource: [UBT_UAC_Tunnel](#/UBT_UAC_Tunnel)<br>Tunnel associated with this client."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Interface.name",
+            "in": "path",
+            "description": "Reference Resource: [Port](#/Port)<br>The port name. For non-bonded ports, the port name is the same as the associated interface name. The name must otherwise be unique across all ports and interfaces of the system.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "auth_attributes",
+                  "applied_role",
+                  "role_state",
+                  "device_profile_matched_mac_group",
+                  "ubt_uac_tunnel",
+                  "gbp_in_status",
+                  "reauthentication_requested",
+                  "access_vlan",
+                  "session_creation_time",
+                  "accounting_session_start_time",
+                  "auth_history",
+                  "policy_in_status",
+                  "gbp_in_applied",
+                  "mka_policy",
+                  "macsec_policy",
+                  "accounting_session_id",
+                  "previously_applied_role_type",
+                  "macsec_status",
+                  "radius_coa_attributes",
+                  "authenticating_radius_server",
+                  "policy_in_applied",
+                  "gbp_in_data_plane_states",
+                  "mac",
+                  "device_traffic_class",
+                  "device_profile",
+                  "ubt_client_state",
+                  "previously_applied_role",
+                  "applied_role_type",
+                  "client_state",
+                  "onboarded_method",
+                  "authorization_failure_reason",
+                  "device_profile_matched_lldp_group",
+                  "device_profile_matched_cdp_group",
+                  "ubt_tunnel_hw_programmed",
+                  "reauthentication_performed"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/interfaces/{Interface.name}/port_access_clients/{Port_Access_Client.mac}": {
+      "get": {
+        "tags": [
+          "Port_Access_Client"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "access_vlan": {
+                      "type": "string",
+                      "description": "Reference Resource: [VLAN](#/VLAN)<br>The access VLAN assigned to this client."
+                    },
+                    "accounting_session_id": {
+                      "type": "string",
+                      "description": "Accounting session identifier associated with this client's session.",
+                      "maxLength": 32,
+                      "minLength": 1
+                    },
+                    "accounting_session_start_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time (in seconds) since system boot at which the client accounting session was started."
+                    },
+                    "applied_role": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_Role](#/Port_Access_Role)<br>Access Role applied for the client."
+                    },
+                    "applied_role_type": {
+                      "type": "string",
+                      "description": "Type of role applied for the client:  `preauth`:         applied for clients that are yet to be                     authenticated.  `auth`:            applied for clients that have been                     authenticated but have not received any                     specific role or attribute from the                     authentication server.  `reject`:          applied for clients that failed                     authentication.  `critical`:        applied for clients that failed                     authentication due to unreachable.                     authentication servers.  `fallback`:        applied for clients that failed                     to onboard, and no role is derived.  `radius-assigned`: applied for clients that have been                     authenticated and received specific role or                     attribute from the authentication server.  `cached-critical`: applied for clients that failed                     authentication due to unreachable                     authentication servers. This role is                     the previously assigned role for the client                     as provided by the server post authentication.  `critical-voice`:  applied to 'voice' clients that failed                      re-authentication due to server                      unreachability   `ubt-fallback`:    applied for clients on an UBT role that failed                      due to UBT zone unreachability.",
+                      "enum": [
+                        "preauth",
+                        "auth",
+                        "reject",
+                        "critical",
+                        "fallback",
+                        "radius-assigned",
+                        "cached-critical",
+                        "critical-voice",
+                        "ubt-fallback"
+                      ]
+                    },
+                    "auth_attributes": {
+                      "type": "object",
+                      "description": "Reference Resource: [Port_Access_Client_Auth_Attribute](#/Port_Access_Client_Auth_Attribute)<br>Authentication method specific port access client attributes.",
+                      "properties": {
+                        "string": {
+                          "type": "string",
+                          "description": "Reference resource URI of Port_Access_Client_Auth_Attribute"
+                        }
+                      }
+                    },
+                    "auth_history": {
+                      "type": "object",
+                      "description": "The authentication history associated with the client.",
+                      "properties": {
+                        "integer": {
+                          "type": "object",
+                          "properties": {
+                            "auth_failure_reason": {
+                              "type": "string",
+                              "description": "One instance of recorded information about the authentication failure reason, if any, associated with this client.  `server-timeout`:             authentication server was not reachable.  `supplicant-timeout`:         supplicant was not reachable.  `server-reject`:              authentication server rejected the client.  `no-server`:                  no authentication servers configured  `attribute-processing-error`: error processing attributes received from                                authentication server.",
+                              "enum": [
+                                "server-timeout",
+                                "supplicant-timeout",
+                                "reject",
+                                "no-server",
+                                "attribute-processing-error"
+                              ]
+                            },
+                            "auth_method": {
+                              "type": "string",
+                              "description": "One instance of recorded information about the authentication method used by this client.  `dot1x`:     Client authentication was triggerd via 802.1X.  `mac-auth`:  Client authentication was triggerd via MAC-authentication.",
+                              "enum": [
+                                "dot1x",
+                                "mac-auth"
+                              ]
+                            },
+                            "auth_state": {
+                              "type": "string",
+                              "description": "One instance of recorded information about the authentication state associated with this client.  `authenticated`:   Client authenticated successfully..  `unauthenticated`: Client authentication failed.  `attempted`:       Client authentication was attempted but never completed.",
+                              "enum": [
+                                "unauthenticated",
+                                "authenticated",
+                                "attempted"
+                              ]
+                            },
+                            "auth_time": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Time (in seconds) since system boot when this authentication state was updated."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "authenticating_radius_server": {
+                      "type": "string",
+                      "description": "Reference Resource: [Radius_Server](#/Radius_Server)<br>Radius server that authenticated the client."
+                    },
+                    "authorization_failure_reason": {
+                      "type": "string",
+                      "description": "Reason for authorization failure:  `failed-to-apply-pa-policy`:         Failed to apply Port Access Policy. failed-to-apply-gbp`: Failed to apply Group Based Policy.  `failed-to-assign-mac-based-vlan`:   Failed to assign MAC based VLAN.  `failed-to-assign-vlan`:             Failed to assign VLAN.  `failed-to-assign-vlan-group`:       Failed to assign VLAN group.  `failed-to-assign-ubt-vlan`:         Failed to assign UBT VLAN.  `failed-to-assign-ubt-vlan-to-non-ubt-client`: Failed to assign VLAN - Attempt to assign UBT-VLAN to a non-UBT-client.  `failed-to-setup-user-based-tunnel`: Failed to setup User Based Tunnel.  `failed-due-to-vlan-limit-violation`: Failed to assign VLANs - VLAN limit per role exceeded.  `failed-due-to-pvlan-violation` :    Failed due to Private-VLAN violation.  `failed-to-assign-voice-vlan`:       Failed to assign voice VLAN.  `current-auth-mode-not-allowed-on-lag-interface`: Current Auth-Mode is not allowed on a LAG interface.  `failed-to-apply-macsec-policy`:         Failed to apply MACsec Policy.  `pa-policy-not-allowed-on-mclag-interface`: Port Access Policy is not allowed on a MCLAG interface.  `current-auth-mode-not-allowed-on-mclag-interface`: Current Auth-Mode is not allowed on a MCLAG interface.",
+                      "enum": [
+                        "failed-to-apply-pa-policy",
+                        "failed-to-apply-gbp",
+                        "failed-to-assign-mac-based-vlan",
+                        "role-id-not-configured-for-gbp-policy",
+                        "failed-to-assign-vlan",
+                        "failed-to-setup-user-based-tunnel",
+                        "failed-due-to-vlan-limit-violation",
+                        "failed-to-assign-vlan-group",
+                        "failed-to-assign-ubt-vlan",
+                        "failed-to-assign-ubt-vlan-to-non-ubt-client",
+                        "failed-due-to-user-based-tunnel-resource-exhaustion",
+                        "failed-due-to-pvlan-violation",
+                        "failed-to-assign-voice-vlan",
+                        "failed-to-apply-macsec-policy",
+                        "pa-policy-not-allowed-on-mclag-interface",
+                        "current-auth-mode-not-allowed-on-mclag-interface"
+                      ]
+                    },
+                    "client_state": {
+                      "type": "string",
+                      "description": "Port client access state:  `initialized`:                new client request recieved.  `no-authentication-required`: client authentication is not required.  `authenticating`:             client authentication is in progress.  `interim-authenticated`:      client authenticated via a lower priority method.  `interim-authentication-failed`: client authentication failed by one of the method.  `authenticated`:              client authentication completed successfully.  `authentication-failed`:      client authentication failed.  `authorized`:                 client with a valid and allowed MAC.  `sticky-authorized`:          sticky client with a valid and allowed MAC.  `proxy-authorized`:           client authorized via RADIUS proxy.",
+                      "enum": [
+                        "initialized",
+                        "no-authentication-needed",
+                        "authenticating",
+                        "interim-authenticated",
+                        "interim-authentication-failed",
+                        "authenticated",
+                        "authentication-failed",
+                        "authorized",
+                        "sticky-authorized"
+                      ]
+                    },
+                    "device_profile": {
+                      "type": "string",
+                      "description": "Reference Resource: [Device_Profile](#/Device_Profile)<br>Device Profile that matched this client."
+                    },
+                    "device_profile_matched_cdp_group": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_CDP_Group](#/Port_Access_CDP_Group)<br>CDP group in the device profile that matched this client."
+                    },
+                    "device_profile_matched_lldp_group": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_LLDP_Group](#/Port_Access_LLDP_Group)<br>LLDP group in the device profile that matched this client."
+                    },
+                    "device_profile_matched_mac_group": {
+                      "type": "string",
+                      "description": "Reference Resource: [MAC_Group](#/MAC_Group)<br>MAC group in the device profile that matched this client."
+                    },
+                    "device_traffic_class": {
+                      "type": "string",
+                      "description": "Specifies the traffic class of the client.",
+                      "enum": [
+                        "data",
+                        "voice"
+                      ]
+                    },
+                    "gbp_in_applied": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_GBP](#/Port_Access_GBP)<br>Current, successfully applied group based policy to this client as identified in the [Port_Access_GBP](#/Port_Access_GBP)."
+                    },
+                    "gbp_in_data_plane_states": {
+                      "type": "object",
+                      "description": "Reference Resource: [Data_Plane](#/Data_Plane)<br>Application status for each data_plane (Line card or VSF member).",
+                      "properties": {
+                        "URI": {
+                          "type": "string",
+                          "enum": [
+                            "applied",
+                            "failed"
+                          ]
+                        }
+                      }
+                    },
+                    "gbp_in_status": {
+                      "type": "object",
+                      "description": "The status of the last version of 'gbp_in_cfg' column as programmed in hardware.",
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Numeric error code. Expected to be 0 when state is 'applied'."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Detailed reason for error state.  Expected empty when state is 'applied'."
+                        },
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "applied",
+                            "in_progress",
+                            "rejected"
+                          ]
+                        },
+                        "version": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The version of 'gbp_in_cfg' that corresponds to this status."
+                        }
+                      }
+                    },
+                    "mac": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_Client](#/Port_Access_Client)<br>MAC address of the client.",
+                      "maxLength": 17,
+                      "minLength": 17
+                    },
+                    "macsec_policy": {
+                      "type": "string",
+                      "description": "Reference Resource: [MACsec_Policy](#/MACsec_Policy)<br>MACsec policy associated with the 802.1X client."
+                    },
+                    "macsec_status": {
+                      "type": "string",
+                      "description": "MACsec status for the client.  `in-progress`: MACsec setup is in-progress for the client.  `success`:     MACsec setup completed successfully for the client.  `failed`:      MACsec setup failed for the client.",
+                      "enum": [
+                        "in-progress",
+                        "success",
+                        "failed"
+                      ]
+                    },
+                    "mka_policy": {
+                      "type": "string",
+                      "description": "Reference Resource: [MKA_Policy](#/MKA_Policy)<br>MKA policy associated with the client."
+                    },
+                    "onboarded_method": {
+                      "type": "string",
+                      "description": "Client on-boarded method:  `device-profile`: Client was onboarded via the device-profile method.  `dot1x`:          Client was authenticated and onboarded via dot1x method.  `mac-auth`:       Client was authenticated and onboarded via mac-auth method.  `port-security`:  Client was onboarded via the port-security method.",
+                      "enum": [
+                        "device-profile",
+                        "dot1x",
+                        "mac-auth",
+                        "port-security"
+                      ]
+                    },
+                    "policy_in_applied": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_Policy](#/Port_Access_Policy)<br>Current, successfully applied ingress user policy to this client, as identified in the [Port_Access_Policy](#/Port_Access_Policy)."
+                    },
+                    "policy_in_status": {
+                      "type": "object",
+                      "description": "The status of the last version of 'policy_in_cfg' column as programmed in hardware.",
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Numeric error code.  Expected to be 0 when state is 'applied'"
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Detailed reason for error state.  Expected empty when state is 'applied'."
+                        },
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "applied",
+                            "in_progress",
+                            "rejected"
+                          ]
+                        },
+                        "version": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The version of 'policy_in_cfg' that corresponds to this status."
+                        }
+                      }
+                    },
+                    "port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_Client](#/Port_Access_Client)<br>Port of the client."
+                    },
+                    "previously_applied_role": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_Role](#/Port_Access_Role)<br>Previously applied role for the client."
+                    },
+                    "previously_applied_role_type": {
+                      "type": "string",
+                      "description": "Type of role previously applied for the client:  `preauth`:         previously applied role is preauth   `auth`:            previously applied role is auth   `reject`:          previously applied role is reject   `critical`:        previously applied role is critical   `fallback`:        previously applied role is fallback   `radius-assigned`: previously applied role is radius-assigned   `cached-critical`: previously applied role is cached-critical   `critical-voice`:  previously applied role is critical-voice   `ubt-fallback`:    previously applied role is ubt-fallback.",
+                      "enum": [
+                        "preauth",
+                        "auth",
+                        "reject",
+                        "critical",
+                        "fallback",
+                        "radius-assigned",
+                        "cached-critical",
+                        "critical-voice",
+                        "ubt-fallback"
+                      ]
+                    },
+                    "radius_coa_attributes": {
+                      "type": "object",
+                      "description": "The RADIUS attributes received for the client via a Change Of Authorization (CoA) request.  Outer key: the `attribute_id` is derived from a combination of            RADIUS attribute type, vendor ID and the monotonic            clock time when the CoA request was processed            separated by a `:`.            For standard attribute types, the vendor ID is 0.             Example: For standard attribute `Egress-VLAN-Name`            with type 58, attribute_id will be 58:0:167602531114996.            For vendor specific attributes from Aruba (Vendor-ID            14823) such as `aruba-user-role` and            `aruba-cppm-user-role` the attribute_id will be            26:14823:167602531114996.  Inner key: the `vendor_type_instance` is derived from a            combination of the vendor type associated with a            RADIUS attribute and the nth instance of the            attribute appearing in the same RADIUS message            separated by a `:`.            The value associated with this key is the value            received for that instance of the vendor type.            For standard attributes, the vendor_type is 0.             Example: For standard attribute `Egress-VLAN-Name`,            the first instance of this attribute in a RADIUS            message will have vendor_type_instance as 0:1, the            second instance (if exists) as 0:2 and so on.            For vendor specific attribute `aruba-user-role` with            vendor type 1, the first instance of this attribute in            a RADIUS message will have vendor_type_instance as            1:1, the second instance as 1:2 and so on.            For vendor specific attribute `aruba-cppm-user-role`            with vendor type 23, the first instance of this            attribute in a RADIUS message will have            vendor_type_instance as 23:1, the second instance as            23:2 and so on.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "string": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "reauthentication_performed": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Number of times re-authentication is performed for this client.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "reauthentication_requested": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Number of times re-authentication is requested for this client.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "role_state": {
+                      "type": "string",
+                      "description": "Per client role state status.  `not-ready`:                role is not ready for client.  `download-failed`           role download failed.  `not-valid`:                role is not valid for client.  `applied`:                  role has been applied successfully for client.  `application-in-progress`:  role update is in progress for client.  `application-failed`:       role failed to apply for client.",
+                      "enum": [
+                        "not-ready",
+                        "download-failed",
+                        "not-valid",
+                        "applied",
+                        "application-in-progress",
+                        "application-failed"
+                      ]
+                    },
+                    "session_creation_time": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Time (in seconds) since system boot at which the client session was created."
+                    },
+                    "ubt_client_state": {
+                      "type": "string",
+                      "description": " `bootstrapping`:                client bootstrapping with the UBT cluster.  `bootstrap_timedout`:           client bootstrap timed out.  `bootstrap_failed`:             client bootstrap failed.  `registered`:                   client registered with the UBT cluster.  `unbootstrapping`:              client de-registering from the UBT cluster.  `unbootstrap_timedout`:         client de-registration process timed out.  `deregistered`:                 client de-registered from the UBT cluster.  `resource_unavailable`:         client bootstrapped failed - resource unavailable.",
+                      "enum": [
+                        "bootstrapping",
+                        "bootstrap_timedout",
+                        "bootstrap_failed",
+                        "registered",
+                        "unbootstrapping",
+                        "unbootstrap_timedout",
+                        "deregistered",
+                        "resource_unavailable"
+                      ]
+                    },
+                    "ubt_tunnel_hw_programmed": {
+                      "type": "boolean",
+                      "description": " `true`:  Hardware has been programmed to tunnel client traffic           to the UBT cluster.  `false`: Hardware programming error, client traffic is not being           tunneled."
+                    },
+                    "ubt_uac_tunnel": {
+                      "type": "string",
+                      "description": "Reference Resource: [UBT_UAC_Tunnel](#/UBT_UAC_Tunnel)<br>Tunnel associated with this client."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Interface.name",
+            "in": "path",
+            "description": "Reference Resource: [Port](#/Port)<br>The port name. For non-bonded ports, the port name is the same as the associated interface name. The name must otherwise be unique across all ports and interfaces of the system.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Port_Access_Client.mac",
+            "in": "path",
+            "description": "Reference Resource: [Port_Access_Client](#/Port_Access_Client)<br>MAC address of the client.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "access_vlan",
+                  "accounting_session_start_time",
+                  "session_creation_time",
+                  "policy_in_status",
+                  "gbp_in_applied",
+                  "mka_policy",
+                  "macsec_policy",
+                  "auth_history",
+                  "accounting_session_id",
+                  "previously_applied_role_type",
+                  "macsec_status",
+                  "policy_in_applied",
+                  "gbp_in_data_plane_states",
+                  "radius_coa_attributes",
+                  "authenticating_radius_server",
+                  "device_profile",
+                  "ubt_client_state",
+                  "previously_applied_role",
+                  "mac",
+                  "device_traffic_class",
+                  "onboarded_method",
+                  "authorization_failure_reason",
+                  "device_profile_matched_lldp_group",
+                  "device_profile_matched_cdp_group",
+                  "ubt_tunnel_hw_programmed",
+                  "applied_role_type",
+                  "client_state",
+                  "reauthentication_performed",
+                  "role_state",
+                  "device_profile_matched_mac_group",
+                  "ubt_uac_tunnel",
+                  "gbp_in_status",
+                  "reauthentication_requested",
+                  "auth_attributes",
+                  "applied_role"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

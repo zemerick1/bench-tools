@@ -1,0 +1,832 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Static_Nexthop",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Static_Nexthop"
+    }
+  ],
+  "paths": {
+    "/system/vrfs/{VRF.name}/static_routes/{Static_Route.prefix}/static_nexthops": {
+      "get": {
+        "tags": [
+          "Static_Nexthop"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "bfd_enable": {
+                      "type": "boolean",
+                      "description": "Enables BFD session to the specific next hop."
+                    },
+                    "distance": {
+                      "type": "integer",
+                      "description": "Administrative distance to be used instead of the default.",
+                      "maximum": 255,
+                      "minimum": 1
+                    },
+                    "id": {
+                      "type": "integer",
+                      "description": "Reference Resource: [Static_Nexthop](#/Static_Nexthop)<br>Nexthops of the static route indexed by an unique identifier. Should be empty in case of Nullroute or Reject."
+                    },
+                    "ip_address": {
+                      "type": "string",
+                      "description": "IP address of the nexthop device.",
+                      "maxLength": 49
+                    },
+                    "ipsla_track_object": {
+                      "type": "string",
+                      "description": "Reference Resource: [Ipsla_Track_Object](#/Ipsla_Track_Object)<br>Object monitor associated with the static route.  When object monitor status is down, the route associated with this nexthop will be  brought down. Similarly when the object monitor status is up, the route associated  with this nexthop will be brought up."
+                    },
+                    "port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>Egress port, if specified."
+                    },
+                    "tag": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Route tag to be used to filter routes and apply administrative policies, such as redistribution with route maps.",
+                      "maximum": 4294967295,
+                      "minimum": 1
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Nexthop corresponding to the static route is 'forward', 'nullroute'  or 'reject'. `forward` - Packets to destinations that match this route will be  forwarded based on the nexthop entry. `reject` - Packets to destinations that  match this route will be  discarded and corresponding ICMP unreachable messages sent to the sender. `nullroute` - Packets to destinations that match this route will be  silently discarded.",
+                      "enum": [
+                        "forward",
+                        "nullroute",
+                        "reject"
+                      ]
+                    },
+                    "use_forwarding_address": {
+                      "type": "boolean",
+                      "description": "Set the nexthop address as the static route forwarding address. This nexthop address is used as forwarding address by OSPF to shorten route paths."
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Static_Route.prefix",
+            "in": "path",
+            "description": "Reference Resource: [Static_Route](#/Static_Route)<br>IPv4 or IPv6 destination prefix and mask in the address/mask format. Example 192.168.0.0/16",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "port",
+                  "type",
+                  "distance",
+                  "bfd_enable",
+                  "tag",
+                  "use_forwarding_address",
+                  "ipsla_track_object",
+                  "ip_address"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Static_Nexthop"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "bfd_enable": {
+                    "type": "boolean",
+                    "description": "Enables BFD session to the specific next hop."
+                  },
+                  "distance": {
+                    "type": "integer",
+                    "description": "Administrative distance to be used instead of the default.",
+                    "maximum": 255,
+                    "minimum": 1
+                  },
+                  "id": {
+                    "type": "integer",
+                    "description": "Reference Resource: [Static_Nexthop](#/Static_Nexthop)<br>Nexthops of the static route indexed by an unique identifier. Should be empty in case of Nullroute or Reject."
+                  },
+                  "ip_address": {
+                    "type": "string",
+                    "description": "IP address of the nexthop device.",
+                    "maxLength": 49
+                  },
+                  "ipsla_track_object": {
+                    "type": "string",
+                    "description": "Reference Resource: [Ipsla_Track_Object](#/Ipsla_Track_Object)<br>Object monitor associated with the static route.  When object monitor status is down, the route associated with this nexthop will be  brought down. Similarly when the object monitor status is up, the route associated  with this nexthop will be brought up."
+                  },
+                  "port": {
+                    "type": "string",
+                    "description": "Reference Resource: [Port](#/Port)<br>Egress port, if specified."
+                  },
+                  "tag": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Route tag to be used to filter routes and apply administrative policies, such as redistribution with route maps.",
+                    "maximum": 4294967295,
+                    "minimum": 1
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "Nexthop corresponding to the static route is 'forward', 'nullroute'  or 'reject'. `forward` - Packets to destinations that match this route will be  forwarded based on the nexthop entry. `reject` - Packets to destinations that  match this route will be  discarded and corresponding ICMP unreachable messages sent to the sender. `nullroute` - Packets to destinations that match this route will be  silently discarded.",
+                    "enum": [
+                      "forward",
+                      "nullroute",
+                      "reject"
+                    ]
+                  },
+                  "use_forwarding_address": {
+                    "type": "boolean",
+                    "description": "Set the nexthop address as the static route forwarding address. This nexthop address is used as forwarding address by OSPF to shorten route paths."
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Static_Route.prefix",
+            "in": "path",
+            "description": "Reference Resource: [Static_Route](#/Static_Route)<br>IPv4 or IPv6 destination prefix and mask in the address/mask format. Example 192.168.0.0/16",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    },
+    "/system/vrfs/{VRF.name}/static_routes/{Static_Route.prefix}/static_nexthops/{Static_Nexthop.id}": {
+      "get": {
+        "tags": [
+          "Static_Nexthop"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "bfd_enable": {
+                      "type": "boolean",
+                      "description": "Enables BFD session to the specific next hop."
+                    },
+                    "distance": {
+                      "type": "integer",
+                      "description": "Administrative distance to be used instead of the default.",
+                      "maximum": 255,
+                      "minimum": 1
+                    },
+                    "id": {
+                      "type": "integer",
+                      "description": "Reference Resource: [Static_Nexthop](#/Static_Nexthop)<br>Nexthops of the static route indexed by an unique identifier. Should be empty in case of Nullroute or Reject."
+                    },
+                    "ip_address": {
+                      "type": "string",
+                      "description": "IP address of the nexthop device.",
+                      "maxLength": 49
+                    },
+                    "ipsla_track_object": {
+                      "type": "string",
+                      "description": "Reference Resource: [Ipsla_Track_Object](#/Ipsla_Track_Object)<br>Object monitor associated with the static route.  When object monitor status is down, the route associated with this nexthop will be  brought down. Similarly when the object monitor status is up, the route associated  with this nexthop will be brought up."
+                    },
+                    "port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>Egress port, if specified."
+                    },
+                    "tag": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Route tag to be used to filter routes and apply administrative policies, such as redistribution with route maps.",
+                      "maximum": 4294967295,
+                      "minimum": 1
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Nexthop corresponding to the static route is 'forward', 'nullroute'  or 'reject'. `forward` - Packets to destinations that match this route will be  forwarded based on the nexthop entry. `reject` - Packets to destinations that  match this route will be  discarded and corresponding ICMP unreachable messages sent to the sender. `nullroute` - Packets to destinations that match this route will be  silently discarded.",
+                      "enum": [
+                        "forward",
+                        "nullroute",
+                        "reject"
+                      ]
+                    },
+                    "use_forwarding_address": {
+                      "type": "boolean",
+                      "description": "Set the nexthop address as the static route forwarding address. This nexthop address is used as forwarding address by OSPF to shorten route paths."
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Static_Route.prefix",
+            "in": "path",
+            "description": "Reference Resource: [Static_Route](#/Static_Route)<br>IPv4 or IPv6 destination prefix and mask in the address/mask format. Example 192.168.0.0/16",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Static_Nexthop.id",
+            "in": "path",
+            "description": "Reference Resource: [Static_Nexthop](#/Static_Nexthop)<br>Nexthops of the static route indexed by an unique identifier. Should be empty in case of Nullroute or Reject.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "use_forwarding_address",
+                  "ipsla_track_object",
+                  "ip_address",
+                  "port",
+                  "type",
+                  "distance",
+                  "bfd_enable",
+                  "tag"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Static_Nexthop"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "bfd_enable": {
+                    "type": "boolean",
+                    "description": "Enables BFD session to the specific next hop."
+                  },
+                  "distance": {
+                    "type": "integer",
+                    "description": "Administrative distance to be used instead of the default.",
+                    "maximum": 255,
+                    "minimum": 1
+                  },
+                  "id": {
+                    "type": "integer",
+                    "description": "Reference Resource: [Static_Nexthop](#/Static_Nexthop)<br>Nexthops of the static route indexed by an unique identifier. Should be empty in case of Nullroute or Reject."
+                  },
+                  "tag": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Route tag to be used to filter routes and apply administrative policies, such as redistribution with route maps.",
+                    "maximum": 4294967295,
+                    "minimum": 1
+                  },
+                  "use_forwarding_address": {
+                    "type": "boolean",
+                    "description": "Set the nexthop address as the static route forwarding address. This nexthop address is used as forwarding address by OSPF to shorten route paths."
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Static_Route.prefix",
+            "in": "path",
+            "description": "Reference Resource: [Static_Route](#/Static_Route)<br>IPv4 or IPv6 destination prefix and mask in the address/mask format. Example 192.168.0.0/16",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Static_Nexthop.id",
+            "in": "path",
+            "description": "Reference Resource: [Static_Nexthop](#/Static_Nexthop)<br>Nexthops of the static route indexed by an unique identifier. Should be empty in case of Nullroute or Reject.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Static_Nexthop"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Static_Route.prefix",
+            "in": "path",
+            "description": "Reference Resource: [Static_Route](#/Static_Route)<br>IPv4 or IPv6 destination prefix and mask in the address/mask format. Example 192.168.0.0/16",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Static_Nexthop.id",
+            "in": "path",
+            "description": "Reference Resource: [Static_Nexthop](#/Static_Nexthop)<br>Nexthops of the static route indexed by an unique identifier. Should be empty in case of Nullroute or Reject.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Static_Nexthop"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "bfd_enable": {
+                    "type": "boolean",
+                    "description": "Enables BFD session to the specific next hop."
+                  },
+                  "distance": {
+                    "type": "integer",
+                    "description": "Administrative distance to be used instead of the default.",
+                    "maximum": 255,
+                    "minimum": 1
+                  },
+                  "id": {
+                    "type": "integer",
+                    "description": "Reference Resource: [Static_Nexthop](#/Static_Nexthop)<br>Nexthops of the static route indexed by an unique identifier. Should be empty in case of Nullroute or Reject."
+                  },
+                  "tag": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Route tag to be used to filter routes and apply administrative policies, such as redistribution with route maps.",
+                    "maximum": 4294967295,
+                    "minimum": 1
+                  },
+                  "use_forwarding_address": {
+                    "type": "boolean",
+                    "description": "Set the nexthop address as the static route forwarding address. This nexthop address is used as forwarding address by OSPF to shorten route paths."
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Static_Route.prefix",
+            "in": "path",
+            "description": "Reference Resource: [Static_Route](#/Static_Route)<br>IPv4 or IPv6 destination prefix and mask in the address/mask format. Example 192.168.0.0/16",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Static_Nexthop.id",
+            "in": "path",
+            "description": "Reference Resource: [Static_Nexthop](#/Static_Nexthop)<br>Nexthops of the static route indexed by an unique identifier. Should be empty in case of Nullroute or Reject.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

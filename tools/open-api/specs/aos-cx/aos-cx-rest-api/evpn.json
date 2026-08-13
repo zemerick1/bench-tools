@@ -1,0 +1,584 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "EVPN",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "EVPN"
+    }
+  ],
+  "paths": {
+    "/system/evpn": {
+      "get": {
+        "tags": [
+          "EVPN"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "allow_imet_relay": {
+                      "type": "boolean",
+                      "description": "Allow IMET routes to be relayed between eBGP peers."
+                    },
+                    "arp_suppression_enable": {
+                      "type": "boolean",
+                      "description": "Enable ARP suppression on the device."
+                    },
+                    "evpn_vlan_aware_bundles": {
+                      "type": "object",
+                      "description": "Reference Resource: [EVPN_VLAN_Aware_Bundle](#/EVPN_VLAN_Aware_Bundle)<br>EVPN VLAN-aware bundle configuration.",
+                      "properties": {
+                        "string": {
+                          "type": "string",
+                          "description": "Reference resource URI of EVPN_VLAN_Aware_Bundle"
+                        }
+                      }
+                    },
+                    "evpn_vlans": {
+                      "type": "object",
+                      "description": "Reference Resource: [EVPN_VLAN](#/EVPN_VLAN)<br>References to per-VLAN EVPN configurations.",
+                      "properties": {
+                        "URI": {
+                          "type": "string",
+                          "description": "Reference resource URI of EVPN_VLAN"
+                        }
+                      }
+                    },
+                    "mac_move_count": {
+                      "type": "integer",
+                      "description": "Specifies the limit on the number of times a host (MAC)  is allowed to move across interfaces within a given 'MAC move' interval.  When this threshold is exceeded, this MAC is considered to be duplicated  in the network. The corresponding MAC route will no longer be advertised  to peer EVPN routers until the duplication issue has been resolved and  the duplicate MAC is cleared from this device's FDB via an explicit administrative action.",
+                      "maximum": 10,
+                      "minimum": 2
+                    },
+                    "mac_move_timer": {
+                      "type": "integer",
+                      "description": "Specifies the MAC move time interval in seconds.",
+                      "maximum": 1000,
+                      "minimum": 1
+                    },
+                    "nd_suppression_enable": {
+                      "type": "boolean",
+                      "description": "Enable IPv6 ND suppression on the device."
+                    },
+                    "redistribute": {
+                      "type": "object",
+                      "description": "Types of routes that should be redistributed by EVPN.",
+                      "properties": {
+                        "local-mac": {
+                          "type": "boolean",
+                          "description": "Enable Type-2 route advertisement for local system MAC  address of the EVPN enabled VLANs."
+                        },
+                        "local-svi": {
+                          "type": "boolean",
+                          "description": "Enable Type-2 route advertisement for local IP address  and MAC address of the SVI interfaces corresponding to  EVPN enabled VLANs."
+                        }
+                      }
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "redistribute",
+                  "nd_suppression_enable",
+                  "allow_imet_relay",
+                  "evpn_vlans",
+                  "evpn_vlan_aware_bundles",
+                  "mac_move_count",
+                  "mac_move_timer",
+                  "arp_suppression_enable"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "EVPN"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "allow_imet_relay": {
+                    "type": "boolean",
+                    "description": "Allow IMET routes to be relayed between eBGP peers."
+                  },
+                  "arp_suppression_enable": {
+                    "type": "boolean",
+                    "description": "Enable ARP suppression on the device."
+                  },
+                  "evpn_vlan_aware_bundles": {
+                    "type": "object",
+                    "description": "Reference Resource: [EVPN_VLAN_Aware_Bundle](#/EVPN_VLAN_Aware_Bundle)<br>EVPN VLAN-aware bundle configuration.",
+                    "properties": {
+                      "string": {
+                        "type": "string",
+                        "description": "Reference resource URI of EVPN_VLAN_Aware_Bundle"
+                      }
+                    }
+                  },
+                  "evpn_vlans": {
+                    "type": "object",
+                    "description": "Reference Resource: [EVPN_VLAN](#/EVPN_VLAN)<br>References to per-VLAN EVPN configurations.",
+                    "properties": {
+                      "URI": {
+                        "type": "string",
+                        "description": "Reference resource URI of EVPN_VLAN"
+                      }
+                    }
+                  },
+                  "mac_move_count": {
+                    "type": "integer",
+                    "description": "Specifies the limit on the number of times a host (MAC)  is allowed to move across interfaces within a given 'MAC move' interval.  When this threshold is exceeded, this MAC is considered to be duplicated  in the network. The corresponding MAC route will no longer be advertised  to peer EVPN routers until the duplication issue has been resolved and  the duplicate MAC is cleared from this device's FDB via an explicit administrative action.",
+                    "maximum": 10,
+                    "minimum": 2
+                  },
+                  "mac_move_timer": {
+                    "type": "integer",
+                    "description": "Specifies the MAC move time interval in seconds.",
+                    "maximum": 1000,
+                    "minimum": 1
+                  },
+                  "nd_suppression_enable": {
+                    "type": "boolean",
+                    "description": "Enable IPv6 ND suppression on the device."
+                  },
+                  "redistribute": {
+                    "type": "object",
+                    "description": "Types of routes that should be redistributed by EVPN.",
+                    "properties": {
+                      "local-mac": {
+                        "type": "boolean",
+                        "description": "Enable Type-2 route advertisement for local system MAC  address of the EVPN enabled VLANs."
+                      },
+                      "local-svi": {
+                        "type": "boolean",
+                        "description": "Enable Type-2 route advertisement for local IP address  and MAC address of the SVI interfaces corresponding to  EVPN enabled VLANs."
+                      }
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "EVPN"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "allow_imet_relay": {
+                    "type": "boolean",
+                    "description": "Allow IMET routes to be relayed between eBGP peers."
+                  },
+                  "arp_suppression_enable": {
+                    "type": "boolean",
+                    "description": "Enable ARP suppression on the device."
+                  },
+                  "evpn_vlan_aware_bundles": {
+                    "type": "object",
+                    "description": "Reference Resource: [EVPN_VLAN_Aware_Bundle](#/EVPN_VLAN_Aware_Bundle)<br>EVPN VLAN-aware bundle configuration.",
+                    "properties": {
+                      "string": {
+                        "type": "string",
+                        "description": "Reference resource URI of EVPN_VLAN_Aware_Bundle"
+                      }
+                    }
+                  },
+                  "evpn_vlans": {
+                    "type": "object",
+                    "description": "Reference Resource: [EVPN_VLAN](#/EVPN_VLAN)<br>References to per-VLAN EVPN configurations.",
+                    "properties": {
+                      "URI": {
+                        "type": "string",
+                        "description": "Reference resource URI of EVPN_VLAN"
+                      }
+                    }
+                  },
+                  "mac_move_count": {
+                    "type": "integer",
+                    "description": "Specifies the limit on the number of times a host (MAC)  is allowed to move across interfaces within a given 'MAC move' interval.  When this threshold is exceeded, this MAC is considered to be duplicated  in the network. The corresponding MAC route will no longer be advertised  to peer EVPN routers until the duplication issue has been resolved and  the duplicate MAC is cleared from this device's FDB via an explicit administrative action.",
+                    "maximum": 10,
+                    "minimum": 2
+                  },
+                  "mac_move_timer": {
+                    "type": "integer",
+                    "description": "Specifies the MAC move time interval in seconds.",
+                    "maximum": 1000,
+                    "minimum": 1
+                  },
+                  "nd_suppression_enable": {
+                    "type": "boolean",
+                    "description": "Enable IPv6 ND suppression on the device."
+                  },
+                  "redistribute": {
+                    "type": "object",
+                    "description": "Types of routes that should be redistributed by EVPN.",
+                    "properties": {
+                      "local-mac": {
+                        "type": "boolean",
+                        "description": "Enable Type-2 route advertisement for local system MAC  address of the EVPN enabled VLANs."
+                      },
+                      "local-svi": {
+                        "type": "boolean",
+                        "description": "Enable Type-2 route advertisement for local IP address  and MAC address of the SVI interfaces corresponding to  EVPN enabled VLANs."
+                      }
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "EVPN"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "EVPN"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "allow_imet_relay": {
+                    "type": "boolean",
+                    "description": "Allow IMET routes to be relayed between eBGP peers."
+                  },
+                  "arp_suppression_enable": {
+                    "type": "boolean",
+                    "description": "Enable ARP suppression on the device."
+                  },
+                  "evpn_vlan_aware_bundles": {
+                    "type": "object",
+                    "description": "Reference Resource: [EVPN_VLAN_Aware_Bundle](#/EVPN_VLAN_Aware_Bundle)<br>EVPN VLAN-aware bundle configuration.",
+                    "properties": {
+                      "string": {
+                        "type": "string",
+                        "description": "Reference resource URI of EVPN_VLAN_Aware_Bundle"
+                      }
+                    }
+                  },
+                  "evpn_vlans": {
+                    "type": "object",
+                    "description": "Reference Resource: [EVPN_VLAN](#/EVPN_VLAN)<br>References to per-VLAN EVPN configurations.",
+                    "properties": {
+                      "URI": {
+                        "type": "string",
+                        "description": "Reference resource URI of EVPN_VLAN"
+                      }
+                    }
+                  },
+                  "mac_move_count": {
+                    "type": "integer",
+                    "description": "Specifies the limit on the number of times a host (MAC)  is allowed to move across interfaces within a given 'MAC move' interval.  When this threshold is exceeded, this MAC is considered to be duplicated  in the network. The corresponding MAC route will no longer be advertised  to peer EVPN routers until the duplication issue has been resolved and  the duplicate MAC is cleared from this device's FDB via an explicit administrative action.",
+                    "maximum": 10,
+                    "minimum": 2
+                  },
+                  "mac_move_timer": {
+                    "type": "integer",
+                    "description": "Specifies the MAC move time interval in seconds.",
+                    "maximum": 1000,
+                    "minimum": 1
+                  },
+                  "nd_suppression_enable": {
+                    "type": "boolean",
+                    "description": "Enable IPv6 ND suppression on the device."
+                  },
+                  "redistribute": {
+                    "type": "object",
+                    "description": "Types of routes that should be redistributed by EVPN.",
+                    "properties": {
+                      "local-mac": {
+                        "type": "boolean",
+                        "description": "Enable Type-2 route advertisement for local system MAC  address of the EVPN enabled VLANs."
+                      },
+                      "local-svi": {
+                        "type": "boolean",
+                        "description": "Enable Type-2 route advertisement for local IP address  and MAC address of the SVI interfaces corresponding to  EVPN enabled VLANs."
+                      }
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

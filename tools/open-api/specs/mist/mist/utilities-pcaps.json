@@ -1,0 +1,2553 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Utilities PCAPs",
+    "version": "2602.1.1"
+  },
+  "servers": [
+    {
+      "description": "Mist Global 01",
+      "url": "https://api.mist.com"
+    },
+    {
+      "description": "Mist Global 02",
+      "url": "https://api.gc1.mist.com"
+    },
+    {
+      "description": "Mist Global 03",
+      "url": "https://api.ac2.mist.com"
+    },
+    {
+      "description": "Mist Global 04",
+      "url": "https://api.gc2.mist.com"
+    },
+    {
+      "description": "Mist Global 05",
+      "url": "https://api.gc4.mist.com"
+    },
+    {
+      "description": "Mist EMEA 01",
+      "url": "https://api.eu.mist.com"
+    },
+    {
+      "description": "Mist EMEA 02",
+      "url": "https://api.gc3.mist.com"
+    },
+    {
+      "description": "Mist EMEA 03",
+      "url": "https://api.ac6.mist.com"
+    },
+    {
+      "description": "Mist EMEA 04",
+      "url": "https://api.gc6.mist.com"
+    },
+    {
+      "description": "Mist APAC 01",
+      "url": "https://api.ac5.mist.com"
+    },
+    {
+      "description": "Mist APAC 02",
+      "url": "https://api.gc5.mist.com"
+    },
+    {
+      "description": "Mist APAC 03",
+      "url": "https://api.gc7.mist.com"
+    }
+  ],
+  "security": [
+    {
+      "apiToken": []
+    },
+    {
+      "basicAuth": []
+    },
+    {
+      "basicAuth": [],
+      "csrfToken": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "API Calls to start, stop or managed Packet Captures at the device level",
+      "name": "Utilities PCAPs"
+    }
+  ],
+  "paths": {
+    "/api/v1/orgs/{org_id}/pcaps": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "get": {
+        "description": "Get List of Org  Packet Captures",
+        "operationId": "listOrgPacketCaptures",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/start"
+          },
+          {
+            "$ref": "#/components/parameters/end"
+          },
+          {
+            "$ref": "#/components/parameters/duration"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PcapsSearch"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "listOrgPacketCaptures",
+        "tags": [
+          "Utilities PCAPs"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_id}/pcaps/capture": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "get": {
+        "description": "Get Org Capturing status",
+        "operationId": "getOrgCapturingStatus",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PcapStatus"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getOrgCapturingStatus",
+        "tags": [
+          "Utilities PCAPs"
+        ]
+      },
+      "post": {
+        "description": "Initiate a Packet Capture\n\n**NOTE**: For packet captures of org level Mist Edges only. Use [Start Site Packet Capture](/#operations/startSitePacketCapture) for site level Mist Edges. \n\nThe output will be available through websocket. As there can be multiple command issued against the same AP at the same time and the output all goes through the same websocket stream, session is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/pcaps\"\n}\n```\n#### Response (Wireless/RadioTap)\n```json\n{\n  \"event\": \"data\"\n  \"channel\": \"/orgs/67970e46-4e12-11e6-9188-0242ac110007/pcaps\"\n  \"data\": {\n      \"capture_id\": \"f039b1b4-a23e-48b2-906a-0da40524de73\", \n      \"pcap_dict\": {\n          \"dst_mac\": \"68:ec:c5:09:2e:87\",\n          \"src_mac\": \"8c:3b:ad:e0:47:40\", \n          \"vlan\": 1, \n          \"src_ip\": \"34.224.147.117\", \n          \"dst_ip\": \"192.168.1.55\",\n          \"dst_port\": 51635, \n          \"src_port\": 443,\n          \"protocol\": \"TCP\", \n          \"mxedge_id\": \"00000000-0000-0000-1000-001122334455\",\n          \"direction\": \"tx\", \n          \"timestamp\": 1652247615, \n          \"length\": 159.0, \n          \"interface\": \"port0\",\n          \"info\": \"1652247616.007409 IP ec2-34-224-147-117.compute-1.amazonaws.com.https > ip-192-168-1-55.ec2.internal.51635: Flags [P.], seq \n                    2192123968:2192124057, ack 4035166782, win 12, options [nop,nop,TS val 597467050 ecr 740580660], length 89\\\\n\",\n          }, \n      \"pcap_raw\": \"1MOyoQIABAAAAAAAAAAAAP//AAABAAAAQEx7YhMzAACfAAAAnwAAAGjsxQkuh4w7reBHQIEAAAEIAEUAAI1bLEAAKAZ/CiLgk3XAqAE3AbvJs4KpKEDwg8I+gBgADFf9AAABAQgKI5yfqiwkXTQXAwMAVKY5JopoKQrVEn0/3ld4YntctGEH/rTZuwtCvzSncFw71QJveJi9uxHs57KC8w9Apph3YvXJrmWg7M37+o+YV0KH/xmr626s5Bkhb3QhKOu+NoNEmA==\\\"\n    }\n}\n```",
+        "operationId": "startOrgPacketCapture",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "MxEdge-Packet-Capture": {
+                  "value": {
+                    "duration": 600,
+                    "format": "stream",
+                    "max_pkt_len": 1500,
+                    "mxedges": {
+                      "00000000-0000-0000-1000-001122334455": {
+                        "interfaces": {
+                          "port1": {
+                            "tcpdump_expression": "udp port 67 or udp port 68"
+                          }
+                        }
+                      }
+                    },
+                    "num_packets": 100,
+                    "type": "mxedge"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/capture_org"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PcapStart"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "startOrgPacketCapture",
+        "tags": [
+          "Utilities PCAPs"
+        ]
+      },
+      "delete": {
+        "description": "Stop current Org capture",
+        "operationId": "stopOrgPacketCapture",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "stopOrgPacketCapture",
+        "tags": [
+          "Utilities PCAPs"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/pcaps": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        }
+      ],
+      "get": {
+        "description": "Get List of Site Packet Captures",
+        "operationId": "listSitePacketCaptures",
+        "parameters": [
+          {
+            "description": "Optional client mac filter",
+            "in": "query",
+            "name": "client_mac",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/start"
+          },
+          {
+            "$ref": "#/components/parameters/end"
+          },
+          {
+            "$ref": "#/components/parameters/duration"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PcapsSearch"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "listSitePacketCaptures",
+        "tags": [
+          "Utilities PCAPs"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/pcaps/capture": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        }
+      ],
+      "get": {
+        "description": "Get Capturing status",
+        "operationId": "getSiteCapturingStatus",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PcapStatus"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getSiteCapturingStatus",
+        "tags": [
+          "Utilities PCAPs"
+        ]
+      },
+      "post": {
+        "description": "Initiate a Site Packet Capture\n\nThe output will be available through websocket. As there can be multiple command issued against the same AP at the same time and the output all goes through the same websocket stream, session is introduced for demux.\n\n#### Subscribe to Device Command outputs\n`WS /api-ws/v1/stream`\n\n```json\n{\n    \"subscribe\": \"/sites/{site_id}/pcaps\"\n}\n```\n#### Response (MxEdge)\n```json\n{\n    \"event\": \"data\"\n    \"channel\": \"/sites/{site_id}/pcaps\"\n    \"data\": {\n         \"capture_id\": \"6b1be4fb-b239-44d9-9d3b-cb1ff3af1721\",\n     \"lost_messages\": 0\n         \"pcap_dict\": {\n             \"channel_frequency\": 2412,\n             \"channel\": \"1\",\n             \"datarate\": \"1.0 Mbps\",\n             \"rssi\": -75, \n             \"dst\": \"78:bd:bc:ca:0b:0a\",\n             \"src\": \"18:b8:1f:4c:91:c0\",\n             \"bssid\": \"18:b8:1f:4c:91:c0\",\n             \"frame_type\": \"Management\", \n             \"frame_subtype\": \"Probe Response\", \n         \"proto\": \"802.11\", \n             \"ap_mac\": \"d4:20:b0:81:99:2e\", \n             \"direction\": \"tx\", \n             \"timestamp\": 1652246543, \n             \"length\": 416.0,\n             \"interface\": \"radiotap\",\n             \"info\": \"1652246544.467733 1683216786us tsft 1.0 Mb/s 2412 MHz 11g -75dBm signal -82dBm noise antenna 0 Probe Response (ATTKmsWiVS) [1.0* 2.0* 5.5* 11.0* 18.0 24.0 36.0 54.0 Mbit] CH: 2, PRIVACY\\\\n\",\n         }, \n        \"pcap_raw\": \"1MOyoQIABAAAAAAAAAAAAP//AAABAAAAEEh7Yh5VBwCgAQAAoAEAAAAAKwBvCADAAQAAAIw7reCS2VNkAAAAABACbAmABLWuAAEAEBgAAwACAABQADoBeL28ygsKGLgfTJHAGLgfTJHAcIZ2WDlBJQAAAGQAERUACkFUVEttc1dpVlMBCIKEi5YkMEhsAwECBwZVUyABCx4gAQAjAhkAKgEEMgQMEhhgMBQBAAAPrAQBAAAPrAQBAAAPrAIMAAsFAQAbAABGBTIIAQAALRqtCR////8AAAAAAAAAAAAAAAAAAAAAAAAAAD0WAggVAAAAAAAAAAAAAAAAAAAAAAAAAH8IBAAIAAAAAEDdkwBQ8gQQSgABEBBEAAECEDsAAQMQRwAQn2481frn3KT+uGod2ERx+RAhAAtBcnJpcywgSW5jLhAjAApCR1cyMTAtNzAwECQACkJHVzIxMC03MDAQQgAKQkdXMjEwLTcwMBBUAAgABgBQ8gQAARARAA5BcnJpcyBXaXJlbGVzcxAIAAIgCBA8AAEBEEkABgA3KgABIN0JABAYAgEQHAAA3RgAUPICAQGEAAOkAAAnpAAAQkNeAGIyLwAzjakr\"\n}\n```\n\n#### Response (Wired)\n```json\n{\n    \"event\": \"data\"\n    \"channel\": \"/sites/67970e46-4e12-11e6-9188-0242ac110007/pcaps\"\n    \"data\": {\n        \"capture_id\": \"f039b1b4-a23e-48b2-906a-0da40524de73\", \n        \"pcap_dict\": {\n             \"dst_mac\": \"68:ec:c5:09:2e:87\",\n             \"src_mac\": \"8c:3b:ad:e0:47:40\", \n             \"vlan\": 1, \n             \"src_ip\": \"34.224.147.117\", \n             \"dst_ip\": \"192.168.1.55\",\n             \"dst_port\": 51635, \n             \"src_port\": 443,\n             \"proto\": \"TCP\", \n             \"ap_mac\": \"d4:20:b0:81:99:2e\",\n             \"direction\": \"tx\", \n             \"timestamp\": 1652247615, \n             \"length\": 159.0, \n             \"interface\": \"wired\",\n             \"info\": \"1652247616.007409 IP ec2-34-224-147-117.compute-1.amazonaws.com.https > ip-192-168-1-55.ec2.internal.51635: Flags [P.], seq 2192123968:2192124057, ack 4035166782, win 12, options [nop,nop,TS val 597467050 ecr 740580660], length 89\\\\n\",\n             }, \n        \"pcap_raw\": \"1MOyoQIABAAAAAAAAAAAAP//AAABAAAAQEx7YhMzAACfAAAAnwAAAGjsxQkuh4w7reBHQIEAAAEIAEUAAI1bLEAAKAZ/CiLgk3XAqAE3AbvJs4KpKEDwg8I+gBgADFf9AAABAQgKI5yfqiwkXTQXAwMAVKY5JopoKQrVEn0/3ld4YntctGEH/rTZuwtCvzSncFw71QJveJi9uxHs57KC8w9Apph3YvXJrmWg7M37+o+YV0KH/xmr626s5Bkhb3QhKOu+NoNEmA==\"\n\n    }\n}\n```\n\n#### Stop Response (Wired/Wireless)\n```json\n{\n    \"event\": \"data\"\n    \"channel\": \"/sites/67970e46-4e12-11e6-9188-0242ac110007/pcaps\"\n    \"data\": {\n      \"capture_id\": \"a2f7374d-6a70-41fd-8a3f-71e42573baaf\", \n      \"lost_messages\": 0,\n      \"pcap_dict\": null\n    }\n}\n```",
+        "operationId": "startSitePacketCapture",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "AP-New-Wireless-Client-Associations-Packet-Capture": {
+                  "value": {
+                    "client_mac": "60a10a773412",
+                    "duration": 600,
+                    "includes_mcast": false,
+                    "max_pkt_len": 128,
+                    "num_packets": 100,
+                    "type": "new_assoc"
+                  }
+                },
+                "AP-Radiotap-Packet-Capture": {
+                  "value": {
+                    "duration": 600,
+                    "max_pkt_len": 68,
+                    "num_packets": 100,
+                    "type": "radiotap"
+                  }
+                },
+                "AP-Radiotap-Packet-Capture-and-Wired-Packet-Capture": {
+                  "value": {
+                    "ap_mac": "string",
+                    "client_mac": "38f9d3972ff1",
+                    "duration": 600,
+                    "max_pkt_len": 128,
+                    "num_packets": 1024,
+                    "ssid": "string",
+                    "type": "radiotap,wired"
+                  }
+                },
+                "AP-Scan-radio-Packet-Capture": {
+                  "value": {
+                    "ap_mac": null,
+                    "band": "24",
+                    "bandwidth": 20,
+                    "channel": 1,
+                    "client_mac": "38f9d3972ff1",
+                    "duration": 600,
+                    "format": "stream",
+                    "max_pkt_len": 68,
+                    "num_packets": 100,
+                    "tcpdump_expression": "tcp port 80",
+                    "type": "scan"
+                  }
+                },
+                "AP-Wired-Packet-Capture": {
+                  "value": {
+                    "duration": 600,
+                    "max_pkt_len": 68,
+                    "num_packets": 100,
+                    "tcpdump_expression": "tcp port 80",
+                    "type": "wired"
+                  }
+                },
+                "AP-Wireless-Packet-Capture": {
+                  "value": {
+                    "ap_mac": null,
+                    "band": "24",
+                    "duration": 600,
+                    "max_pkt_len": 128,
+                    "num_packets": 100,
+                    "type": "wireless"
+                  }
+                },
+                "Client-Packet-Capture": {
+                  "value": {
+                    "client_mac": "60a10a773412",
+                    "duration": 300,
+                    "includes_mcast": false,
+                    "max_pkt_len": 128,
+                    "num_packets": 1000,
+                    "type": "client"
+                  }
+                },
+                "SSR-Packet-Capture": {
+                  "value": {
+                    "duration": 600,
+                    "format": "stream",
+                    "gateways": {
+                      "001122334455": {
+                        "ports": {
+                          "ge-0/0/0": {
+                            "tcpdump_expression": "tcp"
+                          },
+                          "ge-0/0/1": {
+                            "tcpdump_expression": "port 443"
+                          },
+                          "ge-1/0/0": {
+                            "tcpdump_expression": "tcp"
+                          },
+                          "ge-1/0/1": {
+                            "tcpdump_expression": "port 443"
+                          }
+                        }
+                      },
+                      "001122334466": {
+                        "ports": {
+                          "ge-0/0/0": {
+                            "tcpdump_expression": "udp"
+                          },
+                          "ge-0/0/1": {
+                            "tcpdump_expression": "port 32768"
+                          }
+                        }
+                      }
+                    },
+                    "max_pkt_len": 1500,
+                    "num_packets": 100,
+                    "type": "gateway"
+                  }
+                },
+                "Switch-Packet-Capture": {
+                  "value": {
+                    "duration": 600,
+                    "format": "stream",
+                    "max_pkt_len": 1500,
+                    "num_packets": 100,
+                    "switches": {
+                      "001122334455": {
+                        "ports": {
+                          "ge-0/0/0": {
+                            "tcpdump_expression": "udp"
+                          },
+                          "ge-0/0/1": {},
+                          "ge-1/0/0": {},
+                          "ge-1/0/1": {}
+                        }
+                      },
+                      "001122334466": {
+                        "ports": {
+                          "ge-0/0/0": {},
+                          "ge-0/0/1": {}
+                        }
+                      }
+                    },
+                    "tcpdump_expression": "port 443",
+                    "type": "switch"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/capture_site"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PcapStart"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "startSitePacketCapture",
+        "tags": [
+          "Utilities PCAPs"
+        ]
+      },
+      "delete": {
+        "description": "Stop current capture",
+        "operationId": "stopSitePacketCapture",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "stopSitePacketCapture",
+        "tags": [
+          "Utilities PCAPs"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/pcaps/{pcap_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/pcap_id"
+        }
+      ],
+      "put": {
+        "description": "Update or add notes to a completed packet capture",
+        "operationId": "updateSitePacketCapture",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "notes": "wired pcap test"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/notes_string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "updateSitePacketCapture",
+        "tags": [
+          "Utilities PCAPs"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "capture_client": {
+        "additionalProperties": false,
+        "description": "Initiate a Client Packet Capture",
+        "properties": {
+          "ap_mac": {
+            "examples": [
+              null
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "client_mac": {
+            "description": "Client mac, required if `type`==`client`; optional otherwise",
+            "examples": [
+              "60a10a773412"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "duration": {
+            "$ref": "#/components/schemas/capture_duration"
+          },
+          "includes_mcast": {
+            "default": false,
+            "type": "boolean"
+          },
+          "max_pkt_len": {
+            "$ref": "#/components/schemas/capture_max_pkt_length"
+          },
+          "num_packets": {
+            "$ref": "#/components/schemas/capture_num_packets"
+          },
+          "ssid": {
+            "description": "Optional filter by ssid",
+            "examples": [
+              null
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "type": {
+            "$ref": "#/components/schemas/capture_client_type"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "capture_client_type": {
+        "description": "enum: `client`",
+        "enum": [
+          "client"
+        ],
+        "examples": [
+          "client"
+        ],
+        "type": "string"
+      },
+      "capture_duration": {
+        "default": 600,
+        "description": "Duration of the capture, in seconds",
+        "examples": [
+          300
+        ],
+        "maximum": 86400,
+        "minimum": 60,
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "capture_gateway": {
+        "additionalProperties": false,
+        "description": "Initiate a Gateway (SSR/SRX) Packet Capture",
+        "properties": {
+          "duration": {
+            "$ref": "#/components/schemas/capture_duration"
+          },
+          "format": {
+            "$ref": "#/components/schemas/capture_gateway_format"
+          },
+          "gateways": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/capture_gateway_gateways"
+            },
+            "description": "List of SSRs. Property key is the SSR MAC",
+            "type": "object"
+          },
+          "max_pkt_len": {
+            "default": 512,
+            "description": "minimum is 64 (SSR) / 68 (SRX) maximum is 10240 (SSR) / 1520 (SRX)",
+            "examples": [
+              128
+            ],
+            "maximum": 1520,
+            "minimum": 64,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "num_packets": {
+            "$ref": "#/components/schemas/capture_num_packets"
+          },
+          "ports": {
+            "$ref": "#/components/schemas/capture_gateway_gateways_ports"
+          },
+          "type": {
+            "$ref": "#/components/schemas/capture_gateway_type"
+          }
+        },
+        "required": [
+          "type",
+          "gateways"
+        ],
+        "type": "object"
+      },
+      "capture_gateway_format": {
+        "default": "stream",
+        "description": "enum: `stream`",
+        "enum": [
+          "stream"
+        ],
+        "examples": [
+          "stream"
+        ],
+        "type": "string"
+      },
+      "capture_gateway_gateways": {
+        "additionalProperties": false,
+        "properties": {
+          "ports": {
+            "$ref": "#/components/schemas/capture_gateway_gateways_ports"
+          }
+        },
+        "type": "object"
+      },
+      "capture_gateway_gateways_port": {
+        "additionalProperties": false,
+        "properties": {
+          "tcpdump_expression": {
+            "description": "tcpdump expression per port",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "capture_gateway_gateways_ports": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/capture_gateway_gateways_port"
+        },
+        "description": "Property key is the port ID",
+        "type": "object"
+      },
+      "capture_gateway_type": {
+        "description": "enum: `gateway`",
+        "enum": [
+          "gateway"
+        ],
+        "examples": [
+          "gateway"
+        ],
+        "type": "string"
+      },
+      "capture_max_pkt_length": {
+        "default": 512,
+        "examples": [
+          128
+        ],
+        "maximum": 2048,
+        "minimum": 64,
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "capture_mxedge": {
+        "additionalProperties": false,
+        "description": "Initiate a Wireless Packet Capture",
+        "properties": {
+          "duration": {
+            "default": 600,
+            "description": "Duration of the capture, in seconds",
+            "examples": [
+              600
+            ],
+            "maximum": 86400,
+            "type": "integer"
+          },
+          "format": {
+            "$ref": "#/components/schemas/capture_mxedge_format"
+          },
+          "max_pkt_len": {
+            "default": 128,
+            "description": "Max_len of each packet to capture",
+            "examples": [
+              68
+            ],
+            "maximum": 2048,
+            "type": "integer"
+          },
+          "mxedges": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/capture_mxedge_mxedges"
+            },
+            "type": "object"
+          },
+          "num_packets": {
+            "default": 1024,
+            "description": "Number of packets to capture, 0 for unlimited",
+            "examples": [
+              100
+            ],
+            "maximum": 10000,
+            "type": "integer"
+          },
+          "type": {
+            "$ref": "#/components/schemas/capture_mxedge_type"
+          },
+          "tzsp_host": {
+            "description": "Required if `format`==`tzsp`. Remote host accessible to mxedges over the network for receiving the captured packets.",
+            "examples": [
+              "192.168.1.2"
+            ],
+            "type": "string"
+          },
+          "tzsp_port": {
+            "default": 37008,
+            "description": "If `format`==`tzsp`. Port on remote host for receiving the captured packets",
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "capture_mxedge_format": {
+        "default": "stream",
+        "description": "PCAP format. enum: \n    * `stream`: to Mist cloud\n    * `tzsp`: stream packets (over UDP as TZSP packets) to a remote host (typically running Wireshark)",
+        "enum": [
+          "stream",
+          "tzsp"
+        ],
+        "type": "string"
+      },
+      "capture_mxedge_mxedges": {
+        "additionalProperties": false,
+        "description": "Property key is the Mx Edge ID, currently limited to one mxedge per org capture session",
+        "properties": {
+          "interfaces": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/capture_mxedge_mxedges_interfaces"
+            }
+          }
+        },
+        "type": "object"
+      },
+      "capture_mxedge_mxedges_interfaces": {
+        "additionalProperties": false,
+        "description": "Property key is the Port name (e.g. \"port1\", \"kni0\", \"lacp0\", \"ipsec\", \"drop\", \"oobm\"), currently limited to specifying one interface per mxedge",
+        "properties": {
+          "tcpdump_expression": {
+            "description": "tcpdump expression common for wired,radiotap",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "capture_mxedge_type": {
+        "description": "enum: `mxedge`",
+        "enum": [
+          "mxedge"
+        ],
+        "examples": [
+          "mxedge"
+        ],
+        "type": "string"
+      },
+      "capture_new_assoc": {
+        "additionalProperties": false,
+        "description": "Initiate a packet Capture for New Wireless Client Associations",
+        "properties": {
+          "ap_mac": {
+            "examples": [
+              "a83a79a947ee"
+            ],
+            "type": "string"
+          },
+          "client_mac": {
+            "description": "Client mac, required if `type`==`client`; optional otherwise",
+            "examples": [
+              "60a10a773412"
+            ],
+            "type": "string"
+          },
+          "duration": {
+            "$ref": "#/components/schemas/capture_duration"
+          },
+          "includes_mcast": {
+            "default": false,
+            "type": "boolean"
+          },
+          "max_pkt_len": {
+            "$ref": "#/components/schemas/capture_max_pkt_length"
+          },
+          "num_packets": {
+            "$ref": "#/components/schemas/capture_num_packets"
+          },
+          "ssid": {
+            "description": "Optional filter by ssid",
+            "examples": [
+              null
+            ],
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/capture_new_assoc_type"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "capture_new_assoc_type": {
+        "description": "enum: `new_assoc`",
+        "enum": [
+          "new_assoc"
+        ],
+        "examples": [
+          "new_assoc"
+        ],
+        "type": "string"
+      },
+      "capture_num_packets": {
+        "default": 1024,
+        "description": "number of packets to capture, 0 for unlimited, default is 1024, maximum is 10000",
+        "examples": [
+          1000
+        ],
+        "maximum": 10000,
+        "minimum": 0,
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "capture_org": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/capture_mxedge"
+          }
+        ]
+      },
+      "capture_radiotap": {
+        "additionalProperties": false,
+        "description": "Initiate a Radiotap Packet Capture",
+        "properties": {
+          "ap_mac": {
+            "examples": [
+              "a83a79a947ee"
+            ],
+            "type": "string"
+          },
+          "band": {
+            "$ref": "#/components/schemas/capture_radiotap_band"
+          },
+          "client_mac": {
+            "examples": [
+              "38f9d3972ff1"
+            ],
+            "type": "string"
+          },
+          "duration": {
+            "$ref": "#/components/schemas/capture_duration"
+          },
+          "format": {
+            "$ref": "#/components/schemas/capture_radiotap_format"
+          },
+          "max_pkt_len": {
+            "$ref": "#/components/schemas/capture_max_pkt_length"
+          },
+          "num_packets": {
+            "$ref": "#/components/schemas/capture_num_packets"
+          },
+          "ssid": {
+            "examples": [
+              "test"
+            ],
+            "type": "string"
+          },
+          "tcpdump_expression": {
+            "$ref": "#/components/schemas/capture_tcpdump_expression"
+          },
+          "type": {
+            "$ref": "#/components/schemas/capture_radiotap_type"
+          },
+          "wlan_id": {
+            "description": "WLAN id associated with the respective ssid.",
+            "examples": [
+              "fac8e973-feb9-421a-b381-aabbc4b61f5a"
+            ],
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "capture_radiotap_band": {
+        "default": "24",
+        "description": "enum: `24`, `24,5,6`, `5`, `6`",
+        "enum": [
+          "24",
+          "24,5,6",
+          "5",
+          "6"
+        ],
+        "examples": [
+          "24"
+        ],
+        "type": "string"
+      },
+      "capture_radiotap_format": {
+        "default": "pcap",
+        "description": "enum: `pcap`, `stream`",
+        "enum": [
+          "pcap",
+          "stream"
+        ],
+        "examples": [
+          "stream"
+        ],
+        "type": "string"
+      },
+      "capture_radiotap_type": {
+        "description": "enum: `radiotap`",
+        "enum": [
+          "radiotap"
+        ],
+        "examples": [
+          "radiotap"
+        ],
+        "type": "string"
+      },
+      "capture_radiotapwired": {
+        "additionalProperties": false,
+        "description": "Initiate a Radiotap Packet Capture and Wired Packet Capture",
+        "properties": {
+          "ap_mac": {
+            "examples": [
+              null
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "band": {
+            "$ref": "#/components/schemas/capture_radiotapwired_band"
+          },
+          "client_mac": {
+            "examples": [
+              "38f9d3972ff1"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "duration": {
+            "$ref": "#/components/schemas/capture_duration"
+          },
+          "format": {
+            "$ref": "#/components/schemas/capture_radiotapwired_format"
+          },
+          "max_pkt_len": {
+            "$ref": "#/components/schemas/capture_max_pkt_length"
+          },
+          "num_packets": {
+            "$ref": "#/components/schemas/capture_num_packets"
+          },
+          "radiotap_tcpdump_expression": {
+            "description": "tcpdump expression for radiotap interface (802.11 + radio headers)",
+            "examples": [
+              "type"
+            ],
+            "type": "string"
+          },
+          "ssid": {
+            "examples": [
+              "test"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tcpdump_expression": {
+            "$ref": "#/components/schemas/capture_tcpdump_expression"
+          },
+          "type": {
+            "$ref": "#/components/schemas/capture_radiotapwired_type"
+          },
+          "wired_tcpdump_expression": {
+            "$ref": "#/components/schemas/capture_tcpdump_expression"
+          },
+          "wireless_tcpdump_expression": {
+            "description": "tcpdump expression for radiotap interface (802.11)",
+            "type": "string"
+          },
+          "wlan_id": {
+            "description": "WLAN id associated with the respective ssid.",
+            "examples": [
+              "fac8e973-feb9-421a-b381-aabbc4b61f5a"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "capture_radiotapwired_band": {
+        "default": "24",
+        "description": "only used for radiotap. enum: `24`, `24,5,6`, `5`, `6`",
+        "enum": [
+          "24",
+          "24,5,6",
+          "5",
+          "6"
+        ],
+        "examples": [
+          "24"
+        ],
+        "type": "string"
+      },
+      "capture_radiotapwired_format": {
+        "default": "pcap",
+        "description": "enum: `pcap`, `stream`",
+        "enum": [
+          "pcap",
+          "stream"
+        ],
+        "examples": [
+          "stream"
+        ],
+        "type": "string"
+      },
+      "capture_radiotapwired_type": {
+        "description": "enum: `radiotap,wired`",
+        "enum": [
+          "radiotap,wired"
+        ],
+        "examples": [
+          "radiotap,wired"
+        ],
+        "type": "string"
+      },
+      "capture_scan": {
+        "additionalProperties": false,
+        "description": "Initiate a Scan Radio Packet Capture",
+        "properties": {
+          "ap_mac": {
+            "description": "Filter by ap_mac",
+            "examples": [
+              null
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "aps": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/capture_scan_aps"
+            },
+            "description": "Dictionary key is AP mac and value is a dictionary which contains key \"band\", \"bandwidth\", \"channel\" and \"tcpdump_expression\". In case keys are missed we will take parent value if parent values are not set we will use default value",
+            "type": "object"
+          },
+          "band": {
+            "$ref": "#/components/schemas/capture_scan_band"
+          },
+          "bandwidth": {
+            "$ref": "#/components/schemas/dot11_bandwidth"
+          },
+          "channel": {
+            "default": 1,
+            "description": "Specify the channel value where scan PCAP has to be started, default value gets applied when user provides wrong values",
+            "examples": [
+              1
+            ],
+            "type": "integer"
+          },
+          "client_mac": {
+            "description": "Filter by client mac",
+            "examples": [
+              "38f9d3972ff1"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "duration": {
+            "$ref": "#/components/schemas/capture_duration"
+          },
+          "format": {
+            "$ref": "#/components/schemas/capture_scan_format"
+          },
+          "max_pkt_len": {
+            "$ref": "#/components/schemas/capture_max_pkt_length"
+          },
+          "num_packets": {
+            "$ref": "#/components/schemas/capture_num_packets"
+          },
+          "tcpdump_expression": {
+            "description": "tcpdump expression, port specific if specified under ports dict, otherwise applicable across ports if specified at top level of payload. Port specific value overrides top level value when both exist.",
+            "examples": [
+              "tcp port 80"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/capture_scan_type"
+          },
+          "width": {
+            "description": "Specify the bandwidth value with respect to the channel.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "capture_scan_aps": {
+        "additionalProperties": false,
+        "description": "Property key is the AP MAC address (e.g. \"5c5b35000001\"). All optionals, parent parameters will be used if not defined",
+        "properties": {
+          "band": {
+            "$ref": "#/components/schemas/capture_scan_aps_band"
+          },
+          "channel": {
+            "description": "Specify the channel value where scan PCAP has to be started",
+            "type": "string"
+          },
+          "tcpdump_expression": {
+            "description": "tcpdump expression, port specific if specified under ports dict, otherwise applicable across ports if specified at top level of payload. Port specific value overrides top level value when both exist.",
+            "type": "string"
+          },
+          "width": {
+            "description": "Specify the bandwidth value with respect to the channel.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "capture_scan_aps_band": {
+        "default": "24",
+        "description": "Only Single value allowed. enum: `24`, `5`, `6`",
+        "enum": [
+          "24",
+          "5",
+          "6"
+        ],
+        "type": "string"
+      },
+      "capture_scan_band": {
+        "default": "5",
+        "description": "Only Single value allowed, default value gets applied when user provides wrong values. enum: `24`, `5`, `6`",
+        "enum": [
+          "24",
+          "5",
+          "6"
+        ],
+        "examples": [
+          "24"
+        ],
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "capture_scan_format": {
+        "default": "pcap",
+        "description": "enum: `pcap`, `stream`",
+        "enum": [
+          "pcap",
+          "stream"
+        ],
+        "examples": [
+          "stream"
+        ],
+        "type": "string"
+      },
+      "capture_scan_type": {
+        "description": "enum: `scan`",
+        "enum": [
+          "scan"
+        ],
+        "examples": [
+          "scan"
+        ],
+        "type": "string"
+      },
+      "capture_site": {
+        "discriminator": {
+          "mapping": {
+            "client": "#/components/schemas/capture_client",
+            "gateway": "#/components/schemas/capture_gateway",
+            "new_assoc": "#/components/schemas/capture_new_assoc",
+            "radiotap": "#/components/schemas/capture_radiotap",
+            "radiotap,wired": "#/components/schemas/capture_radiotapwired",
+            "scan": "#/components/schemas/capture_scan",
+            "switch": "#/components/schemas/capture_switch",
+            "wired": "#/components/schemas/capture_wired",
+            "wireless": "#/components/schemas/capture_wireless"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/capture_client"
+          },
+          {
+            "$ref": "#/components/schemas/capture_gateway"
+          },
+          {
+            "$ref": "#/components/schemas/capture_new_assoc"
+          },
+          {
+            "$ref": "#/components/schemas/capture_radiotap"
+          },
+          {
+            "$ref": "#/components/schemas/capture_radiotapwired"
+          },
+          {
+            "$ref": "#/components/schemas/capture_scan"
+          },
+          {
+            "$ref": "#/components/schemas/capture_switch"
+          },
+          {
+            "$ref": "#/components/schemas/capture_wired"
+          },
+          {
+            "$ref": "#/components/schemas/capture_wireless"
+          }
+        ]
+      },
+      "capture_switch": {
+        "additionalProperties": false,
+        "description": "Initiate a Switch (Junos) Packet Capture",
+        "properties": {
+          "duration": {
+            "$ref": "#/components/schemas/capture_duration"
+          },
+          "format": {
+            "$ref": "#/components/schemas/capture_switch_format"
+          },
+          "max_pkt_len": {
+            "$ref": "#/components/schemas/capture_max_pkt_length"
+          },
+          "num_packets": {
+            "$ref": "#/components/schemas/capture_num_packets"
+          },
+          "ports": {
+            "$ref": "#/components/schemas/capture_switch_ports"
+          },
+          "switches": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/capture_switch_switches"
+            },
+            "description": "Property key is the switch mac",
+            "type": "object"
+          },
+          "tcpdump_expression": {
+            "description": "tcpdump expression, port specific if specified under ports dict, otherwise applicable across ports if specified at top level of payload. Port specific value overrides top level value when both exist.",
+            "examples": [
+              "port 443"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/capture_switch_type"
+          }
+        },
+        "required": [
+          "type",
+          "switches"
+        ],
+        "type": "object"
+      },
+      "capture_switch_format": {
+        "default": "stream",
+        "description": "enum: `stream`",
+        "enum": [
+          "stream"
+        ],
+        "type": "string"
+      },
+      "capture_switch_ports": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/capture_switch_ports_tcpdump_expression"
+        },
+        "description": "Property key is the port name. 6 ports max per switch supported, or 5 max with irb port auto-included into capture request",
+        "type": "object"
+      },
+      "capture_switch_ports_tcpdump_expression": {
+        "additionalProperties": false,
+        "properties": {
+          "tcpdump_expression": {
+            "description": "tcpdump expression, port specific if specified under ports dict, otherwise applicable across ports if specified at top level of payload. Port specific value overrides top level value when both exist.",
+            "examples": [
+              "port 443"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "capture_switch_switches": {
+        "additionalProperties": false,
+        "properties": {
+          "ports": {
+            "$ref": "#/components/schemas/capture_switch_ports"
+          }
+        },
+        "type": "object"
+      },
+      "capture_switch_type": {
+        "description": "enum: `switch`",
+        "enum": [
+          "switch"
+        ],
+        "examples": [
+          "switch"
+        ],
+        "type": "string"
+      },
+      "capture_tcpdump_expression": {
+        "description": "tcpdump expression",
+        "examples": [
+          "tcp port 80"
+        ],
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "capture_wired": {
+        "additionalProperties": false,
+        "description": "Initiate a Wired Packet Capture",
+        "properties": {
+          "ap_mac": {
+            "examples": [
+              null
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "duration": {
+            "$ref": "#/components/schemas/capture_duration"
+          },
+          "format": {
+            "$ref": "#/components/schemas/capture_wired_format"
+          },
+          "max_pkt_len": {
+            "$ref": "#/components/schemas/capture_max_pkt_length"
+          },
+          "num_packets": {
+            "$ref": "#/components/schemas/capture_num_packets"
+          },
+          "tcpdump_expression": {
+            "$ref": "#/components/schemas/capture_tcpdump_expression"
+          },
+          "type": {
+            "$ref": "#/components/schemas/capture_wired_type"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "capture_wired_format": {
+        "default": "pcap",
+        "description": "pcap format. enum: `pcap`, `stream`",
+        "enum": [
+          "pcap",
+          "stream"
+        ],
+        "type": "string"
+      },
+      "capture_wired_type": {
+        "description": "enum: `wired`",
+        "enum": [
+          "wired"
+        ],
+        "examples": [
+          "wired"
+        ],
+        "type": "string"
+      },
+      "capture_wireless": {
+        "additionalProperties": false,
+        "description": "Initiate a Wireless Packet Capture",
+        "properties": {
+          "ap_mac": {
+            "examples": [
+              null
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "band": {
+            "$ref": "#/components/schemas/capture_wireless_band"
+          },
+          "duration": {
+            "$ref": "#/components/schemas/capture_duration"
+          },
+          "format": {
+            "$ref": "#/components/schemas/capture_wireless_format"
+          },
+          "max_pkt_len": {
+            "$ref": "#/components/schemas/capture_max_pkt_length"
+          },
+          "num_packets": {
+            "$ref": "#/components/schemas/capture_num_packets"
+          },
+          "ssid": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/capture_wireless_type"
+          },
+          "wlan_id": {
+            "description": "WLAN ID",
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "capture_wireless_band": {
+        "default": "24",
+        "description": "enum: `24`, `5`, `6`",
+        "enum": [
+          "24",
+          "5",
+          "6"
+        ],
+        "type": "string"
+      },
+      "capture_wireless_format": {
+        "default": "pcap",
+        "description": "pcap format. enum: `pcap`, `stream`",
+        "enum": [
+          "pcap",
+          "stream"
+        ],
+        "type": "string"
+      },
+      "capture_wireless_type": {
+        "description": "enum: `wireless`",
+        "enum": [
+          "wireless"
+        ],
+        "examples": [
+          "wireless"
+        ],
+        "type": "string"
+      },
+      "dot11_bandwidth": {
+        "description": "channel width for the band.enum: `0`(disabled, response only), `20`, `40`, `80` (only applicable for band_5 and band_6), `160` (only for band_6)",
+        "enum": [
+          0,
+          20,
+          40,
+          80,
+          160
+        ],
+        "examples": [
+          20
+        ],
+        "type": "integer"
+      },
+      "id": {
+        "description": "Unique ID of the object instance in the Mist Organization",
+        "examples": [
+          "53f10664-3ce8-4c27-b382-0ef66432349f"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "notes_string": {
+        "properties": {
+          "notes": {
+            "examples": [
+              "wired pcap test"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "org_id": {
+        "examples": [
+          "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "pcap_type": {
+        "description": "enum: `client`, `gateway`, `new_assoc`, `radiotap`, `radiotap,wired`, `wired`, `wireless`",
+        "enum": [
+          "client",
+          "gateway",
+          "new_assoc",
+          "radiotap",
+          "radiotap,wired",
+          "wired",
+          "wireless"
+        ],
+        "examples": [
+          "client"
+        ],
+        "type": "string"
+      },
+      "response_http400": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http401": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Authentication credentials were not provided."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http403": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "You do not have permission to perform this action."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http404": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http429": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_pcap_ap": {
+        "additionalProperties": false,
+        "properties": {
+          "band": {
+            "type": "integer"
+          },
+          "bandwidth": {
+            "type": "integer"
+          },
+          "channel": {
+            "type": "integer"
+          },
+          "tcpdump_expression": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "response_pcap_search": {
+        "additionalProperties": false,
+        "properties": {
+          "end": {
+            "type": "integer"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "next": {
+            "type": "string"
+          },
+          "results": {
+            "$ref": "#/components/schemas/response_pcap_search_results"
+          },
+          "start": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "end",
+          "limit",
+          "results",
+          "start"
+        ],
+        "type": "object"
+      },
+      "response_pcap_search_item": {
+        "additionalProperties": false,
+        "properties": {
+          "ap_macs": {
+            "$ref": "#/components/schemas/strings"
+          },
+          "aps": {
+            "$ref": "#/components/schemas/response_pcap_search_item_aps"
+          },
+          "duration": {
+            "examples": [
+              600
+            ],
+            "type": "number"
+          },
+          "format": {
+            "examples": [
+              "stream"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/components/schemas/id"
+          },
+          "max_num_packets": {
+            "examples": [
+              1024
+            ],
+            "type": "number"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/org_id"
+          },
+          "pcap_aps": {
+            "$ref": "#/components/schemas/response_pcap_search_item_pcap_aps"
+          },
+          "pcap_url": {
+            "type": "string"
+          },
+          "site_id": {
+            "$ref": "#/components/schemas/site_id"
+          },
+          "termination_reason": {
+            "examples": [
+              "default"
+            ],
+            "type": "string"
+          },
+          "timestamp": {
+            "$ref": "#/components/schemas/timestamp"
+          },
+          "type": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "timestamp",
+          "type",
+          "url"
+        ],
+        "type": "object"
+      },
+      "response_pcap_search_item_ap": {
+        "examples": [
+          "5c5b35000010"
+        ],
+        "type": "string"
+      },
+      "response_pcap_search_item_aps": {
+        "items": {
+          "$ref": "#/components/schemas/response_pcap_search_item_ap"
+        },
+        "type": "array"
+      },
+      "response_pcap_search_item_pcap_aps": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/response_pcap_search_item_pcap_aps_item"
+        },
+        "examples": [
+          {
+            "5c5b35000010": {
+              "band": "6",
+              "bandwidth": "20",
+              "channel": 133,
+              "tcpdump_expression": null
+            }
+          }
+        ],
+        "type": "object"
+      },
+      "response_pcap_search_item_pcap_aps_item": {
+        "additionalProperties": false,
+        "properties": {
+          "band": {
+            "type": "string"
+          },
+          "bandwidth": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "integer"
+          },
+          "tcpdump_expression": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "response_pcap_search_results": {
+        "items": {
+          "$ref": "#/components/schemas/response_pcap_search_item"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "response_pcap_start": {
+        "additionalProperties": false,
+        "properties": {
+          "ap_count": {
+            "type": "integer"
+          },
+          "aps": {
+            "$ref": "#/components/schemas/strings"
+          },
+          "client_mac": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "duration": {
+            "type": "number"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "expiry": {
+            "type": "number"
+          },
+          "format": {
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/components/schemas/id"
+          },
+          "include_mcast": {
+            "type": "boolean"
+          },
+          "max_pkt_len": {
+            "type": "integer"
+          },
+          "num_packets": {
+            "type": "integer"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/org_id"
+          },
+          "raw": {
+            "type": "boolean"
+          },
+          "site_id": {
+            "$ref": "#/components/schemas/site_id"
+          },
+          "ssid": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tcpdump_parser_expression": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "timestamp": {
+            "$ref": "#/components/schemas/timestamp"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "timestamp",
+          "id",
+          "org_id",
+          "site_id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "response_pcap_status": {
+        "additionalProperties": false,
+        "properties": {
+          "ap_mac": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "aps": {
+            "$ref": "#/components/schemas/response_pcap_status_aps"
+          },
+          "client_mac": {
+            "examples": [
+              "60a10a773412"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "duration": {
+            "examples": [
+              300
+            ],
+            "type": "integer"
+          },
+          "failed": {
+            "$ref": "#/components/schemas/response_pcap_status_failed"
+          },
+          "format": {
+            "$ref": "#/components/schemas/capture_mxedge_format"
+          },
+          "gateways": {
+            "$ref": "#/components/schemas/response_pcap_status_gateways"
+          },
+          "id": {
+            "$ref": "#/components/schemas/id"
+          },
+          "includes_mcast": {
+            "type": "boolean"
+          },
+          "max_num_packets": {
+            "description": "Max number of packets configured by user",
+            "examples": [
+              1000
+            ],
+            "type": "integer"
+          },
+          "max_pkt_len": {
+            "examples": [
+              128
+            ],
+            "type": "integer"
+          },
+          "mxedges": {
+            "$ref": "#/components/schemas/response_pcap_status_mxedges"
+          },
+          "num_packets": {
+            "description": "total number of packets captured by all AP, not applicable for type [client, new_assoc]",
+            "type": "integer"
+          },
+          "ok": {
+            "$ref": "#/components/schemas/response_pcap_status_ok"
+          },
+          "pcap_aps": {
+            "$ref": "#/components/schemas/response_pcap_status_pcap_aps"
+          },
+          "radiotap_tcpdump_expression": {
+            "description": "When `type`==`radiotap`, radiotap_tcpdump_expression expression provided by the user",
+            "type": "string"
+          },
+          "scan_tcpdump_expression": {
+            "description": "When `type`==`scan`, scan_tcpdump_expression provided by the user",
+            "type": "string"
+          },
+          "ssid": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "started_time": {
+            "examples": [
+              1435080709
+            ],
+            "type": "integer"
+          },
+          "switches": {
+            "$ref": "#/components/schemas/response_pcap_status_switches"
+          },
+          "tcpdump_expression": {
+            "description": "tcpdump expression provided by the user (common)",
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/pcap_type"
+          },
+          "tzsp_host": {
+            "description": "Required if `format`==`tzsp`. Remote host accessible to mxedges over the network for receiving the captured packets.",
+            "examples": [
+              "192.168.1.2"
+            ],
+            "type": "string"
+          },
+          "tzsp_port": {
+            "description": "If `format`==`tzsp`. Port on remote host for receiving the captured packets",
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "wired_tcpdump_expression": {
+            "description": "When `type`==`wired`, wired_tcpdump_expression provided by the user",
+            "type": "string"
+          },
+          "wireless_tcpdump_expression": {
+            "description": "When `type`==`‘wireless’`, wireless_tcpdump_expression provided by the user",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "response_pcap_status_aps": {
+        "description": "List of target APs to capture packets",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "response_pcap_status_failed": {
+        "description": "List of APs where configuration attempt failed",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "response_pcap_status_gateways": {
+        "description": "Information on gateways to capture packets on if a gateway capture type is specified",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "response_pcap_status_mxedges": {
+        "description": "Information on mxedges to capture packets on if a mxedge capture type is specified",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "response_pcap_status_ok": {
+        "description": "List of target APs successfully configured to capture packets",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "response_pcap_status_pcap_aps": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/response_pcap_ap"
+        },
+        "examples": [
+          {
+            "5c5b35000010": {
+              "band": 6,
+              "bandwidth": 20,
+              "channel": 133,
+              "tcpdump_expression": null
+            }
+          }
+        ],
+        "type": "object"
+      },
+      "response_pcap_status_switches": {
+        "description": "Information on switches to capture packets on if a switch capture type is specified. irb port interface is automatically added to capture as needed to ensure all desired packets are captured.",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "site_id": {
+        "examples": [
+          "441a1214-6928-442a-8e92-e1d34b8ec6a6"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "strings": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "timestamp": {
+        "description": "Epoch (seconds)",
+        "format": "double",
+        "readOnly": true,
+        "type": "number"
+      }
+    },
+    "responses": {
+      "HTTP400": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          }
+        },
+        "description": "Bad Syntax"
+      },
+      "HTTP401": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          }
+        },
+        "description": "Unauthorized"
+      },
+      "HTTP403": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          }
+        },
+        "description": "Permission Denied"
+      },
+      "HTTP404": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          }
+        },
+        "description": "Not found. The API endpoint doesn’t exist or resource doesn’ t exist"
+      },
+      "HTTP429": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          }
+        },
+        "description": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+      },
+      "OK": {
+        "description": "OK"
+      },
+      "PcapStart": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/PcapStartExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_pcap_start"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/PcapStartExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_pcap_start"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "PcapStatus": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/PcapStatusExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_pcap_status"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/PcapStatusExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_pcap_status"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "PcapsSearch": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/PcapsSearchExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_pcap_search"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/PcapsSearchExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_pcap_search"
+            }
+          }
+        },
+        "description": "OK"
+      }
+    },
+    "parameters": {
+      "duration": {
+        "description": "Duration like 7d, 2w",
+        "in": "query",
+        "name": "duration",
+        "required": false,
+        "schema": {
+          "default": "1d",
+          "examples": [
+            "10m"
+          ],
+          "type": "string"
+        }
+      },
+      "end": {
+        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "in": "query",
+        "name": "end",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "limit": {
+        "in": "query",
+        "name": "limit",
+        "required": false,
+        "schema": {
+          "default": 100,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "org_id": {
+        "in": "path",
+        "name": "org_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "page": {
+        "in": "query",
+        "name": "page",
+        "required": false,
+        "schema": {
+          "default": 1,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "pcap_id": {
+        "in": "path",
+        "name": "pcap_id",
+        "required": true,
+        "schema": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "site_id": {
+        "in": "path",
+        "name": "site_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "start": {
+        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "in": "query",
+        "name": "start",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "examples": {
+      "HTTP400Example": {
+        "value": {
+          "detail": "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+        }
+      },
+      "HTTP401Example": {
+        "value": {
+          "detail": "Authentication credentials were not provided."
+        }
+      },
+      "HTTP403Example": {
+        "value": {
+          "detail": "You do not have permission to perform this action."
+        }
+      },
+      "HTTP429Example": {
+        "value": {
+          "detail": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+        }
+      },
+      "PcapStartExample": {
+        "value": {
+          "ap_count": 3,
+          "aps": [],
+          "duration": 600,
+          "enabled": true,
+          "expiry": 1614886726.5411825,
+          "format": "stream",
+          "id": "a9a84e13-a714-b1eb-152f-a434416217d5",
+          "include_mcast": false,
+          "max_pkt_len": 68,
+          "num_packets": 100,
+          "org_id": "a9346fba-f920-e99a-cc51-2e8dcc57fa3c",
+          "raw": true,
+          "site_id": "67970e46-4e12-11e6-9188-0242ac110007",
+          "ssid": "",
+          "timestamp": 1614886126.5411825,
+          "type": "radiotap"
+        }
+      },
+      "PcapStatusExample": {
+        "value": {
+          "aps": [
+            "5c5b350e001c",
+            "5c5b350e001b"
+          ],
+          "client_mac": "60a10a773412",
+          "duration": 300,
+          "failed": [],
+          "id": "a9a84e13-a714-b1eb-152f-a434416217d5",
+          "includes_mcast": false,
+          "max_pkt_len": 128,
+          "num_packets": 1000,
+          "ok": [
+            "5c5b350e001c",
+            "5c5b350e001b"
+          ],
+          "started_time": 1435080709,
+          "type": "client"
+        }
+      },
+      "PcapsSearchExample": {
+        "value": {
+          "end": 1461089816,
+          "limit": 100,
+          "next": "/api/v1/sites/67970e46-4e12-11e6-9188-0242ac110007/pcaps?start=1461099816&search_after=%5B1694537121217%5D&limit=100&end=1461089816",
+          "results": [
+            {
+              "ap_macs": [
+                "5c5b35000010"
+              ],
+              "timestamp": 1461869041,
+              "type": "new_assoc",
+              "url": "https://..."
+            }
+          ],
+          "start": 1461099816
+        }
+      }
+    },
+    "securitySchemes": {
+      "apiToken": {
+        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      },
+      "basicAuth": {
+        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
+        "scheme": "basic",
+        "type": "http"
+      },
+      "csrfToken": {
+        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "in": "header",
+        "name": "X-CSRFToken",
+        "type": "apiKey"
+      }
+    }
+  }
+}

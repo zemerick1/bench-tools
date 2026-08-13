@@ -1,0 +1,891 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Port_Access_Policy",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Port_Access_Policy"
+    }
+  ],
+  "paths": {
+    "/system/port_access_policies": {
+      "get": {
+        "tags": [
+          "Port_Access_Policy"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "acl_names": {
+                      "type": "array",
+                      "description": "List of ACLs from which the current policy is derived. This is applicable only when the policy is of type 'radius'.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 128
+                    },
+                    "base_policy_name": {
+                      "type": "string",
+                      "description": "Base policy from which the current policy is derived. This is applicable only when the policy is of type 'radius'.",
+                      "maxLength": 128
+                    },
+                    "cfg_entries": {
+                      "type": "object",
+                      "description": "Reference Resource: [Port_Access_Policy_Entry](#/Port_Access_Policy_Entry)<br>Policy entries as configured by the user. MAC based classes are not supported in a policy entry. The entire policy is rejected if it contains one or more policy entries with MAC classes.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "description": "Reference resource URI of Port_Access_Policy_Entry"
+                        }
+                      }
+                    },
+                    "cfg_version": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "The version of 'cfg_entries' that should be changed to a random value each time 'cfg_entries' is modified.",
+                      "maximum": 9007199254740991,
+                      "minimum": -9007199254740991
+                    },
+                    "client_in_conform_rate": {
+                      "type": "object",
+                      "description": "Traffic rate in kilobits per second that matched ingress port-access policy specific 'cir', count' entries. This is an aggregated statistics across all clients on a  port that have port-access authentication mode set to 'client-mode'.",
+                      "properties": {
+                        "integer": {
+                          "type": "integer",
+                          "format": "int64",
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "client_in_statistics": {
+                      "type": "object",
+                      "description": "Count of packets that matched ingress port-access policy specific 'count' entries. This is an aggregated statistics across all clients  on a port that have port-access authentication mode set to 'client-mode'.",
+                      "properties": {
+                        "integer": {
+                          "type": "integer",
+                          "format": "int64",
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "cur_entries": {
+                      "type": "object",
+                      "description": "Reference Resource: [Port_Access_Policy_Entry](#/Port_Access_Policy_Entry)<br>Policy entries that are currently programmed in the data path.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "description": "Reference resource URI of Port_Access_Policy_Entry"
+                        }
+                      }
+                    },
+                    "in_progress_entries": {
+                      "type": "object",
+                      "description": "Reference Resource: [Port_Access_Policy_Entry](#/Port_Access_Policy_Entry)<br>Policy entries that are being processed for installation into the data path.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "description": "Reference resource URI of Port_Access_Policy_Entry"
+                        }
+                      }
+                    },
+                    "in_progress_version": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "The version of the 'in_progress' Policy.  This value is copied from 'cfg_version' when the Policy processing begins. This value is cleared when the Policy status is updated to 'applied' or 'rejected.'",
+                      "maximum": 9007199254740991,
+                      "minimum": -9007199254740991
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_Policy](#/Port_Access_Policy)<br>Name of a port-access policy.",
+                      "maxLength": 128,
+                      "minLength": 1
+                    },
+                    "origin": {
+                      "type": "string",
+                      "description": "Origin of the policy, i.e., how the policy is provisioned.  `local`:           policy is provisioned locally on the device.  `downloaded`:      policy is downloaded from ClearPass server.  `radius`:          policy is translated from the attributes assigned                     by RADIUS server.",
+                      "enum": [
+                        "downloaded",
+                        "local",
+                        "radius"
+                      ]
+                    },
+                    "port_in_conform_rate": {
+                      "type": "object",
+                      "description": "Traffic rate in kilobits per second that matched ingress port-access policy specific 'cir', 'count' entries. This is an aggregated statistics across all ports that  have their port-access authentication mode set to 'device-mode'.",
+                      "properties": {
+                        "integer": {
+                          "type": "integer",
+                          "format": "int64",
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "port_in_statistics": {
+                      "type": "object",
+                      "description": "Count of packets that matched ingress port-access policy specific 'count' entries.This is an aggregated statistics across all ports  that have their port-access authentication mode set to 'device-mode'.",
+                      "properties": {
+                        "integer": {
+                          "type": "integer",
+                          "format": "int64",
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Numeric error code.  Expected to be 0 when state is 'applied'."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Detailed reason for error state.  Expected empty when state is 'applied'."
+                        },
+                        "state": {
+                          "type": "string",
+                          "description": "Valid values are 'applied', 'in_progress', 'rejected'",
+                          "enum": [
+                            "applied",
+                            "in_progress",
+                            "rejected"
+                          ]
+                        },
+                        "version": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The version of cfg_entries that corresponds to this status."
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "cur_entries",
+                  "origin",
+                  "name",
+                  "acl_names",
+                  "in_progress_version",
+                  "base_policy_name",
+                  "in_progress_entries",
+                  "port_in_statistics",
+                  "cfg_version",
+                  "port_in_conform_rate",
+                  "cfg_entries",
+                  "client_in_statistics",
+                  "client_in_conform_rate",
+                  "status"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Port_Access_Policy"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "cfg_entries": {
+                    "type": "object",
+                    "description": "Reference Resource: [Port_Access_Policy_Entry](#/Port_Access_Policy_Entry)<br>Policy entries as configured by the user. MAC based classes are not supported in a policy entry. The entire policy is rejected if it contains one or more policy entries with MAC classes.",
+                    "properties": {
+                      "integer": {
+                        "type": "string",
+                        "description": "Reference resource URI of Port_Access_Policy_Entry"
+                      }
+                    }
+                  },
+                  "cfg_version": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "The version of 'cfg_entries' that should be changed to a random value each time 'cfg_entries' is modified.",
+                    "maximum": 9007199254740991,
+                    "minimum": -9007199254740991
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [Port_Access_Policy](#/Port_Access_Policy)<br>Name of a port-access policy.",
+                    "maxLength": 128,
+                    "minLength": 1
+                  },
+                  "origin": {
+                    "type": "string",
+                    "description": "Origin of the policy, i.e., how the policy is provisioned.  `local`:           policy is provisioned locally on the device.  `downloaded`:      policy is downloaded from ClearPass server.  `radius`:          policy is translated from the attributes assigned                     by RADIUS server.",
+                    "enum": [
+                      "downloaded",
+                      "local",
+                      "radius"
+                    ]
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/system/port_access_policies/{Port_Access_Policy.name}": {
+      "get": {
+        "tags": [
+          "Port_Access_Policy"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "acl_names": {
+                      "type": "array",
+                      "description": "List of ACLs from which the current policy is derived. This is applicable only when the policy is of type 'radius'.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 128
+                    },
+                    "base_policy_name": {
+                      "type": "string",
+                      "description": "Base policy from which the current policy is derived. This is applicable only when the policy is of type 'radius'.",
+                      "maxLength": 128
+                    },
+                    "cfg_entries": {
+                      "type": "object",
+                      "description": "Reference Resource: [Port_Access_Policy_Entry](#/Port_Access_Policy_Entry)<br>Policy entries as configured by the user. MAC based classes are not supported in a policy entry. The entire policy is rejected if it contains one or more policy entries with MAC classes.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "description": "Reference resource URI of Port_Access_Policy_Entry"
+                        }
+                      }
+                    },
+                    "cfg_version": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "The version of 'cfg_entries' that should be changed to a random value each time 'cfg_entries' is modified.",
+                      "maximum": 9007199254740991,
+                      "minimum": -9007199254740991
+                    },
+                    "client_in_conform_rate": {
+                      "type": "object",
+                      "description": "Traffic rate in kilobits per second that matched ingress port-access policy specific 'cir', count' entries. This is an aggregated statistics across all clients on a  port that have port-access authentication mode set to 'client-mode'.",
+                      "properties": {
+                        "integer": {
+                          "type": "integer",
+                          "format": "int64",
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "client_in_statistics": {
+                      "type": "object",
+                      "description": "Count of packets that matched ingress port-access policy specific 'count' entries. This is an aggregated statistics across all clients  on a port that have port-access authentication mode set to 'client-mode'.",
+                      "properties": {
+                        "integer": {
+                          "type": "integer",
+                          "format": "int64",
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "cur_entries": {
+                      "type": "object",
+                      "description": "Reference Resource: [Port_Access_Policy_Entry](#/Port_Access_Policy_Entry)<br>Policy entries that are currently programmed in the data path.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "description": "Reference resource URI of Port_Access_Policy_Entry"
+                        }
+                      }
+                    },
+                    "in_progress_entries": {
+                      "type": "object",
+                      "description": "Reference Resource: [Port_Access_Policy_Entry](#/Port_Access_Policy_Entry)<br>Policy entries that are being processed for installation into the data path.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "description": "Reference resource URI of Port_Access_Policy_Entry"
+                        }
+                      }
+                    },
+                    "in_progress_version": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "The version of the 'in_progress' Policy.  This value is copied from 'cfg_version' when the Policy processing begins. This value is cleared when the Policy status is updated to 'applied' or 'rejected.'",
+                      "maximum": 9007199254740991,
+                      "minimum": -9007199254740991
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port_Access_Policy](#/Port_Access_Policy)<br>Name of a port-access policy.",
+                      "maxLength": 128,
+                      "minLength": 1
+                    },
+                    "origin": {
+                      "type": "string",
+                      "description": "Origin of the policy, i.e., how the policy is provisioned.  `local`:           policy is provisioned locally on the device.  `downloaded`:      policy is downloaded from ClearPass server.  `radius`:          policy is translated from the attributes assigned                     by RADIUS server.",
+                      "enum": [
+                        "downloaded",
+                        "local",
+                        "radius"
+                      ]
+                    },
+                    "port_in_conform_rate": {
+                      "type": "object",
+                      "description": "Traffic rate in kilobits per second that matched ingress port-access policy specific 'cir', 'count' entries. This is an aggregated statistics across all ports that  have their port-access authentication mode set to 'device-mode'.",
+                      "properties": {
+                        "integer": {
+                          "type": "integer",
+                          "format": "int64",
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "port_in_statistics": {
+                      "type": "object",
+                      "description": "Count of packets that matched ingress port-access policy specific 'count' entries.This is an aggregated statistics across all ports  that have their port-access authentication mode set to 'device-mode'.",
+                      "properties": {
+                        "integer": {
+                          "type": "integer",
+                          "format": "int64",
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Numeric error code.  Expected to be 0 when state is 'applied'."
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Detailed reason for error state.  Expected empty when state is 'applied'."
+                        },
+                        "state": {
+                          "type": "string",
+                          "description": "Valid values are 'applied', 'in_progress', 'rejected'",
+                          "enum": [
+                            "applied",
+                            "in_progress",
+                            "rejected"
+                          ]
+                        },
+                        "version": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The version of cfg_entries that corresponds to this status."
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Port_Access_Policy.name",
+            "in": "path",
+            "description": "Reference Resource: [Port_Access_Policy](#/Port_Access_Policy)<br>Name of a port-access policy.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "name",
+                  "acl_names",
+                  "in_progress_version",
+                  "cur_entries",
+                  "origin",
+                  "in_progress_entries",
+                  "port_in_statistics",
+                  "base_policy_name",
+                  "port_in_conform_rate",
+                  "cfg_version",
+                  "client_in_statistics",
+                  "client_in_conform_rate",
+                  "status",
+                  "cfg_entries"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Port_Access_Policy"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "cfg_entries": {
+                    "type": "object",
+                    "description": "Reference Resource: [Port_Access_Policy_Entry](#/Port_Access_Policy_Entry)<br>Policy entries as configured by the user. MAC based classes are not supported in a policy entry. The entire policy is rejected if it contains one or more policy entries with MAC classes.",
+                    "properties": {
+                      "integer": {
+                        "type": "string",
+                        "description": "Reference resource URI of Port_Access_Policy_Entry"
+                      }
+                    }
+                  },
+                  "cfg_version": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "The version of 'cfg_entries' that should be changed to a random value each time 'cfg_entries' is modified.",
+                    "maximum": 9007199254740991,
+                    "minimum": -9007199254740991
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Port_Access_Policy.name",
+            "in": "path",
+            "description": "Reference Resource: [Port_Access_Policy](#/Port_Access_Policy)<br>Name of a port-access policy.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Port_Access_Policy"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Port_Access_Policy.name",
+            "in": "path",
+            "description": "Reference Resource: [Port_Access_Policy](#/Port_Access_Policy)<br>Name of a port-access policy.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Port_Access_Policy"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "cfg_entries": {
+                    "type": "object",
+                    "description": "Reference Resource: [Port_Access_Policy_Entry](#/Port_Access_Policy_Entry)<br>Policy entries as configured by the user. MAC based classes are not supported in a policy entry. The entire policy is rejected if it contains one or more policy entries with MAC classes.",
+                    "properties": {
+                      "integer": {
+                        "type": "string",
+                        "description": "Reference resource URI of Port_Access_Policy_Entry"
+                      }
+                    }
+                  },
+                  "cfg_version": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "The version of 'cfg_entries' that should be changed to a random value each time 'cfg_entries' is modified.",
+                    "maximum": 9007199254740991,
+                    "minimum": -9007199254740991
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Port_Access_Policy.name",
+            "in": "path",
+            "description": "Reference Resource: [Port_Access_Policy](#/Port_Access_Policy)<br>Name of a port-access policy.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

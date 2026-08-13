@@ -28,6 +28,7 @@ python3 -m http.server 8080
 | **CLI Explorer** | AOS-CX 10.13.x–10.18.x (per switch series) + AOS 10 CLI hierarchy from local PDF TOC |
 | **Show-Tech Sticky Note** | Paste a novel-length show-tech → sticky facts + loud lines (**not** an RCA) |
 | **Subnet Planner** | Buildings × roles × device counts → meshed greenfield IPv4 scheme (**not** a calculator) |
+| **OpenAPI Docs** | Central (and other hub specs) split into feature slices and rendered in Scalar |
 
 ## Structure
 
@@ -58,12 +59,18 @@ bench-tools/
 │   ├── subnet-planner/          # Greenfield multi-building IPv4 scheme (not a calculator)
 │   │   ├── index.html / app.js / planner.js
 │   │   └── test_planner.js
-│   └── cli-explorer/            # AOS-CX 10.13.x–10.18.x + AOS 10
+│   ├── cli-explorer/            # AOS-CX 10.13.x–10.18.x + AOS 10
+│   │   ├── index.html / app.js
+│   │   ├── scripts/             # Offline PDF → layers pipeline (not web UI)
+│   │   ├── data/                # catalog.json, layers/, aos-10/
+│   │   ├── full-banks/          # Local full extracts only (gitignored)
+│   │   └── source/              # Local CLI PDFs only (gitignored)
+│   └── open-api/                # Split OpenAPI slices + Scalar viewer
 │       ├── index.html / app.js
-│       ├── scripts/             # Offline PDF → layers pipeline (not web UI)
-│       ├── data/                # catalog.json, layers/, aos-10/
-│       ├── full-banks/          # Local full extracts only (gitignored)
-│       └── source/              # Local CLI PDFs only (gitignored)
+│       ├── scripts/             # fetch / split / validate (not web UI)
+│       ├── data/manifest.json
+│       ├── specs/               # published slices
+│       └── source/              # raw hub pulls (gitignored)
 ├── docs/                        # Ideas / design notes
 └── README.md
 ```
@@ -186,6 +193,20 @@ python3 -m venv .venv
 ```
 
 See [tools/cli-explorer/README.md](./tools/cli-explorer/README.md) for the full pipeline and ship surface.
+
+### OpenAPI Docs
+
+Split HPE/Aruba OpenAPI documents under `tools/open-api/`. The UI loads `data/manifest.json`, then one file from `specs/` into Scalar.
+
+```bash
+cd tools/open-api
+python3 -m venv .venv
+.venv/bin/pip install -r scripts/requirements.txt
+.venv/bin/python scripts/build.py --central-only --no-ssl-verify
+# later: .venv/bin/python scripts/build.py --offline
+```
+
+Raw pulls stay in `source/` (gitignored). Published slices + the manifest are committed so Cloudflare can deploy them.
 
 ## Deploy
 

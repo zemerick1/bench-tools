@@ -1,0 +1,408 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Recursive_Nexthop",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Recursive_Nexthop"
+    }
+  ],
+  "paths": {
+    "/system/vrfs/{VRF.name}/recursive_nexthops": {
+      "get": {
+        "tags": [
+          "Recursive_Nexthop"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "nh_ips": {
+                      "type": "array",
+                      "description": "The IPv4 or IPv6 addresses of the forwarding next hops that the recursive next hop is resolved to. It is possible that the recursive next hop is resolved to a single forwarding next hop or a ECMP which consists a list of forwarding next hops. Example 12.1.0.2",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "nh_metric": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "The cost to reach the forwarding next hops that the recursive next hop is resolved to.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "nh_ports": {
+                      "type": "array",
+                      "description": "Reference Resource: [Port](#/Port)<br>The ports of the forwarding next hops that the recursive next hop is resolved to. It is possible that the recursive next hop is resolved to a single forwarding next hop or a ECMP which consists a list of next hops.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "rnh_from": {
+                      "type": "array",
+                      "description": "This indicates from which protocol the request comes.",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "bgp",
+                          "ldp"
+                        ]
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "rnh_ip": {
+                      "type": "string",
+                      "description": "Reference Resource: [Recursive_Nexthop](#/Recursive_Nexthop)<br>IPv4 or IPv6 recursive next hop address to be resolved. Example 192.168.0.2",
+                      "maxLength": 49
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [Recursive_Nexthop](#/Recursive_Nexthop)<br>Reference to the VRF to which this entry belongs to."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "rnh_ip",
+                  "rnh_from",
+                  "nh_ips",
+                  "nh_metric",
+                  "nh_ports"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/vrfs/{VRF.name}/recursive_nexthops/{Recursive_Nexthop.rnh_ip}": {
+      "get": {
+        "tags": [
+          "Recursive_Nexthop"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "nh_ips": {
+                      "type": "array",
+                      "description": "The IPv4 or IPv6 addresses of the forwarding next hops that the recursive next hop is resolved to. It is possible that the recursive next hop is resolved to a single forwarding next hop or a ECMP which consists a list of forwarding next hops. Example 12.1.0.2",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "nh_metric": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "The cost to reach the forwarding next hops that the recursive next hop is resolved to.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "nh_ports": {
+                      "type": "array",
+                      "description": "Reference Resource: [Port](#/Port)<br>The ports of the forwarding next hops that the recursive next hop is resolved to. It is possible that the recursive next hop is resolved to a single forwarding next hop or a ECMP which consists a list of next hops.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "rnh_from": {
+                      "type": "array",
+                      "description": "This indicates from which protocol the request comes.",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "bgp",
+                          "ldp"
+                        ]
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "rnh_ip": {
+                      "type": "string",
+                      "description": "Reference Resource: [Recursive_Nexthop](#/Recursive_Nexthop)<br>IPv4 or IPv6 recursive next hop address to be resolved. Example 192.168.0.2",
+                      "maxLength": 49
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [Recursive_Nexthop](#/Recursive_Nexthop)<br>Reference to the VRF to which this entry belongs to."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Recursive_Nexthop.rnh_ip",
+            "in": "path",
+            "description": "Reference Resource: [Recursive_Nexthop](#/Recursive_Nexthop)<br>IPv4 or IPv6 recursive next hop address to be resolved. Example 192.168.0.2",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "rnh_ip",
+                  "rnh_from",
+                  "nh_ips",
+                  "nh_metric",
+                  "nh_ports"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

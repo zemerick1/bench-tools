@@ -1,0 +1,695 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "User",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "User"
+    }
+  ],
+  "paths": {
+    "/system/users": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "authorized_keys": {
+                      "type": "object",
+                      "description": "Public keys for public key authentication of a user.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "maxLength": 8192
+                        }
+                      }
+                    },
+                    "current_password": {
+                      "type": "string",
+                      "description": "The plaintext password of the user, required for password updates when password complexity is enabled.",
+                      "maxLength": 192
+                    },
+                    "is_user_lockedout": {
+                      "type": "boolean",
+                      "description": "Indicates whether this user is currently locked out from accessing the device."
+                    },
+                    "login_failure_attempts": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Number of failed login attempts for this user since last successful login."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [User](#/User)<br>Name of the user.",
+                      "maxLength": 32,
+                      "minLength": 1
+                    },
+                    "origin": {
+                      "type": "string",
+                      "description": "Indicator of whether the user is built-in (system-defined) or configured. Unlike user configured users, built-in users cannot be deleted.",
+                      "enum": [
+                        "built-in",
+                        "configuration"
+                      ]
+                    },
+                    "password": {
+                      "type": "string",
+                      "description": "SHA1 or SHA512 encrypted password of the user. If not set, it indicates that the user is created with an empty password.",
+                      "maxLength": 192
+                    },
+                    "user_group": {
+                      "type": "string",
+                      "description": "Reference Resource: [User_Group](#/User_Group)<br>User group to which the user belongs. If not populated, `operators` group would be assumed."
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "origin",
+                  "is_user_lockedout",
+                  "authorized_keys",
+                  "user_group",
+                  "login_failure_attempts",
+                  "name",
+                  "password"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "authorized_keys": {
+                    "type": "object",
+                    "description": "Public keys for public key authentication of a user.",
+                    "properties": {
+                      "integer": {
+                        "type": "string",
+                        "maxLength": 8192
+                      }
+                    }
+                  },
+                  "current_password": {
+                    "type": "string",
+                    "description": "The plaintext password of the user, required for password updates when password complexity is enabled.",
+                    "maxLength": 192
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [User](#/User)<br>Name of the user.",
+                    "maxLength": 32,
+                    "minLength": 1
+                  },
+                  "origin": {
+                    "type": "string",
+                    "description": "Indicator of whether the user is built-in (system-defined) or configured. Unlike user configured users, built-in users cannot be deleted.",
+                    "enum": [
+                      "built-in",
+                      "configuration"
+                    ]
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "SHA1 or SHA512 encrypted password of the user. If not set, it indicates that the user is created with an empty password.",
+                    "maxLength": 192
+                  },
+                  "user_group": {
+                    "type": "string",
+                    "description": "Reference Resource: [User_Group](#/User_Group)<br>User group to which the user belongs. If not populated, `operators` group would be assumed."
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/system/users/{User.name}": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "authorized_keys": {
+                      "type": "object",
+                      "description": "Public keys for public key authentication of a user.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "maxLength": 8192
+                        }
+                      }
+                    },
+                    "current_password": {
+                      "type": "string",
+                      "description": "The plaintext password of the user, required for password updates when password complexity is enabled.",
+                      "maxLength": 192
+                    },
+                    "is_user_lockedout": {
+                      "type": "boolean",
+                      "description": "Indicates whether this user is currently locked out from accessing the device."
+                    },
+                    "login_failure_attempts": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Number of failed login attempts for this user since last successful login."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [User](#/User)<br>Name of the user.",
+                      "maxLength": 32,
+                      "minLength": 1
+                    },
+                    "origin": {
+                      "type": "string",
+                      "description": "Indicator of whether the user is built-in (system-defined) or configured. Unlike user configured users, built-in users cannot be deleted.",
+                      "enum": [
+                        "built-in",
+                        "configuration"
+                      ]
+                    },
+                    "password": {
+                      "type": "string",
+                      "description": "SHA1 or SHA512 encrypted password of the user. If not set, it indicates that the user is created with an empty password.",
+                      "maxLength": 192
+                    },
+                    "user_group": {
+                      "type": "string",
+                      "description": "Reference Resource: [User_Group](#/User_Group)<br>User group to which the user belongs. If not populated, `operators` group would be assumed."
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "User.name",
+            "in": "path",
+            "description": "Reference Resource: [User](#/User)<br>Name of the user.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "origin",
+                  "is_user_lockedout",
+                  "authorized_keys",
+                  "name",
+                  "password",
+                  "user_group",
+                  "login_failure_attempts"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "authorized_keys": {
+                    "type": "object",
+                    "description": "Public keys for public key authentication of a user.",
+                    "properties": {
+                      "integer": {
+                        "type": "string",
+                        "maxLength": 8192
+                      }
+                    }
+                  },
+                  "current_password": {
+                    "type": "string",
+                    "description": "The plaintext password of the user, required for password updates when password complexity is enabled.",
+                    "maxLength": 192
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "SHA1 or SHA512 encrypted password of the user. If not set, it indicates that the user is created with an empty password.",
+                    "maxLength": 192
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "User.name",
+            "in": "path",
+            "description": "Reference Resource: [User](#/User)<br>Name of the user.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "User"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "User.name",
+            "in": "path",
+            "description": "Reference Resource: [User](#/User)<br>Name of the user.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "User"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "authorized_keys": {
+                    "type": "object",
+                    "description": "Public keys for public key authentication of a user.",
+                    "properties": {
+                      "integer": {
+                        "type": "string",
+                        "maxLength": 8192
+                      }
+                    }
+                  },
+                  "current_password": {
+                    "type": "string",
+                    "description": "The plaintext password of the user, required for password updates when password complexity is enabled.",
+                    "maxLength": 192
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "SHA1 or SHA512 encrypted password of the user. If not set, it indicates that the user is created with an empty password.",
+                    "maxLength": 192
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "User.name",
+            "in": "path",
+            "description": "Reference Resource: [User](#/User)<br>Name of the user.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

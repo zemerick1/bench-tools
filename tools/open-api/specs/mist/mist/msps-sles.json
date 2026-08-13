@@ -1,0 +1,556 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "MSPs SLEs",
+    "version": "2602.1.1"
+  },
+  "servers": [
+    {
+      "description": "Mist Global 01",
+      "url": "https://api.mist.com"
+    },
+    {
+      "description": "Mist Global 02",
+      "url": "https://api.gc1.mist.com"
+    },
+    {
+      "description": "Mist Global 03",
+      "url": "https://api.ac2.mist.com"
+    },
+    {
+      "description": "Mist Global 04",
+      "url": "https://api.gc2.mist.com"
+    },
+    {
+      "description": "Mist Global 05",
+      "url": "https://api.gc4.mist.com"
+    },
+    {
+      "description": "Mist EMEA 01",
+      "url": "https://api.eu.mist.com"
+    },
+    {
+      "description": "Mist EMEA 02",
+      "url": "https://api.gc3.mist.com"
+    },
+    {
+      "description": "Mist EMEA 03",
+      "url": "https://api.ac6.mist.com"
+    },
+    {
+      "description": "Mist EMEA 04",
+      "url": "https://api.gc6.mist.com"
+    },
+    {
+      "description": "Mist APAC 01",
+      "url": "https://api.ac5.mist.com"
+    },
+    {
+      "description": "Mist APAC 02",
+      "url": "https://api.gc5.mist.com"
+    },
+    {
+      "description": "Mist APAC 03",
+      "url": "https://api.gc7.mist.com"
+    }
+  ],
+  "security": [
+    {
+      "apiToken": []
+    },
+    {
+      "basicAuth": []
+    },
+    {
+      "basicAuth": [],
+      "csrfToken": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "SLEs, or Service-Level Expectations, are metrics used to monitor and report on the user experience of a Wireless, Wired or Wan network.\n\nThey are generated through data science and machine learning algorithms and provide insights into various aspects of the network, such as coverage, capacity, connectivity, and performance.\n\nMist SLEs help identify when users do not have sufficient network quality, when they face issues with connecting or roaming between access points, and when there are problems on the wired network.\n\nSLEs API Calls at the MSP level can be used to retrieve the SLEs summary for each Organization attached to the MSP account.",
+      "name": "MSPs SLEs"
+    }
+  ],
+  "paths": {
+    "/api/v1/msps/{msp_id}/insights/{metric}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/msp_id"
+        },
+        {
+          "$ref": "#/components/parameters/metric"
+        }
+      ],
+      "get": {
+        "description": "Get MSP SLEs (all/worst Orgs ...)",
+        "operationId": "getMspSle",
+        "parameters": [
+          {
+            "description": "See [List Insight Metrics](/#operations/listInsightMetrics) for more details",
+            "in": "query",
+            "name": "sle",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/duration"
+          },
+          {
+            "$ref": "#/components/parameters/interval"
+          },
+          {
+            "$ref": "#/components/parameters/start"
+          },
+          {
+            "$ref": "#/components/parameters/end"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/InsightMetricMsp"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getMspSle",
+        "tags": [
+          "MSPs SLEs"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "insight_metrics": {
+        "additionalProperties": false,
+        "properties": {
+          "end": {
+            "type": "integer"
+          },
+          "interval": {
+            "type": "integer"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "results": {
+            "$ref": "#/components/schemas/insight_metrics_results"
+          },
+          "start": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "end",
+          "interval",
+          "start"
+        ],
+        "type": "object"
+      },
+      "insight_metrics_results": {
+        "description": "Results depends on the `metric` - some return numbers (e.g. bytes, ap-count), others return objects",
+        "items": {
+          "$ref": "#/components/schemas/insight_metrics_results_item"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "insight_metrics_results_item": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "additionalProperties": true,
+            "type": "object"
+          }
+        ]
+      },
+      "response_http400": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http401": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Authentication credentials were not provided."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http403": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "You do not have permission to perform this action."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http404": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http429": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "responses": {
+      "HTTP400": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          }
+        },
+        "description": "Bad Syntax"
+      },
+      "HTTP401": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          }
+        },
+        "description": "Unauthorized"
+      },
+      "HTTP403": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          }
+        },
+        "description": "Permission Denied"
+      },
+      "HTTP404": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          }
+        },
+        "description": "Not found. The API endpoint doesn’t exist or resource doesn’ t exist"
+      },
+      "HTTP429": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          }
+        },
+        "description": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+      },
+      "InsightMetricMsp": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Orgs Sle": {
+                "$ref": "#/components/examples/InsightMetricMspOrgsSle"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/insight_metrics"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Orgs Sle": {
+                "$ref": "#/components/examples/InsightMetricMspOrgsSle"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/insight_metrics"
+            }
+          }
+        },
+        "description": "OK"
+      }
+    },
+    "parameters": {
+      "duration": {
+        "description": "Duration like 7d, 2w",
+        "in": "query",
+        "name": "duration",
+        "required": false,
+        "schema": {
+          "default": "1d",
+          "examples": [
+            "10m"
+          ],
+          "type": "string"
+        }
+      },
+      "end": {
+        "description": "End time (epoch timestamp in seconds, or relative string like \"-1d\", \"-2h\", \"now\")",
+        "in": "query",
+        "name": "end",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "interval": {
+        "description": "Aggregation works by giving a time range plus interval (e.g. 1d, 1h, 10m) where aggregation function would be applied to.",
+        "in": "query",
+        "name": "interval",
+        "required": false,
+        "schema": {
+          "examples": [
+            "10m"
+          ],
+          "type": "string"
+        }
+      },
+      "metric": {
+        "description": "See [List Insight Metrics](/#operations/listInsightMetrics) for available metrics",
+        "in": "path",
+        "name": "metric",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "msp_id": {
+        "in": "path",
+        "name": "msp_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "start": {
+        "description": "Start time (epoch timestamp in seconds, or relative string like \"-1d\", \"-1w\")",
+        "in": "query",
+        "name": "start",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "examples": {
+      "HTTP400Example": {
+        "value": {
+          "detail": "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+        }
+      },
+      "HTTP401Example": {
+        "value": {
+          "detail": "Authentication credentials were not provided."
+        }
+      },
+      "HTTP403Example": {
+        "value": {
+          "detail": "You do not have permission to perform this action."
+        }
+      },
+      "HTTP429Example": {
+        "value": {
+          "detail": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+        }
+      },
+      "InsightMetricMspOrgsSle": {
+        "value": {
+          "end": 1643706000,
+          "interval": 3600,
+          "limit": 100,
+          "results": [
+            {
+              "ap-availability": 0.9919400860511628,
+              "ap-health": 0.967607512909879,
+              "capacity": 0.7484652273070254,
+              "coverage": 0.91217567374857,
+              "num_aps": 13,
+              "num_clients": 12,
+              "org_id": "ab0aca7a-d45c-469b-b3bb-4fe240642d0b",
+              "roaming": 0.991735537682683,
+              "roaming-exp": 0.991735537682683,
+              "successful-connect": 0.46052632135780236,
+              "throughput": 0.6775702123846302,
+              "time-to-connect": 0.9349112447196916
+            },
+            {
+              "ap-availability": 0.9990384613092129,
+              "ap-health": 0.48201754375507955,
+              "capacity": 0.9702673450306101,
+              "coverage": 0.8335392334930375,
+              "num_aps": 1,
+              "num_clients": 6,
+              "org_id": "49ff76e0-a283-4e7d-b38d-041f1e9aff3c",
+              "roaming": 1,
+              "roaming-exp": 1,
+              "successful-connect": 1,
+              "throughput": 0,
+              "time-to-connect": 1
+            },
+            {
+              "ap-availability": 1,
+              "ap-health": 0.982456140612301,
+              "capacity": 1,
+              "coverage": 0.9276041182442488,
+              "num_aps": 2,
+              "num_clients": 3,
+              "org_id": "9b9b48f1-15a4-459e-86cc-9cbec9005983",
+              "roaming": 1,
+              "roaming-exp": 1,
+              "successful-connect": 1,
+              "throughput": 1,
+              "time-to-connect": 0.8125
+            },
+            {
+              "ap-availability": 0.9981132070973234,
+              "ap-health": 0.9991228068084047,
+              "capacity": 1,
+              "coverage": 1,
+              "num_aps": 1,
+              "num_clients": 0,
+              "org_id": "eb0e1671-7a6b-472b-94c3-c187dafe5274",
+              "roaming": 1,
+              "roaming-exp": 1,
+              "successful-connect": 1,
+              "throughput": 0,
+              "time-to-connect": 0.5
+            }
+          ],
+          "start": 1643670000
+        }
+      }
+    },
+    "securitySchemes": {
+      "apiToken": {
+        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      },
+      "basicAuth": {
+        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
+        "scheme": "basic",
+        "type": "http"
+      },
+      "csrfToken": {
+        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "in": "header",
+        "name": "X-CSRFToken",
+        "type": "apiKey"
+      }
+    }
+  }
+}

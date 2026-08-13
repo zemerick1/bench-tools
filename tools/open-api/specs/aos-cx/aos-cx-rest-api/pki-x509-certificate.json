@@ -1,0 +1,1260 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "PKI_X509_Certificate",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "PKI_X509_Certificate"
+    }
+  ],
+  "paths": {
+    "/system/pki_x509_certificates": {
+      "get": {
+        "tags": [
+          "PKI_X509_Certificate"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "PEM_certificate": {
+                      "type": "string",
+                      "description": "Installed certificate or generated CSR in PEM format.",
+                      "minLength": 52
+                    },
+                    "common_name": {
+                      "type": "string",
+                      "description": "Common name for the subject of the certificate.  Default value is the device serial number.",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "country": {
+                      "type": "string",
+                      "description": "Country name for the subject of the certificate.  ISO Alpha-2 country code is expected, but we only enforce  it to be two letters both uppercase, do not enforce its  correctness, which is users' responsibility. It can be empty  when it is not configured.",
+                      "maxLength": 2,
+                      "minLength": 2
+                    },
+                    "est_profile": {
+                      "type": "string",
+                      "description": "Reference Resource: [PKI_EST_Profile](#/PKI_EST_Profile)<br>The EST profile that enrolled this certificate, if applicable.  This field should be null (not set) if this certificate is not  enrolled from an EST service."
+                    },
+                    "est_status": {
+                      "type": "string",
+                      "description": "EST processing status: 'not_applicable':          certificate is not enrolled by EST                            service. 'enroll_reenroll_success': certificate was successfully                            enrolled or reenrolled through EST                            service, is valid and in normal use. 'enroll_pending':          user requested EST enrollment and                            CSR has been created. 'reenroll_pending':        certificate has been in re-enrollment                            lead time, waiting for re-enrollment.                            The current certificate is still                            valid and in normal use. 'enroll_waiting_retry':    EST enrollment failed and waiting                            to retry. 'reenroll_waiting_retry':  EST re-enrollment failed and                            waiting to retry. The current                            certificate is still valid and                            in normal use. 'enroll_reenroll_failed':  EST enrollment or re-enrollment                            failed and retry count also ran                            out. Certificate status should be                            expires_soon, expired or csr_pending.                            Note that when the status is                            expires_soon, the certificate will                            continue to be used by associated                            applications; if status is expired,                            associated applications will turn to                            use local-cert instead.",
+                      "enum": [
+                        "not_applicable",
+                        "enroll_reenroll_success",
+                        "enroll_pending",
+                        "reenroll_pending",
+                        "enroll_waiting_retry",
+                        "reenroll_waiting_retry",
+                        "enroll_reenroll_failed"
+                      ]
+                    },
+                    "ext_key_usage": {
+                      "type": "object",
+                      "properties": {
+                        "clientAuth": {
+                          "type": "boolean",
+                          "description": "Indicate whether the public key of the certificate can be  used for TLS WWW client authentication purpose. Key usage  may be digitalSignature and/or keyAgreement."
+                        },
+                        "serverAuth": {
+                          "type": "boolean",
+                          "description": "Indicate whether the public key of the certificate can be  used for TLS WWW server authentication purpose. Key usage  may be digitalSignature, keyEncipherment or keyAgreement."
+                        }
+                      }
+                    },
+                    "file_status": {
+                      "type": "string",
+                      "description": "CSR or certificate file status: 'nonexistent':  CSR or certificate file doe not exist 'installed':    CSR or certificate file is installed 'mismatch_subject': CSR or certificate file is installed,                  but some subject field(s) of the certificate in                  file is different from the user configuration.                  It is still valid and usable if certificate                  status is 'installed', but user may want to                  update the configuration or re-enroll the                  certificate with the desired subject values. 'mismatch_keyusage': CSR or certificate file is installed,                  but key usage field of the certificate in                  file is different from the user configuration.                  It is still valid and usable if certificate                  status is 'installed', but user may want to                  update the configuration or re-enroll the                  certificate with the desired key usage values. 'mismatch_xkusage': CSR or certificate file is installed,                  but extended key usage field of the certificate                  in file is different from the user configuration.                  It is still valid and usable if certificate                  status is 'installed', but user may want to                  update the configuration or re-enroll the                  certificate with the desired extended key                  usage values. 'mismatch_san': CSR or certificate file is installed,                  but subject alternative name field of the                  certificate in file is different from the user                  configuration. It is still valid and usable if                  certificate status is 'installed', but user may                  want to update the configuration or re-enroll                  the certificate with the desired                  subject alternative name value. 'mismatch_keytype': CSR or certificate file is installed,                  but the key type of the certificate in file                  is different from the user configuration.                  It is still valid and usable if certificate                  status is 'installed', but user may want to                  update the configuration or re-enroll the                  certificate with the desired key type. 'mismatch_keysize': CSR or certificate file is installed,                  but the key size of the certificate in file                  is different from the user configuration.                  It is still valid and usable if certificate                  status is 'installed', but user may want to                  update the configuration or re-enroll the                  certificate with the desired key size.",
+                      "enum": [
+                        "nonexistent",
+                        "installed",
+                        "mismatch_subject",
+                        "mismatch_keyusage",
+                        "mismatch_xkusage",
+                        "mismatch_san",
+                        "mismatch_keytype",
+                        "mismatch_keysize"
+                      ]
+                    },
+                    "key_type": {
+                      "type": "string",
+                      "description": "key-type:  'RSA-2048':   RSA keypair with key size to be 2048 bits 'RSA-3072':   RSA keypair with key size to be 3072 bits 'RSA-4096':   RSA keypair with key size to be 4096 bits 'ECDSA-256':  ECDSA keypair with curve size to be 256 bits 'ECDSA-384':  ECDSA keypair with curve size to be 384 bits 'ECDSA-521':  ECDSA keypair with curve size to be 521 bits",
+                      "enum": [
+                        "RSA-2048",
+                        "RSA-3072",
+                        "RSA-4096",
+                        "ECDSA-256",
+                        "ECDSA-384",
+                        "ECDSA-521"
+                      ]
+                    },
+                    "key_usage": {
+                      "type": "object",
+                      "properties": {
+                        "dataEncipherment": {
+                          "type": "boolean",
+                          "description": "Indicate whether the public key in certificate can be  used for encrypting data other than cryptographic keys."
+                        },
+                        "digitalSignature": {
+                          "type": "boolean",
+                          "description": "Indicate whether the public key in certificate can be  used to validate digital signature for entity  authentication or data origin authentication, but not  certificate signing, CRL signing, or non-repudiation."
+                        },
+                        "keyAgreement": {
+                          "type": "boolean",
+                          "description": "Indicate whether the public key in certificate can be  used to encrypt and decrypt keys between the sender and  receiver."
+                        },
+                        "keyEncipherment": {
+                          "type": "boolean",
+                          "description": "Indicate whether the public key in certificate can be  used with a protocol that encrypts keys."
+                        },
+                        "keyRestriction": {
+                          "type": "string",
+                          "description": "Indicate how the public key in certificate is used in a  keyAgreement protocol. This value is ignored if          keyAgreement value is not true;                          otherwise it can take one of these values:                 unrestricted: no restriction to encipher or decipher;    encipherOnly: key is used for encipher only;    decipherOnly: key is used for decipher only. ",
+                          "enum": [
+                            "unrestricted",
+                            "encipherOnly",
+                            "decipherOnly"
+                          ]
+                        },
+                        "nonRepudiation": {
+                          "type": "boolean",
+                          "description": "Indicate whether the public key in certificate can be  used to validate digital signature to provide a  non-repudiation service."
+                        }
+                      }
+                    },
+                    "locality": {
+                      "type": "string",
+                      "description": "Locality name for the subject of the certificate.  It can be empty when it is not configured.",
+                      "maxLength": 128,
+                      "minLength": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [PKI_X509_Certificate](#/PKI_X509_Certificate)<br>Certificate name.",
+                      "maxLength": 32,
+                      "minLength": 1
+                    },
+                    "org": {
+                      "type": "string",
+                      "description": "Organization name for the subject of the certificate.  It can be empty when it is not configured.",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "org_unit": {
+                      "type": "string",
+                      "description": "Organization unit name for the subject of the certificate.  It can be empty when it is not configured.",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "origin": {
+                      "type": "string",
+                      "description": "Indicator of whether the cert is built-in (system-created) or user-configured. Unlike user-configured certs,  built-in certs cannot be modified or deleted.",
+                      "enum": [
+                        "built-in",
+                        "configuration"
+                      ]
+                    },
+                    "san_dnsname": {
+                      "type": "array",
+                      "description": "A dNSName type of entry (or entries) for subject alternative  name of the certificate. A dNSName is a domain name system  label in the preferred name syntax as specified by Section  3.5 of RFC 1034 and modified by Section 2.1 of RFC 1123.  Subject alternative name is a X509 certificate extension  specified in RFC 5280 Section 4.2.1.6.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 2
+                    },
+                    "san_ip": {
+                      "type": "array",
+                      "description": "An ipAddress type of entry (or entries) for subject alternative  name of the certificate. It supports both IPv4 and IPv6  addresses. Subject alternative name is a X509 certificate  extension specified in RFC 5280 Section 4.2.1.6.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 2
+                    },
+                    "state_or_province": {
+                      "type": "string",
+                      "description": "State or province name for the subject of the certificate.  It can be empty when it is not configured.",
+                      "maxLength": 128,
+                      "minLength": 1
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Certificate status: 'installed':     certificate can be associated with an                   application. 'csr_pending':   a CSR has been generated, but the signed cert                   has not yet been installed. 'malformed':     certificate is malformed. 'expired':       certificate is expired. 'expires_soon':  certificate will be expiring within 60 days. 'not_installed': certificate has just been created and is                   still pending status check.",
+                      "enum": [
+                        "installed",
+                        "csr_pending",
+                        "malformed",
+                        "expired",
+                        "expires_soon",
+                        "not_installed"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "locality",
+                  "status",
+                  "name",
+                  "key_usage",
+                  "file_status",
+                  "org_unit",
+                  "state_or_province",
+                  "org",
+                  "est_profile",
+                  "origin",
+                  "key_type",
+                  "common_name",
+                  "country",
+                  "san_ip",
+                  "san_dnsname",
+                  "ext_key_usage",
+                  "est_status",
+                  "PEM_certificate"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "PKI_X509_Certificate"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "common_name": {
+                    "type": "string",
+                    "description": "Common name for the subject of the certificate.  Default value is the device serial number.",
+                    "maxLength": 64,
+                    "minLength": 1
+                  },
+                  "country": {
+                    "type": "string",
+                    "description": "Country name for the subject of the certificate.  ISO Alpha-2 country code is expected, but we only enforce  it to be two letters both uppercase, do not enforce its  correctness, which is users' responsibility. It can be empty  when it is not configured.",
+                    "maxLength": 2,
+                    "minLength": 2
+                  },
+                  "est_profile": {
+                    "type": "string",
+                    "description": "Reference Resource: [PKI_EST_Profile](#/PKI_EST_Profile)<br>The EST profile that enrolled this certificate, if applicable.  This field should be null (not set) if this certificate is not  enrolled from an EST service."
+                  },
+                  "ext_key_usage": {
+                    "type": "object",
+                    "properties": {
+                      "clientAuth": {
+                        "type": "boolean",
+                        "description": "Indicate whether the public key of the certificate can be  used for TLS WWW client authentication purpose. Key usage  may be digitalSignature and/or keyAgreement."
+                      },
+                      "serverAuth": {
+                        "type": "boolean",
+                        "description": "Indicate whether the public key of the certificate can be  used for TLS WWW server authentication purpose. Key usage  may be digitalSignature, keyEncipherment or keyAgreement."
+                      }
+                    }
+                  },
+                  "key_type": {
+                    "type": "string",
+                    "description": "key-type:  'RSA-2048':   RSA keypair with key size to be 2048 bits 'RSA-3072':   RSA keypair with key size to be 3072 bits 'RSA-4096':   RSA keypair with key size to be 4096 bits 'ECDSA-256':  ECDSA keypair with curve size to be 256 bits 'ECDSA-384':  ECDSA keypair with curve size to be 384 bits 'ECDSA-521':  ECDSA keypair with curve size to be 521 bits",
+                    "enum": [
+                      "RSA-2048",
+                      "RSA-3072",
+                      "RSA-4096",
+                      "ECDSA-256",
+                      "ECDSA-384",
+                      "ECDSA-521"
+                    ]
+                  },
+                  "key_usage": {
+                    "type": "object",
+                    "properties": {
+                      "dataEncipherment": {
+                        "type": "boolean",
+                        "description": "Indicate whether the public key in certificate can be  used for encrypting data other than cryptographic keys."
+                      },
+                      "digitalSignature": {
+                        "type": "boolean",
+                        "description": "Indicate whether the public key in certificate can be  used to validate digital signature for entity  authentication or data origin authentication, but not  certificate signing, CRL signing, or non-repudiation."
+                      },
+                      "keyAgreement": {
+                        "type": "boolean",
+                        "description": "Indicate whether the public key in certificate can be  used to encrypt and decrypt keys between the sender and  receiver."
+                      },
+                      "keyEncipherment": {
+                        "type": "boolean",
+                        "description": "Indicate whether the public key in certificate can be  used with a protocol that encrypts keys."
+                      },
+                      "keyRestriction": {
+                        "type": "string",
+                        "description": "Indicate how the public key in certificate is used in a  keyAgreement protocol. This value is ignored if          keyAgreement value is not true;                          otherwise it can take one of these values:                 unrestricted: no restriction to encipher or decipher;    encipherOnly: key is used for encipher only;    decipherOnly: key is used for decipher only. ",
+                        "enum": [
+                          "unrestricted",
+                          "encipherOnly",
+                          "decipherOnly"
+                        ]
+                      },
+                      "nonRepudiation": {
+                        "type": "boolean",
+                        "description": "Indicate whether the public key in certificate can be  used to validate digital signature to provide a  non-repudiation service."
+                      }
+                    }
+                  },
+                  "locality": {
+                    "type": "string",
+                    "description": "Locality name for the subject of the certificate.  It can be empty when it is not configured.",
+                    "maxLength": 128,
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [PKI_X509_Certificate](#/PKI_X509_Certificate)<br>Certificate name.",
+                    "maxLength": 32,
+                    "minLength": 1
+                  },
+                  "org": {
+                    "type": "string",
+                    "description": "Organization name for the subject of the certificate.  It can be empty when it is not configured.",
+                    "maxLength": 64,
+                    "minLength": 1
+                  },
+                  "org_unit": {
+                    "type": "string",
+                    "description": "Organization unit name for the subject of the certificate.  It can be empty when it is not configured.",
+                    "maxLength": 64,
+                    "minLength": 1
+                  },
+                  "origin": {
+                    "type": "string",
+                    "description": "Indicator of whether the cert is built-in (system-created) or user-configured. Unlike user-configured certs,  built-in certs cannot be modified or deleted.",
+                    "enum": [
+                      "built-in",
+                      "configuration"
+                    ]
+                  },
+                  "san_dnsname": {
+                    "type": "array",
+                    "description": "A dNSName type of entry (or entries) for subject alternative  name of the certificate. A dNSName is a domain name system  label in the preferred name syntax as specified by Section  3.5 of RFC 1034 and modified by Section 2.1 of RFC 1123.  Subject alternative name is a X509 certificate extension  specified in RFC 5280 Section 4.2.1.6.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 2
+                  },
+                  "san_ip": {
+                    "type": "array",
+                    "description": "An ipAddress type of entry (or entries) for subject alternative  name of the certificate. It supports both IPv4 and IPv6  addresses. Subject alternative name is a X509 certificate  extension specified in RFC 5280 Section 4.2.1.6.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 2
+                  },
+                  "state_or_province": {
+                    "type": "string",
+                    "description": "State or province name for the subject of the certificate.  It can be empty when it is not configured.",
+                    "maxLength": 128,
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/system/pki_x509_certificates/{PKI_X509_Certificate.name}": {
+      "get": {
+        "tags": [
+          "PKI_X509_Certificate"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "PEM_certificate": {
+                      "type": "string",
+                      "description": "Installed certificate or generated CSR in PEM format.",
+                      "minLength": 52
+                    },
+                    "common_name": {
+                      "type": "string",
+                      "description": "Common name for the subject of the certificate.  Default value is the device serial number.",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "country": {
+                      "type": "string",
+                      "description": "Country name for the subject of the certificate.  ISO Alpha-2 country code is expected, but we only enforce  it to be two letters both uppercase, do not enforce its  correctness, which is users' responsibility. It can be empty  when it is not configured.",
+                      "maxLength": 2,
+                      "minLength": 2
+                    },
+                    "est_profile": {
+                      "type": "string",
+                      "description": "Reference Resource: [PKI_EST_Profile](#/PKI_EST_Profile)<br>The EST profile that enrolled this certificate, if applicable.  This field should be null (not set) if this certificate is not  enrolled from an EST service."
+                    },
+                    "est_status": {
+                      "type": "string",
+                      "description": "EST processing status: 'not_applicable':          certificate is not enrolled by EST                            service. 'enroll_reenroll_success': certificate was successfully                            enrolled or reenrolled through EST                            service, is valid and in normal use. 'enroll_pending':          user requested EST enrollment and                            CSR has been created. 'reenroll_pending':        certificate has been in re-enrollment                            lead time, waiting for re-enrollment.                            The current certificate is still                            valid and in normal use. 'enroll_waiting_retry':    EST enrollment failed and waiting                            to retry. 'reenroll_waiting_retry':  EST re-enrollment failed and                            waiting to retry. The current                            certificate is still valid and                            in normal use. 'enroll_reenroll_failed':  EST enrollment or re-enrollment                            failed and retry count also ran                            out. Certificate status should be                            expires_soon, expired or csr_pending.                            Note that when the status is                            expires_soon, the certificate will                            continue to be used by associated                            applications; if status is expired,                            associated applications will turn to                            use local-cert instead.",
+                      "enum": [
+                        "not_applicable",
+                        "enroll_reenroll_success",
+                        "enroll_pending",
+                        "reenroll_pending",
+                        "enroll_waiting_retry",
+                        "reenroll_waiting_retry",
+                        "enroll_reenroll_failed"
+                      ]
+                    },
+                    "ext_key_usage": {
+                      "type": "object",
+                      "properties": {
+                        "clientAuth": {
+                          "type": "boolean",
+                          "description": "Indicate whether the public key of the certificate can be  used for TLS WWW client authentication purpose. Key usage  may be digitalSignature and/or keyAgreement."
+                        },
+                        "serverAuth": {
+                          "type": "boolean",
+                          "description": "Indicate whether the public key of the certificate can be  used for TLS WWW server authentication purpose. Key usage  may be digitalSignature, keyEncipherment or keyAgreement."
+                        }
+                      }
+                    },
+                    "file_status": {
+                      "type": "string",
+                      "description": "CSR or certificate file status: 'nonexistent':  CSR or certificate file doe not exist 'installed':    CSR or certificate file is installed 'mismatch_subject': CSR or certificate file is installed,                  but some subject field(s) of the certificate in                  file is different from the user configuration.                  It is still valid and usable if certificate                  status is 'installed', but user may want to                  update the configuration or re-enroll the                  certificate with the desired subject values. 'mismatch_keyusage': CSR or certificate file is installed,                  but key usage field of the certificate in                  file is different from the user configuration.                  It is still valid and usable if certificate                  status is 'installed', but user may want to                  update the configuration or re-enroll the                  certificate with the desired key usage values. 'mismatch_xkusage': CSR or certificate file is installed,                  but extended key usage field of the certificate                  in file is different from the user configuration.                  It is still valid and usable if certificate                  status is 'installed', but user may want to                  update the configuration or re-enroll the                  certificate with the desired extended key                  usage values. 'mismatch_san': CSR or certificate file is installed,                  but subject alternative name field of the                  certificate in file is different from the user                  configuration. It is still valid and usable if                  certificate status is 'installed', but user may                  want to update the configuration or re-enroll                  the certificate with the desired                  subject alternative name value. 'mismatch_keytype': CSR or certificate file is installed,                  but the key type of the certificate in file                  is different from the user configuration.                  It is still valid and usable if certificate                  status is 'installed', but user may want to                  update the configuration or re-enroll the                  certificate with the desired key type. 'mismatch_keysize': CSR or certificate file is installed,                  but the key size of the certificate in file                  is different from the user configuration.                  It is still valid and usable if certificate                  status is 'installed', but user may want to                  update the configuration or re-enroll the                  certificate with the desired key size.",
+                      "enum": [
+                        "nonexistent",
+                        "installed",
+                        "mismatch_subject",
+                        "mismatch_keyusage",
+                        "mismatch_xkusage",
+                        "mismatch_san",
+                        "mismatch_keytype",
+                        "mismatch_keysize"
+                      ]
+                    },
+                    "key_type": {
+                      "type": "string",
+                      "description": "key-type:  'RSA-2048':   RSA keypair with key size to be 2048 bits 'RSA-3072':   RSA keypair with key size to be 3072 bits 'RSA-4096':   RSA keypair with key size to be 4096 bits 'ECDSA-256':  ECDSA keypair with curve size to be 256 bits 'ECDSA-384':  ECDSA keypair with curve size to be 384 bits 'ECDSA-521':  ECDSA keypair with curve size to be 521 bits",
+                      "enum": [
+                        "RSA-2048",
+                        "RSA-3072",
+                        "RSA-4096",
+                        "ECDSA-256",
+                        "ECDSA-384",
+                        "ECDSA-521"
+                      ]
+                    },
+                    "key_usage": {
+                      "type": "object",
+                      "properties": {
+                        "dataEncipherment": {
+                          "type": "boolean",
+                          "description": "Indicate whether the public key in certificate can be  used for encrypting data other than cryptographic keys."
+                        },
+                        "digitalSignature": {
+                          "type": "boolean",
+                          "description": "Indicate whether the public key in certificate can be  used to validate digital signature for entity  authentication or data origin authentication, but not  certificate signing, CRL signing, or non-repudiation."
+                        },
+                        "keyAgreement": {
+                          "type": "boolean",
+                          "description": "Indicate whether the public key in certificate can be  used to encrypt and decrypt keys between the sender and  receiver."
+                        },
+                        "keyEncipherment": {
+                          "type": "boolean",
+                          "description": "Indicate whether the public key in certificate can be  used with a protocol that encrypts keys."
+                        },
+                        "keyRestriction": {
+                          "type": "string",
+                          "description": "Indicate how the public key in certificate is used in a  keyAgreement protocol. This value is ignored if          keyAgreement value is not true;                          otherwise it can take one of these values:                 unrestricted: no restriction to encipher or decipher;    encipherOnly: key is used for encipher only;    decipherOnly: key is used for decipher only. ",
+                          "enum": [
+                            "unrestricted",
+                            "encipherOnly",
+                            "decipherOnly"
+                          ]
+                        },
+                        "nonRepudiation": {
+                          "type": "boolean",
+                          "description": "Indicate whether the public key in certificate can be  used to validate digital signature to provide a  non-repudiation service."
+                        }
+                      }
+                    },
+                    "locality": {
+                      "type": "string",
+                      "description": "Locality name for the subject of the certificate.  It can be empty when it is not configured.",
+                      "maxLength": 128,
+                      "minLength": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [PKI_X509_Certificate](#/PKI_X509_Certificate)<br>Certificate name.",
+                      "maxLength": 32,
+                      "minLength": 1
+                    },
+                    "org": {
+                      "type": "string",
+                      "description": "Organization name for the subject of the certificate.  It can be empty when it is not configured.",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "org_unit": {
+                      "type": "string",
+                      "description": "Organization unit name for the subject of the certificate.  It can be empty when it is not configured.",
+                      "maxLength": 64,
+                      "minLength": 1
+                    },
+                    "origin": {
+                      "type": "string",
+                      "description": "Indicator of whether the cert is built-in (system-created) or user-configured. Unlike user-configured certs,  built-in certs cannot be modified or deleted.",
+                      "enum": [
+                        "built-in",
+                        "configuration"
+                      ]
+                    },
+                    "san_dnsname": {
+                      "type": "array",
+                      "description": "A dNSName type of entry (or entries) for subject alternative  name of the certificate. A dNSName is a domain name system  label in the preferred name syntax as specified by Section  3.5 of RFC 1034 and modified by Section 2.1 of RFC 1123.  Subject alternative name is a X509 certificate extension  specified in RFC 5280 Section 4.2.1.6.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 2
+                    },
+                    "san_ip": {
+                      "type": "array",
+                      "description": "An ipAddress type of entry (or entries) for subject alternative  name of the certificate. It supports both IPv4 and IPv6  addresses. Subject alternative name is a X509 certificate  extension specified in RFC 5280 Section 4.2.1.6.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 2
+                    },
+                    "state_or_province": {
+                      "type": "string",
+                      "description": "State or province name for the subject of the certificate.  It can be empty when it is not configured.",
+                      "maxLength": 128,
+                      "minLength": 1
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Certificate status: 'installed':     certificate can be associated with an                   application. 'csr_pending':   a CSR has been generated, but the signed cert                   has not yet been installed. 'malformed':     certificate is malformed. 'expired':       certificate is expired. 'expires_soon':  certificate will be expiring within 60 days. 'not_installed': certificate has just been created and is                   still pending status check.",
+                      "enum": [
+                        "installed",
+                        "csr_pending",
+                        "malformed",
+                        "expired",
+                        "expires_soon",
+                        "not_installed"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "PKI_X509_Certificate.name",
+            "in": "path",
+            "description": "Reference Resource: [PKI_X509_Certificate](#/PKI_X509_Certificate)<br>Certificate name.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "org_unit",
+                  "key_usage",
+                  "file_status",
+                  "origin",
+                  "state_or_province",
+                  "org",
+                  "est_profile",
+                  "key_type",
+                  "common_name",
+                  "country",
+                  "san_ip",
+                  "san_dnsname",
+                  "ext_key_usage",
+                  "est_status",
+                  "PEM_certificate",
+                  "name",
+                  "locality",
+                  "status"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "PKI_X509_Certificate"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "common_name": {
+                    "type": "string",
+                    "description": "Common name for the subject of the certificate.  Default value is the device serial number.",
+                    "maxLength": 64,
+                    "minLength": 1
+                  },
+                  "country": {
+                    "type": "string",
+                    "description": "Country name for the subject of the certificate.  ISO Alpha-2 country code is expected, but we only enforce  it to be two letters both uppercase, do not enforce its  correctness, which is users' responsibility. It can be empty  when it is not configured.",
+                    "maxLength": 2,
+                    "minLength": 2
+                  },
+                  "ext_key_usage": {
+                    "type": "object",
+                    "properties": {
+                      "clientAuth": {
+                        "type": "boolean",
+                        "description": "Indicate whether the public key of the certificate can be  used for TLS WWW client authentication purpose. Key usage  may be digitalSignature and/or keyAgreement."
+                      },
+                      "serverAuth": {
+                        "type": "boolean",
+                        "description": "Indicate whether the public key of the certificate can be  used for TLS WWW server authentication purpose. Key usage  may be digitalSignature, keyEncipherment or keyAgreement."
+                      }
+                    }
+                  },
+                  "key_type": {
+                    "type": "string",
+                    "description": "key-type:  'RSA-2048':   RSA keypair with key size to be 2048 bits 'RSA-3072':   RSA keypair with key size to be 3072 bits 'RSA-4096':   RSA keypair with key size to be 4096 bits 'ECDSA-256':  ECDSA keypair with curve size to be 256 bits 'ECDSA-384':  ECDSA keypair with curve size to be 384 bits 'ECDSA-521':  ECDSA keypair with curve size to be 521 bits",
+                    "enum": [
+                      "RSA-2048",
+                      "RSA-3072",
+                      "RSA-4096",
+                      "ECDSA-256",
+                      "ECDSA-384",
+                      "ECDSA-521"
+                    ]
+                  },
+                  "key_usage": {
+                    "type": "object",
+                    "properties": {
+                      "dataEncipherment": {
+                        "type": "boolean",
+                        "description": "Indicate whether the public key in certificate can be  used for encrypting data other than cryptographic keys."
+                      },
+                      "digitalSignature": {
+                        "type": "boolean",
+                        "description": "Indicate whether the public key in certificate can be  used to validate digital signature for entity  authentication or data origin authentication, but not  certificate signing, CRL signing, or non-repudiation."
+                      },
+                      "keyAgreement": {
+                        "type": "boolean",
+                        "description": "Indicate whether the public key in certificate can be  used to encrypt and decrypt keys between the sender and  receiver."
+                      },
+                      "keyEncipherment": {
+                        "type": "boolean",
+                        "description": "Indicate whether the public key in certificate can be  used with a protocol that encrypts keys."
+                      },
+                      "keyRestriction": {
+                        "type": "string",
+                        "description": "Indicate how the public key in certificate is used in a  keyAgreement protocol. This value is ignored if          keyAgreement value is not true;                          otherwise it can take one of these values:                 unrestricted: no restriction to encipher or decipher;    encipherOnly: key is used for encipher only;    decipherOnly: key is used for decipher only. ",
+                        "enum": [
+                          "unrestricted",
+                          "encipherOnly",
+                          "decipherOnly"
+                        ]
+                      },
+                      "nonRepudiation": {
+                        "type": "boolean",
+                        "description": "Indicate whether the public key in certificate can be  used to validate digital signature to provide a  non-repudiation service."
+                      }
+                    }
+                  },
+                  "locality": {
+                    "type": "string",
+                    "description": "Locality name for the subject of the certificate.  It can be empty when it is not configured.",
+                    "maxLength": 128,
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [PKI_X509_Certificate](#/PKI_X509_Certificate)<br>Certificate name.",
+                    "maxLength": 32,
+                    "minLength": 1
+                  },
+                  "org": {
+                    "type": "string",
+                    "description": "Organization name for the subject of the certificate.  It can be empty when it is not configured.",
+                    "maxLength": 64,
+                    "minLength": 1
+                  },
+                  "org_unit": {
+                    "type": "string",
+                    "description": "Organization unit name for the subject of the certificate.  It can be empty when it is not configured.",
+                    "maxLength": 64,
+                    "minLength": 1
+                  },
+                  "san_dnsname": {
+                    "type": "array",
+                    "description": "A dNSName type of entry (or entries) for subject alternative  name of the certificate. A dNSName is a domain name system  label in the preferred name syntax as specified by Section  3.5 of RFC 1034 and modified by Section 2.1 of RFC 1123.  Subject alternative name is a X509 certificate extension  specified in RFC 5280 Section 4.2.1.6.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 2
+                  },
+                  "san_ip": {
+                    "type": "array",
+                    "description": "An ipAddress type of entry (or entries) for subject alternative  name of the certificate. It supports both IPv4 and IPv6  addresses. Subject alternative name is a X509 certificate  extension specified in RFC 5280 Section 4.2.1.6.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 2
+                  },
+                  "state_or_province": {
+                    "type": "string",
+                    "description": "State or province name for the subject of the certificate.  It can be empty when it is not configured.",
+                    "maxLength": 128,
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "PKI_X509_Certificate.name",
+            "in": "path",
+            "description": "Reference Resource: [PKI_X509_Certificate](#/PKI_X509_Certificate)<br>Certificate name.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "PKI_X509_Certificate"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "PKI_X509_Certificate.name",
+            "in": "path",
+            "description": "Reference Resource: [PKI_X509_Certificate](#/PKI_X509_Certificate)<br>Certificate name.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "PKI_X509_Certificate"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "common_name": {
+                    "type": "string",
+                    "description": "Common name for the subject of the certificate.  Default value is the device serial number.",
+                    "maxLength": 64,
+                    "minLength": 1
+                  },
+                  "country": {
+                    "type": "string",
+                    "description": "Country name for the subject of the certificate.  ISO Alpha-2 country code is expected, but we only enforce  it to be two letters both uppercase, do not enforce its  correctness, which is users' responsibility. It can be empty  when it is not configured.",
+                    "maxLength": 2,
+                    "minLength": 2
+                  },
+                  "ext_key_usage": {
+                    "type": "object",
+                    "properties": {
+                      "clientAuth": {
+                        "type": "boolean",
+                        "description": "Indicate whether the public key of the certificate can be  used for TLS WWW client authentication purpose. Key usage  may be digitalSignature and/or keyAgreement."
+                      },
+                      "serverAuth": {
+                        "type": "boolean",
+                        "description": "Indicate whether the public key of the certificate can be  used for TLS WWW server authentication purpose. Key usage  may be digitalSignature, keyEncipherment or keyAgreement."
+                      }
+                    }
+                  },
+                  "key_type": {
+                    "type": "string",
+                    "description": "key-type:  'RSA-2048':   RSA keypair with key size to be 2048 bits 'RSA-3072':   RSA keypair with key size to be 3072 bits 'RSA-4096':   RSA keypair with key size to be 4096 bits 'ECDSA-256':  ECDSA keypair with curve size to be 256 bits 'ECDSA-384':  ECDSA keypair with curve size to be 384 bits 'ECDSA-521':  ECDSA keypair with curve size to be 521 bits",
+                    "enum": [
+                      "RSA-2048",
+                      "RSA-3072",
+                      "RSA-4096",
+                      "ECDSA-256",
+                      "ECDSA-384",
+                      "ECDSA-521"
+                    ]
+                  },
+                  "key_usage": {
+                    "type": "object",
+                    "properties": {
+                      "dataEncipherment": {
+                        "type": "boolean",
+                        "description": "Indicate whether the public key in certificate can be  used for encrypting data other than cryptographic keys."
+                      },
+                      "digitalSignature": {
+                        "type": "boolean",
+                        "description": "Indicate whether the public key in certificate can be  used to validate digital signature for entity  authentication or data origin authentication, but not  certificate signing, CRL signing, or non-repudiation."
+                      },
+                      "keyAgreement": {
+                        "type": "boolean",
+                        "description": "Indicate whether the public key in certificate can be  used to encrypt and decrypt keys between the sender and  receiver."
+                      },
+                      "keyEncipherment": {
+                        "type": "boolean",
+                        "description": "Indicate whether the public key in certificate can be  used with a protocol that encrypts keys."
+                      },
+                      "keyRestriction": {
+                        "type": "string",
+                        "description": "Indicate how the public key in certificate is used in a  keyAgreement protocol. This value is ignored if          keyAgreement value is not true;                          otherwise it can take one of these values:                 unrestricted: no restriction to encipher or decipher;    encipherOnly: key is used for encipher only;    decipherOnly: key is used for decipher only. ",
+                        "enum": [
+                          "unrestricted",
+                          "encipherOnly",
+                          "decipherOnly"
+                        ]
+                      },
+                      "nonRepudiation": {
+                        "type": "boolean",
+                        "description": "Indicate whether the public key in certificate can be  used to validate digital signature to provide a  non-repudiation service."
+                      }
+                    }
+                  },
+                  "locality": {
+                    "type": "string",
+                    "description": "Locality name for the subject of the certificate.  It can be empty when it is not configured.",
+                    "maxLength": 128,
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [PKI_X509_Certificate](#/PKI_X509_Certificate)<br>Certificate name.",
+                    "maxLength": 32,
+                    "minLength": 1
+                  },
+                  "org": {
+                    "type": "string",
+                    "description": "Organization name for the subject of the certificate.  It can be empty when it is not configured.",
+                    "maxLength": 64,
+                    "minLength": 1
+                  },
+                  "org_unit": {
+                    "type": "string",
+                    "description": "Organization unit name for the subject of the certificate.  It can be empty when it is not configured.",
+                    "maxLength": 64,
+                    "minLength": 1
+                  },
+                  "san_dnsname": {
+                    "type": "array",
+                    "description": "A dNSName type of entry (or entries) for subject alternative  name of the certificate. A dNSName is a domain name system  label in the preferred name syntax as specified by Section  3.5 of RFC 1034 and modified by Section 2.1 of RFC 1123.  Subject alternative name is a X509 certificate extension  specified in RFC 5280 Section 4.2.1.6.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 2
+                  },
+                  "san_ip": {
+                    "type": "array",
+                    "description": "An ipAddress type of entry (or entries) for subject alternative  name of the certificate. It supports both IPv4 and IPv6  addresses. Subject alternative name is a X509 certificate  extension specified in RFC 5280 Section 4.2.1.6.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 2
+                  },
+                  "state_or_province": {
+                    "type": "string",
+                    "description": "State or province name for the subject of the certificate.  It can be empty when it is not configured.",
+                    "maxLength": 128,
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "PKI_X509_Certificate.name",
+            "in": "path",
+            "description": "Reference Resource: [PKI_X509_Certificate](#/PKI_X509_Certificate)<br>Certificate name.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

@@ -1,0 +1,4604 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Access Points",
+    "version": "0.0.1",
+    "description": "API service to run troubleshooting tests on devices - Access Points (APs), CX Switches, AOS-S Switches, and Gateways (GWs)."
+  },
+  "servers": [
+    {
+      "url": "https://de1.api.central.arubanetworks.com",
+      "description": "eu"
+    },
+    {
+      "url": "https://de2.api.central.arubanetworks.com",
+      "description": "eucentral2"
+    },
+    {
+      "url": "https://de3.api.central.arubanetworks.com",
+      "description": "eucentral3"
+    },
+    {
+      "url": "https://gb1.api.central.arubanetworks.com",
+      "description": "ukwest2"
+    },
+    {
+      "url": "https://us1.api.central.arubanetworks.com",
+      "description": "prod"
+    },
+    {
+      "url": "https://us2.api.central.arubanetworks.com",
+      "description": "central-prod2"
+    },
+    {
+      "url": "https://us4.api.central.arubanetworks.com",
+      "description": "uswest4"
+    },
+    {
+      "url": "https://us5.api.central.arubanetworks.com",
+      "description": "uswest5"
+    },
+    {
+      "url": "https://us6.api.central.arubanetworks.com",
+      "description": "us-east-1"
+    },
+    {
+      "url": "https://ca1.api.central.arubanetworks.com",
+      "description": "starman"
+    },
+    {
+      "url": "https://in1.api.central.arubanetworks.com",
+      "description": "apac"
+    },
+    {
+      "url": "https://jp1.api.central.arubanetworks.com",
+      "description": "apaceast"
+    },
+    {
+      "url": "https://au1.api.central.arubanetworks.com",
+      "description": "apacsouth"
+    },
+    {
+      "url": "https://ae1.api.central.arubanetworks.com",
+      "description": "uaenorth1"
+    },
+    {
+      "url": "https://cn1.api.central.arubanetworks.com.cn",
+      "description": "china-prod"
+    },
+    {
+      "url": "https://internal.api.central.arubanetworks.com",
+      "description": "internal2"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Access Points",
+      "description": "Troubleshooting operations on Access Points (APs)"
+    }
+  ],
+  "paths": {
+    "/network-troubleshooting/v1/aps/{serial-number}/aaa": {
+      "post": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Initiate an AAA test on an AP",
+        "description": "Starts an asynchronous AAA test on the specified AP.",
+        "operationId": "initiateApAaaV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          }
+        ],
+        "requestBody": {
+          "description": "AP AAA command parameters",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AaaApRequest"
+              },
+              "example": {
+                "serverName": "radius-server-1",
+                "username": "testuser",
+                "password": "password123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted. The operation has been successfully initiated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncOperationStatus"
+                },
+                "example": {
+                  "location": "/network-troubleshooting/v1/aps/{serial-number}/aaa/async-operations/{task-id}",
+                  "status": "INITIATED",
+                  "startTime": "2025-07-22T10:00:00Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/DeviceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/DeviceOffline"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/aaa/async-operations/{task-id}": {
+      "get": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Get AP AAA test status and results",
+        "description": "Retrieves the status and results of a previously initiated asynchronous AP AAA test.",
+        "operationId": "getApAaaResultV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncTaskId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. Returns the status and results of the AP AAA test.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AaaApResult"
+                },
+                "examples": {
+                  "completed-passed": {
+                    "summary": "AP AAA test passed",
+                    "value": {
+                      "startTime": "2025-07-22T10:00:05Z",
+                      "endTime": "2025-07-22T10:00:07Z",
+                      "progressPercent": 100,
+                      "status": "COMPLETED",
+                      "failReason": null,
+                      "output": {
+                        "serverName": "radius-server-1",
+                        "authenticationStatus": "Passed"
+                      }
+                    }
+                  },
+                  "completed-failed": {
+                    "summary": "AP AAA test failed",
+                    "value": {
+                      "startTime": "2025-07-22T10:01:05Z",
+                      "endTime": "2025-07-22T10:01:08Z",
+                      "progressPercent": 100,
+                      "status": "COMPLETED",
+                      "failReason": "Authentication timed out",
+                      "output": {
+                        "serverName": "radius-server-1",
+                        "authenticationStatus": "Failed"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/TaskNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/disconnectUserAll": {
+      "post": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Disconnect all users from an Access Point",
+        "description": "Initiates a disconnect action for all users connected to the specified Access Point.",
+        "operationId": "disconnectAllUsersApV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted. The disconnect action has been successfully initiated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionInitiatedStatus"
+                },
+                "example": {
+                  "startTime": "2025-07-22T15:00:00Z",
+                  "status": "INITIATED"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/DeviceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/DeviceOffline"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/disconnectUserByMacAddress": {
+      "post": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Disconnect a specific user by MAC address from an Access Point",
+        "description": "Initiates a disconnect action for a specific user connected to the specified Access Point, identified by their MAC address.",
+        "operationId": "disconnectUserByMacApV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          }
+        ],
+        "requestBody": {
+          "description": "User MAC address to disconnect",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DisconnectUserByMacApRequest"
+              },
+              "example": {
+                "userMacAddress": "AA:BB:CC:DD:EE:FF"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted. The disconnect action has been successfully initiated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionInitiatedStatus"
+                },
+                "example": {
+                  "startTime": "2025-07-22T15:05:00Z",
+                  "status": "INITIATED"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/DeviceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/DeviceOffline"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/disconnectUserByNetwork": {
+      "post": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Disconnect all users from a specific network (SSID) on an Access Point",
+        "description": "Initiates a disconnect action for all users connected to a specific network (SSID) on the specified Access Point.",
+        "operationId": "disconnectUserByNetworkApV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          }
+        ],
+        "requestBody": {
+          "description": "Network name (SSID) to disconnect users from",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DisconnectUserByNetworkApRequest"
+              },
+              "example": {
+                "networkName": "Corporate-WiFi-5G"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted. The disconnect action has been successfully initiated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionInitiatedStatus"
+                },
+                "example": {
+                  "startTime": "2025-07-22T15:10:00Z",
+                  "status": "INITIATED"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/DeviceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/DeviceOffline"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/getArpTable": {
+      "post": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Initiate a Get Arp Table test on an AP",
+        "description": "Starts an asynchronous Get Arp Table test on the specified AP.",
+        "operationId": "initiateApGetArpTableV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted. The operation has been successfully initiated. The response includes the location to track the operation's status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncOperationStatus"
+                },
+                "example": {
+                  "location": "/network-troubleshooting/v1/aps/{serial-number}/getArpTable/async-operations/{task-id}",
+                  "status": "INITIATED",
+                  "startTime": "2025-04-09T10:00:00Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/DeviceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/DeviceOffline"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/getArpTable/async-operations/{task-id}": {
+      "get": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Get AP Get Arp Table test status and results",
+        "description": "Retrieves the status and results of a previously initiated asynchronous AP Get Arp Table test.",
+        "operationId": "getApGetArpTableResultV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncTaskId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. Returns the status and results of the AP Get Arp Table test.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetArpTableApResult"
+                },
+                "examples": {
+                  "completed": {
+                    "summary": "AP Get Arp Table completed successfully",
+                    "value": {
+                      "startTime": "2025-05-20T13:25:03.610188852Z",
+                      "endTime": "2025-05-20T13:25:03.920485478Z",
+                      "rawOutput": "\nCOMMAND=show arp\nIP address       HW type     Flags       HW address            Mask     Device\n172.31.98.18     0x1         0x2         a4:83:e7:18:ec:9f     *        br0.3333\n10.27.113.225    0x1         0x2         ec:eb:b8:19:aa:00     *        br0\n10.27.113.226    0x1         0x2         20:4c:03:11:f3:90     *        br0\n172.31.98.36     0x1         0x0         00:00:00:00:00:00     *        br0.3333\n172.31.98.2      0x1         0x6         c8:b5:ad:c3:b2:02     *        br0.3333\n",
+                      "output": {
+                        "entries": [
+                          {
+                            "macAddress": "a4:83:e7:18:ec:9f",
+                            "mask": "*",
+                            "ipAddress": "172.31.98.18",
+                            "device": "br0.3333",
+                            "hardwareType": "0x1",
+                            "flags": "0x2"
+                          },
+                          {
+                            "macAddress": "ec:eb:b8:19:aa:00",
+                            "mask": "*",
+                            "ipAddress": "10.27.113.225",
+                            "device": "br0",
+                            "hardwareType": "0x1",
+                            "flags": "0x2"
+                          },
+                          {
+                            "macAddress": "20:4c:03:11:f3:90",
+                            "mask": "*",
+                            "ipAddress": "10.27.113.226",
+                            "device": "br0",
+                            "hardwareType": "0x1",
+                            "flags": "0x2"
+                          },
+                          {
+                            "macAddress": "00:00:00:00:00:00",
+                            "mask": "*",
+                            "ipAddress": "172.31.98.36",
+                            "device": "br0.3333",
+                            "hardwareType": "0x1",
+                            "flags": "0x0"
+                          },
+                          {
+                            "macAddress": "c8:b5:ad:c3:b2:02",
+                            "mask": "*",
+                            "ipAddress": "172.31.98.2",
+                            "device": "br0.3333",
+                            "hardwareType": "0x1",
+                            "flags": "0x6"
+                          }
+                        ]
+                      },
+                      "failReason": null,
+                      "progressPercent": 100,
+                      "status": "COMPLETED"
+                    }
+                  },
+                  "running": {
+                    "summary": "Operation still running",
+                    "value": {
+                      "status": "RUNNING",
+                      "progressPercent": 0,
+                      "startTime": "2025-04-09T10:14:08Z",
+                      "endTime": null,
+                      "output": null,
+                      "rawOutput": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/TaskNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/http": {
+      "post": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Initiate an HTTP test on an AP",
+        "description": "Starts an asynchronous HTTP test on the specified AP.",
+        "operationId": "initiateApHttpV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted. The operation has been successfully initiated. The response includes the location to track the operation's status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncOperationStatus"
+                },
+                "example": {
+                  "location": "/network-troubleshooting/v1/aps/{serial-number}/http/async-operations/{task-id}",
+                  "status": "INITIATED",
+                  "startTime": "2025-04-09T10:00:00Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/DeviceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/DeviceOffline"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "requestBody": {
+          "description": "AP Http command parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HttpApRequest"
+              },
+              "examples": {
+                "minimal": {
+                  "summary": "Minimal AP Http request",
+                  "value": {
+                    "url": "www.google.com"
+                  }
+                },
+                "full": {
+                  "summary": "AP Http request with additional parameters",
+                  "value": {
+                    "url": "www.google.com",
+                    "timeout": 5
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/http/async-operations/{task-id}": {
+      "get": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Get AP HTTP test status and results",
+        "description": "Retrieves the status and results of a previously initiated asynchronous AP HTTP test.",
+        "operationId": "getApHttpResultV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncTaskId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. Returns the status and results of the AP HTTP test.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpApResult"
+                },
+                "examples": {
+                  "completed": {
+                    "summary": "AP Http completed successfully",
+                    "value": {
+                      "progressPercent": 100,
+                      "endTime": "2025-05-20T13:21:00.449524726Z",
+                      "failReason": null,
+                      "status": "COMPLETED",
+                      "output": {
+                        "downloadRateInKbps": "125",
+                        "url": "www.google.com",
+                        "downloadBytesInKB": "19"
+                      },
+                      "startTime": "2025-05-20T13:20:58.202843531Z"
+                    }
+                  },
+                  "running": {
+                    "summary": "Operation still running",
+                    "value": {
+                      "status": "RUNNING",
+                      "progressPercent": 0,
+                      "startTime": "2025-04-09T10:14:08Z",
+                      "endTime": null,
+                      "output": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/TaskNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/https": {
+      "post": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Initiate an HTTPS test on an AP",
+        "description": "Starts an asynchronous HTTPS test on the specified AP.",
+        "operationId": "initiateApHttpsV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted. The operation has been successfully initiated. The response includes the location to track the operation's status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncOperationStatus"
+                },
+                "example": {
+                  "location": "/network-troubleshooting/v1/aps/{serial-number}/https/async-operations/{task-id}",
+                  "status": "INITIATED",
+                  "startTime": "2025-04-09T10:00:00Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/DeviceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/DeviceOffline"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "requestBody": {
+          "description": "AP Https command parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HttpsApRequest"
+              },
+              "examples": {
+                "minimal": {
+                  "summary": "Minimal AP Https request",
+                  "value": {
+                    "url": "www.google.com"
+                  }
+                },
+                "full": {
+                  "summary": "AP Https request with additional parameters",
+                  "value": {
+                    "url": "www.google.com",
+                    "timeout": 5
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/https/async-operations/{task-id}": {
+      "get": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Get AP HTTPS test status and results",
+        "description": "Retrieves the status and results of a previously initiated asynchronous AP HTTPS test.",
+        "operationId": "getApHttpsResultV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncTaskId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. Returns the status and results of the AP HTTPS test.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpsApResult"
+                },
+                "examples": {
+                  "completed": {
+                    "summary": "AP Https completed successfully",
+                    "value": {
+                      "progressPercent": 100,
+                      "endTime": "2025-05-20T13:21:00.449524726Z",
+                      "failReason": null,
+                      "rawOutput": null,
+                      "status": "COMPLETED",
+                      "output": {
+                        "downloadRateInKbps": "125",
+                        "url": "www.google.com",
+                        "downloadBytesInKB": "19"
+                      },
+                      "startTime": "2025-05-20T13:20:58.202843531Z"
+                    }
+                  },
+                  "running": {
+                    "summary": "Operation still running",
+                    "value": {
+                      "status": "RUNNING",
+                      "progressPercent": 0,
+                      "startTime": "2025-04-09T10:14:08Z",
+                      "endTime": null,
+                      "output": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/TaskNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/list-tasks": {
+      "get": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "List active async tasks for an AP",
+        "description": "Retrieves a list of all active or recently completed asynchronous operations for the specified AP, grouped by test name. Results are sorted by startTime in descending order (most recently started first).",
+        "operationId": "listApTasksV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. Returns the list of active/recent tasks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/DeviceNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/locate": {
+      "post": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Locate an Access Point",
+        "description": "Initiates a locate (e.g., blinking LED) operation on the specified Access Point.",
+        "operationId": "locateApV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted. The locate action has been successfully initiated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionInitiatedStatus"
+                },
+                "example": {
+                  "startTime": "2025-06-25T08:31:15.380079232Z",
+                  "status": "INITIATED"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/DeviceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/DeviceConflictLocating"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/nslookup": {
+      "post": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Initiate an Nslookup test on an AP",
+        "description": "Starts an asynchronous Nslookup test on the specified AP.",
+        "operationId": "initiateApNslookupV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          }
+        ],
+        "requestBody": {
+          "description": "AP Nslookup command parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NslookupApRequest"
+              },
+              "examples": {
+                "minimal": {
+                  "summary": "Minimal AP Nslookup request",
+                  "value": {
+                    "host": "www.google.com"
+                  }
+                },
+                "full": {
+                  "summary": "AP Nslookup request with a specific DNS server",
+                  "value": {
+                    "host": "www.google.com",
+                    "dnsServer": "8.8.8.8"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted. The operation has been successfully initiated. The response includes the location to track the operation's status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncOperationStatus"
+                },
+                "example": {
+                  "location": "/network-troubleshooting/v1/aps/{serial-number}/nslookup/async-operations/{task-id}",
+                  "status": "INITIATED",
+                  "startTime": "2025-04-09T10:00:00Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/DeviceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/DeviceOffline"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/nslookup/async-operations/{task-id}": {
+      "get": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Get AP Nslookup test status and results",
+        "description": "Retrieves the status and results of a previously initiated asynchronous AP Nslookup test.",
+        "operationId": "getApNslookupResultV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncTaskId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. Returns the status and results of the AP Nslookup test.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NslookupApResult"
+                },
+                "examples": {
+                  "completed": {
+                    "summary": "AP Nslookup completed successfully",
+                    "value": {
+                      "startTime": "2025-05-20T13:26:20.837887330Z",
+                      "endTime": "2025-05-20T13:26:21.719771353Z",
+                      "output": {
+                        "hostName": "www.google.com",
+                        "dnsServer": "8.8.8.8",
+                        "resolvedAddresses": [
+                          "142.251.46.164"
+                        ]
+                      },
+                      "failReason": null,
+                      "progressPercent": 100,
+                      "status": "COMPLETED"
+                    }
+                  },
+                  "running": {
+                    "summary": "Operation still running",
+                    "value": {
+                      "status": "RUNNING",
+                      "progressPercent": 50,
+                      "startTime": "2025-04-09T10:14:08Z",
+                      "endTime": null,
+                      "output": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/TaskNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/ping": {
+      "post": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Initiate a Ping test on an AP",
+        "description": "Starts an asynchronous Ping test on the specified AP.",
+        "operationId": "initiateApPingV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted. The operation has been successfully initiated. The response includes the location to track the operation's status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncOperationStatus"
+                },
+                "example": {
+                  "location": "/network-troubleshooting/v1/aps/{serial-number}/ping/async-operations/{task-id}",
+                  "status": "INITIATED",
+                  "startTime": "2025-04-09T10:00:00Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/DeviceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/DeviceOffline"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "requestBody": {
+          "description": "AP Ping command parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PingApRequest"
+              },
+              "examples": {
+                "minimal": {
+                  "summary": "Minimal AP Ping request",
+                  "value": {
+                    "destination": "www.google.com"
+                  }
+                },
+                "full": {
+                  "summary": "AP Ping request with additional parameters",
+                  "value": {
+                    "destination": "www.google.com",
+                    "packetSize": 10,
+                    "count": 5,
+                    "interfacePort": "eth0",
+                    "vlan": 3000,
+                    "includeRawOutput": true
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/ping/async-operations/{task-id}": {
+      "get": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Get AP Ping test status and results",
+        "description": "Retrieves the status and results of a previously initiated asynchronous AP Ping test.",
+        "operationId": "getApPingResultV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncTaskId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. Returns the status and results of the AP Ping test.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PingApResult"
+                },
+                "examples": {
+                  "completed": {
+                    "summary": "AP Ping completed successfully",
+                    "value": {
+                      "startTime": "2025-05-20T13:07:48.849780286Z",
+                      "endTime": "2025-05-20T13:08:04.034123064Z",
+                      "rawOutput": "\nCOMMAND=ping www.google.com\nPING 142.251.46.164 (142.251.46.164): 56 data bytes\n64 bytes from 142.251.46.164: icmp_seq=0 ttl=108 time=200.2 ms\n64 bytes from 142.251.46.164: icmp_seq=1 ttl=108 time=209.8 ms\n64 bytes from 142.251.46.164: icmp_seq=3 ttl=108 time=208.8 ms\n64 bytes from 142.251.46.164: icmp_seq=4 ttl=108 time=200.2 ms\n\n--- 142.251.46.164 ping statistics ---\n5 packets transmitted, 4 packets received, 20% packet loss\nround-trip min/avg/max = 200.2/204.7/209.8 ms\n",
+                      "output": {
+                        "receivedPacketsCount": "4",
+                        "packetLossPercent": "20",
+                        "minimumRoundTripTimeMilliseconds": "200.2",
+                        "maximumRoundTripTimeMilliseconds": "209.8",
+                        "replies": [
+                          {
+                            "sentPacketAddress": "142.251.46.164",
+                            "sentPacketIcmpSequenceNumber": "0",
+                            "sentPacketTimeToLive": "108",
+                            "sentPacketTimeMilliseconds": "200.2",
+                            "sentPacketSizeBytes": "64"
+                          },
+                          {
+                            "sentPacketAddress": "142.251.46.164",
+                            "sentPacketIcmpSequenceNumber": "1",
+                            "sentPacketTimeToLive": "108",
+                            "sentPacketTimeMilliseconds": "209.8",
+                            "sentPacketSizeBytes": "64"
+                          },
+                          {
+                            "sentPacketAddress": "142.251.46.164",
+                            "sentPacketIcmpSequenceNumber": "3",
+                            "sentPacketTimeToLive": "108",
+                            "sentPacketTimeMilliseconds": "208.8",
+                            "sentPacketSizeBytes": "64"
+                          },
+                          {
+                            "sentPacketAddress": "142.251.46.164",
+                            "sentPacketIcmpSequenceNumber": "4",
+                            "sentPacketTimeToLive": "108",
+                            "sentPacketTimeMilliseconds": "200.2",
+                            "sentPacketSizeBytes": "64"
+                          }
+                        ],
+                        "averageRoundTripTimeMilliseconds": "204.7",
+                        "destination": "www.google.com",
+                        "resolvedIp": "142.251.46.164",
+                        "transmittedPacketsCount": "5"
+                      },
+                      "failReason": null,
+                      "progressPercent": 100,
+                      "status": "COMPLETED"
+                    }
+                  },
+                  "completed with failure": {
+                    "summary": "AP Ping failed result",
+                    "value": {
+                      "startTime": "2025-05-20T13:26:20.837887330Z",
+                      "endTime": "2025-05-20T13:26:21.719771353Z",
+                      "rawOutput": "\nCOMMAND=ping www.djgdij.com\nhost address failed because the ipv4/v6 address www.djgdij.com is invalid.\n",
+                      "output": null,
+                      "failReason": "Destination not resolved",
+                      "progressPercent": 100,
+                      "status": "COMPLETED"
+                    }
+                  },
+                  "running": {
+                    "summary": "Operation still running",
+                    "value": {
+                      "status": "RUNNING",
+                      "progressPercent": 0,
+                      "startTime": "2025-04-09T10:14:08Z",
+                      "endTime": null,
+                      "output": null,
+                      "rawOutput": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/TaskNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/reboot": {
+      "post": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Reboot an Access Point",
+        "description": "Initiates a reboot operation on the specified Access Point.",
+        "operationId": "rebootApV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted. The reboot action has been successfully initiated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionInitiatedStatus"
+                },
+                "example": {
+                  "startTime": "2025-06-25T08:31:15.380079232Z",
+                  "status": "INITIATED"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/DeviceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/DeviceConflictRebooting"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/rebootSwarm": {
+      "post": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Reboot an AP Swarm",
+        "description": "Initiates a reboot operation on the entire Swarm, triggered via its current conductor AP. The {serial-number} must be the serial of the Swarm's active conductor.",
+        "operationId": "rebootApSwarmV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted. The Swarm reboot action has been successfully initiated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionInitiatedStatus"
+                },
+                "example": {
+                  "startTime": "2025-10-28T11:00:00Z",
+                  "status": "INITIATED"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. Validation errors, or the specified device is not a conductor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "notConductor": {
+                    "summary": "Device is not a conductor",
+                    "value": {
+                      "errorCode": "HPE_GL_ERROR_BAD_REQUEST",
+                      "message": "Given device is not a conductor"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64",
+                  "minimum": 0,
+                  "maximum": 9223372036854776000
+                },
+                "description": "Request limit per hour."
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64",
+                  "minimum": 0,
+                  "maximum": 9223372036854776000
+                },
+                "description": "The number of requests left for the time window."
+              },
+              "X-RateLimit-Reset": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time",
+                  "maxLength": 20
+                },
+                "description": "The date-time (RFC 3339 timestamp in UTC+0) at which the current rate limit window resets."
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/DeviceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/DeviceConflictRebooting"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/show-commands": {
+      "get": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "List 'show' commands (AP - top commands)",
+        "description": "Returns most used/top 'show' commands supported on given AP. ",
+        "operationId": "listApShowCommandsV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. Returns the list of 'show' commands grouped by category.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShowCommandsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/DeviceNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/showCommands": {
+      "post": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Run 'show' commands (AP)",
+        "description": "Starts an asynchronous execution of one or more 'show' commands on an AP. The request is rejected with 400 if any command does not start with 'show ', or if more than 20 commands are provided.",
+        "operationId": "runApShowCommandsV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The list of 'show' commands to run.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShowCommandRequest"
+              },
+              "example": {
+                "commands": [
+                  "show interface brief",
+                  "show version"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted. Operation initiated; use the returned location to poll status/result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncOperationStatus"
+                },
+                "example": {
+                  "location": "/network-troubleshooting/v1/aps/{serial-number}/showCommands/async-operations/{task-id}",
+                  "status": "INITIATED",
+                  "startTime": "2025-08-25T10:00:00Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestShowCommand"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/DeviceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/DeviceOffline"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/showCommands/async-operations/{task-id}": {
+      "get": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Get 'show' commands status/result (AP)",
+        "description": "Polls the async task for the 'show' commands and returns status and raw text output.",
+        "operationId": "getApShowCommandsResultV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncTaskId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. Returns the status and result for the run 'show' commands.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShowCommandResult"
+                },
+                "examples": {
+                  "completed": {
+                    "summary": "Command finished successfully",
+                    "value": {
+                      "status": "COMPLETED",
+                      "startTime": "2026-02-03T14:20:59.912054756Z",
+                      "progressPercent": 100,
+                      "output": {
+                        "commands": [
+                          "show version"
+                        ],
+                        "results": [
+                          {
+                            "output": "\r\n\r\n## Command: show version - Tue Feb 3 06:39:02 2026\n====================================================\n\nTue Feb 03 06:39:02.313 2026\nHPE Aruba Networking Wireless Operating System.\nAOS-10 (MODEL: Aruba7010), Version 10.7.2.0 SSR\nWebsite: http://www.arubanetworks.com\n(c) Copyright 2025 Hewlett Packard Enterprise Development LP.\nCompiled on 2025-02-10 at 15:26:21 UTC (build 91891) by jenkins\n\nROM: System Bootstrap, Version CPBoot 1.0.7.0 (build 65676)\nBuilt: 2018-07-06 04:23:32\nBuilt by: p4build@re_client_65676\n\n\nSwitch uptime is 43 days 14 hours 8 minutes 8 seconds\nReboot Cause: Power Cycle (Intent:cause:register ee:ee:0:8000)\nSupervisor Card\nProcessor (XLP208 Rev B1 (Secure Boot) , 800 MHz) with 3797M bytes of memory.\n32K bytes of non-volatile configuration memory.\n1936M bytes of Supervisor Card system flash.\n",
+                            "command": "show version"
+                          }
+                        ]
+                      },
+                      "endTime": "2026-02-03T14:21:02.004881090Z",
+                      "failReason": null
+                    }
+                  },
+                  "running": {
+                    "summary": "Still running",
+                    "value": {
+                      "status": "RUNNING",
+                      "progressPercent": 40,
+                      "startTime": "2025-08-25T10:00:01Z",
+                      "endTime": null,
+                      "failReason": null,
+                      "output": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/TaskNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/speedtest": {
+      "post": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Initiate a Speedtest on an AP",
+        "description": "Starts an asynchronous Speedtest on the specified AP.",
+        "operationId": "initiateApSpeedtestV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted. The operation has been successfully initiated. The response includes the location to track the operation's status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncOperationStatus"
+                },
+                "example": {
+                  "location": "/network-troubleshooting/v1/aps/{serial-number}/speedtest/async-operations/{task-id}",
+                  "status": "INITIATED",
+                  "startTime": "2025-04-09T10:00:00Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/DeviceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/DeviceOffline"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "requestBody": {
+          "description": "AP Speedtest command parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SpeedtestApRequest"
+              },
+              "examples": {
+                "minimal": {
+                  "summary": "Minimal AP Speedtest request",
+                  "value": {
+                    "iperfServerAddress": "84.1.43.23"
+                  }
+                },
+                "full": {
+                  "summary": "AP Speedtest request with additional parameters",
+                  "value": {
+                    "iperfServerAddress": "84.1.43.23",
+                    "protocol": "tcp",
+                    "serverPort": 5055,
+                    "bandwidth": 1000,
+                    "includeReverse": true,
+                    "secondsToMeasure": 20,
+                    "parallel": 10,
+                    "omit": 3,
+                    "windowSize": 1000
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/speedtest/async-operations/{task-id}": {
+      "get": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Get AP Speedtest status and results",
+        "description": "Retrieves the status and results of a previously initiated asynchronous AP Speedtest.",
+        "operationId": "getApSpeedtestResultV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncTaskId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. Returns the status and results of the AP Speedtest.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpeedtestApResult"
+                },
+                "examples": {
+                  "completed": {
+                    "summary": "AP Speedtest completed successfully",
+                    "value": {
+                      "startTime": "2025-05-20T13:19:36.125254066Z",
+                      "endTime": "2025-05-20T13:19:48.499847376Z",
+                      "progressPercent": 100,
+                      "output": {
+                        "iperfServerAddress": "84.17.57.129",
+                        "serverPort": "51118",
+                        "downstreamRetries": null,
+                        "upstreamDatagrams": null,
+                        "downstreamDatagrams": null,
+                        "upstreamJitter": null,
+                        "downstreamJitter": null,
+                        "upstreamLostPackets": null,
+                        "upstreamBytes": "21069984",
+                        "downstreamLostPackets": null,
+                        "upstreamBandwidthInMbps": "16.855683",
+                        "downstreamBandwidthInMbps": null,
+                        "intervalInSeconds": "10",
+                        "protocol": "TCP",
+                        "upstreamRetries": "1442",
+                        "downstreamBytes": null
+                      },
+                      "failReason": null,
+                      "status": "COMPLETED"
+                    }
+                  },
+                  "running": {
+                    "summary": "Operation still running",
+                    "value": {
+                      "status": "RUNNING",
+                      "progressPercent": 0,
+                      "startTime": "2025-04-09T10:14:08Z",
+                      "endTime": null,
+                      "output": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/TaskNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/tcp": {
+      "post": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Initiate a TCP test on an AP",
+        "description": "Starts an asynchronous TCP test on the specified AP.",
+        "operationId": "initiateApTcpV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted. The operation has been successfully initiated. The response includes the location to track the operation's status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncOperationStatus"
+                },
+                "example": {
+                  "location": "/network-troubleshooting/v1/aps/{serial-number}/tcp/async-operations/{task-id}",
+                  "status": "INITIATED",
+                  "startTime": "2025-04-09T10:00:00Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/DeviceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/DeviceOffline"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "requestBody": {
+          "description": "AP Tcp command parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TcpApRequest"
+              },
+              "examples": {
+                "minimal": {
+                  "summary": "Minimal AP Tcp request",
+                  "value": {
+                    "host": "www.google.com",
+                    "port": 443
+                  }
+                },
+                "full": {
+                  "summary": "AP Tcp request with additional parameters",
+                  "value": {
+                    "host": "www.google.com",
+                    "port": 443,
+                    "timeout": 5
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/tcp/async-operations/{task-id}": {
+      "get": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Get AP TCP test status and results",
+        "description": "Retrieves the status and results of a previously initiated asynchronous AP TCP test.",
+        "operationId": "getApTcpResultV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncTaskId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. Returns the status and results of the AP TCP test.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TcpApResult"
+                },
+                "examples": {
+                  "completed": {
+                    "summary": "AP Tcp completed successfully",
+                    "value": {
+                      "startTime": "2025-05-20T13:23:33.299455647Z",
+                      "endTime": "2025-05-20T13:23:34.121460257Z",
+                      "output": {
+                        "host": "www.google.com",
+                        "connectionTimeInMilliseconds": "209"
+                      },
+                      "failReason": null,
+                      "progressPercent": 100,
+                      "status": "COMPLETED"
+                    }
+                  },
+                  "running": {
+                    "summary": "Operation still running",
+                    "value": {
+                      "status": "RUNNING",
+                      "progressPercent": 0,
+                      "startTime": "2025-04-09T10:14:08Z",
+                      "endTime": null,
+                      "output": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/TaskNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/traceroute": {
+      "post": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Initiate a Traceroute test on an AP",
+        "description": "Starts an asynchronous Traceroute test on the specified AP.",
+        "operationId": "initiateApTracerouteV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted. The operation has been successfully initiated. The response includes the location to track the operation's status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncOperationStatus"
+                },
+                "example": {
+                  "location": "/network-troubleshooting/v1/aps/{serial-number}/traceroute/async-operations/{task-id}",
+                  "status": "INITIATED",
+                  "startTime": "2025-04-09T10:00:00Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/DeviceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/DeviceOffline"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "requestBody": {
+          "description": "AP Traceroute command parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TracerouteApRequest"
+              },
+              "examples": {
+                "minimal": {
+                  "summary": "Minimal AP Traceroute request",
+                  "value": {
+                    "destination": "www.google.com"
+                  }
+                },
+                "full": {
+                  "summary": "AP Traceroute request with additional parameters",
+                  "value": {
+                    "destination": "www.google.com",
+                    "includeRawOutput": false
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/network-troubleshooting/v1/aps/{serial-number}/traceroute/async-operations/{task-id}": {
+      "get": {
+        "tags": [
+          "Access Points"
+        ],
+        "summary": "Get AP Traceroute test status and results",
+        "description": "Retrieves the status and results of a previously initiated asynchronous AP Traceroute test.",
+        "operationId": "getApTracerouteResultV1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeviceSerial"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncTaskId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. Returns the status and results of the AP Traceroute test.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TracerouteApResult"
+                },
+                "examples": {
+                  "completed": {
+                    "summary": "AP Traceroute completed successfully",
+                    "value": {
+                      "startTime": "2025-05-20T13:14:29.148912180Z",
+                      "progressPercent": 100,
+                      "output": {
+                        "resolvedIp": "142.251.46.164",
+                        "hops": [
+                          {
+                            "hop": "1",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "33.799 ms",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "10.27.113.225"
+                              },
+                              {
+                                "responseTimeMilliseconds": "0.942 ms",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "10.27.113.225"
+                              },
+                              {
+                                "responseTimeMilliseconds": "0.897 ms",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "10.27.113.225"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "2",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "0.890 ms",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "10.27.113.1"
+                              },
+                              {
+                                "responseTimeMilliseconds": "399.632 ms",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "10.27.113.1"
+                              },
+                              {
+                                "responseTimeMilliseconds": "0.887 ms",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "10.27.113.1"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "3",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "0.890 ms",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "10.27.70.2"
+                              },
+                              {
+                                "responseTimeMilliseconds": "0.795 ms",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "10.27.70.2"
+                              },
+                              {
+                                "responseTimeMilliseconds": "997.445 ms",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "10.27.70.2"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "4",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "0.889 ms",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "10.27.66.2"
+                              },
+                              {
+                                "responseTimeMilliseconds": "0.889 ms",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "10.27.66.2"
+                              },
+                              {
+                                "responseTimeMilliseconds": "0.801 ms",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "10.27.66.2"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "5",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "6",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "7",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "8",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "9",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "10",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "11",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "12",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "13",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "14",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "15",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "16",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "17",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "18",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "19",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "20",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "21",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "22",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "23",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "24",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "25",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "26",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "27",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "28",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "29",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          },
+                          {
+                            "hop": "30",
+                            "probes": [
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              },
+                              {
+                                "responseTimeMilliseconds": "*",
+                                "ipAddress": "null",
+                                "reverseDnsResolution": "null"
+                              }
+                            ]
+                          }
+                        ],
+                        "destination": "www.google.com"
+                      },
+                      "failReason": null,
+                      "status": "COMPLETED",
+                      "rawOutput": "\nCOMMAND=traceroute www.google.com\ntraceroute to 142.251.46.164 (142.251.46.164), 30 hops max, 38 byte packets\n 1  10.27.113.225  33.799 ms  0.942 ms  0.897 ms\n 2  10.27.113.1  0.890 ms  399.632 ms  0.887 ms\n 3  10.27.70.2  0.890 ms  0.795 ms  997.445 ms\n 4  10.27.66.2  0.889 ms  0.889 ms  0.801 ms\n 5  * * *\n 6  * * *\n 7  * * *\n 8  * * *\n 9  * * *\n10  * * *\n11  * * *\n12  * * *\n13  * * *\n14  * * *\n15  * * *\n16  * * *\n17  * * *\n18  * * *\n19  * * *\n20  * * *\n21  * * *\n22  * * *\n23  * * *\n24  * * *\n25  * * *\n26  * * *\n27  * * *\n28  * * *\n29  * * *\n30  * * *\n",
+                      "endTime": "2025-05-20T13:17:07.358841792Z"
+                    }
+                  },
+                  "running": {
+                    "summary": "Operation still running",
+                    "value": {
+                      "output": null,
+                      "progressPercent": 0,
+                      "failReason": null,
+                      "startTime": "2025-05-20T13:14:29.148912180Z",
+                      "rawOutput": null,
+                      "status": "RUNNING",
+                      "endTime": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/TaskNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AaaApParsedOutput": {
+        "type": "object",
+        "properties": {
+          "serverName": {
+            "type": "string",
+            "description": "The name of the RADIUS server tested against."
+          },
+          "authenticationStatus": {
+            "type": "string",
+            "description": "The result of the authentication test.",
+            "enum": [
+              "Passed",
+              "Failed"
+            ]
+          }
+        },
+        "title": "AP AAA RESPONSE"
+      },
+      "AaaApRequest": {
+        "type": "object",
+        "properties": {
+          "serverName": {
+            "type": "string",
+            "description": "Radius Server Name Required"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username"
+          },
+          "password": {
+            "type": "string",
+            "description": "Password"
+          }
+        },
+        "required": [
+          "serverName",
+          "username",
+          "password"
+        ],
+        "title": "AP AAA REQUEST"
+      },
+      "AaaApResult": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AsyncOperationResultBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "output": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/AaaApParsedOutput"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "title": "AP AAA RESULT"
+      },
+      "ActionInitiatedStatus": {
+        "title": "Action Initiation Response",
+        "type": "object",
+        "properties": {
+          "startTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp indicating when the action was initiated."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "INITIATED"
+            ],
+            "description": "The initial status of the action."
+          }
+        },
+        "required": [
+          "startTime",
+          "status"
+        ]
+      },
+      "AsyncOperationResultBase": {
+        "title": "Base structure for test GET",
+        "required": [
+          "status",
+          "progressPercent",
+          "startTime"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "INITIATED",
+              "RUNNING",
+              "COMPLETED",
+              "FAILED"
+            ],
+            "description": "The final or current status of the operation."
+          },
+          "progressPercent": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Percentage completion of the operation (0-100)."
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp indicating when the operation was initiated."
+          },
+          "endTime": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp indicating when the operation finished (null if not finished)."
+          }
+        }
+      },
+      "AsyncOperationStatus": {
+        "title": "Test Initiation Response",
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "string",
+            "format": "uri-reference",
+            "description": "The relative URL path to query the status and result of the asynchronous operation."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "INITIATED"
+            ],
+            "description": "The initial status of the operation."
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp indicating when the operation was initiated."
+          }
+        }
+      },
+      "DeviceNotReadyErrorResponse": {
+        "title": "Device Not Ready Error Response",
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "A human-readable description of the error."
+          },
+          "errorCode": {
+            "type": "string",
+            "description": "A unique code identifying the error type."
+          }
+        },
+        "required": [
+          "message",
+          "errorCode"
+        ]
+      },
+      "DisconnectUserByMacApRequest": {
+        "type": "object",
+        "properties": {
+          "userMacAddress": {
+            "type": "string",
+            "description": "MAC address of the user to disconnect."
+          }
+        },
+        "required": [
+          "userMacAddress"
+        ],
+        "title": "AP DISCONNECT USER BY MAC REQUEST"
+      },
+      "DisconnectUserByNetworkApRequest": {
+        "type": "object",
+        "properties": {
+          "networkName": {
+            "type": "string",
+            "description": "Name (SSID) of the network from which to disconnect users."
+          }
+        },
+        "required": [
+          "networkName"
+        ],
+        "title": "AP DISCONNECT USER BY NETWORK REQUEST"
+      },
+      "ErrorResponse": {
+        "title": "Error Response",
+        "type": "object",
+        "properties": {
+          "errorCode": {
+            "type": "string",
+            "description": "A unique code identifying the error type."
+          },
+          "message": {
+            "type": "string",
+            "description": "A human-readable description of the error."
+          }
+        }
+      },
+      "ForbiddenError": {
+        "type": "object",
+        "description": "Forbidden error details returned from the server.",
+        "required": [
+          "httpStatusCode",
+          "errorCode",
+          "message",
+          "debugId"
+        ],
+        "properties": {
+          "httpStatusCode": {
+            "type": "integer",
+            "minimum": 403,
+            "maximum": 403,
+            "example": 403,
+            "description": "HTTP status code."
+          },
+          "errorCode": {
+            "type": "string",
+            "description": "Error code for the specific error.",
+            "maxLength": 256,
+            "example": "HPE_GL_ERROR_FORBIDDEN"
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message describing the issue.",
+            "maxLength": 1024,
+            "example": "Insufficient permissions to access this resource"
+          },
+          "debugId": {
+            "type": "string",
+            "description": "Debug identifier for troubleshooting.",
+            "maxLength": 256,
+            "example": "abc-123-456"
+          }
+        }
+      },
+      "GetArpTableApArptablerowresult": {
+        "type": "object",
+        "properties": {
+          "ipAddress": {
+            "type": "string",
+            "description": "The IP address in the ARP table."
+          },
+          "hardwareType": {
+            "type": "string",
+            "description": "The hardware type."
+          },
+          "flags": {
+            "type": "string",
+            "description": "The flags associated with the entry."
+          },
+          "macAddress": {
+            "type": "string",
+            "description": "The MAC address."
+          },
+          "mask": {
+            "type": "string",
+            "description": "The mask associated with the entry."
+          },
+          "device": {
+            "type": "string",
+            "description": "The device associated with the entry."
+          }
+        },
+        "title": "AP ARP TABLE ENTRY"
+      },
+      "GetArpTableApParsedOutput": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GetArpTableApArptablerowresult"
+            },
+            "description": "The entries in the ARP table."
+          }
+        },
+        "title": "AP ARP TABLE RESPONSE"
+      },
+      "GetArpTableApResult": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AsyncOperationResultBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "output": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GetArpTableApParsedOutput"
+                  }
+                ]
+              },
+              "rawOutput": {
+                "type": "string",
+                "description": "The raw output of the test."
+              }
+            }
+          }
+        ],
+        "title": "AP ARP TABLE RESULT"
+      },
+      "HttpApParsedOutput": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The URL used for the HTTP test."
+          },
+          "downloadRateInKbps": {
+            "type": "string",
+            "description": "The download rate in Mbps."
+          },
+          "downloadBytesInKB": {
+            "type": "string",
+            "description": "The download size in bytes."
+          }
+        },
+        "title": "AP HTTP RESPONSE"
+      },
+      "HttpApRequest": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Hostname/IP address required"
+          },
+          "timeout": {
+            "type": "integer",
+            "description": "Timeout in seconds (1-10)",
+            "minimum": 1,
+            "maximum": 10
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "AP HTTP REQUEST"
+      },
+      "HttpApResult": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AsyncOperationResultBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "output": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/HttpApParsedOutput"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "title": "AP HTTP RESULT"
+      },
+      "HttpsApParsedOutput": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The URL used for the HTTP test."
+          },
+          "downloadRateInKbps": {
+            "type": "string",
+            "description": "The download rate in Mbps."
+          },
+          "downloadBytesInKB": {
+            "type": "string",
+            "description": "The download size in bytes."
+          }
+        },
+        "title": "AP HTTPS RESPONSE"
+      },
+      "HttpsApRequest": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Hostname/IP address required"
+          },
+          "timeout": {
+            "type": "integer",
+            "description": "Timeout in seconds (1-10)",
+            "minimum": 1,
+            "maximum": 10
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "AP HTTPS REQUEST"
+      },
+      "HttpsApResult": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AsyncOperationResultBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "output": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/HttpsApParsedOutput"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "title": "AP HTTPS RESULT"
+      },
+      "NslookupApParsedOutput": {
+        "type": "object",
+        "properties": {
+          "hostName": {
+            "type": "string",
+            "description": "The host name that was looked up."
+          },
+          "dnsServer": {
+            "type": "string",
+            "description": "The DNS server used for the lookup."
+          },
+          "resolvedAddresses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The list of resolved IP addresses."
+          }
+        },
+        "title": "AP NSLOOKUP RESPONSE"
+      },
+      "NslookupApRequest": {
+        "type": "object",
+        "properties": {
+          "host": {
+            "type": "string",
+            "description": "Hostname to lookup Required"
+          },
+          "dnsServer": {
+            "type": "string",
+            "description": "Optional DNS server to use for the lookup"
+          }
+        },
+        "required": [
+          "host"
+        ],
+        "title": "AP NSLOOKUP REQUEST"
+      },
+      "NslookupApResult": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AsyncOperationResultBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "output": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/NslookupApParsedOutput"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "title": "AP NSLOOKUP RESULT"
+      },
+      "PingApParsedOutput": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "type": "string",
+            "description": "The destination host name or IP address provided for the ping command."
+          },
+          "averageRoundTripTimeMilliseconds": {
+            "type": "string",
+            "description": "Average round trip time in milliseconds"
+          },
+          "resolvedIp": {
+            "type": "string",
+            "description": "The IP address resolved from the destination host."
+          },
+          "transmittedPacketsCount": {
+            "type": "string",
+            "description": "Number of packets transmitted."
+          },
+          "receivedPacketsCount": {
+            "type": "string",
+            "description": "Number of packets received."
+          },
+          "packetLossPercent": {
+            "type": "string",
+            "description": "Percentage of packet loss."
+          },
+          "minimumRoundTripTimeMilliseconds": {
+            "type": "string",
+            "description": "Minimum round-trip time in milliseconds."
+          },
+          "maximumRoundTripTimeMilliseconds": {
+            "type": "string",
+            "description": "Maximum round-trip time in milliseconds."
+          },
+          "replies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PingApPingrowresult"
+            },
+            "description": "Details for a single ping packet reply."
+          }
+        },
+        "title": "AP PING RESPONSE"
+      },
+      "PingApPingrowresult": {
+        "type": "object",
+        "properties": {
+          "sentPacketSizeBytes": {
+            "type": "string",
+            "description": "Size of the sent packet."
+          },
+          "sentPacketAddress": {
+            "type": "string",
+            "description": "IP address of the sent packet."
+          },
+          "sentPacketIcmpSequenceNumber": {
+            "type": "string",
+            "description": "ICMP sequence number of the sent packet."
+          },
+          "sentPacketTimeToLive": {
+            "type": "string",
+            "description": "Time to live of the sent packet."
+          },
+          "sentPacketTimeMilliseconds": {
+            "type": "string",
+            "description": "Time taken for the sent packet."
+          }
+        },
+        "title": "AP PING REPLY"
+      },
+      "PingApRequest": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "type": "string",
+            "description": "Hostname/IP address required"
+          },
+          "packetSize": {
+            "type": "integer",
+            "description": "The packet size in bytes (10-2000)",
+            "minimum": 10,
+            "maximum": 2000
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of probes to send (1-100)",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "interfacePort": {
+            "type": "string",
+            "description": ""
+          },
+          "vlan": {
+            "type": "integer",
+            "description": "",
+            "minimum": 1,
+            "maximum": 4095
+          },
+          "role": {
+            "type": "string",
+            "description": ""
+          },
+          "includeRawOutput": {
+            "type": "boolean",
+            "description": "Whether to include raw output in the response."
+          }
+        },
+        "required": [
+          "destination"
+        ],
+        "title": "AP PING REQUEST"
+      },
+      "PingApResult": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AsyncOperationResultBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "output": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PingApParsedOutput"
+                  }
+                ]
+              },
+              "rawOutput": {
+                "type": "string",
+                "description": "The raw output of the test."
+              }
+            }
+          }
+        ],
+        "title": "AP PING RESULT"
+      },
+      "ShowCommandOutput": {
+        "title": "RUN SHOW COMMANDS OUTPUT",
+        "type": "object",
+        "properties": {
+          "commands": {
+            "type": "array",
+            "description": "The original commands sent by the user in order.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "results": {
+            "type": "array",
+            "description": "Command outputs in the same order as the commands array.",
+            "items": {
+              "$ref": "#/components/schemas/ShowCommandResultItem"
+            }
+          }
+        },
+        "required": [
+          "commands",
+          "results"
+        ]
+      },
+      "ShowCommandRequest": {
+        "title": "RUN SHOW COMMANDS REQUEST",
+        "type": "object",
+        "properties": {
+          "commands": {
+            "type": "array",
+            "description": "List of CLI commands to run; each MUST start with 'show '.",
+            "maxItems": 20,
+            "items": {
+              "type": "string",
+              "description": "A device CLI command that begins with 'show '.",
+              "pattern": "^\\s*show\\b.+"
+            }
+          }
+        },
+        "required": [
+          "commands"
+        ]
+      },
+      "ShowCommandResult": {
+        "title": "RUN SHOW COMMAND RESULT",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AsyncOperationResultBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "output": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ShowCommandOutput"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "ShowCommandResultItem": {
+        "title": "RUN SHOW COMMAND RESULT ITEM",
+        "type": "object",
+        "properties": {
+          "output": {
+            "type": "string",
+            "description": "The raw text response returned by the device for the given command."
+          },
+          "command": {
+            "type": "string",
+            "description": "The original command sent by the user."
+          }
+        },
+        "required": [
+          "output",
+          "command"
+        ]
+      },
+      "ShowCommandsCategory": {
+        "title": "SHOW COMMANDS CATEGORY",
+        "type": "object",
+        "properties": {
+          "categoryName": {
+            "type": "string",
+            "description": "A logical category/group name for the commands."
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of commands under this category."
+          },
+          "commands": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShowCommandsCommand"
+            },
+            "description": "Commands under this category."
+          }
+        },
+        "required": [
+          "categoryName",
+          "count",
+          "commands"
+        ]
+      },
+      "ShowCommandsCommand": {
+        "title": "SHOW COMMAND",
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "A device CLI command that begins with 'show '."
+          }
+        },
+        "required": [
+          "command"
+        ]
+      },
+      "ShowCommandsResponse": {
+        "title": "SHOW COMMANDS LIST",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ShowCommandsCategory"
+        }
+      },
+      "SpeedtestApParsedOutput": {
+        "type": "object",
+        "properties": {
+          "iperfServerAddress": {
+            "type": "string",
+            "description": "The server address used for the speed test."
+          },
+          "protocol": {
+            "type": "string",
+            "description": "The protocol used for the speed test."
+          },
+          "upstreamBytes": {
+            "type": "string",
+            "description": "The upstream speed in bytes."
+          },
+          "upstreamBandwidthInMbps": {
+            "type": "string",
+            "description": "The upstream bandwidth in Mbps."
+          },
+          "intervalInSeconds": {
+            "type": "string",
+            "description": "The interval of the speed test."
+          },
+          "serverPort": {
+            "type": "string",
+            "description": "The server port used for the speed test."
+          },
+          "upstreamRetries": {
+            "type": "string",
+            "description": "The number of retries for upstream."
+          },
+          "downstreamBytes": {
+            "type": "string",
+            "description": "The downstream speed in bytes."
+          },
+          "downstreamBandwidthInMbps": {
+            "type": "string",
+            "description": "The downstream bandwidth in Mbps."
+          },
+          "downstreamRetries": {
+            "type": "string",
+            "description": "The number of retries for downstream."
+          },
+          "upstreamDatagrams": {
+            "type": "string",
+            "description": "The number of upstream datagrams."
+          },
+          "downstreamDatagrams": {
+            "type": "string",
+            "description": "The number of downstream datagrams."
+          },
+          "upstreamJitter": {
+            "type": "string",
+            "description": "The jitter for upstream."
+          },
+          "downstreamJitter": {
+            "type": "string",
+            "description": "The jitter for downstream."
+          },
+          "upstreamLostPackets": {
+            "type": "string",
+            "description": "Lost packets count for upstream."
+          },
+          "downstreamLostPackets": {
+            "type": "string",
+            "description": "Lost packets count for downstream."
+          }
+        },
+        "title": "AP SPEEDTEST RESPONSE"
+      },
+      "SpeedtestApRequest": {
+        "type": "object",
+        "properties": {
+          "iperfServerAddress": {
+            "type": "string",
+            "description": "IP Address Required"
+          },
+          "protocol": {
+            "type": "string",
+            "description": "",
+            "enum": [
+              "tcp",
+              "udp"
+            ]
+          },
+          "serverPort": {
+            "type": "integer",
+            "description": "Enter number between (0-65535)",
+            "minimum": 0,
+            "maximum": 65535
+          },
+          "bandwidth": {
+            "type": "integer",
+            "description": "Configures the bandwidth length in Kbps"
+          },
+          "includeReverse": {
+            "type": "boolean",
+            "description": "Reverse"
+          },
+          "secondsToMeasure": {
+            "type": "integer",
+            "description": "Configures a time duration (in seconds) to run the speed test",
+            "minimum": 0,
+            "maximum": 20
+          },
+          "parallel": {
+            "type": "integer",
+            "description": "",
+            "minimum": 1,
+            "maximum": 30
+          },
+          "omit": {
+            "type": "integer",
+            "description": "Enter the number of initial seconds to omit.",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "windowSize": {
+            "type": "integer",
+            "description": "Window size (in kb) sent to the server while running speed test",
+            "minimum": 64,
+            "maximum": 1638
+          }
+        },
+        "required": [
+          "iperfServerAddress"
+        ],
+        "title": "AP SPEEDTEST REQUEST"
+      },
+      "SpeedtestApResult": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AsyncOperationResultBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "output": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SpeedtestApParsedOutput"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "title": "AP SPEEDTEST RESULT"
+      },
+      "TaskListEntry": {
+        "title": "Task List Entry",
+        "type": "object",
+        "properties": {
+          "testName": {
+            "type": "string",
+            "description": "The name of the test or command (e.g., 'ping', 'showCommands')."
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri-reference",
+              "description": "A list of relative URL paths to query the status of individual task instances."
+            },
+            "description": "A list of one or more active/recent task locations for this test type."
+          }
+        },
+        "required": [
+          "testName",
+          "locations"
+        ]
+      },
+      "TaskListResponse": {
+        "title": "Task List Response",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/TaskListEntry"
+        },
+        "example": [
+          {
+            "testName": "showCommands",
+            "locations": [
+              "/network-troubleshooting/v1/aps/CNMJKZ203A/showCommands/async-operations/34f851ed-5142-44e3-a387-1f57e098e7c6"
+            ]
+          },
+          {
+            "testName": "ping",
+            "locations": [
+              "/network-troubleshooting/v1/aps/CNMJKZ203A/ping/async-operations/03b02a6f-ba7e-47de-8763-161c7ab17ad1"
+            ]
+          },
+          {
+            "testName": "getArpTable",
+            "locations": [
+              "/network-troubleshooting/v1/aps/CNMJKZ203A/getArpTable/async-operations/2cb150ca-a6b5-4603-9135-563697f1f4b9",
+              "/network-troubleshooting/v1/aps/CNMJKZ203A/getArpTable/async-operations/9728dc97-8a81-45b7-91ab-676faaf7de0e"
+            ]
+          }
+        ]
+      },
+      "TcpApParsedOutput": {
+        "type": "object",
+        "properties": {
+          "host": {
+            "type": "string",
+            "description": "The host name or IP address for the TCP connection."
+          },
+          "connectionTimeInMilliseconds": {
+            "type": "string",
+            "description": "The time taken to establish the TCP connection."
+          }
+        },
+        "title": "AP TCP RESPONSE"
+      },
+      "TcpApRequest": {
+        "type": "object",
+        "properties": {
+          "host": {
+            "type": "string",
+            "description": "Hostname/IP address required"
+          },
+          "port": {
+            "type": "integer",
+            "description": "The TCP port (range: 1-65535)",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "timeout": {
+            "type": "integer",
+            "description": "Timeout in seconds (1-10)",
+            "minimum": 1,
+            "maximum": 10
+          }
+        },
+        "required": [
+          "host",
+          "port"
+        ],
+        "title": "AP TCP REQUEST"
+      },
+      "TcpApResult": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AsyncOperationResultBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "output": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/TcpApParsedOutput"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "title": "AP TCP RESULT"
+      },
+      "TracerouteApParsedOutput": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "type": "string",
+            "description": "The destination host name or IP address for the traceroute command."
+          },
+          "resolvedIp": {
+            "type": "string",
+            "description": "The IP address resolved from the destination host."
+          },
+          "hops": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TracerouteApTracerouterowresult"
+            },
+            "description": "Details for a single traceroute hop."
+          }
+        },
+        "title": "AP TRACEROUTE RESPONSE"
+      },
+      "TracerouteApRequest": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "type": "string",
+            "description": "Hostname/IP address required"
+          },
+          "sourceInterface": {
+            "type": "string",
+            "description": ""
+          },
+          "includeRawOutput": {
+            "type": "boolean",
+            "description": "Whether to include raw output in the response."
+          }
+        },
+        "required": [
+          "destination"
+        ],
+        "title": "AP TRACEROUTE REQUEST"
+      },
+      "TracerouteApResult": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AsyncOperationResultBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "output": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/TracerouteApParsedOutput"
+                  }
+                ]
+              },
+              "rawOutput": {
+                "type": "string",
+                "description": "The raw output of the test."
+              }
+            }
+          }
+        ],
+        "title": "AP TRACEROUTE RESULT"
+      },
+      "TracerouteApTracerouteproberesult": {
+        "type": "object",
+        "properties": {
+          "ipAddress": {
+            "type": "string",
+            "description": "The IP address of the probe."
+          },
+          "reverseDnsResolution": {
+            "type": "string",
+            "description": "The reverse DNS resolution of the probe."
+          },
+          "responseTimeMilliseconds": {
+            "type": "string",
+            "description": "The response time of the probe in milliseconds."
+          }
+        },
+        "title": "AP TRACEROUTE PROBE"
+      },
+      "TracerouteApTracerouterowresult": {
+        "type": "object",
+        "properties": {
+          "hop": {
+            "type": "string",
+            "description": "The hop number in the traceroute."
+          },
+          "probes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TracerouteApTracerouteproberesult"
+            },
+            "description": "Details of the probes used in the traceroute."
+          }
+        },
+        "title": "AP TRACEROUTE ROW"
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad Request. Validation errors in the request body or parameters, or invalid parameters for the specific device.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "errorCode": "HPE_GL_ERROR_BAD_REQUEST",
+              "message": "Validation errors - packetSize must be between 10 and 2000"
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "Request limit per hour."
+          },
+          "X-RateLimit-Remaining": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "The number of requests left for the time window."
+          },
+          "X-RateLimit-Reset": {
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 20
+            },
+            "description": "The date-time (RFC 3339 timestamp in UTC+0) at which the current rate limit window resets."
+          }
+        }
+      },
+      "BadRequestShowCommand": {
+        "description": "Bad Request. Validation errors in the request body or parameters, or invalid parameters for the specific device.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "commandNotShow": {
+                "summary": "Command does not start with show",
+                "value": {
+                  "errorCode": "HPE_GL_ERROR_BAD_REQUEST",
+                  "message": "Command denied: must start with 'show '"
+                }
+              },
+              "tooManyCommands": {
+                "summary": "Commands array over limit",
+                "value": {
+                  "errorCode": "HPE_GL_ERROR_BAD_REQUEST",
+                  "message": "Too many commands, maximum allowed is 20"
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "Request limit per hour."
+          },
+          "X-RateLimit-Remaining": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "The number of requests left for the time window."
+          },
+          "X-RateLimit-Reset": {
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 20
+            },
+            "description": "The date-time (RFC 3339 timestamp in UTC+0) at which the current rate limit window resets."
+          }
+        }
+      },
+      "DeviceConflictLocating": {
+        "description": "Conflict. The device is already performing a locate operation.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DeviceNotReadyErrorResponse"
+            },
+            "example": {
+              "summary": "Device Already Locating",
+              "value": {
+                "serviceName": "Troubleshooting",
+                "httpStatusCode": "409",
+                "message": "Device already locating: VN2ZLHB006",
+                "code": "DOWNSTREAM_SERVICE_ERROR",
+                "errorType": "CONFLICT",
+                "errorCode": "HPE_GL_ERROR_CONFLICT"
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "Request limit per hour."
+          },
+          "X-RateLimit-Remaining": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "The number of requests left for the time window."
+          },
+          "X-RateLimit-Reset": {
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 20
+            },
+            "description": "The date-time (RFC 3339 timestamp in UTC+0) at which the current rate limit window resets."
+          }
+        }
+      },
+      "DeviceConflictRebooting": {
+        "description": "Conflict. The device is already performing a reboot.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DeviceNotReadyErrorResponse"
+            },
+            "example": {
+              "summary": "Device Already Rebooting",
+              "value": {
+                "serviceName": "Troubleshooting",
+                "httpStatusCode": "409",
+                "message": "Device already rebooting: VN2ZLHB006",
+                "code": "DOWNSTREAM_SERVICE_ERROR",
+                "errorType": "CONFLICT",
+                "errorCode": "HPE_GL_ERROR_CONFLICT"
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "Request limit per hour."
+          },
+          "X-RateLimit-Remaining": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "The number of requests left for the time window."
+          },
+          "X-RateLimit-Reset": {
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 20
+            },
+            "description": "The date-time (RFC 3339 timestamp in UTC+0) at which the current rate limit window resets."
+          }
+        }
+      },
+      "DeviceNotFound": {
+        "description": "Not Found. The device with the specified serial number was not found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "errorCode": "HPE_GL_ERROR_NOT_FOUND",
+              "message": "Device not found: CXXYYZZ001"
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "Request limit per hour."
+          },
+          "X-RateLimit-Remaining": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "The number of requests left for the time window."
+          },
+          "X-RateLimit-Reset": {
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 20
+            },
+            "description": "The date-time (RFC 3339 timestamp in UTC+0) at which the current rate limit window resets."
+          }
+        }
+      },
+      "DeviceOffline": {
+        "description": "Conflict. The device is currently offline.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "errorCode": "HPE_GL_ERROR_CONFLICT",
+              "message": "Device offline: CXXYYZZ001"
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "Request limit per hour."
+          },
+          "X-RateLimit-Remaining": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "The number of requests left for the time window."
+          },
+          "X-RateLimit-Reset": {
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 20
+            },
+            "description": "The date-time (RFC 3339 timestamp in UTC+0) at which the current rate limit window resets."
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Forbidden: Access is denied.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitReset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ForbiddenError"
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Internal Server Error. An unexpected error occurred on the server.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "errorCode": "HPE_GL_ERROR_INTERNAL_SERVER_ERROR",
+              "message": "An unexpected error occurred."
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "Request limit per hour."
+          },
+          "X-RateLimit-Remaining": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "The number of requests left for the time window."
+          },
+          "X-RateLimit-Reset": {
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 20
+            },
+            "description": "The date-time (RFC 3339 timestamp in UTC+0) at which the current rate limit window resets."
+          }
+        }
+      },
+      "TaskNotFound": {
+        "description": "Not Found. The specified async task ID or device serial was not found for this operation type.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "errorCode": "HPE_GL_ERROR_NOT_FOUND",
+              "message": "Async operation task not found: c7a3f2d1-e8a9-4b7c-8d1e-0f9a3b2c1d0e"
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "Request limit per hour."
+          },
+          "X-RateLimit-Remaining": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "The number of requests left for the time window."
+          },
+          "X-RateLimit-Reset": {
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 20
+            },
+            "description": "The date-time (RFC 3339 timestamp in UTC+0) at which the current rate limit window resets."
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "Too Many Requests. The user has sent too many requests in a given amount of time.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "errorCode": "HPE_GL_ERROR_TOO_MANY_REQUESTS",
+              "message": "Rate limit exceeded."
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "Request limit per hour."
+          },
+          "X-RateLimit-Remaining": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "The number of requests left for the time window."
+          },
+          "X-RateLimit-Reset": {
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 20
+            },
+            "description": "The date-time (RFC 3339 timestamp in UTC+0) at which the current rate limit window resets."
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized. Authentication credentials are required or invalid.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "errorCode": "HPE_GL_ERROR_UNAUTHORIZED",
+              "message": "Authentication required."
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "Request limit per hour."
+          },
+          "X-RateLimit-Remaining": {
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 9223372036854776000
+            },
+            "description": "The number of requests left for the time window."
+          },
+          "X-RateLimit-Reset": {
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 20
+            },
+            "description": "The date-time (RFC 3339 timestamp in UTC+0) at which the current rate limit window resets."
+          }
+        }
+      }
+    },
+    "parameters": {
+      "AsyncTaskId": {
+        "name": "task-id",
+        "in": "path",
+        "description": "ID of the asynchronous operation task",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "DeviceSerial": {
+        "name": "serial-number",
+        "in": "path",
+        "description": "Serial number of the target device",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "headers": {
+      "XRateLimitLimit": {
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0,
+          "maximum": 9223372036854776000
+        },
+        "description": "The request limit per hour."
+      },
+      "XRateLimitRemaining": {
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0,
+          "maximum": 9223372036854776000
+        },
+        "description": "The number of requests left for the time window."
+      },
+      "XRateLimitReset": {
+        "schema": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 20
+        },
+        "description": "The date-time (RFC 3339 timestamp in UTC) at which the current rate limit window resets."
+      }
+    },
+    "securitySchemes": {
+      "OAuth2": {
+        "type": "oauth2",
+        "description": "OAuth 2.0 authentication with client credentials flow. You can also use your own access token.",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://sso.common.cloud.hpe.com/as/token.oauth2",
+            "scopes": {}
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,444 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "PIM_RPF",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "PIM_RPF"
+    }
+  ],
+  "paths": {
+    "/system/pim_rpfs": {
+      "get": {
+        "tags": [
+          "PIM_RPF"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "RPF_interface": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>Nexthop Interface to reach the source or RP Address."
+                    },
+                    "RPF_nexthop_address": {
+                      "type": "string",
+                      "description": "Nexthop address to reach the source or RP address.",
+                      "maxLength": 45
+                    },
+                    "address": {
+                      "type": "string",
+                      "description": "Reference Resource: [PIM_RPF](#/PIM_RPF)<br>Source Address or the RP Address for the multicast groups that are being routed.",
+                      "maxLength": 45
+                    },
+                    "address_family": {
+                      "type": "string",
+                      "description": "Represents the address family for this entry.",
+                      "enum": [
+                        "ipv4",
+                        "ipv6"
+                      ]
+                    },
+                    "from": {
+                      "type": "string",
+                      "description": "Represents the origin for this entry.",
+                      "enum": [
+                        "RIP",
+                        "OSPF",
+                        "BGP",
+                        "connected",
+                        "static-multicast",
+                        "static-unicast",
+                        "local"
+                      ]
+                    },
+                    "group_address": {
+                      "type": "string",
+                      "description": "Reference Resource: [PIM_RPF](#/PIM_RPF)<br>When ECMP paths are available and user has configured multipath selection based on source and group addresses, different next-hops are choosen for different flows to achieve load splitting. This column indicates the group address of the multicast streams that are being routed. 0.0.0.0/:: indicates that this entry shows the next-hop details to reach a given source. When the group address is present, the entry indicates the next-hop choosen by PIM to reach a given source for the corresponding group.",
+                      "maxLength": 45
+                    },
+                    "is_pim_neighbor": {
+                      "type": "boolean",
+                      "description": "Specifies whether the nexthop is PIM neighbor or not."
+                    },
+                    "is_used": {
+                      "type": "boolean",
+                      "description": "Represents if the RPF Entry is used or unused."
+                    },
+                    "prefix": {
+                      "type": "string",
+                      "description": "IPv4 or IPv6 Source Prefix. Example: 192.168.0.1/32.",
+                      "maxLength": 49
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [PIM_RPF](#/PIM_RPF)<br>Reference to a VRF, associated with this multicast L3 source or RP address entry."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "vrf",
+                  "group_address",
+                  "from",
+                  "RPF_nexthop_address",
+                  "address",
+                  "prefix",
+                  "address_family",
+                  "is_used",
+                  "RPF_interface",
+                  "is_pim_neighbor"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/pim_rpfs/{PIM_RPF.vrf},{PIM_RPF.address},{PIM_RPF.group_address}": {
+      "get": {
+        "tags": [
+          "PIM_RPF"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "RPF_interface": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>Nexthop Interface to reach the source or RP Address."
+                    },
+                    "RPF_nexthop_address": {
+                      "type": "string",
+                      "description": "Nexthop address to reach the source or RP address.",
+                      "maxLength": 45
+                    },
+                    "address": {
+                      "type": "string",
+                      "description": "Reference Resource: [PIM_RPF](#/PIM_RPF)<br>Source Address or the RP Address for the multicast groups that are being routed.",
+                      "maxLength": 45
+                    },
+                    "address_family": {
+                      "type": "string",
+                      "description": "Represents the address family for this entry.",
+                      "enum": [
+                        "ipv4",
+                        "ipv6"
+                      ]
+                    },
+                    "from": {
+                      "type": "string",
+                      "description": "Represents the origin for this entry.",
+                      "enum": [
+                        "RIP",
+                        "OSPF",
+                        "BGP",
+                        "connected",
+                        "static-multicast",
+                        "static-unicast",
+                        "local"
+                      ]
+                    },
+                    "group_address": {
+                      "type": "string",
+                      "description": "Reference Resource: [PIM_RPF](#/PIM_RPF)<br>When ECMP paths are available and user has configured multipath selection based on source and group addresses, different next-hops are choosen for different flows to achieve load splitting. This column indicates the group address of the multicast streams that are being routed. 0.0.0.0/:: indicates that this entry shows the next-hop details to reach a given source. When the group address is present, the entry indicates the next-hop choosen by PIM to reach a given source for the corresponding group.",
+                      "maxLength": 45
+                    },
+                    "is_pim_neighbor": {
+                      "type": "boolean",
+                      "description": "Specifies whether the nexthop is PIM neighbor or not."
+                    },
+                    "is_used": {
+                      "type": "boolean",
+                      "description": "Represents if the RPF Entry is used or unused."
+                    },
+                    "prefix": {
+                      "type": "string",
+                      "description": "IPv4 or IPv6 Source Prefix. Example: 192.168.0.1/32.",
+                      "maxLength": 49
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [PIM_RPF](#/PIM_RPF)<br>Reference to a VRF, associated with this multicast L3 source or RP address entry."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "PIM_RPF.vrf",
+            "in": "path",
+            "description": "Reference Resource: [PIM_RPF](#/PIM_RPF)<br>Reference to a VRF, associated with this multicast L3 source or RP address entry.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "PIM_RPF.address",
+            "in": "path",
+            "description": "Reference Resource: [PIM_RPF](#/PIM_RPF)<br>Source Address or the RP Address for the multicast groups that are being routed.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "PIM_RPF.group_address",
+            "in": "path",
+            "description": "Reference Resource: [PIM_RPF](#/PIM_RPF)<br>When ECMP paths are available and user has configured multipath selection based on source and group addresses, different next-hops are choosen for different flows to achieve load splitting. This column indicates the group address of the multicast streams that are being routed. 0.0.0.0/:: indicates that this entry shows the next-hop details to reach a given source. When the group address is present, the entry indicates the next-hop choosen by PIM to reach a given source for the corresponding group.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "vrf",
+                  "group_address",
+                  "from",
+                  "RPF_nexthop_address",
+                  "address",
+                  "prefix",
+                  "address_family",
+                  "is_used",
+                  "RPF_interface",
+                  "is_pim_neighbor"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

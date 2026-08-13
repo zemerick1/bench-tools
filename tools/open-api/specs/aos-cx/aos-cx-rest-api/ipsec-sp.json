@@ -1,0 +1,326 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "IPsec_SP",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "IPsec_SP"
+    }
+  ],
+  "paths": {
+    "/system/vrfs/{VRF.name}/ipsec_sps": {
+      "get": {
+        "tags": [
+          "IPsec_SP"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "action": {
+                      "type": "string",
+                      "description": "Action to take on the traffic when SP matches.",
+                      "enum": [
+                        "allow",
+                        "block"
+                      ]
+                    },
+                    "address_family": {
+                      "type": "string",
+                      "description": "Traffic selector address family.",
+                      "enum": [
+                        "ipv4",
+                        "ipv6"
+                      ]
+                    },
+                    "dest_l4_port": {
+                      "type": "integer",
+                      "description": "Traffic selector TCP/UDP destination port.",
+                      "maximum": 65535,
+                      "minimum": 1
+                    },
+                    "dest_prefix": {
+                      "type": "string",
+                      "description": "Traffic selector destination prefix. IPv4 or IPv6 destination prefix and mask in the address/mask format. Example: 192.168.0.0/16.",
+                      "maxLength": 49
+                    },
+                    "direction": {
+                      "type": "string",
+                      "description": "'in':  Selector will be applied on the inbound packets. 'out': Selector will be applied on the outbound packets. 'fwd': Selector will be applied on the forwarded packets.",
+                      "enum": [
+                        "in",
+                        "out",
+                        "fwd"
+                      ]
+                    },
+                    "from": {
+                      "type": "string",
+                      "description": "Originator of this SP.",
+                      "enum": [
+                        "ospf",
+                        "ospfv3af",
+                        "radius"
+                      ]
+                    },
+                    "ip_protocol": {
+                      "type": "integer",
+                      "description": "Traffic selector IP protocol.",
+                      "maximum": 255,
+                      "minimum": 0
+                    },
+                    "ipsec_template": {
+                      "type": "object",
+                      "description": "Rules for SA lookup.",
+                      "properties": {
+                        "SPI": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Security Parameters Index for the Security Association.",
+                          "maximum": 4294967295,
+                          "minimum": 0
+                        },
+                        "ipsec_protocol": {
+                          "type": "string",
+                          "description": "IPsec protocol to use in the Security Association. Authentication Header (AH) | Encapsulating Security Payload (ESP). 'AH' : Provides authentication. 'ESP': Provides confidentiality and authentication.",
+                          "enum": [
+                            "AH",
+                            "ESP"
+                          ]
+                        },
+                        "mode": {
+                          "type": "string",
+                          "description": "IPsec operation mode. 'tunnel'    : Entire IP packet is encapsulated into a new packet with a new IP header. 'transport' : IP header of the packet is not modified.",
+                          "enum": [
+                            "transport",
+                            "tunnel"
+                          ]
+                        }
+                      }
+                    },
+                    "port": {
+                      "type": "string",
+                      "description": "Reference Resource: [Port](#/Port)<br>Traffic selector layer three interface."
+                    },
+                    "source_l4_port": {
+                      "type": "integer",
+                      "description": "Traffic selector TCP/UDP source port.",
+                      "maximum": 65535,
+                      "minimum": 1
+                    },
+                    "src_prefix": {
+                      "type": "string",
+                      "description": "Traffic selector source prefix. IPv4 or IPv6 source prefix and mask in the address/mask format. Example: 192.168.0.0/16.",
+                      "maxLength": 49
+                    },
+                    "statistics": {
+                      "type": "object",
+                      "description": "Statistics of this Security Policy.",
+                      "properties": {
+                        "bytes": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of bytes processed by this SP."
+                        },
+                        "packets": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of packets processed by this SP."
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "object",
+                      "description": "Status of this Security Policy.",
+                      "properties": {
+                        "kernel_application_time": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time (in seconds) since epoch when this SP was applied in the kernel."
+                        },
+                        "kernel_state": {
+                          "type": "string",
+                          "description": "Runtime state of this SP in the kernel. 'not_applied'      : SP is added for kernel configuration and not yet applied to the kernel. 'applied'          : SP is configured successfully in the kernel. 'failed_to_apply'  : SP configuration failed in the kernel.",
+                          "enum": [
+                            "not_applied",
+                            "applied",
+                            "failed_to_apply"
+                          ]
+                        }
+                      }
+                    },
+                    "vrf": {
+                      "type": "string",
+                      "description": "Reference Resource: [VRF](#/VRF)<br>Reference to the VRF table, to which this IPsec SP belongs."
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "VRF.name",
+            "in": "path",
+            "description": "Reference Resource: [VRF](#/VRF)<br>VRF identifier. Should be alphanumeric. VRF names must be unique.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "dest_prefix",
+                  "ip_protocol",
+                  "dest_l4_port",
+                  "ipsec_template",
+                  "status",
+                  "statistics",
+                  "direction",
+                  "from",
+                  "address_family",
+                  "src_prefix",
+                  "port",
+                  "source_l4_port",
+                  "action"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

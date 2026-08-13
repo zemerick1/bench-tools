@@ -1,0 +1,2095 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Sites",
+    "version": "1.0.0",
+    "description": "This is a release of the Aruba Network Configuration APIs."
+  },
+  "servers": [
+    {
+      "description": "eu",
+      "url": "https://de1.api.central.arubanetworks.com"
+    },
+    {
+      "description": "eucentral2",
+      "url": "https://de2.api.central.arubanetworks.com"
+    },
+    {
+      "description": "eucentral3",
+      "url": "https://de3.api.central.arubanetworks.com"
+    },
+    {
+      "description": "ukwest2",
+      "url": "https://gb1.api.central.arubanetworks.com"
+    },
+    {
+      "description": "prod",
+      "url": "https://us1.api.central.arubanetworks.com"
+    },
+    {
+      "description": "central-prod2",
+      "url": "https://us2.api.central.arubanetworks.com"
+    },
+    {
+      "description": "uswest4",
+      "url": "https://us4.api.central.arubanetworks.com"
+    },
+    {
+      "description": "uswest5",
+      "url": "https://us5.api.central.arubanetworks.com"
+    },
+    {
+      "description": "us-east-1",
+      "url": "https://us6.api.central.arubanetworks.com"
+    },
+    {
+      "description": "starman",
+      "url": "https://ca1.api.central.arubanetworks.com"
+    },
+    {
+      "description": "apac",
+      "url": "https://in1.api.central.arubanetworks.com"
+    },
+    {
+      "description": "apaceast",
+      "url": "https://jp1.api.central.arubanetworks.com"
+    },
+    {
+      "description": "apacsouth",
+      "url": "https://au1.api.central.arubanetworks.com"
+    },
+    {
+      "description": "uaenorth1",
+      "url": "https://ae1.api.central.arubanetworks.com"
+    },
+    {
+      "description": "china-prod",
+      "url": "https://cn1.api.central.arubanetworks.com.cn"
+    },
+    {
+      "description": "internal2",
+      "url": "https://internal.api.central.arubanetworks.com"
+    }
+  ],
+  "security": [
+    {
+      "AccessToken": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "Site management APIs for creating, updating, deleting sites and managing devices within sites.",
+      "name": "Sites"
+    }
+  ],
+  "paths": {
+    "/network-config/v1/site-add-devices": {
+      "post": {
+        "description": "This API will add devices to a site. \n - `desScopeId` -> ScopeId of the site to which devices should be associated.\n - `devices` -> Array of device serials that need to be associated. This can be a serial of a device or stackId.\n\nImportant: This API is supported only in Central On-Prem and standalone Central accounts. If your Central account has both Classic Central & Central (i.e. if you see the Classic Central toggle in the UI), this API is not supported & will not work.",
+        "operationId": "addDevicesToSiteSMV1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "desScopeId": {
+                    "description": "ScopeId of the site to which devices should be associated.",
+                    "type": "string"
+                  },
+                  "devices": {
+                    "description": "An array of device serials that need to be associated. This can be a serial of a device or stackId.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "desScopeId",
+                  "devices"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "description": "The request body for adding devices to a site.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceMoveSiteSMSchema"
+                }
+              }
+            },
+            "description": "Add-devices-to-site successful."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "summary": "Add devices to site",
+        "tags": [
+          "Sites"
+        ]
+      }
+    },
+    "/network-config/v1/sites": {
+      "get": {
+        "description": "This API is used to fetch information about all sites, based on the query parameters provided. Each site in the returned list includes details like the scopeId, scopeName, collectionId, collectionName, deviceCount, image, the address params and geolocation.",
+        "operationId": "getSitesV1",
+        "parameters": [
+          {
+            "description": "Number of sites that need to be fetched. (Default: 100) Maximum limit per query is 100.",
+            "example": 20,
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/LimitParam"
+            }
+          },
+          {
+            "description": "Offset from where the sites need to be fetched.",
+            "example": 0,
+            "in": "query",
+            "name": "offset",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/OffsetParam"
+            }
+          },
+          {
+            "description": "OData 4.0 filter supports filtering on fields `scopeName`, `address`, `city`, `state`, `country`, `zipcode`, `collectionName`.",
+            "example": "scopeName eq 'Building A'",
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Filter"
+            }
+          },
+          {
+            "description": "Sort by field. May be one of `scopeName`, `address`, `state`, `country`, `city`, `deviceCount`, `collectionName`, `zipcode`, `timezone`, `longitude`, `latitude`.",
+            "example": "scopeName ASC",
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "$ref": "#/components/schemas/Sort"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteGetRPCOutputSchema"
+                }
+              }
+            },
+            "description": "Returns the site list with its properties.",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/XRateLimitLimitHeader"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/XRateLimitRemainingHeader"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/XRateLimitResetHeader"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "summary": "Get sites",
+        "tags": [
+          "Sites"
+        ]
+      },
+      "put": {
+        "description": "This API is used to update name, address, geo coordinates or image for existing site based on its scopeId.\nImage needs to be uploaded first before referencing it here. \n\n `timezone` : Timezone response from Google API for the corresponding geo coordinate.\n - `rawOffset` -> offset value from UTC (in seconds) for the given location from Google Timezone API.\n - `timezoneId` -> Timezone ID from the Google Maps API response\n - `timezoneName` -> long form name for the timezone from Google Maps API response.",
+        "operationId": "updateSiteByScopeIdV1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SitePutRPCInputSchema"
+              }
+            }
+          },
+          "description": "The site update body.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SitePutRPCOutputSchema"
+                }
+              }
+            },
+            "description": "Site update successful and returns the scopeId of the site updated."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "summary": "Update site",
+        "tags": [
+          "Sites"
+        ]
+      },
+      "post": {
+        "description": "This API is used to create a site with address, geo coordinates (optional) and image (optional). Image needs to be uploaded first before referencing it here. \n\n `timezone` : Timezone response from Google API for the corresponding geo coordinate.\n - `rawOffset` -> offset value from UTC (in seconds) for the given location from Google Timezone API.\n - `timezoneId` -> Timezone ID from the Google Maps API response\n - `timezoneName` -> long form name for the timezone from Google Maps API response.",
+        "operationId": "createSiteV1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SitePostRPCInputSchema"
+              }
+            }
+          },
+          "description": "The site create body.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SitePostRPCOutputSchema"
+                }
+              }
+            },
+            "description": "Site creation successful and returns the scopeId of the site created."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "summary": "Create site",
+        "tags": [
+          "Sites"
+        ]
+      }
+    },
+    "/network-config/v1/sites/bulk": {
+      "delete": {
+        "description": "This API is used to delete one or more existing sites using a bulk delete operation.",
+        "operationId": "deleteSitesBulkV1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "example": {
+                  "items": [
+                    {
+                      "id": "scope-id-1"
+                    },
+                    {
+                      "id": "scope-id-2"
+                    },
+                    {
+                      "id": "scope-id-3"
+                    }
+                  ]
+                },
+                "properties": {
+                  "items": {
+                    "description": "An array of site IDs to delete.",
+                    "items": {
+                      "properties": {
+                        "id": {
+                          "description": "The site ID to delete.",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "items"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "description": "The request body for bulk deleting sites.",
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "description": "Response code.",
+                      "type": "string"
+                    },
+                    "items": {
+                      "description": "The list of deleted site IDs.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "message": {
+                      "description": "Response message.",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "Operation status.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Site deleted successfully and returns the scopeId of the site deleted.",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/XRateLimitLimitHeader"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/XRateLimitRemainingHeader"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/XRateLimitResetHeader"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "summary": "Bulk delete sites",
+        "tags": [
+          "Sites"
+        ]
+      }
+    },
+    "/network-config/v1alpha1/site-add-devices": {
+      "post": {
+        "deprecated": true,
+        "description": "(Deprecated) This API will add devices to a site. \n - `desScopeId` -> ScopeId of the site to which devices should be associated.\n - `devices` -> Array of device serials that need to be associated. This can be a serial of a device or stackId.  Use /network-config/v1/site-add-devices instead.\n\nImportant: This API is supported only in Central On-Prem and standalone Central accounts. If your Central account has both Classic Central & Central (i.e. if you see the Classic Central toggle in the UI), this API is not supported & will not work.",
+        "operationId": "addDevicesToSiteSM",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "desScopeId": {
+                    "description": "ScopeId of the site to which devices should be associated.",
+                    "type": "string"
+                  },
+                  "devices": {
+                    "description": "Array of device serials that need to be associated. This can be a serial of a device or stackId",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "desScopeId",
+                  "devices"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "description": "Request body for adding devices to a site",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceMoveSiteSMSchema"
+                }
+              }
+            },
+            "description": "add-devices-to-site successful",
+            "headers": {
+              "Deprecation": {
+                "$ref": "#/components/headers/Deprecation"
+              },
+              "Sunset": {
+                "$ref": "#/components/headers/Sunset"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/Default"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "summary": "Add devices to site",
+        "tags": [
+          "Sites"
+        ]
+      }
+    },
+    "/network-config/v1alpha1/sites": {
+      "get": {
+        "deprecated": true,
+        "description": "(Deprecated) This API is used to fetch information of all sites, based on the query parameters provided. Each site in the returned list includes details like - scopeId, scopeName, collectionId, collectionName, deviceCount, image, address params and geolocation. Use /network-config/v1/sites instead.",
+        "operationId": "getSites",
+        "parameters": [
+          {
+            "description": "number of sites that need to be fetched. (Default: 100) Maximum limit per query is 100",
+            "example": 20,
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "offset from where the sites need to be fetched",
+            "example": 0,
+            "in": "query",
+            "name": "offset",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "OData 4.0 filter supports filtering on fields `scopeName`, `address`, `city`, `state`, `country`, `zipcode`, `collectionName`",
+            "example": "scopeName eq 'Building A'",
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Filter"
+            }
+          },
+          {
+            "description": "Partial or Full String Free text search",
+            "example": "office",
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Search"
+            }
+          },
+          {
+            "description": "sort by field may be one of `scopeName`, `address`, `state`, `country`, `city`, `deviceCount`, `collectionName`, `zipcode`, `timezone`, `longitude`, `latitude`",
+            "example": "scopeName ASC",
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "$ref": "#/components/schemas/Sort"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteGetRPCOutputSchema"
+                }
+              }
+            },
+            "description": "Returned site list with its properties",
+            "headers": {
+              "Deprecation": {
+                "$ref": "#/components/headers/Deprecation"
+              },
+              "Sunset": {
+                "$ref": "#/components/headers/Sunset"
+              },
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/XRateLimitLimitHeader"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/XRateLimitRemainingHeader"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/XRateLimitResetHeader"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/Default"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "summary": "Get sites",
+        "tags": [
+          "Sites"
+        ]
+      },
+      "put": {
+        "deprecated": true,
+        "description": "(Deprecated) This API is used to update name, address, geo coordinates or image for existing site based on its scopeId.\nImage needs to be uploaded first before referencing it here. \n\n `timezone` : Timezone response from Google API for the corresponding geo coordinate.\n - `rawOffset` -> offset value from UTC (in seconds) for the given location from Google Timezone API.\n - `timezoneId` -> Timezone ID from the Google Maps API response\n - `timezoneName` -> long form name for the timezone from Google Maps API response. Use /network-config/v1/sites instead.",
+        "operationId": "updateSiteByScopeId",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SitePutRPCInputSchema"
+              }
+            }
+          },
+          "description": "site update body",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SitePutRPCOutputSchema"
+                }
+              }
+            },
+            "description": "Site update successful and returns the scopeId of the site updated.",
+            "headers": {
+              "Deprecation": {
+                "$ref": "#/components/headers/Deprecation"
+              },
+              "Sunset": {
+                "$ref": "#/components/headers/Sunset"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/Default"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "summary": "Update site",
+        "tags": [
+          "Sites"
+        ]
+      },
+      "post": {
+        "deprecated": true,
+        "description": "(Deprecated) This API is used to create a site with address, geo coordinates (optional) and image (optional). Image needs to be uploaded first before referencing it here. \n\n `timezone` : Timezone response from Google API for the corresponding geo coordinate.\n - `rawOffset` -> offset value from UTC (in seconds) for the given location from Google Timezone API.\n - `timezoneId` -> Timezone ID from the Google Maps API response\n - `timezoneName` -> long form name for the timezone from Google Maps API response. Use /network-config/v1/sites instead.",
+        "operationId": "createSite",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SitePostRPCInputSchema"
+              }
+            }
+          },
+          "description": "site create body",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SitePostRPCOutputSchema"
+                }
+              }
+            },
+            "description": "Site creation successful and returns the scopeId of the site created.",
+            "headers": {
+              "Deprecation": {
+                "$ref": "#/components/headers/Deprecation"
+              },
+              "Sunset": {
+                "$ref": "#/components/headers/Sunset"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/Default"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "summary": "Create site",
+        "tags": [
+          "Sites"
+        ]
+      },
+      "delete": {
+        "deprecated": true,
+        "description": "(Deprecated) Site Deletion. This API is used to delete one or more existing sites based on their scopeId. Use /network-config/v1alpha1/sites/bulk instead.",
+        "operationId": "deleteSiteByScopeId",
+        "parameters": [
+          {
+            "description": "scope ids of sites to be deleted",
+            "example": "24833497",
+            "in": "query",
+            "name": "scope-id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteDeleteRPCOutputSchema"
+                }
+              }
+            },
+            "description": "Site deleted successfully",
+            "headers": {
+              "Deprecation": {
+                "$ref": "#/components/headers/Deprecation"
+              },
+              "Sunset": {
+                "$ref": "#/components/headers/Sunset"
+              },
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/XRateLimitLimitHeader"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/XRateLimitRemainingHeader"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/XRateLimitResetHeader"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/Default"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "summary": "Delete site by scopeId",
+        "tags": [
+          "Sites"
+        ]
+      }
+    },
+    "/network-config/v1alpha1/sites/bulk": {
+      "delete": {
+        "deprecated": true,
+        "description": "(Deprecated) This API is used to delete one or more existing sites using a bulk delete operation. Use /network-config/v1/sites/bulk instead.",
+        "operationId": "deleteSitesBulk",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "example": {
+                  "items": [
+                    {
+                      "id": "scope-id-1"
+                    },
+                    {
+                      "id": "scope-id-2"
+                    },
+                    {
+                      "id": "scope-id-3"
+                    }
+                  ]
+                },
+                "properties": {
+                  "items": {
+                    "description": "Array of site IDs to delete",
+                    "items": {
+                      "properties": {
+                        "id": {
+                          "description": "Site ID to delete",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "items"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "description": "Request body for bulk deleting sites",
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "description": "Response code",
+                      "type": "string"
+                    },
+                    "items": {
+                      "description": "List of deleted site IDs",
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "message": {
+                      "description": "Response message",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "Operation status",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Site deleted successfully and returns the scopeId of the site deleted.",
+            "headers": {
+              "Deprecation": {
+                "$ref": "#/components/headers/Deprecation"
+              },
+              "Sunset": {
+                "$ref": "#/components/headers/Sunset"
+              },
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/XRateLimitLimitHeader"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/XRateLimitRemainingHeader"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/XRateLimitResetHeader"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/Default"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "summary": "Bulk delete sites",
+        "tags": [
+          "Sites"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Address": {
+        "properties": {
+          "address": {
+            "description": "address",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "City": {
+        "properties": {
+          "city": {
+            "description": "city",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Country": {
+        "properties": {
+          "country": {
+            "description": "country",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DeviceMoveSiteSMSchema": {
+        "description": "Successful deletion of site-collection by scopeId.",
+        "properties": {
+          "code": {
+            "description": "The return code of site-collection deletion operation.\n",
+            "format": "const",
+            "maxLength": 128,
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ScopeIds"
+            },
+            "maxItems": 2147483647,
+            "type": "array"
+          },
+          "message": {
+            "description": "The message site-collection deletion operation.\n",
+            "format": "const",
+            "maxLength": 128,
+            "type": "string"
+          },
+          "status": {
+            "description": "site-collection delete operation status.\n",
+            "format": "const",
+            "maxLength": 128,
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "code",
+          "status",
+          "message"
+        ],
+        "type": "object"
+      },
+      "Filter": {
+        "description": "OData Version 4.0 filter string (limited functionality).\nSupports only 'eq' operations ('gt', 'ge', 'lt', 'le' and 'in' are NOT supported).\nSupports only 'and' conjunction ('or' and 'not' are NOT supported).\nSupported filter fields are: scopeName, address, city, state, country, zipcode, collectionName\n",
+        "example": "scopeName eq 'Aruba'",
+        "format": "const",
+        "maxLength": 256,
+        "type": "string"
+      },
+      "Latitude": {
+        "properties": {
+          "latitude": {
+            "description": "latitude",
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "LimitParam": {
+        "default": 100,
+        "description": "Specifies the number of results to return. (Default: 100) Maximum limit per query is 100.",
+        "format": "int32",
+        "maximum": 100,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "Longitude": {
+        "properties": {
+          "longitude": {
+            "description": "longitude",
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "Name": {
+        "properties": {
+          "name": {
+            "description": "name of the site scope",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OffsetParam": {
+        "default": 0,
+        "description": "Specifies the pagination offset for the page of resources.",
+        "format": "int32",
+        "maximum": 2147483647,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "PaginationResponseProperties": {
+        "description": "Fields appended to a list to facilitate paging.\n",
+        "properties": {
+          "count": {
+            "description": "The number of objects returned in the current list.\n",
+            "example": 1,
+            "format": "int32",
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "offset": {
+            "description": "An offset which could be passed in the next query to fetch the next page.\nSet to null when no more pages remain.\n",
+            "format": "const",
+            "maxLength": 128,
+            "type": "string"
+          },
+          "total": {
+            "description": "The total number of objects contained in the datastore.\n",
+            "example": 1,
+            "format": "int64",
+            "maximum": 9223372036854776000,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count",
+          "total",
+          "offset"
+        ],
+        "type": "object"
+      },
+      "ScopeId": {
+        "properties": {
+          "scopeId": {
+            "description": "scopeId of the scope",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ScopeIds": {
+        "description": "scope id's",
+        "type": "string"
+      },
+      "Search": {
+        "description": "Partial or Full String Free text search.",
+        "format": "const",
+        "maxLength": 256,
+        "type": "string"
+      },
+      "SiteDeleteRPCOutputSchema": {
+        "description": "Successful Deleted Site scopeIds.",
+        "properties": {
+          "code": {
+            "description": "The return code of delete operation.\n",
+            "format": "const",
+            "maxLength": 128,
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ScopeIds"
+            },
+            "maxItems": 2147483647,
+            "type": "array"
+          },
+          "message": {
+            "description": "The message of delete operation.\n",
+            "format": "const",
+            "maxLength": 128,
+            "type": "string"
+          },
+          "status": {
+            "description": "Delete operation status.\n",
+            "format": "const",
+            "maxLength": 128,
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "code",
+          "status",
+          "message"
+        ],
+        "type": "object"
+      },
+      "SiteGetRPCOutputSchema": {
+        "allOf": [
+          {
+            "description": "List of site with their properties.",
+            "properties": {
+              "items": {
+                "items": {
+                  "$ref": "#/components/schemas/SiteScope"
+                },
+                "maxItems": 9999,
+                "type": "array"
+              },
+              "response": {
+                "$ref": "#/components/schemas/SiteResponse"
+              }
+            },
+            "required": [
+              "items"
+            ],
+            "type": "object"
+          },
+          {
+            "$ref": "#/components/schemas/PaginationResponseProperties"
+          }
+        ]
+      },
+      "SitePostRPCInputSchema": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Name"
+          },
+          {
+            "$ref": "#/components/schemas/Latitude"
+          },
+          {
+            "$ref": "#/components/schemas/Longitude"
+          },
+          {
+            "$ref": "#/components/schemas/City"
+          },
+          {
+            "$ref": "#/components/schemas/State"
+          },
+          {
+            "$ref": "#/components/schemas/Country"
+          },
+          {
+            "$ref": "#/components/schemas/Zipcode"
+          },
+          {
+            "$ref": "#/components/schemas/Address"
+          },
+          {
+            "$ref": "#/components/schemas/Timezone"
+          },
+          {
+            "$ref": "#/components/schemas/image"
+          }
+        ],
+        "properties": {
+          "address": {
+            "description": "place",
+            "type": "string"
+          },
+          "city": {
+            "description": "place",
+            "type": "string"
+          },
+          "country": {
+            "description": "place",
+            "type": "string"
+          },
+          "latitude": {
+            "description": "latitude",
+            "format": "double",
+            "type": "number"
+          },
+          "longitude": {
+            "description": "longitude",
+            "format": "double",
+            "type": "number"
+          },
+          "name": {
+            "description": "name of the site scope",
+            "type": "string"
+          },
+          "state": {
+            "description": "place",
+            "type": "string"
+          },
+          "zipcode": {
+            "description": "place",
+            "type": "string"
+          }
+        }
+      },
+      "SitePostRPCOutputSchema": {
+        "description": "Successful Creation of Site.",
+        "properties": {
+          "code": {
+            "description": "The return code of site create operation.\n",
+            "format": "const",
+            "maxLength": 128,
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ScopeIds"
+            },
+            "maxItems": 2147483647,
+            "type": "array"
+          },
+          "message": {
+            "description": "The message of site create operation.\n",
+            "format": "const",
+            "maxLength": 128,
+            "type": "string"
+          },
+          "status": {
+            "description": "Site Create operation status.\n",
+            "format": "const",
+            "maxLength": 128,
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "code",
+          "status",
+          "message"
+        ],
+        "type": "object"
+      },
+      "SitePutRPCInputSchema": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ScopeId"
+          },
+          {
+            "$ref": "#/components/schemas/Name"
+          },
+          {
+            "$ref": "#/components/schemas/Latitude"
+          },
+          {
+            "$ref": "#/components/schemas/Longitude"
+          },
+          {
+            "$ref": "#/components/schemas/City"
+          },
+          {
+            "$ref": "#/components/schemas/State"
+          },
+          {
+            "$ref": "#/components/schemas/Country"
+          },
+          {
+            "$ref": "#/components/schemas/Zipcode"
+          },
+          {
+            "$ref": "#/components/schemas/Address"
+          },
+          {
+            "$ref": "#/components/schemas/Timezone"
+          },
+          {
+            "$ref": "#/components/schemas/image"
+          }
+        ],
+        "properties": {
+          "address": {
+            "description": "address",
+            "type": "string"
+          },
+          "city": {
+            "description": "city",
+            "type": "string"
+          },
+          "country": {
+            "description": "country",
+            "type": "string"
+          },
+          "latitude": {
+            "description": "latitude",
+            "format": "double",
+            "type": "number"
+          },
+          "longitude": {
+            "description": "longitude",
+            "format": "double",
+            "type": "number"
+          },
+          "name": {
+            "description": "name of the site scope",
+            "type": "string"
+          },
+          "scopeId": {
+            "description": "scopeId of site",
+            "type": "string"
+          },
+          "state": {
+            "description": "state",
+            "type": "string"
+          },
+          "zipcode": {
+            "description": "zipcode",
+            "type": "string"
+          }
+        }
+      },
+      "SitePutRPCOutputSchema": {
+        "description": "Successful Updated of Site by scopeId.",
+        "properties": {
+          "code": {
+            "description": "The return code of site update operation.\n",
+            "format": "const",
+            "maxLength": 128,
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ScopeIds"
+            },
+            "maxItems": 2147483647,
+            "type": "array"
+          },
+          "message": {
+            "description": "The message of site update operation.\n",
+            "format": "const",
+            "maxLength": 128,
+            "type": "string"
+          },
+          "status": {
+            "description": "Site Update operation status.\n",
+            "format": "const",
+            "maxLength": 128,
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "code",
+          "status",
+          "message"
+        ],
+        "type": "object"
+      },
+      "SiteResponse": {
+        "properties": {
+          "code": {
+            "description": "status code.\n",
+            "example": "SCOPE-LIST-SITES-SUCCESS-001",
+            "format": "const",
+            "maxLength": 32,
+            "type": "string"
+          },
+          "message": {
+            "description": "Descriptive text on the outcome of the operation.\n",
+            "example": "success.",
+            "format": "const",
+            "maxLength": 512,
+            "type": "string"
+          },
+          "status": {
+            "description": "Final status of operation.\n",
+            "example": "SUCCESS",
+            "format": "const",
+            "maxLength": 20,
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "status",
+          "message"
+        ],
+        "type": "object"
+      },
+      "SiteScope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Timezone"
+          }
+        ],
+        "properties": {
+          "address": {
+            "description": "address for the site",
+            "type": "string"
+          },
+          "city": {
+            "description": "city for the site",
+            "type": "string"
+          },
+          "collectionId": {
+            "description": "site collection id to which site belongs to",
+            "readOnly": true,
+            "type": "string"
+          },
+          "collectionName": {
+            "description": "site collection Name to which site belongs to",
+            "readOnly": true,
+            "type": "string"
+          },
+          "country": {
+            "description": "country for the site",
+            "type": "string"
+          },
+          "description": {
+            "description": "description for the site",
+            "type": "string"
+          },
+          "deviceCount": {
+            "description": "device count in the site",
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "scopeId.\n",
+            "example": "12345",
+            "format": "const",
+            "maxLength": 20,
+            "type": "string"
+          },
+          "latitude": {
+            "description": "latitude of the site",
+            "type": "string"
+          },
+          "longitude": {
+            "description": "longitude",
+            "type": "string"
+          },
+          "scopeId": {
+            "description": "Scope Id for the scope",
+            "readOnly": true,
+            "type": "string"
+          },
+          "scopeName": {
+            "description": "name of the site",
+            "type": "string"
+          },
+          "state": {
+            "description": "state for the site",
+            "type": "string"
+          },
+          "type": {
+            "description": "network-config/site.\n",
+            "example": "Sample Site",
+            "format": "const",
+            "maxLength": 512,
+            "type": "string"
+          },
+          "zipcode": {
+            "description": "zipcode for the site",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "address",
+          "city",
+          "country",
+          "scopeName",
+          "state",
+          "zipcode"
+        ],
+        "type": "object"
+      },
+      "Sort": {
+        "description": "Specifies the sort order of the field followed by sort direction.\nSupports ASC and DESC.\nSupported filter fields are: scopeName, address, city, state, country, zipcode, longitude, latitude, deviceCount, collectionName\n. Example: scopeName ASC",
+        "example": "scopeName ASC",
+        "format": "const",
+        "maxLength": 256,
+        "type": "string"
+      },
+      "State": {
+        "properties": {
+          "state": {
+            "description": "state",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Timezone": {
+        "properties": {
+          "timezone": {
+            "properties": {
+              "rawOffset": {
+                "description": "A timezone offset represents the difference in time between a specific timezone and Coordinated Universal Time (UTC), in milliseconds.\n",
+                "type": "number"
+              },
+              "timezoneId": {
+                "description": "A timezone name is a standardized designation for a region of the Earth where the same standard time is used, often based on geopolitical boundaries or geographical features.",
+                "type": "string"
+              },
+              "timezoneName": {
+                "description": "A timezone ID is a unique identifier used to represent a specific timezone, typically following the \"continent/city\" format, allowing for accurate timekeeping and coordination across different locations.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "Zipcode": {
+        "properties": {
+          "zipcode": {
+            "description": "place",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "image": {
+        "properties": {
+          "image": {
+            "properties": {
+              "contentType": {
+                "description": "Image content type ",
+                "type": "string"
+              },
+              "name": {
+                "description": "name of the image file",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "responses": {
+      "BadRequestError": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "Error details returned from the server.\n",
+              "properties": {
+                "debugId": {
+                  "description": "This can be used to help with troubleshooting\n",
+                  "example": "abc-123-456",
+                  "format": "const",
+                  "maxLength": 50,
+                  "type": "string"
+                },
+                "errorCode": {
+                  "description": "Bad Request.\n",
+                  "example": "HPE_GL_ERROR_BAD_REQUEST",
+                  "format": "const",
+                  "maxLength": 32,
+                  "type": "string"
+                },
+                "httpStatusCode": {
+                  "description": "HTTP status code.\n",
+                  "example": 400,
+                  "maximum": 400,
+                  "minimum": 400,
+                  "type": "integer"
+                },
+                "message": {
+                  "description": "Error message indicating the cause of the failure.\n",
+                  "example": "Invalid input provided for field `limit`. The value must be between 1 and 100.",
+                  "format": "const",
+                  "maxLength": 512,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "httpStatusCode",
+                "errorCode",
+                "message",
+                "debugId"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        "description": "Invalid input received.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimitHeader"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemainingHeader"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitResetHeader"
+          }
+        }
+      },
+      "Default": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "Error details returned from the server.\n",
+              "properties": {
+                "debugId": {
+                  "description": "Internal debug id.\n",
+                  "format": "const",
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                "errorCode": {
+                  "description": "Internal error code.\n",
+                  "enum": [
+                    "HPE_GL_ERROR_BAD_REQUEST"
+                  ],
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                "httpStatusCode": {
+                  "description": "HTTP status code.\n",
+                  "maximum": 400,
+                  "minimum": 400,
+                  "type": "integer"
+                },
+                "message": {
+                  "description": "Error message indicating the cause of the failure.\n",
+                  "format": "const",
+                  "maxLength": 512,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "errorCode",
+                "message",
+                "debugId",
+                "httpStatusCode"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        "description": "Unexpected error.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimitHeader"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemainingHeader"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitResetHeader"
+          }
+        }
+      },
+      "Forbidden": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "Error details returned from the server.\n",
+              "properties": {
+                "debugId": {
+                  "description": "Internal debug id.\n",
+                  "format": "const",
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                "errorCode": {
+                  "description": "Internal error code.\n",
+                  "enum": [
+                    "HPE_GL_ERROR_FORBIDDEN"
+                  ],
+                  "maxLength": 32,
+                  "type": "string"
+                },
+                "httpStatusCode": {
+                  "description": "HTTP status code.\n",
+                  "maximum": 403,
+                  "minimum": 403,
+                  "type": "integer"
+                },
+                "message": {
+                  "description": "Error message indicating the cause of the failure.\n",
+                  "format": "const",
+                  "maxLength": 512,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "errorCode",
+                "message",
+                "debugId",
+                "httpStatusCode"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        "description": "Forbidden.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimitHeader"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemainingHeader"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitResetHeader"
+          }
+        }
+      },
+      "InternalServerError": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "Error details returned from the server.\n",
+              "properties": {
+                "debugId": {
+                  "description": "Internal debug id.\n",
+                  "format": "const",
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                "errorCode": {
+                  "description": "Internal error code.\n",
+                  "enum": [
+                    "HPE_GL_ERROR_INTERNAL_SERVER_ERROR"
+                  ],
+                  "maxLength": 32,
+                  "type": "string"
+                },
+                "httpStatusCode": {
+                  "description": "HTTP status code.\n",
+                  "maximum": 500,
+                  "minimum": 500,
+                  "type": "integer"
+                },
+                "message": {
+                  "description": "Error message indicating the cause of the failure.\n",
+                  "format": "const",
+                  "maxLength": 512,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "errorCode",
+                "message",
+                "debugId",
+                "httpStatusCode"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        "description": "Internal Server Error.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimitHeader"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemainingHeader"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitResetHeader"
+          }
+        }
+      },
+      "NotFound": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "Error details returned from the server.",
+              "properties": {
+                "debugId": {
+                  "description": "Internal debug id.",
+                  "format": "const",
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                "errorCode": {
+                  "description": "Internal error code.",
+                  "enum": [
+                    "HPE_GL_ERROR_NOT_FOUND"
+                  ],
+                  "maxLength": 32,
+                  "type": "string"
+                },
+                "httpStatusCode": {
+                  "description": "HTTP status code.",
+                  "maximum": 404,
+                  "minimum": 404,
+                  "type": "integer"
+                },
+                "message": {
+                  "description": "Error message indicating the cause of the failure.",
+                  "format": "const",
+                  "maxLength": 512,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "errorCode",
+                "message",
+                "debugId",
+                "httpStatusCode"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        "description": "Resource not found.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimitHeader"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemainingHeader"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitResetHeader"
+          }
+        }
+      },
+      "TooManyRequests": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "Error details returned from the server.\n",
+              "properties": {
+                "debugId": {
+                  "description": "Internal debug id.\n",
+                  "format": "const",
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                "errorCode": {
+                  "description": "Internal error code.\n",
+                  "enum": [
+                    "HPE_GL_ERROR_TOO_MANY_REQUESTS"
+                  ],
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                "httpStatusCode": {
+                  "description": "HTTP status code.\n",
+                  "maximum": 429,
+                  "minimum": 429,
+                  "type": "integer"
+                },
+                "message": {
+                  "description": "Error message indicating the cause of the failure.\n",
+                  "format": "const",
+                  "maxLength": 512,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "errorCode",
+                "message",
+                "debugId",
+                "httpStatusCode"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        "description": "Too Many Requests. Rate limit exceeded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimitHeader"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemainingHeader"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitResetHeader"
+          }
+        }
+      },
+      "Unauthorized": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "description": "Error details returned from the server.\n",
+              "properties": {
+                "debugId": {
+                  "description": "Internal debug id.\n",
+                  "format": "const",
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                "errorCode": {
+                  "description": "Internal error code.\n",
+                  "enum": [
+                    "HPE_GL_ERROR_UNAUTHORIZED"
+                  ],
+                  "maxLength": 32,
+                  "type": "string"
+                },
+                "httpStatusCode": {
+                  "description": "HTTP status code.\n",
+                  "maximum": 401,
+                  "minimum": 401,
+                  "type": "integer"
+                },
+                "message": {
+                  "description": "Error message indicating the cause of the failure.\n",
+                  "format": "const",
+                  "maxLength": 512,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "errorCode",
+                "message",
+                "debugId",
+                "httpStatusCode"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        "description": "Unauthorized request.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/XRateLimitLimitHeader"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/XRateLimitRemainingHeader"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/XRateLimitResetHeader"
+          }
+        }
+      }
+    },
+    "headers": {
+      "Deprecation": {
+        "description": "Deprecation header indicating deprecation of the API",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "Sunset": {
+        "description": "This API will sunset on Tue, 30 June 2026 23:59:59 GMT",
+        "schema": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "XRateLimitLimitHeader": {
+        "description": "Request limit per hour.",
+        "schema": {
+          "format": "int64",
+          "maximum": 9223372036854776000,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "XRateLimitRemainingHeader": {
+        "description": "The number of requests left for the time window.",
+        "schema": {
+          "format": "int64",
+          "maximum": 9223372036854776000,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "XRateLimitResetHeader": {
+        "description": "The UTC date/time at which the current rate limit window resets.",
+        "schema": {
+          "format": "date-time",
+          "maxLength": 20,
+          "type": "string"
+        }
+      }
+    },
+    "securitySchemes": {
+      "OAuth2": {
+        "description": "OAuth 2.0 authentication with client credentials flow. You can also use your own access token.",
+        "flows": {
+          "clientCredentials": {
+            "scopes": {},
+            "tokenUrl": "https://sso.common.cloud.hpe.com/as/token.oauth2"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  }
+}

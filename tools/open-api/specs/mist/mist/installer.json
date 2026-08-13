@@ -1,0 +1,4358 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Installer",
+    "version": "2602.1.1"
+  },
+  "servers": [
+    {
+      "description": "Mist Global 01",
+      "url": "https://api.mist.com"
+    },
+    {
+      "description": "Mist Global 02",
+      "url": "https://api.gc1.mist.com"
+    },
+    {
+      "description": "Mist Global 03",
+      "url": "https://api.ac2.mist.com"
+    },
+    {
+      "description": "Mist Global 04",
+      "url": "https://api.gc2.mist.com"
+    },
+    {
+      "description": "Mist Global 05",
+      "url": "https://api.gc4.mist.com"
+    },
+    {
+      "description": "Mist EMEA 01",
+      "url": "https://api.eu.mist.com"
+    },
+    {
+      "description": "Mist EMEA 02",
+      "url": "https://api.gc3.mist.com"
+    },
+    {
+      "description": "Mist EMEA 03",
+      "url": "https://api.ac6.mist.com"
+    },
+    {
+      "description": "Mist EMEA 04",
+      "url": "https://api.gc6.mist.com"
+    },
+    {
+      "description": "Mist APAC 01",
+      "url": "https://api.ac5.mist.com"
+    },
+    {
+      "description": "Mist APAC 02",
+      "url": "https://api.gc5.mist.com"
+    },
+    {
+      "description": "Mist APAC 03",
+      "url": "https://api.gc7.mist.com"
+    }
+  ],
+  "security": [
+    {
+      "apiToken": []
+    },
+    {
+      "basicAuth": []
+    },
+    {
+      "basicAuth": [],
+      "csrfToken": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "In a typical enterprise, a separate group of people, Installers, are responsible for install new devices. May it be a new installation (e.g. new stores), a replacement installation (e.g. replacing Cisco APs with Mist APs), or addition (e.g. adding new APs for better coverage). Instead of granting them Admin/Write privilege, it's more desirable to grant them minimum privileges to do the initial provisioning so they cannot read sensible information (e.g. PSK of a WLAN), or change configs of running APs.\nAt a high level, Installer APs try to achieve the following:\n1. identifying a device by MAC (that\\u2019\\ \ns what they see)\n2. they can only touch configurations of the devices they\\u2019\\\nre installing\n3. allow the following configurations: \n  * name * site assignment \n  * device profile assignment \n  * map and location (x/y) assignment \n  * claim (if not already in the inventory) \n  * replace existing device with the device being installed\n\n**Grace Period**\n\nGrace period provides a dynamic way to limit what devices / sites installer can work on. Generally installers work on recent deployments - bringing up new sites, add newly claimed devices to new / existing sites. They make mistakes, too, and may need to further tweak some of the parameters. Default grace period is 7 days and can be set from 1 day to 365 days.",
+      "name": "Installer"
+    }
+  ],
+  "paths": {
+    "/api/v1/installer/orgs/{org_id}/alarmtemplates": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "get": {
+        "description": "Get List of alarm templates",
+        "operationId": "listInstallerAlarmTemplates",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/InstallerAlarmtemplates"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "listInstallerAlarmTemplates",
+        "tags": [
+          "Installer"
+        ]
+      }
+    },
+    "/api/v1/installer/orgs/{org_id}/deviceprofiles": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "get": {
+        "description": "Get List of Device Profiles",
+        "operationId": "listInstallerDeviceProfiles",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "$ref": "#/components/schemas/device_type_default_ap"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/InstallerDeviceProfiles"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "listInstallerDeviceProfiles",
+        "tags": [
+          "Installer"
+        ]
+      }
+    },
+    "/api/v1/installer/orgs/{org_id}/devices": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "get": {
+        "description": "Get List of recently claimed devices",
+        "operationId": "listInstallerListOfRecentlyClaimedDevices",
+        "parameters": [
+          {
+            "description": "Device Model",
+            "in": "query",
+            "name": "model",
+            "schema": {
+              "examples": [
+                "AP43"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Site Name",
+            "in": "query",
+            "name": "site_name",
+            "schema": {
+              "examples": [
+                "SJ1"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Site ID",
+            "in": "query",
+            "name": "site_id",
+            "schema": {
+              "examples": [
+                "72771e6a-6f5e-4de4-a5b9-1266c4197811"
+              ],
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/InstallerDevicesArray"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "listInstallerListOfRecentlyClaimedDevices",
+        "tags": [
+          "Installer"
+        ]
+      },
+      "post": {
+        "description": "This mirrors `POST /api/v1/orgs/{org_id}/inventory` (see Inventory API)",
+        "operationId": "claimInstallerDevices",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": [
+                    "6JG8E-PTFV2-A9Z2N",
+                    "DVH4V-SNMSZ-PDXBR"
+                  ]
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/claim_codes"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OrgInventoryAdd"
+          },
+          "400": {
+            "$ref": "#/components/responses/OrgInventoryAdd"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "claimInstallerDevices",
+        "tags": [
+          "Installer"
+        ]
+      }
+    },
+    "/api/v1/installer/orgs/{org_id}/devices/{device_mac}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_mac"
+        }
+      ],
+      "put": {
+        "description": "Provision or Replace a device \n\nIf replacing_mac is in the request payload, other attributes are ignored, we attempt to replace existing device (with mac replacing_mac) with the inventory device being configured. The replacement device must be in the inventory but not assigned, and the replacing_mac device must be assigned to a site, and satisfy grace period requirements. The Device replaced will become unassigned.",
+        "operationId": "provisionInstallerDevices",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "deviceprofile_name": "SJ1",
+                    "height": 2.7,
+                    "name": "SJ1-AP1",
+                    "orientation": 90,
+                    "site_id": "72771e6a-6f5e-4de4-a5b9-1266c4197811",
+                    "site_name": "SJ1",
+                    "x": 150,
+                    "y": 300
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/installer_provision_device"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/OrgInventoryUnassignFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/OrgInventoryUnassignNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "provisionInstallerDevices",
+        "tags": [
+          "Installer"
+        ]
+      },
+      "delete": {
+        "description": "Unassign recently claimed devices",
+        "operationId": "unassignInstallerRecentlyClaimedDevice",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "unassignInstallerRecentlyClaimedDevice",
+        "tags": [
+          "Installer"
+        ]
+      }
+    },
+    "/api/v1/installer/orgs/{org_id}/devices/{device_mac}/locate": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_mac"
+        }
+      ],
+      "post": {
+        "description": "Locate a Device by blinking it’s LED, it’s a persisted state that has to be stopped by calling Stop Locating API",
+        "operationId": "startInstallerLocateDevice",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "startInstallerLocateDevice",
+        "tags": [
+          "Installer"
+        ]
+      }
+    },
+    "/api/v1/installer/orgs/{org_id}/devices/{device_mac}/unlocate": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_mac"
+        }
+      ],
+      "post": {
+        "description": "Stop it",
+        "operationId": "stopInstallerLocateDevice",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "stopInstallerLocateDevice",
+        "tags": [
+          "Installer"
+        ]
+      }
+    },
+    "/api/v1/installer/orgs/{org_id}/devices/{device_mac}/{image_name}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        },
+        {
+          "$ref": "#/components/parameters/image_name"
+        },
+        {
+          "$ref": "#/components/parameters/device_mac"
+        }
+      ],
+      "post": {
+        "description": "Add image",
+        "operationId": "addInstallerDeviceImage",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/map_site_import_file"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "addInstallerDeviceImage",
+        "tags": [
+          "Installer"
+        ]
+      },
+      "delete": {
+        "description": "Delete image",
+        "operationId": "deleteInstallerDeviceImage",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "deleteInstallerDeviceImage",
+        "tags": [
+          "Installer"
+        ]
+      }
+    },
+    "/api/v1/installer/orgs/{org_id}/devices/{fpc0_mac}/vc": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        },
+        {
+          "description": "FPC0 MAC Address",
+          "in": "path",
+          "name": "fpc0_mac",
+          "required": true,
+          "schema": {
+            "examples": [
+              "aff827549235"
+            ],
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "description": "Get VC Status\n\nThe API returns a combined view of the VC status which includes topology and stats",
+        "operationId": "getInstallerDeviceVirtualChassis",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/VirtualChassis"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getInstallerDeviceVirtualChassis",
+        "tags": [
+          "Installer"
+        ]
+      },
+      "put": {
+        "description": "The VC creation and adding member switch API will update the device’ s virtual chassis config which is applied after VC is formed to create JUNOS pre-provisioned virtual chassis configuration.\n\n## Change to use preprovisioned VC\nTo switch the VC to use preprovisioned VC, enable preprovisioned in virtual_chassis config. Both vc_role master and backup will be matched to routing-engine role in Junos preprovisioned VC config.\n\nIn this config, fpc0 has to be the same as the mac of device_id. Use renumber if you want to replace fpc0 which involves device_id change.\n\nNotice: to configure preprovisioned VC, every member of the VC must be in the inventory.\n\n## Add new members\nFor models (e.g. EX4300 and up) having dedicated VC ports, it is easier to add new member switches into a VC by just connecting cables with the dedicated VC ports. Cloud will detect the new members and update the inventory.\n\nFor EX2300 VC, adding new members requires to follow the procedures below:\n1. Powering on the new member switches and ensuring cables are not connected to any VC ports.\n2. Claim or adopt all new member switches under the VC’s organization Inventory\n3. Assign all new member switches to the same Site as the VC\n4. Invoke vc command to add switches to the VC.\n5. Connect the cables to the VC ports for these switches\n6. After a while, the Org’s Inventory shows this new switches has been added into the VC.\n\n## Removing member switch\nTo remove a member switch from the VC, following the procedures below:\n\n1. Ensuring the VC is connected to the cloud first\n2. Unplug the cable from the VC port of the switch\n3. Waiting for the VC state (vc_state) of this switch is changed to not-present\n4. Invoke update_vc with remove to remove this switch from the VC\n5. The Org’s Inventory shows the switch is removed.\n\nPlease notice that member ID 0 (fpc0) cannot be removed. When a VC has two switches left, unplugging the cable may result in the situation that fpc0 becomes a line card (LC). When this situation is happening, please re-plug in the cable, wait for both switches becoming present (show virtual-chassis) and then removing the cable again.\n\n## Renumber a member switch\nWhen a member switch doesn't' work properly and needed to be replaced, the renumber API could be used. The following two types of renumber are supported:\n\n1. Replace a non-fpc0 member switch\n2. Replace fpc0. When fpc0 is replaced, PAPI device config and JUNOS config will be both updated.\n\nFor renumber to work, the following procedures are needed: \n1. Ensuring the VC is connected to the cloud and the state of the member switch to be replaced must be non present. \n2. Adding the new member switch to the VC \n3. Waiting for the VC state (vc_state) of this VC to be updated to API server \n4. Invoke vc with renumber to replace the new member switch from fpc X to\n\n## Perprovision VC members\nBy specifying \"preprovision\" op, you can convert the current VC to pre-provisioned mode, update VC members as well as specify vc_ports when adding new members for device models without dedicated vc ports. Use renumber for fpc0 replacement which involves device_id change.\n\nNote: \n1. vc_ports is used for adding new members and not needed if * the device model has dedicated vc ports, or * no new member is added \n2. New VC members to be added should exist in the same Site as the VC\n\nUpdate Device’s VC config can achieve similar purpose by directly modifying current virtual_chassis config. However, it cannot fulfill requests to enabling vc_ports on new members that are yet to belong to current VC.",
+        "operationId": "updateInstallerVirtualChassisMember",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "adding-two-new-switches-as-line-cards-into-the-VC": {
+                  "value": {
+                    "members": [
+                      {
+                        "mac": "aff827549235",
+                        "member_id": 2,
+                        "vc_ports": [
+                          "xe-0/1/0",
+                          "xe-0/1/1"
+                        ],
+                        "vc_role": "linecard"
+                      },
+                      {
+                        "mac": "8396cd00777c",
+                        "member_id": 3,
+                        "vc_ports": [
+                          "xe-0/1/0",
+                          "xe-0/1/1"
+                        ],
+                        "vc_role": "linecard"
+                      }
+                    ],
+                    "op": "add"
+                  }
+                },
+                "convert-to-pre-provisioned-VC": {
+                  "value": {
+                    "member": 0,
+                    "members": [
+                      {
+                        "mac": "string",
+                        "member_id": 0,
+                        "vc_ports": [
+                          "xe-0/1/0",
+                          "xe-0/1/1"
+                        ],
+                        "vc_role": "master"
+                      }
+                    ],
+                    "new-member": 0,
+                    "op": "add"
+                  }
+                },
+                "removing-two-switches-from-VC": {
+                  "value": {
+                    "members": [
+                      {
+                        "member": 2
+                      },
+                      {
+                        "member": 3
+                      }
+                    ],
+                    "op": "remove"
+                  }
+                },
+                "renumber-member-ID-3-to-member-ID-2": {
+                  "value": {
+                    "member": 3,
+                    "new-member": 2,
+                    "op": "renumber"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/virtual_chassis_update"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/VirtualChassis"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "updateInstallerVirtualChassisMember",
+        "tags": [
+          "Installer"
+        ]
+      },
+      "post": {
+        "description": "For models (e.g. EX3400 and up) having dedicated VC ports, it is easier to form a VC by just connecting cables with the dedicated VC ports. Cloud will detect the new VC and update the inventory.\n\nIn case that the user would like to choose the dedicated switch as a VC master or for EX2300-C-12P and EX2300-C-12T which doesn't have dedicated VC ports, below are procedures to automate the VC creation:\n\n1. Power on the switch that is chosen as the VC master first. And then powering on the other member switches.\n2. Claim or adopt all these switches under the same organization’s Inventory\n3. Assign these switches into the same Site\n4. Invoke vc command on the switch chosen to be the VC master. For EX2300-C-12P, VC ports will be created automatically.\n5. Connect the cables to the VC ports for these switches\n6. Wait for the VC to be formed. The Org’s inventory will be updated for the new VC.",
+        "operationId": "createInstallerVirtualChassis",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "create-a-VC-with-three-members": {
+                  "value": {
+                    "members": [
+                      {
+                        "mac": "aff827549235",
+                        "vc_ports": [
+                          "xe-0/1/0",
+                          "xe-0/1/1"
+                        ],
+                        "vc_role": "master"
+                      },
+                      {
+                        "mac": "8396cd006c8c",
+                        "vc_ports": [
+                          "xe-0/1/0",
+                          "xe-0/1/1"
+                        ],
+                        "vc_role": "backup"
+                      },
+                      {
+                        "mac": "8396cd00888c",
+                        "vc_ports": [
+                          "xe-0/1/0",
+                          "xe-0/1/1"
+                        ],
+                        "vc_role": "linecard"
+                      }
+                    ]
+                  }
+                },
+                "create-a-pre-provisioned-VC-with-three-members": {
+                  "value": {
+                    "members": [
+                      {
+                        "mac": "aff827549235",
+                        "member_id": 0,
+                        "vc_ports": [
+                          "xe-0/1/0",
+                          "xe-0/1/1"
+                        ],
+                        "vc_role": "master"
+                      },
+                      {
+                        "mac": "8396cd006c8c",
+                        "member_id": 1,
+                        "vc_ports": [
+                          "xe-0/1/0",
+                          "xe-0/1/1"
+                        ],
+                        "vc_role": "linecard"
+                      },
+                      {
+                        "mac": "8396cd00888c",
+                        "member_id": 2,
+                        "vc_ports": [
+                          "xe-0/1/0",
+                          "xe-0/1/1"
+                        ],
+                        "vc_role": "backup"
+                      }
+                    ],
+                    "preprovisioned": true
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/virtual_chassis_config"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/VirtualChassis"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "createInstallerVirtualChassis",
+        "tags": [
+          "Installer"
+        ]
+      }
+    },
+    "/api/v1/installer/orgs/{org_id}/rftemplates": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "get": {
+        "description": "Get List of RF Templates",
+        "operationId": "listInstallerRfTemplatesNames",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/InstallerRftemplatesArray"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "listInstallerRfTemplatesNames",
+        "tags": [
+          "Installer"
+        ]
+      }
+    },
+    "/api/v1/installer/orgs/{org_id}/sitegroups": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "get": {
+        "description": "Get List of Site Groups",
+        "operationId": "listInstallerSiteGroups",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/InstallerSitegroupsArray"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "listInstallerSiteGroups",
+        "tags": [
+          "Installer"
+        ]
+      }
+    },
+    "/api/v1/installer/orgs/{org_id}/sites": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "get": {
+        "description": "Get List of Sites",
+        "operationId": "listInstallerSites",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/InstallerSitesArray"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "listInstallerSites",
+        "tags": [
+          "Installer"
+        ]
+      }
+    },
+    "/api/v1/installer/orgs/{org_id}/sites/{site_name}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        },
+        {
+          "$ref": "#/components/parameters/site_name"
+        }
+      ],
+      "put": {
+        "description": "Often the Installers are asked to assign Devices to Sites. The Sites can either be pre-created or created/modified by the Installer. If this is an update, the same grace period also applies.",
+        "operationId": "createOrUpdateInstallerSites",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "address": "1601 S. Deanza Blvd., Cupertino, CA, 95014",
+                    "country_code": "US",
+                    "latlng": {
+                      "lat": 37.295833,
+                      "lng": -122.032946
+                    },
+                    "name": "string",
+                    "rftemplate_name": "rftemplate1",
+                    "sitegroup_names": [
+                      "sg1",
+                      "sg2"
+                    ],
+                    "timezone": "America/Los_Angeles"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/installer_site"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "createOrUpdateInstallerSites",
+        "tags": [
+          "Installer"
+        ]
+      }
+    },
+    "/api/v1/installer/orgs/{org_id}/sites/{site_name}/maps": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        },
+        {
+          "$ref": "#/components/parameters/site_name"
+        }
+      ],
+      "get": {
+        "description": "Get List of Maps",
+        "operationId": "listInstallerMaps",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MapsArray"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "listInstallerMaps",
+        "tags": [
+          "Installer"
+        ]
+      }
+    },
+    "/api/v1/installer/orgs/{org_id}/sites/{site_name}/maps/import": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        },
+        {
+          "$ref": "#/components/parameters/site_name"
+        }
+      ],
+      "post": {
+        "description": "Import data from files is a multipart POST which has an file, an optional json, and an optional csv, to create floorplan, assign & place ap if name or mac matches",
+        "operationId": "importInstallerMap",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/map_site_import_file"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MapImport"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "importInstallerMap",
+        "tags": [
+          "Installer"
+        ]
+      }
+    },
+    "/api/v1/installer/orgs/{org_id}/sites/{site_name}/maps/{map_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        },
+        {
+          "$ref": "#/components/parameters/site_name"
+        },
+        {
+          "$ref": "#/components/parameters/map_id"
+        }
+      ],
+      "put": {
+        "description": "Update map",
+        "operationId": "updateInstallerMap",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/map"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Map"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "updateInstallerMap",
+        "tags": [
+          "Installer"
+        ]
+      },
+      "post": {
+        "description": "Create a MAP",
+        "operationId": "createInstallerMap",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "height": 0,
+                    "latlng_br": {
+                      "lat": "string",
+                      "lng": "string"
+                    },
+                    "latlng_tl": {
+                      "lat": "string",
+                      "lng": "string"
+                    },
+                    "locked": true,
+                    "name": "string",
+                    "orientation": 0,
+                    "origin_x": 0,
+                    "origin_y": 0,
+                    "ppm": 0,
+                    "sitesurvey_path": [
+                      {
+                        "coordinate": "string",
+                        "name": "string",
+                        "nodes": [
+                          {
+                            "edges": {
+                              "N2": "string"
+                            },
+                            "name": "string",
+                            "position": {
+                              "x": 0,
+                              "y": 0
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "type": "image",
+                    "view": "roadmap",
+                    "wall_path": {
+                      "coordinate": "string",
+                      "nodes": [
+                        {
+                          "edges": {
+                            "N2": "string"
+                          },
+                          "name": "string",
+                          "position": {
+                            "x": 0,
+                            "y": 0
+                          }
+                        }
+                      ]
+                    },
+                    "wayfinding": {
+                      "micello": {
+                        "account_key": "string",
+                        "default_level_id": 0
+                      },
+                      "snap_to_path": true
+                    },
+                    "wayfinding_path": {
+                      "coordinate": "string",
+                      "nodes": [
+                        {
+                          "edges": {
+                            "N2": "string"
+                          },
+                          "name": "string",
+                          "position": {
+                            "x": 0,
+                            "y": 0
+                          }
+                        }
+                      ]
+                    },
+                    "width": 0
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/map"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Map"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "createInstallerMap",
+        "tags": [
+          "Installer"
+        ]
+      },
+      "delete": {
+        "description": "Delete Map",
+        "operationId": "deleteInstallerMap",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "deleteInstallerMap",
+        "tags": [
+          "Installer"
+        ]
+      }
+    },
+    "/api/v1/installer/sites/{site_name}/optimize": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_name"
+        }
+      ],
+      "get": {
+        "description": "After installation is considered complete (APs are placed on maps, all powered up), you can trigger an optimize operation where RRM will kick in (and maybe other things in the future) before it’s automatically scheduled.",
+        "operationId": "optimizeInstallerRrm",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "optimizeInstallerRrm",
+        "tags": [
+          "Installer"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "claim_codes": {
+        "description": "List of Claim Codes",
+        "examples": [
+          [
+            "6JG8E-PTFV2-A9Z2N",
+            "DVH4V-SNMSZ-PDXBR"
+          ]
+        ],
+        "items": {
+          "description": "Claim code",
+          "type": "string"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "cpu_stat": {
+        "additionalProperties": false,
+        "properties": {
+          "idle": {
+            "description": "Percentage of CPU time that is idle",
+            "readOnly": true,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "interrupt": {
+            "description": "Percentage of CPU time being used by interrupts",
+            "readOnly": true,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "load_avg": {
+            "$ref": "#/components/schemas/cpu_stat_load_avg"
+          },
+          "system": {
+            "description": "Percentage of CPU time being used by system processes",
+            "readOnly": true,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "usage": {
+            "description": "CPU usage",
+            "readOnly": true,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "user": {
+            "description": "Percentage of CPU time being used by user processes",
+            "readOnly": true,
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "cpu_stat_load_avg": {
+        "description": "Load averages for the last 1, 5, and 15 minutes",
+        "items": {
+          "type": "number"
+        },
+        "type": "array"
+      },
+      "created_time": {
+        "description": "When the object has been created, in epoch",
+        "format": "double",
+        "readOnly": true,
+        "type": "number"
+      },
+      "device_type_default_ap": {
+        "default": "ap",
+        "description": "enum: `ap`, `gateway`, `switch`",
+        "enum": [
+          "ap",
+          "gateway",
+          "switch"
+        ],
+        "type": "string"
+      },
+      "id": {
+        "description": "Unique ID of the object instance in the Mist Organization",
+        "examples": [
+          "53f10664-3ce8-4c27-b382-0ef66432349f"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "installer_device": {
+        "additionalProperties": false,
+        "properties": {
+          "connected": {
+            "examples": [
+              true
+            ],
+            "type": "boolean"
+          },
+          "deviceprofile_name": {
+            "examples": [
+              "SJ1"
+            ],
+            "type": "string"
+          },
+          "ext_ip": {
+            "examples": [
+              "12.34.56.78"
+            ],
+            "type": "string"
+          },
+          "height": {
+            "examples": [
+              2.7
+            ],
+            "format": "double",
+            "type": "number"
+          },
+          "ip": {
+            "examples": [
+              "192.168.1.111"
+            ],
+            "type": "string"
+          },
+          "last_seen": {
+            "$ref": "#/components/schemas/last_seen"
+          },
+          "mac": {
+            "examples": [
+              "5c5b35000018"
+            ],
+            "type": "string"
+          },
+          "map_id": {
+            "examples": [
+              "845a23bf-bed9-e43c-4c86-6fa474be7ae5"
+            ],
+            "format": "uuid",
+            "type": "string"
+          },
+          "model": {
+            "examples": [
+              "AP41"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "examples": [
+              "hallway"
+            ],
+            "type": "string"
+          },
+          "orientation": {
+            "examples": [
+              90
+            ],
+            "type": "integer"
+          },
+          "serial": {
+            "examples": [
+              "FXLH2015150025"
+            ],
+            "type": "string"
+          },
+          "site_name": {
+            "examples": [
+              "SJ1"
+            ],
+            "type": "string"
+          },
+          "uptime": {
+            "examples": [
+              12345
+            ],
+            "type": "integer"
+          },
+          "vc_mac": {
+            "examples": [
+              null
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "version": {
+            "examples": [
+              "0.10.24362"
+            ],
+            "type": "string"
+          },
+          "x": {
+            "examples": [
+              150
+            ],
+            "format": "double",
+            "type": "number"
+          },
+          "y": {
+            "examples": [
+              300
+            ],
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "installer_devices": {
+        "items": {
+          "$ref": "#/components/schemas/installer_device"
+        },
+        "type": "array"
+      },
+      "installer_provision_device": {
+        "description": "Provision Device",
+        "properties": {
+          "deviceprofile_name": {
+            "examples": [
+              "SJ1"
+            ],
+            "type": "string"
+          },
+          "for_site": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "height": {
+            "examples": [
+              2.7
+            ],
+            "format": "double",
+            "type": "number"
+          },
+          "map_id": {
+            "examples": [
+              "845a23bf-bed9-e43c-4c86-6fa474be7ae5"
+            ],
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "examples": [
+              "SJ1-AP1"
+            ],
+            "type": "string"
+          },
+          "orientation": {
+            "examples": [
+              90
+            ],
+            "type": "integer"
+          },
+          "replacing_mac": {
+            "description": "Onlif this is to replace an existing device",
+            "examples": [
+              "5c5b3500003"
+            ],
+            "type": "string"
+          },
+          "role": {
+            "description": "Optional role for switch / gateway",
+            "type": "string"
+          },
+          "site_id": {
+            "examples": [
+              "72771e6a-6f5e-4de4-a5b9-1266c4197811"
+            ],
+            "format": "uuid",
+            "type": "string"
+          },
+          "site_name": {
+            "examples": [
+              "SJ1"
+            ],
+            "type": "string"
+          },
+          "x": {
+            "examples": [
+              150
+            ],
+            "format": "double",
+            "type": "number"
+          },
+          "y": {
+            "examples": [
+              300
+            ],
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "installer_site": {
+        "properties": {
+          "address": {
+            "examples": [
+              "1601 S. Deanza Blvd., Cupertino, CA, 95014"
+            ],
+            "type": "string"
+          },
+          "country_code": {
+            "examples": [
+              "US"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/components/schemas/id"
+          },
+          "latlng": {
+            "$ref": "#/components/schemas/lat_lng"
+          },
+          "name": {
+            "examples": [
+              "Mist Office"
+            ],
+            "type": "string"
+          },
+          "rftemplate_name": {
+            "examples": [
+              "rftemplate1"
+            ],
+            "type": "string"
+          },
+          "sitegroup_names": {
+            "$ref": "#/components/schemas/installer_site_sitegroup_names"
+          },
+          "timezone": {
+            "examples": [
+              "America/Los_Angeles"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "address",
+          "country_code",
+          "latlng",
+          "name"
+        ],
+        "type": "object"
+      },
+      "installer_site_sitegroup_names": {
+        "examples": [
+          [
+            "sg1",
+            "sg2"
+          ]
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "installer_sites": {
+        "items": {
+          "$ref": "#/components/schemas/installer_site"
+        },
+        "type": "array"
+      },
+      "installers": {
+        "items": {
+          "$ref": "#/components/schemas/installers_item"
+        },
+        "type": "array"
+      },
+      "installers_item": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/id"
+          },
+          "name": {
+            "examples": [
+              "Entry #1"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "last_seen": {
+        "description": "Last seen timestamp",
+        "examples": [
+          1470417522
+        ],
+        "format": "double",
+        "readOnly": true,
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "lat_lng": {
+        "additionalProperties": false,
+        "properties": {
+          "lat": {
+            "examples": [
+              37.295833
+            ],
+            "format": "double",
+            "type": "number"
+          },
+          "lng": {
+            "examples": [
+              -122.032946
+            ],
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "lat",
+          "lng"
+        ],
+        "type": "object"
+      },
+      "latlng_br": {
+        "additionalProperties": false,
+        "description": "When type=google, latitude / longitude of the bottom-right corner",
+        "properties": {
+          "lat": {
+            "type": "string"
+          },
+          "lng": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "latlng_tl": {
+        "additionalProperties": false,
+        "description": "When type=google, latitude / longitude of the top-left corner",
+        "properties": {
+          "lat": {
+            "type": "string"
+          },
+          "lng": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "map": {
+        "description": "Map",
+        "properties": {
+          "created_time": {
+            "$ref": "#/components/schemas/created_time"
+          },
+          "flags": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "description": "Name/val pair objects for location engine to use",
+            "examples": [
+              {
+                "assetHoldTime": 5,
+                "storeTime": 10
+              }
+            ],
+            "readOnly": true,
+            "type": "object"
+          },
+          "for_site": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "geofences": {
+            "$ref": "#/components/schemas/map_geofences"
+          },
+          "height": {
+            "description": "When type=image, height of the image map",
+            "examples": [
+              1500
+            ],
+            "type": "integer"
+          },
+          "height_m": {
+            "format": "double",
+            "type": "number"
+          },
+          "id": {
+            "$ref": "#/components/schemas/id"
+          },
+          "latlng_br": {
+            "$ref": "#/components/schemas/latlng_br"
+          },
+          "latlng_tl": {
+            "$ref": "#/components/schemas/latlng_tl"
+          },
+          "locked": {
+            "default": false,
+            "description": "Whether this map is considered locked down",
+            "type": "boolean"
+          },
+          "mapstack_floor": {
+            "description": "maps stack, optional",
+            "examples": [
+              1
+            ],
+            "type": "integer"
+          },
+          "mapstack_id": {
+            "description": "maps stack, optional",
+            "examples": [
+              "424ef025-a5c0-9a8f-62a8-e6fcbb6a0fc2"
+            ],
+            "format": "uuid",
+            "type": "string"
+          },
+          "modified_time": {
+            "$ref": "#/components/schemas/modified_time"
+          },
+          "name": {
+            "description": "The name of the map",
+            "examples": [
+              "Mist Office"
+            ],
+            "type": "string"
+          },
+          "occupancy_limit": {
+            "type": "integer"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/org_id"
+          },
+          "orientation": {
+            "default": 0,
+            "description": "Orientation of the map, 0 means up is north, 90 means up is west",
+            "examples": [
+              30
+            ],
+            "maximum": 359,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "origin_x": {
+            "description": "User-annotated X origin, pixels",
+            "examples": [
+              35
+            ],
+            "type": "integer"
+          },
+          "origin_y": {
+            "description": "User-annotated Y origin, pixels",
+            "examples": [
+              60
+            ],
+            "type": "integer"
+          },
+          "ppm": {
+            "description": "When type=image, pixels per meter",
+            "examples": [
+              40.94
+            ],
+            "type": "number"
+          },
+          "site_id": {
+            "$ref": "#/components/schemas/site_id"
+          },
+          "sitesurvey_path": {
+            "$ref": "#/components/schemas/map_sitesurvey_path"
+          },
+          "thumbnail_url": {
+            "description": "When type=image, the url for the thumbnail image / preview",
+            "examples": [
+              "https://url/to/image.png"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/map_type"
+          },
+          "url": {
+            "description": "When type=image, the url",
+            "examples": [
+              "https://url/to/image.png"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "view": {
+            "$ref": "#/components/schemas/map_view"
+          },
+          "wall_path": {
+            "$ref": "#/components/schemas/map_wall_path"
+          },
+          "wayfinding": {
+            "$ref": "#/components/schemas/map_wayfinding"
+          },
+          "wayfinding_path": {
+            "$ref": "#/components/schemas/map_wayfinding_path"
+          },
+          "width": {
+            "description": "When type=image, width of the image map",
+            "examples": [
+              1250
+            ],
+            "type": "integer"
+          },
+          "width_m": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "map_geofence": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "Name of the geofence",
+            "examples": [
+              "example"
+            ],
+            "type": "string"
+          },
+          "vertices": {
+            "$ref": "#/components/schemas/map_geofence_vertices"
+          }
+        },
+        "type": "object"
+      },
+      "map_geofence_vertice": {
+        "additionalProperties": false,
+        "properties": {
+          "X": {
+            "description": "X coordinate",
+            "examples": [
+              700
+            ],
+            "type": "number"
+          },
+          "Y": {
+            "description": "Y coordinate",
+            "examples": [
+              100
+            ],
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "map_geofence_vertices": {
+        "description": "List of vertices defining the geofence",
+        "items": {
+          "$ref": "#/components/schemas/map_geofence_vertice"
+        },
+        "type": "array"
+      },
+      "map_geofences": {
+        "description": "List of geofences for the map",
+        "items": {
+          "$ref": "#/components/schemas/map_geofence"
+        },
+        "type": "array"
+      },
+      "map_import_json": {
+        "additionalProperties": false,
+        "properties": {
+          "import_all_floorplans": {
+            "default": false,
+            "type": "boolean"
+          },
+          "import_height": {
+            "default": true,
+            "type": "boolean"
+          },
+          "import_orientation": {
+            "default": true,
+            "type": "boolean"
+          },
+          "vendor_name": {
+            "$ref": "#/components/schemas/map_import_json_vendor_name"
+          }
+        },
+        "required": [
+          "vendor_name"
+        ],
+        "type": "object"
+      },
+      "map_import_json_vendor_name": {
+        "description": "enum: `ekahau`, `ibwave`",
+        "enum": [
+          "ekahau",
+          "ibwave"
+        ],
+        "examples": [
+          "ekahau"
+        ],
+        "type": "string"
+      },
+      "map_node": {
+        "additionalProperties": false,
+        "description": "Nodes on maps",
+        "properties": {
+          "edges": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "examples": [
+              {
+                "N1": "1"
+              }
+            ],
+            "type": "object"
+          },
+          "name": {
+            "examples": [
+              "N1"
+            ],
+            "type": "string"
+          },
+          "position": {
+            "$ref": "#/components/schemas/map_node_position"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "map_node_position": {
+        "additionalProperties": false,
+        "properties": {
+          "x": {
+            "examples": [
+              746
+            ],
+            "format": "double",
+            "type": "number"
+          },
+          "y": {
+            "examples": [
+              104
+            ],
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "x",
+          "y"
+        ],
+        "type": "object"
+      },
+      "map_site_import_file": {
+        "additionalProperties": false,
+        "properties": {
+          "auto_deviceprofile_assignment": {
+            "description": "Whether to auto assign device to deviceprofile by name",
+            "examples": [
+              true
+            ],
+            "type": "boolean"
+          },
+          "csv": {
+            "contentMediaType": "application/octet-stream",
+            "description": "CSV file for ap name mapping, optional",
+            "type": "string"
+          },
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "description": "Ekahau or ibwave file",
+            "type": "string"
+          },
+          "json": {
+            "$ref": "#/components/schemas/map_import_json"
+          }
+        },
+        "type": "object"
+      },
+      "map_sitesurvey_path": {
+        "description": "Sitesurvey_path",
+        "items": {
+          "$ref": "#/components/schemas/map_sitesurvey_path_items"
+        },
+        "minItems": 0,
+        "type": "array"
+      },
+      "map_sitesurvey_path_items": {
+        "additionalProperties": false,
+        "properties": {
+          "coordinate": {
+            "examples": [
+              "actual"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/components/schemas/id"
+          },
+          "name": {
+            "examples": [
+              "Default"
+            ],
+            "type": "string"
+          },
+          "nodes": {
+            "$ref": "#/components/schemas/map_sitesurvey_path_items_nodes"
+          }
+        },
+        "type": "object"
+      },
+      "map_sitesurvey_path_items_nodes": {
+        "items": {
+          "$ref": "#/components/schemas/map_node"
+        },
+        "minItems": 0,
+        "type": "array"
+      },
+      "map_type": {
+        "default": "image",
+        "description": "enum: `google`, `image`",
+        "enum": [
+          "google",
+          "image"
+        ],
+        "examples": [
+          "image"
+        ],
+        "type": "string"
+      },
+      "map_view": {
+        "description": "if `type`==`google`. enum: `hybrid`, `roadmap`, `satellite`, `terrain`",
+        "enum": [
+          "hybrid",
+          "roadmap",
+          "satellite",
+          "terrain"
+        ],
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "map_wall_path": {
+        "additionalProperties": false,
+        "description": "JSON blob for wall definition (same format as wayfinding_path)",
+        "properties": {
+          "coordinate": {
+            "examples": [
+              "actual"
+            ],
+            "type": "string"
+          },
+          "nodes": {
+            "$ref": "#/components/schemas/map_wall_path_nodes"
+          }
+        },
+        "type": "object"
+      },
+      "map_wall_path_nodes": {
+        "items": {
+          "$ref": "#/components/schemas/map_node"
+        },
+        "minItems": 0,
+        "type": "array"
+      },
+      "map_wayfinding": {
+        "additionalProperties": false,
+        "description": "Properties related to wayfinding",
+        "properties": {
+          "micello": {
+            "$ref": "#/components/schemas/map_wayfinding_micello"
+          },
+          "snap_to_path": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "map_wayfinding_micello": {
+        "additionalProperties": false,
+        "properties": {
+          "account_key": {
+            "examples": [
+              "adasdf"
+            ],
+            "type": "string"
+          },
+          "default_level_id": {
+            "examples": [
+              5
+            ],
+            "type": "integer"
+          },
+          "map_id": {
+            "examples": [
+              "c660f81dd250c"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "map_wayfinding_path": {
+        "additionalProperties": false,
+        "description": "JSON blob for wayfinding (using Dijkstra’s algorithm)",
+        "properties": {
+          "coordinate": {
+            "examples": [
+              "actual"
+            ],
+            "type": "string"
+          },
+          "nodes": {
+            "$ref": "#/components/schemas/map_wayfinding_path_nodes"
+          }
+        },
+        "type": "object"
+      },
+      "map_wayfinding_path_nodes": {
+        "items": {
+          "$ref": "#/components/schemas/map_node"
+        },
+        "minItems": 0,
+        "type": "array"
+      },
+      "maps": {
+        "items": {
+          "$ref": "#/components/schemas/map"
+        },
+        "type": "array"
+      },
+      "memory_stat": {
+        "additionalProperties": false,
+        "description": "Memory usage stat (for virtual chassis, memory usage of master RE)",
+        "properties": {
+          "usage": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "usage"
+        ],
+        "type": "object"
+      },
+      "modified_time": {
+        "description": "When the object has been modified for the last time, in epoch",
+        "format": "double",
+        "readOnly": true,
+        "type": "number"
+      },
+      "module_stat_item_errors": {
+        "description": "Used to report all error states the device node is running into. An error should always have `type` and `since` fields, and could have some other fields specific to that type.",
+        "items": {
+          "$ref": "#/components/schemas/module_stat_item_errors_items"
+        },
+        "type": "array"
+      },
+      "module_stat_item_errors_items": {
+        "additionalProperties": false,
+        "properties": {
+          "feature": {
+            "examples": [
+              "Mist-Management"
+            ],
+            "type": "string"
+          },
+          "minimum_version": {
+            "examples": [
+              "128T-6.0.0-1"
+            ],
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "since": {
+            "examples": [
+              1657497600
+            ],
+            "type": "integer"
+          },
+          "type": {
+            "examples": [
+              "FW_UPGRADE_REQUIRED_BY_FEATURE"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "since",
+          "type"
+        ],
+        "type": "object"
+      },
+      "module_stat_item_fans": {
+        "items": {
+          "$ref": "#/components/schemas/module_stat_item_fans_items"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "module_stat_item_fans_items": {
+        "additionalProperties": false,
+        "properties": {
+          "airflow": {
+            "examples": [
+              "out"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "examples": [
+              "Fan 0"
+            ],
+            "type": "string"
+          },
+          "rpm": {
+            "type": "integer"
+          },
+          "status": {
+            "examples": [
+              "ok"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "module_stat_item_pics": {
+        "items": {
+          "$ref": "#/components/schemas/module_stat_item_pics_item"
+        },
+        "type": "array"
+      },
+      "module_stat_item_pics_item": {
+        "additionalProperties": false,
+        "properties": {
+          "index": {
+            "type": "integer"
+          },
+          "model_number": {
+            "type": "string"
+          },
+          "port_groups": {
+            "$ref": "#/components/schemas/module_stat_item_pics_item_port_groups"
+          }
+        },
+        "type": "object"
+      },
+      "module_stat_item_pics_item_port_groups": {
+        "items": {
+          "$ref": "#/components/schemas/module_stat_item_pics_item_port_groups_item"
+        },
+        "type": "array"
+      },
+      "module_stat_item_pics_item_port_groups_item": {
+        "additionalProperties": false,
+        "properties": {
+          "count": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "module_stat_item_poe": {
+        "additionalProperties": false,
+        "properties": {
+          "max_power": {
+            "examples": [
+              250
+            ],
+            "type": "number"
+          },
+          "power_draw": {
+            "examples": [
+              120.3
+            ],
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "module_stat_item_psus": {
+        "items": {
+          "$ref": "#/components/schemas/module_stat_item_psus_item"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "module_stat_item_psus_item": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "examples": [
+              "Power Supply 0"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "examples": [
+              "ok"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "module_stat_item_temperatures": {
+        "items": {
+          "$ref": "#/components/schemas/module_stat_item_temperatures_item"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "module_stat_item_temperatures_item": {
+        "additionalProperties": false,
+        "properties": {
+          "celsius": {
+            "examples": [
+              45
+            ],
+            "type": "number"
+          },
+          "name": {
+            "examples": [
+              "CPU"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "examples": [
+              "ok"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "module_stat_item_vc_links": {
+        "items": {
+          "$ref": "#/components/schemas/module_stat_item_vc_links_item"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "module_stat_item_vc_links_item": {
+        "additionalProperties": false,
+        "properties": {
+          "neighbor_module_idx": {
+            "examples": [
+              1
+            ],
+            "type": "integer"
+          },
+          "neighbor_port_id": {
+            "examples": [
+              "vcp-255/1/0"
+            ],
+            "type": "string"
+          },
+          "port_id": {
+            "examples": [
+              "vcp-255/1/0"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "org_id": {
+        "examples": [
+          "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "response_detail_string": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http400": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http401": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Authentication credentials were not provided."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http403": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "You do not have permission to perform this action."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http404": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http429": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_inventory": {
+        "additionalProperties": false,
+        "properties": {
+          "added": {
+            "$ref": "#/components/schemas/response_inventory_added"
+          },
+          "duplicated": {
+            "$ref": "#/components/schemas/response_inventory_duplicated"
+          },
+          "error": {
+            "$ref": "#/components/schemas/response_inventory_error"
+          },
+          "inventory_added": {
+            "$ref": "#/components/schemas/response_inventory_inventory_added"
+          },
+          "inventory_duplicated": {
+            "$ref": "#/components/schemas/response_inventory_inventory_duplicated"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/strings"
+          }
+        },
+        "type": "object"
+      },
+      "response_inventory_added": {
+        "items": {
+          "examples": [
+            "6JG8E-PTFV2-A9Z2N"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "response_inventory_duplicated": {
+        "items": {
+          "examples": [
+            "DVH4V-SNMSZ-PDXBR"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "response_inventory_error": {
+        "items": {
+          "examples": [
+            "PO1025335ohoh"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "response_inventory_inventory_added": {
+        "items": {
+          "$ref": "#/components/schemas/response_inventory_inventory_added_items"
+        },
+        "minItems": 1,
+        "type": "array",
+        "uniqueItems": true
+      },
+      "response_inventory_inventory_added_items": {
+        "additionalProperties": false,
+        "properties": {
+          "mac": {
+            "examples": [
+              "5c5b35000018"
+            ],
+            "type": "string"
+          },
+          "magic": {
+            "examples": [
+              "6JG8EPTFV2A9Z2N"
+            ],
+            "type": "string"
+          },
+          "model": {
+            "examples": [
+              "AP41"
+            ],
+            "type": "string"
+          },
+          "serial": {
+            "examples": [
+              "FXLH2015150025"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "examples": [
+              "ap"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "mac",
+          "magic",
+          "model",
+          "serial",
+          "type"
+        ],
+        "type": "object"
+      },
+      "response_inventory_inventory_duplicated": {
+        "items": {
+          "$ref": "#/components/schemas/response_inventory_inventory_duplicated_items"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "response_inventory_inventory_duplicated_items": {
+        "additionalProperties": false,
+        "properties": {
+          "mac": {
+            "examples": [
+              "5c5b35000012"
+            ],
+            "type": "string"
+          },
+          "magic": {
+            "examples": [
+              "DVH4VSNMSZPDXBR"
+            ],
+            "type": "string"
+          },
+          "model": {
+            "examples": [
+              "AP41"
+            ],
+            "type": "string"
+          },
+          "serial": {
+            "examples": [
+              "FXLH2015150027"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "examples": [
+              "ap"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "mac",
+          "magic",
+          "model",
+          "serial",
+          "type"
+        ],
+        "type": "object"
+      },
+      "response_map_import": {
+        "additionalProperties": false,
+        "properties": {
+          "aps": {
+            "$ref": "#/components/schemas/response_map_import_aps"
+          },
+          "floorplans": {
+            "$ref": "#/components/schemas/response_map_import_floorplans"
+          },
+          "for_site": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "site_id": {
+            "$ref": "#/components/schemas/site_id"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/response_map_import_summary"
+          }
+        },
+        "required": [
+          "site_id",
+          "aps",
+          "floorplans",
+          "summary"
+        ],
+        "type": "object"
+      },
+      "response_map_import_ap": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/response_map_import_ap_action"
+          },
+          "floorplan_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "height": {
+            "format": "double",
+            "type": "number"
+          },
+          "mac": {
+            "type": "string"
+          },
+          "map_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "orientation": {
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "mac",
+          "action",
+          "map_id",
+          "floorplan_id",
+          "orientation"
+        ],
+        "type": "object"
+      },
+      "response_map_import_ap_action": {
+        "description": "enum: `assigned-named-placed`, `assigned-placed`, `ignored`, `named-placed`, `placed`",
+        "enum": [
+          "assigned-named-placed",
+          "assigned-placed",
+          "ignored",
+          "named-placed",
+          "placed"
+        ],
+        "type": "string"
+      },
+      "response_map_import_aps": {
+        "items": {
+          "$ref": "#/components/schemas/response_map_import_ap"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "response_map_import_floorplan": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/components/schemas/id"
+          },
+          "map_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "action",
+          "map_id"
+        ],
+        "type": "object"
+      },
+      "response_map_import_floorplans": {
+        "items": {
+          "$ref": "#/components/schemas/response_map_import_floorplan"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "response_map_import_summary": {
+        "additionalProperties": false,
+        "properties": {
+          "num_ap_assigned": {
+            "type": "integer"
+          },
+          "num_inv_assigned": {
+            "type": "integer"
+          },
+          "num_map_assigned": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "num_ap_assigned",
+          "num_map_assigned",
+          "num_inv_assigned"
+        ],
+        "type": "object"
+      },
+      "response_virtual_chassis_config": {
+        "additionalProperties": false,
+        "properties": {
+          "config_type": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/components/schemas/id"
+          },
+          "locating": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "mac": {
+            "type": "string"
+          },
+          "members": {
+            "$ref": "#/components/schemas/stats_switch_module_stat"
+          },
+          "model": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "num_routing_engines": {
+            "description": "routing-engine count",
+            "examples": [
+              1
+            ],
+            "type": "integer"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/org_id"
+          },
+          "serial": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "site_id": {
+            "$ref": "#/components/schemas/site_id"
+          },
+          "status": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "vc_mac": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "site_id": {
+        "examples": [
+          "441a1214-6928-442a-8e92-e1d34b8ec6a6"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "stats_switch_module_stat": {
+        "items": {
+          "$ref": "#/components/schemas/stats_switch_module_stat_item"
+        },
+        "minItems": 1,
+        "type": "array",
+        "uniqueItems": true
+      },
+      "stats_switch_module_stat_item": {
+        "additionalProperties": false,
+        "properties": {
+          "backup_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "bios_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "boot_partition": {
+            "type": "string"
+          },
+          "cpld_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "cpu_stat": {
+            "$ref": "#/components/schemas/cpu_stat"
+          },
+          "errors": {
+            "$ref": "#/components/schemas/module_stat_item_errors"
+          },
+          "fans": {
+            "$ref": "#/components/schemas/module_stat_item_fans"
+          },
+          "fpc_idx": {
+            "readOnly": true,
+            "type": "integer"
+          },
+          "fpga_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "last_seen": {
+            "$ref": "#/components/schemas/last_seen"
+          },
+          "locating": {
+            "type": "boolean"
+          },
+          "mac": {
+            "examples": [
+              "fc3342123456"
+            ],
+            "type": "string"
+          },
+          "memory_stat": {
+            "$ref": "#/components/schemas/memory_stat"
+          },
+          "model": {
+            "examples": [
+              "EX4300-48P"
+            ],
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "optics_cpld_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "pending_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "pics": {
+            "$ref": "#/components/schemas/module_stat_item_pics"
+          },
+          "poe": {
+            "$ref": "#/components/schemas/module_stat_item_poe"
+          },
+          "poe_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "power_cpld_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "psus": {
+            "$ref": "#/components/schemas/module_stat_item_psus"
+          },
+          "re_fpga_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "recovery_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "serial": {
+            "examples": [
+              "PX8716230021"
+            ],
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "temperatures": {
+            "$ref": "#/components/schemas/module_stat_item_temperatures"
+          },
+          "tmc_fpga_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "type": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "uboot_version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "uptime": {
+            "readOnly": true,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "vc_links": {
+            "$ref": "#/components/schemas/module_stat_item_vc_links"
+          },
+          "vc_mode": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "vc_role": {
+            "description": "enum: `master`, `backup`, `linecard`",
+            "examples": [
+              "master"
+            ],
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "vc_state": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "version": {
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "strings": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "virtual_chassis_config": {
+        "description": "Virtual Chassis",
+        "properties": {
+          "locating": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "members": {
+            "$ref": "#/components/schemas/virtual_chassis_config_members"
+          },
+          "preprovisioned": {
+            "default": false,
+            "description": "To create the Virtual Chassis in Pre-Provisioned mode",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "virtual_chassis_config_member": {
+        "additionalProperties": false,
+        "properties": {
+          "locating": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "mac": {
+            "description": "fpc0, same as the mac of device_id",
+            "type": "string"
+          },
+          "member_id": {
+            "description": "For preprovisionned virtual chassis",
+            "type": "integer"
+          },
+          "vc_ports": {
+            "$ref": "#/components/schemas/strings"
+          },
+          "vc_role": {
+            "$ref": "#/components/schemas/virtual_chassis_config_member_vc_role"
+          }
+        },
+        "required": [
+          "mac",
+          "vc_role"
+        ],
+        "type": "object"
+      },
+      "virtual_chassis_config_member_vc_role": {
+        "description": "enum: `backup`, `linecard`, `master`",
+        "enum": [
+          "backup",
+          "linecard",
+          "master"
+        ],
+        "type": "string"
+      },
+      "virtual_chassis_config_members": {
+        "items": {
+          "$ref": "#/components/schemas/virtual_chassis_config_member"
+        },
+        "type": "array"
+      },
+      "virtual_chassis_member_update": {
+        "additionalProperties": false,
+        "properties": {
+          "mac": {
+            "description": "Required if `op`==`add` or `op`==`preprovision`.",
+            "type": "string"
+          },
+          "member": {
+            "description": "Required if `op`==`remove`",
+            "type": "integer"
+          },
+          "member_id": {
+            "description": "Required if `op`==`preprovision`. Optional if `op`==`add`",
+            "type": "integer"
+          },
+          "vc_ports": {
+            "$ref": "#/components/schemas/virtual_chassis_member_update_vc_ports"
+          },
+          "vc_role": {
+            "$ref": "#/components/schemas/virtual_chassis_member_update_vc_role"
+          }
+        },
+        "type": "object"
+      },
+      "virtual_chassis_member_update_vc_ports": {
+        "description": "Required if `op`==`add` or `op`==`preprovision`",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "virtual_chassis_member_update_vc_role": {
+        "description": "Required if `op`==`add` or `op`==`preprovision`. enum: `backup`, `linecard`, `master`",
+        "enum": [
+          "backup",
+          "linecard",
+          "master"
+        ],
+        "type": "string"
+      },
+      "virtual_chassis_update": {
+        "description": "Virtual Chassis",
+        "properties": {
+          "member": {
+            "description": "Only if `op`==`renumber`",
+            "type": "integer"
+          },
+          "members": {
+            "$ref": "#/components/schemas/virtual_chassis_update_members"
+          },
+          "new-member": {
+            "description": "Only if `op`==`renumber`",
+            "type": "integer"
+          },
+          "op": {
+            "$ref": "#/components/schemas/virtual_chassis_update_op"
+          }
+        },
+        "type": "object"
+      },
+      "virtual_chassis_update_members": {
+        "items": {
+          "$ref": "#/components/schemas/virtual_chassis_member_update"
+        },
+        "type": "array"
+      },
+      "virtual_chassis_update_op": {
+        "description": "enum: `add`, `preprovision`, `remove`, `renumber`",
+        "enum": [
+          "add",
+          "preprovision",
+          "remove",
+          "renumber"
+        ],
+        "type": "string"
+      }
+    },
+    "responses": {
+      "HTTP400": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          }
+        },
+        "description": "Bad Syntax"
+      },
+      "HTTP401": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          }
+        },
+        "description": "Unauthorized"
+      },
+      "HTTP403": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          }
+        },
+        "description": "Permission Denied"
+      },
+      "HTTP404": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          }
+        },
+        "description": "Not found. The API endpoint doesn’t exist or resource doesn’ t exist"
+      },
+      "HTTP429": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          }
+        },
+        "description": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+      },
+      "InstallerAlarmtemplates": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/InstallerAlarmtemplatesExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/installers"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/InstallerAlarmtemplatesExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/installers"
+            }
+          }
+        },
+        "description": "Installer List of Alarm Templates"
+      },
+      "InstallerDeviceProfiles": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/InstallerDeviceProfilesExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/installers"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/InstallerDeviceProfilesExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/installers"
+            }
+          }
+        },
+        "description": "Installer List of Device Profiles"
+      },
+      "InstallerDevicesArray": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/InstallerDevicesArrayExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/installer_devices"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/InstallerDevicesArrayExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/installer_devices"
+            }
+          }
+        },
+        "description": "List of Devices Recently Claimed"
+      },
+      "InstallerRftemplatesArray": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/InstallerRftemplatesArrayExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/installers"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/InstallerRftemplatesArrayExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/installers"
+            }
+          }
+        },
+        "description": "Installer List of RF Templates"
+      },
+      "InstallerSitegroupsArray": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/InstallerSitegroupsArrayExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/installers"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/InstallerSitegroupsArrayExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/installers"
+            }
+          }
+        },
+        "description": "Installer List of Site Groups"
+      },
+      "InstallerSitesArray": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/InstallerSitesArrayExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/installer_sites"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/InstallerSitesArrayExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/installer_sites"
+            }
+          }
+        },
+        "description": "List of Sites"
+      },
+      "Map": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/map"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/map"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "MapImport": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Assigned And Placed": {
+                "$ref": "#/components/examples/MapImportAssignedAndPlaced"
+              },
+              "Assigned Named And Placed": {
+                "$ref": "#/components/examples/MapImportAssignedNamedAndPlaced"
+              },
+              "Placed": {
+                "$ref": "#/components/examples/MapImportPlaced"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_map_import"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Assigned And Placed": {
+                "$ref": "#/components/examples/MapImportAssignedAndPlaced"
+              },
+              "Assigned Named And Placed": {
+                "$ref": "#/components/examples/MapImportAssignedNamedAndPlaced"
+              },
+              "Placed": {
+                "$ref": "#/components/examples/MapImportPlaced"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_map_import"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "MapsArray": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/MapsArrayExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/maps"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/MapsArrayExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/maps"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "OK": {
+        "description": "OK"
+      },
+      "OrgInventoryAdd": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/OrgInventoryAddExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_inventory"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/OrgInventoryAddExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_inventory"
+            }
+          }
+        },
+        "description": "OK - if any of entries are valid or there’s no errors"
+      },
+      "OrgInventoryUnassignFailed": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Invalid Mac Given For Replacing Mac": {
+                "$ref": "#/components/examples/OrgInventoryUnassignFailedInvalidMacGivenForReplacingMac"
+              },
+              "Inventory Device Is Already Assigned": {
+                "$ref": "#/components/examples/OrgInventoryUnassignFailedInventoryDeviceIsAlreadyAssigned"
+              },
+              "Outside Of Grace Period": {
+                "$ref": "#/components/examples/OrgInventoryUnassignFailedOutsideOfGracePeriod"
+              },
+              "Replacing Mac Device Is Not Assigned To A Site": {
+                "$ref": "#/components/examples/OrgInventoryUnassignFailedReplacingMacDeviceIsNotAssignedToASite"
+              },
+              "Replacing Mac Device Last Modified Outside Of Grace Period": {
+                "$ref": "#/components/examples/OrgInventoryUnassignFailedReplacingMacDeviceLastModifiedOutsideOfGracePeriod"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_detail_string"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Invalid Mac Given For Replacing Mac": {
+                "$ref": "#/components/examples/OrgInventoryUnassignFailedInvalidMacGivenForReplacingMac"
+              },
+              "Inventory Device Is Already Assigned": {
+                "$ref": "#/components/examples/OrgInventoryUnassignFailedInventoryDeviceIsAlreadyAssigned"
+              },
+              "Outside Of Grace Period": {
+                "$ref": "#/components/examples/OrgInventoryUnassignFailedOutsideOfGracePeriod"
+              },
+              "Replacing Mac Device Is Not Assigned To A Site": {
+                "$ref": "#/components/examples/OrgInventoryUnassignFailedReplacingMacDeviceIsNotAssignedToASite"
+              },
+              "Replacing Mac Device Last Modified Outside Of Grace Period": {
+                "$ref": "#/components/examples/OrgInventoryUnassignFailedReplacingMacDeviceLastModifiedOutsideOfGracePeriod"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_detail_string"
+            }
+          }
+        },
+        "description": "Bad Request"
+      },
+      "OrgInventoryUnassignNotFound": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Replacing Mac Device Is Not In Org Inventory": {
+                "$ref": "#/components/examples/OrgInventoryUnassignNotFoundReplacingMacDeviceIsNotInOrgInventory"
+              },
+              "Replacing Mac Device Not Found": {
+                "$ref": "#/components/examples/OrgInventoryUnassignNotFoundReplacingMacDeviceNotFound"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_detail_string"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Replacing Mac Device Is Not In Org Inventory": {
+                "$ref": "#/components/examples/OrgInventoryUnassignNotFoundReplacingMacDeviceIsNotInOrgInventory"
+              },
+              "Replacing Mac Device Not Found": {
+                "$ref": "#/components/examples/OrgInventoryUnassignNotFoundReplacingMacDeviceNotFound"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_detail_string"
+            }
+          }
+        },
+        "description": "Not Found"
+      },
+      "VirtualChassis": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/VirtualChassisExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_virtual_chassis_config"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/VirtualChassisExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_virtual_chassis_config"
+            }
+          }
+        },
+        "description": "Example response"
+      }
+    },
+    "parameters": {
+      "device_mac": {
+        "in": "path",
+        "name": "device_mac",
+        "required": true,
+        "schema": {
+          "examples": [
+            "0000000000ab"
+          ],
+          "pattern": "^[0-9a-fA-F]{12}$",
+          "type": "string"
+        }
+      },
+      "image_name": {
+        "in": "path",
+        "name": "image_name",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "limit": {
+        "in": "query",
+        "name": "limit",
+        "required": false,
+        "schema": {
+          "default": 100,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "map_id": {
+        "in": "path",
+        "name": "map_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "org_id": {
+        "in": "path",
+        "name": "org_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "page": {
+        "in": "query",
+        "name": "page",
+        "required": false,
+        "schema": {
+          "default": 1,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "site_name": {
+        "in": "path",
+        "name": "site_name",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "examples": {
+      "HTTP400Example": {
+        "value": {
+          "detail": "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+        }
+      },
+      "HTTP401Example": {
+        "value": {
+          "detail": "Authentication credentials were not provided."
+        }
+      },
+      "HTTP403Example": {
+        "value": {
+          "detail": "You do not have permission to perform this action."
+        }
+      },
+      "HTTP429Example": {
+        "value": {
+          "detail": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+        }
+      },
+      "InstallerAlarmtemplatesExample": {
+        "value": [
+          {
+            "id": "684dfc5c-fe77-2290-eb1d-ef3d677fe168",
+            "name": "AlarmTemplate 1"
+          }
+        ]
+      },
+      "InstallerDeviceProfilesExample": {
+        "value": [
+          {
+            "id": "6f4bf402-45f9-2a56-6c8b-7f83d3bc98e9",
+            "name": "DeviceProfile 1"
+          }
+        ]
+      },
+      "InstallerDevicesArrayExample": {
+        "value": [
+          {
+            "connected": true,
+            "deviceprofile_name": "SJ1",
+            "height": 2.7,
+            "mac": "5c5b35000018",
+            "map_id": "845a23bf-bed9-e43c-4c86-6fa474be7ae5",
+            "model": "AP41",
+            "name": "hallway",
+            "orientation": 90,
+            "serial": "FXLH2015150025",
+            "site_name": "SJ1",
+            "x": 150,
+            "y": 300
+          }
+        ]
+      },
+      "InstallerRftemplatesArrayExample": {
+        "value": [
+          {
+            "id": "bb8a9017-1e36-5d6c-6f2b-551abe8a76a2",
+            "name": "RFTemplate 1"
+          }
+        ]
+      },
+      "InstallerSitegroupsArrayExample": {
+        "value": [
+          {
+            "id": "581328b6-e382-f54e-c9dc-999983183a34",
+            "name": "SiteGroup 1"
+          }
+        ]
+      },
+      "InstallerSitesArrayExample": {
+        "value": [
+          {
+            "address": "1601 S. Deanza Blvd., Cupertino, CA, 95014",
+            "country_code": "US",
+            "id": "4ac1dcf4-9d8b-7211-65c4-057819f0862b",
+            "latlng": {
+              "lat": 37.295833,
+              "lng": -122.032946
+            },
+            "name": "Mist Office",
+            "rftemplate_name": "rftemplate1",
+            "sitegroup_names": [
+              "sg1",
+              "sg2"
+            ],
+            "timezone": "America/Los_Angeles"
+          }
+        ]
+      },
+      "MapImportAssignedAndPlaced": {
+        "value": {
+          "aps": [
+            {
+              "action": "assigned-placed",
+              "floorplan_id": "6f4bf402-45f9-2a56-6c8b-7f83d3bc98e9",
+              "height": 3,
+              "mac": "5c5b35000001",
+              "map_id": "845a23bf-bed9-e43c-4c86-6fa474be7ae5",
+              "orientation": 45
+            }
+          ],
+          "floorplans": [
+            {
+              "action": "imported",
+              "id": "cbdb7f0b-3be0-4872-88f9-58790b509c23",
+              "map_id": "845a23bf-bed9-e43c-4c86-6fa474be7ae5",
+              "name": "map1"
+            }
+          ],
+          "site_id": "4ac1dcf4-9d8b-7211-65c4-057819f0862b",
+          "summary": {
+            "num_ap_assigned": 1,
+            "num_inv_assigned": 1,
+            "num_map_assigned": 1
+          }
+        }
+      },
+      "MapImportAssignedNamedAndPlaced": {
+        "value": {
+          "aps": [
+            {
+              "action": "assigned-named-placed",
+              "floorplan_id": "6f4bf402-45f9-2a56-6c8b-7f83d3bc98e9",
+              "mac": "5c5b35000001",
+              "map_id": "845a23bf-bed9-e43c-4c86-6fa474be7ae5",
+              "orientation": 45
+            }
+          ],
+          "floorplans": [
+            {
+              "action": "imported",
+              "id": "cbdb7f0b-3be0-4872-88f9-58790b509c23",
+              "map_id": "845a23bf-bed9-e43c-4c86-6fa474be7ae5",
+              "name": "map1"
+            }
+          ],
+          "site_id": "4ac1dcf4-9d8b-7211-65c4-057819f0862b",
+          "summary": {
+            "num_ap_assigned": 1,
+            "num_inv_assigned": 1,
+            "num_map_assigned": 1
+          }
+        }
+      },
+      "MapImportPlaced": {
+        "value": {
+          "aps": [
+            {
+              "action": "placed",
+              "floorplan_id": "b069b358-4c97-5319-1f8c-7c5ca64d6ab1",
+              "height": 3,
+              "mac": "5c5b35000001",
+              "map_id": "845a23bf-bed9-e43c-4c86-6fa474be7ae5",
+              "orientation": 45
+            }
+          ],
+          "floorplans": [
+            {
+              "action": "imported",
+              "id": "b069b358-4c97-5319-1f8c-7c5ca64d6ab1",
+              "map_id": "845a23bf-bed9-e43c-4c86-6fa474be7ae5",
+              "name": "map1"
+            }
+          ],
+          "site_id": "4ac1dcf4-9d8b-7211-65c4-057819f0862b",
+          "summary": {
+            "num_ap_assigned": 1,
+            "num_inv_assigned": 1,
+            "num_map_assigned": 1
+          }
+        }
+      },
+      "MapsArrayExample": {
+        "value": [
+          {
+            "created_time": 0,
+            "flags": {},
+            "group_idx": 1,
+            "group_name": "East Wing",
+            "height": 0,
+            "height_m": 0,
+            "id": "b069b358-4c97-5319-1f8c-7c5ca64d6ab1",
+            "latlng_br": {
+              "lat": "string",
+              "lng": "string"
+            },
+            "latlng_tl": {
+              "lat": "string",
+              "lng": "string"
+            },
+            "locked": true,
+            "modified_time": 0,
+            "name": "string",
+            "occupancy_limit": 0,
+            "org_id": "b069b358-4c97-5319-1f8c-7c5ca64d6ab1",
+            "orientation": 0,
+            "origin_x": 0,
+            "origin_y": 0,
+            "ppm": 0,
+            "site_id": "b069b358-4c97-5319-1f8c-7c5ca64d6ab1",
+            "sitesurvey_path": [
+              {
+                "coordinate": "string",
+                "id": "b069b358-4c97-5319-1f8c-7c5ca64d6ab1",
+                "name": "string",
+                "nodes": [
+                  {
+                    "edges": {
+                      "N2": "string"
+                    },
+                    "name": "string",
+                    "position": {
+                      "x": 0,
+                      "y": 0
+                    }
+                  }
+                ]
+              }
+            ],
+            "thumbnail_url": "string",
+            "type": "image",
+            "url": "string",
+            "view": "roadmap",
+            "wall_path": {
+              "coordinate": "string",
+              "nodes": [
+                {
+                  "edges": {
+                    "N2": "string"
+                  },
+                  "name": "string",
+                  "position": {
+                    "x": 0,
+                    "y": 0
+                  }
+                }
+              ]
+            },
+            "wayfinding": {
+              "micello": {
+                "account_key": "string",
+                "default_level_id": 0,
+                "map_id": "b069b358-4c97-5319-1f8c-7c5ca64d6ab1"
+              },
+              "snap_to_path": true
+            },
+            "wayfinding_path": {
+              "coordinate": "string",
+              "nodes": [
+                {
+                  "edges": {
+                    "N2": "string"
+                  },
+                  "name": "string",
+                  "position": {
+                    "x": 0,
+                    "y": 0
+                  }
+                }
+              ]
+            },
+            "width": 0,
+            "width_m": 0
+          }
+        ]
+      },
+      "OrgInventoryAddExample": {
+        "value": {
+          "added": [
+            "6JG8E-PTFV2-A9Z2N"
+          ],
+          "duplicated": [
+            "DVH4V-SNMSZ-PDXBR"
+          ],
+          "error": [
+            "PO1025335ohoh"
+          ],
+          "inventory_added": [
+            {
+              "mac": "5c5b35000018",
+              "magic": "6JG8EPTFV2A9Z2N",
+              "model": "AP41",
+              "serial": "FXLH2015150025",
+              "type": "ap"
+            }
+          ],
+          "inventory_duplicated": [
+            {
+              "mac": "5c5b35000012",
+              "magic": "DVH4VSNMSZPDXBR",
+              "model": "AP41",
+              "serial": "FXLH2015150027",
+              "type": "ap"
+            }
+          ],
+          "reason": [
+            "belongs to another org ('e2f543f7-d6e1-409f-a565-e77a1f098d3b' (other) != '0de5d6fc-219a-414d-a840-67d6b919ad8f' (you))"
+          ]
+        }
+      },
+      "OrgInventoryUnassignFailedInvalidMacGivenForReplacingMac": {
+        "value": {
+          "detail": "invalid replacing_mac"
+        }
+      },
+      "OrgInventoryUnassignFailedInventoryDeviceIsAlreadyAssigned": {
+        "value": {
+          "detail": "device already assigned"
+        }
+      },
+      "OrgInventoryUnassignFailedOutsideOfGracePeriod": {
+        "value": {
+          "detail": "outside of grace period"
+        }
+      },
+      "OrgInventoryUnassignFailedReplacingMacDeviceIsNotAssignedToASite": {
+        "value": {
+          "detail": "replacing_mac device is unassigned"
+        }
+      },
+      "OrgInventoryUnassignFailedReplacingMacDeviceLastModifiedOutsideOfGracePeriod": {
+        "value": {
+          "detail": "replacing_mac device outside of grace period"
+        }
+      },
+      "OrgInventoryUnassignNotFoundReplacingMacDeviceIsNotInOrgInventory": {
+        "value": {
+          "detail": "replacing_mac inventory not found"
+        }
+      },
+      "OrgInventoryUnassignNotFoundReplacingMacDeviceNotFound": {
+        "value": {
+          "detail": "replacing_mac device not found"
+        }
+      },
+      "VirtualChassisExample": {
+        "value": {
+          "config_type": "nonprovisioned",
+          "id": "00000000-0000-0000-1000-52d9107af289",
+          "mac": "52d9107af289",
+          "members": [
+            {
+              "boot_partition": "junos",
+              "cpld_version": "6",
+              "cpu_stat": {
+                "idle": 69,
+                "interrupt": 1,
+                "load_avg": [
+                  0.8,
+                  1.09,
+                  1.07
+                ],
+                "system": 11,
+                "user": 19
+              },
+              "fans": [
+                {
+                  "airflow": "out",
+                  "name": "Fan Tray 0 Fan 0",
+                  "rpm": 0,
+                  "status": "ok"
+                },
+                {
+                  "airflow": "out",
+                  "name": "Fan Tray 1 Fan 0",
+                  "rpm": 0,
+                  "status": "ok"
+                }
+              ],
+              "fpc_idx": 0,
+              "mac": "52d9107af289",
+              "memory_stat": {
+                "usage": 42
+              },
+              "model": "EX2300-48P",
+              "pics": [
+                {
+                  "index": 0,
+                  "model_number": "EX2300-48P",
+                  "port_groups": [
+                    {
+                      "count": 48,
+                      "type": "GE"
+                    }
+                  ]
+                },
+                {
+                  "index": 1,
+                  "model_number": "EX2300-48P",
+                  "port_groups": [
+                    {
+                      "count": 4,
+                      "type": "SFP/SFP+"
+                    }
+                  ]
+                }
+              ],
+              "poe": {
+                "max_power": 750,
+                "power_draw": 40.4,
+                "status": "AT_MODE"
+              },
+              "poe_version": "2.1.1.19.3 (type1)",
+              "psus": [
+                {
+                  "name": "Power Supply 0",
+                  "status": "ok"
+                }
+              ],
+              "recovery_version": "21.4R3-S4.18",
+              "serial": "JW0000000000",
+              "temperatures": [
+                {
+                  "celsius": 33,
+                  "name": "CPU Sensor",
+                  "status": "ok"
+                },
+                {
+                  "celsius": 29,
+                  "name": "PSU Sensor",
+                  "status": "ok"
+                }
+              ],
+              "type": "fpc",
+              "uboot_version": "U-Boot 2016.01-rc1 (Nov 11 2016 - 14:26:00 -0800)  1.3.2",
+              "uptime": 27636720,
+              "vc_links": [
+                {
+                  "neighbor_module_idx": 1,
+                  "neighbor_port_id": "vcp-1/1/0",
+                  "port_id": "vcp-0/1/0"
+                }
+              ],
+              "vc_mode": "HiGiG",
+              "vc_role": "master",
+              "vc_state": "present",
+              "version": "21.4R3-S4.18"
+            },
+            {
+              "boot_partition": "junos",
+              "cpld_version": "6",
+              "cpu_stat": {
+                "idle": 76,
+                "interrupt": 0,
+                "load_avg": [
+                  0.96,
+                  0.87,
+                  0.76
+                ],
+                "system": 6,
+                "user": 17
+              },
+              "fans": [
+                {
+                  "airflow": "out",
+                  "name": "Fan Tray 0 Fan 0",
+                  "rpm": 0,
+                  "status": "ok"
+                },
+                {
+                  "airflow": "out",
+                  "name": "Fan Tray 1 Fan 0",
+                  "rpm": 0,
+                  "status": "ok"
+                }
+              ],
+              "fpc_idx": 1,
+              "mac": "d0dd4991652d",
+              "memory_stat": {
+                "usage": 18
+              },
+              "model": "EX2300-48P",
+              "pics": [
+                {
+                  "index": 0,
+                  "model_number": "EX2300-48P",
+                  "port_groups": [
+                    {
+                      "count": 48,
+                      "type": "GE"
+                    }
+                  ]
+                },
+                {
+                  "index": 1,
+                  "model_number": "EX2300-48P",
+                  "port_groups": [
+                    {
+                      "count": 4,
+                      "type": "SFP/SFP+"
+                    }
+                  ]
+                }
+              ],
+              "poe": {
+                "max_power": 750,
+                "power_draw": 21.2,
+                "status": "AT_MODE"
+              },
+              "poe_version": "2.1.1.19.3 (type1)",
+              "psus": [
+                {
+                  "name": "Power Supply 0",
+                  "status": "ok"
+                }
+              ],
+              "recovery_version": "21.4R3-S4.18",
+              "serial": "JW3619300922",
+              "temperatures": [
+                {
+                  "celsius": 32,
+                  "name": "CPU Sensor",
+                  "status": "ok"
+                },
+                {
+                  "celsius": 29,
+                  "name": "PSU Sensor",
+                  "status": "ok"
+                }
+              ],
+              "type": "fpc",
+              "uboot_version": "U-Boot 2016.01-rc1 (Nov 11 2016 - 14:26:00 -0800)  1.3.2",
+              "uptime": 27636720,
+              "vc_links": [
+                {
+                  "neighbor_module_idx": 0,
+                  "neighbor_port_id": "vcp-0/1/0",
+                  "port_id": "vcp-1/1/0"
+                }
+              ],
+              "vc_mode": "HiGiG",
+              "vc_role": "backup",
+              "vc_state": "present",
+              "version": "21.4R3-S4.18"
+            }
+          ],
+          "model": "EX2300-48P",
+          "num_routing_engines": 1,
+          "org_id": "1e9a61a9-bc42-42ca-bf67-1ad87443d9b8",
+          "serial": "JW3619300157",
+          "site_id": "ab0aca7a-d45c-469b-b3bb-4fe240642d0b",
+          "status": "connected",
+          "type": "switch",
+          "vc_mac": "52d9107af289"
+        }
+      }
+    },
+    "securitySchemes": {
+      "apiToken": {
+        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      },
+      "basicAuth": {
+        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
+        "scheme": "basic",
+        "type": "http"
+      },
+      "csrfToken": {
+        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "in": "header",
+        "name": "X-CSRFToken",
+        "type": "apiKey"
+      }
+    }
+  }
+}

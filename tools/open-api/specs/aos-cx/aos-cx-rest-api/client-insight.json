@@ -1,0 +1,754 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Client_Insight",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Client_Insight"
+    }
+  ],
+  "paths": {
+    "/system/client_insights": {
+      "get": {
+        "tags": [
+          "Client_Insight"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "arp_onboarding_info": {
+                      "type": "object",
+                      "description": "Per Gateway specific ARP latency for the client",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "end_time": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Time (in microseconds) since Epoch, when the ARP response from Gateway was received during on-boarding.",
+                              "minimum": 0
+                            },
+                            "start_time": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Time (in microseconds) since Epoch, when the ARP request to Gateway was received during on-boarding.",
+                              "minimum": 0
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "l2_info": {
+                      "type": "object",
+                      "description": "Authentication related attributes for the client.",
+                      "properties": {
+                        "applied_role_name": {
+                          "type": "string",
+                          "description": "Role name of the client."
+                        },
+                        "applied_role_type": {
+                          "type": "string",
+                          "description": "Type of role applied for the client:  `preauth`:         applied for clients that are yet to be                     authenticated.  `auth`:            applied for clients that have been                     authenticated but have not received any                     specific role or attribute from the                     authentication server.  `reject`:          applied for clients that failed                     authentication.  `critical`:        applied for clients that failed                     authentication due to unreachable.                     authentication servers.  `fallback`:        applied for clients that failed                     to get role type, and no role is derived.  `radius-assigned`: applied for clients that have been                     authenticated and received specific role or                     attribute from the authentication server.  `cached-critical`: applied for clients that failed                     authentication due to unreachable                     authentication servers. This role is                     the previously assigned role for the client                     as provided by the server post authentication.  `critical-voice`:  applied to 'voice' clients that failed                      re-authentication due to server                      unreachability   `ubt-fallback`:    applied for clients on an UBT role that failed                      due to UBT zone unreachability."
+                        },
+                        "auth_type": {
+                          "type": "string",
+                          "description": "Client on-boarded method."
+                        },
+                        "authenticating_radius_server": {
+                          "type": "string",
+                          "description": "RADIUS server that authenticated the client."
+                        },
+                        "failure_reason": {
+                          "type": "string",
+                          "description": "Client authentication failure reasons. Applicable when the status is  'auth_failed'. 'server-reject':       authentication server rejected client request. 'server-timeout':      no response from the authentication server. 'supplicant-timeout':  dot1x client timed out. 'no-server':                  no authentication servers configured 'attribute-processing-error': error processing attributes received from                               authentication server.",
+                          "enum": [
+                            "server-reject",
+                            "server-timeout",
+                            "supplicant-timeout",
+                            "no-server",
+                            "attribute-processing-error"
+                          ]
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "Client L2 on-going status 'successful' : L2 on-going successful. 'in_progress': authentication is in progress. 'partial'    : authentication not successful in intended role. 'auth_failed': authentication failed.",
+                          "enum": [
+                            "successful",
+                            "in_progress",
+                            "partial",
+                            "auth_failed"
+                          ]
+                        }
+                      }
+                    },
+                    "l2_latency": {
+                      "type": "object",
+                      "description": "Authentication related latencies and L2-onboarding timestamp for the client.",
+                      "properties": {
+                        "auth_latency": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time (in microseconds) taken by client to complete authentication. This  is not applicable for non-secure clients.",
+                          "minimum": 0
+                        },
+                        "dot1x_radius_latency": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time (in microseconds) taken by 802.1X to complete RADIUS authentication.",
+                          "minimum": 0
+                        },
+                        "l2_onboard_time": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time (in microseconds) since Epoch, when L2 on-boarding completed.",
+                          "minimum": 0
+                        },
+                        "macauth_radius_latency": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time (in microseconds) taken by MACauth to complete RADIUS authentication.",
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "l2_onboarding_status": {
+                      "type": "object",
+                      "properties": {
+                        "applied_role_name": {
+                          "type": "string",
+                          "description": "Role Name of the client."
+                        },
+                        "applied_role_type": {
+                          "type": "string",
+                          "description": "Type of role applied for the client:  `preauth`:         applied for clients that are yet to be                     authenticated.  `auth`:            applied for clients that have been                     authenticated but have not received any                     specific role or attribute from the                     authentication server.  `reject`:          applied for clients that failed                     authentication.  `critical`:        applied for clients that failed                     authentication due to unreachable.                     authentication servers.  `fallback`:        applied for clients that failed                     to onboard, and no role is derived.  `radius-assigned`: applied for clients that have been                     authenticated and received specific role or                     attribute from the authentication server.  `cached-critical`: applied for clients that failed                     authentication due to unreachable                     authentication servers. This role is                     the previously assigned role for the client                     as provided by the server post authentication.  `critical-voice`:  applied to 'voice' clients that failed                      re-authentication due to server                      unreachability   `ubt-fallback`:    applied for clients on an UBT role that failed                      due to UBT zone unreachability."
+                        },
+                        "auth_type": {
+                          "type": "string",
+                          "description": "Client on-boarded method."
+                        },
+                        "authenticating_radius_server": {
+                          "type": "string",
+                          "description": "RADIUS server that authenticated the client."
+                        },
+                        "error": {
+                          "type": "string",
+                          "description": "Client authentication failure reasons. Applicable when the status is  'auth_failed'. 'server-reject':       authentication server rejected client request. 'server-timeout':      no response from the authentication server. 'supplicant-timeout':  dot1x client timed out. 'no-server':           no authentication servers configured 'attribute-processing-error': error processing attributes received from                                authentication server.",
+                          "enum": [
+                            "server-reject",
+                            "server-timeout",
+                            "supplicant-timeout",
+                            "no-server",
+                            "attribute-processing-error"
+                          ]
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "Client L2 on-boarding status 'successful' : L2 on-boarding successful. 'in_progress': authentication is in progress. 'partial'    : authentication not successful in intended role. 'auth_failed': authentication failed.",
+                          "enum": [
+                            "successful",
+                            "in_progress",
+                            "partial",
+                            "auth_failed"
+                          ]
+                        }
+                      }
+                    },
+                    "l3_onboarding_status": {
+                      "type": "object",
+                      "properties": {
+                        "reason_code": {
+                          "type": "string",
+                          "description": "Client's L3 on-boarding failure reason 'dhcp-failure':     Client DHCP exchange failed. 'no-dhcp': Client did not trigger DHCP.",
+                          "enum": [
+                            "dhcp-failure",
+                            "no-dhcp"
+                          ]
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "Client L3 on-boarding status 'successful' : successful. 'in_progress': in-progress. 'failed'     : failed. 'timeout'    : timeout. 'partial'    : incomplete onboarding.",
+                          "enum": [
+                            "successful",
+                            "in_progress",
+                            "failed",
+                            "timeout",
+                            "partial"
+                          ]
+                        }
+                      }
+                    },
+                    "l4_onboarding_status": {
+                      "type": "object",
+                      "description": "L4 onboarding related info of the client.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "description": "Client L4 on-boarding status 'successful' : successful. 'failed'     : failed. 'timeout'    : timeout.",
+                              "enum": [
+                                "successful",
+                                "failed",
+                                "timeout"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "mac": {
+                      "type": "string",
+                      "description": "Reference Resource: [Client_Insight](#/Client_Insight)<br>MAC address of the client.",
+                      "maxLength": 17,
+                      "minLength": 17
+                    },
+                    "onboarding_status": {
+                      "type": "object",
+                      "properties": {
+                        "failure_reason": {
+                          "type": "string",
+                          "description": "Client authentication failure reason 'l2_onboarding_failed'  : L2 onboarding failed. 'l3_onboarding_failed'  : L3 onboarding failed. 'l4_onboarding_failed'  : L4 onboarding failed.",
+                          "enum": [
+                            "l2_onboarding_failed",
+                            "l3_onboarding_failed",
+                            "l4_onboarding_failed"
+                          ]
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "The client's overall on-boarding status 'successful' : successful. 'failed'     : failed. 'timeout'    : timeout. 'partial'    : incomplete onboarding.",
+                          "enum": [
+                            "successful",
+                            "failed",
+                            "timeout",
+                            "partial"
+                          ]
+                        }
+                      }
+                    },
+                    "per_vlan_client_insight": {
+                      "type": "object",
+                      "description": "Reference Resource: [Client_Insight_Per_VLAN](#/Client_Insight_Per_VLAN)<br>Per VLAN client insight information for this MAC.",
+                      "properties": {
+                        "URI": {
+                          "type": "string",
+                          "description": "Reference resource URI of Client_Insight_Per_VLAN"
+                        }
+                      }
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "l3_onboarding_status",
+                  "l2_info",
+                  "per_vlan_client_insight",
+                  "l2_latency",
+                  "l2_onboarding_status",
+                  "arp_onboarding_info",
+                  "l4_onboarding_status",
+                  "onboarding_status",
+                  "mac"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/client_insights/{Client_Insight.mac}": {
+      "get": {
+        "tags": [
+          "Client_Insight"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "arp_onboarding_info": {
+                      "type": "object",
+                      "description": "Per Gateway specific ARP latency for the client",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "end_time": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Time (in microseconds) since Epoch, when the ARP response from Gateway was received during on-boarding.",
+                              "minimum": 0
+                            },
+                            "start_time": {
+                              "type": "integer",
+                              "format": "int64",
+                              "description": "Time (in microseconds) since Epoch, when the ARP request to Gateway was received during on-boarding.",
+                              "minimum": 0
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "l2_info": {
+                      "type": "object",
+                      "description": "Authentication related attributes for the client.",
+                      "properties": {
+                        "applied_role_name": {
+                          "type": "string",
+                          "description": "Role name of the client."
+                        },
+                        "applied_role_type": {
+                          "type": "string",
+                          "description": "Type of role applied for the client:  `preauth`:         applied for clients that are yet to be                     authenticated.  `auth`:            applied for clients that have been                     authenticated but have not received any                     specific role or attribute from the                     authentication server.  `reject`:          applied for clients that failed                     authentication.  `critical`:        applied for clients that failed                     authentication due to unreachable.                     authentication servers.  `fallback`:        applied for clients that failed                     to get role type, and no role is derived.  `radius-assigned`: applied for clients that have been                     authenticated and received specific role or                     attribute from the authentication server.  `cached-critical`: applied for clients that failed                     authentication due to unreachable                     authentication servers. This role is                     the previously assigned role for the client                     as provided by the server post authentication.  `critical-voice`:  applied to 'voice' clients that failed                      re-authentication due to server                      unreachability   `ubt-fallback`:    applied for clients on an UBT role that failed                      due to UBT zone unreachability."
+                        },
+                        "auth_type": {
+                          "type": "string",
+                          "description": "Client on-boarded method."
+                        },
+                        "authenticating_radius_server": {
+                          "type": "string",
+                          "description": "RADIUS server that authenticated the client."
+                        },
+                        "failure_reason": {
+                          "type": "string",
+                          "description": "Client authentication failure reasons. Applicable when the status is  'auth_failed'. 'server-reject':       authentication server rejected client request. 'server-timeout':      no response from the authentication server. 'supplicant-timeout':  dot1x client timed out. 'no-server':                  no authentication servers configured 'attribute-processing-error': error processing attributes received from                               authentication server.",
+                          "enum": [
+                            "server-reject",
+                            "server-timeout",
+                            "supplicant-timeout",
+                            "no-server",
+                            "attribute-processing-error"
+                          ]
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "Client L2 on-going status 'successful' : L2 on-going successful. 'in_progress': authentication is in progress. 'partial'    : authentication not successful in intended role. 'auth_failed': authentication failed.",
+                          "enum": [
+                            "successful",
+                            "in_progress",
+                            "partial",
+                            "auth_failed"
+                          ]
+                        }
+                      }
+                    },
+                    "l2_latency": {
+                      "type": "object",
+                      "description": "Authentication related latencies and L2-onboarding timestamp for the client.",
+                      "properties": {
+                        "auth_latency": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time (in microseconds) taken by client to complete authentication. This  is not applicable for non-secure clients.",
+                          "minimum": 0
+                        },
+                        "dot1x_radius_latency": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time (in microseconds) taken by 802.1X to complete RADIUS authentication.",
+                          "minimum": 0
+                        },
+                        "l2_onboard_time": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time (in microseconds) since Epoch, when L2 on-boarding completed.",
+                          "minimum": 0
+                        },
+                        "macauth_radius_latency": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Time (in microseconds) taken by MACauth to complete RADIUS authentication.",
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "l2_onboarding_status": {
+                      "type": "object",
+                      "properties": {
+                        "applied_role_name": {
+                          "type": "string",
+                          "description": "Role Name of the client."
+                        },
+                        "applied_role_type": {
+                          "type": "string",
+                          "description": "Type of role applied for the client:  `preauth`:         applied for clients that are yet to be                     authenticated.  `auth`:            applied for clients that have been                     authenticated but have not received any                     specific role or attribute from the                     authentication server.  `reject`:          applied for clients that failed                     authentication.  `critical`:        applied for clients that failed                     authentication due to unreachable.                     authentication servers.  `fallback`:        applied for clients that failed                     to onboard, and no role is derived.  `radius-assigned`: applied for clients that have been                     authenticated and received specific role or                     attribute from the authentication server.  `cached-critical`: applied for clients that failed                     authentication due to unreachable                     authentication servers. This role is                     the previously assigned role for the client                     as provided by the server post authentication.  `critical-voice`:  applied to 'voice' clients that failed                      re-authentication due to server                      unreachability   `ubt-fallback`:    applied for clients on an UBT role that failed                      due to UBT zone unreachability."
+                        },
+                        "auth_type": {
+                          "type": "string",
+                          "description": "Client on-boarded method."
+                        },
+                        "authenticating_radius_server": {
+                          "type": "string",
+                          "description": "RADIUS server that authenticated the client."
+                        },
+                        "error": {
+                          "type": "string",
+                          "description": "Client authentication failure reasons. Applicable when the status is  'auth_failed'. 'server-reject':       authentication server rejected client request. 'server-timeout':      no response from the authentication server. 'supplicant-timeout':  dot1x client timed out. 'no-server':           no authentication servers configured 'attribute-processing-error': error processing attributes received from                                authentication server.",
+                          "enum": [
+                            "server-reject",
+                            "server-timeout",
+                            "supplicant-timeout",
+                            "no-server",
+                            "attribute-processing-error"
+                          ]
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "Client L2 on-boarding status 'successful' : L2 on-boarding successful. 'in_progress': authentication is in progress. 'partial'    : authentication not successful in intended role. 'auth_failed': authentication failed.",
+                          "enum": [
+                            "successful",
+                            "in_progress",
+                            "partial",
+                            "auth_failed"
+                          ]
+                        }
+                      }
+                    },
+                    "l3_onboarding_status": {
+                      "type": "object",
+                      "properties": {
+                        "reason_code": {
+                          "type": "string",
+                          "description": "Client's L3 on-boarding failure reason 'dhcp-failure':     Client DHCP exchange failed. 'no-dhcp': Client did not trigger DHCP.",
+                          "enum": [
+                            "dhcp-failure",
+                            "no-dhcp"
+                          ]
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "Client L3 on-boarding status 'successful' : successful. 'in_progress': in-progress. 'failed'     : failed. 'timeout'    : timeout. 'partial'    : incomplete onboarding.",
+                          "enum": [
+                            "successful",
+                            "in_progress",
+                            "failed",
+                            "timeout",
+                            "partial"
+                          ]
+                        }
+                      }
+                    },
+                    "l4_onboarding_status": {
+                      "type": "object",
+                      "description": "L4 onboarding related info of the client.",
+                      "properties": {
+                        "string": {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "description": "Client L4 on-boarding status 'successful' : successful. 'failed'     : failed. 'timeout'    : timeout.",
+                              "enum": [
+                                "successful",
+                                "failed",
+                                "timeout"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "mac": {
+                      "type": "string",
+                      "description": "Reference Resource: [Client_Insight](#/Client_Insight)<br>MAC address of the client.",
+                      "maxLength": 17,
+                      "minLength": 17
+                    },
+                    "onboarding_status": {
+                      "type": "object",
+                      "properties": {
+                        "failure_reason": {
+                          "type": "string",
+                          "description": "Client authentication failure reason 'l2_onboarding_failed'  : L2 onboarding failed. 'l3_onboarding_failed'  : L3 onboarding failed. 'l4_onboarding_failed'  : L4 onboarding failed.",
+                          "enum": [
+                            "l2_onboarding_failed",
+                            "l3_onboarding_failed",
+                            "l4_onboarding_failed"
+                          ]
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "The client's overall on-boarding status 'successful' : successful. 'failed'     : failed. 'timeout'    : timeout. 'partial'    : incomplete onboarding.",
+                          "enum": [
+                            "successful",
+                            "failed",
+                            "timeout",
+                            "partial"
+                          ]
+                        }
+                      }
+                    },
+                    "per_vlan_client_insight": {
+                      "type": "object",
+                      "description": "Reference Resource: [Client_Insight_Per_VLAN](#/Client_Insight_Per_VLAN)<br>Per VLAN client insight information for this MAC.",
+                      "properties": {
+                        "URI": {
+                          "type": "string",
+                          "description": "Reference resource URI of Client_Insight_Per_VLAN"
+                        }
+                      }
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Client_Insight.mac",
+            "in": "path",
+            "description": "Reference Resource: [Client_Insight](#/Client_Insight)<br>MAC address of the client.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "l2_info",
+                  "l3_onboarding_status",
+                  "per_vlan_client_insight",
+                  "l2_latency",
+                  "l2_onboarding_status",
+                  "arp_onboarding_info",
+                  "l4_onboarding_status",
+                  "onboarding_status",
+                  "mac"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

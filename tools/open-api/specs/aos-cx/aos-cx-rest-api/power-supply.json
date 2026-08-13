@@ -1,0 +1,672 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Power_supply",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Power_supply"
+    }
+  ],
+  "paths": {
+    "/system/subsystems/{Subsystem.type},{Subsystem.name}/power_supplies": {
+      "get": {
+        "tags": [
+          "Power_supply"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "": {
+                      "type": "string",
+                      "description": "Reference Resource: [Power_supply](#/Power_supply)<br>References to the power supplies which are part of this subsystem.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "characteristics": {
+                      "type": "object",
+                      "description": "Electrical characteristics.",
+                      "properties": {
+                        "instantaneous_current": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Total instantaneous current drawn from the power supply in Amps."
+                        },
+                        "instantaneous_power": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Total instantaneous power supplied by the power supply in Watts."
+                        },
+                        "instantaneous_voltage": {
+                          "type": "number",
+                          "format": "float",
+                          "description": "Total instantaneous input voltage of the power supply in volts (V).",
+                          "maximum": 300,
+                          "minimum": -300
+                        },
+                        "maximum_power": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Total maximum power capacity that can be supplied by the power supply in Watts."
+                        },
+                        "power_monitor_read_timestamp": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The time in seconds since the switch booted when the power monitoring data for the power supply was last read."
+                        }
+                      }
+                    },
+                    "identity": {
+                      "type": "object",
+                      "description": "Power supply identification.",
+                      "properties": {
+                        "airflow": {
+                          "type": "string",
+                          "description": "Power supply airflow direction. Valid values are: 'F2B': Power supply has front-to-back airflow 'B2F': Power supply has back-to-front airflow",
+                          "enum": [
+                            "F2B",
+                            "B2F"
+                          ]
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "Short description of the power supply."
+                        },
+                        "hardware_rev": {
+                          "type": "string",
+                          "description": "Revision number of the hardware for the power supply."
+                        },
+                        "input_voltage_high": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Higher threshold of the power supply input voltage range for the given operating wattage. This is not set when the threshold is unknown."
+                        },
+                        "input_voltage_low": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Lower threshold of the power supply input voltage range for the given operating wattage. This is not set when the threshold is unknown."
+                        },
+                        "manufacturer_name": {
+                          "type": "string",
+                          "description": "Manufacturer of the power supply."
+                        },
+                        "model_number": {
+                          "type": "string",
+                          "description": "Power supply model number identification."
+                        },
+                        "product_name": {
+                          "type": "string",
+                          "description": "Power supply product name identification.  This field is  used to determine if the power supply is supported."
+                        },
+                        "serial_number": {
+                          "type": "string",
+                          "description": "Power supply serial number to uniquely identify the power  supply."
+                        },
+                        "voltage_type": {
+                          "type": "string",
+                          "description": "Power supply input voltage type. Valid values are: 'AC': Power supply has AC voltage input 'DC': Power supply has DC voltage input This is not set when the voltage type is unknown.",
+                          "enum": [
+                            "AC",
+                            "DC"
+                          ]
+                        }
+                      }
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Power_supply](#/Power_supply)<br>"
+                    },
+                    "redundant_psu": {
+                      "type": "array",
+                      "description": "List of redundant power supplies that are compatible with the power supply.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "statistics": {
+                      "type": "object",
+                      "description": "Various statistics about the power supply.",
+                      "properties": {
+                        "failures": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of failures the power supply has experienced since the most recent insertion of the power supply and boot of the system.  The number of failures for a power supply will be cleared if the power supply is removed from the system or if the system is rebooted.  For non removable power supplies, the number of failures will not clear until the system reboots.  Failures are any events where power delivery from the power supply did not occur when expected.  This includes unsupported power supply types since their power delivery is not considered valid even though the power supply itself may not have an internal failure. Some examples of failures are over current, invalid input power, and unsupported power supply type.",
+                          "minimum": 0
+                        },
+                        "warnings": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of warnings the power supply has experienced since the most recent insertion of the power supply and boot of the system.  The number of warnings for a power supply will be cleared if the power supply is removed from the system or if the system is rebooted.  For non removable power supplies, the number of warnings will not clear until the system reboots.  Warnings are any events that do not impair the power delivery from the power supply but require notification that service may be needed.  Some examples of warnings are fan failures and over temperature.",
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Current status for the power supply.  Valid value are: 'ok':                power supply is operating normally 'fault_absent':      no power supply is installed when one is expected 'fault_input':       there is a fault condition on the input of the power supply 'fault_output':      there is a fault condition on the output of the power supply 'fault_poe':         there is a fault condition on the PoE output of the power supply 'fault_norecov':     power supply has experienced a non recoverable fault condition 'alert':             power supply has experienced an abnormal event but it is still operational 'unknown':           power supply has experienced an unknown fault condition 'unsupported':       power supply is not of a known supported type 'warning':           there is an internal fault condition but the power supply is still operational 'overvoltage':       power supply's input voltage has exceeded the normal input voltage range 'undervoltage':      power supply's input voltage has dipped below the normal input voltage range 'init':              power supply is initializing 'empty':             no power supply is installed 'fault_airflow':     airflow direction does not match the airflow direction for the chassis 'fault_redundancy':  type or capacity does not match the redundancy type and capacity for the chassis 'fault_mixed_input': input type of the inserted power supplies does not match",
+                      "enum": [
+                        "ok",
+                        "fault_absent",
+                        "fault_input",
+                        "fault_output",
+                        "fault_poe",
+                        "fault_norecov",
+                        "alert",
+                        "unknown",
+                        "unsupported",
+                        "warning",
+                        "overvoltage",
+                        "undervoltage",
+                        "init",
+                        "empty",
+                        "fault_airflow",
+                        "fault_redundancy",
+                        "fault_mixed_input"
+                      ]
+                    }
+                  },
+                  "required": [
+                    ""
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Subsystem.type",
+            "in": "path",
+            "description": "Reference Resource: [Subsystem](#/Subsystem)<br>",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "uninitialized",
+                "system",
+                "chassis",
+                "line_card",
+                "mezz_card",
+                "fabric_card",
+                "management_module",
+                "rear_display_card",
+                "fan_tray",
+                "services_card",
+                "io_module"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "Subsystem.name",
+            "in": "path",
+            "description": "Reference Resource: [Subsystem](#/Subsystem)<br>",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "name",
+                  "identity",
+                  "statistics",
+                  "status",
+                  "redundant_psu",
+                  "characteristics"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/system/subsystems/{Subsystem.type},{Subsystem.name}/power_supplies/{Power_supply.name}": {
+      "get": {
+        "tags": [
+          "Power_supply"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "": {
+                      "type": "string",
+                      "description": "Reference Resource: [Power_supply](#/Power_supply)<br>References to the power supplies which are part of this subsystem.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "characteristics": {
+                      "type": "object",
+                      "description": "Electrical characteristics.",
+                      "properties": {
+                        "instantaneous_current": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Total instantaneous current drawn from the power supply in Amps."
+                        },
+                        "instantaneous_power": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Total instantaneous power supplied by the power supply in Watts."
+                        },
+                        "instantaneous_voltage": {
+                          "type": "number",
+                          "format": "float",
+                          "description": "Total instantaneous input voltage of the power supply in volts (V).",
+                          "maximum": 300,
+                          "minimum": -300
+                        },
+                        "maximum_power": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Total maximum power capacity that can be supplied by the power supply in Watts."
+                        },
+                        "power_monitor_read_timestamp": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The time in seconds since the switch booted when the power monitoring data for the power supply was last read."
+                        }
+                      }
+                    },
+                    "identity": {
+                      "type": "object",
+                      "description": "Power supply identification.",
+                      "properties": {
+                        "airflow": {
+                          "type": "string",
+                          "description": "Power supply airflow direction. Valid values are: 'F2B': Power supply has front-to-back airflow 'B2F': Power supply has back-to-front airflow",
+                          "enum": [
+                            "F2B",
+                            "B2F"
+                          ]
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "Short description of the power supply."
+                        },
+                        "hardware_rev": {
+                          "type": "string",
+                          "description": "Revision number of the hardware for the power supply."
+                        },
+                        "input_voltage_high": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Higher threshold of the power supply input voltage range for the given operating wattage. This is not set when the threshold is unknown."
+                        },
+                        "input_voltage_low": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Lower threshold of the power supply input voltage range for the given operating wattage. This is not set when the threshold is unknown."
+                        },
+                        "manufacturer_name": {
+                          "type": "string",
+                          "description": "Manufacturer of the power supply."
+                        },
+                        "model_number": {
+                          "type": "string",
+                          "description": "Power supply model number identification."
+                        },
+                        "product_name": {
+                          "type": "string",
+                          "description": "Power supply product name identification.  This field is  used to determine if the power supply is supported."
+                        },
+                        "serial_number": {
+                          "type": "string",
+                          "description": "Power supply serial number to uniquely identify the power  supply."
+                        },
+                        "voltage_type": {
+                          "type": "string",
+                          "description": "Power supply input voltage type. Valid values are: 'AC': Power supply has AC voltage input 'DC': Power supply has DC voltage input This is not set when the voltage type is unknown.",
+                          "enum": [
+                            "AC",
+                            "DC"
+                          ]
+                        }
+                      }
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [Power_supply](#/Power_supply)<br>"
+                    },
+                    "redundant_psu": {
+                      "type": "array",
+                      "description": "List of redundant power supplies that are compatible with the power supply.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxItems": 9223372036854776000
+                    },
+                    "statistics": {
+                      "type": "object",
+                      "description": "Various statistics about the power supply.",
+                      "properties": {
+                        "failures": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of failures the power supply has experienced since the most recent insertion of the power supply and boot of the system.  The number of failures for a power supply will be cleared if the power supply is removed from the system or if the system is rebooted.  For non removable power supplies, the number of failures will not clear until the system reboots.  Failures are any events where power delivery from the power supply did not occur when expected.  This includes unsupported power supply types since their power delivery is not considered valid even though the power supply itself may not have an internal failure. Some examples of failures are over current, invalid input power, and unsupported power supply type.",
+                          "minimum": 0
+                        },
+                        "warnings": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "Number of warnings the power supply has experienced since the most recent insertion of the power supply and boot of the system.  The number of warnings for a power supply will be cleared if the power supply is removed from the system or if the system is rebooted.  For non removable power supplies, the number of warnings will not clear until the system reboots.  Warnings are any events that do not impair the power delivery from the power supply but require notification that service may be needed.  Some examples of warnings are fan failures and over temperature.",
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Current status for the power supply.  Valid value are: 'ok':                power supply is operating normally 'fault_absent':      no power supply is installed when one is expected 'fault_input':       there is a fault condition on the input of the power supply 'fault_output':      there is a fault condition on the output of the power supply 'fault_poe':         there is a fault condition on the PoE output of the power supply 'fault_norecov':     power supply has experienced a non recoverable fault condition 'alert':             power supply has experienced an abnormal event but it is still operational 'unknown':           power supply has experienced an unknown fault condition 'unsupported':       power supply is not of a known supported type 'warning':           there is an internal fault condition but the power supply is still operational 'overvoltage':       power supply's input voltage has exceeded the normal input voltage range 'undervoltage':      power supply's input voltage has dipped below the normal input voltage range 'init':              power supply is initializing 'empty':             no power supply is installed 'fault_airflow':     airflow direction does not match the airflow direction for the chassis 'fault_redundancy':  type or capacity does not match the redundancy type and capacity for the chassis 'fault_mixed_input': input type of the inserted power supplies does not match",
+                      "enum": [
+                        "ok",
+                        "fault_absent",
+                        "fault_input",
+                        "fault_output",
+                        "fault_poe",
+                        "fault_norecov",
+                        "alert",
+                        "unknown",
+                        "unsupported",
+                        "warning",
+                        "overvoltage",
+                        "undervoltage",
+                        "init",
+                        "empty",
+                        "fault_airflow",
+                        "fault_redundancy",
+                        "fault_mixed_input"
+                      ]
+                    }
+                  },
+                  "required": [
+                    ""
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Subsystem.type",
+            "in": "path",
+            "description": "Reference Resource: [Subsystem](#/Subsystem)<br>",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "uninitialized",
+                "system",
+                "chassis",
+                "line_card",
+                "mezz_card",
+                "fabric_card",
+                "management_module",
+                "rear_display_card",
+                "fan_tray",
+                "services_card",
+                "io_module"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "Subsystem.name",
+            "in": "path",
+            "description": "Reference Resource: [Subsystem](#/Subsystem)<br>",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Power_supply.name",
+            "in": "path",
+            "description": "Reference Resource: [Power_supply](#/Power_supply)<br>",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "redundant_psu",
+                  "characteristics",
+                  "status",
+                  "identity",
+                  "statistics",
+                  "name"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

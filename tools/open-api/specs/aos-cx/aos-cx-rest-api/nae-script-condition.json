@@ -1,0 +1,1110 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "NAE_Script_Condition",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "NAE_Script_Condition"
+    }
+  ],
+  "paths": {
+    "/system/nae_script_generates/{NAE_Script_Generate.name}/conditions": {
+      "get": {
+        "tags": [
+          "NAE_Script_Condition"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "action_alert_description": {
+                      "type": "string",
+                      "description": "Alert description for NAE agent.",
+                      "maxLength": 1024
+                    },
+                    "action_alert_state": {
+                      "type": "string",
+                      "description": "Alert set on NAE agent.",
+                      "enum": [
+                        "critical",
+                        "major",
+                        "minor",
+                        "normal"
+                      ]
+                    },
+                    "action_cli_commands": {
+                      "type": "string",
+                      "description": "CLI commands to be executed. Multiple commands can be seperated using \n. This column value can be empty."
+                    },
+                    "action_schedule": {
+                      "type": "string",
+                      "description": "schedule config CLIs to be executed and can be seperated using \n. This column value can be empty."
+                    },
+                    "action_snmp": {
+                      "type": "string",
+                      "description": "SNMP traps sent to the snmp server. This column value can be empty."
+                    },
+                    "action_syslog": {
+                      "type": "object",
+                      "properties": {
+                        "facility": {
+                          "type": "string",
+                          "description": "Send syslog messages based on the facility specified. A facility code is used to specify the type of program  that is logging the message.  `kern`:       Kernal messages. `user`:       User-level messages. `mail`:       Mail system. `daemon`:     System daemons. `auth`:       Security/authorization messages. `syslog`:     Mmessages generated internally by syslogd. `lpr`:        Line printer subsystem. `news`:       Network news subsystem. `uucp`:       UUCP subsystem. `authpriv`:   Security/authorization messages. `cron`:       Scheduling daemon. `ftp`:        FTP daemon.",
+                          "enum": [
+                            "kern",
+                            "user",
+                            "mail",
+                            "daemon",
+                            "auth",
+                            "syslog",
+                            "lpr",
+                            "news",
+                            "uucp",
+                            "authpriv",
+                            "cron",
+                            "ftp"
+                          ]
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Syslog message sent to the syslog server."
+                        },
+                        "severity": {
+                          "type": "string",
+                          "description": "Send syslog messages based on the severity specified. `debug`:   Debug-level messages.            Messages that contain information normally of use             only when debugging a program.  `info`:    Informational messages. `notice`:  Normal but significant conditions.            Conditions that are not error conditions, but that may             require special handling.  `warning`: Warning conditions. `err`:     Error conditions. `crit`:    Critical conditions, such as hard device errors. `alert`:   Action must be taken immediately.            A condition that should be corrected immediately,             such as a corrupted system database.  `emer`:    System is unusable. A panic condition.",
+                          "enum": [
+                            "debug",
+                            "info",
+                            "notice",
+                            "warning",
+                            "err",
+                            "crit",
+                            "alert",
+                            "emer"
+                          ]
+                        }
+                      }
+                    },
+                    "expression": {
+                      "type": "string",
+                      "description": "Expression associated with the NAE Condition. The grammar for condition language depends on the *expression_type* Expression for type *monitor_resource* is defined as follows: operand      = integer | enum operator     = \"<\" | \">\" | \"==\" | \"!=\" | \">=\" | \"<=\" list_element = '\"' , ( enum | integer ) , '\"' list         = list_element , { \",\" , list_element } for          = \"for\" , integer , time time         = \"second\" | \"minute\" | \"hour\" | \"day\" | \"seconds\" | \"minutes\" | \"hours\" | \"days\" operation1   = resource , operator, operand , [ for ] operation2  = \"transition\" , resource , \"from\" , list , \"to\" , list Here are some examples: transition {} from \"up\" to \"down\" {} < 5 for 3 minutes every {} would be substituted by the monitored resource. <br> Expression for type *watch_event_log* is defined as follows: regex          = Extended Posix Regular Expression list_element   = regex list           = \" list_element , { \",\" list_element } \" operand        = integer | enum count          = \"count\" , integer operation1     = resource , [ count ] operation2     = resource \"include\" ( \"any\" | \"all\" ) list operation3     = resource \"exclude\" list Here are some examples: {} {} count 10 {} include all \"servername,error\" {} include any \"hpe-cardd,log-mgmtd\" count 5 {} exclude \"Ok\" every {} would be substituted by the event log."
+                    },
+                    "expression_type": {
+                      "type": "string",
+                      "description": "Type of the expression associated with the NAE Condition.",
+                      "enum": [
+                        "watch_event_log",
+                        "monitor_resource"
+                      ]
+                    },
+                    "resource_name": {
+                      "type": "object",
+                      "description": "References the NAE watch or monitors used in a specific expression The key contains a position in the condition expression and the value contains the name of the watch or monitor used in that position.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "maxLength": 80,
+                          "minLength": 3
+                        }
+                      }
+                    },
+                    "rule_name": {
+                      "type": "string",
+                      "description": "Reference Resource: [NAE_Script_Condition](#/NAE_Script_Condition)<br>Reference to the conditions. If clear-condition is not defined, then the active condition is always active. If clear condition is defined, then an active condition once triggered will be suspended until the corresponding clear-condition has been triggered."
+                    }
+                  },
+                  "required": [
+                    "resource_name",
+                    "expression",
+                    "rule_name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "NAE_Script_Generate.name",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Script_Generate](#/NAE_Script_Generate)<br>Name of the NAE Script.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "action_alert_description",
+                  "action_cli_commands",
+                  "action_snmp",
+                  "expression_type",
+                  "expression",
+                  "action_syslog",
+                  "action_alert_state",
+                  "resource_name",
+                  "action_schedule"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "NAE_Script_Condition"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "action_alert_description": {
+                    "type": "string",
+                    "description": "Alert description for NAE agent.",
+                    "maxLength": 1024
+                  },
+                  "action_alert_state": {
+                    "type": "string",
+                    "description": "Alert set on NAE agent.",
+                    "enum": [
+                      "critical",
+                      "major",
+                      "minor",
+                      "normal"
+                    ]
+                  },
+                  "action_cli_commands": {
+                    "type": "string",
+                    "description": "CLI commands to be executed. Multiple commands can be seperated using \n. This column value can be empty."
+                  },
+                  "action_schedule": {
+                    "type": "string",
+                    "description": "schedule config CLIs to be executed and can be seperated using \n. This column value can be empty."
+                  },
+                  "action_snmp": {
+                    "type": "string",
+                    "description": "SNMP traps sent to the snmp server. This column value can be empty."
+                  },
+                  "action_syslog": {
+                    "type": "object",
+                    "properties": {
+                      "facility": {
+                        "type": "string",
+                        "description": "Send syslog messages based on the facility specified. A facility code is used to specify the type of program  that is logging the message.  `kern`:       Kernal messages. `user`:       User-level messages. `mail`:       Mail system. `daemon`:     System daemons. `auth`:       Security/authorization messages. `syslog`:     Mmessages generated internally by syslogd. `lpr`:        Line printer subsystem. `news`:       Network news subsystem. `uucp`:       UUCP subsystem. `authpriv`:   Security/authorization messages. `cron`:       Scheduling daemon. `ftp`:        FTP daemon.",
+                        "enum": [
+                          "kern",
+                          "user",
+                          "mail",
+                          "daemon",
+                          "auth",
+                          "syslog",
+                          "lpr",
+                          "news",
+                          "uucp",
+                          "authpriv",
+                          "cron",
+                          "ftp"
+                        ]
+                      },
+                      "message": {
+                        "type": "string",
+                        "description": "Syslog message sent to the syslog server."
+                      },
+                      "severity": {
+                        "type": "string",
+                        "description": "Send syslog messages based on the severity specified. `debug`:   Debug-level messages.            Messages that contain information normally of use             only when debugging a program.  `info`:    Informational messages. `notice`:  Normal but significant conditions.            Conditions that are not error conditions, but that may             require special handling.  `warning`: Warning conditions. `err`:     Error conditions. `crit`:    Critical conditions, such as hard device errors. `alert`:   Action must be taken immediately.            A condition that should be corrected immediately,             such as a corrupted system database.  `emer`:    System is unusable. A panic condition.",
+                        "enum": [
+                          "debug",
+                          "info",
+                          "notice",
+                          "warning",
+                          "err",
+                          "crit",
+                          "alert",
+                          "emer"
+                        ]
+                      }
+                    }
+                  },
+                  "expression": {
+                    "type": "string",
+                    "description": "Expression associated with the NAE Condition. The grammar for condition language depends on the *expression_type* Expression for type *monitor_resource* is defined as follows: operand      = integer | enum operator     = \"<\" | \">\" | \"==\" | \"!=\" | \">=\" | \"<=\" list_element = '\"' , ( enum | integer ) , '\"' list         = list_element , { \",\" , list_element } for          = \"for\" , integer , time time         = \"second\" | \"minute\" | \"hour\" | \"day\" | \"seconds\" | \"minutes\" | \"hours\" | \"days\" operation1   = resource , operator, operand , [ for ] operation2  = \"transition\" , resource , \"from\" , list , \"to\" , list Here are some examples: transition {} from \"up\" to \"down\" {} < 5 for 3 minutes every {} would be substituted by the monitored resource. <br> Expression for type *watch_event_log* is defined as follows: regex          = Extended Posix Regular Expression list_element   = regex list           = \" list_element , { \",\" list_element } \" operand        = integer | enum count          = \"count\" , integer operation1     = resource , [ count ] operation2     = resource \"include\" ( \"any\" | \"all\" ) list operation3     = resource \"exclude\" list Here are some examples: {} {} count 10 {} include all \"servername,error\" {} include any \"hpe-cardd,log-mgmtd\" count 5 {} exclude \"Ok\" every {} would be substituted by the event log."
+                  },
+                  "expression_type": {
+                    "type": "string",
+                    "description": "Type of the expression associated with the NAE Condition.",
+                    "enum": [
+                      "watch_event_log",
+                      "monitor_resource"
+                    ]
+                  },
+                  "resource_name": {
+                    "type": "object",
+                    "description": "References the NAE watch or monitors used in a specific expression The key contains a position in the condition expression and the value contains the name of the watch or monitor used in that position.",
+                    "properties": {
+                      "integer": {
+                        "type": "string",
+                        "maxLength": 80,
+                        "minLength": 3
+                      }
+                    }
+                  },
+                  "rule_name": {
+                    "type": "string",
+                    "description": "Reference Resource: [NAE_Script_Condition](#/NAE_Script_Condition)<br>Reference to the conditions. If clear-condition is not defined, then the active condition is always active. If clear condition is defined, then an active condition once triggered will be suspended until the corresponding clear-condition has been triggered."
+                  }
+                },
+                "required": [
+                  "resource_name",
+                  "expression",
+                  "rule_name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "NAE_Script_Generate.name",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Script_Generate](#/NAE_Script_Generate)<br>Name of the NAE Script.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    },
+    "/system/nae_script_generates/{NAE_Script_Generate.name}/conditions/{NAE_Script_Condition.rule_name},{NAE_Script_Condition.condition_type}": {
+      "get": {
+        "tags": [
+          "NAE_Script_Condition"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "action_alert_description": {
+                      "type": "string",
+                      "description": "Alert description for NAE agent.",
+                      "maxLength": 1024
+                    },
+                    "action_alert_state": {
+                      "type": "string",
+                      "description": "Alert set on NAE agent.",
+                      "enum": [
+                        "critical",
+                        "major",
+                        "minor",
+                        "normal"
+                      ]
+                    },
+                    "action_cli_commands": {
+                      "type": "string",
+                      "description": "CLI commands to be executed. Multiple commands can be seperated using \n. This column value can be empty."
+                    },
+                    "action_schedule": {
+                      "type": "string",
+                      "description": "schedule config CLIs to be executed and can be seperated using \n. This column value can be empty."
+                    },
+                    "action_snmp": {
+                      "type": "string",
+                      "description": "SNMP traps sent to the snmp server. This column value can be empty."
+                    },
+                    "action_syslog": {
+                      "type": "object",
+                      "properties": {
+                        "facility": {
+                          "type": "string",
+                          "description": "Send syslog messages based on the facility specified. A facility code is used to specify the type of program  that is logging the message.  `kern`:       Kernal messages. `user`:       User-level messages. `mail`:       Mail system. `daemon`:     System daemons. `auth`:       Security/authorization messages. `syslog`:     Mmessages generated internally by syslogd. `lpr`:        Line printer subsystem. `news`:       Network news subsystem. `uucp`:       UUCP subsystem. `authpriv`:   Security/authorization messages. `cron`:       Scheduling daemon. `ftp`:        FTP daemon.",
+                          "enum": [
+                            "kern",
+                            "user",
+                            "mail",
+                            "daemon",
+                            "auth",
+                            "syslog",
+                            "lpr",
+                            "news",
+                            "uucp",
+                            "authpriv",
+                            "cron",
+                            "ftp"
+                          ]
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Syslog message sent to the syslog server."
+                        },
+                        "severity": {
+                          "type": "string",
+                          "description": "Send syslog messages based on the severity specified. `debug`:   Debug-level messages.            Messages that contain information normally of use             only when debugging a program.  `info`:    Informational messages. `notice`:  Normal but significant conditions.            Conditions that are not error conditions, but that may             require special handling.  `warning`: Warning conditions. `err`:     Error conditions. `crit`:    Critical conditions, such as hard device errors. `alert`:   Action must be taken immediately.            A condition that should be corrected immediately,             such as a corrupted system database.  `emer`:    System is unusable. A panic condition.",
+                          "enum": [
+                            "debug",
+                            "info",
+                            "notice",
+                            "warning",
+                            "err",
+                            "crit",
+                            "alert",
+                            "emer"
+                          ]
+                        }
+                      }
+                    },
+                    "expression": {
+                      "type": "string",
+                      "description": "Expression associated with the NAE Condition. The grammar for condition language depends on the *expression_type* Expression for type *monitor_resource* is defined as follows: operand      = integer | enum operator     = \"<\" | \">\" | \"==\" | \"!=\" | \">=\" | \"<=\" list_element = '\"' , ( enum | integer ) , '\"' list         = list_element , { \",\" , list_element } for          = \"for\" , integer , time time         = \"second\" | \"minute\" | \"hour\" | \"day\" | \"seconds\" | \"minutes\" | \"hours\" | \"days\" operation1   = resource , operator, operand , [ for ] operation2  = \"transition\" , resource , \"from\" , list , \"to\" , list Here are some examples: transition {} from \"up\" to \"down\" {} < 5 for 3 minutes every {} would be substituted by the monitored resource. <br> Expression for type *watch_event_log* is defined as follows: regex          = Extended Posix Regular Expression list_element   = regex list           = \" list_element , { \",\" list_element } \" operand        = integer | enum count          = \"count\" , integer operation1     = resource , [ count ] operation2     = resource \"include\" ( \"any\" | \"all\" ) list operation3     = resource \"exclude\" list Here are some examples: {} {} count 10 {} include all \"servername,error\" {} include any \"hpe-cardd,log-mgmtd\" count 5 {} exclude \"Ok\" every {} would be substituted by the event log."
+                    },
+                    "expression_type": {
+                      "type": "string",
+                      "description": "Type of the expression associated with the NAE Condition.",
+                      "enum": [
+                        "watch_event_log",
+                        "monitor_resource"
+                      ]
+                    },
+                    "resource_name": {
+                      "type": "object",
+                      "description": "References the NAE watch or monitors used in a specific expression The key contains a position in the condition expression and the value contains the name of the watch or monitor used in that position.",
+                      "properties": {
+                        "integer": {
+                          "type": "string",
+                          "maxLength": 80,
+                          "minLength": 3
+                        }
+                      }
+                    },
+                    "rule_name": {
+                      "type": "string",
+                      "description": "Reference Resource: [NAE_Script_Condition](#/NAE_Script_Condition)<br>Reference to the conditions. If clear-condition is not defined, then the active condition is always active. If clear condition is defined, then an active condition once triggered will be suspended until the corresponding clear-condition has been triggered."
+                    }
+                  },
+                  "required": [
+                    "resource_name",
+                    "expression",
+                    "rule_name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "NAE_Script_Generate.name",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Script_Generate](#/NAE_Script_Generate)<br>Name of the NAE Script.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "NAE_Script_Condition.rule_name",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Script_Condition](#/NAE_Script_Condition)<br>Reference to the conditions. If clear-condition is not defined, then the active condition is always active. If clear condition is defined, then an active condition once triggered will be suspended until the corresponding clear-condition has been triggered.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "NAE_Script_Condition.condition_type",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Script_Condition](#/NAE_Script_Condition)<br>Reference to the conditions. If clear-condition is not defined, then the active condition is always active. If clear condition is defined, then an active condition once triggered will be suspended until the corresponding clear-condition has been triggered.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "resource_name",
+                  "action_schedule",
+                  "action_syslog",
+                  "action_alert_state",
+                  "action_alert_description",
+                  "action_cli_commands",
+                  "action_snmp",
+                  "expression_type",
+                  "expression"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "NAE_Script_Condition"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "action_alert_description": {
+                    "type": "string",
+                    "description": "Alert description for NAE agent.",
+                    "maxLength": 1024
+                  },
+                  "action_alert_state": {
+                    "type": "string",
+                    "description": "Alert set on NAE agent.",
+                    "enum": [
+                      "critical",
+                      "major",
+                      "minor",
+                      "normal"
+                    ]
+                  },
+                  "action_cli_commands": {
+                    "type": "string",
+                    "description": "CLI commands to be executed. Multiple commands can be seperated using \n. This column value can be empty."
+                  },
+                  "action_schedule": {
+                    "type": "string",
+                    "description": "schedule config CLIs to be executed and can be seperated using \n. This column value can be empty."
+                  },
+                  "action_snmp": {
+                    "type": "string",
+                    "description": "SNMP traps sent to the snmp server. This column value can be empty."
+                  },
+                  "action_syslog": {
+                    "type": "object",
+                    "properties": {
+                      "facility": {
+                        "type": "string",
+                        "description": "Send syslog messages based on the facility specified. A facility code is used to specify the type of program  that is logging the message.  `kern`:       Kernal messages. `user`:       User-level messages. `mail`:       Mail system. `daemon`:     System daemons. `auth`:       Security/authorization messages. `syslog`:     Mmessages generated internally by syslogd. `lpr`:        Line printer subsystem. `news`:       Network news subsystem. `uucp`:       UUCP subsystem. `authpriv`:   Security/authorization messages. `cron`:       Scheduling daemon. `ftp`:        FTP daemon.",
+                        "enum": [
+                          "kern",
+                          "user",
+                          "mail",
+                          "daemon",
+                          "auth",
+                          "syslog",
+                          "lpr",
+                          "news",
+                          "uucp",
+                          "authpriv",
+                          "cron",
+                          "ftp"
+                        ]
+                      },
+                      "message": {
+                        "type": "string",
+                        "description": "Syslog message sent to the syslog server."
+                      },
+                      "severity": {
+                        "type": "string",
+                        "description": "Send syslog messages based on the severity specified. `debug`:   Debug-level messages.            Messages that contain information normally of use             only when debugging a program.  `info`:    Informational messages. `notice`:  Normal but significant conditions.            Conditions that are not error conditions, but that may             require special handling.  `warning`: Warning conditions. `err`:     Error conditions. `crit`:    Critical conditions, such as hard device errors. `alert`:   Action must be taken immediately.            A condition that should be corrected immediately,             such as a corrupted system database.  `emer`:    System is unusable. A panic condition.",
+                        "enum": [
+                          "debug",
+                          "info",
+                          "notice",
+                          "warning",
+                          "err",
+                          "crit",
+                          "alert",
+                          "emer"
+                        ]
+                      }
+                    }
+                  },
+                  "expression": {
+                    "type": "string",
+                    "description": "Expression associated with the NAE Condition. The grammar for condition language depends on the *expression_type* Expression for type *monitor_resource* is defined as follows: operand      = integer | enum operator     = \"<\" | \">\" | \"==\" | \"!=\" | \">=\" | \"<=\" list_element = '\"' , ( enum | integer ) , '\"' list         = list_element , { \",\" , list_element } for          = \"for\" , integer , time time         = \"second\" | \"minute\" | \"hour\" | \"day\" | \"seconds\" | \"minutes\" | \"hours\" | \"days\" operation1   = resource , operator, operand , [ for ] operation2  = \"transition\" , resource , \"from\" , list , \"to\" , list Here are some examples: transition {} from \"up\" to \"down\" {} < 5 for 3 minutes every {} would be substituted by the monitored resource. <br> Expression for type *watch_event_log* is defined as follows: regex          = Extended Posix Regular Expression list_element   = regex list           = \" list_element , { \",\" list_element } \" operand        = integer | enum count          = \"count\" , integer operation1     = resource , [ count ] operation2     = resource \"include\" ( \"any\" | \"all\" ) list operation3     = resource \"exclude\" list Here are some examples: {} {} count 10 {} include all \"servername,error\" {} include any \"hpe-cardd,log-mgmtd\" count 5 {} exclude \"Ok\" every {} would be substituted by the event log."
+                  },
+                  "expression_type": {
+                    "type": "string",
+                    "description": "Type of the expression associated with the NAE Condition.",
+                    "enum": [
+                      "watch_event_log",
+                      "monitor_resource"
+                    ]
+                  },
+                  "resource_name": {
+                    "type": "object",
+                    "description": "References the NAE watch or monitors used in a specific expression The key contains a position in the condition expression and the value contains the name of the watch or monitor used in that position.",
+                    "properties": {
+                      "integer": {
+                        "type": "string",
+                        "maxLength": 80,
+                        "minLength": 3
+                      }
+                    }
+                  },
+                  "rule_name": {
+                    "type": "string",
+                    "description": "Reference Resource: [NAE_Script_Condition](#/NAE_Script_Condition)<br>Reference to the conditions. If clear-condition is not defined, then the active condition is always active. If clear condition is defined, then an active condition once triggered will be suspended until the corresponding clear-condition has been triggered."
+                  }
+                },
+                "required": [
+                  "resource_name",
+                  "expression",
+                  "rule_name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "NAE_Script_Generate.name",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Script_Generate](#/NAE_Script_Generate)<br>Name of the NAE Script.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "NAE_Script_Condition.rule_name",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Script_Condition](#/NAE_Script_Condition)<br>Reference to the conditions. If clear-condition is not defined, then the active condition is always active. If clear condition is defined, then an active condition once triggered will be suspended until the corresponding clear-condition has been triggered.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "NAE_Script_Condition.condition_type",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Script_Condition](#/NAE_Script_Condition)<br>Reference to the conditions. If clear-condition is not defined, then the active condition is always active. If clear condition is defined, then an active condition once triggered will be suspended until the corresponding clear-condition has been triggered.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "NAE_Script_Condition"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "NAE_Script_Generate.name",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Script_Generate](#/NAE_Script_Generate)<br>Name of the NAE Script.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "NAE_Script_Condition.rule_name",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Script_Condition](#/NAE_Script_Condition)<br>Reference to the conditions. If clear-condition is not defined, then the active condition is always active. If clear condition is defined, then an active condition once triggered will be suspended until the corresponding clear-condition has been triggered.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "NAE_Script_Condition.condition_type",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Script_Condition](#/NAE_Script_Condition)<br>Reference to the conditions. If clear-condition is not defined, then the active condition is always active. If clear condition is defined, then an active condition once triggered will be suspended until the corresponding clear-condition has been triggered.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "NAE_Script_Condition"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "action_alert_description": {
+                    "type": "string",
+                    "description": "Alert description for NAE agent.",
+                    "maxLength": 1024
+                  },
+                  "action_alert_state": {
+                    "type": "string",
+                    "description": "Alert set on NAE agent.",
+                    "enum": [
+                      "critical",
+                      "major",
+                      "minor",
+                      "normal"
+                    ]
+                  },
+                  "action_cli_commands": {
+                    "type": "string",
+                    "description": "CLI commands to be executed. Multiple commands can be seperated using \n. This column value can be empty."
+                  },
+                  "action_schedule": {
+                    "type": "string",
+                    "description": "schedule config CLIs to be executed and can be seperated using \n. This column value can be empty."
+                  },
+                  "action_snmp": {
+                    "type": "string",
+                    "description": "SNMP traps sent to the snmp server. This column value can be empty."
+                  },
+                  "action_syslog": {
+                    "type": "object",
+                    "properties": {
+                      "facility": {
+                        "type": "string",
+                        "description": "Send syslog messages based on the facility specified. A facility code is used to specify the type of program  that is logging the message.  `kern`:       Kernal messages. `user`:       User-level messages. `mail`:       Mail system. `daemon`:     System daemons. `auth`:       Security/authorization messages. `syslog`:     Mmessages generated internally by syslogd. `lpr`:        Line printer subsystem. `news`:       Network news subsystem. `uucp`:       UUCP subsystem. `authpriv`:   Security/authorization messages. `cron`:       Scheduling daemon. `ftp`:        FTP daemon.",
+                        "enum": [
+                          "kern",
+                          "user",
+                          "mail",
+                          "daemon",
+                          "auth",
+                          "syslog",
+                          "lpr",
+                          "news",
+                          "uucp",
+                          "authpriv",
+                          "cron",
+                          "ftp"
+                        ]
+                      },
+                      "message": {
+                        "type": "string",
+                        "description": "Syslog message sent to the syslog server."
+                      },
+                      "severity": {
+                        "type": "string",
+                        "description": "Send syslog messages based on the severity specified. `debug`:   Debug-level messages.            Messages that contain information normally of use             only when debugging a program.  `info`:    Informational messages. `notice`:  Normal but significant conditions.            Conditions that are not error conditions, but that may             require special handling.  `warning`: Warning conditions. `err`:     Error conditions. `crit`:    Critical conditions, such as hard device errors. `alert`:   Action must be taken immediately.            A condition that should be corrected immediately,             such as a corrupted system database.  `emer`:    System is unusable. A panic condition.",
+                        "enum": [
+                          "debug",
+                          "info",
+                          "notice",
+                          "warning",
+                          "err",
+                          "crit",
+                          "alert",
+                          "emer"
+                        ]
+                      }
+                    }
+                  },
+                  "expression": {
+                    "type": "string",
+                    "description": "Expression associated with the NAE Condition. The grammar for condition language depends on the *expression_type* Expression for type *monitor_resource* is defined as follows: operand      = integer | enum operator     = \"<\" | \">\" | \"==\" | \"!=\" | \">=\" | \"<=\" list_element = '\"' , ( enum | integer ) , '\"' list         = list_element , { \",\" , list_element } for          = \"for\" , integer , time time         = \"second\" | \"minute\" | \"hour\" | \"day\" | \"seconds\" | \"minutes\" | \"hours\" | \"days\" operation1   = resource , operator, operand , [ for ] operation2  = \"transition\" , resource , \"from\" , list , \"to\" , list Here are some examples: transition {} from \"up\" to \"down\" {} < 5 for 3 minutes every {} would be substituted by the monitored resource. <br> Expression for type *watch_event_log* is defined as follows: regex          = Extended Posix Regular Expression list_element   = regex list           = \" list_element , { \",\" list_element } \" operand        = integer | enum count          = \"count\" , integer operation1     = resource , [ count ] operation2     = resource \"include\" ( \"any\" | \"all\" ) list operation3     = resource \"exclude\" list Here are some examples: {} {} count 10 {} include all \"servername,error\" {} include any \"hpe-cardd,log-mgmtd\" count 5 {} exclude \"Ok\" every {} would be substituted by the event log."
+                  },
+                  "expression_type": {
+                    "type": "string",
+                    "description": "Type of the expression associated with the NAE Condition.",
+                    "enum": [
+                      "watch_event_log",
+                      "monitor_resource"
+                    ]
+                  },
+                  "resource_name": {
+                    "type": "object",
+                    "description": "References the NAE watch or monitors used in a specific expression The key contains a position in the condition expression and the value contains the name of the watch or monitor used in that position.",
+                    "properties": {
+                      "integer": {
+                        "type": "string",
+                        "maxLength": 80,
+                        "minLength": 3
+                      }
+                    }
+                  },
+                  "rule_name": {
+                    "type": "string",
+                    "description": "Reference Resource: [NAE_Script_Condition](#/NAE_Script_Condition)<br>Reference to the conditions. If clear-condition is not defined, then the active condition is always active. If clear condition is defined, then an active condition once triggered will be suspended until the corresponding clear-condition has been triggered."
+                  }
+                },
+                "required": [
+                  "resource_name",
+                  "expression",
+                  "rule_name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "NAE_Script_Generate.name",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Script_Generate](#/NAE_Script_Generate)<br>Name of the NAE Script.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "NAE_Script_Condition.rule_name",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Script_Condition](#/NAE_Script_Condition)<br>Reference to the conditions. If clear-condition is not defined, then the active condition is always active. If clear condition is defined, then an active condition once triggered will be suspended until the corresponding clear-condition has been triggered.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "NAE_Script_Condition.condition_type",
+            "in": "path",
+            "description": "Reference Resource: [NAE_Script_Condition](#/NAE_Script_Condition)<br>Reference to the conditions. If clear-condition is not defined, then the active condition is always active. If clear condition is defined, then an active condition once triggered will be suspended until the corresponding clear-condition has been triggered.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

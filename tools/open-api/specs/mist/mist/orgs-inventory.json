@@ -1,0 +1,2069 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Orgs Inventory",
+    "version": "2602.1.1"
+  },
+  "servers": [
+    {
+      "description": "Mist Global 01",
+      "url": "https://api.mist.com"
+    },
+    {
+      "description": "Mist Global 02",
+      "url": "https://api.gc1.mist.com"
+    },
+    {
+      "description": "Mist Global 03",
+      "url": "https://api.ac2.mist.com"
+    },
+    {
+      "description": "Mist Global 04",
+      "url": "https://api.gc2.mist.com"
+    },
+    {
+      "description": "Mist Global 05",
+      "url": "https://api.gc4.mist.com"
+    },
+    {
+      "description": "Mist EMEA 01",
+      "url": "https://api.eu.mist.com"
+    },
+    {
+      "description": "Mist EMEA 02",
+      "url": "https://api.gc3.mist.com"
+    },
+    {
+      "description": "Mist EMEA 03",
+      "url": "https://api.ac6.mist.com"
+    },
+    {
+      "description": "Mist EMEA 04",
+      "url": "https://api.gc6.mist.com"
+    },
+    {
+      "description": "Mist APAC 01",
+      "url": "https://api.ac5.mist.com"
+    },
+    {
+      "description": "Mist APAC 02",
+      "url": "https://api.gc5.mist.com"
+    },
+    {
+      "description": "Mist APAC 03",
+      "url": "https://api.gc7.mist.com"
+    }
+  ],
+  "security": [
+    {
+      "apiToken": []
+    },
+    {
+      "basicAuth": []
+    },
+    {
+      "basicAuth": [],
+      "csrfToken": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "The Org Inventory allows administrators to view and manage all devices registered (claimed) to the Organization.",
+      "name": "Orgs Inventory"
+    }
+  ],
+  "paths": {
+    "/api/v1/orgs/{org_id}/inventory": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "get": {
+        "description": "Get Org Inventory\n\n### VC (Virtual-Chassis) Management \n\nStarting with the April release, Virtual Chassis devices in Mist will now use\na cloud-assigned virtual MAC address as the device ID, instead of the physical\nMAC address of the FPC0 member.\n\n\n**Retrieving the device ID or Site ID of a Virtual Chassis:**\n\n1. Use this API call with the query parameters `vc=true` and `mac` set to the MAC address of the VC member.\n\n2. In the response, check the `vc_mac` and `mac` fields:\n\n    - If `vc_mac` is empty or not present, the device is not part of a Virtual Chassis.\n    The `device_id` and `site_id` will be available in the device information.\n\n    - If `vc_mac` differs from the `mac` field, the device is part of a Virtual Chassis\n    but is not the device used to generate the Virtual Chassis ID. Use the `vc_mac` value with the [Get Org Inventory](/#operations/getOrgInventory)\n    API call to retrieve the `device_id` and `site_id`.\n\n    - If `vc_mac` matches the `mac` field, the device is the device used to generate the Virtual Chassis ID and he `device_id` and `site_id` will be available\n    in the device information.  \n    This is the case if the device is the Virtual Chassis \"virtual device\" (MAC starting with `020003`) or if the device is the Virtual Chassis FPC0 and the Virtual Chassis is still using the FPC0 MAC address to generate the device ID.\n",
+        "operationId": "getOrgInventory",
+        "parameters": [
+          {
+            "description": "Device serial",
+            "in": "query",
+            "name": "serial",
+            "schema": {
+              "examples": [
+                "FXLH2015150025"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Device model",
+            "in": "query",
+            "name": "model",
+            "schema": {
+              "examples": [
+                "AP43"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "$ref": "#/components/schemas/device_type"
+            }
+          },
+          {
+            "description": "MAC address",
+            "in": "query",
+            "name": "mac",
+            "schema": {
+              "examples": [
+                "5c5b350e0001"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Site id if assigned, null if not assigned",
+            "in": "query",
+            "name": "site_id",
+            "schema": {
+              "examples": [
+                "4ac1dcf4-9d8b-7211-65c4-057819f0862b"
+              ],
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Virtual Chassis MAC Address",
+            "in": "query",
+            "name": "vc_mac",
+            "schema": {
+              "examples": [
+                "5c5b350e0001"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "To display Virtual Chassis members",
+            "in": "query",
+            "name": "vc",
+            "schema": {
+              "default": false,
+              "examples": [
+                false
+              ],
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "To display Unassigned devices",
+            "in": "query",
+            "name": "unassigned",
+            "schema": {
+              "default": true,
+              "examples": [
+                true
+              ],
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Filter on inventory last modified time, in epoch",
+            "in": "query",
+            "name": "modified_after",
+            "schema": {
+              "examples": [
+                1703003296
+              ],
+              "type": "integer"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OrgInventory"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getOrgInventory",
+        "tags": [
+          "Orgs Inventory"
+        ]
+      },
+      "put": {
+        "description": "Update Org Inventory",
+        "operationId": "updateOrgInventoryAssignment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "assign": {
+                  "value": {
+                    "disable_auto_config": false,
+                    "macs": [
+                      "5c5b350e0001"
+                    ],
+                    "no_reassign": false,
+                    "op": "assign",
+                    "site_id": "4ac1dcf4-9d8b-7211-65c4-057819f0862b"
+                  }
+                },
+                "delete": {
+                  "value": {
+                    "macs": [
+                      "5c5b350e0001"
+                    ],
+                    "op": "delete",
+                    "serials": [
+                      "FXLH2015150025",
+                      "FXLH2015150026"
+                    ]
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/inventory_update"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OrgInventoryChanges"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "updateOrgInventoryAssignment",
+        "tags": [
+          "Orgs Inventory"
+        ]
+      },
+      "post": {
+        "description": "Add Device to Org Inventory with the device claim codes",
+        "operationId": "addOrgInventory",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": [
+                    "6JG8E-PTFV2-A9Z2N",
+                    "DVH4V-SNMSZ-PDXBR"
+                  ]
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/claim_codes"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OrgInventoryAdd"
+          },
+          "400": {
+            "$ref": "#/components/responses/OrgInventoryAdd"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "addOrgInventory",
+        "tags": [
+          "Orgs Inventory"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_id}/inventory/count": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "get": {
+        "description": "Count by Distinct Attributes of in the Org Inventory",
+        "operationId": "countOrgInventory",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "$ref": "#/components/schemas/device_type_default_ap"
+            }
+          },
+          {
+            "in": "query",
+            "name": "distinct",
+            "schema": {
+              "$ref": "#/components/schemas/inventory_count_distinct"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Count"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "countOrgInventory",
+        "tags": [
+          "Orgs Inventory"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_id}/inventory/create_ha_cluster": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "post": {
+        "description": "Create HA Cluster from unassigned Gateways",
+        "operationId": "createOrgGatewayHaCluster",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "disable_auto_config": true,
+                    "mist_configured": true,
+                    "nodes": [
+                      {
+                        "mac": "aff827549235"
+                      },
+                      {
+                        "mac": "8396cd006c8c"
+                      }
+                    ],
+                    "site_id": "4ac1dcf4-9d8b-7211-65c4-057819f0862b"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/ha_cluster_config"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "createOrgGatewayHaCluster",
+        "tags": [
+          "Orgs Inventory"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_id}/inventory/delete_ha_cluster": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "post": {
+        "description": "Delete HA Cluster\n\nAfter HA cluster deleted, both of the nodes will be unassigned.",
+        "operationId": "deleteOrgGatewayHaCluster",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ha_cluster_delete"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "deleteOrgGatewayHaCluster",
+        "tags": [
+          "Orgs Inventory"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_id}/inventory/reevaluate_auto_assignment": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "post": {
+        "description": "Reevaluate Auto Assignment",
+        "operationId": "reevaluateOrgAutoAssignment",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "reevaluateOrgAutoAssignment",
+        "tags": [
+          "Orgs Inventory"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_id}/inventory/replace": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "post": {
+        "description": "It’s a common request we get from the customers. When a AP HW has problem and need a replacement, they would want to copy the existing attributes (Device Config) of this old AP to the new one. It can be done by providing the MAC of a device that’s currently in the inventory but not assigned. The Device replaced will become unassigned.\n\nThis API also supports replacement of Mist Edges. This API copies device agnostic attributes from old Mist edge to new one.\nMist manufactured Mist Edges will be reset to factory settings but will still be in Inventory.Brownfield or VM’s will be\ndeleted from Inventory\n\n**Note:** For Gateway devices only like-for-like replacements (can only replace a SRX320 with a SRX320 and not some other model) are allowed.",
+        "operationId": "replaceOrgDevices",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "discard": [],
+                    "inventory_mac": "5c5b35000301",
+                    "mac": "5c5b35000101",
+                    "site_id": "4ac1dcf4-9d8b-7211-65c4-057819f0862b"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/replace_device"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OrgInventoryChanges"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "replaceOrgDevices",
+        "tags": [
+          "Orgs Inventory"
+        ]
+      }
+    },
+    "/api/v1/orgs/{org_id}/inventory/search": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "get": {
+        "description": "Search in the Org Inventory",
+        "operationId": "searchOrgInventory",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "$ref": "#/components/schemas/device_type_default_ap"
+            }
+          },
+          {
+            "description": "MAC address",
+            "in": "query",
+            "name": "mac",
+            "schema": {
+              "examples": [
+                "5c5b350e0001"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Virtual Chassis MAC Address",
+            "in": "query",
+            "name": "vc_mac",
+            "schema": {
+              "examples": [
+                "5c5b350e0001"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Master device mac for virtual mac cluster",
+            "in": "query",
+            "name": "master_mac",
+            "schema": {
+              "examples": [
+                "5c5b350e0001"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Site id if assigned, null if not assigned",
+            "in": "query",
+            "name": "site_id",
+            "schema": {
+              "examples": [
+                "4ac1dcf4-9d8b-7211-65c4-057819f0862b"
+              ],
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Device serial",
+            "in": "query",
+            "name": "serial",
+            "schema": {
+              "examples": [
+                "FXLH2015150025"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "true / false",
+            "in": "query",
+            "name": "master",
+            "schema": {
+              "examples": [
+                "true"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Device sku",
+            "in": "query",
+            "name": "sku",
+            "schema": {
+              "examples": [
+                "AP43-WW"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Device version",
+            "in": "query",
+            "name": "version",
+            "schema": {
+              "examples": [
+                "1.0.0"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Device status",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "examples": [
+                "connected"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Wildcards for name, mac, serial",
+            "in": "query",
+            "name": "text",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/sort"
+          },
+          {
+            "$ref": "#/components/parameters/search_after"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OrgInventorySearch"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "searchOrgInventory",
+        "tags": [
+          "Orgs Inventory"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "claim_codes": {
+        "description": "List of Claim Codes",
+        "examples": [
+          [
+            "6JG8E-PTFV2-A9Z2N",
+            "DVH4V-SNMSZ-PDXBR"
+          ]
+        ],
+        "items": {
+          "description": "Claim code",
+          "type": "string"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "count_result": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "properties": {
+          "count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count"
+        ],
+        "type": "object"
+      },
+      "count_results": {
+        "items": {
+          "$ref": "#/components/schemas/count_result"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "created_time": {
+        "description": "When the object has been created, in epoch",
+        "format": "double",
+        "readOnly": true,
+        "type": "number"
+      },
+      "device_type": {
+        "description": "enum: `ap`, `gateway`, `switch`",
+        "enum": [
+          "ap",
+          "gateway",
+          "switch"
+        ],
+        "type": "string"
+      },
+      "device_type_default_ap": {
+        "default": "ap",
+        "description": "enum: `ap`, `gateway`, `switch`",
+        "enum": [
+          "ap",
+          "gateway",
+          "switch"
+        ],
+        "type": "string"
+      },
+      "ha_cluster_config": {
+        "properties": {
+          "disable_auto_config": {
+            "deprecated": true,
+            "description": "This disables the default behavior of a cloud-ready switch/gateway being managed/configured by Mist. Setting this to `true` means you want to disable the default behavior and do not want the device to be Mist-managed.",
+            "type": "boolean"
+          },
+          "managed": {
+            "deprecated": true,
+            "description": "An adopted switch/gateway will not be managed/configured by Mist by default. Setting this parameter to `true` enables the adopted switch/gateway to be managed/configured by Mist.",
+            "type": "boolean"
+          },
+          "mist_configured": {
+            "description": "whether the device can be configured by Mist or not. This deprecates `managed` (for adopted device) and `disable_auto_config` for claimed device)",
+            "type": "boolean"
+          },
+          "nodes": {
+            "$ref": "#/components/schemas/ha_cluster_config_nodes"
+          },
+          "site_id": {
+            "examples": [
+              "43e9c864-a7e4-4310-8031-d9817d2c5a43"
+            ],
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ha_cluster_config_node": {
+        "additionalProperties": false,
+        "maxProperties": 2,
+        "properties": {
+          "mac": {
+            "description": "Node mac, should be unassigned",
+            "examples": [
+              "aff827549235"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ha_cluster_config_nodes": {
+        "items": {
+          "$ref": "#/components/schemas/ha_cluster_config_node"
+        },
+        "type": "array"
+      },
+      "ha_cluster_delete": {
+        "properties": {
+          "mac": {
+            "description": "Node0 mac address",
+            "examples": [
+              "aff827549235"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "id": {
+        "description": "Unique ID of the object instance in the Mist Organization",
+        "examples": [
+          "53f10664-3ce8-4c27-b382-0ef66432349f"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "inventory": {
+        "additionalProperties": false,
+        "properties": {
+          "adopted": {
+            "description": "Only if `type`==`switch` or `type`==`gateway`, whether the switch/gateway is adopted",
+            "type": "boolean"
+          },
+          "chassis_mac": {
+            "description": "For Virtual Chassis only, the MAC Address of the FPC0",
+            "type": "string"
+          },
+          "chassis_serial": {
+            "description": "For Virtual Chassis only, the Serial Number of the FPC0",
+            "type": "string"
+          },
+          "connected": {
+            "description": "Whether the device is connected",
+            "type": "boolean"
+          },
+          "created_time": {
+            "$ref": "#/components/schemas/created_time"
+          },
+          "deviceprofile_id": {
+            "description": "Deviceprofile id if assigned, null if not assigned",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hostname": {
+            "description": "Hostname reported by the device",
+            "type": "string"
+          },
+          "hw_rev": {
+            "description": "Device hardware revision number",
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/components/schemas/id"
+          },
+          "jsi": {
+            "type": "boolean"
+          },
+          "mac": {
+            "description": "Device MAC address",
+            "type": "string"
+          },
+          "magic": {
+            "description": "Device claim code",
+            "type": "string"
+          },
+          "model": {
+            "description": "Device model",
+            "type": "string"
+          },
+          "modified_time": {
+            "$ref": "#/components/schemas/modified_time"
+          },
+          "name": {
+            "description": "Device name if configured",
+            "type": "string"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/org_id"
+          },
+          "serial": {
+            "description": "Device serial",
+            "type": "string"
+          },
+          "site_id": {
+            "$ref": "#/components/schemas/site_id"
+          },
+          "sku": {
+            "description": "Device stock keeping unit",
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/device_type_default_ap"
+          },
+          "vc_mac": {
+            "description": "If `type`==`switch` and device part of a Virtual Chassis, MAC Address of the Virtual Chassis. if `type`==`gateway` and device part of a Cluster, MAC Address of the Cluster",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "inventory_count_distinct": {
+        "default": "model",
+        "description": "enum: `model`, `status`, `site_id`, `sku`, `version`",
+        "enum": [
+          "model",
+          "status",
+          "site_id",
+          "sku",
+          "version"
+        ],
+        "type": "string"
+      },
+      "inventory_list": {
+        "items": {
+          "$ref": "#/components/schemas/inventory"
+        },
+        "type": "array"
+      },
+      "inventory_search": {
+        "additionalProperties": false,
+        "properties": {
+          "end": {
+            "type": "integer"
+          },
+          "limit": {
+            "examples": [
+              1000
+            ],
+            "type": "integer"
+          },
+          "next": {
+            "type": "string"
+          },
+          "results": {
+            "$ref": "#/components/schemas/inventory_search_results"
+          },
+          "start": {
+            "type": "integer"
+          },
+          "total": {
+            "examples": [
+              1
+            ],
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "inventory_search_result": {
+        "additionalProperties": false,
+        "properties": {
+          "mac": {
+            "examples": [
+              "f01c2df166e0"
+            ],
+            "type": "string"
+          },
+          "master": {
+            "examples": [
+              true
+            ],
+            "type": "boolean"
+          },
+          "members": {
+            "$ref": "#/components/schemas/inventory_search_result_members"
+          },
+          "model": {
+            "examples": [
+              "EX4300-48P"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "examples": [
+              "mist-wa-ex4300-VC"
+            ],
+            "type": "string"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/org_id"
+          },
+          "serial": {
+            "examples": [
+              "PD3714460200"
+            ],
+            "type": "string"
+          },
+          "site_id": {
+            "$ref": "#/components/schemas/site_id"
+          },
+          "sku": {
+            "examples": [
+              "EX4300-48P"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "examples": [
+              "disconnected"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/device_type_default_ap"
+          },
+          "vc_mac": {
+            "examples": [
+              "f01c2df166e0"
+            ],
+            "type": "string"
+          },
+          "version": {
+            "examples": [
+              "21.4R3.5"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "inventory_search_result_member": {
+        "additionalProperties": false,
+        "properties": {
+          "mac": {
+            "examples": [
+              "f01c2df166e0"
+            ],
+            "type": "string"
+          },
+          "model": {
+            "examples": [
+              "EX4300-48P"
+            ],
+            "type": "string"
+          },
+          "serial": {
+            "examples": [
+              "PD3714460200"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "inventory_search_result_members": {
+        "items": {
+          "$ref": "#/components/schemas/inventory_search_result_member"
+        },
+        "type": "array"
+      },
+      "inventory_search_results": {
+        "items": {
+          "$ref": "#/components/schemas/inventory_search_result"
+        },
+        "type": "array"
+      },
+      "inventory_update": {
+        "properties": {
+          "disable_auto_config": {
+            "default": false,
+            "deprecated": true,
+            "description": "If `op`==`assign`, this disables the default behavior of a cloud-ready switch/gateway being managed/configured by Mist. Setting this to `true` means you want to disable the default behavior and do not want the device to be Mist-managed.",
+            "type": "boolean"
+          },
+          "macs": {
+            "$ref": "#/components/schemas/inventory_update_macs"
+          },
+          "managed": {
+            "default": false,
+            "deprecated": true,
+            "description": "If `op`==`assign`. An adopted switch/gateway will not be managed/configured by Mist by default. Setting this parameter to `true` enables the adopted switch/gateway to be managed/configured by Mist.",
+            "type": "boolean"
+          },
+          "mist_configured": {
+            "description": "whether the device can be configured by Mist or not. This deprecates `managed` (for adopted device) and `disable_auto_config` for claimed device)",
+            "type": "boolean"
+          },
+          "no_reassign": {
+            "default": false,
+            "description": "If `op`==`assign`, if true, treat site assignment against an already assigned AP as error",
+            "type": "boolean"
+          },
+          "op": {
+            "$ref": "#/components/schemas/inventory_update_operation"
+          },
+          "serials": {
+            "$ref": "#/components/schemas/inventory_update_serials"
+          },
+          "site_id": {
+            "description": "If `op`==`assign`, target site id",
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "op"
+        ],
+        "type": "object"
+      },
+      "inventory_update_macs": {
+        "description": "If `op`==`assign`, `op`==`unassign`, `op`==`upgrade_to_mist`or `op`==`downgrade_to_jsi` , list of MAC, e.g. [\"5c5b350e0001\"]",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "inventory_update_operation": {
+        "description": "enum:\n  * `upgrade_to_mist`: Upgrade to mist-managed\n  * `downgrade_to_jsi`: Downgrade to basic monitoring. When downgrading a VC member to jsi, we will move the cloud connection of the VC to jsi-terminator and keep all VC device/inventories intact for pain-free upgrading back to mist.\n  * `assign`: Assign inventory to a site\n  * `unassign`: Unassign inventory from a site\n  * `delete`: Delete multiple inventory from org. If the device is already assigned to a site, it will be unassigned",
+        "enum": [
+          "assign",
+          "delete",
+          "downgrade_to_jsi",
+          "unassign",
+          "upgrade_to_mist"
+        ],
+        "type": "string"
+      },
+      "inventory_update_serials": {
+        "description": "If `op`==`delete`, list of serial numbers, e.g. [\"FXLH2015150025\"]",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "modified_time": {
+        "description": "When the object has been modified for the last time, in epoch",
+        "format": "double",
+        "readOnly": true,
+        "type": "number"
+      },
+      "org_id": {
+        "examples": [
+          "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "replace_device": {
+        "properties": {
+          "discard": {
+            "$ref": "#/components/schemas/replace_device_discard"
+          },
+          "inventory_mac": {
+            "description": "MAC Address of the inventory that will be replacing the old one. It has to be claimed and unassigned",
+            "examples": [
+              "5c5b35000301"
+            ],
+            "type": "string"
+          },
+          "mac": {
+            "description": "MAC Address of the device to replace",
+            "examples": [
+              "5c5b35000101"
+            ],
+            "type": "string"
+          },
+          "site_id": {
+            "description": "Site_id of the device to be replaced",
+            "examples": [
+              "4ac1dcf4-9d8b-7211-65c4-057819f0862b"
+            ],
+            "type": "string"
+          },
+          "tunterm_port_config": {
+            "$ref": "#/components/schemas/tunterm_port_config"
+          }
+        }
+      },
+      "replace_device_discard": {
+        "description": "Attributes that you don’t want to copy",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "response_count": {
+        "additionalProperties": false,
+        "properties": {
+          "distinct": {
+            "type": "string"
+          },
+          "end": {
+            "type": "integer"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "results": {
+            "$ref": "#/components/schemas/count_results"
+          },
+          "start": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "distinct",
+          "end",
+          "limit",
+          "results",
+          "start",
+          "total"
+        ],
+        "type": "object"
+      },
+      "response_http400": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http401": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Authentication credentials were not provided."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http403": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "You do not have permission to perform this action."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http404": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http429": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_inventory": {
+        "additionalProperties": false,
+        "properties": {
+          "added": {
+            "$ref": "#/components/schemas/response_inventory_added"
+          },
+          "duplicated": {
+            "$ref": "#/components/schemas/response_inventory_duplicated"
+          },
+          "error": {
+            "$ref": "#/components/schemas/response_inventory_error"
+          },
+          "inventory_added": {
+            "$ref": "#/components/schemas/response_inventory_inventory_added"
+          },
+          "inventory_duplicated": {
+            "$ref": "#/components/schemas/response_inventory_inventory_duplicated"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/strings"
+          }
+        },
+        "type": "object"
+      },
+      "response_inventory_added": {
+        "items": {
+          "examples": [
+            "6JG8E-PTFV2-A9Z2N"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "response_inventory_duplicated": {
+        "items": {
+          "examples": [
+            "DVH4V-SNMSZ-PDXBR"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "response_inventory_error": {
+        "items": {
+          "examples": [
+            "PO1025335ohoh"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "response_inventory_inventory_added": {
+        "items": {
+          "$ref": "#/components/schemas/response_inventory_inventory_added_items"
+        },
+        "minItems": 1,
+        "type": "array",
+        "uniqueItems": true
+      },
+      "response_inventory_inventory_added_items": {
+        "additionalProperties": false,
+        "properties": {
+          "mac": {
+            "examples": [
+              "5c5b35000018"
+            ],
+            "type": "string"
+          },
+          "magic": {
+            "examples": [
+              "6JG8EPTFV2A9Z2N"
+            ],
+            "type": "string"
+          },
+          "model": {
+            "examples": [
+              "AP41"
+            ],
+            "type": "string"
+          },
+          "serial": {
+            "examples": [
+              "FXLH2015150025"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "examples": [
+              "ap"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "mac",
+          "magic",
+          "model",
+          "serial",
+          "type"
+        ],
+        "type": "object"
+      },
+      "response_inventory_inventory_duplicated": {
+        "items": {
+          "$ref": "#/components/schemas/response_inventory_inventory_duplicated_items"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "response_inventory_inventory_duplicated_items": {
+        "additionalProperties": false,
+        "properties": {
+          "mac": {
+            "examples": [
+              "5c5b35000012"
+            ],
+            "type": "string"
+          },
+          "magic": {
+            "examples": [
+              "DVH4VSNMSZPDXBR"
+            ],
+            "type": "string"
+          },
+          "model": {
+            "examples": [
+              "AP41"
+            ],
+            "type": "string"
+          },
+          "serial": {
+            "examples": [
+              "FXLH2015150027"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "examples": [
+              "ap"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "mac",
+          "magic",
+          "model",
+          "serial",
+          "type"
+        ],
+        "type": "object"
+      },
+      "response_org_inventory_change": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/strings"
+          },
+          "op": {
+            "$ref": "#/components/schemas/response_org_inventory_change_op"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/strings"
+          },
+          "success": {
+            "$ref": "#/components/schemas/strings"
+          }
+        },
+        "required": [
+          "error",
+          "op",
+          "success",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "response_org_inventory_change_op": {
+        "description": "enum: `assign`, `delete`, `downgrade_to_jsi`, `unassign`, `upgrade_to_mist`",
+        "enum": [
+          "assign",
+          "delete",
+          "downgrade_to_jsi",
+          "unassign",
+          "upgrade_to_mist"
+        ],
+        "type": "string"
+      },
+      "site_id": {
+        "examples": [
+          "441a1214-6928-442a-8e92-e1d34b8ec6a6"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "strings": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "tunterm_port_config": {
+        "additionalProperties": false,
+        "description": "Ethernet port configurations",
+        "properties": {
+          "downstream_ports": {
+            "$ref": "#/components/schemas/tunterm_port_config_downstream_ports"
+          },
+          "separate_upstream_downstream": {
+            "default": false,
+            "description": "Whether to separate upstream / downstream ports. default is false where all ports will be used.",
+            "type": "boolean"
+          },
+          "upstream_port_vlan_id": {
+            "$ref": "#/components/schemas/tunterm_port_config_upstream_port_vlan_id"
+          },
+          "upstream_ports": {
+            "$ref": "#/components/schemas/tunterm_port_config_upstream_ports"
+          }
+        },
+        "type": "object"
+      },
+      "tunterm_port_config_downstream_ports": {
+        "description": "List of ports to be used for downstream (to AP) purpose",
+        "examples": [
+          [
+            "2",
+            "3"
+          ]
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "tunterm_port_config_upstream_port_vlan_id": {
+        "description": "Native VLAN id for upstream ports",
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "maximum": 4094,
+            "minimum": 1,
+            "type": "integer"
+          }
+        ]
+      },
+      "tunterm_port_config_upstream_ports": {
+        "description": "List of ports to be used for upstream purpose (to LAN)",
+        "examples": [
+          [
+            "0",
+            "1"
+          ]
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      }
+    },
+    "responses": {
+      "Count": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/CountExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_count"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/CountExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_count"
+            }
+          }
+        },
+        "description": "Result of Count"
+      },
+      "HTTP400": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          }
+        },
+        "description": "Bad Syntax"
+      },
+      "HTTP401": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          }
+        },
+        "description": "Unauthorized"
+      },
+      "HTTP403": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          }
+        },
+        "description": "Permission Denied"
+      },
+      "HTTP404": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          }
+        },
+        "description": "Not found. The API endpoint doesn’t exist or resource doesn’ t exist"
+      },
+      "HTTP429": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          }
+        },
+        "description": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+      },
+      "OK": {
+        "description": "OK"
+      },
+      "OrgInventory": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/OrgInventoryExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/inventory_list"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/OrgInventoryExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/inventory_list"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "OrgInventoryAdd": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/OrgInventoryAddExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_inventory"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/OrgInventoryAddExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_inventory"
+            }
+          }
+        },
+        "description": "OK - if any of entries are valid or there’s no errors"
+      },
+      "OrgInventoryChanges": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Assign": {
+                "$ref": "#/components/examples/OrgInventoryChangesAssign"
+              },
+              "Delete": {
+                "$ref": "#/components/examples/OrgInventoryChangesDelete"
+              },
+              "Error": {
+                "$ref": "#/components/examples/OrgInventoryChangesError"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_org_inventory_change"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Assign": {
+                "$ref": "#/components/examples/OrgInventoryChangesAssign"
+              },
+              "Delete": {
+                "$ref": "#/components/examples/OrgInventoryChangesDelete"
+              },
+              "Error": {
+                "$ref": "#/components/examples/OrgInventoryChangesError"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_org_inventory_change"
+            }
+          }
+        },
+        "description": "OK"
+      },
+      "OrgInventorySearch": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/OrgInventorySearchExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/inventory_search"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/OrgInventorySearchExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/inventory_search"
+            }
+          }
+        },
+        "description": "OK"
+      }
+    },
+    "parameters": {
+      "limit": {
+        "in": "query",
+        "name": "limit",
+        "required": false,
+        "schema": {
+          "default": 100,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "org_id": {
+        "in": "path",
+        "name": "org_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "page": {
+        "in": "query",
+        "name": "page",
+        "required": false,
+        "schema": {
+          "default": 1,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "search_after": {
+        "description": "Pagination cursor for retrieving subsequent pages of results. This value is automatically populated by Mist in the `next` URL from the previous response and should not be manually constructed.",
+        "in": "query",
+        "name": "search_after",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "sort": {
+        "description": "On which field the list should be sorted, -prefix represents DESC order",
+        "in": "query",
+        "name": "sort",
+        "required": false,
+        "schema": {
+          "default": "timestamp",
+          "examples": [
+            "-site_id"
+          ],
+          "type": "string"
+        }
+      }
+    },
+    "examples": {
+      "CountExample": {
+        "value": {
+          "distinct": "string",
+          "end": 0,
+          "limit": 0,
+          "results": [
+            {
+              "count": 0,
+              "property": "string"
+            }
+          ],
+          "start": 0,
+          "total": 0
+        }
+      },
+      "HTTP400Example": {
+        "value": {
+          "detail": "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+        }
+      },
+      "HTTP401Example": {
+        "value": {
+          "detail": "Authentication credentials were not provided."
+        }
+      },
+      "HTTP403Example": {
+        "value": {
+          "detail": "You do not have permission to perform this action."
+        }
+      },
+      "HTTP429Example": {
+        "value": {
+          "detail": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+        }
+      },
+      "OrgInventoryAddExample": {
+        "value": {
+          "added": [
+            "6JG8E-PTFV2-A9Z2N"
+          ],
+          "duplicated": [
+            "DVH4V-SNMSZ-PDXBR"
+          ],
+          "error": [
+            "PO1025335ohoh"
+          ],
+          "inventory_added": [
+            {
+              "mac": "5c5b35000018",
+              "magic": "6JG8EPTFV2A9Z2N",
+              "model": "AP41",
+              "serial": "FXLH2015150025",
+              "type": "ap"
+            }
+          ],
+          "inventory_duplicated": [
+            {
+              "mac": "5c5b35000012",
+              "magic": "DVH4VSNMSZPDXBR",
+              "model": "AP41",
+              "serial": "FXLH2015150027",
+              "type": "ap"
+            }
+          ],
+          "reason": [
+            "belongs to another org ('e2f543f7-d6e1-409f-a565-e77a1f098d3b' (other) != '0de5d6fc-219a-414d-a840-67d6b919ad8f' (you))"
+          ]
+        }
+      },
+      "OrgInventoryChangesAssign": {
+        "value": {
+          "error": [],
+          "op": "assign",
+          "reason": [],
+          "success": [
+            "5c5b350e0001"
+          ]
+        }
+      },
+      "OrgInventoryChangesDelete": {
+        "value": {
+          "error": [
+            "FXLH2015150026"
+          ],
+          "op": "delete",
+          "reason": [],
+          "success": [
+            "FXLH2015150025",
+            "5c5b350e0001"
+          ]
+        }
+      },
+      "OrgInventoryChangesError": {
+        "value": {
+          "error": [
+            "5c5b350e0001"
+          ],
+          "op": "upgrade_to_mist",
+          "reason": [
+            "already managed"
+          ],
+          "success": [
+            "c15353123096"
+          ]
+        }
+      },
+      "OrgInventoryExample": {
+        "value": [
+          {
+            "connected": true,
+            "created_time": 1542328276,
+            "deviceprofile_id": "6f4bf402-45f9-2a56-6c8b-7f83d3bc98e9",
+            "id": "00000000-0000-0000-0000-5c5b35000018",
+            "mac": "5c5b35000018",
+            "model": "AP41",
+            "modified_time": 1542829778,
+            "name": "hallway",
+            "serial": "FXLH2015150025",
+            "site_id": "4ac1dcf4-9d8b-7211-65c4-057819f0862b",
+            "type": "ap"
+          }
+        ]
+      },
+      "OrgInventorySearchExample": {
+        "value": {
+          "limit": 1000,
+          "results": [
+            {
+              "mac": "f01c2df166e0",
+              "master": true,
+              "members": [
+                {
+                  "mac": "f01c2df166e0",
+                  "model": "EX4300-48P",
+                  "serial": "PD3714460200"
+                }
+              ],
+              "model": "EX4300-48P",
+              "name": "mist-wa-ex4300-VC",
+              "org_id": "9b853544-51e4-45fb-81ac-a442e4a111d0",
+              "serial": "PD3714460200",
+              "site_id": "01dc141d-b6af-4baa-b00f-0e31ef954c4f",
+              "sku": "EX4300-48P",
+              "status": "disconnected",
+              "type": "switch",
+              "vc_mac": "f01c2df166e0",
+              "version": "21.4R3.5"
+            }
+          ],
+          "total": 1
+        }
+      }
+    },
+    "securitySchemes": {
+      "apiToken": {
+        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      },
+      "basicAuth": {
+        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
+        "scheme": "basic",
+        "type": "http"
+      },
+      "csrfToken": {
+        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "in": "header",
+        "name": "X-CSRFToken",
+        "type": "apiKey"
+      }
+    }
+  }
+}

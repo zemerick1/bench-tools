@@ -1,0 +1,975 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "MACsec_Policy",
+    "version": "10.16",
+    "description": "RESTful interface for AOS-CX switch software"
+  },
+  "servers": [
+    {
+      "url": "https://{switchIp}/rest/v10.16",
+      "description": "AOS-CX switch",
+      "variables": {
+        "switchIp": {
+          "default": "192.0.2.1",
+          "description": "Switch management IP or hostname"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "MACsec_Policy"
+    }
+  ],
+  "paths": {
+    "/system/macsec_policies": {
+      "get": {
+        "tags": [
+          "MACsec_Policy"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "bypass": {
+                      "type": "object",
+                      "description": "The features to bypass MACsec processing on the channel.",
+                      "properties": {
+                        "ieee_bpdu_enabled": {
+                          "type": "boolean",
+                          "description": "Bypass MACsec protection for IEEE BPDU frames. When enabled, packets with destination MAC as one of the IEEE BPDU MACs (01:80:c2:00:00:0*) will bypass the MACsec engine in both the Tx and Rx directions."
+                        }
+                      }
+                    },
+                    "cipher_suites": {
+                      "type": "object",
+                      "description": "The MACsec cipher-suites to use to protect the MACsec frames. When more than one cipher-suite is enabled, the MKA instance will use the most secure cipher-suite in the list to generate the SAK when it is the key-server. If no specific cipher-suite is enabled, the switch will use the cipher-suites supported on the interface for MACsec.",
+                      "properties": {
+                        "gcm_aes_128_enabled": {
+                          "type": "boolean",
+                          "description": "Enable Galois/Counter mode of operation with the AES-128 symmetric block cipher."
+                        },
+                        "gcm_aes_256_enabled": {
+                          "type": "boolean",
+                          "description": "Enable Galois/Counter mode of operation with the AES-256 symmetric block cipher."
+                        },
+                        "gcm_aes_xpn_128_enabled": {
+                          "type": "boolean",
+                          "description": "Enable Galois/Counter mode of operation with the AES-128 symmetric block cipher with extended packet numbering."
+                        },
+                        "gcm_aes_xpn_256_enabled": {
+                          "type": "boolean",
+                          "description": "Enable Galois/Counter mode of operation with the AES-256 symmetric block cipher with extended packet numbering."
+                        }
+                      }
+                    },
+                    "clear_tag_mode": {
+                      "type": "string",
+                      "description": "Ethernet data in a MACsec PDU that must precede the MACsec SecTAG in clear text. `none`:  The SecTAG directly follows the destination and source          MAC address in a MACsec PDU. `dot1q`: Send the 802.1q tag in clear in a MACsec PDU.          When configured, untagged traffic is not allowed on the          MACsec channel.",
+                      "enum": [
+                        "none",
+                        "dot1q"
+                      ]
+                    },
+                    "confidentiality_disable": {
+                      "type": "boolean",
+                      "description": "Disable encryption on the MACsec interface."
+                    },
+                    "confidentiality_offset": {
+                      "type": "string",
+                      "description": "Number of octets in an Ethernet frame that are unencrypted. This is only applicable when confidentiality is enabled for this policy.  `byte_0`:  the entire Ethernet frame is sent encrypted.  `byte_30`: the data following the first 30 bytes of the Ethernet             frame is sent encrypted.  `byte_50`: the data following the first 50 bytes of the Ethernet             frame is sent encrypted.",
+                      "enum": [
+                        "byte_0",
+                        "byte_30",
+                        "byte_50"
+                      ]
+                    },
+                    "data_delay_protection_enable": {
+                      "type": "boolean",
+                      "description": "Enable data delay protection. Data delay protection allows  MKA participants to ensure that the data frames protected by  MACsec delayed by more than 2 seconds are dropped."
+                    },
+                    "include_sci_disable": {
+                      "type": "boolean",
+                      "description": "Disable inclusion of Secure Channel Identifier (SCI) in MACsec frames."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [MACsec_Policy](#/MACsec_Policy)<br>Name of the MACsec policy.",
+                      "maxLength": 128,
+                      "minLength": 1
+                    },
+                    "origin": {
+                      "type": "string",
+                      "description": "Origin of the MACsec policy, i.e., how the policy is provisioned:  `static`:  policy is provisioned by the administrator via CLI or             REST.  `dynamic`: policy is provisioned based on attributes provided by             the RADIUS server.",
+                      "enum": [
+                        "dynamic",
+                        "static"
+                      ]
+                    },
+                    "replay_protect_disable": {
+                      "type": "boolean",
+                      "description": "Disable replay protection on the MACsec interface."
+                    },
+                    "replay_window": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Replay protection window associated with this policy. When a packet is received, it is processed only if the Packet Number (PN) associated with this packet is within the replay window. This is only applicable if the replay protection is enabled for this policy.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "secure_mode": {
+                      "type": "string",
+                      "description": "Forwarding behavior of the interface when the MKA session is not established. `should-secure`: Open the interface on the data-plane with no                  MACsec protection. `must-secure`:   Block the interface on the data-plane.",
+                      "enum": [
+                        "should-secure",
+                        "must-secure"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "name",
+                  "confidentiality_disable",
+                  "confidentiality_offset",
+                  "bypass",
+                  "clear_tag_mode",
+                  "origin",
+                  "replay_protect_disable",
+                  "replay_window",
+                  "include_sci_disable",
+                  "cipher_suites",
+                  "secure_mode",
+                  "data_delay_protection_enable"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "MACsec_Policy"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "bypass": {
+                    "type": "object",
+                    "description": "The features to bypass MACsec processing on the channel.",
+                    "properties": {
+                      "ieee_bpdu_enabled": {
+                        "type": "boolean",
+                        "description": "Bypass MACsec protection for IEEE BPDU frames. When enabled, packets with destination MAC as one of the IEEE BPDU MACs (01:80:c2:00:00:0*) will bypass the MACsec engine in both the Tx and Rx directions."
+                      }
+                    }
+                  },
+                  "cipher_suites": {
+                    "type": "object",
+                    "description": "The MACsec cipher-suites to use to protect the MACsec frames. When more than one cipher-suite is enabled, the MKA instance will use the most secure cipher-suite in the list to generate the SAK when it is the key-server. If no specific cipher-suite is enabled, the switch will use the cipher-suites supported on the interface for MACsec.",
+                    "properties": {
+                      "gcm_aes_128_enabled": {
+                        "type": "boolean",
+                        "description": "Enable Galois/Counter mode of operation with the AES-128 symmetric block cipher."
+                      },
+                      "gcm_aes_256_enabled": {
+                        "type": "boolean",
+                        "description": "Enable Galois/Counter mode of operation with the AES-256 symmetric block cipher."
+                      },
+                      "gcm_aes_xpn_128_enabled": {
+                        "type": "boolean",
+                        "description": "Enable Galois/Counter mode of operation with the AES-128 symmetric block cipher with extended packet numbering."
+                      },
+                      "gcm_aes_xpn_256_enabled": {
+                        "type": "boolean",
+                        "description": "Enable Galois/Counter mode of operation with the AES-256 symmetric block cipher with extended packet numbering."
+                      }
+                    }
+                  },
+                  "clear_tag_mode": {
+                    "type": "string",
+                    "description": "Ethernet data in a MACsec PDU that must precede the MACsec SecTAG in clear text. `none`:  The SecTAG directly follows the destination and source          MAC address in a MACsec PDU. `dot1q`: Send the 802.1q tag in clear in a MACsec PDU.          When configured, untagged traffic is not allowed on the          MACsec channel.",
+                    "enum": [
+                      "none",
+                      "dot1q"
+                    ]
+                  },
+                  "confidentiality_disable": {
+                    "type": "boolean",
+                    "description": "Disable encryption on the MACsec interface."
+                  },
+                  "confidentiality_offset": {
+                    "type": "string",
+                    "description": "Number of octets in an Ethernet frame that are unencrypted. This is only applicable when confidentiality is enabled for this policy.  `byte_0`:  the entire Ethernet frame is sent encrypted.  `byte_30`: the data following the first 30 bytes of the Ethernet             frame is sent encrypted.  `byte_50`: the data following the first 50 bytes of the Ethernet             frame is sent encrypted.",
+                    "enum": [
+                      "byte_0",
+                      "byte_30",
+                      "byte_50"
+                    ]
+                  },
+                  "data_delay_protection_enable": {
+                    "type": "boolean",
+                    "description": "Enable data delay protection. Data delay protection allows  MKA participants to ensure that the data frames protected by  MACsec delayed by more than 2 seconds are dropped."
+                  },
+                  "include_sci_disable": {
+                    "type": "boolean",
+                    "description": "Disable inclusion of Secure Channel Identifier (SCI) in MACsec frames."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Reference Resource: [MACsec_Policy](#/MACsec_Policy)<br>Name of the MACsec policy.",
+                    "maxLength": 128,
+                    "minLength": 1
+                  },
+                  "origin": {
+                    "type": "string",
+                    "description": "Origin of the MACsec policy, i.e., how the policy is provisioned:  `static`:  policy is provisioned by the administrator via CLI or             REST.  `dynamic`: policy is provisioned based on attributes provided by             the RADIUS server.",
+                    "enum": [
+                      "dynamic",
+                      "static"
+                    ]
+                  },
+                  "replay_protect_disable": {
+                    "type": "boolean",
+                    "description": "Disable replay protection on the MACsec interface."
+                  },
+                  "replay_window": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Replay protection window associated with this policy. When a packet is received, it is processed only if the Packet Number (PN) associated with this packet is within the replay window. This is only applicable if the replay protection is enabled for this policy.",
+                    "maximum": 4294967295,
+                    "minimum": 0
+                  },
+                  "secure_mode": {
+                    "type": "string",
+                    "description": "Forwarding behavior of the interface when the MKA session is not established. `should-secure`: Open the interface on the data-plane with no                  MACsec protection. `must-secure`:   Block the interface on the data-plane.",
+                    "enum": [
+                      "should-secure",
+                      "must-secure"
+                    ]
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        }
+      }
+    },
+    "/system/macsec_policies/{MACsec_Policy.name}": {
+      "get": {
+        "tags": [
+          "MACsec_Policy"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "bypass": {
+                      "type": "object",
+                      "description": "The features to bypass MACsec processing on the channel.",
+                      "properties": {
+                        "ieee_bpdu_enabled": {
+                          "type": "boolean",
+                          "description": "Bypass MACsec protection for IEEE BPDU frames. When enabled, packets with destination MAC as one of the IEEE BPDU MACs (01:80:c2:00:00:0*) will bypass the MACsec engine in both the Tx and Rx directions."
+                        }
+                      }
+                    },
+                    "cipher_suites": {
+                      "type": "object",
+                      "description": "The MACsec cipher-suites to use to protect the MACsec frames. When more than one cipher-suite is enabled, the MKA instance will use the most secure cipher-suite in the list to generate the SAK when it is the key-server. If no specific cipher-suite is enabled, the switch will use the cipher-suites supported on the interface for MACsec.",
+                      "properties": {
+                        "gcm_aes_128_enabled": {
+                          "type": "boolean",
+                          "description": "Enable Galois/Counter mode of operation with the AES-128 symmetric block cipher."
+                        },
+                        "gcm_aes_256_enabled": {
+                          "type": "boolean",
+                          "description": "Enable Galois/Counter mode of operation with the AES-256 symmetric block cipher."
+                        },
+                        "gcm_aes_xpn_128_enabled": {
+                          "type": "boolean",
+                          "description": "Enable Galois/Counter mode of operation with the AES-128 symmetric block cipher with extended packet numbering."
+                        },
+                        "gcm_aes_xpn_256_enabled": {
+                          "type": "boolean",
+                          "description": "Enable Galois/Counter mode of operation with the AES-256 symmetric block cipher with extended packet numbering."
+                        }
+                      }
+                    },
+                    "clear_tag_mode": {
+                      "type": "string",
+                      "description": "Ethernet data in a MACsec PDU that must precede the MACsec SecTAG in clear text. `none`:  The SecTAG directly follows the destination and source          MAC address in a MACsec PDU. `dot1q`: Send the 802.1q tag in clear in a MACsec PDU.          When configured, untagged traffic is not allowed on the          MACsec channel.",
+                      "enum": [
+                        "none",
+                        "dot1q"
+                      ]
+                    },
+                    "confidentiality_disable": {
+                      "type": "boolean",
+                      "description": "Disable encryption on the MACsec interface."
+                    },
+                    "confidentiality_offset": {
+                      "type": "string",
+                      "description": "Number of octets in an Ethernet frame that are unencrypted. This is only applicable when confidentiality is enabled for this policy.  `byte_0`:  the entire Ethernet frame is sent encrypted.  `byte_30`: the data following the first 30 bytes of the Ethernet             frame is sent encrypted.  `byte_50`: the data following the first 50 bytes of the Ethernet             frame is sent encrypted.",
+                      "enum": [
+                        "byte_0",
+                        "byte_30",
+                        "byte_50"
+                      ]
+                    },
+                    "data_delay_protection_enable": {
+                      "type": "boolean",
+                      "description": "Enable data delay protection. Data delay protection allows  MKA participants to ensure that the data frames protected by  MACsec delayed by more than 2 seconds are dropped."
+                    },
+                    "include_sci_disable": {
+                      "type": "boolean",
+                      "description": "Disable inclusion of Secure Channel Identifier (SCI) in MACsec frames."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Reference Resource: [MACsec_Policy](#/MACsec_Policy)<br>Name of the MACsec policy.",
+                      "maxLength": 128,
+                      "minLength": 1
+                    },
+                    "origin": {
+                      "type": "string",
+                      "description": "Origin of the MACsec policy, i.e., how the policy is provisioned:  `static`:  policy is provisioned by the administrator via CLI or             REST.  `dynamic`: policy is provisioned based on attributes provided by             the RADIUS server.",
+                      "enum": [
+                        "dynamic",
+                        "static"
+                      ]
+                    },
+                    "replay_protect_disable": {
+                      "type": "boolean",
+                      "description": "Disable replay protection on the MACsec interface."
+                    },
+                    "replay_window": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Replay protection window associated with this policy. When a packet is received, it is processed only if the Packet Number (PN) associated with this packet is within the replay window. This is only applicable if the replay protection is enabled for this policy.",
+                      "maximum": 4294967295,
+                      "minimum": 0
+                    },
+                    "secure_mode": {
+                      "type": "string",
+                      "description": "Forwarding behavior of the interface when the MKA session is not established. `should-secure`: Open the interface on the data-plane with no                  MACsec protection. `must-secure`:   Block the interface on the data-plane.",
+                      "enum": [
+                        "should-secure",
+                        "must-secure"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "$ref": "#/components/responses/304"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "MACsec_Policy.name",
+            "in": "path",
+            "description": "Reference Resource: [MACsec_Policy](#/MACsec_Policy)<br>Name of the MACsec policy.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "attributes",
+            "in": "query",
+            "description": "Columns to display.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "origin",
+                  "replay_protect_disable",
+                  "replay_window",
+                  "include_sci_disable",
+                  "cipher_suites",
+                  "secure_mode",
+                  "data_delay_protection_enable",
+                  "name",
+                  "confidentiality_disable",
+                  "confidentiality_offset",
+                  "bypass",
+                  "clear_tag_mode"
+                ]
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "description": "Depth to traverse.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "description": "Select configuration, status and/or statistics. Default is all categories.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "configuration",
+                "status",
+                "statistics",
+                "writable"
+              ]
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter rows by attribute values.  Format: attribute:value",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Count the number of rows found.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "Entity-tag value for representation comparison (see RFC 7232 - Conditional Requests - section 3.2)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "MACsec_Policy"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "bypass": {
+                    "type": "object",
+                    "description": "The features to bypass MACsec processing on the channel.",
+                    "properties": {
+                      "ieee_bpdu_enabled": {
+                        "type": "boolean",
+                        "description": "Bypass MACsec protection for IEEE BPDU frames. When enabled, packets with destination MAC as one of the IEEE BPDU MACs (01:80:c2:00:00:0*) will bypass the MACsec engine in both the Tx and Rx directions."
+                      }
+                    }
+                  },
+                  "cipher_suites": {
+                    "type": "object",
+                    "description": "The MACsec cipher-suites to use to protect the MACsec frames. When more than one cipher-suite is enabled, the MKA instance will use the most secure cipher-suite in the list to generate the SAK when it is the key-server. If no specific cipher-suite is enabled, the switch will use the cipher-suites supported on the interface for MACsec.",
+                    "properties": {
+                      "gcm_aes_128_enabled": {
+                        "type": "boolean",
+                        "description": "Enable Galois/Counter mode of operation with the AES-128 symmetric block cipher."
+                      },
+                      "gcm_aes_256_enabled": {
+                        "type": "boolean",
+                        "description": "Enable Galois/Counter mode of operation with the AES-256 symmetric block cipher."
+                      },
+                      "gcm_aes_xpn_128_enabled": {
+                        "type": "boolean",
+                        "description": "Enable Galois/Counter mode of operation with the AES-128 symmetric block cipher with extended packet numbering."
+                      },
+                      "gcm_aes_xpn_256_enabled": {
+                        "type": "boolean",
+                        "description": "Enable Galois/Counter mode of operation with the AES-256 symmetric block cipher with extended packet numbering."
+                      }
+                    }
+                  },
+                  "clear_tag_mode": {
+                    "type": "string",
+                    "description": "Ethernet data in a MACsec PDU that must precede the MACsec SecTAG in clear text. `none`:  The SecTAG directly follows the destination and source          MAC address in a MACsec PDU. `dot1q`: Send the 802.1q tag in clear in a MACsec PDU.          When configured, untagged traffic is not allowed on the          MACsec channel.",
+                    "enum": [
+                      "none",
+                      "dot1q"
+                    ]
+                  },
+                  "confidentiality_disable": {
+                    "type": "boolean",
+                    "description": "Disable encryption on the MACsec interface."
+                  },
+                  "confidentiality_offset": {
+                    "type": "string",
+                    "description": "Number of octets in an Ethernet frame that are unencrypted. This is only applicable when confidentiality is enabled for this policy.  `byte_0`:  the entire Ethernet frame is sent encrypted.  `byte_30`: the data following the first 30 bytes of the Ethernet             frame is sent encrypted.  `byte_50`: the data following the first 50 bytes of the Ethernet             frame is sent encrypted.",
+                    "enum": [
+                      "byte_0",
+                      "byte_30",
+                      "byte_50"
+                    ]
+                  },
+                  "data_delay_protection_enable": {
+                    "type": "boolean",
+                    "description": "Enable data delay protection. Data delay protection allows  MKA participants to ensure that the data frames protected by  MACsec delayed by more than 2 seconds are dropped."
+                  },
+                  "include_sci_disable": {
+                    "type": "boolean",
+                    "description": "Disable inclusion of Secure Channel Identifier (SCI) in MACsec frames."
+                  },
+                  "replay_protect_disable": {
+                    "type": "boolean",
+                    "description": "Disable replay protection on the MACsec interface."
+                  },
+                  "replay_window": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Replay protection window associated with this policy. When a packet is received, it is processed only if the Packet Number (PN) associated with this packet is within the replay window. This is only applicable if the replay protection is enabled for this policy.",
+                    "maximum": 4294967295,
+                    "minimum": 0
+                  },
+                  "secure_mode": {
+                    "type": "string",
+                    "description": "Forwarding behavior of the interface when the MKA session is not established. `should-secure`: Open the interface on the data-plane with no                  MACsec protection. `must-secure`:   Block the interface on the data-plane.",
+                    "enum": [
+                      "should-secure",
+                      "must-secure"
+                    ]
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "MACsec_Policy.name",
+            "in": "path",
+            "description": "Reference Resource: [MACsec_Policy](#/MACsec_Policy)<br>Name of the MACsec policy.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "MACsec_Policy"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "MACsec_Policy.name",
+            "in": "path",
+            "description": "Reference Resource: [MACsec_Policy](#/MACsec_Policy)<br>Name of the MACsec policy.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "MACsec_Policy"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "bypass": {
+                    "type": "object",
+                    "description": "The features to bypass MACsec processing on the channel.",
+                    "properties": {
+                      "ieee_bpdu_enabled": {
+                        "type": "boolean",
+                        "description": "Bypass MACsec protection for IEEE BPDU frames. When enabled, packets with destination MAC as one of the IEEE BPDU MACs (01:80:c2:00:00:0*) will bypass the MACsec engine in both the Tx and Rx directions."
+                      }
+                    }
+                  },
+                  "cipher_suites": {
+                    "type": "object",
+                    "description": "The MACsec cipher-suites to use to protect the MACsec frames. When more than one cipher-suite is enabled, the MKA instance will use the most secure cipher-suite in the list to generate the SAK when it is the key-server. If no specific cipher-suite is enabled, the switch will use the cipher-suites supported on the interface for MACsec.",
+                    "properties": {
+                      "gcm_aes_128_enabled": {
+                        "type": "boolean",
+                        "description": "Enable Galois/Counter mode of operation with the AES-128 symmetric block cipher."
+                      },
+                      "gcm_aes_256_enabled": {
+                        "type": "boolean",
+                        "description": "Enable Galois/Counter mode of operation with the AES-256 symmetric block cipher."
+                      },
+                      "gcm_aes_xpn_128_enabled": {
+                        "type": "boolean",
+                        "description": "Enable Galois/Counter mode of operation with the AES-128 symmetric block cipher with extended packet numbering."
+                      },
+                      "gcm_aes_xpn_256_enabled": {
+                        "type": "boolean",
+                        "description": "Enable Galois/Counter mode of operation with the AES-256 symmetric block cipher with extended packet numbering."
+                      }
+                    }
+                  },
+                  "clear_tag_mode": {
+                    "type": "string",
+                    "description": "Ethernet data in a MACsec PDU that must precede the MACsec SecTAG in clear text. `none`:  The SecTAG directly follows the destination and source          MAC address in a MACsec PDU. `dot1q`: Send the 802.1q tag in clear in a MACsec PDU.          When configured, untagged traffic is not allowed on the          MACsec channel.",
+                    "enum": [
+                      "none",
+                      "dot1q"
+                    ]
+                  },
+                  "confidentiality_disable": {
+                    "type": "boolean",
+                    "description": "Disable encryption on the MACsec interface."
+                  },
+                  "confidentiality_offset": {
+                    "type": "string",
+                    "description": "Number of octets in an Ethernet frame that are unencrypted. This is only applicable when confidentiality is enabled for this policy.  `byte_0`:  the entire Ethernet frame is sent encrypted.  `byte_30`: the data following the first 30 bytes of the Ethernet             frame is sent encrypted.  `byte_50`: the data following the first 50 bytes of the Ethernet             frame is sent encrypted.",
+                    "enum": [
+                      "byte_0",
+                      "byte_30",
+                      "byte_50"
+                    ]
+                  },
+                  "data_delay_protection_enable": {
+                    "type": "boolean",
+                    "description": "Enable data delay protection. Data delay protection allows  MKA participants to ensure that the data frames protected by  MACsec delayed by more than 2 seconds are dropped."
+                  },
+                  "include_sci_disable": {
+                    "type": "boolean",
+                    "description": "Disable inclusion of Secure Channel Identifier (SCI) in MACsec frames."
+                  },
+                  "replay_protect_disable": {
+                    "type": "boolean",
+                    "description": "Disable replay protection on the MACsec interface."
+                  },
+                  "replay_window": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Replay protection window associated with this policy. When a packet is received, it is processed only if the Packet Number (PN) associated with this packet is within the replay window. This is only applicable if the replay protection is enabled for this policy.",
+                    "maximum": 4294967295,
+                    "minimum": 0
+                  },
+                  "secure_mode": {
+                    "type": "string",
+                    "description": "Forwarding behavior of the interface when the MKA session is not established. `should-secure`: Open the interface on the data-plane with no                  MACsec protection. `must-secure`:   Block the interface on the data-plane.",
+                    "enum": [
+                      "should-secure",
+                      "must-secure"
+                    ]
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "415": {
+            "$ref": "#/components/responses/415"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "MACsec_Policy.name",
+            "in": "path",
+            "description": "Reference Resource: [MACsec_Policy](#/MACsec_Policy)<br>Name of the MACsec policy.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "304": {
+        "description": "Not Modified"
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Not Found"
+      },
+      "415": {
+        "description": "Unsupported Media Type"
+      },
+      "500": {
+        "description": "Internal Server Error"
+      },
+      "501": {
+        "description": "Not Implemented"
+      },
+      "503": {
+        "description": "Service Unavailable"
+      }
+    }
+  }
+}

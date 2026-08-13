@@ -1,0 +1,719 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Sites Devices - Wired",
+    "version": "2602.1.1"
+  },
+  "servers": [
+    {
+      "description": "Mist Global 01",
+      "url": "https://api.mist.com"
+    },
+    {
+      "description": "Mist Global 02",
+      "url": "https://api.gc1.mist.com"
+    },
+    {
+      "description": "Mist Global 03",
+      "url": "https://api.ac2.mist.com"
+    },
+    {
+      "description": "Mist Global 04",
+      "url": "https://api.gc2.mist.com"
+    },
+    {
+      "description": "Mist Global 05",
+      "url": "https://api.gc4.mist.com"
+    },
+    {
+      "description": "Mist EMEA 01",
+      "url": "https://api.eu.mist.com"
+    },
+    {
+      "description": "Mist EMEA 02",
+      "url": "https://api.gc3.mist.com"
+    },
+    {
+      "description": "Mist EMEA 03",
+      "url": "https://api.ac6.mist.com"
+    },
+    {
+      "description": "Mist EMEA 04",
+      "url": "https://api.gc6.mist.com"
+    },
+    {
+      "description": "Mist APAC 01",
+      "url": "https://api.ac5.mist.com"
+    },
+    {
+      "description": "Mist APAC 02",
+      "url": "https://api.gc5.mist.com"
+    },
+    {
+      "description": "Mist APAC 03",
+      "url": "https://api.gc7.mist.com"
+    }
+  ],
+  "security": [
+    {
+      "apiToken": []
+    },
+    {
+      "basicAuth": []
+    },
+    {
+      "basicAuth": [],
+      "csrfToken": []
+    }
+  ],
+  "tags": [
+    {
+      "description": "API Calls specific to the Juniper Switches managed by Mist",
+      "name": "Sites Devices - Wired"
+    }
+  ],
+  "paths": {
+    "/api/v1/sites/{site_id}/devices/{device_id}/local_port_config": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "put": {
+        "description": "API Calls to add port config local overrides. This can be used by Switch Port Operators or Helpdesk administrators\nto change a Switch Port configuration without having to change the switch configuration.\n\n\nThe local overrides configured for the switchports with `no_local_overwrite`==`true` won't be applied to the switch configuration. \n\n\n> NOTE:\n>\n> When using the API Call, it is required to put send all overrides in the PUT request Payload, even the existing once. \n>\n> The current overrides can be retrieved with the API Call [Get Site Device](/#operations/getSiteDevice). The local overrides will show up separately from the `port_config` in the `local_port_config` so it can be easily identified (and cleared)",
+        "operationId": "updateSiteLocalSwitchPortConfig",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "ge-0/0/0-1": {
+                      "poe_disabled": true,
+                      "usage": "iot"
+                    }
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/local_port_config"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "updateSiteLocalSwitchPortConfig",
+        "tags": [
+          "Sites Devices - Wired"
+        ]
+      },
+      "delete": {
+        "description": "API Calls delete all the existing port config local overrides, and reapply the configured planed at the device level \n(with site / template heritance).",
+        "operationId": "deleteSiteLocalSwitchPortConfig",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "deleteSiteLocalSwitchPortConfig",
+        "tags": [
+          "Sites Devices - Wired"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "junos_local_port_config": {
+        "additionalProperties": false,
+        "description": "Switch port config",
+        "properties": {
+          "all_networks": {
+            "default": false,
+            "description": "Only if `mode`==`trunk` whether to trunk all network/vlans",
+            "type": "boolean"
+          },
+          "allow_dhcpd": {
+            "description": "Controls whether DHCP server traffic is allowed on ports using this configuration if DHCP snooping is enabled. This is a tri-state setting; `true`: ports become trusted ports allowing DHCP server traffic, `false`: ports become untrusted blocking DHCP server traffic, undefined: use system defaults (access ports default to untrusted, trunk ports default to trusted).",
+            "type": "boolean"
+          },
+          "allow_multiple_supplicants": {
+            "default": false,
+            "type": "boolean"
+          },
+          "bypass_auth_when_server_down": {
+            "default": false,
+            "description": "Only if `port_auth`==`dot1x` bypass auth for known clients if set to true when RADIUS server is down",
+            "type": "boolean"
+          },
+          "bypass_auth_when_server_down_for_unknown_client": {
+            "default": false,
+            "description": "Only if `port_auth`=`dot1x` bypass auth for all (including unknown clients) if set to true when RADIUS server is down",
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "disable_autoneg": {
+            "default": false,
+            "description": "Only if `mode`!=`dynamic` if speed and duplex are specified, whether to disable autonegotiation",
+            "type": "boolean"
+          },
+          "disabled": {
+            "default": false,
+            "description": "Whether the port is disabled",
+            "type": "boolean"
+          },
+          "duplex": {
+            "$ref": "#/components/schemas/switch_port_local_usage_duplex"
+          },
+          "dynamic_vlan_networks": {
+            "$ref": "#/components/schemas/switch_port_local_usage_dynamic_vlan_networks"
+          },
+          "enable_mac_auth": {
+            "default": false,
+            "description": "Only if `port_auth`==`dot1x` whether to enable MAC Auth",
+            "type": "boolean"
+          },
+          "enable_qos": {
+            "default": false,
+            "type": "boolean"
+          },
+          "guest_network": {
+            "description": "Only if `port_auth`==`dot1x` which network to put the device into if the device cannot do dot1x. default is null (i.e. not allowed)",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "inter_switch_link": {
+            "default": false,
+            "description": "inter_switch_link is used together with \"isolation\" under networks. NOTE: inter_switch_link works only between Juniper devices. This has to be applied to both ports connected together",
+            "type": "boolean"
+          },
+          "mac_auth_only": {
+            "description": "Only if `enable_mac_auth`==`true`",
+            "type": "boolean"
+          },
+          "mac_auth_preferred": {
+            "description": "Only if `enable_mac_auth`==`true` + `mac_auth_only`==`false`, dot1x will be given priority then mac_auth. Enable this to prefer mac_auth over dot1x.",
+            "type": "boolean"
+          },
+          "mac_auth_protocol": {
+            "$ref": "#/components/schemas/switch_port_local_usage_mac_auth_protocol"
+          },
+          "mac_limit": {
+            "default": 0,
+            "description": "Max number of mac addresses, default is 0 for unlimited, otherwise range is 1 or higher, with upper bound constrained by platform",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/switch_port_local_usage_mode"
+          },
+          "mtu": {
+            "description": "Media maximum transmission unit (MTU) is the largest data unit that can be forwarded without fragmentation. The default value is 1514.",
+            "type": "integer"
+          },
+          "networks": {
+            "$ref": "#/components/schemas/switch_port_usage_networks"
+          },
+          "note": {
+            "description": "Additional note for the port config override",
+            "examples": [
+              "force 100M for camera"
+            ],
+            "type": "string"
+          },
+          "persist_mac": {
+            "default": false,
+            "description": "Only if `mode`==`access` and `port_auth`!=`dot1x` whether the port should retain dynamically learned MAC addresses",
+            "type": "boolean"
+          },
+          "poe_disabled": {
+            "default": false,
+            "description": "Whether PoE capabilities are disabled for a port",
+            "type": "boolean"
+          },
+          "port_auth": {
+            "$ref": "#/components/schemas/switch_port_local_usage_dot1x"
+          },
+          "port_network": {
+            "description": "Native network/vlan for untagged traffic",
+            "type": "string"
+          },
+          "reauth_interval": {
+            "$ref": "#/components/schemas/switch_port_usage_reauth_interval"
+          },
+          "server_fail_network": {
+            "description": "Only if `port_auth`==`dot1x` sets server fail fallback vlan",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "server_reject_network": {
+            "description": "Only if `port_auth`==`dot1x` when radius server reject / fails",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "speed": {
+            "$ref": "#/components/schemas/junos_port_config_speed"
+          },
+          "storm_control": {
+            "$ref": "#/components/schemas/switch_port_local_usage_storm_control"
+          },
+          "stp_edge": {
+            "default": false,
+            "description": "When enabled, the port is not expected to receive BPDU frames",
+            "type": "boolean"
+          },
+          "stp_no_root_port": {
+            "default": false,
+            "type": "boolean"
+          },
+          "stp_p2p": {
+            "default": false,
+            "type": "boolean"
+          },
+          "usage": {
+            "description": "Port usage name.",
+            "type": "string"
+          },
+          "use_vstp": {
+            "default": false,
+            "description": "If this is connected to a vstp network",
+            "type": "boolean"
+          },
+          "voip_network": {
+            "description": "Network/vlan for voip traffic, must also set port_network. to authenticate device, set port_auth",
+            "type": "string"
+          }
+        },
+        "required": [
+          "usage"
+        ],
+        "type": "object"
+      },
+      "junos_port_config_speed": {
+        "default": "auto",
+        "description": "enum: `100m`, `10m`, `1g`, `2.5g`, `5g`, `10g`, `25g`, `40g`, `100g`,`auto`",
+        "enum": [
+          "10m",
+          "100m",
+          "1g",
+          "2.5g",
+          "5g",
+          "10g",
+          "25g",
+          "40g",
+          "100g",
+          "auto"
+        ],
+        "type": "string"
+      },
+      "local_port_config": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/junos_local_port_config"
+        },
+        "description": "Local port override, overriding the port configuration from `port_config`. Property key is the port name or range (e.g. \"ge-0/0/0-10\")",
+        "type": "object"
+      },
+      "response_http400": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http401": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Authentication credentials were not provided."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http403": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "You do not have permission to perform this action."
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http404": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "response_http429": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "examples": [
+              "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "switch_port_local_usage_dot1x": {
+        "description": "if dot1x is desired, set to dot1x. enum: `dot1x`",
+        "enum": [
+          "dot1x"
+        ],
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "switch_port_local_usage_duplex": {
+        "default": "auto",
+        "description": "link connection mode. enum: `auto`, `full`, `half`",
+        "enum": [
+          "auto",
+          "full",
+          "half"
+        ],
+        "type": "string"
+      },
+      "switch_port_local_usage_dynamic_vlan_networks": {
+        "description": "Only if `port_auth`==`dot1x`, if dynamic vlan is used, specify the possible networks/vlans RADIUS can return",
+        "examples": [
+          [
+            "corp",
+            "user"
+          ]
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "switch_port_local_usage_mac_auth_protocol": {
+        "default": "eap-md5",
+        "description": "Only if `enable_mac_auth` ==`true`. This type is ignored if mist_nac is enabled. enum: `eap-md5`, `eap-peap`, `pap`",
+        "enum": [
+          "eap-md5",
+          "eap-peap",
+          "pap"
+        ],
+        "type": "string"
+      },
+      "switch_port_local_usage_mode": {
+        "description": "enum: `access`, `inet`, `trunk`",
+        "enum": [
+          "access",
+          "inet",
+          "trunk"
+        ],
+        "type": "string"
+      },
+      "switch_port_local_usage_storm_control": {
+        "additionalProperties": false,
+        "description": "Switch storm control",
+        "properties": {
+          "disable_port": {
+            "default": false,
+            "description": "Whether to disable the port when storm control is triggered",
+            "type": "boolean"
+          },
+          "no_broadcast": {
+            "default": false,
+            "description": "Whether to disable storm control on broadcast traffic",
+            "type": "boolean"
+          },
+          "no_multicast": {
+            "default": false,
+            "description": "Whether to disable storm control on multicast traffic",
+            "type": "boolean"
+          },
+          "no_registered_multicast": {
+            "default": false,
+            "description": "Whether to disable storm control on registered multicast traffic",
+            "type": "boolean"
+          },
+          "no_unknown_unicast": {
+            "default": false,
+            "description": "Whether to disable storm control on unknown unicast traffic",
+            "type": "boolean"
+          },
+          "percentage": {
+            "default": 80,
+            "description": "Bandwidth-percentage, configures the storm control level as a percentage of the available bandwidth",
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "switch_port_usage_networks": {
+        "description": "Only if `mode`==`trunk`, the list of network/vlans",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "switch_port_usage_reauth_interval": {
+        "anyOf": [
+          {
+            "default": 3600,
+            "maximum": 65535,
+            "minimum": 10,
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "description": "Only if `mode`!=`dynamic` and `port_auth`=`dot1x` reauthentication interval range (min: 10, max: 65535, default: 3600)"
+      }
+    },
+    "responses": {
+      "HTTP400": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP400Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http400"
+            }
+          }
+        },
+        "description": "Bad Syntax"
+      },
+      "HTTP401": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP401Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http401"
+            }
+          }
+        },
+        "description": "Unauthorized"
+      },
+      "HTTP403": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP403Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http403"
+            }
+          }
+        },
+        "description": "Permission Denied"
+      },
+      "HTTP404": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/response_http404"
+            }
+          }
+        },
+        "description": "Not found. The API endpoint doesn’t exist or resource doesn’ t exist"
+      },
+      "HTTP429": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/HTTP429Example"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_http429"
+            }
+          }
+        },
+        "description": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+      },
+      "OK": {
+        "description": "OK"
+      }
+    },
+    "parameters": {
+      "device_id": {
+        "in": "path",
+        "name": "device_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "site_id": {
+        "in": "path",
+        "name": "site_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      }
+    },
+    "examples": {
+      "HTTP400Example": {
+        "value": {
+          "detail": "JSON parse error - Expecting value: line 5 column 8 (char 56)"
+        }
+      },
+      "HTTP401Example": {
+        "value": {
+          "detail": "Authentication credentials were not provided."
+        }
+      },
+      "HTTP403Example": {
+        "value": {
+          "detail": "You do not have permission to perform this action."
+        }
+      },
+      "HTTP429Example": {
+        "value": {
+          "detail": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
+        }
+      }
+    },
+    "securitySchemes": {
+      "apiToken": {
+        "description": "Like many other API providers, it’s also possible to generate API Tokens to be used (in HTTP Header) for authentication. An API token ties to a Admin with equal or less privileges.\n\n**Format**:\n  API Token value format is `Token {apitoken}`\n\n**Notes**:\n* an API token generated for a specific admin has the same privilege as the user\n* an API token will be automatically removed if not used for > 90 days\n* SSO admins cannot generate these API tokens. Refer Org level API tokens which can have privileges of a specific Org/Site for more information.",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      },
+      "basicAuth": {
+        "description": "While our current UI uses Session / Cookie-based authentication, it’s also possible to do Basic Auth.",
+        "scheme": "basic",
+        "type": "http"
+      },
+      "csrfToken": {
+        "description": "This protects the website against [Cross Site Request Forgery](https://en.wikipedia.org/wiki/Cross-site_request_forgery), all the POST / PUT / DELETE APIs needs to have CSRF token in the AJAX Request header when using Login/Password authentication (with or without MFA)\n\n\nThe CSRF Token is sent back by Mist in the Cookies from the Login Response API Call:\n`cookies[csrftoken]` \n\nThe CSRF Token must be added in the HTTP Request Headers:\n```\nX-CSRFToken: vwvBuq9qkqaKh7lu8tNc0gkvBfEaLAmx\n```",
+        "in": "header",
+        "name": "X-CSRFToken",
+        "type": "apiKey"
+      }
+    }
+  }
+}

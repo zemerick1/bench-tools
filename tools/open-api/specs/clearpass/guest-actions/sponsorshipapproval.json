@@ -1,0 +1,199 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "SponsorshipApproval",
+    "version": "6.12.7"
+  },
+  "servers": [
+    {
+      "url": "https://clearpass-hostname/api"
+    }
+  ],
+  "tags": [
+    {
+      "name": "SponsorshipApproval",
+      "description": "Sponsor confirmation for guest accounts"
+    }
+  ],
+  "paths": {
+    "/guest/{guest_id}/sponsor": {
+      "post": {
+        "summary": "Accept or reject a guest sponsorship request",
+        "description": "<p>Accept or reject a guest account that is waiting for a sponsor’s approval.</p>\n<p>Requires a guest self-registration page that has been configured for sponsor confirmation.</p>\n<p>A common <tt>filter</tt> for <tt>/guest</tt> to query accounts needing sponsorship is: <tt>{\"register_token\":{\"$ne\":\"\"},\"register_token_confirmed\":0}</tt></p>\n<p>If <tt>guest_register</tt> is not the sponsor-enabled self-registration, pass the registration page name as <tt>gsr_id</tt>.</p>",
+        "operationId": "SponsorshipApprovalByGuest_idSponsorPost",
+        "deprecated": false,
+        "parameters": [
+          {
+            "name": "guest_id",
+            "in": "path",
+            "required": true,
+            "description": "Numeric ID of the guest account",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "gsr_id",
+            "in": "query",
+            "required": false,
+            "description": "Optional name of the self-registration with the sponsor confirmation configuration.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SponsorshipApproval"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SponsorshipApprovalResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "406": {
+            "description": "Not Acceptable",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported Media Type",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "tags": [
+          "SponsorshipApproval"
+        ],
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SponsorshipApproval": {
+        "title": "SponsorshipApproval",
+        "type": "object",
+        "properties": {
+          "token": {
+            "description": "Registration token",
+            "type": "string"
+          },
+          "register_token": {
+            "description": "Registration token",
+            "type": "string"
+          },
+          "register_reject": {
+            "description": "Set to true to reject the sponsorship request",
+            "type": "boolean"
+          },
+          "role_id": {
+            "description": "Override the guest role",
+            "type": "integer"
+          },
+          "modify_expire_time": {
+            "description": "Override the guest expiration time",
+            "type": "string"
+          },
+          "confirm_expire_time": {
+            "description": "Timestamp for new expiration time; used if modify_expire_time is \"expire_time\"",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "register_token"
+        ]
+      },
+      "SponsorshipApprovalResponse": {
+        "title": "SponsorshipApprovalResponse",
+        "type": "object",
+        "properties": {
+          "guest_receipt": {
+            "description": "Object containing guest receipt details",
+            "type": "object"
+          },
+          "user": {
+            "description": "Object containing guest account details",
+            "type": "object"
+          },
+          "message": {
+            "description": "A message describing any actions taken",
+            "type": "string"
+          },
+          "_confirm_success": {
+            "description": "Flag indicating the operation was successful",
+            "type": "boolean"
+          },
+          "_confirm_reject": {
+            "description": "Flag indicating the account was deleted",
+            "type": "boolean"
+          },
+          "...": {
+            "description": "Additional properties from the receipt may also be returned",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

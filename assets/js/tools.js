@@ -95,6 +95,16 @@ export const tools = [
     status: "available",
     cta: "Plan subnets",
   },
+  {
+    id: "open-api",
+    title: "OpenAPI Docs",
+    description:
+      "Aruba Central (and friends) OpenAPI, split so Scalar never swallows the 17 MB master spec.",
+    href: "./tools/open-api/",
+    icon: "API",
+    status: "available",
+    cta: "Browse specs",
+  },
 ];
 
 /**
