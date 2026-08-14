@@ -199,6 +199,8 @@ See [tools/cli-explorer/README.md](./tools/cli-explorer/README.md) for the full 
 
 Split HPE/Aruba OpenAPI documents under `tools/open-api/`. The UI loads `data/manifest.json`, then one file from `specs/` into Scalar.
 
+**AOS-CX caveat.** The fetcher takes whatever OpenAPI the developer hub’s stable `aoscx` project is serving. The hub version dropdown may already say 10.18; the attached file still labels itself 10.16 and is the same blob on 10.16/10.17/10.18. This tool publishes that hub document. A live switch has more endpoints (and the real train). For the full list for *that* firmware, open `https://<switch-IP>/api` on the switch. The on-page FAQ repeats this until HPE clarifies.
+
 ```bash
 cd tools/open-api
 python3 -m venv .venv

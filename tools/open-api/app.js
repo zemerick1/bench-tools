@@ -228,10 +228,19 @@
     return value || DEFAULT_SWITCH_IP;
   }
 
+  function aosCxSourceVersion(api) {
+    const source = api || (manifest?.apis || []).find((item) => item.id === "aos-cx");
+    const version = source?.sources?.[0]?.version || "10.16";
+    return String(version).replace(/^v/i, "");
+  }
+
   function aosCxRestPath(api) {
-    const version = (api?.sources && api.sources[0] && api.sources[0].version) || "10.16";
-    const numeric = String(version).replace(/^v/i, "");
-    return `/rest/v${numeric}`;
+    return `/rest/v${aosCxSourceVersion(api)}`;
+  }
+
+  function fillAosCxDisclaimer() {
+    const el = document.getElementById("oas-cx-hub-version");
+    if (el) el.textContent = aosCxSourceVersion();
   }
 
   function populatePlatforms() {
@@ -462,6 +471,7 @@
     }
 
     populatePlatforms();
+    fillAosCxDisclaimer();
     applyFromUrl(true);
 
     PLATFORM?.addEventListener("change", () => {
