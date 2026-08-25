@@ -56,6 +56,16 @@ export const tools = [
     cta: "Browse platforms",
   },
   {
+    id: "antenna-matrix",
+    title: "Aruba Antenna Matrix",
+    description:
+      "Which external antenna for which Aruba AP — omni or directional, how many, which connectors.",
+    href: "./tools/antenna-matrix/",
+    icon: "ANT",
+    status: "available",
+    cta: "Browse antennas",
+  },
+  {
     id: "access-tracker",
     title: "Access Tracker Translator",
     description:

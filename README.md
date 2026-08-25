@@ -23,6 +23,7 @@ python3 -m http.server 8080
 | **Cert Assembler** | Key + cert + chain → ordered PEMs or PKCS#12 (PFX/P12) |
 | **MAC / OUI Lookup** | Parse MACs, randomized-MAC hint, offline OUI vendor |
 | **Hardware Platform Support** | Aruba AOS-10/Instant matrix + Juniper EX/QFX/AP Pathfinder |
+| **Aruba Antenna Matrix** | Which external antenna for which Aruba AP — how many, omni vs directional |
 | **Central Alerts & Insights** | Searchable Aruba Central alert / insight catalog |
 | **Access Tracker Translator** | ClearPass session export → sticky-note story + why |
 | **CLI Explorer** | AOS-CX 10.13.x–10.18.x (per switch series) + AOS 10 CLI hierarchy from local PDF TOC |
@@ -44,6 +45,7 @@ bench-tools/
 │   ├── cert-assembler/
 │   ├── mac-lookup/
 │   ├── hardware-platform-support/
+│   ├── antenna-matrix/              # Connectorized AP × antenna matrix
 │   ├── central-alerts/
 │   ├── access-tracker/
 │   │   ├── decoder.js
@@ -153,11 +155,22 @@ See [tools/show-tech/README.md](./tools/show-tech/README.md) for personas, PuTTY
 - Refresh from Central API with `update_catalog.py` (stdlib only) — see that folder’s README
 - Put secrets in `credentials.local.json` or env vars (**gitignored**)
 
+### Aruba Antenna Matrix
+
+External-antenna Aruba APs × compatible antennas under `tools/antenna-matrix/`. Pairing is QuickSpecs “Select antennas (AP-xxx only)” plus connector / MIMO / band-coverage filters. Antenna purpose/docs are a separate enrichment step (HPE search + Support Antenna Options).
+
+```bash
+python3 tools/antenna-matrix/update_data.py
+```
+
+See [tools/antenna-matrix/README.md](./tools/antenna-matrix/README.md).
+
 ### Hardware Platform Support / MAC Lookup
 
 - Data files ship with the tool; maintainer refresh scripts live alongside each tool
 - MAC / OUI: `tools/mac-lookup/update_oui.py` pulls IEEE MA-L / MA-M / MA-S CSVs. GitHub Actions runs it weekly and commits `oui-data.json` only when the assignment tables change (the `updated` date is not enough to trigger a commit)
 - Juniper EX / QFX / Mist APs: `tools/hardware-platform-support/update_juniper.py` (merges Pathfinder catalog into `platforms.json` without rewriting Aruba rows)
+- Antenna matrix: `tools/antenna-matrix/update_data.py` (filters QuickSpecs seed → `data/matrix.json`)
 
 ### CLI Explorer
 
