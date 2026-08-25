@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Utilities Upgrade",
-    "version": "2607.1.0"
+    "version": "2607.1.1"
   },
   "servers": [
     {
@@ -1491,7 +1491,7 @@
           },
           "channel": {
             "$ref": "#/components/schemas/mxedge_upgrade_channel",
-            "description": "Upgrade channel to use for qualified versions"
+            "description": "Upgrade channel to use for qualified versions. enum: `alpha`, `beta`, `stable`."
           },
           "distro": {
             "description": "Linux distribution codename for an optional distro upgrade, such as bullseye or `next` to upgrade to the next distro version. Uses highest qualified versions",
@@ -1512,7 +1512,7 @@
           },
           "strategy": {
             "$ref": "#/components/schemas/mxedge_upgrade_strategy",
-            "description": "Upgrade rollout strategy for the selected Mist Edges"
+            "description": "Upgrade rollout strategy for the selected Mist Edges. enum: `canary`, `big_bang`, `serial`."
           },
           "versions": {
             "$ref": "#/components/schemas/mxedge_upgrade_version",
@@ -1645,7 +1645,7 @@
         "properties": {
           "status": {
             "$ref": "#/components/schemas/upgrade_info_status",
-            "description": "Current status of the requested device upgrade"
+            "description": "Current status of the requested device upgrade. enum: `error`, `inprogress`, `scheduled`, `starting`, `success`."
           },
           "timestamp": {
             "$ref": "#/components/schemas/timestamp",
@@ -1828,11 +1828,11 @@
           },
           "status": {
             "$ref": "#/components/schemas/upgrade_device_status",
-            "description": "Current status of the site device upgrade job"
+            "description": "Current status of the site device upgrade job. enum: `cancelled`, `completed`, `created`, `downloaded`, `downloading`, `failed`, `queued`, `upgrading`."
           },
           "strategy": {
             "$ref": "#/components/schemas/upgrade_device_strategy",
-            "description": "Device upgrade strategy used by this job"
+            "description": "Device upgrade strategy used by this job. enum: `big_bang`, `canary`, `rrm`, `serial`."
           },
           "target_version": {
             "description": "Version to upgrade to",
@@ -1915,11 +1915,11 @@
           },
           "status": {
             "$ref": "#/components/schemas/upgrade_device_status",
-            "description": "Current status of the site device upgrade job"
+            "description": "Current status of the site device upgrade job. enum: `cancelled`, `completed`, `created`, `downloaded`, `downloading`, `failed`, `queued`, `upgrading`."
           },
           "strategy": {
             "$ref": "#/components/schemas/upgrade_device_strategy",
-            "description": "Device upgrade strategy used by this job"
+            "description": "Device upgrade strategy used by this job. enum: `big_bang`, `canary`, `rrm`, `serial`."
           },
           "target_version": {
             "description": "Version to upgrade to",
@@ -2144,7 +2144,7 @@
           },
           "strategy": {
             "$ref": "#/components/schemas/upgrade_device_strategy",
-            "description": "Execution strategy used for the organization upgrade job"
+            "description": "Execution strategy used for the organization upgrade job. enum: `big_bang`, `canary`, `rrm`, `serial`."
           },
           "target_version": {
             "description": "Firmware version targeted by the organization AP upgrade",
@@ -2174,7 +2174,7 @@
         "properties": {
           "channel": {
             "$ref": "#/components/schemas/ssr_upgrade_channel",
-            "description": "Firmware release channel to use for the SSR upgrade"
+            "description": "Firmware release channel to use for the SSR upgrade. enum: `alpha`, `beta`, `stable`."
           },
           "force": {
             "default": false,
@@ -2216,7 +2216,7 @@
         "properties": {
           "channel": {
             "$ref": "#/components/schemas/ssr_upgrade_channel",
-            "description": "Firmware release channel to use for the SSR upgrade"
+            "description": "Firmware release channel to use for the SSR upgrade. enum: `alpha`, `beta`, `stable`."
           },
           "device_ids": {
             "$ref": "#/components/schemas/ssr_upgrade_multi_device_ids",
@@ -2237,7 +2237,7 @@
           },
           "strategy": {
             "$ref": "#/components/schemas/ssr_upgrade_strategy",
-            "description": "Upgrade rollout strategy for the targeted SSR devices"
+            "description": "Upgrade rollout strategy for the targeted SSR devices. enum: `big_bang`, `serial`."
           },
           "version": {
             "description": "128T firmware version to upgrade (e.g. 5.3.0-93)",
@@ -2417,6 +2417,18 @@
         ],
         "type": "string"
       },
+      "upgrade_device_strategy_deprecated": {
+        "default": "big_bang",
+        "deprecated": true,
+        "description": "Deprecated; use `download_strategy` and `reboot_strategy` instead. `big_bang` (upgrade all at once, no orchestration), `serial` (one at a time), `canary`, or `rrm` (AP only); default is big_bang",
+        "enum": [
+          "big_bang",
+          "canary",
+          "rrm",
+          "serial"
+        ],
+        "type": "string"
+      },
       "upgrade_devices_max_failure_percentage": {
         "default": 5,
         "description": "If `strategy`!=`big_bang`. percentage of failures allowed across the entire upgrade",
@@ -2581,11 +2593,11 @@
           },
           "device_type": {
             "$ref": "#/components/schemas/device_type",
-            "description": "Device family selected for the organization upgrade"
+            "description": "Device family selected for the organization upgrade. enum: `ap`, `gateway`, `switch`."
           },
           "download_strategy": {
             "$ref": "#/components/schemas/upgrade_org_devices_download_strategy",
-            "description": "Firmware download orchestration strategy for the organization upgrade"
+            "description": "Firmware download orchestration strategy for the organization upgrade. enum: `canary`, `big_bang`, `serial`."
           },
           "enable_p2p": {
             "description": "For APs only. Whether to allow local AP-to-AP firmware upgrade",
@@ -2633,7 +2645,7 @@
           },
           "reboot_strategy": {
             "$ref": "#/components/schemas/upgrade_device_strategy",
-            "description": "Device reboot orchestration strategy for selected devices"
+            "description": "Device reboot orchestration strategy for selected devices. enum: `big_bang`, `canary`, `rrm`, `serial`."
           },
           "rrm_first_batch_percentage": {
             "description": "For APs only and if `strategy`==`rrm`. Percentage of APs that need to be present in the first RRM batch",
@@ -2651,11 +2663,11 @@
           },
           "rrm_mesh_upgrade": {
             "$ref": "#/components/schemas/upgrade_device_rrm_mesh_upgrade",
-            "description": "For APs only and if `strategy`==`rrm`. Mesh AP upgrade order for the organization upgrade"
+            "description": "For APs only and if `strategy`==`rrm`. Mesh AP upgrade order for the organization upgrade. enum: `parallel`, `sequential`."
           },
           "rrm_node_order": {
             "$ref": "#/components/schemas/upgrade_device_rrm_node_order",
-            "description": "For APs only and if `strategy`==`rrm`. AP ordering direction for RRM upgrade batches"
+            "description": "For APs only and if `strategy`==`rrm`. AP ordering direction for RRM upgrade batches. enum: `center_to_fringe`, `fringe_to_center`."
           },
           "rrm_slow_ramp": {
             "description": "For APs only and if `strategy`==`rrm`. True will make rrm batch sizes slowly ramp up",
@@ -2690,9 +2702,7 @@
             "type": "integer"
           },
           "strategy": {
-            "$ref": "#/components/schemas/upgrade_device_strategy",
-            "deprecated": true,
-            "description": "Deprecated; use `download_strategy` and `reboot_strategy` instead. `big_bang` (upgrade all at once, no orchestration), `serial` (one at a time), `canary`, or `rrm` (AP only); default is big_bang"
+            "$ref": "#/components/schemas/upgrade_device_strategy_deprecated"
           },
           "version": {
             "deprecated": true,
@@ -2811,7 +2821,7 @@
           },
           "status": {
             "$ref": "#/components/schemas/upgrade_device_status",
-            "description": "Current status of the site-level upgrade job"
+            "description": "Current status of the site-level upgrade job. enum: `cancelled`, `completed`, `created`, `downloaded`, `downloading`, `failed`, `queued`, `upgrading`."
           },
           "targets": {
             "$ref": "#/components/schemas/upgrade_devices_targets",
@@ -2833,7 +2843,7 @@
         "properties": {
           "firmware_type": {
             "$ref": "#/components/schemas/upgrade_org_devices_version_firmware_type",
-            "description": "Firmware family this version entry applies to"
+            "description": "Firmware family this version entry applies to. enum: `ap`, `junos`, `ssr`."
           },
           "force": {
             "default": false,
@@ -2947,11 +2957,11 @@
           },
           "rrm_mesh_upgrade": {
             "$ref": "#/components/schemas/upgrade_device_rrm_mesh_upgrade",
-            "description": "For APs only and if `strategy`==`rrm`. Mesh AP upgrade order for the site upgrade"
+            "description": "For APs only and if `strategy`==`rrm`. Mesh AP upgrade order for the site upgrade. enum: `parallel`, `sequential`."
           },
           "rrm_node_order": {
             "$ref": "#/components/schemas/upgrade_device_rrm_node_order",
-            "description": "For APs only and if `strategy`==`rrm`. AP ordering direction for RRM upgrade batches"
+            "description": "For APs only and if `strategy`==`rrm`. AP ordering direction for RRM upgrade batches. enum: `center_to_fringe`, `fringe_to_center`."
           },
           "rrm_slow_ramp": {
             "description": "For APs only and if `strategy`==`rrm`. True will make rrm batch sizes slowly ramp up",
@@ -2975,7 +2985,7 @@
           },
           "strategy": {
             "$ref": "#/components/schemas/upgrade_device_strategy",
-            "description": "Upgrade orchestration strategy for selected devices"
+            "description": "Upgrade orchestration strategy for selected devices. enum: `big_bang`, `canary`, `rrm`, `serial`."
           },
           "version": {
             "description": "Specific version / stable, default is to use the latest available version",
