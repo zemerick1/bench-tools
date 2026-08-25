@@ -13,30 +13,33 @@ Pairing comes from QuickSpecs **Select antennas (AP-xxx only)**. An antenna stay
 
 ## Data
 
-- `seed/models.json` — connectorized models + HPE BOM SKUs from QuickSpecs
-- `seed/antenna_catalog.json` — SKU identity (bands, MIMO, connector, mount)
+- `seed/models.json` — AP chassis (ports, connector, bands) plus last-known BOM SKUs
+- `seed/antenna_catalog.json` — SKU identity when the live name is thin
 - `data/matrix.json` — filtered snapshot the UI loads
 
-Rebuild:
+Port maps stay in the seed: HPE does not put jack layout in the antenna BOM table.
+
+Rebuild (live — default):
 
 ```bash
 cd tools/antenna-matrix
+python3 -m pip install -r requirements.txt   # curl_cffi + pdfplumber
 python3 update_data.py
 ```
 
-`--live` only probes the HPE store catalog (usually 403 from datacenter IPs). Seed is still used until a saved-HTML path exists.
+Primary: QuickSpecs HTML `collateral.{id}.html` Description/SKU rows (same as the hand seed).  
+Backup: `downloadDoc` PDF via pdfplumber if HPE serves a viewer.
 
-Saved QuickSpecs HTML/PDF belong in `source/` (gitignored). Do not copy research dumps, CSVs, or `C:\temp` prototypes into this folder.
+`--offline` uses seed lists only.
 
-## Refresh contract (when live parse lands)
+## Refresh contract
 
-1. List AP families from store category `c/4172284` (`/p/{oid}`).
-2. PDP → **QuickSpecs** (`jumpid=in_pdp-psnow-qs`), not DDS Related Options.
-3. Parse collaterals HTML `collateral.{docid}.html` (or files in `source/`) → Select antennas (AP-xxx only).
-4. Keep even `AP-(\d+)`. Match connector, MIMO vs port groups, antenna bands ⊆ AP radios.
-5. Enrich remaining SKUs via HPE search (`/search?text={SKU}`) and support family [`kmpmoid=1009431431`](https://support.hpe.com/connect/s/product?language=en_US&kmpmoid=1009431431&tab=manuals). `/p/{sku}` 404s for many JW* options.
+1. One fetch per seed `quickSpecsId`.
+2. HTML `uct-row` tables under **For NNN Std**, not DDS Related Options.
+3. Keep the SKU if connector matches (N-type on RP-SMA needs the adapter cable), MIMO fits a port group, and the antenna covers every band on that group. Tri-band is valid on 2.4+5.
+4. Store links are HPE search (`/search?text={SKU}`). Support family [`kmpmoid=1009431431`](https://support.hpe.com/connect/s/product?language=en_US&kmpmoid=1009431431&tab=manuals).
 
-Do **not** use marketing `downloadDoc?id=a00…enw` PDFs or DDS **Related Options** as the pairing table.
+Do **not** use marketing `a00…enw` datasheet PDFs or DDS **Related Options**.
 
 ## Not official
 

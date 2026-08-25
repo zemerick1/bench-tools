@@ -157,7 +157,7 @@ See [tools/show-tech/README.md](./tools/show-tech/README.md) for personas, PuTTY
 
 ### Aruba Antenna Matrix
 
-External-antenna Aruba APs × compatible antennas under `tools/antenna-matrix/`. Pairing is QuickSpecs “Select antennas (AP-xxx only)” plus connector / MIMO / band-coverage filters. Antenna purpose/docs are a separate enrichment step (HPE search + Support Antenna Options).
+External-antenna Aruba APs × compatible antennas under `tools/antenna-matrix/`. Pairing is live HPE QuickSpecs “Select antennas (AP-xxx only)” plus connector / MIMO / band-coverage filters. `update_data.py` needs `curl_cffi` and `pdfplumber` (see that folder’s requirements.txt). `--offline` rebuilds from seed.
 
 ```bash
 python3 tools/antenna-matrix/update_data.py
@@ -170,7 +170,7 @@ See [tools/antenna-matrix/README.md](./tools/antenna-matrix/README.md).
 - Data files ship with the tool; maintainer refresh scripts live alongside each tool
 - MAC / OUI: `tools/mac-lookup/update_oui.py` pulls IEEE MA-L / MA-M / MA-S CSVs. GitHub Actions runs it weekly and commits `oui-data.json` only when the assignment tables change (the `updated` date is not enough to trigger a commit)
 - Juniper EX / QFX / Mist APs: `tools/hardware-platform-support/update_juniper.py` (merges Pathfinder catalog into `platforms.json` without rewriting Aruba rows)
-- Antenna matrix: `tools/antenna-matrix/update_data.py` (filters QuickSpecs seed → `data/matrix.json`)
+- Antenna matrix: `tools/antenna-matrix/update_data.py` (live HPE QuickSpecs PDFs → `data/matrix.json`; `--offline` uses seed)
 
 ### CLI Explorer
 
