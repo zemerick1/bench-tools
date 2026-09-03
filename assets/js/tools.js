@@ -66,6 +66,16 @@ export const tools = [
     cta: "Browse antennas",
   },
   {
+    id: "ap-capacity",
+    title: "AP Capacity",
+    description:
+      "How many users can this AP actually support? Practical per-client throughput, not the datasheet PHY.",
+    href: "./tools/ap-capacity/",
+    icon: "AP",
+    status: "available",
+    cta: "Estimate",
+  },
+  {
     id: "access-tracker",
     title: "Access Tracker Translator",
     description:
