@@ -412,6 +412,12 @@ def diff_banks(
                     1 for e in plat_entries.values() if e.get("_layer") == "partial"
                 ),
                 "entryCount": len(plat_entries),
+                "sourceFormat": banks[pid]["meta"].get("sourceFormat")
+                or (
+                    "html"
+                    if str(banks[pid]["meta"].get("docId") or pid).startswith("sd")
+                    else "pdf"
+                ),
                 # Prefer path relative to app root (never absolute home paths)
                 "sourceBank": (
                     str(banks[pid]["path"].resolve().relative_to(APP_ROOT))
@@ -442,6 +448,12 @@ def diff_banks(
         "matchFields": list(fp_fields),
         "minCommonRatio": min_common_ratio,
         "entryCount": len(common_entries),
+        "sourceFormat": banks[base_pid]["meta"].get("sourceFormat")
+        or (
+            "html"
+            if str(banks[base_pid]["meta"].get("docId") or base_pid).startswith("sd")
+            else "pdf"
+        ),
     }
     common_sizes = write_pack(out_root / "common", common_tree, common_entries, common_meta)
 

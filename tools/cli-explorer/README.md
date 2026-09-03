@@ -11,8 +11,14 @@ Searchable browser for Aruba/HPE CLI guides (AOS-CX and AOS 10).
    load time so we do not ship every full bank.
 
 The web app serves static HTML/JS, `data/catalog.json`, layered packs under
-`data/layers/`, and AOS 10 under `data/aos-10/`. Offline tooling lives in
-`scripts/` (repo only — not part of the product UI).
+`data/layers/`, HTML-built full banks under `data/aos-cx-*-html-*`, and AOS 10
+under `data/aos-10/`. Offline tooling lives in `scripts/` (repo only — not
+part of the product UI).
+
+HTML ingest (HPESC DITA topics, no PDF) lives in `scripts/build_from_html.py`.
+It fetches the Support Center TOC + per-command HTML for a `sd0000…` doc id
+and writes the same `tree.json` / `entries.json` / `meta.json` the UI already
+loads. Raw topic JSON is cached under `source/html/` (gitignored).
 
 ## Using the app
 
@@ -67,3 +73,26 @@ PDFs go in `source/` (gitignored). Full per-platform banks from
 `build_from_pdf` should live in `full-banks/` (gitignored) so long builds are
 kept locally without bloating the repo. **Ship `data/layers/` + `catalog.json`**
 (and `data/aos-10/`). Markdown exports default to `markdown/` (gitignored).
+
+### HTML ingest (HPESC, no PDF)
+
+HPE now serves AOS-CX CLI books as DITA HTML in Support Center. The portal
+page still maps **version × series → doc id** (`json/aoscx/cli.json`; snapshot
+in `scripts/portal/aoscx-cli.json`). The builder pulls that book’s TOC and each
+topic:
+
+```bash
+# 4100 / 10.18 — writes data/aos-cx-10.18-html-4100i/
+.venv/bin/python scripts/build_from_html.py --version 10.18 --platform 4100i
+.venv/bin/python scripts/build_catalog.py
+```
+
+10.17 and 10.18 **replace** the old PDF layers (the version picker shows
+`(HTML)`). 10.13–10.16 stay on the frozen PDF packs. Topic HTML is cached at
+`source/html/<docId>/`. GitHub Actions (`.github/workflows/update-cli-html.yml`)
+refreshes HTML trains weekly; a book is skipped when its HPESC TOC hash is
+unchanged.
+
+```bash
+python3 scripts/test_html_parser.py
+```

@@ -140,6 +140,7 @@
       versionHint,
       platform,
       platformLabel: platLabel || null,
+      sourceFormat: raw.sourceFormat || (platform && String(platform).indexOf("sd") === 0 ? "html" : "pdf"),
       default: !!raw.default,
       dataPath: raw.dataPath || (layers ? undefined : `data/${id}`),
       layers,
@@ -182,7 +183,13 @@
     return banks
       .filter((b) => b.family === family && b.versionHint === version)
       .slice()
-      .sort((a, b) => String(a.platform || "").localeCompare(String(b.platform || ""), undefined, { numeric: true }));
+      .sort((a, b) =>
+        String(a.platformLabel || a.platform || "").localeCompare(
+          String(b.platformLabel || b.platform || ""),
+          undefined,
+          { numeric: true }
+        )
+      );
   }
 
   function resolveBank(family, version, platform) {
@@ -240,7 +247,15 @@
       const version = vers.includes(bank.versionHint) ? bank.versionHint : vers[0];
       fillSelect(
         $("cx-version"),
-        vers.map((v) => ({ value: v, label: v })),
+        vers.map((v) => {
+          const html = banks.some(
+            (b) =>
+              b.family === family &&
+              b.versionHint === v &&
+              b.sourceFormat === "html"
+          );
+          return { value: v, label: html ? `${v} (HTML)` : v };
+        }),
         version
       );
       const models = modelsFor(family, version);
@@ -529,10 +544,13 @@
       return;
     }
 
-    const pageLabel =
-      entry.pageEnd && entry.pageEnd !== entry.page
+    const pageLabel = entry.page
+      ? entry.pageEnd && entry.pageEnd !== entry.page
         ? `pp. ${entry.page}–${entry.pageEnd}`
-        : `p. ${entry.page}`;
+        : `p. ${entry.page}`
+      : entry.source === "html" || (meta && meta.sourceFormat === "html")
+        ? "HTML topic"
+        : "p. —";
 
     const syntaxText = [entry.syntax, entry.syntaxNo].filter(Boolean).join("\n");
     const syntax = syntaxText
@@ -645,19 +663,25 @@
     const srcNote = meta.sourceNote
       ? escapeHtml(meta.sourceNote)
       : meta.versionHint
-        ? `Indexed from ${escapeHtml(String(meta.versionHint))} CLI PDF`
+        ? `Indexed from ${escapeHtml(String(meta.versionHint))} CLI ${
+            meta.sourceFormat === "html" ? "HTML" : "PDF"
+          }`
         : "Indexed from local CLI PDF";
     const disc = meta.sourceDisclaimer
       ? `<span class="hint" style="display:block;margin-top:0.35rem">${escapeHtml(
           meta.sourceDisclaimer
         )}</span>`
       : "";
+    const sizeBit =
+      meta.sourceFormat === "html"
+        ? `${meta.leafCount || "?"} commands`
+        : `${meta.tocCount || "?"} TOC entries
+      · ${meta.leafCount || "?"} commands
+      · ${meta.pageCount || "?"} source pages`;
     metaEl.className = "callout callout--soft";
     metaEl.innerHTML = `<strong>${escapeHtml(meta.label || meta.source || "CLI")}</strong>
       · ${srcNote}
-      · ${meta.tocCount || "?"} TOC entries
-      · ${meta.leafCount || "?"} commands
-      · ${meta.pageCount || "?"} source pages
+      · ${sizeBit}
       ${disc}`;
   }
 
@@ -717,6 +741,10 @@
           (platform.meta.partialLeaves || 0);
         m = Object.assign({}, common.meta, platform.meta, {
           label: bank.label || platform.meta.label || common.meta.label,
+          sourceFormat:
+            bank.sourceFormat ||
+            platform.meta.sourceFormat ||
+            common.meta.sourceFormat,
           layered: true,
           layerCommon: bank.layers.common,
           layerPlatform: bank.layers.platform,

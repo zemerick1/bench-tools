@@ -126,6 +126,16 @@ def build_catalog(min_version: str | None = None) -> dict:
                     continue
                 label_plat = pretty_platform(plat)
                 bank_id = f"aos-cx-{version}-{plat}"
+                plat_meta = {}
+                mp = plat_dir / "meta.json"
+                if mp.is_file():
+                    try:
+                        plat_meta = json.loads(mp.read_text(encoding="utf-8"))
+                    except json.JSONDecodeError:
+                        plat_meta = {}
+                source_format = plat_meta.get("sourceFormat") or (
+                    "html" if plat.startswith("sd") else "pdf"
+                )
                 banks.append(
                     {
                         "id": bank_id,
@@ -134,6 +144,7 @@ def build_catalog(min_version: str | None = None) -> dict:
                         "versionHint": version,
                         "platform": plat,
                         "platformLabel": label_plat,
+                        "sourceFormat": source_format,
                         "default": False,
                         "layers": {
                             "common": f"data/layers/{group_dir.name}/common",
