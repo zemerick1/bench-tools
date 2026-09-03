@@ -126,6 +126,16 @@ def build_catalog(min_version: str | None = None) -> dict:
                     continue
                 label_plat = pretty_platform(plat)
                 bank_id = f"aos-cx-{version}-{plat}"
+                plat_meta = {}
+                mp = plat_dir / "meta.json"
+                if mp.is_file():
+                    try:
+                        plat_meta = json.loads(mp.read_text(encoding="utf-8"))
+                    except json.JSONDecodeError:
+                        plat_meta = {}
+                source_format = plat_meta.get("sourceFormat") or (
+                    "html" if plat.startswith("sd") else "pdf"
+                )
                 banks.append(
                     {
                         "id": bank_id,
@@ -134,6 +144,7 @@ def build_catalog(min_version: str | None = None) -> dict:
                         "versionHint": version,
                         "platform": plat,
                         "platformLabel": label_plat,
+                        "sourceFormat": source_format,
                         "default": False,
                         "layers": {
                             "common": f"data/layers/{group_dir.name}/common",
@@ -141,43 +152,6 @@ def build_catalog(min_version: str | None = None) -> dict:
                         },
                     }
                 )
-
-    # Standalone HTML full banks (data/aos-cx-<ver>-html-<series>/)
-    if DATA_DIR.is_dir():
-        for child in sorted(DATA_DIR.iterdir()):
-            if not child.is_dir() or child.name in {"layers", "aos-10"}:
-                continue
-            if not (child / "tree.json").is_file() or not (child / "entries.json").is_file():
-                continue
-            meta = {}
-            meta_path = child / "meta.json"
-            if meta_path.is_file():
-                try:
-                    meta = json.loads(meta_path.read_text(encoding="utf-8"))
-                except json.JSONDecodeError:
-                    meta = {}
-            html_name = re.match(r"^aos-cx-(\d+(?:\.\d+)*)-html-(.+)$", child.name)
-            if meta.get("sourceFormat") != "html" and not html_name:
-                continue
-            version = (meta.get("versionHint") or "").strip()
-            if html_name and not version:
-                version = html_name.group(1)
-            platform = meta.get("platform") or (
-                "html_{0}".format(html_name.group(2)) if html_name else child.name
-            )
-            plat_label = meta.get("platformLabel") or pretty_platform(platform)
-            banks.append(
-                {
-                    "id": child.name,
-                    "label": f"AOS-CX {version} · {plat_label}",
-                    "family": "AOS-CX",
-                    "versionHint": version or "html",
-                    "platform": platform,
-                    "platformLabel": plat_label,
-                    "default": False,
-                    "dataPath": f"data/{child.name}",
-                }
-            )
 
     # Default: newest train's 6200-class platform if present
     preferred_platforms = (

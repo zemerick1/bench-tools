@@ -87,9 +87,11 @@ topic:
 .venv/bin/python scripts/build_catalog.py
 ```
 
-The catalog adds it as **AOS-CX 10.18 · 4100i (HTML)** next to the PDF-layered
-4100i pack so you can compare. Topic HTML is cached at
-`source/html/<docId>/` so re-parses do not re-download.
+10.17 and 10.18 **replace** the old PDF layers (the version picker shows
+`(HTML)`). 10.13–10.16 stay on the frozen PDF packs. Topic HTML is cached at
+`source/html/<docId>/`. GitHub Actions (`.github/workflows/update-cli-html.yml`)
+refreshes HTML trains weekly; a book is skipped when its HPESC TOC hash is
+unchanged.
 
 ```bash
 python3 scripts/test_html_parser.py

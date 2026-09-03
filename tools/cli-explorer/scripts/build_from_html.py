@@ -13,15 +13,19 @@ Usage (from tools/cli-explorer/):
 from __future__ import annotations
 
 import argparse
+import hashlib
+import http.client
 import json
 import re
 import sys
+import threading
 import time
 import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+from urllib.parse import urlparse
 
 SCRIPTS_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPTS_DIR))
@@ -33,12 +37,14 @@ DATA_DIR = APP_ROOT / "data"
 SOURCE_DIR = APP_ROOT / "source"
 PORTAL_SNAPSHOT = SCRIPTS_DIR / "portal" / "aoscx-cli.json"
 
+HPESC_HOST = "support.hpe.com"
 HPESC_DOC = "https://support.hpe.com/hpesc/public/api/document/{doc_id}"
 PORTAL_CLI_JSON = (
     "https://arubanetworking.hpe.com/techdocs/ArubaDocPortal/"
     "content/new-portal/json/aoscx/cli.json"
 )
 UA = "tools-cli-explorer/1.0 (+https://tools.emerickcc.com)"
+_TLS = threading.local()
 
 CX_FRONT_MATTER_L1 = {
     "about this document",
@@ -101,28 +107,62 @@ def guid_from_link(link: str) -> str:
     return link.rsplit("/", 1)[-1]
 
 
+def _hpesc_conn(reset: bool = False, timeout: int = 60):
+    if reset:
+        old = getattr(_TLS, "conn", None)
+        if old is not None:
+            try:
+                old.close()
+            except Exception:
+                pass
+        _TLS.conn = None
+    conn = getattr(_TLS, "conn", None)
+    if conn is None:
+        conn = http.client.HTTPSConnection(HPESC_HOST, timeout=timeout)
+        _TLS.conn = conn
+    else:
+        conn.timeout = timeout
+    return conn
+
+
 def http_get(url: str, timeout: int = 60) -> Tuple[str, bytes]:
-    req = urllib.request.Request(
-        url,
-        headers={
-            "User-Agent": UA,
-            "Accept": "application/json, text/html;q=0.8, */*;q=0.5",
-        },
-    )
+    """GET with keep-alive to support.hpe.com (thread-local HTTPSConnection)."""
+    parsed = urlparse(url)
+    headers = {
+        "User-Agent": UA,
+        "Accept": "application/json, text/html;q=0.8, */*;q=0.5",
+        "Connection": "keep-alive",
+    }
     last_err = None  # type: Optional[BaseException]
+
+    if parsed.netloc != HPESC_HOST:
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return resp.headers.get("Content-Type") or "", resp.read()
+
+    path = parsed.path
+    if parsed.query:
+        path = path + "?" + parsed.query
+    headers["Host"] = HPESC_HOST
+
     for attempt in range(4):
         try:
-            with urllib.request.urlopen(req, timeout=timeout) as resp:
-                ctype = resp.headers.get("Content-Type") or ""
-                return ctype, resp.read()
-        except urllib.error.HTTPError as err:
-            last_err = err
-            if err.code in (429, 500, 502, 503, 504) and attempt < 3:
+            conn = _hpesc_conn(reset=attempt > 0, timeout=timeout)
+            conn.request("GET", path, headers=headers)
+            resp = conn.getresponse()
+            body = resp.read()
+            ctype = resp.getheader("Content-Type") or ""
+            if resp.status in (429, 500, 502, 503, 504) and attempt < 3:
                 time.sleep(1.5 * (attempt + 1))
                 continue
-            raise
-        except (urllib.error.URLError, TimeoutError, OSError) as err:
+            if resp.status >= 400:
+                raise RuntimeError(
+                    "HTTP {0} for {1}".format(resp.status, url)
+                )
+            return ctype, body
+        except (http.client.HTTPException, TimeoutError, OSError) as err:
             last_err = err
+            _hpesc_conn(reset=True)
             if attempt < 3:
                 time.sleep(1.5 * (attempt + 1))
                 continue
@@ -364,6 +404,18 @@ def build(
     cache_dir = SOURCE_DIR / "html" / doc_id
     t0 = time.monotonic()
     toc = fetch_toc(doc_id, cache_dir, refresh)
+    toc_digest = hashlib.sha256(
+        json.dumps(toc, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    digest_path = cache_dir / "toc.sha256"
+    if (
+        not refresh
+        and (out_dir / "entries.json").is_file()
+        and digest_path.is_file()
+        and digest_path.read_text(encoding="utf-8").strip() == toc_digest
+    ):
+        print("  TOC unchanged, skip {0} ({1})".format(doc_id, out_dir.name))
+        return
     rows = flatten_toc(toc, skip_front=skip_front)
     leaves = [r for r in rows if r["leaf"] and r.get("guid")]
     if limit and limit > 0:
@@ -471,6 +523,7 @@ def build(
             out_dir / "entries.json", (out_dir / "entries.json").stat().st_size // 1024
         )
     )
+    digest_path.write_text(toc_digest + "\n", encoding="utf-8")
     print("Done in {0:.1f}s.".format(time.monotonic() - t0))
 
 
@@ -485,7 +538,7 @@ def main() -> int:
         help="Output bank id (default: aos-cx-<ver>-html-<platform>)",
     )
     ap.add_argument("--out", type=Path, default=None, help="Output directory")
-    ap.add_argument("--workers", type=int, default=8)
+    ap.add_argument("--workers", type=int, default=16)
     ap.add_argument("--limit", type=int, default=0, help="Only first N command leaves")
     ap.add_argument("--refresh", action="store_true", help="Ignore on-disk HTML cache")
     ap.add_argument(

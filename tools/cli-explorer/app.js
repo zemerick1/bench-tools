@@ -140,6 +140,7 @@
       versionHint,
       platform,
       platformLabel: platLabel || null,
+      sourceFormat: raw.sourceFormat || (platform && String(platform).indexOf("sd") === 0 ? "html" : "pdf"),
       default: !!raw.default,
       dataPath: raw.dataPath || (layers ? undefined : `data/${id}`),
       layers,
@@ -246,7 +247,15 @@
       const version = vers.includes(bank.versionHint) ? bank.versionHint : vers[0];
       fillSelect(
         $("cx-version"),
-        vers.map((v) => ({ value: v, label: v })),
+        vers.map((v) => {
+          const html = banks.some(
+            (b) =>
+              b.family === family &&
+              b.versionHint === v &&
+              b.sourceFormat === "html"
+          );
+          return { value: v, label: html ? `${v} (HTML)` : v };
+        }),
         version
       );
       const models = modelsFor(family, version);
@@ -732,6 +741,10 @@
           (platform.meta.partialLeaves || 0);
         m = Object.assign({}, common.meta, platform.meta, {
           label: bank.label || platform.meta.label || common.meta.label,
+          sourceFormat:
+            bank.sourceFormat ||
+            platform.meta.sourceFormat ||
+            common.meta.sourceFormat,
           layered: true,
           layerCommon: bank.layers.common,
           layerPlatform: bank.layers.platform,

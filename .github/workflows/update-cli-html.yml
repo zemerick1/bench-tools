@@ -1,0 +1,92 @@
+# Refresh AOS-CX CLI Explorer packs from HPE Support Center HTML.
+#
+# 1. curl --http2 + Chrome UA / sec-ch-ua / Sec-Fetch-* fetches live cli.json
+#    (HTTP/1.1 is Akamai 403). New sd0000 ids = new books to download.
+# 2. Document ids we already have in full-banks/ are skipped (guides do not
+#    get rewritten). --refresh re-downloads everything.
+# 3. Flare/PDF trains (cli_* stems, 10.13–10.16 and portal "10.17") are ignored.
+#
+# Cold fetch of every HTML book can take ~45 minutes (timeout 120). A quiet
+# week is cli.json + skip. Cache keeps full-banks + topic HTML on the runner.
+#
+# If main is protected against GITHUB_TOKEN pushes, add a PAT with contents:write
+# as a repo secret and set checkout token: ${{ secrets.OPENAPI_DOCS_TOKEN }}.
+
+name: Update CLI HTML banks
+
+on:
+  schedule:
+    # Monday 09:41 UTC — after the OUI job, off the hour.
+    - cron: "41 9 * * 1"
+  workflow_dispatch:
+    inputs:
+      refresh:
+        description: "Re-download every HTML book even if we already have it"
+        type: boolean
+        default: false
+
+concurrency:
+  group: update-cli-html-${{ github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache HPESC HTML + full banks
+        uses: actions/cache@v4
+        with:
+          path: |
+            tools/cli-explorer/source/html
+            tools/cli-explorer/full-banks
+          key: cli-html-${{ github.run_id }}
+          restore-keys: |
+            cli-html-
+
+      - name: Parser unit tests
+        run: python tools/cli-explorer/scripts/test_html_parser.py -q
+
+      - name: Fetch HTML trains, layer, catalog
+        working-directory: tools/cli-explorer
+        run: |
+          extra=""
+          if [ "${{ github.event.inputs.refresh }}" = "true" ]; then
+            extra="--refresh"
+          fi
+          python scripts/build_html_train.py --workers 16 $extra
+
+      - name: Refuse an empty 10.18 tree
+        run: |
+          leaves=$(python -c "import json; print(json.load(open('tools/cli-explorer/data/layers/aos-cx-10.18/common/meta.json')).get('totalLeafUniverse',0))")
+          echo "10.18 leaf universe: $leaves"
+          if [ "$leaves" -lt 1000 ]; then
+            echo "10.18 HTML layer looks empty ($leaves) — refusing to commit"
+            exit 1
+          fi
+
+      - name: Commit layered packs if they changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            tools/cli-explorer/data/layers \
+            tools/cli-explorer/data/catalog.json \
+            tools/cli-explorer/scripts/portal/aoscx-cli.json
+          if git diff --staged --quiet; then
+            echo "No CLI HTML layer changes"
+            exit 0
+          fi
+          git commit -m "Refresh AOS-CX CLI HTML layers from HPESC."
+          git push origin "HEAD:${GITHUB_REF_NAME}"
