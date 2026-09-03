@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AP Capacity — Bench Tools</title>
+    <title>AP Capacity — how many users an AP actually supports</title>
     <meta
       name="description"
-      content="How many users can this access point actually support? Practical per-client throughput from MCS, radios, SSIDs, and RF contention — not the datasheet PHY rate."
+      content="Estimate how many users an Aruba or Juniper Mist AP can support. Practical per-client throughput from radios, streams, SSIDs, and RF — not the datasheet PHY. AP-515, AP-635, AP-755, AP43, AP45, AP47."
     />
     <link rel="canonical" href="https://tools.emerickcc.com/tools/ap-capacity/" />
     <meta name="robots" content="index, follow" />
@@ -17,20 +17,20 @@
     <meta property="og:site_name" content="Bench Tools" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:url" content="https://tools.emerickcc.com/tools/ap-capacity/" />
-    <meta property="og:title" content="AP Capacity" />
+    <meta property="og:title" content="AP Capacity — practical user counts, not PHY" />
     <meta
       property="og:description"
-      content="How many users can this access point actually support? Practical throughput, not brochure PHY."
+      content="How many users can this Aruba or Juniper Mist AP actually support? Practical throughput, not brochure PHY."
     />
     <meta property="og:image" content="https://tools.emerickcc.com/assets/icons/og-image.jpg" />
     <meta property="og:image:width" content="1280" />
     <meta property="og:image:height" content="720" />
     <meta property="og:image:alt" content="AP Capacity — Bench Tools" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="AP Capacity" />
+    <meta name="twitter:title" content="AP Capacity — practical user counts, not PHY" />
     <meta
       name="twitter:description"
-      content="How many users can this access point actually support? Practical throughput, not brochure PHY."
+      content="How many users can this Aruba or Juniper Mist AP actually support? Practical throughput, not brochure PHY."
     />
     <meta name="twitter:image" content="https://tools.emerickcc.com/assets/icons/og-image.jpg" />
     <link rel="icon" href="../../assets/icons/favicon.svg" type="image/svg+xml" />
@@ -55,7 +55,7 @@
           "operatingSystem": "Any",
           "isAccessibleForFree": true,
           "inLanguage": "en",
-          "description": "Practical access-point user capacity and per-client throughput estimator.",
+          "description": "Practical Aruba and Juniper Mist access-point user capacity and per-client throughput estimator.",
           "publisher": { "@type": "Organization", "name": "Bench Tools", "url": "https://tools.emerickcc.com/" }
         },
         {
@@ -71,10 +71,58 @@
             },
             {
               "@type": "Question",
+              "name": "Where do the 50% / 45% / 40% numbers come from?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Protocol overhead: IFS, ACKs, backoff, retries, small frames. One active client on a clean radio can see about 50% of PHY as application throughput. A handful of clients drops toward 45%. A busy room is about 40%."
+              }
+            },
+            {
+              "@type": "Question",
               "name": "What does 60% of the channel is yours mean?",
               "acceptedAnswer": {
                 "@type": "Answer",
                 "text": "In a typical enterprise floor, co-channel and adjacent-channel neighbors share airtime. Isolated-cell math assumes 100%. Typical assumes 60%. Crowded assumes 40%."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Why do extra SSIDs hurt?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Every SSID sends beacons, usually at the lowest basic rate, plus probe responses. Extra SSIDs are a tax, especially on 2.4 GHz."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "QAM, MCS, spatial streams — do I have to care?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Only if you want to. MCS is a gear number. Higher QAM needs a cleaner signal. Spatial streams are how many parallel radios the client actually has. The answer is still about N people at X Mbps."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Does OFDMA / MU-MIMO 4× the number?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. OFDMA helps small frames. It does not turn a 20 MHz radio into four 20 MHz radios. MU-MIMO in the field has been underwhelming. This tool does not bake a marketing multiplier into the total."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is this a coverage or channel plan?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. It does not place APs, pick channels, or know your walls."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Where do the data rates come from?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "PHY rates follow IEEE 802.11. The AP list is a curated snapshot of internal-antenna Aruba campus and Juniper Mist models — radios and streams only, not a live datasheet scrape."
               }
             }
           ]
@@ -92,6 +140,7 @@
           <span>Bench Tools</span>
         </a>
         <nav class="nav" aria-label="Primary">
+          <a href="#glossary">Glossary</a>
           <a href="#faq">FAQ</a>
           <a href="../../#tools">All tools</a>
         </nav>
@@ -127,9 +176,10 @@
       <div class="stack">
         <div class="callout callout--soft" role="note">
           <strong>Stays in this tab.</strong>
-          No upload, no “AI RF design,” no SKU database. Device names are
-          borrowed from common client presets (phones, laptops, IoT) so you
-          are not starting from a blank MCS index.
+          No upload, no “AI RF design.” Aruba campus and Juniper Mist APs
+          are a starting point for radios and streams. Channel width, SSIDs,
+          and RF stay yours. Device names are common phones, laptops, and IoT
+          so you are not starting from a blank MCS index.
         </div>
 
         <div class="apc-scenarios" role="group" aria-label="Start from a known story">
@@ -175,11 +225,20 @@
             <section class="panel" aria-labelledby="apc-ap-heading">
               <h2 id="apc-ap-heading">2. The access point</h2>
               <p class="panel__intro">
-                20&nbsp;MHz is the honest enterprise default. Widen a channel
-                only if that spectrum is actually empty. Widths and bands that
-                the generation cannot do (Wi-Fi 4 at 160&nbsp;MHz, 6&nbsp;GHz
-                on ac, and so on) are not offered.
+                Pick an Aruba or Juniper Mist AP to fill radios, generation,
+                and streams — or leave Custom and set them yourself. 20&nbsp;MHz
+                is the honest enterprise default. Widen a channel only if that
+                spectrum is actually empty. Widths and bands that the
+                generation cannot do (Wi-Fi 4 at 160&nbsp;MHz, 6&nbsp;GHz on
+                ac, and so on) are not offered.
               </p>
+              <div class="field">
+                <label for="apc-ap">Access point</label>
+                <select id="apc-ap" name="apc-ap">
+                  <option value="custom" selected>Custom — set radios yourself</option>
+                </select>
+                <p class="hint" id="apc-ap-notes" hidden></p>
+              </div>
               <div class="field">
                 <span class="apc-label">Radios</span>
                 <div id="apc-radio-pills" class="apc-pills" role="radiogroup" aria-label="Radio count"></div>
@@ -189,14 +248,15 @@
                 <div id="apc-gen-pills" class="apc-pills" role="radiogroup" aria-label="Wi-Fi generation"></div>
               </div>
               <div class="field">
-                <label for="apc-nss">Spatial streams (AP)</label>
+                <label for="apc-nss">Spatial streams (all radios)</label>
                 <select id="apc-nss">
                   <option value="1">1×1</option>
                   <option value="2" selected>2×2</option>
                   <option value="3">3×3</option>
                   <option value="4">4×4</option>
+                  <option value="8">8×8</option>
                 </select>
-                <p class="hint">Most enterprise APs you actually buy are 2×2 per radio.</p>
+                <p class="hint">Applies to every radio. Mixed-stream APs (515, 555, 745) set this per radio instead. Changing this box forces all radios to match.</p>
               </div>
               <div id="apc-radios-wrap" class="apc-radios"></div>
             </section>
@@ -308,6 +368,140 @@
           <div id="apc-caveats-body"></div>
         </section>
 
+        <section class="panel" id="glossary" aria-labelledby="glossary-heading">
+          <h2 id="glossary-heading">Glossary</h2>
+          <p class="panel__intro">
+            The words this tab uses, once, in plain language. Nothing here
+            changes the math.
+          </p>
+          <details class="details-block apc-glossary">
+            <summary>PHY, QAM, CCI, SSIDs, and the rest</summary>
+            <dl class="apc-glossary__list">
+              <dt>ACK</dt>
+              <dd>
+                Acknowledgement. After a data frame the receiver says “got it.”
+                That reply uses airtime, which is why a one-way video stream
+                still spends time talking back.
+              </dd>
+              <dt>ACI</dt>
+              <dd>
+                Adjacent-channel interference. A neighbor on a nearby channel
+                whose energy leaks into yours. You still lose airtime; this tab
+                folds it in with CCI on the neighbor slider.
+              </dd>
+              <dt>Airtime</dt>
+              <dd>
+                The clock on a shared radio. Only one station talks at a time.
+                Slow clients, extra SSIDs, and neighbors all buy time you do
+                not get for payload.
+              </dd>
+              <dt>Beacon</dt>
+              <dd>
+                The “I am here” frame every SSID sends, usually at the slowest
+                basic rate. Cheap per frame, expensive in a pile — especially
+                on 2.4&nbsp;GHz at 1&nbsp;Mbps.
+              </dd>
+              <dt>BSS</dt>
+              <dd>
+                Basic service set: this AP plus the clients associated to it,
+                on one channel. Isolated-cell math assumes you are the only BSS
+                on that channel.
+              </dd>
+              <dt>CCI</dt>
+              <dd>
+                Co-channel interference. Another AP (or a pile of them) on the
+                same channel. You wait your turn. Typical floor: we assume you
+                keep about 60% of the channel.
+              </dd>
+              <dt>Channel width</dt>
+              <dd>
+                How wide a slice of spectrum the radio uses (20 / 40 / 80 /
+                160 / 320&nbsp;MHz). Wider is faster on a clean slice and ruder
+                on a busy floor. 20&nbsp;MHz is the honest enterprise default
+                here.
+              </dd>
+              <dt>Guard interval <span class="apc-glossary__aka">GI</span></dt>
+              <dd>
+                A short gap between symbols so echoes do not smear the next
+                one. Shorter is a bit faster and a bit more fragile. We use
+                the generation’s usual value; you do not have to pick it.
+              </dd>
+              <dt>Half-duplex</dt>
+              <dd>
+                The radio cannot send and receive user data at the same time.
+                Datasheet gigabits are one-way PHY. Real TCP is a conversation.
+              </dd>
+              <dt>IFS</dt>
+              <dd>
+                Interframe space. Mandatory silence between frames so the
+                medium can settle. It is not payload. It is why “protocol
+                efficiency” is never 100%.
+              </dd>
+              <dt>MCS</dt>
+              <dd>
+                Modulation and coding scheme. A gear number: which QAM, which
+                coding rate, how many bits per symbol. Higher is faster and
+                needs a cleaner signal. This tab picks MCS from link quality
+                unless you override it.
+              </dd>
+              <dt>MU-MIMO</dt>
+              <dd>
+                Multi-user MIMO: talk to more than one client on different
+                streams at once. Lab demos look great. Field results have been
+                underwhelming. We do not multiply the total by four.
+              </dd>
+              <dt>OFDMA</dt>
+              <dd>
+                Split one transmission across several clients with small
+                frames. Helps dense uplink chatter. Does not turn a
+                20&nbsp;MHz radio into four 20&nbsp;MHz radios.
+              </dd>
+              <dt>PHY</dt>
+              <dd>
+                Physical-layer rate. The number on the box. Bits on the air
+                before Wi-Fi overhead, neighbors, or TCP. We never quote it as
+                user speed.
+              </dd>
+              <dt>Probe</dt>
+              <dd>
+                “Is there a network named X?” Clients shout this; APs answer.
+                Extra SSIDs mean extra answers. Counted with beacons in the
+                SSID tax.
+              </dd>
+              <dt>QAM</dt>
+              <dd>
+                Quadrature amplitude modulation. How many bits you pack in one
+                symbol (16, 64, 256, 1024, 4096). Higher QAM needs to be next
+                to the AP. Typical coverage here is 64-QAM on 2.4 and 256-QAM
+                on 5/6.
+              </dd>
+              <dt>Radio</dt>
+              <dd>
+                One concurrent transmitter in the AP (2.4, 5, or 6&nbsp;GHz).
+                Dual-radio is two at once. Tri-radio is three. A dual-radio
+                tri-band AP (615) still only runs two at a time.
+              </dd>
+              <dt>RSSI</dt>
+              <dd>
+                Received signal strength. Strong RSSI with a low MCS is
+                interference. Weak RSSI with a low MCS is distance — add an AP.
+              </dd>
+              <dt>Spatial streams <span class="apc-glossary__aka">NSS, SS, 2×2</span></dt>
+              <dd>
+                Parallel radios on one link (1×1, 2×2, 4×4). The AP and the
+                client use the worse of the two. Buying 8×8 does not make a
+                2-stream phone faster.
+              </dd>
+              <dt>SSID</dt>
+              <dd>
+                The network name you broadcast. Each one sends beacons and
+                answers probes. One is already inside the protocol factor.
+                Extra ones are a tax, especially on 2.4&nbsp;GHz.
+              </dd>
+            </dl>
+          </details>
+        </section>
+
         <section class="panel faq" id="faq" aria-labelledby="faq-heading">
           <h2 id="faq-heading">FAQ</h2>
           <details>
@@ -393,7 +587,10 @@
             <p>
               PHY rates follow IEEE 802.11 (n/ac/ax/be): channel width, streams,
               MCS/QAM, and guard interval. Device presets are common phones,
-              laptops, and IoT — not a vendor SKU list. Real speed is still
+              laptops, and IoT. The AP list is a curated snapshot of
+              internal-antenna Aruba campus and Juniper Mist models — radios
+              and streams from public specs / Pathfinder hwspecs, not a live
+              scrape. Scan radios are not client radios. Real speed is still
               less than the datasheet number.
             </p>
           </details>
@@ -410,6 +607,6 @@
       </div>
     </footer>
 
-    <script type="module" src="./app.js?v=7"></script>
+    <script type="module" src="./app.js?v=9"></script>
   </body>
 </html>

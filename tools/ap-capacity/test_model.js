@@ -2,6 +2,9 @@
 /**
  * AP capacity model tests — run: node tools/ap-capacity/test_model.js
  */
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   phyRateMbps,
   mcsValid,
@@ -10,9 +13,18 @@ import {
   ssidAirtimeFraction,
   clampWidthMHz,
   clampBand,
+  clampRadio,
   validBandsFor,
   defaultRadios,
+  radiosFromAp,
+  apMatchesRadios,
+  apStreamLabel,
+  sharedNss,
 } from "./model.js";
+
+const catalog = JSON.parse(
+  readFileSync(join(dirname(fileURLToPath(import.meta.url)), "data", "aps.json"), "utf8"),
+);
 
 let passed = 0;
 let failed = 0;
@@ -152,6 +164,47 @@ const wifi4 = estimateCapacity({
 });
 ok(wifi4.radios[0].widthMHz === 40, `estimate clamps n/160 to 40 MHz (got ${wifi4.radios[0].widthMHz})`);
 ok(!defaultRadios(3, "n").some((r) => r.band === "6"), "3-radio Wi-Fi 4 does not keep a 6 GHz radio");
+
+console.log("\nAP catalog\n");
+const byId = Object.fromEntries((catalog.models || []).map((m) => [m.id, m]));
+ok(Array.isArray(catalog.models) && catalog.models.length >= 12, `catalog has campus internals (got ${catalog.models.length})`);
+ok(catalog.models.every((m) => m.radios.every((r) => r.band && r.nss >= 1)), "every radio has band + nss");
+ok(catalog.models.every((m) => m.vendor === "aruba" || m.vendor === "juniper"), "every model has a vendor");
+ok(catalog.models.filter((m) => m.vendor === "juniper").length >= 15, "Juniper Mist APs are in the catalog");
+ok(apStreamLabel(byId["ap-515"]) === "2×2 / 4×4", `515 mixed streams (${apStreamLabel(byId["ap-515"])})`);
+ok(apStreamLabel(byId["ap-655"]) === "4×4", "655 is 4×4 on every radio");
+ok(apStreamLabel(byId["ap-555"]) === "4×4 / 8×8", "555 is 4×4 / 8×8 in dual-radio mode");
+ok(apStreamLabel(byId["ap-745"]) === "2×2 / 4×4 / 4×4", "745 is 2×2 / 4×4 / 4×4");
+ok(byId["ap-615"].radios.length === 2, "615 is dual-radio (tri-band flex)");
+ok(byId["ap-725"].radios.length === 3 && byId["ap-725"].generation === "be", "725 is tri-radio Wi-Fi 7");
+ok(apStreamLabel(byId.ap47) === "4×4" && byId.ap47.generation === "be", "Mist AP47 is 4×4 Wi-Fi 7");
+ok(apStreamLabel(byId.ap33) === "2×2 / 4×4", "Mist AP33 is 2×2 / 4×4");
+ok(byId.ap24.radios.length === 2, "Mist AP24 is dual-radio (2.4/6 flex + 5)");
+
+const from515 = radiosFromAp(byId["ap-515"], [{ id: "r5", band: "5", widthMHz: 80, enabled: true, nss: 2 }]);
+ok(from515[0].nss === 2 && from515[1].nss === 4, "515 radiosFromAp is 2 then 4");
+ok(from515[1].widthMHz === 80, "SKU apply keeps prior 5 GHz width");
+ok(apMatchesRadios(byId["ap-515"], from515, "ax"), "515 matches after apply");
+ok(!apMatchesRadios(byId["ap-515"], from515, "be"), "generation drift is not a match");
+
+const kept = clampRadio({ band: "5", standard: "ax", widthMHz: 20, nss: 4 }, "ax");
+ok(kept.nss === 4, "clampRadio without nss arg keeps 4SS");
+const stamped = clampRadio({ band: "5", standard: "ax", widthMHz: 20, nss: 4 }, "ax", 2);
+ok(stamped.nss === 2, "clampRadio with nss arg stamps 2SS");
+ok(sharedNss(from515) === "mixed", "515 sharedNss is mixed");
+ok(sharedNss(radiosFromAp(byId["ap-635"])) === 2, "635 sharedNss is 2");
+
+const mixedEst = estimateCapacity({
+  radios: radiosFromAp(byId["ap-515"]),
+  client: { standard: "ax", nss: 2, bands: ["2.4", "5"], maxWidthMHz: 80 },
+  quality: "typical",
+  neighbor: "typical",
+  ssidCount: 3,
+  activeClients: 20,
+  targetMbps: 3,
+  splitMode: "steered",
+});
+ok(mixedEst.radios.find((r) => r.band === "5")?.nss === 2, "client 2SS caps the 515's 4SS radio");
 
 console.log();
 if (failed) {

@@ -335,15 +335,82 @@ export function clampMcs(standard, mcs) {
  * Force a radio onto a legal band/width/PHY for this AP generation.
  * Mutates and returns the radio.
  */
+export const MAX_NSS = 8;
+export const NSS_CHOICES = [1, 2, 3, 4, 8];
+
+const BAND_RADIO_IDS = { "2.4": "r24", 5: "r5", 6: "r6" };
+const DEFAULT_WIDTH_MHZ = { "2.4": 20, 5: 20, 6: 40 };
+
+export function clampNss(nss) {
+  const n = Number(nss);
+  if (!Number.isFinite(n)) return 2;
+  return Math.max(1, Math.min(MAX_NSS, Math.floor(n)));
+}
+
+/**
+ * Force a radio onto a legal band/width/PHY for this AP generation.
+ * Mutates and returns the radio. Pass nss to stamp streams; omit to keep the radio's own.
+ */
 export function clampRadio(radio, generation, nss) {
   const gen = generation || radio.standard;
   radio.band = clampBand(gen, radio.band);
   const std = clampStandardToBand(gen, radio.band);
   radio.standard = std || gen;
   radio.widthMHz = clampWidthMHz(radio.standard, radio.band, radio.widthMHz);
-  if (nss) radio.nss = nss;
+  if (nss != null && nss !== "") radio.nss = nss;
+  radio.nss = clampNss(radio.nss);
   if (std == null) radio.enabled = false;
   return radio;
+}
+
+/** Compact stream label: "2×2" or "2×2 / 4×4". */
+export function apStreamLabel(ap) {
+  const parts = (ap?.radios || []).map((r) => `${r.nss}×${r.nss}`);
+  if (!parts.length) return "";
+  if (parts.every((p) => p === parts[0])) return parts[0];
+  return parts.join(" / ");
+}
+
+export function apOptionLabel(ap) {
+  const streams = apStreamLabel(ap);
+  const wifi = ap.wifi || STANDARD_LABEL[ap.generation] || "";
+  return streams ? `${ap.model} — ${streams} · ${wifi}` : `${ap.model} · ${wifi}`;
+}
+
+/**
+ * Radios for a curated AP. Keeps prior width/enable when the band already existed.
+ * Does not copy channel width from the SKU — that stays a design choice.
+ */
+export function radiosFromAp(ap, prevRadios = []) {
+  const prevByBand = new Map((prevRadios || []).map((r) => [r.band, r]));
+  return (ap.radios || []).map((spec) => {
+    const old = prevByBand.get(spec.band);
+    const radio = {
+      id: BAND_RADIO_IDS[spec.band] || `r${spec.band}`,
+      enabled: old ? old.enabled : true,
+      band: spec.band,
+      standard: ap.generation,
+      widthMHz: old ? old.widthMHz : DEFAULT_WIDTH_MHZ[spec.band] || 20,
+      nss: spec.nss,
+    };
+    return clampRadio(radio, ap.generation);
+  });
+}
+
+/** True when generation, radio count, bands, and streams still match the SKU. */
+export function apMatchesRadios(ap, radios, generation) {
+  if (!ap || !ap.radios || generation !== ap.generation) return false;
+  if (!radios || radios.length !== ap.radios.length) return false;
+  return ap.radios.every((spec, i) => {
+    const r = radios[i];
+    return r && r.band === spec.band && Number(r.nss) === Number(spec.nss);
+  });
+}
+
+export function sharedNss(radios) {
+  if (!radios || !radios.length) return 2;
+  const first = clampNss(radios[0].nss);
+  return radios.every((r) => clampNss(r.nss) === first) ? first : "mixed";
 }
 
 export function defaultGiUs(standard) {
@@ -900,7 +967,7 @@ export function defaultRadios(count, generation) {
       widthMHz: t.widthMHz,
       nss: 2,
     };
-    clampRadio(radio, generation, 2);
+    clampRadio(radio, generation);
     radio.enabled = clampStandardToBand(generation, radio.band) != null;
     return radio;
   });

@@ -7,13 +7,17 @@ import {
   DEVICE_PRESETS,
   MAX_MCS,
   NEIGHBOR_MODES,
+  NSS_CHOICES,
   STANDARD_LABEL,
   STANDARD_RANK,
   WIDTHS_MHZ,
   allowedWidths,
+  apMatchesRadios,
+  apOptionLabel,
   appById,
   clampBand,
   clampMcs,
+  clampNss,
   clampRadio,
   clampStandardToBand,
   clampWidthMHz,
@@ -22,8 +26,10 @@ import {
   estimateCapacity,
   formatCount,
   formatMbps,
+  radiosFromAp,
+  sharedNss,
   validBandsFor,
-} from "./model.js?v=7";
+} from "./model.js?v=9";
 
 /** IDs may contain dots (2.4 GHz). querySelector('#x.y') is invalid. */
 function $(sel, root = document) {
@@ -48,7 +54,11 @@ function escapeHtml(value) {
     .join("&quot;");
 }
 
+/** @type {{ models: object[] }} */
+let apCatalog = { models: [] };
+
 const state = {
+  apId: "custom",
   radioCount: 2,
   generation: "ax",
   nss: 2,
@@ -94,9 +104,22 @@ function currentTarget() {
   return appById(state.appId).mbps;
 }
 
+function catalogAp(id) {
+  if (!id || id === "custom") return null;
+  return (apCatalog.models || []).find((m) => m.id === id) || null;
+}
+
+function applyAp(ap) {
+  state.apId = ap.id;
+  state.generation = ap.generation;
+  state.radioCount = ap.radios.length;
+  state.radios = radiosFromAp(ap, state.radios);
+  state.nss = sharedNss(state.radios);
+}
+
 function applyConstraints() {
   for (const r of state.radios) {
-    clampRadio(r, state.generation, state.nss);
+    clampRadio(r, state.generation);
   }
   const maxMcs = MAX_MCS[state.generation] ?? 11;
   if (state.mcsOverride !== "" && state.mcsOverride != null) {
@@ -124,19 +147,21 @@ function rebuildRadios() {
   const prevById = new Map(state.radios.map((r) => [r.id, r]));
   state.radios = next.map((r) => {
     const old = prevById.get(r.id) || prevByBand.get(r.band);
+    const fallbackNss = state.nss === "mixed" ? 2 : state.nss;
     const merged = {
       ...r,
       enabled: old ? old.enabled : r.enabled,
       widthMHz: old ? old.widthMHz : r.widthMHz,
       band: old && validBandsFor(state.generation).includes(old.band) ? old.band : r.band,
-      nss: state.nss,
+      nss: old ? old.nss : fallbackNss || 2,
     };
-    return clampRadio(merged, state.generation, state.nss);
+    return clampRadio(merged, state.generation);
   });
 }
 
 function applyScenario(id) {
   state.scenario = id;
+  state.apId = "custom";
   if (id === "ipad1") {
     state.radioCount = 1;
     state.generation = "n";
@@ -186,6 +211,9 @@ function applyScenario(id) {
     state.splitMode = "steered";
     rebuildRadios();
   }
+  if (state.nss !== "mixed") {
+    for (const r of state.radios) r.nss = state.nss;
+  }
   applyConstraints();
 }
 
@@ -201,33 +229,7 @@ function readNumber(id, fallback, min, max) {
   return n;
 }
 
-function readForm() {
-  const gen = $("input[name=apc-gen]:checked")?.value;
-  const count = Number($("input[name=apc-radios]:checked")?.value);
-  const nss = Number($("#apc-nss")?.value);
-  const countChanged = count && count !== state.radioCount;
-
-  if (gen) state.generation = gen;
-  if (nss) state.nss = nss;
-
-  if (countChanged) {
-    state.radioCount = count;
-    rebuildRadios();
-  } else {
-    for (const r of state.radios) {
-      const en = $(`#apc-en-${r.id}`);
-      const band = $(`#apc-band-${r.id}`);
-      const width = $(`#apc-width-${r.id}`);
-      if (en && !en.disabled) r.enabled = en.checked;
-      if (band && !band.options[band.selectedIndex]?.disabled) r.band = band.value;
-      else if (band) r.band = clampBand(state.generation, band.value);
-      if (width && !width.disabled) r.widthMHz = Number(width.value);
-      r.nss = state.nss;
-    }
-  }
-
-  applyConstraints();
-
+function readNonApFields() {
   state.deviceId = $("#apc-device")?.value || state.deviceId;
   state.customStandard = $("#apc-custom-std")?.value || state.customStandard;
   state.customNss = Number($("#apc-custom-nss")?.value) || state.customNss;
@@ -248,7 +250,62 @@ function readForm() {
   state.customMbps = readNumber("#apc-custom-mbps", state.customMbps, 0.1, 200);
   const mcsRaw = $("#apc-mcs")?.value;
   state.mcsOverride = mcsRaw === "" || mcsRaw == null ? "" : Number(mcsRaw);
+}
 
+function readForm() {
+  const apSel = $("#apc-ap")?.value || state.apId || "custom";
+  const apChanged = apSel !== state.apId;
+  if (apChanged && apSel !== "custom") {
+    const ap = catalogAp(apSel);
+    if (ap) applyAp(ap);
+    else state.apId = "custom";
+    applyConstraints();
+    readNonApFields();
+    applyConstraints();
+    return;
+  }
+  if (apSel === "custom") state.apId = "custom";
+
+  const gen = $("input[name=apc-gen]:checked")?.value;
+  const count = Number($("input[name=apc-radios]:checked")?.value);
+  const nssRaw = $("#apc-nss")?.value;
+  const countChanged = count && count !== state.radioCount;
+  const globalNssChanged = nssRaw && nssRaw !== "mixed" && Number(nssRaw) !== Number(state.nss);
+
+  if (gen) state.generation = gen;
+
+  if (countChanged) {
+    state.radioCount = count;
+    rebuildRadios();
+  } else {
+    for (const r of state.radios) {
+      const en = $(`#apc-en-${r.id}`);
+      const band = $(`#apc-band-${r.id}`);
+      const width = $(`#apc-width-${r.id}`);
+      const nssEl = $(`#apc-nss-${r.id}`);
+      if (en && !en.disabled) r.enabled = en.checked;
+      if (band && !band.options[band.selectedIndex]?.disabled) r.band = band.value;
+      else if (band) r.band = clampBand(state.generation, band.value);
+      if (width && !width.disabled) r.widthMHz = Number(width.value);
+      if (nssEl) r.nss = clampNss(nssEl.value);
+    }
+  }
+
+  if (globalNssChanged) {
+    state.nss = clampNss(nssRaw);
+    for (const r of state.radios) r.nss = state.nss;
+  } else {
+    state.nss = sharedNss(state.radios);
+  }
+
+  applyConstraints();
+
+  const selected = catalogAp(state.apId);
+  if (state.apId !== "custom" && !apMatchesRadios(selected, state.radios, state.generation)) {
+    state.apId = "custom";
+  }
+
+  readNonApFields();
   applyConstraints();
 }
 
@@ -296,6 +353,9 @@ function radioCardHtml(r, i) {
   const widthOpts = WIDTHS_MHZ.map(
     (w) => `<option value="${w}" ${w === r.widthMHz ? "selected" : ""}>${w} MHz</option>`,
   ).join("");
+  const nssOpts = NSS_CHOICES.map(
+    (n) => `<option value="${n}" ${n === r.nss ? "selected" : ""}>${n}×${n}</option>`,
+  ).join("");
   return `<div class="apc-radio-card ${r.enabled && !bandBlocked ? "" : "apc-radio-card--off"}" data-radio="${escapeHtml(r.id)}">
     <div class="apc-radio-card__head">
       <label class="apc-check">
@@ -316,6 +376,10 @@ function radioCardHtml(r, i) {
       <div class="field">
         <label for="apc-width-${escapeHtml(r.id)}">Channel width</label>
         <select id="apc-width-${escapeHtml(r.id)}" ${bandBlocked ? "disabled" : ""}>${widthOpts}</select>
+      </div>
+      <div class="field">
+        <label for="apc-nss-${escapeHtml(r.id)}">Streams</label>
+        <select id="apc-nss-${escapeHtml(r.id)}" ${bandBlocked ? "disabled" : ""}>${nssOpts}</select>
       </div>
     </div>
     <p class="hint apc-radio-note">${note ? escapeHtml(note) : ""}</p>
@@ -371,6 +435,11 @@ function syncRadioCards() {
       for (const w of WIDTHS_MHZ) setOptionEnabled(widthSel, w, allowed.includes(w));
       widthSel.disabled = bandBlocked;
       if (widthSel.value !== String(r.widthMHz)) widthSel.value = String(r.widthMHz);
+    }
+    const nssSel = $(`#apc-nss-${r.id}`);
+    if (nssSel) {
+      nssSel.disabled = bandBlocked;
+      if (nssSel.value !== String(r.nss)) nssSel.value = String(r.nss);
     }
     const label = card?.querySelector(".apc-check span");
     if (label) label.textContent = `Radio ${i + 1}`;
@@ -449,9 +518,10 @@ function renderAnswer(est) {
     })
     .join("");
   const limitNotes = [];
-  if (state.nss > client.nss) {
+  const apNss = Math.max(...state.radios.map((r) => r.nss || 1));
+  if (apNss > client.nss) {
     limitNotes.push(
-      `These devices only have ${client.nss} stream${client.nss === 1 ? "" : "s"}. Buying a ${state.nss}×${state.nss} AP does not make them faster.`,
+      `These devices only have ${client.nss} stream${client.nss === 1 ? "" : "s"}. Buying a ${apNss}×${apNss} AP does not make them faster.`,
     );
   }
   if (STANDARD_LABEL[client.standard] && STANDARD_RANK[state.generation] > STANDARD_RANK[client.standard]) {
@@ -548,7 +618,60 @@ function renderAnswer(est) {
   }
 }
 
+function nssSelectOptions(selected) {
+  const mixed = selected === "mixed";
+  const mixedOpt = mixed
+    ? `<option value="mixed" selected>Mixed (per radio)</option>`
+    : `<option value="mixed" hidden>Mixed (per radio)</option>`;
+  const rest = NSS_CHOICES.map(
+    (n) => `<option value="${n}" ${!mixed && Number(selected) === n ? "selected" : ""}>${n}×${n}</option>`,
+  ).join("");
+  return mixedOpt + rest;
+}
+
+function renderApNotes() {
+  const hint = $("#apc-ap-notes");
+  if (!hint) return;
+  const ap = catalogAp(state.apId);
+  hint.hidden = !ap?.notes;
+  hint.textContent = ap?.notes || "";
+}
+
 function renderStaticControls() {
+  const apSel = $("#apc-ap");
+  if (apSel && !apSel.dataset.ready) {
+    apSel.innerHTML = "";
+    const custom = document.createElement("option");
+    custom.value = "custom";
+    custom.textContent = "Custom — set radios yourself";
+    apSel.appendChild(custom);
+    const groups = new Map();
+    for (const ap of apCatalog.models || []) {
+      const vendor = ap.vendorLabel || "Other";
+      const wifi = ap.wifi || "Other";
+      const key = `${vendor} · ${wifi}`;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(ap);
+    }
+    for (const [label, models] of groups) {
+      const og = document.createElement("optgroup");
+      og.label = label;
+      for (const ap of models) {
+        const opt = document.createElement("option");
+        opt.value = ap.id;
+        opt.textContent = apOptionLabel(ap);
+        og.appendChild(opt);
+      }
+      apSel.appendChild(og);
+    }
+    apSel.dataset.ready = "1";
+    apSel.value = state.apId;
+  }
+  const nss = $("#apc-nss");
+  if (nss && nss.dataset.ready !== "1") {
+    nss.innerHTML = nssSelectOptions(state.nss);
+    nss.dataset.ready = "1";
+  }
   const device = $("#apc-device");
   if (device && !device.options.length) {
     for (const d of DEVICE_PRESETS) {
@@ -580,8 +703,19 @@ function syncToolbar() {
   if (gen) gen.checked = true;
   const count = $(`input[name=apc-radios][value="${state.radioCount}"]`);
   if (count) count.checked = true;
-  if ($("#apc-nss")) $("#apc-nss").value = String(state.nss);
+  if ($("#apc-ap")) $("#apc-ap").value = state.apId || "custom";
+  const nss = $("#apc-nss");
+  if (nss) {
+    const mixedOpt = [...nss.options].find((o) => o.value === "mixed");
+    if (mixedOpt) mixedOpt.hidden = state.nss !== "mixed";
+    if (![...nss.options].some((o) => o.value === String(state.nss))) {
+      nss.innerHTML = nssSelectOptions(state.nss);
+    } else {
+      nss.value = String(state.nss);
+    }
+  }
   if ($("#apc-device")) $("#apc-device").value = state.deviceId;
+  renderApNotes();
   if ($("#apc-app")) $("#apc-app").value = state.appId;
   if ($("#apc-ssids") && document.activeElement !== $("#apc-ssids")) {
     $("#apc-ssids").value = String(state.ssidCount);
@@ -646,7 +780,7 @@ function bind() {
     if (!t || (form && !form.contains(t))) return;
     state.scenario = "";
     const name = t.name;
-    const rebuildCards = name === "apc-radios";
+    const rebuildCards = name === "apc-radios" || t.id === "apc-ap";
     paint({ fromForm: true, rebuildCards });
   };
   // Capture so a descendant stopPropagation cannot swallow it.
@@ -711,8 +845,23 @@ function initPills() {
   );
 }
 
-function init() {
+async function loadApCatalog() {
+  try {
+    const res = await fetch(new URL("./data/aps.json", import.meta.url));
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    apCatalog = {
+      models: (data.models || []).filter((m) => m.id && m.generation && m.radios && m.radios.length),
+    };
+  } catch (err) {
+    console.warn("AP catalog unavailable; Custom only.", err);
+    apCatalog = { models: [] };
+  }
+}
+
+async function init() {
   initPills();
+  await loadApCatalog();
   renderStaticControls();
   bind();
   paint({ fromForm: false, rebuildCards: true });

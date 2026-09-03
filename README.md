@@ -48,6 +48,7 @@ bench-tools/
 │   ├── hardware-platform-support/
 │   ├── antenna-matrix/              # Connectorized AP × antenna matrix
 │   ├── ap-capacity/                 # Practical AP user-count / per-client throughput
+│   │   └── data/aps.json            # Curated Aruba + Juniper Mist radio/stream snapshot
 │   ├── central-alerts/
 │   ├── access-tracker/
 │   │   ├── decoder.js
@@ -119,7 +120,7 @@ python3 tools/access-tracker/update_radius_dict.py
 
 ### AP Capacity
 
-Practical AP user-count and per-client throughput under `tools/ap-capacity/`. IEEE MCS rates, then protocol efficiency, neighbor RF (default **60% of the channel is yours**), and SSID tax. Device presets for common phones/laptops/IoT. Does **not** quote PHY as user speed.
+Practical AP user-count and per-client throughput under `tools/ap-capacity/`. IEEE MCS rates, then protocol efficiency, neighbor RF (default **60% of the channel is yours**), and SSID tax. Curated internal Aruba campus and Juniper Mist APs fill radios and streams; device presets cover phones/laptops/IoT. Does **not** quote PHY as user speed.
 
 ```bash
 python3 tools/ap-capacity/test_model.py
