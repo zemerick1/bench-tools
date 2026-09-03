@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AP Capacity — Bench Tools</title>
+    <meta
+      name="description"
+      content="How many users can this access point actually support? Practical per-client throughput from MCS, radios, SSIDs, and RF contention — not the datasheet PHY rate."
+    />
+    <link rel="canonical" href="https://tools.emerickcc.com/tools/ap-capacity/" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Bench Tools" />
+    <meta name="theme-color" content="#0f6e56" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Bench Tools" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://tools.emerickcc.com/tools/ap-capacity/" />
+    <meta property="og:title" content="AP Capacity" />
+    <meta
+      property="og:description"
+      content="How many users can this access point actually support? Practical throughput, not brochure PHY."
+    />
+    <meta property="og:image" content="https://tools.emerickcc.com/assets/icons/og-image.jpg" />
+    <meta property="og:image:width" content="1280" />
+    <meta property="og:image:height" content="720" />
+    <meta property="og:image:alt" content="AP Capacity — Bench Tools" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AP Capacity" />
+    <meta
+      name="twitter:description"
+      content="How many users can this access point actually support? Practical throughput, not brochure PHY."
+    />
+    <meta name="twitter:image" content="https://tools.emerickcc.com/assets/icons/og-image.jpg" />
+    <link rel="icon" href="../../assets/icons/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="../../assets/icons/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Bench Tools", "item": "https://tools.emerickcc.com/" },
+            { "@type": "ListItem", "position": 2, "name": "AP Capacity", "item": "https://tools.emerickcc.com/tools/ap-capacity/" }
+          ]
+        },
+        {
+          "@type": "WebApplication",
+          "name": "AP Capacity",
+          "url": "https://tools.emerickcc.com/tools/ap-capacity/",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "Any",
+          "isAccessibleForFree": true,
+          "inLanguage": "en",
+          "description": "Practical access-point user capacity and per-client throughput estimator.",
+          "publisher": { "@type": "Organization", "name": "Bench Tools", "url": "https://tools.emerickcc.com/" }
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Why isn’t this the gigabit number on the datasheet?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Datasheets quote PHY rate. Real application throughput is typically 40–50% of that in a busy cell before you even count neighboring APs, extra SSIDs, or slow clients."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What does 60% of the channel is yours mean?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "In a typical enterprise floor, co-channel and adjacent-channel neighbors share airtime. Isolated-cell math assumes 100%. Typical assumes 60%. Crowded assumes 40%."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+    <link rel="stylesheet" href="../../assets/css/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="../../">
+          <span class="brand__mark" aria-hidden="true">B</span>
+          <span>Bench Tools</span>
+        </a>
+        <nav class="nav" aria-label="Primary">
+          <a href="#faq">FAQ</a>
+          <a href="../../#tools">All tools</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="site-main site-main--wide apc-main">
+      <header class="page-header page-header--full">
+        <a class="back" href="../../">← Back to the toolbox</a>
+        <h1>AP Capacity</h1>
+        <p>
+          “How many users can this access point support?” is a sales question
+          with an engineering answer. This tab does the engineering answer:
+          <strong>if you set these things, you can expect about this many
+          people, at about this much each</strong> — not the PHY rate on the
+          box.
+        </p>
+        <div class="explainer" role="note">
+          <strong>What this is:</strong>
+          a practical airtime budget. You pick the AP (radios, generation,
+          width, streams), who is connecting, what they need to do, how noisy
+          the neighbors are, and how many SSIDs you insisted on broadcasting.
+          It uses IEEE MCS rates, then derates them the way a real BSS behaves.
+          <br /><br />
+          <strong>What this is not:</strong>
+          a coverage survey, a channel plan, a promise, or permission to quote
+          4.8&nbsp;Gbps in a meeting. Half-duplex. The slowest active client
+          sets the airtime price. Associated-but-idle does not count as a user
+          here.
+        </div>
+      </header>
+
+      <div class="stack">
+        <div class="callout callout--soft" role="note">
+          <strong>Stays in this tab.</strong>
+          No upload, no “AI RF design,” no SKU database. Device names are
+          borrowed from common client presets (phones, laptops, IoT) so you
+          are not starting from a blank MCS index.
+        </div>
+
+        <div class="apc-scenarios" role="group" aria-label="Start from a known story">
+          <span class="apc-scenarios__label">Start from a story</span>
+          <button type="button" class="btn btn--secondary" data-scenario="ipad1">
+            Classroom that failed (iPad 1)
+          </button>
+          <button type="button" class="btn btn--secondary" data-scenario="air2">
+            Same room, iPad Air 2
+          </button>
+          <button type="button" class="btn btn--secondary" data-scenario="office">
+            2×2 Wi-Fi 6 office
+          </button>
+          <button type="button" class="btn btn--secondary" data-scenario="triband">
+            Tri-band Wi-Fi 7 lobby
+          </button>
+        </div>
+
+        <div class="apc-layout">
+          <form id="apc-form" class="apc-form" aria-label="AP and client settings" novalidate>
+            <section class="panel" aria-labelledby="apc-need-heading">
+              <h2 id="apc-need-heading">1. What are people doing?</h2>
+              <p class="panel__intro">
+                Active transmitters, not badge-in headcount. One person with a
+                paused YouTube tab is not a user for this math.
+              </p>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="apc-app">Each person needs</label>
+                  <select id="apc-app"></select>
+                </div>
+                <div class="field">
+                  <label for="apc-clients">Active clients on this AP</label>
+                  <input id="apc-clients" type="number" min="0" max="500" step="1" value="30" />
+                </div>
+              </div>
+              <div class="field" id="apc-custom-app" hidden>
+                <label for="apc-custom-mbps">Custom target (Mbps per person)</label>
+                <input id="apc-custom-mbps" type="number" min="0.1" max="200" step="0.1" value="2" />
+              </div>
+            </section>
+
+            <section class="panel" aria-labelledby="apc-ap-heading">
+              <h2 id="apc-ap-heading">2. The access point</h2>
+              <p class="panel__intro">
+                20&nbsp;MHz is the honest enterprise default. Widen a channel
+                only if that spectrum is actually empty. Widths and bands that
+                the generation cannot do (Wi-Fi 4 at 160&nbsp;MHz, 6&nbsp;GHz
+                on ac, and so on) are not offered.
+              </p>
+              <div class="field">
+                <span class="apc-label">Radios</span>
+                <div id="apc-radio-pills" class="apc-pills" role="radiogroup" aria-label="Radio count"></div>
+              </div>
+              <div class="field">
+                <span class="apc-label">Generation</span>
+                <div id="apc-gen-pills" class="apc-pills" role="radiogroup" aria-label="Wi-Fi generation"></div>
+              </div>
+              <div class="field">
+                <label for="apc-nss">Spatial streams (AP)</label>
+                <select id="apc-nss">
+                  <option value="1">1×1</option>
+                  <option value="2" selected>2×2</option>
+                  <option value="3">3×3</option>
+                  <option value="4">4×4</option>
+                </select>
+                <p class="hint">Most enterprise APs you actually buy are 2×2 per radio.</p>
+              </div>
+              <div id="apc-radios-wrap" class="apc-radios"></div>
+            </section>
+
+            <section class="panel" aria-labelledby="apc-who-heading">
+              <h2 id="apc-who-heading">3. Who is connecting?</h2>
+              <p class="panel__intro">
+                The AP and the client negotiate the worse of the two. A Wi-Fi 7
+                phone on a Wi-Fi 6 AP is a Wi-Fi 6 phone. IoT that only does
+                2.4&nbsp;GHz never sees the 6&nbsp;GHz radio.
+              </p>
+              <div class="field">
+                <label for="apc-device">Device preset</label>
+                <select id="apc-device"></select>
+              </div>
+              <div id="apc-custom-device" class="apc-custom-device" hidden>
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="apc-custom-std">Client standard</label>
+                    <select id="apc-custom-std">
+                      <option value="n">802.11n (Wi-Fi 4)</option>
+                      <option value="ac">802.11ac (Wi-Fi 5)</option>
+                      <option value="ax" selected>802.11ax (Wi-Fi 6)</option>
+                      <option value="be">802.11be (Wi-Fi 7)</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="apc-custom-nss">Client streams</label>
+                    <select id="apc-custom-nss">
+                      <option value="1">1SS</option>
+                      <option value="2" selected>2SS</option>
+                      <option value="3">3SS</option>
+                      <option value="4">4SS</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="apc-custom-width">Client max width</label>
+                    <select id="apc-custom-width">
+                      <option value="20">20 MHz</option>
+                      <option value="40">40 MHz</option>
+                      <option value="80" selected>80 MHz</option>
+                      <option value="160">160 MHz</option>
+                      <option value="320">320 MHz</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="apc-band-checks">
+                  <label class="apc-check"><input type="checkbox" id="apc-cband-24" checked /> 2.4 GHz</label>
+                  <label class="apc-check"><input type="checkbox" id="apc-cband-5" checked /> 5 GHz</label>
+                  <label class="apc-check"><input type="checkbox" id="apc-cband-6" /> 6 GHz</label>
+                </div>
+              </div>
+              <div class="field">
+                <span class="apc-label">Link quality</span>
+                <div id="apc-quality-pills" class="apc-pills" role="radiogroup" aria-label="Link quality"></div>
+                <p class="hint">Typical coverage is 64-QAM / 256-QAM. 1024-QAM and 4096-QAM are “I am sitting under the AP.”</p>
+              </div>
+            </section>
+
+            <section class="panel" aria-labelledby="apc-assume-heading">
+              <h2 id="apc-assume-heading">4. Assumptions we will not hide</h2>
+              <p class="panel__intro">
+                Change these if your room is a single AP in a faraday cage, or
+                a 2.4&nbsp;GHz war zone. Default is a normal floor.
+              </p>
+              <div class="field">
+                <span class="apc-label">Neighboring APs (CCI / ACI)</span>
+                <div id="apc-neighbor-pills" class="apc-pills" role="radiogroup" aria-label="Neighbor contention"></div>
+                <p class="hint">
+                  Isolated = 100% of the channel is yours.
+                  Typical = <strong>60% yours</strong>.
+                  Crowded = 40% yours.
+                </p>
+              </div>
+              <div class="field">
+                <label for="apc-ssids">SSIDs broadcast on this AP</label>
+                <input id="apc-ssids" type="number" min="1" max="16" step="1" value="3" />
+                <p class="hint">Beacons and probes are not free. They are especially not free on 2.4 GHz at 1 Mbps.</p>
+              </div>
+              <div class="field">
+                <span class="apc-label">Where clients land</span>
+                <div id="apc-split-pills" class="apc-pills" role="radiogroup" aria-label="Client split"></div>
+                <p class="hint">
+                  Band-steered: a little leftover on 2.4, the rest on 5/6 if the
+                  device can. “Best radio” piles everyone onto the highest band they speak.
+                </p>
+              </div>
+              <details class="details-block">
+                <summary>Force an MCS index</summary>
+                <div class="field" style="margin-top: 0.75rem">
+                  <label for="apc-mcs">MCS override (blank = from link quality)</label>
+                  <input id="apc-mcs" type="number" min="0" max="13" placeholder="auto" />
+                  <p class="hint">Same idea as an MCS table: higher is faster and needs a cleaner signal. Invalid combos step down (MCS 9 at 20 MHz on most 802.11ac links is N/A).</p>
+                </div>
+              </details>
+            </section>
+          </form>
+
+          <aside class="apc-aside" aria-live="polite">
+            <div id="apc-answer" class="apc-answer apc-answer--fits">
+              <p class="apc-answer__eyebrow">With these settings you can expect</p>
+              <p class="apc-answer__headline">…</p>
+            </div>
+          </aside>
+        </div>
+
+        <section class="panel" id="apc-caveats-panel" aria-labelledby="apc-caveats-heading">
+          <h2 id="apc-caveats-heading">What this is assuming</h2>
+          <div id="apc-caveats-body"></div>
+        </section>
+
+        <section class="panel faq" id="faq" aria-labelledby="faq-heading">
+          <h2 id="faq-heading">FAQ</h2>
+          <details>
+            <summary>Why isn’t this the gigabit number on the datasheet?</summary>
+            <p>
+              That number is <strong>PHY rate</strong> — layer 1, before Wi-Fi
+              overhead. A single client under ideal RF might see 50–70% of PHY
+              as TCP throughput. A room full of active clients is closer to
+              <strong>40%</strong>. Then neighbors, extra SSIDs, and 1-stream
+              stations take another bite. We never quote PHY as user speed.
+            </p>
+          </details>
+          <details>
+            <summary>Where do the 50% / 45% / 40% numbers come from?</summary>
+            <p>
+              Protocol overhead: IFS, ACKs, backoff, retries, small frames.
+              One active client on a clean radio can see about <strong>50%</strong>
+              of PHY as application throughput. A handful of clients drops that
+              toward <strong>45%</strong>. A busy room (a dozen or more active)
+              is about <strong>40%</strong>. Example: 30× 1-stream 11n clients at
+              72&nbsp;Mbps PHY × 40% ≈ 29&nbsp;Mbps total ≈ 950&nbsp;kbps each —
+              not enough for 2&nbsp;Mbps unicast video. Same room, 2-stream 11ac
+              at 173&nbsp;Mbps × 40% ≈ 2.3&nbsp;Mbps each. One 3-stream laptop
+              left alone: 289 × 50% ≈ 145&nbsp;Mbps. The math is boring on purpose.
+            </p>
+          </details>
+          <details>
+            <summary>What does “60% of the channel is yours” mean?</summary>
+            <p>
+              Wi-Fi is a shared half-duplex medium. Neighboring APs on the same
+              or overlapping channel (CCI / ACI) burn airtime you do not get.
+              <strong>Isolated</strong> is the classroom with no other BSS —
+              100% of the leftover airtime after protocol overhead.
+              <strong>Typical</strong> assumes about 60% remains yours.
+              <strong>Crowded</strong> is 40%, and 2.4&nbsp;GHz often lives there
+              even when 5/6 look fine. This is not a substitute for looking at
+              channel utilization on a survey.
+            </p>
+          </details>
+          <details>
+            <summary>Why do extra SSIDs hurt?</summary>
+            <p>
+              Every SSID sends beacons, usually at the lowest basic rate
+              (often 1&nbsp;Mbps on 2.4, 6&nbsp;Mbps on 5/6), plus probe
+              responses. Four SSIDs is a lot. Eight is how you donate the 2.4
+              GHz radio to management frames. We subtract that tax before we
+              talk about user traffic.
+            </p>
+          </details>
+          <details>
+            <summary>QAM, MCS, spatial streams — do I have to care?</summary>
+            <p>
+              Only if you want to. MCS is a gear number: modulation (QPSK,
+              16-QAM, 64-QAM, 256-QAM, 1024-QAM, 4096-QAM) plus a coding rate.
+              Higher QAM packs more bits per symbol and needs a cleaner signal.
+              Spatial streams are how many parallel radios the client actually
+              has — most phones are 2SS, a pile of IoT is 1SS. We pick MCS from
+              link quality unless you override it. The answer is still “about N
+              people at X Mbps.”
+            </p>
+          </details>
+          <details>
+            <summary>Does OFDMA / MU-MIMO 4× the number?</summary>
+            <p>
+              No. OFDMA helps when many clients send small frames at once. It
+              does not turn a 20&nbsp;MHz radio into four 20&nbsp;MHz radios.
+              MU-MIMO in the field has been underwhelming for the same reason
+              most rooms are not a lab demo. We do not bake a marketing
+              multiplier into the total.
+            </p>
+          </details>
+          <details>
+            <summary>Is this a coverage or channel plan?</summary>
+            <p>
+              No. It does not place APs, pick channels, or know your walls.
+              If MCS is low with strong RSSI, that is interference, not distance.
+              If MCS is low with weak RSSI, add an AP. This tab will not walk
+              the floor for you.
+            </p>
+          </details>
+          <details>
+            <summary>Where do the data rates come from?</summary>
+            <p>
+              PHY rates follow IEEE 802.11 (n/ac/ax/be): channel width, streams,
+              MCS/QAM, and guard interval. Device presets are common phones,
+              laptops, and IoT — not a vendor SKU list. Real speed is still
+              less than the datasheet number.
+            </p>
+          </details>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <p>
+          Hand-assembled utilities. If something’s missing, it might be next —
+          or it might be a weekend project that got distracted by snacks.
+        </p>
+      </div>
+    </footer>
+
+    <script type="module" src="./app.js?v=7"></script>
+  </body>
+</html>

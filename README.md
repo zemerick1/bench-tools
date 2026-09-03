@@ -24,6 +24,7 @@ python3 -m http.server 8080
 | **MAC / OUI Lookup** | Parse MACs, randomized-MAC hint, offline OUI vendor |
 | **Hardware Platform Support** | Aruba AOS-10/Instant matrix + Juniper EX/QFX/AP Pathfinder |
 | **Aruba Antenna Matrix** | Which external antenna for which Aruba AP — how many, omni vs directional |
+| **AP Capacity** | How many users can this AP actually support — practical throughput, not PHY |
 | **Central Alerts & Insights** | Searchable Aruba Central alert / insight catalog |
 | **Access Tracker Translator** | ClearPass session export → sticky-note story + why |
 | **CLI Explorer** | AOS-CX 10.13.x–10.18.x (per switch series) + AOS 10 CLI hierarchy from local PDF TOC |
@@ -46,6 +47,7 @@ bench-tools/
 │   ├── mac-lookup/
 │   ├── hardware-platform-support/
 │   ├── antenna-matrix/              # Connectorized AP × antenna matrix
+│   ├── ap-capacity/                 # Practical AP user-count / per-client throughput
 │   ├── central-alerts/
 │   ├── access-tracker/
 │   │   ├── decoder.js
@@ -114,6 +116,17 @@ Rebuild dictionaries after dropping new ClearPass XML exports into `tools/access
 ```bash
 python3 tools/access-tracker/update_radius_dict.py
 ```
+
+### AP Capacity
+
+Practical AP user-count and per-client throughput under `tools/ap-capacity/`. IEEE MCS rates, then protocol efficiency, neighbor RF (default **60% of the channel is yours**), and SSID tax. Device presets for common phones/laptops/IoT. Does **not** quote PHY as user speed.
+
+```bash
+python3 tools/ap-capacity/test_model.py
+node tools/ap-capacity/test_model.js
+```
+
+See [tools/ap-capacity/README.md](./tools/ap-capacity/README.md).
 
 ### Subnet Planner
 
