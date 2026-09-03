@@ -48,7 +48,9 @@ bench-tools/
 │   ├── hardware-platform-support/
 │   ├── antenna-matrix/              # Connectorized AP × antenna matrix
 │   ├── ap-capacity/                 # Practical AP user-count / per-client throughput
-│   │   └── data/aps.json            # Curated Aruba + Juniper Mist radio/stream snapshot
+│   │   ├── index.html / app.js / model.js
+│   │   ├── data/aps.json            # Curated Aruba + Juniper Mist radio/stream snapshot
+│   │   └── test_model.py / test_model.js
 │   ├── central-alerts/
 │   ├── access-tracker/
 │   │   ├── decoder.js
