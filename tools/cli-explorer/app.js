@@ -182,7 +182,13 @@
     return banks
       .filter((b) => b.family === family && b.versionHint === version)
       .slice()
-      .sort((a, b) => String(a.platform || "").localeCompare(String(b.platform || ""), undefined, { numeric: true }));
+      .sort((a, b) =>
+        String(a.platformLabel || a.platform || "").localeCompare(
+          String(b.platformLabel || b.platform || ""),
+          undefined,
+          { numeric: true }
+        )
+      );
   }
 
   function resolveBank(family, version, platform) {
@@ -529,10 +535,13 @@
       return;
     }
 
-    const pageLabel =
-      entry.pageEnd && entry.pageEnd !== entry.page
+    const pageLabel = entry.page
+      ? entry.pageEnd && entry.pageEnd !== entry.page
         ? `pp. ${entry.page}–${entry.pageEnd}`
-        : `p. ${entry.page}`;
+        : `p. ${entry.page}`
+      : entry.source === "html" || (meta && meta.sourceFormat === "html")
+        ? "HTML topic"
+        : "p. —";
 
     const syntaxText = [entry.syntax, entry.syntaxNo].filter(Boolean).join("\n");
     const syntax = syntaxText
@@ -645,19 +654,25 @@
     const srcNote = meta.sourceNote
       ? escapeHtml(meta.sourceNote)
       : meta.versionHint
-        ? `Indexed from ${escapeHtml(String(meta.versionHint))} CLI PDF`
+        ? `Indexed from ${escapeHtml(String(meta.versionHint))} CLI ${
+            meta.sourceFormat === "html" ? "HTML" : "PDF"
+          }`
         : "Indexed from local CLI PDF";
     const disc = meta.sourceDisclaimer
       ? `<span class="hint" style="display:block;margin-top:0.35rem">${escapeHtml(
           meta.sourceDisclaimer
         )}</span>`
       : "";
+    const sizeBit =
+      meta.sourceFormat === "html"
+        ? `${meta.leafCount || "?"} commands`
+        : `${meta.tocCount || "?"} TOC entries
+      · ${meta.leafCount || "?"} commands
+      · ${meta.pageCount || "?"} source pages`;
     metaEl.className = "callout callout--soft";
     metaEl.innerHTML = `<strong>${escapeHtml(meta.label || meta.source || "CLI")}</strong>
       · ${srcNote}
-      · ${meta.tocCount || "?"} TOC entries
-      · ${meta.leafCount || "?"} commands
-      · ${meta.pageCount || "?"} source pages
+      · ${sizeBit}
       ${disc}`;
   }
 

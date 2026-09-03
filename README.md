@@ -174,7 +174,7 @@ See [tools/antenna-matrix/README.md](./tools/antenna-matrix/README.md).
 
 ### CLI Explorer
 
-Searchable, hierarchical browser for Aruba/HPE CLI reference guides (Juniper CLI Explorer–style). The UI only loads static JSON; PDFs stay on your machine.
+Searchable, hierarchical browser for Aruba/HPE CLI reference guides (Juniper CLI Explorer–style). The UI only loads static JSON. Older trains come from local PDFs; AOS-CX 10.17.1000+ can be built from HPE Support Center HTML (`scripts/build_from_html.py`).
 
 | Product | What’s indexed |
 |---------|----------------|
