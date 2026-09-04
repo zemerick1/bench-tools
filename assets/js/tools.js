@@ -86,6 +86,16 @@ export const tools = [
     cta: "Walk the hallway",
   },
   {
+    id: "client-auth",
+    title: "Client Auth",
+    description:
+      "A device logs in. See who it actually talks to — and who trusts the cert — with EAP-TLS, PEAP, TTLS, TEAP, and MAC auth. Not a packet capture.",
+    href: "./tools/client-auth/",
+    icon: "AX",
+    status: "available",
+    cta: "Play a login",
+  },
+  {
     id: "access-tracker",
     title: "Access Tracker Translator",
     description:

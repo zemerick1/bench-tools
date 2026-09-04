@@ -26,6 +26,7 @@ python3 -m http.server 8080
 | **Aruba Antenna Matrix** | Which external antenna for which Aruba AP — how many, omni vs directional |
 | **AP Capacity** | How many users can this AP actually support — practical throughput, not PHY |
 | **Client Roam** | Rooms and a hallway: when a device leaves an AP, and how long the hole is (power, min rates, 802.11r/k/v) |
+| **Client Auth** | A device logs in: who it talks to, who trusts the cert (EAP-TLS, PEAP, TTLS, TEAP, MAC). Not a packet capture |
 | **Central Alerts & Insights** | Searchable Aruba Central alert / insight catalog |
 | **Access Tracker Translator** | ClearPass session export → sticky-note story + why |
 | **CLI Explorer** | AOS-CX 10.13.x–10.18.x (per switch series) + AOS 10 CLI hierarchy from local PDF TOC |
@@ -54,6 +55,9 @@ bench-tools/
 │   │   └── test_model.py / test_model.js
 │   ├── client-roam/                 # Rooms and a hallway: sticky roam (802.11r/k/v, power vs min rate)
 │   │   ├── index.html / app.js / model.js
+│   │   └── test_model.js
+│   ├── client-auth/                 # Device login: who it talks to, who trusts the cert (EAP, MAC)
+│   │   ├── index.html / app.js / model.js / viz.js
 │   │   └── test_model.js
 │   ├── central-alerts/
 │   ├── access-tracker/
@@ -144,6 +148,16 @@ node tools/client-roam/test_model.js
 ```
 
 See [tools/client-roam/README.md](./tools/client-roam/README.md).
+
+### Client Auth
+
+Cartoon under `tools/client-auth/`. A device logs in. You see who it actually talks to — and who trusts the cert — with EAP-TLS, PEAP, TTLS, TEAP, and MAC auth. Visualization only; it is not a packet capture.
+
+```bash
+node tools/client-auth/test_model.js
+```
+
+See [tools/client-auth/README.md](./tools/client-auth/README.md).
 
 ### Subnet Planner
 
