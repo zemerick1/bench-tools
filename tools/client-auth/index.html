@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Client Auth — who talks to the NAC</title>
+    <meta
+      name="description"
+      content="Watch who talks to the NAC. Left wire is EAP. Right wire is RADIUS — the protocol, not the box. The device does not talk to the authentication server. Not a packet capture."
+    />
+    <link rel="canonical" href="https://tools.emerickcc.com/tools/client-auth/" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Bench Tools" />
+    <meta name="theme-color" content="#0f6e56" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Bench Tools" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://tools.emerickcc.com/tools/client-auth/" />
+    <meta property="og:title" content="Client Auth — who talks to the NAC" />
+    <meta
+      property="og:description"
+      content="Left wire is EAP. Right wire is RADIUS — the protocol to the NAC. The device does not talk to the authentication server."
+    />
+    <meta property="og:image" content="https://tools.emerickcc.com/assets/icons/og-image.jpg" />
+    <meta property="og:image:width" content="1280" />
+    <meta property="og:image:height" content="720" />
+    <meta property="og:image:alt" content="Client Auth — Bench Tools" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Client Auth — who talks to the NAC" />
+    <meta
+      name="twitter:description"
+      content="Left wire is EAP. Right wire is RADIUS — the protocol to the NAC. The device does not talk to the authentication server."
+    />
+    <meta name="twitter:image" content="https://tools.emerickcc.com/assets/icons/og-image.jpg" />
+    <link rel="icon" href="../../assets/icons/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="../../assets/icons/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Bench Tools", "item": "https://tools.emerickcc.com/" },
+            { "@type": "ListItem", "position": 2, "name": "Client Auth", "item": "https://tools.emerickcc.com/tools/client-auth/" }
+          ]
+        },
+        {
+          "@type": "WebApplication",
+          "name": "Client Auth",
+          "url": "https://tools.emerickcc.com/tools/client-auth/",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "Any",
+          "isAccessibleForFree": true,
+          "inLanguage": "en",
+          "description": "Cartoon of who talks to the NAC: EAP on the left wire, RADIUS on the right. RADIUS is the protocol, not the box. The device does not talk to the authentication server.",
+          "publisher": { "@type": "Organization", "name": "Bench Tools", "url": "https://tools.emerickcc.com/" }
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Does the device ever talk to the NAC?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. Left wire is EAP to the AP or switch. Right wire is RADIUS — the protocol — to the NAC (authentication server). The device does not have the NAC IP."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What do the cert knobs actually check?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Signer, expiry, and OCSP. Not a full PKI lab. Unknown signer, expired, wrong name, or revoked — any of those fail closed."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is MAC auth EAP?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. Nobody spoke EAP. The authenticator sent a MAC to the NAC over RADIUS and hoped. Zero EAP hops."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Does the AP learn the password?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. Inner credentials ride inside the tunnel. The AP forwards EAP. It does not get a copy of the password."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is this a packet capture?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. Not a lab trace. Visualization and education only. It does not replace a packet capture, and it does not depict every EAP round-trip."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+    <link rel="stylesheet" href="../../assets/css/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="../../">
+          <span class="brand__mark" aria-hidden="true">B</span>
+          <span>Bench Tools</span>
+        </a>
+        <nav class="nav" aria-label="Primary">
+          <a href="#glossary">Glossary</a>
+          <a href="#faq">FAQ</a>
+          <a href="../../#tools">All tools</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="site-main site-main--wide ca-main">
+      <header class="ca-pagehead">
+        <a class="back" href="../../">← Back to the toolbox</a>
+        <h1>Client Auth</h1>
+      </header>
+
+      <div class="ca-workspace">
+          <form id="ca-form" class="ca-rail" aria-label="Auth settings" novalidate>
+            <div class="ca-stories" id="ca-stories" role="group" aria-label="Start from a story">
+              <span class="ca-stories__label">Stories</span>
+            </div>
+            <div class="field">
+              <label for="ca-method">Method</label>
+              <select id="ca-method">
+                <option value="open" selected>Open — no login</option>
+                <option value="mac">MAC auth — nobody spoke EAP</option>
+                <option value="portal">Captive portal — a website, then the NAC</option>
+                <option value="peap">PEAP — server cert, password in a tunnel</option>
+                <option value="eap-ttls">EAP-TTLS — tunnel, then PAP or MSCHAPv2</option>
+                <option value="teap">TEAP — two methods in a trench coat</option>
+                <option value="eap-tls">EAP-TLS — both sides, a cert</option>
+              </select>
+              <p class="hint">The device speaks EAP. RADIUS is the protocol on the other wire, to the NAC. Two conversations, one cartoon.</p>
+            </div>
+            <div class="field">
+              <label for="ca-medium">Medium</label>
+              <select id="ca-medium">
+                <option value="ap" selected>Access point</option>
+                <option value="switch">Switch</option>
+              </select>
+              <p class="hint">AP or switch — that’s the authenticator. It is the RADIUS client. The NAC is the authentication server.</p>
+            </div>
+            <div class="field" id="ca-certs-wrap">
+              <label for="ca-server-cert">Server cert</label>
+              <select id="ca-server-cert">
+                <option value="trusted" selected>Trusted</option>
+                <option value="unknown">Unknown signer</option>
+                <option value="expired">Expired</option>
+                <option value="name">Wrong name</option>
+                <option value="revoked">Revoked</option>
+              </select>
+              <p class="hint">If the device does not trust this, the rest is theater.</p>
+            </div>
+            <div class="field" id="ca-client-wrap">
+              <label for="ca-client-cert">Client cert</label>
+              <select id="ca-client-cert">
+                <option value="none">None</option>
+                <option value="trusted" selected>Trusted</option>
+                <option value="unknown">Unknown signer</option>
+                <option value="expired">Expired</option>
+                <option value="revoked">Revoked</option>
+              </select>
+              <p class="hint">EAP-TLS needs one. PEAP usually does not. Expired is still expired.</p>
+            </div>
+            <div class="field" id="ca-inner-wrap" hidden>
+              <label for="ca-inner">Inner</label>
+              <select id="ca-inner">
+                <option value="mschapv2" selected>MSCHAPv2</option>
+                <option value="pap">PAP</option>
+                <option value="tls">TLS</option>
+              </select>
+              <p class="hint">This is what rides inside the tunnel. The AP never sees it. That is the point.</p>
+            </div>
+            <div class="field" id="ca-password-wrap" hidden>
+              <label for="ca-password">Password</label>
+              <select id="ca-password">
+                <option value="good" selected>Good</option>
+                <option value="bad">Bad</option>
+              </select>
+              <p class="hint">Wrong password still builds the tunnel first. Then the NAC says no, which is later than people expect.</p>
+            </div>
+            <div class="field" id="ca-ocsp-wrap">
+              <label for="ca-ocsp">OCSP</label>
+              <select id="ca-ocsp">
+                <option value="skip" selected>Skip — nobody asked</option>
+                <option value="good">Good</option>
+                <option value="revoked">Revoked</option>
+                <option value="unreachable">Unreachable</option>
+              </select>
+              <p class="hint">Skip means nobody asked. Revoked means somebody did, and the answer was no.</p>
+            </div>
+          </form>
+
+          <div class="ca-stage-col">
+            <div
+              id="ca-stage"
+              class="ca-stage"
+              role="application"
+              aria-label="Two wires: EAP on the left, RADIUS on the right to the NAC. The device does not talk to the authentication server."
+            ></div>
+            <p class="ca-legend">
+              Green = EAP (left). Purple = RADIUS to the NAC (right).
+              The device does not talk to the authentication server.
+            </p>
+            <div class="ca-transport" id="ca-transport">
+              <div class="form-actions" style="margin-top: 0">
+                <button type="button" class="btn btn--primary" id="ca-play">Play</button>
+                <button type="button" class="btn btn--secondary" id="ca-reset">Reset</button>
+              </div>
+              <div class="field ca-transport__scrub">
+                <label for="ca-scrub">Time</label>
+                <input id="ca-scrub" type="range" min="0" max="1" step="0.05" value="0" />
+              </div>
+              <div class="field">
+                <label for="ca-speed">Speed</label>
+                <select id="ca-speed">
+                  <option value="1" selected>1×</option>
+                  <option value="2">2×</option>
+                  <option value="4">4×</option>
+                  <option value="8">8×</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <aside class="ca-aside">
+            <article class="ca-caption" id="ca-caption" aria-live="polite">
+              <p class="ca-caption__eyebrow" id="ca-cap-eye">Two wires</p>
+              <p class="ca-caption__headline" id="ca-cap-head">Left wire is EAP. Right wire is RADIUS — the protocol, not the box.</p>
+              <p class="ca-caption__body" id="ca-cap-body">
+                The box on the right is the NAC (authentication server). The device does not talk to it. Hit Play.
+              </p>
+            </article>
+            <div class="ca-timeline" id="ca-timeline" aria-label="This auth’s hops"></div>
+            <section class="ca-history-panel" aria-labelledby="ca-history-heading">
+              <h2 id="ca-history-heading">Hop history</h2>
+              <ol class="ca-history" id="ca-history"></ol>
+            </section>
+          </aside>
+      </div>
+
+      <div class="ca-notes">
+        <div class="callout callout--soft ca-disclaimer" role="note">
+          <strong>Not a lab trace.</strong>
+          This is for visualization and education only. It does not replace
+          a packet capture, and it does not depict every EAP round-trip.
+        </div>
+
+        <section class="panel" id="glossary" aria-labelledby="glossary-heading">
+          <h2 id="glossary-heading">Glossary</h2>
+          <p class="panel__intro">
+            The words this tab uses, once. Nothing here changes the cartoon.
+          </p>
+          <details class="details-block">
+            <summary>EAP, RADIUS, NAC, and the rest</summary>
+            <dl>
+              <dt>EAP</dt>
+              <dd>
+                Extensible Authentication Protocol. What the device speaks to
+                the authenticator. Left wire. Not RADIUS.
+              </dd>
+              <dt>NAC <span aria-hidden="true">/ authentication server</span></dt>
+              <dd>
+                The box on the right that decides if you get on — ClearPass,
+                ISE, the usual suspects. People call it “the RADIUS server.”
+                RADIUS is the protocol that box speaks with the AP, not the
+                name of the box.
+              </dd>
+              <dt>RADIUS</dt>
+              <dd>
+                A protocol, not a hostname. Access-Request, Access-Challenge,
+                Access-Accept, Access-Reject. It runs on the right wire,
+                between the authenticator and the NAC. The device never
+                speaks it.
+              </dd>
+              <dt>Authenticator</dt>
+              <dd>
+                The AP or switch in the middle. In RADIUS this box is the
+                client (NAS). The laptop is not a RADIUS client.
+              </dd>
+              <dt>PEAP</dt>
+              <dd>
+                Protected EAP. Server cert, then a password inside a TLS tunnel.
+                One cert, a secret in a trench coat.
+              </dd>
+              <dt>EAP-TLS</dt>
+              <dd>
+                Both sides brought a cert. No password. Mutual trust or nobody
+                gets on.
+              </dd>
+              <dt>TTLS <span aria-hidden="true">/ EAP-TTLS</span></dt>
+              <dd>
+                Tunneled TLS. Server cert outside, PAP or MSCHAPv2 or another
+                TLS inside. The AP still does not see the inner password.
+              </dd>
+              <dt>TEAP</dt>
+              <dd>
+                Two methods in a trench coat. Inner methods can chain. Still
+                two wires.
+              </dd>
+              <dt>MAC auth</dt>
+              <dd>
+                The authenticator sent the MAC address to the NAC over RADIUS.
+                Nobody spoke EAP. If it works, it is not 802.1X.
+              </dd>
+              <dt>OCSP</dt>
+              <dd>
+                Online Certificate Status Protocol. Ask the signer if this cert
+                is still good. Skip means nobody asked. Revoked means the
+                answer was no.
+              </dd>
+              <dt>Access-Accept</dt>
+              <dd>
+                A RADIUS packet: the NAC said yes. The right wire’s happy
+                ending. Not an EAP-Success by itself, though they usually
+                travel as a pair in this cartoon.
+              </dd>
+            </dl>
+          </details>
+        </section>
+
+        <section class="panel faq" id="faq" aria-labelledby="faq-heading">
+          <h2 id="faq-heading">FAQ</h2>
+          <details>
+            <summary>Does the device ever talk to the NAC?</summary>
+            <p>
+              No. Left wire is EAP to the AP or switch. Right wire is RADIUS
+              — the protocol — to the NAC. The device does not have the NAC
+              IP. People say “RADIUS server” the way they say “Kleenex” for
+              tissue. If a hop ever drew device ↔ NAC, this tab would be lying.
+            </p>
+          </details>
+          <details>
+            <summary>What do the cert knobs actually check?</summary>
+            <p>
+              Signer, expiry, and OCSP. Not a full PKI lab. Unknown signer,
+              expired, wrong name, or revoked — any of those fail closed.
+              The cartoon stops. It does not keep bouncing.
+            </p>
+          </details>
+          <details>
+            <summary>Is MAC auth EAP?</summary>
+            <p>
+              No. Nobody spoke EAP. The authenticator sent a MAC to the NAC
+              over RADIUS and hoped. History will show zero EAP hops. That
+              is the lesson.
+            </p>
+          </details>
+          <details>
+            <summary>Does the AP learn the password?</summary>
+            <p>
+              No. Inner credentials ride inside the tunnel. The AP forwards
+              EAP. It does not get a copy of the password, and it cannot
+              “see PEAP.” That is why the inner knobs only appear for
+              tunneled methods.
+            </p>
+          </details>
+          <details>
+            <summary>Is this a packet capture?</summary>
+            <p>
+              No. Not a lab trace. Visualization and education only. It does
+              not replace a packet capture, and it does not depict every EAP
+              round-trip.
+            </p>
+          </details>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <p>
+          Hand-assembled utilities. If something’s missing, it might be next —
+          or it might be a weekend project that got distracted by snacks.
+        </p>
+      </div>
+    </footer>
+
+    <script type="module" src="./app.js?v=8"></script>
+    <script type="module" src="../../assets/js/tool-nav.js"></script>
+  </body>
+</html>
