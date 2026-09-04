@@ -3,6 +3,7 @@
  * Add an entry here when you introduce a new tool under /tools/<id>/.
  *
  * status: "available" | "soon"
+ * kind: "lesson" — teaching cartoon, not a wrench. Optional.
  */
 export const tools = [
   {
@@ -83,6 +84,7 @@ export const tools = [
     href: "./tools/client-roam/",
     icon: "RM",
     status: "available",
+    kind: "lesson",
     cta: "Walk the hallway",
   },
   {
@@ -93,6 +95,7 @@ export const tools = [
     href: "./tools/client-auth/",
     icon: "AX",
     status: "available",
+    kind: "lesson",
     cta: "Play a login",
   },
   {
@@ -159,28 +162,72 @@ export function renderTools(root) {
     return;
   }
 
-  const list = document.createElement("ul");
-  list.className = "tools-grid";
-  list.setAttribute("role", "list");
+  const lessons = tools.filter((t) => t.kind === "lesson");
+  const wrenches = tools.filter((t) => t.kind !== "lesson");
+  const frag = document.createDocumentFragment();
 
-  for (const tool of tools) {
+  if (lessons.length) {
+    const band = document.createElement("div");
+    band.className = "lessons-band";
+    band.innerHTML = `
+      <div class="lessons-band__head">
+        <p class="lessons-band__kicker">Not a wrench</p>
+        <h3 class="lessons-band__title" id="lessons-heading">Cartoons</h3>
+        <p class="lessons-band__lede">
+          These don’t ship a config. They explain why the last one was wrong.
+          Play them. Don’t quote them in a design.
+        </p>
+      </div>
+    `;
+    band.appendChild(cardList(lessons, { lesson: true }));
+    frag.append(band);
+  }
+
+  if (wrenches.length) {
+    if (lessons.length) {
+      const sub = document.createElement("div");
+      sub.className = "section-head section-head--bench";
+      sub.innerHTML = `
+        <h3 class="section-head__title">The wrenches</h3>
+        <p>The ones that actually do a job</p>
+      `;
+      frag.append(sub);
+    }
+    frag.append(cardList(wrenches, { lesson: false }));
+  }
+
+  root.replaceChildren(frag);
+}
+
+function cardList(items, { lesson }) {
+  const list = document.createElement("ul");
+  list.className = lesson ? "lessons-grid" : "tools-grid";
+  list.setAttribute("role", "list");
+  if (lesson) list.setAttribute("aria-labelledby", "lessons-heading");
+
+  for (const tool of items) {
     const li = document.createElement("li");
     const available = tool.status === "available";
     const tag = available ? "a" : "div";
     const card = document.createElement(tag);
 
-    card.className = available
-      ? "tool-card"
-      : "tool-card tool-card--disabled";
+    card.className = [
+      "tool-card",
+      lesson ? "tool-card--lesson" : "",
+      available ? "" : "tool-card--disabled",
+    ]
+      .filter(Boolean)
+      .join(" ");
 
-    if (available) {
-      card.href = tool.href;
-    } else {
-      card.setAttribute("aria-disabled", "true");
-    }
+    if (available) card.href = tool.href;
+    else card.setAttribute("aria-disabled", "true");
 
-    const badgeClass = available ? "badge badge--available" : "badge badge--soon";
-    const badgeLabel = available ? "Available" : "Soon";
+    const badgeClass = lesson
+      ? "badge badge--lesson"
+      : available
+        ? "badge badge--available"
+        : "badge badge--soon";
+    const badgeLabel = lesson ? "Lesson" : available ? "Available" : "Soon";
     const cta = tool.cta || (available ? "Open tool" : "Coming soon");
 
     card.innerHTML = `
@@ -197,7 +244,7 @@ export function renderTools(root) {
     list.appendChild(li);
   }
 
-  root.replaceChildren(list);
+  return list;
 }
 
 /** @param {string} value */
