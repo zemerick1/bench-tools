@@ -3,7 +3,7 @@
  * Add an entry here when you introduce a new tool under /tools/<id>/.
  *
  * status: "available" | "soon"
- * kind: "lesson" — teaching cartoon, not a wrench. Optional.
+ * kind: "lesson" — explainer, not a wrench. Optional.
  */
 export const tools = [
   {
@@ -172,7 +172,7 @@ export function renderTools(root) {
     band.innerHTML = `
       <div class="lessons-band__head">
         <p class="lessons-band__kicker">Not a wrench</p>
-        <h3 class="lessons-band__title" id="lessons-heading">Cartoons</h3>
+        <h3 class="lessons-band__title" id="lessons-heading">Explainers</h3>
         <p class="lessons-band__lede">
           These don’t ship a config. They explain why the last one was wrong.
           Play them. Don’t quote them in a design.
@@ -227,7 +227,7 @@ function cardList(items, { lesson }) {
       : available
         ? "badge badge--available"
         : "badge badge--soon";
-    const badgeLabel = lesson ? "Lesson" : available ? "Available" : "Soon";
+    const badgeLabel = lesson ? "Explainer" : available ? "Available" : "Soon";
     const cta = tool.cta || (available ? "Open tool" : "Coming soon");
 
     card.innerHTML = `
