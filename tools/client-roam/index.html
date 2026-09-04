@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Client Roam — sticky devices, rooms, and a hallway</title>
+    <meta
+      name="description"
+      content="Watch a sticky device walk rooms and a hallway. See when it leaves an AP — or falls off — with power, min basic rate, and 802.11r/k/v. Not a coverage survey."
+    />
+    <link rel="canonical" href="https://tools.emerickcc.com/tools/client-roam/" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Bench Tools" />
+    <meta name="theme-color" content="#0f6e56" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Bench Tools" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://tools.emerickcc.com/tools/client-roam/" />
+    <meta property="og:title" content="Client Roam — sticky devices, not a survey" />
+    <meta
+      property="og:description"
+      content="Watch a sticky device walk rooms and a hallway. See when it leaves an AP, and how long the hole is."
+    />
+    <meta property="og:image" content="https://tools.emerickcc.com/assets/icons/og-image.jpg" />
+    <meta property="og:image:width" content="1280" />
+    <meta property="og:image:height" content="720" />
+    <meta property="og:image:alt" content="Client Roam — Bench Tools" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Client Roam — sticky devices, not a survey" />
+    <meta
+      name="twitter:description"
+      content="Watch a sticky device walk rooms and a hallway. See when it leaves an AP, and how long the hole is."
+    />
+    <meta name="twitter:image" content="https://tools.emerickcc.com/assets/icons/og-image.jpg" />
+    <link rel="icon" href="../../assets/icons/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="../../assets/icons/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Bench Tools", "item": "https://tools.emerickcc.com/" },
+            { "@type": "ListItem", "position": 2, "name": "Client Roam", "item": "https://tools.emerickcc.com/tools/client-roam/" }
+          ]
+        },
+        {
+          "@type": "WebApplication",
+          "name": "Client Roam",
+          "url": "https://tools.emerickcc.com/tools/client-roam/",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "Any",
+          "isAccessibleForFree": true,
+          "inLanguage": "en",
+          "description": "Cartoon of a sticky Wi-Fi device walking rooms and a hallway: when it leaves an AP, and how long the hole is, with transmit power, min basic rate, and 802.11r/k/v.",
+          "publisher": { "@type": "Organization", "name": "Bench Tools", "url": "https://tools.emerickcc.com/" }
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Does 802.11r make the client roam sooner?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. 802.11r shortens the hole after the client has already decided to leave. A sticky client with FT still holds the old AP too long."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Why does turning power up make roaming worse?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Higher power makes cells bigger, not better. The old AP stays loud farther into the next room, so a sticky client waits longer."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What does min basic rate actually change?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "The inner disc — the usable cell — not RF physics. Energy still goes the same distance. Raise the min rate and only the inner disc shrinks. The outer disc is RF still there."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What do the two discs mean?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Inner disc is the usable cell — the device can hold the min basic rate. Outer disc is RF still there. A sticky client can hold past the inner disc. 802.11v is what kicks it once it leaves that inner cell, if a neighbor can take it."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What is a hard roam versus FT versus a drop?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "A hard roam drops the old AP and fully joins the next one — the radio goes dark in between. History shows that as one hop, not “left nobody.” FT (802.11r) is a fast handoff while still associated. A drop is off the radio with nobody to join yet."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What do 802.11k and 802.11v actually do?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "802.11k gives the client a neighbor list so it does not scan every channel. 802.11v is the AP telling the client to leave for a neighbor. Neither one is a substitute for 802.11r’s short hole."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Does 802.11r still work after the client drops?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. FT only applies while still associated. After a drop, the next join is a full 802.1X or PSK, even with r/k/v checked."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Why is 802.1X the default?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "That is the long hole: EAP plus a 4-way handshake. PSK without r is already short. Fast roam looks magical on enterprise Wi-Fi because 802.1X without r is slow."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Why isn’t the AP across the hall “right there”?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Two walls. Each is about 14 dB here, so across the hall is 28 dB. Next door is one wall. That is the tax, not the hallway distance."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is this a coverage survey?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. It is a cartoon of one sticky device walking rooms and a hallway. Visualization and education only — not an RF survey, and not perfect RF."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+    <link rel="stylesheet" href="../../assets/css/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="../../">
+          <span class="brand__mark" aria-hidden="true">B</span>
+          <span>Bench Tools</span>
+        </a>
+        <nav class="nav" aria-label="Primary">
+          <a href="#glossary">Glossary</a>
+          <a href="#faq">FAQ</a>
+          <a href="../../#tools">All tools</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="site-main site-main--wide cr-main">
+      <header class="cr-pagehead">
+        <a class="back" href="../../">← Back to the toolbox</a>
+        <h1>Client Roam</h1>
+      </header>
+
+      <div class="cr-workspace">
+          <form id="cr-form" class="cr-rail" aria-label="RF and roam settings" novalidate>
+            <div class="cr-stories" id="cr-stories" role="group" aria-label="Start from a story">
+              <span class="cr-stories__label">Stories</span>
+            </div>
+            <div class="field">
+              <span class="cr-dock__label">Journey</span>
+              <div class="cr-pills" role="group" aria-label="Preset walks">
+                <button type="button" class="btn btn--secondary" data-journey="next-door">Next door</button>
+                <button type="button" class="btn btn--secondary" data-journey="across">Across</button>
+                <button type="button" class="btn btn--secondary" data-journey="far">Far end</button>
+                <button type="button" class="btn btn--secondary" id="cr-random" data-journey="random">Random</button>
+              </div>
+              <div class="form-grid" style="margin-top: 0.45rem">
+                <div class="field">
+                  <label for="cr-start">Start</label>
+                  <select id="cr-start"></select>
+                </div>
+                <div class="field">
+                  <label for="cr-end">End</label>
+                  <select id="cr-end"></select>
+                </div>
+              </div>
+            </div>
+            <div class="field">
+              <label for="cr-power">AP power — <span id="cr-power-val">15 dBm</span></label>
+              <input id="cr-power" type="range" min="8" max="20" step="1" value="15" />
+              <p class="hint">Up = bigger cells, stickier device. Nobody ever cranked this and got better roaming.</p>
+            </div>
+            <div class="field">
+              <label for="cr-rate">Min basic rate</label>
+              <select id="cr-rate">
+                <option value="6" selected>6 Mbps — typical default</option>
+                <option value="12">12 Mbps — tighter cell</option>
+                <option value="24">24 Mbps — client must be close</option>
+              </select>
+              <p class="hint">Shrinks the usable cell. The RF does not get the memo.</p>
+            </div>
+            <div class="field">
+              <span class="cr-dock__label">Roam kit</span>
+              <div class="cr-kit">
+                <label class="cr-check"><input type="checkbox" id="cr-ft" /> <span>802.11r</span> <span class="cr-check__note">shorter hole</span></label>
+                <label class="cr-check"><input type="checkbox" id="cr-k" /> <span>802.11k</span> <span class="cr-check__note">shorter scan</span></label>
+                <label class="cr-check"><input type="checkbox" id="cr-v" /> <span>802.11v</span> <span class="cr-check__note">please leave</span></label>
+              </div>
+              <p class="hint">r shortens the hole. It does not make the device less clingy. Dropped is still dropped.</p>
+            </div>
+            <div class="field">
+              <label for="cr-auth">How they log in</label>
+              <select id="cr-auth">
+                <option value="dot1x" selected>802.1X (username/password)</option>
+                <option value="psk">PSK — a shared password</option>
+              </select>
+              <p class="hint">802.1X is why r looks like magic. PSK was already short.</p>
+            </div>
+          </form>
+
+          <div class="cr-stage-col">
+            <div
+              id="cr-stage"
+              class="cr-stage"
+              role="application"
+              aria-label="Floor plan of rooms and a hallway. Drag the client to poke RSSI."
+            ></div>
+            <p class="cr-legend">
+              Inner disc = usable. Outer = RF still there. Sticky clients
+              can hold past the inner disc.
+            </p>
+            <div class="cr-transport" id="cr-transport">
+              <div class="form-actions" style="margin-top: 0">
+                <button type="button" class="btn btn--primary" id="cr-play">Play</button>
+                <button type="button" class="btn btn--secondary" id="cr-reset">Reset</button>
+              </div>
+              <div class="field cr-transport__scrub">
+                <label for="cr-scrub">Walk</label>
+                <input id="cr-scrub" type="range" min="0" max="1" step="0.05" value="0" />
+              </div>
+              <div class="field">
+                <label for="cr-speed">Speed</label>
+                <select id="cr-speed">
+                  <option value="1">1×</option>
+                  <option value="2">2×</option>
+                  <option value="4" selected>4×</option>
+                  <option value="8">8×</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="cr-dwell">Sit first (<span id="cr-dwell-val">5 s</span>)</label>
+                <input id="cr-dwell" type="range" min="0" max="20" step="1" value="5" />
+              </div>
+            </div>
+          </div>
+
+          <aside class="cr-aside">
+            <article class="cr-caption" id="cr-caption" aria-live="polite">
+              <p class="cr-caption__eyebrow" id="cr-cap-eye">Holding A2</p>
+              <p class="cr-caption__headline" id="cr-cap-head">Sit, then walk. Teleporting is not a roam.</p>
+              <p class="cr-caption__body" id="cr-cap-body">
+                Change power or min rate on the left. Watch the cells and the device.
+              </p>
+              <p class="cr-gap" id="cr-gap">—</p>
+            </article>
+            <div class="cr-timeline" id="cr-timeline" aria-label="This roam’s frames"></div>
+            <section class="cr-history-panel" aria-labelledby="cr-history-heading">
+              <h2 id="cr-history-heading">Roam history</h2>
+              <ol class="cr-history" id="cr-history"></ol>
+            </section>
+          </aside>
+      </div>
+
+      <div class="cr-notes">
+        <div class="callout callout--soft cr-disclaimer" role="note">
+          <strong>Not a survey.</strong>
+          This is for visualization and education only. It does not replace
+          an RF survey, and it does not depict perfect RF characteristics.
+        </div>
+
+        <section class="panel" id="glossary" aria-labelledby="glossary-heading">
+          <h2 id="glossary-heading">Glossary</h2>
+          <p class="panel__intro">
+            The words this tab uses, once. Nothing here changes the cartoon.
+          </p>
+          <details class="details-block">
+            <summary>RSSI, sticky, r/k/v, walls, and the rest</summary>
+            <dl>
+              <dt>RSSI</dt>
+              <dd>
+                How loud the AP is at the device, in dBm. Strong-and-stuck is
+                a sticky client. Weak-and-stuck is a wall.
+              </dd>
+              <dt>Sticky client</dt>
+              <dd>
+                A device that holds the old AP into the next room. Typical, not
+                broken. This tab is that device.
+              </dd>
+              <dt>Min basic rate</dt>
+              <dd>
+                The slowest rate the SSID will talk. Beacons use it. Raise it
+                and the <em>usable</em> cell shrinks. The radio does not get
+                quieter.
+              </dd>
+              <dt>802.11r <span aria-hidden="true">/ FT</span></dt>
+              <dd>
+                Fast BSS Transition. Shorter hole after the device has already
+                decided. Does not pick the moment.
+              </dd>
+              <dt>802.11k</dt>
+              <dd>
+                Neighbor report. The client gets a list instead of scanning
+                every channel. Faster discovery. Same trigger.
+              </dd>
+              <dt>802.11v <span aria-hidden="true">/ BTM</span></dt>
+              <dd>
+                BSS Transition Management: the network says “please go there.”
+                This cartoon honors it. Real devices can shrug.
+              </dd>
+              <dt>dB vs dBm</dt>
+              <dd>
+                dBm is a level (RSSI, TX power). dB is a difference (a wall,
+                hysteresis). A 14&nbsp;dB wall is not “−14&nbsp;dBm.”
+              </dd>
+              <dt>Wall loss</dt>
+              <dd>
+                Each wall crossed is 14&nbsp;dB here. Next door is one.
+                Across the hall is two. Doors are ignored on purpose.
+              </dd>
+              <dt>Hysteresis</dt>
+              <dd>
+                The new AP has to be enough better before the device bothers.
+                Stops bouncing. Also makes sticky worse.
+              </dd>
+              <dt>Beacon</dt>
+              <dd>
+                “I am here,” sent at the lowest basic rate. If you cannot
+                decode the beacon, you cannot join, even if RF energy is still
+                on the floor.
+              </dd>
+            </dl>
+          </details>
+        </section>
+
+        <section class="panel faq" id="faq" aria-labelledby="faq-heading">
+          <h2 id="faq-heading">FAQ</h2>
+          <details>
+            <summary>Does 802.11r make the client roam sooner?</summary>
+            <p>
+              No. Check r and hit Play. The hole shrinks. The roam point does
+              not move. A sticky client with FT still holds the old AP too
+              long.
+            </p>
+          </details>
+          <details>
+            <summary>Why does turning power up make roaming worse?</summary>
+            <p>
+              Higher power makes cells bigger, not “better roaming.” The old
+              AP stays loud farther into the next room, so the client waits
+              longer. Overlap grows. Sticky gets worse.
+            </p>
+          </details>
+          <details>
+            <summary>What does min basic rate actually change?</summary>
+            <p>
+              The inner disc — the usable cell — not RF physics. Energy still
+              goes the same distance. Raise the min rate and only the inner
+              disc shrinks. The outer disc is RF still there.
+            </p>
+          </details>
+          <details>
+            <summary>What do the two discs mean?</summary>
+            <p>
+              Inner disc is the usable cell — the device can hold the min
+              basic rate. Outer disc is RF still there. A sticky client can
+              hold past the inner disc. <strong>802.11v</strong> is what
+              kicks it once it leaves that inner cell, if a neighbor can
+              take it.
+            </p>
+          </details>
+          <details>
+            <summary>What is a hard roam versus FT versus a drop?</summary>
+            <p>
+              A <strong>hard roam</strong> drops the old AP and fully joins
+              the next one — the radio goes dark in between. History shows
+              that as one hop, not “left nobody.” <strong>FT</strong>
+              (802.11r) is a fast handoff while still associated.
+              A <strong>drop</strong> is off the radio with nobody to join yet.
+            </p>
+          </details>
+          <details>
+            <summary>What do 802.11k and 802.11v actually do?</summary>
+            <p>
+              <strong>802.11k</strong> gives the client a neighbor list, so
+              it does not scan every channel — roam history will say it
+              already knew the next AP. <strong>802.11v</strong> is the
+              serving AP telling the client to leave; the old AP flashes a
+              kick. Neither one is a substitute for 802.11r’s short hole.
+            </p>
+          </details>
+          <details>
+            <summary>Does 802.11r still work after the client drops?</summary>
+            <p>
+              No. FT only applies while still associated. After a drop, the
+              next join is a full 802.1X or PSK, even with r/k/v checked.
+              Raise power or lower min rate so it can roam <em>before</em> it
+              dies.
+            </p>
+          </details>
+          <details>
+            <summary>Why is 802.1X the default?</summary>
+            <p>
+              That is the long hole: EAP plus a 4-way handshake. PSK without r
+              is already short. Fast roam looks magical on enterprise Wi-Fi
+              because 802.1X without r is slow.
+            </p>
+          </details>
+          <details>
+            <summary>Why isn’t the AP across the hall “right there”?</summary>
+            <p>
+              Two walls. Each is about 14&nbsp;dB here, so across the hall is
+              28&nbsp;dB. Next door is one wall. That is the tax, not the
+              hallway distance.
+            </p>
+          </details>
+          <details>
+            <summary>Is this a coverage survey?</summary>
+            <p>
+              No. It is a cartoon of one sticky device walking rooms and a
+              hallway. Visualization and education only — not an RF survey,
+              and not perfect RF.
+            </p>
+          </details>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <p>
+          Hand-assembled utilities. If something’s missing, it might be next —
+          or it might be a weekend project that got distracted by snacks.
+        </p>
+      </div>
+    </footer>
+
+    <script type="module" src="./app.js?v=12"></script>
+  </body>
+</html>

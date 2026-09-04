@@ -25,6 +25,7 @@ python3 -m http.server 8080
 | **Hardware Platform Support** | Aruba AOS-10/Instant matrix + Juniper EX/QFX/AP Pathfinder |
 | **Aruba Antenna Matrix** | Which external antenna for which Aruba AP — how many, omni vs directional |
 | **AP Capacity** | How many users can this AP actually support — practical throughput, not PHY |
+| **Client Roam** | Rooms and a hallway: when a device leaves an AP, and how long the hole is (power, min rates, 802.11r/k/v) |
 | **Central Alerts & Insights** | Searchable Aruba Central alert / insight catalog |
 | **Access Tracker Translator** | ClearPass session export → sticky-note story + why |
 | **CLI Explorer** | AOS-CX 10.13.x–10.18.x (per switch series) + AOS 10 CLI hierarchy from local PDF TOC |
@@ -51,6 +52,9 @@ bench-tools/
 │   │   ├── index.html / app.js / model.js
 │   │   ├── data/aps.json            # Curated Aruba + Juniper Mist radio/stream snapshot
 │   │   └── test_model.py / test_model.js
+│   ├── client-roam/                 # Rooms and a hallway: sticky roam (802.11r/k/v, power vs min rate)
+│   │   ├── index.html / app.js / model.js
+│   │   └── test_model.js
 │   ├── central-alerts/
 │   ├── access-tracker/
 │   │   ├── decoder.js
@@ -130,6 +134,16 @@ node tools/ap-capacity/test_model.js
 ```
 
 See [tools/ap-capacity/README.md](./tools/ap-capacity/README.md).
+
+### Client Roam
+
+Cartoon under `tools/client-roam/`. A sticky device walks rooms and a hallway. You see when it leaves an AP — and how long the hole is — with transmit power, min basic rate, and 802.11r/k/v. Power versus the min basic rate is the whole plot. Visualization only; it is not an RF survey.
+
+```bash
+node tools/client-roam/test_model.js
+```
+
+See [tools/client-roam/README.md](./tools/client-roam/README.md).
 
 ### Subnet Planner
 
