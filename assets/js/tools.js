@@ -76,6 +76,16 @@ export const tools = [
     cta: "Estimate",
   },
   {
+    id: "client-roam",
+    title: "Client Roam",
+    description:
+      "A sticky device walks rooms and a hallway. See when it leaves an AP — and how long the hole is — with power, min rates, and 802.11r/k/v.",
+    href: "./tools/client-roam/",
+    icon: "RM",
+    status: "available",
+    cta: "Walk the hallway",
+  },
+  {
     id: "access-tracker",
     title: "Access Tracker Translator",
     description:
