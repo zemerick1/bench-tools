@@ -89,7 +89,7 @@ bench-tools/
 ## Adding a tool
 
 1. Put it under `tools/<tool-id>/`.
-2. Register a card in `assets/js/tools.js`.
+2. Register a card in `assets/js/tools.js` (the left Tools flyout on tool pages reads this list).
 3. Prefer zero build steps and no secrets in the repo.
 
 ## Tool notes
