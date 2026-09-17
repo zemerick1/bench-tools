@@ -83,6 +83,13 @@ def build_catalog(min_version: str | None = None) -> dict:
     # AOS 10 full bank (not layered)
     aos10 = DATA_DIR / "aos-10"
     if (aos10 / "tree.json").is_file() and (aos10 / "entries.json").is_file():
+        aos10_meta = {}
+        mp = aos10 / "meta.json"
+        if mp.is_file():
+            try:
+                aos10_meta = json.loads(mp.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                aos10_meta = {}
         banks.append(
             {
                 "id": "aos-10",
@@ -90,6 +97,7 @@ def build_catalog(min_version: str | None = None) -> dict:
                 "family": "AOS 10",
                 "versionHint": "10.x",
                 "platform": None,
+                "sourceFormat": aos10_meta.get("sourceFormat") or "pdf",
                 "default": False,
                 "dataPath": "data/aos-10",
             }

@@ -218,12 +218,12 @@ See [tools/antenna-matrix/README.md](./tools/antenna-matrix/README.md).
 
 ### CLI Explorer
 
-Searchable, hierarchical browser for Aruba/HPE CLI reference guides (Juniper CLI Explorer–style). The UI only loads static JSON. Older trains come from local PDFs; AOS-CX 10.17.1000+ can be built from HPE Support Center HTML (`scripts/build_from_html.py`).
+Searchable, hierarchical browser for Aruba/HPE CLI reference guides (Juniper CLI Explorer–style). The UI only loads static JSON. Older AOS-CX trains come from local PDFs; AOS-CX 10.17.1000+ from HPE Support Center HTML (`scripts/build_from_html.py`); AOS 10 from Aruba CLI-Bank HTML (`scripts/build_from_cli_bank.py`).
 
 | Product | What’s indexed |
 |---------|----------------|
 | **AOS-CX 10.13.x – 10.18.x** | Nested TOC from the official per-series CLI PDFs (layered common + platform packs for each software train) |
-| **AOS 10.x** | AOS 10 controller/gateway CLI reference PDF |
+| **AOS 10.x** | Aruba CLI-Bank HTML (`show` commands, letter-sharded Flare topics) |
 
 - Pick **Product → Version → Switch series** for AOS-CX (or product alone for AOS 10)
 - Catalog + layered packs (`data/catalog.json`, `data/layers/`, `data/aos-10/`)
