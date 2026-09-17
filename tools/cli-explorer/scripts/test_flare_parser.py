@@ -72,5 +72,31 @@ class FlareTopicTests(unittest.TestCase):
         self.assertIn("show aaa authentication via global-config", self.parsed["preview"])
 
 
+class ClearPassFlareTests(unittest.TestCase):
+    """ClearPass repeats Description for the example screen and puts params in the first."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        html = (FIXTURES / "cppm_ad_auth.htm").read_text(encoding="utf-8")
+        cls.parsed = parse_flare_topic(html)
+
+    def test_title_and_syntax(self) -> None:
+        self.assertEqual(self.parsed["title"], "ad auth")
+        self.assertIn("ad auth -u", self.parsed["syntax"])
+
+    def test_description_is_prose_not_example(self) -> None:
+        self.assertIn("Active Directory", self.parsed["description"])
+        self.assertNotIn("[appadmin]", self.parsed["description"])
+
+    def test_second_description_is_examples(self) -> None:
+        self.assertIn("ad auth -u jbrown", self.parsed["examples"])
+        self.assertIn("Authentication successful", self.parsed["examples"])
+
+    def test_param_table_inside_description(self) -> None:
+        rows = self.parsed["paramRows"]
+        self.assertGreaterEqual(len(rows), 2)
+        self.assertIn("parameter", rows[0][0].lower())
+
+
 if __name__ == "__main__":
     unittest.main()

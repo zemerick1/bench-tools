@@ -112,7 +112,7 @@ export const tools = [
     id: "cli-explorer",
     title: "CLI Explorer",
     description:
-      "Aruba/HPE CLI in a tree, not a multi-thousand-page PDF. AOS-CX, AOS 10, more banks offline.",
+      "Aruba/HPE CLI in a tree, not a multi-thousand-page PDF. AOS-CX, AOS 10, ClearPass.",
     href: "./tools/cli-explorer/",
     icon: "CLI",
     status: "available",

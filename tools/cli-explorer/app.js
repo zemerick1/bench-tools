@@ -84,6 +84,7 @@
 
     if (!family) {
       if (id === "aos-10" || id.startsWith("aos-10")) family = "AOS 10";
+      else if (id === "clearpass" || id.startsWith("clearpass")) family = "ClearPass";
       else if (id.startsWith("aos-cx")) family = "AOS-CX";
       else family = "Other";
     }
@@ -97,6 +98,11 @@
     if (id === "aos-10" || family === "AOS 10") {
       family = "AOS 10";
       if (!versionHint) versionHint = "10.x";
+      platform = null;
+    }
+    if (id === "clearpass" || family === "ClearPass") {
+      family = "ClearPass";
+      if (!versionHint) versionHint = "Policy Manager";
       platform = null;
     }
 
@@ -113,6 +119,7 @@
       (platform && label.indexOf(platform) !== -1 && platLabel !== platform)
     ) {
       if (family === "AOS 10") label = "AOS 10.x";
+      else if (family === "ClearPass") label = "ClearPass";
       else if (platform) label = `AOS-CX ${versionHint} · ${platLabel}`;
       else label = `AOS-CX ${versionHint}`;
     }
@@ -167,7 +174,7 @@
   }
 
   function families() {
-    const order = ["AOS-CX", "AOS 10"];
+    const order = ["AOS-CX", "AOS 10", "ClearPass"];
     const set = new Set(banks.map((b) => b.family));
     return [...order.filter((f) => set.has(f)), ...[...set].filter((f) => !order.includes(f))];
   }
@@ -192,9 +199,13 @@
       );
   }
 
+  function familyNeedsDrillDown(family) {
+    return banks.some((b) => b.family === family && b.platform);
+  }
+
   function resolveBank(family, version, platform) {
-    if (family === "AOS 10") {
-      return banks.find((b) => b.family === "AOS 10") || null;
+    if (!familyNeedsDrillDown(family)) {
+      return banks.find((b) => b.family === family) || null;
     }
     const matches = banks.filter(
       (b) => b.family === family && b.versionHint === version
@@ -232,7 +243,7 @@
 
     const famList = families();
     const family = famList.includes(bank.family) ? bank.family : famList[0];
-    const isCx = family === "AOS-CX";
+    const drillDown = familyNeedsDrillDown(family);
 
     fillSelect(
       $("cx-family"),
@@ -240,7 +251,7 @@
       family
     );
 
-    if (isCx) {
+    if (drillDown) {
       setFieldVisible("cx-version-wrap", true);
       setFieldVisible("cx-model-wrap", true);
       const vers = versionsFor(family);
@@ -274,7 +285,7 @@
       $("cx-version").disabled = vers.length <= 1;
       $("cx-model").disabled = models.length <= 1;
     } else {
-      // AOS 10 — no version/model drill-down
+      // AOS 10 / ClearPass — no version/model drill-down
       setFieldVisible("cx-version-wrap", false);
       setFieldVisible("cx-model-wrap", false);
       fillSelect($("cx-version"), [{ value: "", label: "—" }], "");
@@ -812,8 +823,8 @@
     const onFamilyChange = async () => {
       if (syncingSelects) return;
       const family = $("cx-family").value;
-      if (family === "AOS 10") {
-        const b = resolveBank("AOS 10", "10.x", null);
+      if (!familyNeedsDrillDown(family)) {
+        const b = resolveBank(family, "", null);
         if (b) await loadBank(b.id);
         return;
       }

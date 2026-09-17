@@ -1,4 +1,11 @@
-# Refresh AOS-CX CLI Explorer packs from HPE Support Center HTML.
+# Refresh CLI Explorer packs:
+#   AOS-CX  — HPE Support Center HTML (sd0000 books)
+#   AOS 10 + ClearPass — Aruba CLI-Bank Flare letter shards
+#
+# CLI-Bank (see tools/cli-explorer/scripts/build_from_cli_bank.py BOOKS):
+#   AOS 10     Data/Tocs/AOS10__Commands__A_Chunk0.js
+#   ClearPass  Data/Tocs/cppm__Command_List__A_Chunk0.js
+# Akamai 403s without HTTP/2 + Edge UA + sec-ch-ua. Cache source/cli-bank.
 #
 # 1. curl --http2 + Chrome UA / sec-ch-ua / Sec-Fetch-* fetches live cli.json
 #    (HTTP/1.1 is Akamai 403). New sd0000 ids = new books to download.
@@ -52,13 +59,16 @@ jobs:
         with:
           path: |
             tools/cli-explorer/source/html
+            tools/cli-explorer/source/cli-bank
             tools/cli-explorer/full-banks
           key: cli-html-${{ github.run_id }}
           restore-keys: |
             cli-html-
 
       - name: Parser unit tests
-        run: python tools/cli-explorer/scripts/test_html_parser.py -q
+        run: |
+          python tools/cli-explorer/scripts/test_html_parser.py -q
+          python tools/cli-explorer/scripts/test_flare_parser.py -q
 
       - name: Fetch HTML trains, layer, catalog
         working-directory: tools/cli-explorer
@@ -69,6 +79,16 @@ jobs:
           fi
           python scripts/build_html_train.py --workers 16 $extra
 
+      - name: Refresh AOS 10 + ClearPass from CLI-Bank
+        working-directory: tools/cli-explorer
+        run: |
+          extra=""
+          if [ "${{ github.event.inputs.refresh }}" = "true" ]; then
+            extra="--refresh"
+          fi
+          python scripts/build_from_cli_bank.py --all --workers 16 $extra
+          python scripts/build_catalog.py
+
       - name: Refuse an empty 10.18 tree
         run: |
           leaves=$(python -c "import json; print(json.load(open('tools/cli-explorer/data/layers/aos-cx-10.18/common/meta.json')).get('totalLeafUniverse',0))")
@@ -78,17 +98,28 @@ jobs:
             exit 1
           fi
 
+      - name: Refuse empty CLI-Bank banks
+        run: |
+          aos=$(python -c "import json; print(json.load(open('tools/cli-explorer/data/aos-10/meta.json')).get('leafCount',0))")
+          cppm=$(python -c "import json; print(json.load(open('tools/cli-explorer/data/clearpass/meta.json')).get('leafCount',0))")
+          echo "AOS 10 commands: $aos"
+          echo "ClearPass commands: $cppm"
+          if [ "$aos" -lt 200 ]; then echo "AOS 10 bank looks empty ($aos)"; exit 1; fi
+          if [ "$cppm" -lt 40 ]; then echo "ClearPass bank looks empty ($cppm)"; exit 1; fi
+
       - name: Commit layered packs if they changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -- \
             tools/cli-explorer/data/layers \
+            tools/cli-explorer/data/aos-10 \
+            tools/cli-explorer/data/clearpass \
             tools/cli-explorer/data/catalog.json \
             tools/cli-explorer/scripts/portal/aoscx-cli.json
           if git diff --staged --quiet; then
             echo "No CLI HTML layer changes"
             exit 0
           fi
-          git commit -m "Refresh AOS-CX CLI HTML layers from HPESC."
+          git commit -m "Refresh CLI HTML banks from HPESC and CLI-Bank."
           bash .github/scripts/push-bot-commit.sh "$GITHUB_REF_NAME"

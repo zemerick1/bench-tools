@@ -1,6 +1,6 @@
 # CLI Explorer
 
-Searchable browser for Aruba/HPE CLI guides (AOS-CX and AOS 10).
+Searchable browser for Aruba/HPE CLI guides (AOS-CX, AOS 10, and ClearPass).
 
 ## How data is produced
 
@@ -11,9 +11,8 @@ Searchable browser for Aruba/HPE CLI guides (AOS-CX and AOS 10).
    load time so we do not ship every full bank.
 
 The web app serves static HTML/JS, `data/catalog.json`, layered packs under
-`data/layers/`, HTML-built full banks under `data/aos-cx-*-html-*`, and AOS 10
-under `data/aos-10/` (CLI-Bank Flare HTML). Offline tooling lives in `scripts/`
-(repo only — not part of the product UI).
+`data/layers/`, and CLI-Bank banks under `data/aos-10/` and `data/clearpass/`.
+Offline tooling lives in `scripts/` (repo only — not part of the product UI).
 
 HTML ingest (HPESC DITA topics, no PDF) lives in `scripts/build_from_html.py`.
 It fetches the Support Center TOC + per-command HTML for a `sd0000…` doc id
@@ -25,7 +24,7 @@ loads. Raw topic JSON is cached under `source/html/` (gitignored).
 Open `/tools/cli-explorer/` from the site root.
 
 Pick **Product** → for AOS-CX also **Version** and **Switch series**, or just
-**AOS 10**. Filter the tree and open a command.
+**AOS 10** / **ClearPass**. Filter the tree and open a command.
 
 ### Why “Raw extracted block” exists
 
@@ -74,22 +73,30 @@ PDFs go in `source/` (gitignored). Full per-platform banks from
 kept locally without bloating the repo. **Ship `data/layers/` + `catalog.json`**
 (and `data/aos-10/`). Markdown exports default to `markdown/` (gitignored).
 
-### AOS 10 (CLI-Bank HTML)
+### CLI-Bank HTML (AOS 10, ClearPass)
 
-AOS 10 is **not** a PDF. Commands are MadCap Flare topics, indexed by letter
-shards under `Data/Tocs/AOS10__Commands__{A-W}_Chunk0.js`. Akamai 403s a
-plain fetch; the builder uses HTTP/2 + Edge UA + `sec-ch-ua` (same idea as
-`fetch_cli_json.py`).
+These are **not** PDFs. Commands are MadCap Flare topics, indexed by letter
+shards. Akamai 403s a plain fetch; the builder uses HTTP/2 + Edge UA +
+`sec-ch-ua`. Book prefixes live in `BOOKS` inside `build_from_cli_bank.py`
+(how to add the next landing page is documented there).
+
+| Product | Shard prefix | Landing |
+|---------|--------------|---------|
+| AOS 10 | `AOS10__Commands` | `…/landing-pages/aos10-home.htm` |
+| ClearPass | `cppm__Command_List` | `…/landing-pages/cppm-home.htm` |
 
 ```bash
 python3 scripts/test_flare_parser.py
-python3 scripts/build_from_cli_bank.py
+python3 scripts/build_from_cli_bank.py --book aos-10
+python3 scripts/build_from_cli_bank.py --book clearpass
+# or both (what GitHub Actions runs):
+python3 scripts/build_from_cli_bank.py --all
 python3 scripts/build_catalog.py
-# later: python3 scripts/build_from_cli_bank.py --offline
 ```
 
-Raw topic HTML caches under `source/cli-bank/aos10/` (gitignored). Published
-slices stay in `data/aos-10/`.
+Raw topic HTML caches under `source/cli-bank/<book>/` (gitignored). Published
+slices stay in `data/aos-10/` and `data/clearpass/`. The weekly HTML workflow
+refreshes both.
 
 ### HTML ingest (HPESC, no PDF)
 

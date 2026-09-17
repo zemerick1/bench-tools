@@ -29,7 +29,7 @@ python3 -m http.server 8080
 | **Client Auth** | A device logs in: who it talks to, who trusts the cert (EAP-TLS, PEAP, TTLS, TEAP, MAC). Not a packet capture |
 | **Central Alerts & Insights** | Searchable Aruba Central alert / insight catalog |
 | **Access Tracker Translator** | ClearPass session export → sticky-note story + why |
-| **CLI Explorer** | AOS-CX 10.13.x–10.18.x (per switch series) + AOS 10 CLI hierarchy from local PDF TOC |
+| **CLI Explorer** | AOS-CX 10.13.x–10.18.x (per switch series) + AOS 10 and ClearPass from CLI-Bank HTML |
 | **Show-Tech Sticky Note** | Paste a novel-length show-tech → sticky facts + loud lines (**not** an RCA) |
 | **Subnet Planner** | Buildings × roles × device counts → meshed greenfield IPv4 scheme (**not** a calculator) |
 | **OpenAPI Docs** | Central (and other hub specs) split into feature slices and rendered in Scalar |
@@ -74,7 +74,7 @@ bench-tools/
 │   ├── subnet-planner/          # Greenfield multi-building IPv4 scheme (not a calculator)
 │   │   ├── index.html / app.js / planner.js
 │   │   └── test_planner.js
-│   ├── cli-explorer/            # AOS-CX 10.13.x–10.18.x + AOS 10
+│   ├── cli-explorer/            # AOS-CX 10.13.x–10.18.x + AOS 10 + ClearPass
 │   │   ├── index.html / app.js
 │   │   ├── scripts/             # Offline PDF → layers pipeline (not web UI)
 │   │   ├── data/                # catalog.json, layers/, aos-10/
@@ -218,15 +218,16 @@ See [tools/antenna-matrix/README.md](./tools/antenna-matrix/README.md).
 
 ### CLI Explorer
 
-Searchable, hierarchical browser for Aruba/HPE CLI reference guides (Juniper CLI Explorer–style). The UI only loads static JSON. Older AOS-CX trains come from local PDFs; AOS-CX 10.17.1000+ from HPE Support Center HTML (`scripts/build_from_html.py`); AOS 10 from Aruba CLI-Bank HTML (`scripts/build_from_cli_bank.py`).
+Searchable, hierarchical browser for Aruba/HPE CLI reference guides (Juniper CLI Explorer–style). The UI only loads static JSON. Older AOS-CX trains come from local PDFs; AOS-CX 10.17.1000+ from HPE Support Center HTML (`scripts/build_from_html.py`); AOS 10 and ClearPass from Aruba CLI-Bank HTML (`scripts/build_from_cli_bank.py`).
 
 | Product | What’s indexed |
 |---------|----------------|
 | **AOS-CX 10.13.x – 10.18.x** | Nested TOC from the official per-series CLI PDFs (layered common + platform packs for each software train) |
-| **AOS 10.x** | Aruba CLI-Bank HTML (`show` commands, letter-sharded Flare topics) |
+| **AOS 10.x** | Aruba CLI-Bank HTML (`AOS10__Commands` letter shards) |
+| **ClearPass** | Aruba CLI-Bank HTML (`cppm__Command_List` letter shards) |
 
-- Pick **Product → Version → Switch series** for AOS-CX (or product alone for AOS 10)
-- Catalog + layered packs (`data/catalog.json`, `data/layers/`, `data/aos-10/`)
+- Pick **Product → Version → Switch series** for AOS-CX (or product alone for AOS 10 / ClearPass)
+- Catalog + layered packs (`data/catalog.json`, `data/layers/`, `data/aos-10/`, `data/clearpass/`)
 - Tree filter, command detail (syntax, description, parameters, examples, raw extract)
 - Offline extract pipeline under `tools/cli-explorer/scripts/` (not part of the public UI)
 - Unofficial helper — always defer to current HPE docs for production decisions

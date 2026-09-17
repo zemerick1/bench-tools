@@ -80,26 +80,33 @@ def build_catalog(min_version: str | None = None) -> dict:
     banks: list[dict] = []
     min_t = ver_tuple(min_version) if min_version else None
 
-    # AOS 10 full bank (not layered)
-    aos10 = DATA_DIR / "aos-10"
-    if (aos10 / "tree.json").is_file() and (aos10 / "entries.json").is_file():
-        aos10_meta = {}
-        mp = aos10 / "meta.json"
+    # Single-product CLI-Bank HTML banks (AOS 10, ClearPass, …).
+    # data/<bank_id>/{tree,entries,meta}.json — same layout as aos-10.
+    for bank_dir in sorted(DATA_DIR.iterdir()):
+        if not bank_dir.is_dir() or bank_dir.name in {"layers"}:
+            continue
+        if bank_dir.name.startswith("aos-cx"):
+            continue
+        if not (bank_dir / "tree.json").is_file() or not (bank_dir / "entries.json").is_file():
+            continue
+        meta = {}
+        mp = bank_dir / "meta.json"
         if mp.is_file():
             try:
-                aos10_meta = json.loads(mp.read_text(encoding="utf-8"))
+                meta = json.loads(mp.read_text(encoding="utf-8"))
             except json.JSONDecodeError:
-                aos10_meta = {}
+                meta = {}
+        family = meta.get("family") or bank_dir.name
         banks.append(
             {
-                "id": "aos-10",
-                "label": "AOS 10.x",
-                "family": "AOS 10",
-                "versionHint": "10.x",
+                "id": meta.get("bankId") or bank_dir.name,
+                "label": meta.get("label") or bank_dir.name,
+                "family": family,
+                "versionHint": meta.get("versionHint") or "",
                 "platform": None,
-                "sourceFormat": aos10_meta.get("sourceFormat") or "pdf",
+                "sourceFormat": meta.get("sourceFormat") or "html",
                 "default": False,
-                "dataPath": "data/aos-10",
+                "dataPath": f"data/{bank_dir.name}",
             }
         )
 

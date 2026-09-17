@@ -66,7 +66,12 @@ def split_flare_sections(html: str) -> Tuple[str, Dict[str, str]]:
     while i + 1 < len(parts):
         title = re.sub(r"\s+", " ", html_to_text(parts[i])).strip().lower()
         if title:
-            sections[title] = parts[i + 1]
+            if title in sections:
+                # ClearPass often repeats <h2>Description</h2> for the example screen.
+                if title == "description" and "example" not in sections and "examples" not in sections:
+                    sections["example"] = parts[i + 1]
+            else:
+                sections[title] = parts[i + 1]
         i += 2
     return preamble, sections
 
@@ -158,12 +163,17 @@ def parse_flare_topic(page_html: str) -> Dict[str, Any]:
         syn = fields["title"]
     fields["syntax"] = syn
 
-    desc = html_to_text(_section(sections, "description", "descriptions"))
+    desc_html = _section(sections, "description", "descriptions")
+    before_table = desc_html
+    tpos = re.search(r"<table\b", desc_html or "", re.I)
+    if tpos:
+        before_table = desc_html[: tpos.start()]
+    desc = html_to_text(before_table)
     desc = re.sub(r"\s+", " ", desc).strip()
     fields["description"] = desc
 
     param_html = _section(sections, "parameter", "parameters")
-    tables = parse_tables(param_html)
+    tables = parse_tables(param_html) or parse_tables(desc_html)
     for tab in tables:
         header = " ".join(tab[0]).lower()
         if "parameter" in header:

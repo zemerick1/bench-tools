@@ -1,20 +1,41 @@
 #!/usr/bin/env python3
-"""Build the AOS 10 CLI Explorer bank from Aruba CLI-Bank Flare HTML.
+"""Build CLI Explorer banks from Aruba CLI-Bank MadCap Flare HTML.
 
-Letter shards live at::
+How a book is discovered
+------------------------
+Landing pages (aos10-home.htm, cppm-home.htm, …) do **not** embed the command
+list. Letter chips load AMD shards::
 
-    Data/Tocs/AOS10__Commands__A_Chunk0.js
-    Data/Tocs/AOS10__Commands__B_Chunk0.js
-    …
+    https://arubanetworking.hpe.com/techdocs/CLI-Bank/Data/Tocs/<PREFIX>__<Letter>_Chunk0.js
 
-Akamai 403s HTTP/1.1 urllib. curl --http2 with the Edge UA + sec-ch-ua /
-Sec-Fetch-* headers is what actually returns 200.
+AOS 10 PREFIX = ``AOS10__Commands``
+ClearPass PREFIX = ``cppm__Command_List``  (note: Command_List, not Commands)
+
+To add the next product (AOS-8, Instant, SD-Branch, …):
+
+1. Open the landing page in a browser that sends Edge UA + sec-ch-ua
+   (Akamai 403s urllib / curl without those). DevTools → Network, click
+   letter A, copy the Toc JS URL, take the PREFIX before ``__A_Chunk0.js``.
+2. Add a ``BOOKS`` entry below. ``min_leaves`` is the GitHub Actions floor.
+3. Catalog + UI treat ``platform: null`` families as a single Product pick
+   (no version/model). ``build_catalog.py`` already scans ``data/<bank_id>/``.
+4. GitHub Actions: ``.github/workflows/update-cli-html.yml`` runs
+   ``python scripts/build_from_cli_bank.py --all`` after the AOS-CX HTML
+   trains. Cache ``tools/cli-explorer/source/cli-bank``. Commit
+   ``data/aos-10``, ``data/clearpass``, ``data/catalog.json``.
+
+Fetch recipe (same as fetch_cli_json.py, Edge 152 Windows)::
+
+    curl --http2 + Edge UA + sec-ch-ua / sec-ch-ua-mobile / sec-ch-ua-platform
+    Sec-Fetch-Dest: script (chunks) or document (topics)
+    Referer: that book's landing page
 
 Usage (from tools/cli-explorer/)::
 
-    python3 scripts/build_from_cli_bank.py
-    python3 scripts/build_from_cli_bank.py --limit 20 --workers 4
-    python3 scripts/build_from_cli_bank.py --offline
+    python3 scripts/build_from_cli_bank.py --book aos-10
+    python3 scripts/build_from_cli_bank.py --book clearpass
+    python3 scripts/build_from_cli_bank.py --all
+    python3 scripts/build_from_cli_bank.py --book clearpass --offline
 """
 
 from __future__ import annotations
@@ -38,13 +59,12 @@ from flare_topic import group_title, parse_flare_topic, parse_toc_chunk  # noqa:
 
 APP_ROOT = SCRIPTS_DIR.parent
 DATA_DIR = APP_ROOT / "data"
-SOURCE_DIR = APP_ROOT / "source" / "cli-bank" / "aos10"
+SOURCE_ROOT = APP_ROOT / "source" / "cli-bank"
 
 CLI_BANK = "https://arubanetworking.hpe.com/techdocs/CLI-Bank"
-LANDING = CLI_BANK + "/Content/landing-pages/aos10-home.htm"
-CHUNK_URL = CLI_BANK + "/Data/Tocs/AOS10__Commands__{letter}_Chunk{n}.js"
 LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+# Akamai 403s HTTP/1.1 urllib. This UA + client hints is what CLI-Bank 200s.
 EDGE_UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -52,6 +72,7 @@ EDGE_UA = (
 )
 SEC_CH_UA = '"Chromium";v="152", "Not?A_Brand";v="24", "Microsoft Edge";v="152"'
 
+# Shared front-matter titles across CLI-Bank books.
 PREFACE_TITLES = {
     "aos 10",
     "accessing aos 10 cli",
@@ -61,6 +82,36 @@ PREFACE_TITLES = {
     "saving configuration changes",
     "specifying addresses and identifiers in commands",
     "typographic conventions",
+    "clearpass",
+    "about this guide",
+}
+
+# chunk_prefix is the stem before ``__A_Chunk0.js``.
+BOOKS: Dict[str, Dict[str, Any]] = {
+    "aos-10": {
+        "bank_id": "aos-10",
+        "chunk_prefix": "AOS10__Commands",
+        "landing": CLI_BANK + "/Content/landing-pages/aos10-home.htm",
+        "family": "AOS 10",
+        "label": "AOS 10.x",
+        "version_hint": "10.x",
+        "source": "AOS-10.x Command-Line Interface Reference Guide",
+        "source_note": "Indexed from Aruba CLI-Bank HTML (AOS 10 letter shards)",
+        "min_leaves": 200,
+        "cache_name": "aos10",
+    },
+    "clearpass": {
+        "bank_id": "clearpass",
+        "chunk_prefix": "cppm__Command_List",
+        "landing": CLI_BANK + "/Content/landing-pages/cppm-home.htm",
+        "family": "ClearPass",
+        "label": "ClearPass",
+        "version_hint": "Policy Manager",
+        "source": "ClearPass Policy Manager Command-Line Interface Reference Guide",
+        "source_note": "Indexed from Aruba CLI-Bank HTML (ClearPass letter shards)",
+        "min_leaves": 40,
+        "cache_name": "clearpass",
+    },
 }
 
 
@@ -78,7 +129,7 @@ def slugify(title: str, used: set) -> str:
     return slug
 
 
-def http_get(url: str, *, dest: str, mode: str) -> bytes:
+def http_get(url: str, *, dest: str, mode: str, referer: str) -> bytes:
     cmd = [
         "curl",
         "-sS",
@@ -96,7 +147,7 @@ def http_get(url: str, *, dest: str, mode: str) -> bytes:
         "-H",
         "Accept-Language: en-US,en;q=0.9",
         "-H",
-        "Referer: {0}".format(LANDING),
+        "Referer: {0}".format(referer),
         "-H",
         "Origin: https://arubanetworking.hpe.com",
         "-H",
@@ -129,29 +180,48 @@ def topic_url(path: str) -> str:
     return CLI_BANK + encoded
 
 
-def cache_path_for(rel: str) -> Path:
+def cache_path_for(book: Dict[str, Any], rel: str) -> Path:
     safe = rel.lstrip("/").replace("..", "_")
-    return SOURCE_DIR / safe
+    return SOURCE_ROOT / book["cache_name"] / safe
 
 
-def fetch_cached(url: str, dest_path: Path, *, dest: str, mode: str, refresh: bool) -> bytes:
+def fetch_cached(
+    url: str,
+    dest_path: Path,
+    *,
+    dest: str,
+    mode: str,
+    referer: str,
+    refresh: bool,
+) -> bytes:
     if dest_path.is_file() and not refresh:
         return dest_path.read_bytes()
-    blob = http_get(url, dest=dest, mode=mode)
+    blob = http_get(url, dest=dest, mode=mode, referer=referer)
     dest_path.parent.mkdir(parents=True, exist_ok=True)
     dest_path.write_bytes(blob)
     return blob
 
 
-def fetch_letter_chunks(*, refresh: bool, offline: bool) -> List[Dict[str, Any]]:
+def chunk_url(book: Dict[str, Any], letter: str, n: int) -> str:
+    return "{0}/Data/Tocs/{1}__{2}_Chunk{3}.js".format(
+        CLI_BANK, book["chunk_prefix"], letter, n
+    )
+
+
+def fetch_letter_chunks(
+    book: Dict[str, Any], *, refresh: bool, offline: bool
+) -> List[Dict[str, Any]]:
     commands: List[Dict[str, Any]] = []
     seen = set()
+    referer = book["landing"]
     for letter in LETTERS:
         n = 0
         while n < 8:
-            rel = "chunks/AOS10__Commands__{0}_Chunk{1}.js".format(letter, n)
-            path = cache_path_for(rel)
-            url = CHUNK_URL.format(letter=letter, n=n)
+            rel = "chunks/{0}__{1}_Chunk{2}.js".format(
+                book["chunk_prefix"], letter, n
+            )
+            path = cache_path_for(book, rel)
+            url = chunk_url(book, letter, n)
             if offline:
                 if not path.is_file():
                     break
@@ -159,7 +229,12 @@ def fetch_letter_chunks(*, refresh: bool, offline: bool) -> List[Dict[str, Any]]
             else:
                 try:
                     blob = fetch_cached(
-                        url, path, dest="script", mode="no-cors", refresh=refresh
+                        url,
+                        path,
+                        dest="script",
+                        mode="no-cors",
+                        referer=referer,
+                        refresh=refresh,
                     )
                 except RuntimeError:
                     if path.is_file() and not refresh:
@@ -210,7 +285,9 @@ def print_progress(done: int, total: int, started: float, item: str = "") -> Non
         sys.stdout.write("\n")
 
 
-def build_tree(commands: List[Dict[str, Any]], parsed: Dict[str, Dict[str, Any]]) -> Tuple[list, dict]:
+def build_tree(
+    commands: List[Dict[str, Any]], parsed: Dict[str, Dict[str, Any]]
+) -> Tuple[list, dict]:
     used: set = set()
     groups: Dict[str, dict] = {}
     group_order: List[str] = []
@@ -293,7 +370,8 @@ def build_tree(commands: List[Dict[str, Any]], parsed: Dict[str, Dict[str, Any]]
     return tree, entries
 
 
-def build(
+def build_book(
+    book: Dict[str, Any],
     out_dir: Path,
     *,
     workers: int,
@@ -302,11 +380,15 @@ def build(
     offline: bool,
 ) -> int:
     t0 = time.monotonic()
-    SOURCE_DIR.mkdir(parents=True, exist_ok=True)
-    commands = fetch_letter_chunks(refresh=refresh, offline=offline)
+    cache_dir = SOURCE_ROOT / book["cache_name"]
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    commands = fetch_letter_chunks(book, refresh=refresh, offline=offline)
     commands = [c for c in commands if c.get("title") and not is_preface(c)]
     if not commands:
-        print("No AOS 10 commands in CLI-Bank letter chunks", file=sys.stderr)
+        print(
+            "No commands in CLI-Bank letter chunks for {0}".format(book["bank_id"]),
+            file=sys.stderr,
+        )
         return 1
     if limit and limit > 0:
         commands = commands[:limit]
@@ -317,7 +399,7 @@ def build(
             separators=(",", ":"),
         ).encode("utf-8")
     ).hexdigest()
-    digest_path = SOURCE_DIR / "toc.sha256"
+    digest_path = cache_dir / "toc.sha256"
     if (
         not refresh
         and not limit
@@ -325,19 +407,24 @@ def build(
         and digest_path.is_file()
         and digest_path.read_text(encoding="utf-8").strip() == digest
     ):
-        print("  CLI-Bank AOS 10 TOC unchanged, skip")
+        print("  CLI-Bank {0} TOC unchanged, skip".format(book["bank_id"]))
         return 0
 
-    print("  aos-10 commands={0}  cache={1}".format(len(commands), SOURCE_DIR))
+    print(
+        "  {0} commands={1}  cache={2}".format(
+            book["bank_id"], len(commands), cache_dir
+        )
+    )
 
     parsed: Dict[str, Dict[str, Any]] = {}
     errors: List[str] = []
     started = time.monotonic()
     total = len(commands)
+    referer = book["landing"]
 
     def job(cmd: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
         rel = cmd["path"].lstrip("/")
-        path = cache_path_for(rel)
+        path = cache_path_for(book, rel)
         if offline:
             if not path.is_file():
                 raise RuntimeError("missing cache {0}".format(rel))
@@ -348,6 +435,7 @@ def build(
                 path,
                 dest="document",
                 mode="navigate",
+                referer=referer,
                 refresh=refresh,
             )
             html = blob.decode("utf-8", "replace")
@@ -388,22 +476,33 @@ def build(
 
     tree, entries = build_tree(commands, parsed)
     leaf_count = sum(1 for e in entries.values() if e.get("leaf"))
+    min_leaves = int(book.get("min_leaves") or 0)
+    if not limit and min_leaves and leaf_count < min_leaves:
+        print(
+            "{0} bank looks empty ({1} < {2}) — refusing to publish".format(
+                book["bank_id"], leaf_count, min_leaves
+            ),
+            file=sys.stderr,
+        )
+        return 1
+
     meta = {
-        "source": "AOS-10.x Command-Line Interface Reference Guide",
-        "label": "AOS 10.x",
-        "family": "AOS 10",
-        "versionHint": "10.x",
+        "source": book["source"],
+        "label": book["label"],
+        "family": book["family"],
+        "versionHint": book["version_hint"],
         "platform": None,
         "sourceFormat": "html",
-        "sourceNote": "Indexed from Aruba CLI-Bank HTML (AOS 10 letter shards)",
+        "sourceNote": book["source_note"],
         "sourceDisclaimer": "Unofficial helper — confirm against current HPE docs.",
-        "sourceUrl": LANDING,
+        "sourceUrl": book["landing"],
         "tocMode": "cli-bank-letters",
+        "chunkPrefix": book["chunk_prefix"],
         "pageCount": leaf_count,
         "tocCount": len(entries),
         "leafCount": leaf_count,
         "previewChars": 1200,
-        "bankId": "aos-10",
+        "bankId": book["bank_id"],
         "fetchErrors": len(errors),
     }
 
@@ -429,35 +528,59 @@ def build(
             sum(1 for e in entries.values() if not e.get("leaf")),
         )
     )
-    print("Done in {0:.1f}s.".format(time.monotonic() - t0))
+    print("Done {0} in {1:.1f}s.".format(book["bank_id"], time.monotonic() - t0))
     return 0
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument(
-        "--out",
-        type=Path,
-        default=DATA_DIR / "aos-10",
-        help="Output bank directory (default: data/aos-10)",
+        "--book",
+        action="append",
+        dest="books",
+        choices=sorted(BOOKS),
+        help="Book id (repeatable). Default: all books.",
     )
+    ap.add_argument(
+        "--all",
+        action="store_true",
+        help="Build every BOOKS entry (default when --book is omitted).",
+    )
+    ap.add_argument("--out", type=Path, default=None, help="Override output dir (single --book only)")
     ap.add_argument("--workers", type=int, default=12)
     ap.add_argument("--limit", type=int, default=0, help="Only first N commands")
     ap.add_argument("--refresh", action="store_true", help="Ignore on-disk HTML cache")
     ap.add_argument(
         "--offline",
         action="store_true",
-        help="Reuse source/cli-bank/aos10/; skip network",
+        help="Reuse source/cli-bank/<book>/; skip network",
     )
     args = ap.parse_args()
-    out = args.out if args.out.is_absolute() else APP_ROOT / args.out
-    return build(
-        out,
-        workers=max(1, args.workers),
-        limit=args.limit,
-        refresh=args.refresh,
-        offline=args.offline,
-    )
+    names = list(args.books or [])
+    if args.all or not names:
+        names = list(BOOKS)
+    if args.out is not None and len(names) != 1:
+        print("--out requires exactly one --book", file=sys.stderr)
+        return 2
+
+    rc = 0
+    for name in names:
+        book = BOOKS[name]
+        if args.out is not None:
+            out = args.out if args.out.is_absolute() else APP_ROOT / args.out
+        else:
+            out = DATA_DIR / book["bank_id"]
+        book_rc = build_book(
+            book,
+            out,
+            workers=max(1, args.workers),
+            limit=args.limit,
+            refresh=args.refresh,
+            offline=args.offline,
+        )
+        if book_rc:
+            rc = book_rc
+    return rc
 
 
 if __name__ == "__main__":
