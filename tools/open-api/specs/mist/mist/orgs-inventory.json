@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Inventory",
-    "version": "2607.1.1"
+    "version": "2609.1.0"
   },
   "servers": [
     {
@@ -628,7 +628,7 @@
         }
       ],
       "get": {
-        "description": "Search organization inventory records with filters for type, MAC address, model, name, site, serial number, Virtual Chassis master state, SKU, version, status, and text.",
+        "description": "Search organization inventory records with filters for type, MAC address, Virtual Chassis MAC address, Virtual Chassis master MAC address, model, name, site, serial number, Virtual Chassis master state, SKU, version, status, and text.",
         "operationId": "searchOrgInventory",
         "parameters": [
           {
@@ -648,6 +648,30 @@
                 "5c5b350e0001,*5b35*",
                 "5c5b350e0001",
                 "*5b35*"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Virtual Chassis MAC address. Accepts multiple comma-separated values.",
+            "in": "query",
+            "name": "vc_mac",
+            "schema": {
+              "examples": [
+                "5c5b53010101,5c5b53020202",
+                "5c5b350e0001"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "MAC address of the Virtual Chassis master device. Accepts multiple comma-separated values.",
+            "in": "query",
+            "name": "master_mac",
+            "schema": {
+              "examples": [
+                "5c5b53010101,5c5b53020202",
+                "5c5b350e0001"
               ],
               "type": "string"
             }
@@ -767,6 +791,28 @@
             "name": "text",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "description": "Filter on inventory last modified time, in epoch",
+            "in": "query",
+            "name": "modified_after",
+            "schema": {
+              "examples": [
+                1733522845
+              ],
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Filter results to devices that were last disconnected before this time, in epoch seconds",
+            "in": "query",
+            "name": "disconnected_before",
+            "schema": {
+              "examples": [
+                1781519042
+              ],
+              "type": "integer"
             }
           },
           {
@@ -1069,8 +1115,11 @@
         "description": "Paginated inventory search response",
         "properties": {
           "end": {
-            "description": "Page ending index for this inventory search response",
-            "type": "integer"
+            "description": "End of the inventory search time window, in epoch seconds",
+            "examples": [
+              1784062455.7383447
+            ],
+            "type": "number"
           },
           "limit": {
             "description": "Maximum number of inventory search results requested",
@@ -1088,8 +1137,11 @@
             "description": "Inventory records returned by the search"
           },
           "start": {
-            "description": "Page starting index for this inventory search response",
-            "type": "integer"
+            "description": "Start of the inventory search time window, in epoch seconds",
+            "examples": [
+              1784058855.7383447
+            ],
+            "type": "number"
           },
           "total": {
             "description": "Number of inventory records matching the search",
@@ -1105,6 +1157,20 @@
         "additionalProperties": false,
         "description": "Inventory record returned by inventory search",
         "properties": {
+          "last_disconnected": {
+            "description": "Time the device was last disconnected, in epoch seconds",
+            "examples": [
+              1616109044
+            ],
+            "type": "number"
+          },
+          "last_name_change": {
+            "description": "Time the inventory entry name was last changed, in epoch seconds",
+            "examples": [
+              1784007045.409
+            ],
+            "type": "number"
+          },
           "mac": {
             "description": "Device MAC address for this inventory search result",
             "examples": [
@@ -1172,6 +1238,13 @@
               "disconnected"
             ],
             "type": "string"
+          },
+          "timestamp": {
+            "description": "Time the inventory entry was created, in epoch seconds",
+            "examples": [
+              1616108044
+            ],
+            "type": "number"
           },
           "type": {
             "$ref": "#/components/schemas/device_type_default_ap",
@@ -2209,6 +2282,8 @@
           "limit": 1000,
           "results": [
             {
+              "last_disconnected": 1616109044,
+              "last_name_change": 1784007045.409,
               "mac": "f01c2df166e0",
               "magic": "WVTFBLTNPXD23H2",
               "master": true,
@@ -2226,6 +2301,7 @@
               "site_id": "01dc141d-b6af-4baa-b00f-0e31ef954c4f",
               "sku": "EX4300-48P",
               "status": "disconnected",
+              "timestamp": 1616108044,
               "type": "switch",
               "vc_mac": "f01c2df166e0",
               "version": "21.4R3.5"

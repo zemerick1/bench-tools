@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Orgs Devices - SSR",
+    "title": "Orgs Security Zones",
     "version": "2609.1.0"
   },
   "servers": [
@@ -64,45 +64,31 @@
   ],
   "tags": [
     {
-      "description": "API Calls specific to SSR devices",
-      "name": "Orgs Devices - SSR"
+      "description": "Security Zones are Org-level zones used by SRX gateways. The zone `name` is used as the security zone name on the device, and Networks can reference a zone through their `zone_id`.",
+      "name": "Orgs Security Zones"
     }
   ],
   "paths": {
-    "/api/v1/orgs/{org_id}/128routers/register_cmd": {
+    "/api/v1/orgs/{org_id}/securityzones": {
       "parameters": [
         {
           "$ref": "#/components/parameters/org_id"
         }
       ],
       "get": {
-        "deprecated": true,
-        "description": "128T devices can be managed/adopted by Mist.",
-        "operationId": "getOrg128TRegistrationCommands",
+        "description": "List organization-level security zones. Security zones are used by SRX gateways, and the zone `name` is used as the security zone name on the device.",
+        "operationId": "listOrgSecurityZones",
         "parameters": [
           {
-            "description": "Token validity duration in seconds. Defaults to 1 year (31536000 seconds)",
-            "in": "query",
-            "name": "ttl",
-            "schema": {
-              "examples": [
-                31536000
-              ],
-              "type": "integer"
-            }
+            "$ref": "#/components/parameters/limit"
           },
           {
-            "description": "When specified restricts registration to listed assets only. Prefer HTTP body over headers for this parameter, especially with long lists to avoid header size limits.",
-            "in": "query",
-            "name": "asset_ids",
-            "schema": {
-              "$ref": "#/components/schemas/strings"
-            }
+            "$ref": "#/components/parameters/page"
           }
         ],
         "responses": {
           "200": {
-            "$ref": "#/components/responses/RouterSsrRegisterCmd"
+            "$ref": "#/components/responses/SecurityZonesArray"
           },
           "400": {
             "$ref": "#/components/responses/HTTP400"
@@ -120,26 +106,26 @@
             "$ref": "#/components/responses/HTTP429"
           }
         },
-        "summary": "getOrg128TRegistrationCommands",
+        "summary": "listOrgSecurityZones",
         "tags": [
-          "Orgs Devices - SSR"
+          "Orgs Security Zones"
         ]
-      }
-    },
-    "/api/v1/orgs/{org_id}/ssr/export_idtokens": {
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/org_id"
-        }
-      ],
+      },
       "post": {
-        "description": "Export SSR ID tokens for the requested device MAC addresses so they can be imported into Conductor during SSR onboarding.",
-        "operationId": "exportOrgSsrIdTokens",
+        "description": "Create an organization-level security zone for SRX gateways. Networks reference a zone through their `zone_id`, and several networks can share the same zone.",
+        "operationId": "createOrgSecurityZone",
         "requestBody": {
           "content": {
             "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "name": "corp-zone"
+                  }
+                }
+              },
               "schema": {
-                "$ref": "#/components/schemas/mac_addresses"
+                "$ref": "#/components/schemas/securityzone"
               }
             }
           },
@@ -147,7 +133,7 @@
         },
         "responses": {
           "200": {
-            "$ref": "#/components/responses/SsrExportIdTokens"
+            "$ref": "#/components/responses/SecurityZone"
           },
           "400": {
             "$ref": "#/components/responses/HTTP400"
@@ -165,45 +151,27 @@
             "$ref": "#/components/responses/HTTP429"
           }
         },
-        "summary": "exportOrgSsrIdTokens",
+        "summary": "createOrgSecurityZone",
         "tags": [
-          "Orgs Devices - SSR"
+          "Orgs Security Zones"
         ]
       }
     },
-    "/api/v1/orgs/{org_id}/ssr/register_cmd": {
+    "/api/v1/orgs/{org_id}/securityzones/{securityzone_id}": {
       "parameters": [
         {
           "$ref": "#/components/parameters/org_id"
+        },
+        {
+          "$ref": "#/components/parameters/securityzone_id"
         }
       ],
       "get": {
-        "description": "Return the registration token and conductor or router commands used to register SSR routers with Mist. The optional TTL controls token validity, and asset IDs can restrict registration to specific assets.",
-        "operationId": "getOrgSsrRegistrationCommands",
-        "parameters": [
-          {
-            "description": "Token validity duration in seconds. Defaults to 1 year (31536000 seconds)",
-            "in": "query",
-            "name": "ttl",
-            "schema": {
-              "examples": [
-                31536000
-              ],
-              "type": "integer"
-            }
-          },
-          {
-            "description": "When specified restricts registration to listed assets only. Prefer HTTP body over headers for this parameter, especially with long lists to avoid header size limits.",
-            "in": "query",
-            "name": "asset_ids",
-            "schema": {
-              "$ref": "#/components/schemas/strings"
-            }
-          }
-        ],
+        "description": "Retrieve details for a specific organization security zone.",
+        "operationId": "getOrgSecurityZone",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/RouterSsrRegisterCmd"
+            "$ref": "#/components/responses/SecurityZone"
           },
           "400": {
             "$ref": "#/components/responses/HTTP400"
@@ -221,41 +189,117 @@
             "$ref": "#/components/responses/HTTP429"
           }
         },
-        "summary": "getOrgSsrRegistrationCommands",
+        "summary": "getOrgSecurityZone",
         "tags": [
-          "Orgs Devices - SSR"
+          "Orgs Security Zones"
+        ]
+      },
+      "put": {
+        "description": "Update an organization security zone. Renaming a zone changes the security zone name used on the device for every Network referencing it.",
+        "operationId": "updateOrgSecurityZone",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "name": "corp-zone"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/securityzone"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SecurityZone"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "updateOrgSecurityZone",
+        "tags": [
+          "Orgs Security Zones"
+        ]
+      },
+      "delete": {
+        "description": "Delete an organization security zone by ID so it can no longer be referenced by a Network `zone_id`.",
+        "operationId": "deleteOrgSecurityZone",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "deleteOrgSecurityZone",
+        "tags": [
+          "Orgs Security Zones"
         ]
       }
     }
   },
   "components": {
     "schemas": {
-      "mac_addresses": {
-        "description": "Request containing one or more MAC addresses",
-        "properties": {
-          "macs": {
-            "$ref": "#/components/schemas/mac_addresses_macs",
-            "description": "List of MAC addresses included in the request"
-          }
-        },
-        "required": [
-          "macs"
-        ],
-        "type": "object"
+      "created_time": {
+        "description": "When the object has been created, in epoch",
+        "format": "double",
+        "readOnly": true,
+        "type": "number"
       },
-      "mac_addresses_macs": {
-        "description": "Unique MAC addresses included in a request",
+      "id": {
+        "description": "Unique ID of the object instance in the Mist Organization",
         "examples": [
-          [
-            "683b679ac024"
-          ]
+          "53f10664-3ce8-4c27-b382-0ef66432349f"
         ],
-        "items": {
-          "type": "string"
-        },
-        "minItems": 1,
-        "type": "array",
-        "uniqueItems": true
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
+      },
+      "modified_time": {
+        "description": "When the object has been modified for the last time, in epoch",
+        "format": "double",
+        "readOnly": true,
+        "type": "number"
+      },
+      "org_id": {
+        "description": "Unique identifier of a Mist organization",
+        "examples": [
+          "a97c1b22-a4e9-411e-9bfd-d8695a0f9e61"
+        ],
+        "format": "uuid",
+        "readOnly": true,
+        "type": "string"
       },
       "response_http400": {
         "additionalProperties": false,
@@ -324,65 +368,48 @@
         },
         "type": "object"
       },
-      "response_router_ssr_register_cmd": {
+      "securityzone": {
         "additionalProperties": false,
-        "description": "SSR registration token and commands used to register the router with Mist",
+        "description": "Org-level security zone used by SRX gateways. The zone `name` is used as the security zone name on the device, and Networks reference a zone through their `zone_id`.",
         "properties": {
-          "conductor_cmd": {
-            "description": "Command to run in the SSR conductor CLI for Mist registration",
+          "created_time": {
+            "$ref": "#/components/schemas/created_time",
+            "description": "Timestamp when the security zone was created, in epoch seconds"
+          },
+          "id": {
+            "$ref": "#/components/schemas/id",
+            "description": "Unique value identifying the security zone"
+          },
+          "modified_time": {
+            "$ref": "#/components/schemas/modified_time",
+            "description": "Timestamp when the security zone was last modified, in epoch seconds"
+          },
+          "name": {
+            "description": "Security zone name used on the device. Must start with a letter or a digit, followed by letters, digits, hyphens or underscores",
+            "examples": [
+              "corp-zone"
+            ],
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$",
             "type": "string"
           },
-          "registration_code": {
-            "description": "Registration token used by the SSR registration commands",
-            "type": "string"
-          },
-          "router_shell_cmd": {
-            "description": "Shell command to run on the SSR router for Mist registration",
-            "type": "string"
+          "org_id": {
+            "$ref": "#/components/schemas/org_id",
+            "description": "Organization identifier associated with the security zone"
           }
         },
+        "required": [
+          "name"
+        ],
         "type": "object"
       },
-      "response_ssr_export_id_tokens": {
-        "additionalProperties": false,
-        "description": "Response containing SSR ID tokens exported for device onboarding",
-        "properties": {
-          "results": {
-            "$ref": "#/components/schemas/response_ssr_export_id_tokens_results",
-            "description": "Exported SSR ID token records for the requested devices"
-          }
-        },
-        "type": "object"
-      },
-      "response_ssr_export_id_tokens_results": {
-        "description": "Exported SSR ID token records",
+      "securityzones": {
+        "description": "Security zones returned by list operations",
         "items": {
-          "$ref": "#/components/schemas/response_ssr_export_id_tokens_results_item"
+          "$ref": "#/components/schemas/securityzone"
         },
         "type": "array"
-      },
-      "response_ssr_export_id_tokens_results_item": {
-        "additionalProperties": false,
-        "description": "SSR ID token record for a device",
-        "properties": {
-          "mac": {
-            "description": "SSR device MAC address for the exported ID token",
-            "type": "string"
-          },
-          "token": {
-            "description": "ID token to import into Conductor for SSR device onboarding",
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "strings": {
-        "description": "Unique string values returned or accepted by this schema",
-        "items": {
-          "type": "string"
-        },
-        "type": "array",
-        "uniqueItems": true
       }
     },
     "responses": {
@@ -501,61 +528,96 @@
         },
         "description": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
       },
-      "RouterSsrRegisterCmd": {
+      "OK": {
+        "description": "OK"
+      },
+      "SecurityZone": {
         "content": {
           "application/json": {
             "examples": {
               "Example": {
-                "$ref": "#/components/examples/RouterSsrRegisterCmdExample"
+                "$ref": "#/components/examples/SecurityZoneExample"
               }
             },
             "schema": {
-              "$ref": "#/components/schemas/response_router_ssr_register_cmd"
+              "$ref": "#/components/schemas/securityzone"
             }
           },
           "application/vnd.api+json": {
             "examples": {
               "Example": {
-                "$ref": "#/components/examples/RouterSsrRegisterCmdExample"
+                "$ref": "#/components/examples/SecurityZoneExample"
               }
             },
             "schema": {
-              "$ref": "#/components/schemas/response_router_ssr_register_cmd"
+              "$ref": "#/components/schemas/securityzone"
             }
           }
         },
         "description": "OK"
       },
-      "SsrExportIdTokens": {
+      "SecurityZonesArray": {
         "content": {
           "application/json": {
             "examples": {
               "Example": {
-                "$ref": "#/components/examples/SsrExportIdTokensExample"
+                "$ref": "#/components/examples/SecurityZonesArrayExample"
               }
             },
             "schema": {
-              "$ref": "#/components/schemas/response_ssr_export_id_tokens"
+              "$ref": "#/components/schemas/securityzones"
             }
           },
           "application/vnd.api+json": {
             "examples": {
               "Example": {
-                "$ref": "#/components/examples/SsrExportIdTokensExample"
+                "$ref": "#/components/examples/SecurityZonesArrayExample"
               }
             },
             "schema": {
-              "$ref": "#/components/schemas/response_ssr_export_id_tokens"
+              "$ref": "#/components/schemas/securityzones"
             }
           }
         },
-        "description": "Example response"
+        "description": "OK"
       }
     },
     "parameters": {
+      "limit": {
+        "description": "Maximum number of results to return per page",
+        "in": "query",
+        "name": "limit",
+        "schema": {
+          "default": 100,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
       "org_id": {
         "in": "path",
         "name": "org_id",
+        "required": true,
+        "schema": {
+          "examples": [
+            "000000ab-00ab-00ab-00ab-0000000000ab"
+          ],
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "page": {
+        "description": "Select the page number to return when using page-based pagination; starts at `1`",
+        "in": "query",
+        "name": "page",
+        "schema": {
+          "default": 1,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "securityzone_id": {
+        "in": "path",
+        "name": "securityzone_id",
         "required": true,
         "schema": {
           "examples": [
@@ -587,22 +649,25 @@
           "detail": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
         }
       },
-      "RouterSsrRegisterCmdExample": {
+      "SecurityZoneExample": {
         "value": {
-          "conductor_cmd": "register mist eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJvcmdfaWQiOiIyODE4ZTM4Ni04ZGVjLTI1NjItOWVkZS01YjhhMGZiYmRjNzEiLCJzdmMiOiIxMjhyb3V0ZXIiLCJwcm92aWRlciI6ImF3cyIsImVudiI6ImxvY2FsIiwiZXB0ZXJtX3VybCI6IndzczovL2xvY2FsL3dzIiwiaWF0IjoxNjEzODQ3NDg0LCJleHAiOjE2NDUzODM0ODR9.YnhgThKYAj1uaooi6j-zY8dMipp5YqJxnn79B9TB5XQ",
-          "registration_code": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJvcmdfaWQiOiIyODE4ZTM4Ni04ZGVjLTI1NjItOWVkZS01YjhhMGZiYmRjNzEiLCJzdmMiOiIxMjhyb3V0ZXIiLCJwcm92aWRlciI6ImF3cyIsImVudiI6ImxvY2FsIiwiZXB0ZXJtX3VybCI6IndzczovL2xvY2FsL3dzIiwiaWF0IjoxNjEzODQ3NDg0LCJleHAiOjE2NDUzODM0ODR9.YnhgThKYAj1uaooi6j-zY8dMipp5YqJxnn79B9TB5XQ",
-          "router_shell_cmd": "128agent register --registration-code eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJvcmdfaWQiOiIyODE4ZTM4Ni04ZGVjLTI1NjItOWVkZS01YjhhMGZiYmRjNzEiLCJzdmMiOiIxMjhyb3V0ZXIiLCJwcm92aWRlciI6ImF3cyIsImVudiI6ImxvY2FsIiwiZXB0ZXJtX3VybCI6IndzczovL2xvY2FsL3dzIiwiaWF0IjoxNjEzODQ3NDg0LCJleHAiOjE2NDUzODM0ODR9.YnhgThKYAj1uaooi6j-zY8dMipp5YqJxnn79B9TB5XQ"
+          "created_time": 1656353525,
+          "id": "a045ea40-ccd0-4660-8f35-0305fae26e9c",
+          "modified_time": 1656353525,
+          "name": "corp-zone",
+          "org_id": "b069b358-4c97-5319-1f8c-7c5ca64d6ab1"
         }
       },
-      "SsrExportIdTokensExample": {
-        "value": {
-          "results": [
-            {
-              "mac": "025b35000020",
-              "token": "string"
-            }
-          ]
-        }
+      "SecurityZonesArrayExample": {
+        "value": [
+          {
+            "created_time": 1656353525,
+            "id": "a045ea40-ccd0-4660-8f35-0305fae26e9c",
+            "modified_time": 1656353525,
+            "name": "corp-zone",
+            "org_id": "b069b358-4c97-5319-1f8c-7c5ca64d6ab1"
+          }
+        ]
       }
     },
     "securitySchemes": {

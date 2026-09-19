@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Vars",
-    "version": "2607.1.1"
+    "version": "2609.1.0"
   },
   "servers": [
     {
@@ -69,6 +69,93 @@
     }
   ],
   "paths": {
+    "/api/v1/orgs/{org_id}/vars/count": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "get": {
+        "description": "Count organization vars, optionally grouped by `distinct` and filtered by site, variable name, and source.\n\nExample: /api/v1/orgs/{org_id}/vars/count?distinct=var",
+        "operationId": "countOrgVars",
+        "parameters": [
+          {
+            "description": "Field used to group this count response. enum: `site_id`, `src`, `var`",
+            "in": "query",
+            "name": "distinct",
+            "schema": {
+              "$ref": "#/components/schemas/org_vars_count_distinct"
+            }
+          },
+          {
+            "description": "Filter results by site identifier. Accepts multiple comma-separated values.",
+            "in": "query",
+            "name": "site_id",
+            "schema": {
+              "examples": [
+                "00000000-0000-0000-0000-000000000001,00000000-0000-0000-0000-000000000002"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter variable results by variable name. Accepts multiple comma-separated values.",
+            "in": "query",
+            "name": "var",
+            "schema": {
+              "examples": [
+                "guest_end,guest_net"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter results by source. enum: `deviceprofile`, `site`",
+            "in": "query",
+            "name": "src",
+            "schema": {
+              "$ref": "#/components/schemas/var_source"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/start"
+          },
+          {
+            "$ref": "#/components/parameters/end"
+          },
+          {
+            "$ref": "#/components/parameters/duration"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Count"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "countOrgVars",
+        "tags": [
+          "Orgs Vars"
+        ]
+      }
+    },
     "/api/v1/orgs/{org_id}/vars/search": {
       "parameters": [
         {
@@ -148,6 +235,30 @@
   },
   "components": {
     "schemas": {
+      "count_result": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "Count result row with the matching distinct field values",
+        "properties": {
+          "count": {
+            "description": "Number of matching items for the distinct value or values in this result",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count"
+        ],
+        "type": "object"
+      },
+      "count_results": {
+        "description": "List of count result rows",
+        "items": {
+          "$ref": "#/components/schemas/count_result"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
       "created_time": {
         "description": "When the object has been created, in epoch",
         "format": "double",
@@ -168,6 +279,55 @@
         "format": "uuid",
         "readOnly": true,
         "type": "string"
+      },
+      "org_vars_count_distinct": {
+        "default": "var",
+        "description": "enum: `site_id`, `src`, `var`",
+        "enum": [
+          "site_id",
+          "src",
+          "var"
+        ],
+        "type": "string"
+      },
+      "response_count": {
+        "additionalProperties": false,
+        "description": "Distinct count response for time-bounded search results",
+        "properties": {
+          "distinct": {
+            "description": "Field used to group the count results",
+            "type": "string"
+          },
+          "end": {
+            "description": "Search window end timestamp for the count request, in epoch seconds",
+            "type": "integer"
+          },
+          "limit": {
+            "description": "Maximum number of distinct count results requested",
+            "type": "integer"
+          },
+          "results": {
+            "$ref": "#/components/schemas/count_results",
+            "description": "Count results grouped by the distinct field"
+          },
+          "start": {
+            "description": "Search window start timestamp for the count request, in epoch seconds",
+            "type": "integer"
+          },
+          "total": {
+            "description": "Number of distinct result buckets returned",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "distinct",
+          "end",
+          "limit",
+          "results",
+          "start",
+          "total"
+        ],
+        "type": "object"
       },
       "response_http400": {
         "additionalProperties": false,
@@ -324,6 +484,31 @@
       }
     },
     "responses": {
+      "Count": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/CountExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_count"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/CountExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_count"
+            }
+          }
+        },
+        "description": "Result of Count"
+      },
       "HTTP400": {
         "content": {
           "application/json": {
@@ -466,6 +651,26 @@
       }
     },
     "parameters": {
+      "duration": {
+        "description": "Time range duration for the query, using relative units such as `10m`, `7d`, or `2w`",
+        "in": "query",
+        "name": "duration",
+        "schema": {
+          "default": "1d",
+          "examples": [
+            "10m"
+          ],
+          "type": "string"
+        }
+      },
+      "end": {
+        "description": "Upper bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d`, `-2h`, or `now`",
+        "in": "query",
+        "name": "end",
+        "schema": {
+          "type": "string"
+        }
+      },
       "limit": {
         "description": "Maximum number of results to return per page",
         "in": "query",
@@ -507,9 +712,32 @@
           ],
           "type": "string"
         }
+      },
+      "start": {
+        "description": "Lower bound of the time range, as an epoch timestamp in seconds or a relative value such as `-1d` or `-1w`",
+        "in": "query",
+        "name": "start",
+        "schema": {
+          "type": "string"
+        }
       }
     },
     "examples": {
+      "CountExample": {
+        "value": {
+          "distinct": "string",
+          "end": 0,
+          "limit": 0,
+          "results": [
+            {
+              "count": 0,
+              "property": "string"
+            }
+          ],
+          "start": 0,
+          "total": 0
+        }
+      },
       "HTTP400Example": {
         "value": {
           "detail": "JSON parse error - Expecting value: line 5 column 8 (char 56)"

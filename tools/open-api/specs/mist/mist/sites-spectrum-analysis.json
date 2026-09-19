@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sites Spectrum Analysis",
-    "version": "2607.1.1"
+    "version": "2609.1.0"
   },
   "servers": [
     {
@@ -134,7 +134,7 @@
         },
         "responses": {
           "200": {
-            "$ref": "#/components/responses/WebsocketSession"
+            "$ref": "#/components/responses/SpectrumAnalysisSession"
           },
           "400": {
             "$ref": "#/components/responses/HTTP400"
@@ -406,6 +406,21 @@
             "$ref": "#/components/schemas/response_past_spectrum_analysis_channel_usages",
             "description": "Per-channel utilization measurements captured during the analysis"
           },
+          "device_id": {
+            "description": "AP device UUID used for a single-AP spectrum analysis",
+            "format": "uuid",
+            "type": "string"
+          },
+          "device_ids": {
+            "description": "AP device UUIDs used for a multi-AP spectrum analysis; maximum 5 devices",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array"
+          },
           "fft_samples": {
             "$ref": "#/components/schemas/response_past_spectrum_analysis_fft_samples",
             "description": "FFT signal samples captured during the analysis"
@@ -498,14 +513,24 @@
             "type": "array"
           },
           "device_id": {
-            "description": "Device ID of the AP that is performing spectrum analysis",
+            "description": "Optional device-generated UUID of the AP that is performing spectrum analysis. Required when `device_ids` is not provided.",
             "format": "uuid",
             "type": "string"
           },
+          "device_ids": {
+            "description": "Optional device-generated UUIDs of APs to scan. When provided, these take precedence over `device_id`; maximum 5 devices.",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array"
+          },
           "duration": {
-            "default": 300,
+            "default": 600,
             "description": "Length of the spectrum analysis run, in seconds",
-            "maximum": 600,
+            "maximum": 3600,
             "minimum": 60,
             "type": "integer"
           },
@@ -537,20 +562,67 @@
         ],
         "type": "string"
       },
-      "websocket_session": {
+      "spectrum_analysis_response": {
         "additionalProperties": false,
-        "description": "Response containing the WebSocket session handle for asynchronous command output",
+        "description": "Response returned after starting AP spectrum analysis",
         "properties": {
-          "session": {
-            "description": "Identifier used to correlate output on the WebSocket stream",
-            "examples": [
-              "19e73828-937f-05e6-f709-e29efdb0a82b"
-            ],
+          "band": {
+            "$ref": "#/components/schemas/spectrum_analysis_band"
+          },
+          "channels": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "device_id": {
+            "description": "AP device UUID used for a single-AP spectrum analysis",
+            "format": "uuid",
             "type": "string"
+          },
+          "device_ids": {
+            "description": "AP device UUIDs used for a multi-AP spectrum analysis; maximum 5 devices",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array"
+          },
+          "duration": {
+            "type": "integer"
+          },
+          "format": {
+            "$ref": "#/components/schemas/spectrum_analysis_format"
+          },
+          "invalid_device_ids": {
+            "additionalProperties": {
+              "items": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "description": "AP device IDs that failed validation, grouped by reason; available for multi-AP requests",
+            "type": "object"
+          },
+          "session_id": {
+            "description": "Spectrum analysis session identifier used to correlate WebSocket output",
+            "format": "uuid",
+            "type": "string"
+          },
+          "started_time": {
+            "description": "Epoch timestamp when spectrum analysis started",
+            "type": "integer"
+          },
+          "width": {
+            "description": "Channel width used during spectrum analysis, in MHz",
+            "type": "integer"
           }
         },
         "required": [
-          "session"
+          "session_id"
         ],
         "type": "object"
       }
@@ -721,16 +793,16 @@
         },
         "description": "OK"
       },
-      "WebsocketSession": {
+      "SpectrumAnalysisSession": {
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/websocket_session"
+              "$ref": "#/components/schemas/spectrum_analysis_response"
             }
           },
           "application/vnd.api+json": {
             "schema": {
-              "$ref": "#/components/schemas/websocket_session"
+              "$ref": "#/components/schemas/spectrum_analysis_response"
             }
           }
         },

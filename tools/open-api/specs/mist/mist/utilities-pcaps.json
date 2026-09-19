@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Utilities PCAPs",
-    "version": "2607.1.1"
+    "version": "2609.1.0"
   },
   "servers": [
     {
@@ -237,6 +237,123 @@
           }
         },
         "summary": "stopOrgPacketCapture",
+        "tags": [
+          "Utilities PCAPs"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/flow_capture": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        }
+      ],
+      "get": {
+        "description": "Get the current flow capture session status for the site. Returns an empty object when no session is active.",
+        "operationId": "getSiteFlowCaptureStatus",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/FlowCaptureStatus"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getSiteFlowCaptureStatus",
+        "tags": [
+          "Utilities PCAPs"
+        ]
+      },
+      "post": {
+        "description": "Start a flow capture session on one or more online switches running JMA firmware. The same filter is applied to every switch. Only one packet or flow capture session can be active per site at a time.\n\nThe captured flow records are streamed over websocket rather than returned in the HTTP response.\n\n#### Subscribe to Flow Capture outputs\n`WS /api-ws/v1/stream`",
+        "operationId": "startSiteFlowCapture",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "dst_ip": "8.8.8.8",
+                    "dst_port": 443,
+                    "duration": 600,
+                    "protocol": "tcp",
+                    "src_ip": "10.0.0.0/8",
+                    "src_port": 1024,
+                    "switches": [
+                      "5c5b35000001",
+                      "5c5b35000002"
+                    ]
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/flow_capture_request"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/FlowCaptureStatus"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "startSiteFlowCapture",
+        "tags": [
+          "Utilities PCAPs"
+        ]
+      },
+      "delete": {
+        "description": "Stop the active flow capture session for the site. Returns 400 if no flow capture session is active.",
+        "operationId": "stopSiteFlowCapture",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "stopSiteFlowCapture",
         "tags": [
           "Utilities PCAPs"
         ]
@@ -787,11 +904,11 @@
       },
       "capture_max_pkt_length": {
         "default": 512,
-        "description": "Maximum bytes captured from each packet, or null to use the default",
+        "description": "Maximum bytes captured from each packet; default is 512, minimum is 64 and maximum is 1536. Null uses the default.",
         "examples": [
           128
         ],
-        "maximum": 2048,
+        "maximum": 1536,
         "minimum": 64,
         "type": [
           "integer",
@@ -818,11 +935,11 @@
           },
           "max_pkt_len": {
             "default": 512,
-            "description": "Max_len of each packet to capture. Default is 512, minimum is 64 and maximum is 2048",
+            "description": "Max_len of each packet to capture. Default is 512, minimum is 64 and maximum is 1536",
             "examples": [
               512
             ],
-            "maximum": 2048,
+            "maximum": 1536,
             "minimum": 64,
             "type": "integer"
           },
@@ -1698,6 +1815,123 @@
         ],
         "type": "integer"
       },
+      "flow_capture_filter": {
+        "additionalProperties": false,
+        "description": "Normalized filter applied to a flow capture session",
+        "properties": {
+          "dst_ip": {
+            "type": "string"
+          },
+          "dst_port": {
+            "type": "integer"
+          },
+          "protocol": {
+            "$ref": "#/components/schemas/flow_capture_protocol"
+          },
+          "src_ip": {
+            "type": "string"
+          },
+          "src_port": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "flow_capture_invalid_switches": {
+        "additionalProperties": true,
+        "description": "Switches that failed flow capture validation",
+        "type": "object"
+      },
+      "flow_capture_protocol": {
+        "description": "Flow capture protocol filter. enum: `tcp`, `udp`, `icmp`, `icmp6`",
+        "enum": [
+          "tcp",
+          "udp",
+          "icmp",
+          "icmp6"
+        ],
+        "type": "string"
+      },
+      "flow_capture_request": {
+        "additionalProperties": false,
+        "description": "Flow capture request for one or more switches",
+        "properties": {
+          "dst_ip": {
+            "type": "string"
+          },
+          "dst_port": {
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "duration": {
+            "default": 600,
+            "maximum": 900,
+            "minimum": 60,
+            "type": "integer"
+          },
+          "protocol": {
+            "$ref": "#/components/schemas/flow_capture_protocol"
+          },
+          "src_ip": {
+            "type": "string"
+          },
+          "src_port": {
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "switches": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "switches"
+        ],
+        "type": "object"
+      },
+      "flow_capture_session": {
+        "additionalProperties": false,
+        "description": "Current flow capture session status for a site",
+        "properties": {
+          "capture_filter": {
+            "$ref": "#/components/schemas/flow_capture_filter"
+          },
+          "duration": {
+            "type": "integer"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "expiry": {
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "invalid_switches": {
+            "$ref": "#/components/schemas/flow_capture_invalid_switches"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/org_id"
+          },
+          "site_id": {
+            "$ref": "#/components/schemas/site_id"
+          },
+          "switch_count": {
+            "type": "integer"
+          },
+          "timestamp": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "id": {
         "description": "Unique ID of the object instance in the Mist Organization",
         "examples": [
@@ -2415,6 +2649,21 @@
       }
     },
     "responses": {
+      "FlowCaptureStatus": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/flow_capture_session"
+            }
+          },
+          "application/vnd.api+json": {
+            "schema": {
+              "$ref": "#/components/schemas/flow_capture_session"
+            }
+          }
+        },
+        "description": "OK"
+      },
       "HTTP400": {
         "content": {
           "application/json": {
