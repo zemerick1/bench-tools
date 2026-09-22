@@ -171,28 +171,84 @@ def _is_swagger2(spec: dict[str, Any]) -> bool:
     return bool(spec.get("swagger")) and not spec.get("openapi")
 
 
+# Intro blurbs longer than this, or ones that are HTML / link dumps, are
+# marketing pages. Scalar shows info.description above every operation.
+_MAX_INFO_DESCRIPTION = 400
+
+
+def _plain_info_text(value: Any) -> str | None:
+    """Return a short plain-text introduction, or None when it is not one."""
+    if not isinstance(value, str):
+        return None
+    text = value.strip()
+    lowered = text.lower()
+    if (
+        not text
+        or "<" in text
+        or "http://" in lowered
+        or "https://" in lowered
+        or len(text) > _MAX_INFO_DESCRIPTION
+    ):
+        return None
+    return text
+
+
 def _sanitize_info(info: dict[str, Any]) -> dict[str, Any]:
     """Keep title/version. Drop contact, license, logos, and marketing HTML."""
     clean: dict[str, Any] = {}
     for key in ("title", "version", "summary"):
         if key in info:
             clean[key] = deepcopy(info[key])
-    description = info.get("description")
-    if isinstance(description, str):
-        text = description.strip()
-        if (
-            text
-            and "<" not in text
-            and "http://" not in text.lower()
-            and "https://" not in text.lower()
-            and len(text) <= 400
-        ):
-            clean["description"] = text
+    description = _plain_info_text(info.get("description"))
+    if description:
+        clean["description"] = description
     if "title" not in clean:
         clean["title"] = "API"
     if "version" not in clean:
         clean["version"] = info.get("version") or "0.0.0"
     return clean
+
+
+def _feature_index(spec: dict[str, Any]) -> tuple[frozenset[str], dict[str, str]]:
+    """Primary operation tags, and the plain description of each tag object."""
+    primaries: set[str] = set()
+    for _path, _method, operation, _item in iter_operations(spec):
+        tags = operation_tags(operation)
+        if tags:
+            primaries.add(tags[0])
+    blurbs: dict[str, str] = {}
+    for tag in spec.get("tags") or []:
+        if not isinstance(tag, dict) or not tag.get("name"):
+            continue
+        text = _plain_info_text(tag.get("description"))
+        if text:
+            blurbs[str(tag["name"])] = text
+    return frozenset(primaries), blurbs
+
+
+def _apply_feature_description(
+    out: dict[str, Any],
+    operations: list[Operation],
+    feature_index: tuple[frozenset[str], dict[str, str]],
+) -> None:
+    """Replace a shared document blurb with the tag this slice is about.
+
+    Uploaded definitions such as Central Monitoring put one ``info.description``
+    on a file that contains many tags. That sentence is often about a single
+    operation (Monitoring's is the VSX switch blurb) and was copied onto every
+    slice. A tag's own description is the introduction for that slice. A
+    single-feature upload already describes itself, so its document blurb stays.
+    """
+    primaries, blurbs = feature_index
+    if len(primaries) <= 1:
+        return
+    slice_tags = {op.tags[0] for op in operations if op.tags}
+    if len(slice_tags) != 1:
+        return
+    blurb = blurbs.get(next(iter(slice_tags)))
+    if not blurb:
+        return
+    out.setdefault("info", {})["description"] = blurb
 
 
 def _copy_root_metadata(spec: dict[str, Any]) -> dict[str, Any]:
@@ -460,11 +516,13 @@ def build_slice(
     operations: list[Operation],
     *,
     title_suffix: str | None = None,
+    feature_index: tuple[frozenset[str], dict[str, str]] | None = None,
 ) -> tuple[dict[str, Any], list[str]]:
     """Build one self-contained OpenAPI document for *operations*."""
     out = _copy_root_metadata(spec)
     if title_suffix:
         out["info"]["title"] = title_suffix
+    _apply_feature_description(out, operations, feature_index or _feature_index(spec))
 
     pending: set[str] = set()
     used_tags: set[str] = set()
@@ -623,8 +681,14 @@ def _finalize_slice(
     second_cut: bool,
     max_ops: int,
     max_bytes: int,
+    feature_index: tuple[frozenset[str], dict[str, str]],
 ) -> SliceResult:
-    document, unresolved = build_slice(spec, operations, title_suffix=group_title)
+    document, unresolved = build_slice(
+        spec,
+        operations,
+        title_suffix=group_title,
+        feature_index=feature_index,
+    )
     _apply_auth_fixes(document, api=api)
     encoded = dump_spec(document)
     size = len(encoded.encode("utf-8"))
@@ -672,6 +736,7 @@ def _subdivide(
     max_ops: int,
     max_bytes: int,
     second_cut: bool,
+    feature_index: tuple[frozenset[str], dict[str, str]],
 ) -> list[SliceResult]:
     probe = _finalize_slice(
         spec,
@@ -686,6 +751,7 @@ def _subdivide(
         second_cut=second_cut,
         max_ops=max_ops,
         max_bytes=max_bytes,
+        feature_index=feature_index,
     )
     if not _over_budget(probe.operation_count, probe.size_bytes, max_ops, max_bytes):
         return [probe]
@@ -713,6 +779,7 @@ def _subdivide(
                     max_ops=max_ops,
                     max_bytes=max_bytes,
                     second_cut=True,
+                    feature_index=feature_index,
                 )
             )
         return results
@@ -747,6 +814,7 @@ def _subdivide(
                     max_ops=max_ops,
                     max_bytes=max_bytes,
                     second_cut=True,
+                    feature_index=feature_index,
                 )
             )
         return results
@@ -794,6 +862,7 @@ def split_spec(
         titles[group_id] = group_title
         categories[group_id] = category
 
+    feature_index = _feature_index(spec)
     results: list[SliceResult] = []
     for group_id in sorted(grouped):
         results.extend(
@@ -810,6 +879,7 @@ def split_spec(
                 max_ops=max_ops,
                 max_bytes=max_bytes,
                 second_cut=False,
+                feature_index=feature_index,
             )
         )
     return results

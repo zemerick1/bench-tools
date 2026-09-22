@@ -635,6 +635,74 @@ class SplitterFixtureTests(unittest.TestCase):
         self.assertEqual(slice_spec["servers"], spec["servers"])
         self.assertEqual(slice_spec["info"]["title"], "Pets")
 
+    def test_multi_tag_slice_uses_tag_description(self) -> None:
+        spec = _base()
+        spec["info"]["description"] = (
+            "API to retrieve VSX (Virtual Switching Extension) information for switches."
+        )
+        spec["tags"] = [
+            {"name": "Clients", "description": "APIs for managing network clients."},
+            {
+                "name": "Client Onboarding",
+                "description": "APIs to retrieve onboarding stage scores and top reasons.",
+            },
+            {"name": "Switch", "description": "Switch Monitoring APIs to get details about Switch and related info"},
+        ]
+        spec["paths"] = {
+            "/network-monitoring/v1/clients": {
+                "get": {"tags": ["Clients"], "responses": {"200": {"description": "ok"}}}
+            },
+            "/network-monitoring/v1/client-onboarding": {
+                "get": {"tags": ["Client Onboarding"], "responses": {"200": {"description": "ok"}}}
+            },
+            "/network-monitoring/v1/switches/{serial}/vsx": {
+                "get": {"tags": ["Switch"], "responses": {"200": {"description": "vsx"}}}
+            },
+        }
+        results = {
+            item.group_id: item.spec
+            for item in split_spec(spec, api="aruba-central", source_stem="monitoring-81")
+        }
+        self.assertEqual(results["clients"]["info"]["description"], "APIs for managing network clients.")
+        self.assertEqual(
+            results["client-onboarding"]["info"]["description"],
+            "APIs to retrieve onboarding stage scores and top reasons.",
+        )
+        self.assertEqual(
+            results["switch"]["info"]["description"],
+            "Switch Monitoring APIs to get details about Switch and related info",
+        )
+        self.assertNotIn("VSX", results["clients"]["info"]["description"])
+        self.assertEqual(
+            results["clients"]["tags"][0]["description"],
+            "APIs for managing network clients.",
+        )
+
+    def test_single_feature_keeps_document_description(self) -> None:
+        spec = _base()
+        spec["info"]["description"] = "The Reporting APIs for managing network reports."
+        spec["tags"] = [{"name": "Pets", "description": "A shorter tag blurb."}]
+        spec["paths"] = {
+            "/x": {"get": {"tags": ["Pets"], "responses": {"200": {"description": "ok"}}}}
+        }
+        info = split_spec(spec, api="fix", source_stem="reporting")[0].spec["info"]
+        self.assertEqual(info["description"], "The Reporting APIs for managing network reports.")
+
+    def test_html_tag_description_does_not_replace_document_blurb(self) -> None:
+        spec = _base()
+        spec["info"]["description"] = "Plain document description."
+        spec["tags"] = [
+            {"name": "Pets", "description": "See https://example.com/pets"},
+            {"name": "Stores", "description": "Store APIs."},
+        ]
+        spec["paths"] = {
+            "/pets": {"get": {"tags": ["Pets"], "responses": {"200": {"description": "ok"}}}},
+            "/stores": {"get": {"tags": ["Stores"], "responses": {"200": {"description": "ok"}}}},
+        }
+        results = {item.group_id: item.spec for item in split_spec(spec, api="fix", source_stem="core")}
+        self.assertEqual(results["pets"]["info"]["description"], "Plain document description.")
+        self.assertEqual(results["stores"]["info"]["description"], "Store APIs.")
+
     def test_build_slice_keeps_refs(self) -> None:
         spec = _base()
         spec["components"]["schemas"] = {"A": {"type": "string"}}
