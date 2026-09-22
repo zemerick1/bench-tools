@@ -23,13 +23,14 @@ import {
   clampWidthMHz,
   defaultRadios,
   deviceById,
+  capacityArithmetic,
   estimateCapacity,
   formatCount,
   formatMbps,
   radiosFromAp,
   sharedNss,
   validBandsFor,
-} from "./model.js?v=9";
+} from "./model.js?v=11";
 
 /** IDs may contain dots (2.4 GHz). querySelector('#x.y') is invalid. */
 function $(sel, root = document) {
@@ -471,6 +472,31 @@ function renderAppExtras() {
   wrap.hidden = state.appId !== "custom";
 }
 
+function renderArithmetic(est, open) {
+  let sections = [];
+  try {
+    sections = capacityArithmetic(est);
+  } catch (err) {
+    console.warn("capacity arithmetic failed", err);
+    return "";
+  }
+  const blocks = sections
+    .map(
+      (section) => `<section class="apc-formula">
+        <h3>${escapeHtml(section.heading)}</h3>
+        <pre>${escapeHtml(section.text)}</pre>
+      </section>`,
+    )
+    .join("");
+  return `
+    <details class="details-block apc-nerd"${open ? " open" : ""}>
+      <summary>The arithmetic</summary>
+      <p class="hint">Same engine as the headline, printed so you can multiply it yourself.</p>
+      ${blocks}
+    </details>
+  `;
+}
+
 function renderAnswer(est) {
   const root = $("#apc-answer");
   if (!root) return;
@@ -504,9 +530,14 @@ function renderAnswer(est) {
   }
 
   const client = currentClient();
-  const links = est.radios.filter((r) => r.phyMbps);
-  const mathHtml = links
+  const mathHtml = (est.radios || [])
     .map((r) => {
+      if (!r.enabled) {
+        return `<li><strong>${escapeHtml(r.band)} GHz:</strong> off. Left out of the pool.</li>`;
+      }
+      if (!r.phyMbps) {
+        return `<li><strong>${escapeHtml(r.band)} GHz:</strong> ${escapeHtml(r.skip || "Not usable. Left out of the pool.")}</li>`;
+      }
       const macPct = Math.round(r.macEfficiency * 100);
       const rfPct = Math.round(r.rfUsable * 100);
       const extraSsid = r.ssidAirtime > 0 ? ` Extra SSIDs take ${Math.round(r.ssidAirtime * 100)}%.` : "";
@@ -517,6 +548,7 @@ function renderAnswer(est) {
       return `<li><strong>${escapeHtml(r.band)} GHz:</strong> radio rate ${escapeHtml(formatMbps(r.phyMbps))} × ${macPct}% after Wi-Fi overhead = ${escapeHtml(formatMbps(r.protocolMbps))}. ${rfBit}${extraSsid} Real total: <strong>${escapeHtml(formatMbps(r.usableMbps))}</strong>.</li>`;
     })
     .join("");
+  const links = (est.radios || []).filter((r) => r.phyMbps);
   const limitNotes = [];
   const apNss = Math.max(...state.radios.map((r) => r.nss || 1));
   if (apNss > client.nss) {
@@ -544,6 +576,8 @@ function renderAnswer(est) {
 
   const caveats = est.caveats.map((c) => `<li>${escapeHtml(c)}</li>`).join("");
   const caveatRoot = $("#apc-caveats-body");
+  const nerdOpen = Boolean(caveatRoot?.querySelector(".apc-nerd")?.open);
+  const mathOpen = Boolean(caveatRoot?.querySelector(".apc-math")?.open);
 
   const rows = est.radios
     .map((r, i) => {
@@ -588,7 +622,8 @@ function renderAnswer(est) {
   if (caveatRoot) {
     caveatRoot.innerHTML = `
       <ul class="apc-caveats">${caveats}</ul>
-      <details class="details-block apc-math">
+      ${renderArithmetic(est, nerdOpen)}
+      <details class="details-block apc-math"${mathOpen ? " open" : ""}>
         <summary>The radio-by-radio math</summary>
         <div class="apc-table-scroll">
           <table class="apc-table">

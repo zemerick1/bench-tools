@@ -7,10 +7,13 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   phyRateMbps,
+  phyBreakdown,
   mcsValid,
   macEfficiency,
   estimateCapacity,
+  capacityArithmetic,
   ssidAirtimeFraction,
+  ssidAirtimeBreakdown,
   clampWidthMHz,
   clampBand,
   clampRadio,
@@ -205,6 +208,101 @@ const mixedEst = estimateCapacity({
   splitMode: "steered",
 });
 ok(mixedEst.radios.find((r) => r.band === "5")?.nss === 2, "client 2SS caps the 515's 4SS radio");
+
+console.log("\nArithmetic drawer\n");
+const he = phyBreakdown({ standard: "ax", widthMHz: 20, nss: 2, mcs: 9, giUs: 0.8 });
+ok(he && he.nsd === 234 && he.nDbps === 3120, `HE 20 MHz 2SS MCS9 is 234 × 2 × 8 × 5/6 = 3120 (got ${he && he.nDbps})`);
+ok(he && near(he.phyMbps, phyRateMbps({ standard: "ax", widthMHz: 20, nss: 2, mcs: 9, giUs: 0.8 }), 1e-9), "breakdown matches phyRateMbps");
+ok(near(he.phyMbps, 229.411765, 1e-5), `HE PHY 229.411765 (got ${he.phyMbps})`);
+const tax = ssidAirtimeBreakdown(2, "5");
+ok(tax.extra === 1 && near(tax.fraction, 0.0068359375, 1e-12), `one extra 5 GHz SSID is 0.0068359375 (got ${tax.fraction})`);
+ok(ssidAirtimeFraction(2, "5") === tax.fraction, "fraction helper matches breakdown");
+ok(ssidAirtimeFraction(1, "2.4") === 0, "one SSID adds no extra tax");
+
+const shot = estimateCapacity({
+  radios: [
+    { id: "r24", enabled: false, band: "2.4", standard: "ax", widthMHz: 20, nss: 2 },
+    { id: "r5", enabled: true, band: "5", standard: "ax", widthMHz: 20, nss: 2 },
+    { id: "r6", enabled: true, band: "6", standard: "ax", widthMHz: 40, nss: 2 },
+  ],
+  client: { standard: "ax", nss: 2, bands: ["2.4", "5", "6"], maxWidthMHz: 160 },
+  quality: "typical",
+  neighbor: "typical",
+  ssidCount: 2,
+  activeClients: 30,
+  targetMbps: 5,
+  splitMode: "steered",
+});
+const shotText = capacityArithmetic(shot).map((s) => s.text).join("\n");
+ok(shotText.includes("234 × 2 × 8 × 5/6 = 3120"), "5 GHz N_DBPS line");
+ok(shotText.includes("468 × 2 × 8 × 5/6 = 6240"), "6 GHz N_DBPS line");
+ok(shotText.includes("3120 / 13.6 µs = 229.411765 Mbps"), "5 GHz PHY line");
+ok(shotText.includes("0.0068359375"), "SSID tax shows the beacon fraction");
+ok(shotText.includes("54.682445"), "5 GHz usable at working precision");
+ok(shotText.includes("109.36489"), "6 GHz usable at working precision");
+ok(shotText.includes("5.468244 Mbps"), "per-person working precision");
+ok(shotText.includes("shown as 5.5 Mbps"), "headline rounds per person to 5.5");
+ok(Math.floor(shot.clientsThatFit) === 32, `screenshot seats floor to 32 (got ${shot.clientsThatFit})`);
+ok(shotText.includes("floor = 32"), "seat line floors the division");
+ok(shotText.includes("Off. Left out of the pool."), "disabled 2.4 GHz is called out");
+
+const alone = estimateCapacity({
+  radios: [{ id: "r5", enabled: true, band: "5", standard: "ac", widthMHz: 20, nss: 3, giUs: 0.4 }],
+  client: { standard: "ac", nss: 3, bands: ["2.4", "5"], maxWidthMHz: 80 },
+  quality: "excellent",
+  neighbor: "isolated",
+  ssidCount: 1,
+  activeClients: 1,
+  targetMbps: 2,
+  splitMode: "best",
+});
+const aloneText = capacityArithmetic(alone).map((s) => s.text).join("\n");
+ok(aloneText.includes("MAC efficiency = 0.50"), "one client uses 50% MAC");
+ok(aloneText.includes("plan pool ="), "seat count rescales to the 40% pool");
+ok(alone.radios[0].phyMath && near(alone.radios[0].phyMath.phyMbps, alone.radios[0].phyMbps, 1e-9), "radio carries matching PHY terms");
+
+console.log("\nAP-755 with a Wi-Fi 6 laptop\n");
+const ap755 = estimateCapacity({
+  radios: radiosFromAp(byId["ap-755"]),
+  client: { standard: "ax", nss: 2, bands: ["2.4", "5"], maxWidthMHz: 80 },
+  quality: "typical",
+  neighbor: "typical",
+  ssidCount: 3,
+  activeClients: 30,
+  targetMbps: 2,
+  splitMode: "steered",
+});
+const ap24 = ap755.radios.find((r) => r.band === "2.4");
+const ap6 = ap755.radios.find((r) => r.band === "6");
+ok(ap24.standardLabel === "Wi-Fi 6 (802.11ax)", `2.4 negotiated label (${ap24.standardLabel})`);
+ok(!ap24.standardLabel.includes("6E"), "2.4 GHz does not say 6E");
+ok(ap24.apStandard === "be", "2.4 AP PHY stays Wi-Fi 7");
+ok(
+  ap24.notes.some((n) => n.includes("The AP radio is Wi-Fi 7")),
+  "2.4 note says the AP radio is Wi-Fi 7",
+);
+ok(
+  ap6.skip && ap6.skip.startsWith("The client has no 6 GHz radio"),
+  `6 GHz names the client (${ap6.skip})`,
+);
+ok(!/does not have a 6 GHz radio/i.test(ap6.skip || ""), "6 GHz does not blame the AP");
+const ap755Text = capacityArithmetic(ap755).map((s) => `${s.heading}\n${s.text}`).join("\n");
+ok(ap755Text.includes("Wi-Fi 6 (802.11ax)"), "arithmetic uses the Wi-Fi 6 label on 2.4");
+ok(ap755Text.includes("The AP radio is Wi-Fi 7"), "arithmetic says the AP is Wi-Fi 7");
+ok(ap755Text.includes("The client has no 6 GHz radio"), "arithmetic keeps the 6 GHz radio and names the client");
+
+const ap755phone = estimateCapacity({
+  radios: radiosFromAp(byId["ap-755"]),
+  client: { standard: "be", nss: 2, bands: ["2.4", "5", "6"], maxWidthMHz: 160 },
+  quality: "typical",
+  neighbor: "typical",
+  ssidCount: 2,
+  activeClients: 30,
+  targetMbps: 5,
+  splitMode: "steered",
+});
+ok(ap755phone.radios.find((r) => r.band === "2.4").standard === "be", "Wi-Fi 7 client keeps Wi-Fi 7 on 2.4");
+ok(ap755phone.radios.find((r) => r.band === "6").phyMbps > 0, "Wi-Fi 7 client uses the AP-755 6 GHz radio");
 
 console.log();
 if (failed) {

@@ -22,6 +22,14 @@ export const STANDARD_LABEL = {
   be: "Wi-Fi 7 (802.11be)",
 };
 
+/** 6E is a 6 GHz name. 2.4 and 5 GHz 802.11ax is Wi-Fi 6. */
+export function linkStandardLabel(standard, band) {
+  if (standard === "ax") {
+    return band === "6" ? "Wi-Fi 6E (802.11ax)" : "Wi-Fi 6 (802.11ax)";
+  }
+  return STANDARD_LABEL[standard] || standard;
+}
+
 export const STANDARD_RANK = { n: 4, ac: 5, ax: 6, be: 7 };
 
 export const MCS_ROWS = [
@@ -483,17 +491,43 @@ export function mcsForQuality(standard, quality, widthMHz, nss, band) {
 }
 
 /**
- * PHY rate in Mbps. Returns null if the combination is invalid.
+ * PHY terms behind phyRateMbps. Null when the MCS / width / stream mix is invalid.
  * @param {{ standard: Standard, widthMHz: number, nss: number, mcs: number, giUs: number }} p
  */
-export function phyRateMbps(p) {
+export function phyBreakdown(p) {
   const { standard, widthMHz, nss, mcs, giUs } = p;
   if (!mcsValid(standard, widthMHz, nss, mcs)) return null;
   const row = mcsRow(mcs);
   const nsd = nsdFor(standard, widthMHz);
-  const tSym = symbolUs(standard, giUs);
+  const ofdm = standard === "n" || standard === "ac";
+  const tDataUs = ofdm ? 3.2 : 12.8;
+  const tSymUs = symbolUs(standard, giUs);
   const dbps = nDbps(nsd, nss, row.bpscs, row.coding);
-  return (dbps / (tSym * 1e-6)) / 1e6;
+  return {
+    standard,
+    ofdm,
+    nsd,
+    nss,
+    bpscs: row.bpscs,
+    modulation: row.mod,
+    qam: row.qam,
+    coding: row.coding,
+    codingLabel: row.codingLabel,
+    nDbps: dbps,
+    tDataUs,
+    giUs,
+    tSymUs,
+    phyMbps: (dbps / (tSymUs * 1e-6)) / 1e6,
+  };
+}
+
+/**
+ * PHY rate in Mbps. Returns null if the combination is invalid.
+ * @param {{ standard: Standard, widthMHz: number, nss: number, mcs: number, giUs: number }} p
+ */
+export function phyRateMbps(p) {
+  const breakdown = phyBreakdown(p);
+  return breakdown ? breakdown.phyMbps : null;
 }
 
 /**
@@ -502,29 +536,49 @@ export function phyRateMbps(p) {
  *   small / moderate → ~45%
  *   medium-large / heavy → ~40%
  */
+/** Busy-room MAC factor. Seat count always uses this, even for one client. */
+export const PLAN_MAC_EFFICIENCY = 0.4;
+
 export function macEfficiency(activeClients) {
   const n = Math.max(0, Number(activeClients) || 0);
   if (n <= 1) return 0.5;
   if (n <= 10) return 0.45;
-  return 0.4;
+  return PLAN_MAC_EFFICIENCY;
 }
 
 /**
- * Beacon + probe airtime for this radio. 100 TU beacons, ~350-byte frame,
- * 1 Mbps on 2.4 GHz / 6 Mbps on 5 and 6, plus a 1.5× probe fudge.
+ * Beacon + probe airtime for this radio. 100 TU beacons (102.4 ms), ~350-byte
+ * frame, 1 Mbps on 2.4 GHz / 6 Mbps on 5 and 6, plus a 1.5× probe fudge.
+ * One SSID is already inside the 40–50% protocol factor. Extra SSIDs are the tax.
  */
-export function ssidAirtimeFraction(ssidCount, band) {
+export function ssidAirtimeBreakdown(ssidCount, band) {
   const count = Math.max(0, Number(ssidCount) || 0);
-  // One SSID is already inside the 40–50% protocol factor. Extra SSIDs
-  // are additional beacon/probe tax.
   const extra = Math.max(0, count - 1);
-  if (extra === 0) return 0;
   const beaconBytes = 350;
-  const beaconsPerSec = 1000 / 102.4;
+  const beaconIntervalMs = 102.4;
+  const beaconsPerSec = 1000 / beaconIntervalMs;
   const rateMbps = band === "2.4" ? 1 : 6;
   const probeFactor = 1.5;
-  const one = ((beaconBytes * 8 * beaconsPerSec) / (rateMbps * 1e6)) * probeFactor;
-  return Math.min(0.65, extra * one);
+  const perExtra = ((beaconBytes * 8 * beaconsPerSec) / (rateMbps * 1e6)) * probeFactor;
+  const raw = extra * perExtra;
+  const cap = 0.65;
+  return {
+    ssidCount: count,
+    extra,
+    beaconBytes,
+    beaconIntervalMs,
+    beaconsPerSec,
+    rateMbps,
+    probeFactor,
+    perExtra,
+    raw,
+    fraction: Math.min(cap, raw),
+    capped: raw > cap,
+  };
+}
+
+export function ssidAirtimeFraction(ssidCount, band) {
+  return ssidAirtimeBreakdown(ssidCount, band).fraction;
 }
 
 export function formatMbps(mbps) {
@@ -605,7 +659,7 @@ export function negotiateLink(radio, client, quality, mcsOverride, giOverride) {
   if (!client.bands.includes(radio.band)) {
     return {
       ok: false,
-      reason: `This device has no ${radio.band} GHz radio.`,
+      reason: `The client has no ${radio.band} GHz radio. This AP radio stays out of the pool.`,
       notes,
     };
   }
@@ -620,10 +674,12 @@ export function negotiateLink(radio, client, quality, mcsOverride, giOverride) {
   const clientStd = clampStandardToBand(client.standard, radio.band) || client.standard;
   const standard = lowerStandard(apStd, clientStd);
   if (standard !== apStd) {
-    notes.push(`Client caps this radio at ${STANDARD_LABEL[standard]}.`);
+    notes.push(
+      `Client caps this radio at ${linkStandardLabel(standard, radio.band)}. The AP radio is ${linkStandardLabel(apStd, radio.band)}.`,
+    );
   }
   if (standard !== clientStd && STANDARD_RANK[apStd] < STANDARD_RANK[client.standard]) {
-    notes.push(`AP caps this radio at ${STANDARD_LABEL[standard]}.`);
+    notes.push(`AP caps this radio at ${linkStandardLabel(standard, radio.band)}.`);
   }
 
   const nss = Math.max(1, Math.min(radio.nss, client.nss));
@@ -776,6 +832,7 @@ export function estimateCapacity(input) {
     }
 
     let phyMbps = link.phyMbps;
+    let phyBlended = false;
     if (client.mix && client.mix.length) {
       const parts = [];
       for (const m of client.mix) {
@@ -791,6 +848,7 @@ export function estimateCapacity(input) {
       const blended = blendedPhyMbps(parts);
       if (blended) {
         phyMbps = blended;
+        phyBlended = true;
         link.notes.push("Mixed clients: slow stations consume more airtime for the same bits.");
       }
     }
@@ -798,8 +856,18 @@ export function estimateCapacity(input) {
     const macNow = macEfficiency(activeClients);
     // Planning load uses the medium/large-room bucket — "how many users"
     // should not assume a single-client 50% efficiency.
-    const macPlan = 0.4;
-    const ssidTax = ssidAirtimeFraction(ssidCount, radio.band);
+    const macPlan = PLAN_MAC_EFFICIENCY;
+    const ssidMath = ssidAirtimeBreakdown(ssidCount, radio.band);
+    const ssidTax = ssidMath.fraction;
+    const phyMath = phyBlended
+      ? null
+      : phyBreakdown({
+          standard: link.standard,
+          widthMHz: link.widthMHz,
+          nss: link.nss,
+          mcs: link.mcs,
+          giUs: link.giUs,
+        });
     const rf = neighbor.rfUsable;
     const protocolMbps = phyMbps * macNow;
     const protocolPlanMbps = phyMbps * macPlan;
@@ -814,7 +882,9 @@ export function estimateCapacity(input) {
       enabled: true,
       band: link.band,
       standard: link.standard,
-      standardLabel: STANDARD_LABEL[link.standard],
+      standardLabel: linkStandardLabel(link.standard, link.band),
+      apStandard: radio.standard,
+      apStandardLabel: linkStandardLabel(radio.standard, radio.band),
       widthMHz: link.widthMHz,
       nss: link.nss,
       mcs: link.mcs,
@@ -823,11 +893,14 @@ export function estimateCapacity(input) {
       codingLabel: link.codingLabel,
       giUs: link.giUs,
       phyMbps,
+      phyMath,
+      phyBlended,
       minRssiDbm: link.minRssiDbm,
       share,
       clients: clientsHere,
       macEfficiency: macNow,
       ssidAirtime: ssidTax,
+      ssidMath,
       rfUsable: rf,
       protocolMbps,
       protocolPlanMbps,
@@ -876,6 +949,7 @@ export function estimateCapacity(input) {
     perUserMbps,
     aggregateMbps,
     macEfficiency: macEfficiency(activeClients),
+    macPlan: PLAN_MAC_EFFICIENCY,
     rfUsable: neighbor.rfUsable,
     neighbor,
     quality,
@@ -971,6 +1045,222 @@ export function defaultRadios(count, generation) {
     radio.enabled = clampStandardToBand(generation, radio.band) != null;
     return radio;
   });
+}
+
+const PHY_TONE = {
+  n: ["HT", "312.5 kHz"],
+  ac: ["VHT", "312.5 kHz"],
+  ax: ["HE", "78.125 kHz"],
+  be: ["EHT", "78.125 kHz"],
+};
+
+function nearInt(n) {
+  return Number.isFinite(n) && Math.abs(n - Math.round(n)) < 1e-6;
+}
+
+/** Six decimal places, trailing zeros removed. Working precision for the drawer. */
+function mathMbps(n) {
+  if (!Number.isFinite(n)) return "—";
+  return n.toFixed(6).replace(/0+$/, "").replace(/\.$/, "");
+}
+
+function mathFixed(n, digits) {
+  if (!Number.isFinite(n)) return "—";
+  return n.toFixed(digits).replace(/0+$/, "").replace(/\.$/, "");
+}
+
+/** Factors stay two decimals so 40% reads as 0.40, not 0.4. */
+function twoDec(n) {
+  if (!Number.isFinite(n)) return "—";
+  return n.toFixed(2);
+}
+
+function mathCount(n) {
+  if (!Number.isFinite(n)) return "—";
+  if (nearInt(n)) return String(Math.round(n));
+  return mathFixed(n, 4);
+}
+
+function macRule(mac) {
+  if (mac >= 0.5) return "0 or 1 active client keeps 50% of PHY";
+  if (mac >= 0.45) return "2 to 10 active clients keep 45% of PHY";
+  return "11 or more active clients keep 40% of PHY";
+}
+
+function servingRadios(est) {
+  return (est.radios || []).filter((r) => r.planMbps > 0 && r.share > 0);
+}
+
+/**
+ * Plain-text arithmetic for one estimate. Each section is a heading plus a
+ * preformatted block. The last section is the headline on the card.
+ * @param {ReturnType<typeof estimateCapacity>} est
+ * @returns {{ heading: string, text: string }[]}
+ */
+export function capacityArithmetic(est) {
+  const n = Math.max(0, Number(est.activeClients) || 0);
+  const planMac = est.macPlan ?? PLAN_MAC_EFFICIENCY;
+  const liveMac = est.macEfficiency;
+  const usePlan = n <= 0;
+  const mac = usePlan ? planMac : liveMac;
+  const sections = [];
+
+  const placed = servingRadios(est);
+  const shareBits = placed.map((r) => `${r.band} GHz ${twoDec(r.share)}`);
+  const split =
+    est.splitMode === "best"
+      ? `Client split: everyone on the highest band they can use${shareBits.length ? ` (${shareBits.join(", ")})` : ""}.`
+      : `Client split: band-steered${shareBits.length ? ` (${shareBits.join(", ")})` : ""}.`;
+  const headcount = `${n} active client${n === 1 ? "" : "s"}`;
+  const macLine = usePlan
+    ? `MAC efficiency = ${twoDec(mac)} (busy-room seat count)`
+    : `MAC efficiency = ${twoDec(mac)} (${headcount}; ${macRule(mac)})`;
+  const factorLines = [
+    macLine,
+    `RF fraction = ${twoDec(est.rfUsable)} (${est.neighbor?.label || "neighbors"})`,
+    split,
+    "SSID tax applies to extra SSIDs. The first SSID is already inside the MAC factor.",
+  ];
+  if (usePlan) {
+    factorLines.unshift("No headcount is typed. This path is the busy-room seat count (MAC 0.40).");
+  }
+  sections.push({ heading: "Shared factors", text: factorLines.join("\n") });
+
+  for (const radio of est.radios || []) {
+    sections.push(radioArithmetic(radio, est, { mac, usePlan }));
+  }
+
+  sections.push(headlineArithmetic(est, { n, planMac, liveMac, usePlan }));
+  return sections;
+}
+
+function radioArithmetic(radio, est, { mac, usePlan }) {
+  const heading = `${radio.band} GHz`;
+  if (!radio.enabled) {
+    return { heading, text: "Off. Left out of the pool." };
+  }
+  if (!radio.phyMbps) {
+    return { heading, text: radio.skip || "Not usable. Left out of the pool." };
+  }
+  if (!(radio.share > 0)) {
+    const why =
+      est.splitMode === "best"
+        ? "Everyone is on the highest band they can use."
+        : "The split puts nobody here.";
+    return { heading, text: `Link negotiates, then drops out. ${why} Share is 0, so this radio is left out of the pool.` };
+  }
+
+  const protocol = usePlan ? radio.protocolPlanMbps : radio.protocolMbps;
+  const usable = usePlan ? radio.planMbps : radio.usableMbps;
+  const lines = [];
+  const label = [
+    radio.standardLabel,
+    `${radio.widthMHz} MHz`,
+    `${radio.nss}SS`,
+    `MCS ${radio.mcs}`,
+    radio.qam ? `${radio.modulation} ${radio.codingLabel}` : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  lines.push(label);
+  if (radio.notes?.length) {
+    lines.push("");
+    for (const note of radio.notes) lines.push(note);
+  }
+  lines.push("");
+
+  if (radio.phyMath) {
+    const m = radio.phyMath;
+    const [tone, spacing] = PHY_TONE[m.standard] || [m.standard, ""];
+    const nsd = nearInt(m.nsd) ? String(Math.round(m.nsd)) : mathFixed(m.nsd, 4);
+    const dbps = nearInt(m.nDbps) ? String(Math.round(m.nDbps)) : mathFixed(m.nDbps, 4);
+    const tData = mathFixed(m.tDataUs, 1);
+    const gi = mathFixed(m.giUs, 1);
+    const tSym = mathFixed(m.tSymUs, 1);
+    const term = (name, value) => `  ${name.padEnd(8, " ")}= ${value}`;
+    lines.push("PHY");
+    lines.push(term("N_SD", `${nsd} (${radio.widthMHz} MHz ${tone}, ${spacing} tones)`));
+    lines.push(term("N_SS", String(m.nss)));
+    lines.push(term("N_BPSCS", `${m.bpscs} (${m.modulation})`));
+    lines.push(term("R", m.codingLabel));
+    lines.push(term("N_DBPS", `${nsd} × ${m.nss} × ${m.bpscs} × ${m.codingLabel} = ${dbps} bits/symbol`));
+    lines.push(term("T_SYM", `${tData} µs + ${gi} µs GI = ${tSym} µs`));
+    lines.push(term("PHY", `${dbps} / ${tSym} µs = ${mathMbps(m.phyMbps)} Mbps`));
+  } else if (radio.phyBlended) {
+    lines.push("PHY is a harmonic mean across the client mix.");
+    lines.push("Slow stations take more airtime for the same bits.");
+    lines.push(`  blended PHY = ${mathMbps(radio.phyMbps)} Mbps`);
+  } else {
+    lines.push(`PHY = ${mathMbps(radio.phyMbps)} Mbps`);
+  }
+
+  const tax = radio.ssidMath;
+  const chain = (label, value) => `  ${label.padEnd(9, " ")}= ${value}`;
+  lines.push("");
+  lines.push(chain("protocol", `${mathMbps(radio.phyMbps)} × ${twoDec(mac)} = ${mathMbps(protocol)} Mbps`));
+  if (tax && tax.extra > 0) {
+    lines.push(
+      chain(
+        "SSID tax",
+        `${mathCount(tax.extra)} extra × (350 B × 8 × 1000/${mathFixed(tax.beaconIntervalMs, 1)}) / ${tax.rateMbps} Mbps × ${mathFixed(tax.probeFactor, 1)}`,
+      ),
+    );
+    lines.push(`             = ${mathFixed(tax.fraction, 10)}${tax.capped ? " (capped at 0.65)" : ""}`);
+  } else {
+    lines.push(chain("SSID tax", "0"));
+  }
+  const air = radio.rfUsable * (1 - radio.ssidAirtime);
+  lines.push(chain("air", `${twoDec(radio.rfUsable)} × (1 - ${mathFixed(radio.ssidAirtime, 10)}) = ${mathFixed(air, 10)}`));
+  lines.push(chain("usable", `${mathMbps(protocol)} × ${mathFixed(air, 10)} = ${mathMbps(usable)} Mbps`));
+  lines.push(chain("clients", `${mathCount(est.activeClients)} × ${twoDec(radio.share)} = ${mathCount(radio.clients)}`));
+  if (!usePlan) lines.push(`  table shows ${formatMbps(radio.usableMbps)}`);
+  return { heading, text: lines.join("\n") };
+}
+
+function headlineArithmetic(est, { n, planMac, liveMac, usePlan }) {
+  const serving = servingRadios(est);
+  const lines = [];
+  if (!serving.length) {
+    lines.push("No radio landed in the pool.");
+    lines.push("The headline has no per-person speed and seats 0 people.");
+    return { heading: "The headline", text: lines.join("\n") };
+  }
+
+  const roomPool = est.aggregateMbps;
+  const planPool = serving.reduce((s, r) => s + (r.planMbps || 0), 0);
+  const target = est.targetMbps;
+  const sameMac = Math.abs(liveMac - planMac) < 1e-9;
+
+  if (n > 0) {
+    const addends = serving.map((r) => mathMbps(r.usableMbps)).join(" + ");
+    lines.push(`pool = ${addends} = ${mathMbps(roomPool)} Mbps`);
+    lines.push(`each of ${mathCount(n)} = ${mathMbps(roomPool)} / ${mathCount(n)} = ${mathMbps(est.perUserMbps)} Mbps`);
+    lines.push(`shown as ${formatMbps(est.perUserMbps)}`);
+    lines.push("");
+  }
+
+  const fit = target > 0 ? planPool / target : 0;
+  const seats = Math.floor(Number.isFinite(fit) ? fit : 0);
+  if (n > 0 && sameMac) {
+    lines.push(`People who fit at ${formatMbps(target)} use this same pool.`);
+    lines.push(`${mathCount(n)} clients are already in the ${twoDec(planMac)} MAC bucket.`);
+  } else if (n > 0) {
+    lines.push(`The seat count uses MAC ${twoDec(planMac)}.`);
+    lines.push(`The per-person number above uses MAC ${twoDec(liveMac)}.`);
+    lines.push(
+      `plan pool = ${mathMbps(roomPool)} × ${twoDec(planMac)} / ${twoDec(liveMac)} = ${mathMbps(planPool)} Mbps`,
+    );
+  } else {
+    const addends = serving.map((r) => mathMbps(r.planMbps)).join(" + ");
+    lines.push(`plan pool = ${addends} = ${mathMbps(planPool)} Mbps`);
+    lines.push(`busy-room chip shows ${formatMbps(planPool)}`);
+    lines.push("");
+    lines.push(`People who fit at ${formatMbps(target)}:`);
+  }
+  lines.push(`${mathMbps(planPool)} / ${mathMbps(target)} = ${mathFixed(fit, 6)}`);
+  lines.push(`floor = ${seats}`);
+  lines.push(`shown as ${seats} ${seats === 1 ? "person" : "people"}`);
+  return { heading: "The headline", text: lines.join("\n") };
 }
 
 export function deviceById(id) {
