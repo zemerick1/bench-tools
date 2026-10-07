@@ -86,6 +86,34 @@ DEFAULT_SOURCE_DIR = TOOL_ROOT / "source"
 LOCAL_SOURCE_DIR = TOOL_ROOT / "local"
 
 
+def _is_cert_error(exc: BaseException) -> bool:
+    seen: set[int] = set()
+    cur: BaseException | None = exc
+    while cur is not None and id(cur) not in seen:
+        seen.add(id(cur))
+        if isinstance(cur, ssl.SSLCertVerificationError):
+            return True
+        text = str(cur)
+        if "CERTIFICATE_VERIFY_FAILED" in text or "certificate verify failed" in text:
+            return True
+        cur = cur.__cause__ or cur.__context__
+    return False
+
+
+def _disable_ssl_verify(reason: BaseException) -> None:
+    """Stop checking certificates after a proxy intercept rejects the chain.
+
+    GitHub-hosted runners verify normally. A local Zscaler re-sign fails
+    Python's trust store even when the bytes are the public spec, so the
+    rest of that run proceeds without certificate checks.
+    """
+    global _ssl_verify  # noqa: PLW0603
+    if _ssl_verify is False:
+        return
+    logger.warning("SSL verification failed (%s); continuing without certificate checks", reason)
+    _ssl_verify = False
+
+
 def _configure_ssl_verify(*, no_verify: bool = False) -> None:
     """Prefer the system CA store so corporate TLS proxies work locally."""
     global _ssl_verify  # noqa: PLW0603
@@ -109,8 +137,10 @@ def _configure_ssl_verify(*, no_verify: bool = False) -> None:
 
 
 def _http_get(url: str) -> bytes:
+    global _ssl_verify  # noqa: PLW0603
     last_exc: Exception | None = None
-    for attempt in range(1, _RETRIES + 1):
+    attempt = 1
+    while attempt <= _RETRIES:
         try:
             resp = httpx.get(
                 url,
@@ -123,10 +153,14 @@ def _http_get(url: str) -> bytes:
             return resp.content
         except (httpx.HTTPError, TimeoutError) as exc:
             last_exc = exc
+            if _ssl_verify is not False and _is_cert_error(exc):
+                _disable_ssl_verify(exc)
+                continue
             if attempt < _RETRIES:
                 wait = _RETRY_BACKOFF * attempt
                 logger.warning("  attempt %d failed (%s), retrying in %ds…", attempt, exc, wait)
                 time.sleep(wait)
+            attempt += 1
     raise RuntimeError(f"GET failed after {_RETRIES} attempts: {url} ({last_exc})")
 
 
@@ -151,35 +185,90 @@ def _parse_ssr_props(slug: str) -> dict[str, Any]:
         raise RuntimeError(f"{slug}: ssr-props JSON did not parse ({exc})") from exc
 
 
-def discover_specs(slug: str) -> list[dict[str, str]]:
-    """Discover the current branch's OpenAPI specs as ``[{filename, uuid}]``."""
-    props = _parse_ssr_props(slug)
-    api_defs = props.get("apiDefinitions") or []
-    registries = (
-        (((props.get("context") or {}).get("project") or {}).get("stable") or {}).get(
-            "apiRegistries"
-        )
-        or []
-    )
+def _registry_list(node: Any) -> list[Any]:
+    if not isinstance(node, dict):
+        return []
+    regs = node.get("apiRegistries")
+    if isinstance(regs, list) and regs:
+        return regs
+    return []
 
+
+def registry_entries(props: dict[str, Any]) -> list[Any]:
+    """Filename/uuid rows for the version the reference page rendered.
+
+    Older hubs stored these on ``context.project.stable``. That object is now
+    only ``{"version": "<id>"}``. The rows live on the rendered version, which
+    is also ``context.project.child.stable``.
+    """
+    context = props.get("context") if isinstance(props.get("context"), dict) else {}
+    project = context.get("project") if isinstance(context.get("project"), dict) else {}
+    child = project.get("child") if isinstance(project.get("child"), dict) else {}
+    candidates = (
+        props.get("version"),
+        context.get("version"),
+        child.get("stable") if isinstance(child, dict) else None,
+        project.get("stable"),
+    )
+    for node in candidates:
+        regs = _registry_list(node)
+        if regs:
+            return regs
+    return []
+
+
+def specs_from_ssr_props(props: dict[str, Any]) -> list[dict[str, str]]:
+    """Current OpenAPI uploads as ``[{filename, uuid}]``.
+
+    ``apiDefinitions`` is the set ReadMe is serving. ``apiRegistries`` is only
+    the uuid map, and on Central it also keeps every historical upload. Joining
+    the two keeps the current files and leaves the old revisions out.
+    """
+    api_defs = props.get("apiDefinitions") or []
     uuid_by_file: dict[str, str] = {}
-    for reg in registries:
+    for reg in registry_entries(props):
+        if not isinstance(reg, dict):
+            continue
         filename, uuid = reg.get("filename"), reg.get("uuid")
         if filename and uuid:
-            uuid_by_file[filename] = uuid
+            uuid_by_file[filename] = str(uuid)
 
     specs: list[dict[str, str]] = []
+    seen: set[str] = set()
+    skipped: list[str] = []
     for definition in api_defs:
+        if not isinstance(definition, dict):
+            continue
         if definition.get("type") not in (None, "openapi"):
             continue
         filename = definition.get("filename")
-        uuid = uuid_by_file.get(filename or "")
-        if not uuid:
+        if not filename or filename in seen:
             continue
-        specs.append({"filename": filename, "uuid": uuid})
+        uuid = uuid_by_file.get(filename) or definition.get("uuid")
+        if not uuid:
+            skipped.append(str(filename))
+            continue
+        seen.add(filename)
+        specs.append({"filename": filename, "uuid": str(uuid)})
+    if skipped:
+        logger.warning(
+            "  %d OpenAPI definition(s) had no registry uuid and were skipped: %s",
+            len(skipped),
+            ", ".join(skipped),
+        )
+    return specs
 
+
+def discover_specs(slug: str) -> list[dict[str, str]]:
+    """Discover the current branch's OpenAPI specs as ``[{filename, uuid}]``."""
+    props = _parse_ssr_props(slug)
+    specs = specs_from_ssr_props(props)
     if not specs:
-        raise RuntimeError(f"{slug}: no OpenAPI definitions found in ssr-props apiDefinitions")
+        raise RuntimeError(
+            f"{slug}: no OpenAPI definitions with a registry uuid "
+            f"(apiDefinitions={len(props.get('apiDefinitions') or [])}, "
+            f"registries={len(registry_entries(props))})"
+        )
     return specs
 
 

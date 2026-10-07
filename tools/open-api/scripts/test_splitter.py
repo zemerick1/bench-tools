@@ -15,7 +15,12 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from oasutil import dump_spec, normalize_servers, pointer_escape, redact_example_secrets
-from spec_fetcher import seed_local_sources
+from spec_fetcher import (
+    _is_cert_error,
+    registry_entries,
+    seed_local_sources,
+    specs_from_ssr_props,
+)
 from spec_splitter import assign_group, build_slice, slice_output_path, split_spec
 from spec_validate import validate_spec
 
@@ -766,6 +771,83 @@ class ValidatorTests(unittest.TestCase):
         result = validate_spec(spec)
         self.assertFalse(result.ok)
         self.assertTrue(any("unresolved" in error for error in result.errors))
+
+
+class SpecDiscoveryTests(unittest.TestCase):
+    def test_wrapped_certificate_verify_failed_message(self) -> None:
+        outer = ConnectionError("connect")
+        outer.__cause__ = RuntimeError(
+            "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get issuer certificate"
+        )
+        self.assertTrue(_is_cert_error(outer))
+        self.assertFalse(_is_cert_error(TimeoutError("timed out")))
+    def test_legacy_stable_registry_skips_history_and_non_openapi(self) -> None:
+        props = {
+            "apiDefinitions": [
+                {"filename": "authorization.json", "type": "openapi"},
+                {"filename": "notes.md", "type": "basic"},
+            ],
+            "context": {
+                "project": {
+                    "stable": {
+                        "apiRegistries": [
+                            {"filename": "authorization.json", "uuid": "abc"},
+                            {"filename": "monitoring-1.json", "uuid": "old"},
+                        ]
+                    }
+                }
+            },
+        }
+        self.assertEqual(
+            specs_from_ssr_props(props),
+            [{"filename": "authorization.json", "uuid": "abc"}],
+        )
+
+    def test_rendered_version_registry_when_stable_has_no_rows(self) -> None:
+        props = {
+            "apiDefinitions": [
+                {"filename": "monitoring-81.json", "type": "openapi"},
+                {"filename": "network-monitoring-final-openapi.json", "type": "openapi"},
+            ],
+            "version": {
+                "is_stable": True,
+                "apiRegistries": [
+                    {"filename": "monitoring.json", "uuid": "old"},
+                    {"filename": "monitoring-81.json", "uuid": "new"},
+                ],
+            },
+            "context": {"project": {"stable": {"version": "6a7aae71eb3f06e5c048ed84"}}},
+        }
+        self.assertEqual(len(registry_entries(props)), 2)
+        with self.assertLogs("spec_fetcher", level="WARNING") as logs:
+            specs = specs_from_ssr_props(props)
+        self.assertEqual(specs, [{"filename": "monitoring-81.json", "uuid": "new"}])
+        self.assertTrue(any("network-monitoring-final-openapi.json" in line for line in logs.output))
+
+    def test_definition_uuid_used_when_registry_has_no_row(self) -> None:
+        props = {
+            "apiDefinitions": [
+                {"filename": "extra.json", "type": "openapi", "uuid": "from-def"},
+            ],
+            "version": {"apiRegistries": []},
+            "context": {"project": {"stable": {"version": "only-an-id"}}},
+        }
+        self.assertEqual(
+            specs_from_ssr_props(props),
+            [{"filename": "extra.json", "uuid": "from-def"}],
+        )
+
+    def test_rendered_version_wins_over_an_older_stable_list(self) -> None:
+        props = {
+            "apiDefinitions": [{"filename": "a.json", "type": "openapi"}],
+            "version": {"apiRegistries": [{"filename": "a.json", "uuid": "from-version"}]},
+            "context": {
+                "project": {
+                    "stable": {"apiRegistries": [{"filename": "a.json", "uuid": "from-stable"}]}
+                }
+            },
+        }
+        self.assertEqual(specs_from_ssr_props(props)[0]["uuid"], "from-version")
 
 
 if __name__ == "__main__":

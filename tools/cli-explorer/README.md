@@ -76,8 +76,9 @@ kept locally without bloating the repo. **Ship `data/layers/` + `catalog.json`**
 ### CLI-Bank HTML (AOS 10, ClearPass)
 
 These are **not** PDFs. Commands are MadCap Flare topics, indexed by letter
-shards. Akamai 403s a plain fetch; the builder uses HTTP/2 + Edge UA +
-`sec-ch-ua`. Book prefixes live in `BOOKS` inside `build_from_cli_bank.py`
+shards. Akamai 403s a plain fetch; the builder uses HTTP/2 + the Chrome UA,
+`sec-ch-ua`, and `Sec-Fetch-*` headers from `fetch_cli_json.py`. Book prefixes
+live in `BOOKS` inside `build_from_cli_bank.py`
 (how to add the next landing page is documented there).
 
 | Product | Shard prefix | Landing |

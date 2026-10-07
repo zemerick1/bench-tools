@@ -5,7 +5,8 @@
 # CLI-Bank (see tools/cli-explorer/scripts/build_from_cli_bank.py BOOKS):
 #   AOS 10     Data/Tocs/AOS10__Commands__A_Chunk0.js
 #   ClearPass  Data/Tocs/cppm__Command_List__A_Chunk0.js
-# Akamai 403s without HTTP/2 + Edge UA + sec-ch-ua. Cache source/cli-bank.
+# Akamai 403s without HTTP/2 + Chrome UA + sec-ch-ua + Sec-Fetch-*.
+# Cache source/cli-bank.
 #
 # 1. curl --http2 + Chrome UA / sec-ch-ua / Sec-Fetch-* fetches live cli.json
 #    (HTTP/1.1 is Akamai 403). New sd0000 ids = new books to download.
@@ -15,6 +16,9 @@
 #
 # Cold fetch of every HTML book can take ~45 minutes (timeout 120). A quiet
 # week is cli.json + skip. Cache keeps full-banks + topic HTML on the runner.
+# The cache is saved even when the job fails, so a paced retry resumes
+# instead of starting cold. actions/cache's own post-step does not save
+# after a failed step.
 #
 # If main is protected against GITHUB_TOKEN pushes, add a PAT with contents:write
 # as a repo secret and set checkout token: ${{ secrets.OPENAPI_DOCS_TOKEN }}.
@@ -54,14 +58,15 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Cache HPESC HTML + full banks
-        uses: actions/cache@v4
+      - name: Restore HPESC HTML + full banks
+        id: cli-html-cache
+        uses: actions/cache/restore@v4
         with:
           path: |
             tools/cli-explorer/source/html
             tools/cli-explorer/source/cli-bank
             tools/cli-explorer/full-banks
-          key: cli-html-${{ github.run_id }}
+          key: cli-html-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
             cli-html-
 
@@ -69,6 +74,7 @@ jobs:
         run: |
           python tools/cli-explorer/scripts/test_html_parser.py -q
           python tools/cli-explorer/scripts/test_flare_parser.py -q
+          python tools/cli-explorer/scripts/test_cli_bank_http.py -q
 
       - name: Fetch HTML trains, layer, catalog
         working-directory: tools/cli-explorer
@@ -86,7 +92,7 @@ jobs:
           if [ "${{ github.event.inputs.refresh }}" = "true" ]; then
             extra="--refresh"
           fi
-          python scripts/build_from_cli_bank.py --all --workers 16 $extra
+          python scripts/build_from_cli_bank.py --all --workers 4 $extra
           python scripts/build_catalog.py
 
       - name: Refuse an empty 10.18 tree
@@ -123,3 +129,24 @@ jobs:
           fi
           git commit -m "Refresh CLI HTML banks from HPESC and CLI-Bank."
           bash .github/scripts/push-bot-commit.sh "$GITHUB_REF_NAME"
+
+      - name: CLI HTML cache has files
+        id: cli-html-present
+        if: always()
+        run: |
+          if find tools/cli-explorer/source/html tools/cli-explorer/source/cli-bank tools/cli-explorer/full-banks -type f -print -quit 2>/dev/null | grep -q .; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Save HPESC HTML + full banks
+        if: always() && steps.cli-html-present.outputs.present == 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            tools/cli-explorer/source/html
+            tools/cli-explorer/source/cli-bank
+            tools/cli-explorer/full-banks
+          key: cli-html-${{ github.run_id }}-${{ github.run_attempt }}

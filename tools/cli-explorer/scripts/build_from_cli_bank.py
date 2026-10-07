@@ -13,8 +13,9 @@ ClearPass PREFIX = ``cppm__Command_List``  (note: Command_List, not Commands)
 
 To add the next product (AOS-8, Instant, SD-Branch, …):
 
-1. Open the landing page in a browser that sends Edge UA + sec-ch-ua
-   (Akamai 403s urllib / curl without those). DevTools → Network, click
+1. Open the landing page with the Chrome UA from ``fetch_cli_json.py``
+   (Akamai 403s urllib / curl without Chrome UA + sec-ch-ua + Sec-Fetch-*).
+   DevTools → Network, click
    letter A, copy the Toc JS URL, take the PREFIX before ``__A_Chunk0.js``.
 2. Add a ``BOOKS`` entry below. ``min_leaves`` is the GitHub Actions floor.
 3. Catalog + UI treat ``platform: null`` families as a single Product pick
@@ -24,11 +25,16 @@ To add the next product (AOS-8, Instant, SD-Branch, …):
    trains. Cache ``tools/cli-explorer/source/cli-bank``. Commit
    ``data/aos-10``, ``data/clearpass``, ``data/catalog.json``.
 
-Fetch recipe (same as fetch_cli_json.py, Edge 152 Windows)::
+Fetch recipe (same client hints as fetch_cli_json.py)::
 
-    curl --http2 + Edge UA + sec-ch-ua / sec-ch-ua-mobile / sec-ch-ua-platform
-    Sec-Fetch-Dest: script (chunks) or document (topics)
+    curl --http2
+    Chrome UA + sec-ch-ua / sec-ch-ua-mobile / sec-ch-ua-platform: "macOS"
+    Sec-Fetch-Dest / Sec-Fetch-Mode / Sec-Fetch-Site on every request
     Referer: that book's landing page
+
+Akamai 403s a cold crawl that opens many connections at once. Every request
+shares one pace (a few per second) and a 403/429 is retried. A missing letter
+chunk is HTTP 404 and ends that letter; any other chunk failure fails the book.
 
 Usage (from tools/cli-explorer/)::
 
@@ -46,6 +52,7 @@ import json
 import re
 import subprocess
 import sys
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -55,6 +62,7 @@ from urllib.parse import quote
 SCRIPTS_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPTS_DIR))
 
+from fetch_cli_json import CHROME_UA, SEC_CH_UA  # noqa: E402
 from flare_topic import group_title, parse_flare_topic, parse_toc_chunk  # noqa: E402
 
 APP_ROOT = SCRIPTS_DIR.parent
@@ -64,13 +72,8 @@ SOURCE_ROOT = APP_ROOT / "source" / "cli-bank"
 CLI_BANK = "https://arubanetworking.hpe.com/techdocs/CLI-Bank"
 LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-# Akamai 403s HTTP/1.1 urllib. This UA + client hints is what CLI-Bank 200s.
-EDGE_UA = (
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) "
-    "Chrome/152.0.0.0 Safari/537.36 Edg/152.0.0.0"
-)
-SEC_CH_UA = '"Chromium";v="152", "Not?A_Brand";v="24", "Microsoft Edge";v="152"'
+# Akamai 403s HTTP/1.1 and a bare UA. CHROME_UA / SEC_CH_UA match
+# fetch_cli_json.py; the platform hint has to match that Macintosh UA.
 
 # Shared front-matter titles across CLI-Bank books.
 PREFACE_TITLES = {
@@ -129,19 +132,71 @@ def slugify(title: str, used: set) -> str:
     return slug
 
 
-def http_get(url: str, *, dest: str, mode: str, referer: str) -> bytes:
-    cmd = [
+# One gap for every CLI-Bank request. A 16-wide crawl from GitHub's runners
+# did about 120 requests/second and Akamai answered 403 (curl rc 22). 4/s
+# keeps a cold AOS 10 + ClearPass fetch under a few minutes.
+HTTP_MIN_INTERVAL = 0.25
+_HTTP_ATTEMPTS = 4
+_RETRY_STATUSES = {403, 429, 500, 502, 503, 504}
+_pace_lock = threading.Lock()
+_next_http_at = 0.0
+
+
+class HttpGetError(RuntimeError):
+    def __init__(self, url: str, status: Optional[int], detail: str = "") -> None:
+        self.url = url
+        self.status = status
+        self.detail = detail
+        parts = ["GET failed"]
+        if status is not None:
+            parts.append("HTTP {0}".format(status))
+        parts.append(url)
+        if detail:
+            parts.append("({0})".format(detail))
+        super().__init__(" ".join(parts))
+
+
+def _pace_http() -> None:
+    global _next_http_at
+    with _pace_lock:
+        now = time.monotonic()
+        wait = _next_http_at - now
+        if wait > 0:
+            time.sleep(wait)
+            now = time.monotonic()
+        _next_http_at = now + HTTP_MIN_INTERVAL
+
+
+def parse_curl_http(stdout: bytes, stderr: bytes, returncode: int, url: str) -> Tuple[int, bytes]:
+    """Split curl ``-w '\\n%{http_code}'`` output.
+
+    curl stays exit 0 on an HTTP error when ``--fail`` is off, so the status
+    is on the last line. A non-zero exit is a transport failure and has no
+    status.
+    """
+    if returncode != 0:
+        text = stderr.decode("utf-8", "replace").strip()
+        detail = text.splitlines()[-1][:300] if text else "curl rc={0}".format(returncode)
+        raise HttpGetError(url, None, detail)
+    body, sep, code_b = stdout.rpartition(b"\n")
+    if not sep or not code_b.isdigit():
+        raise HttpGetError(url, None, "curl response had no HTTP status")
+    return int(code_b), body
+
+
+def curl_argv(url: str, *, dest: str, mode: str, referer: str) -> List[str]:
+    """HTTP/2 Chrome request. Akamai 403s if any of these client hints are missing."""
+    return [
         "curl",
         "-sS",
-        "--fail",
         "--compressed",
         "--http2",
         "--retry",
-        "3",
-        "--retry-delay",
         "2",
+        "--retry-delay",
+        "1",
         "-A",
-        EDGE_UA,
+        CHROME_UA,
         "-H",
         "Accept: */*",
         "-H",
@@ -155,19 +210,41 @@ def http_get(url: str, *, dest: str, mode: str, referer: str) -> bytes:
         "-H",
         "sec-ch-ua-mobile: ?0",
         "-H",
-        'sec-ch-ua-platform: "Windows"',
+        'sec-ch-ua-platform: "macOS"',
         "-H",
         "Sec-Fetch-Dest: {0}".format(dest),
         "-H",
         "Sec-Fetch-Mode: {0}".format(mode),
         "-H",
         "Sec-Fetch-Site: same-origin",
+        "-w",
+        "\n%{http_code}",
         url,
     ]
-    try:
-        return subprocess.check_output(cmd, stderr=subprocess.DEVNULL)
-    except subprocess.CalledProcessError as err:
-        raise RuntimeError("GET failed rc={0} {1}".format(err.returncode, url)) from err
+
+
+def http_get(url: str, *, dest: str, mode: str, referer: str) -> bytes:
+    cmd = curl_argv(url, dest=dest, mode=mode, referer=referer)
+    last: Optional[HttpGetError] = None
+    for attempt in range(1, _HTTP_ATTEMPTS + 1):
+        _pace_http()
+        try:
+            proc = subprocess.run(cmd, capture_output=True)
+            status, body = parse_curl_http(proc.stdout, proc.stderr, proc.returncode, url)
+        except HttpGetError as err:
+            last = err
+            status = err.status
+            body = b""
+        else:
+            if status == 200:
+                return body
+            last = HttpGetError(url, status)
+        if status not in _RETRY_STATUSES and status is not None:
+            raise last
+        if attempt == _HTTP_ATTEMPTS:
+            raise last
+        time.sleep(attempt)
+    raise last or HttpGetError(url, None, "no response")
 
 
 def topic_url(path: str) -> str:
@@ -236,11 +313,15 @@ def fetch_letter_chunks(
                         referer=referer,
                         refresh=refresh,
                     )
-                except RuntimeError:
+                except HttpGetError as err:
+                    # Chunk1 (and a letter with no commands) is a normal 404.
+                    # 403/429/5xx used to look like an empty book.
+                    if err.status == 404:
+                        break
                     if path.is_file() and not refresh:
                         blob = path.read_bytes()
                     else:
-                        break
+                        raise
             text = blob.decode("utf-8", "replace")
             if text.lstrip().startswith("<"):
                 break
@@ -382,7 +463,14 @@ def build_book(
     t0 = time.monotonic()
     cache_dir = SOURCE_ROOT / book["cache_name"]
     cache_dir.mkdir(parents=True, exist_ok=True)
-    commands = fetch_letter_chunks(book, refresh=refresh, offline=offline)
+    try:
+        commands = fetch_letter_chunks(book, refresh=refresh, offline=offline)
+    except HttpGetError as err:
+        print(
+            "CLI-Bank chunk fetch failed for {0}: {1}".format(book["bank_id"], err),
+            file=sys.stderr,
+        )
+        return 1
     commands = [c for c in commands if c.get("title") and not is_preface(c)]
     if not commands:
         print(
