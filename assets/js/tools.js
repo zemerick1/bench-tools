@@ -70,7 +70,7 @@ export const tools = [
     id: "ap-capacity",
     title: "AP Capacity",
     description:
-      "How many users can this AP actually support? Practical per-client throughput, not the datasheet PHY.",
+      "Compare airtime stories for one AP. Each radio, the band that runs out first, and a recommended count — not a survey, and not the datasheet PHY.",
     href: "./tools/ap-capacity/",
     icon: "AP",
     status: "available",

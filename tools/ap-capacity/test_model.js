@@ -23,6 +23,8 @@ import {
   apMatchesRadios,
   apStreamLabel,
   sharedNss,
+  deviceById,
+  scenarioInput,
 } from "./model.js";
 
 const catalog = JSON.parse(
@@ -240,10 +242,13 @@ ok(shotText.includes("3120 / 13.6 µs = 229.411765 Mbps"), "5 GHz PHY line");
 ok(shotText.includes("0.0068359375"), "SSID tax shows the beacon fraction");
 ok(shotText.includes("54.682445"), "5 GHz usable at working precision");
 ok(shotText.includes("109.36489"), "6 GHz usable at working precision");
-ok(shotText.includes("5.468244 Mbps"), "per-person working precision");
-ok(shotText.includes("shown as 5.5 Mbps"), "headline rounds per person to 5.5");
-ok(Math.floor(shot.clientsThatFit) === 32, `screenshot seats floor to 32 (got ${shot.clientsThatFit})`);
-ok(shotText.includes("floor = 32"), "seat line floors the division");
+ok(shotText.includes("5 GHz: 15 people get 3.645496 Mbps each"), "5 GHz group speed, not a room average");
+ok(shotText.includes("People on different radios do not share one speed."), "headline refuses the average");
+ok(!shotText.includes("5.468244"), "room average is not printed");
+ok(shot.bindingBand === "5", "5 GHz is the tight band at a 50/50 split");
+ok(shot.modeledClients === 21, `screenshot seats floor to 21 (got ${shot.modeledClients})`);
+ok(shotText.includes("floor = 21"), "seat line floors the tight radio");
+ok(shot.recommendedClients === 14, "30% margin recommends 14");
 ok(shotText.includes("Off. Left out of the pool."), "disabled 2.4 GHz is called out");
 
 const alone = estimateCapacity({
@@ -258,7 +263,7 @@ const alone = estimateCapacity({
 });
 const aloneText = capacityArithmetic(alone).map((s) => s.text).join("\n");
 ok(aloneText.includes("MAC efficiency = 0.50"), "one client uses 50% MAC");
-ok(aloneText.includes("plan pool ="), "seat count rescales to the 40% pool");
+ok(aloneText.includes("The seat count uses MAC 0.40"), "seat count rescales to the 40% MAC");
 ok(alone.radios[0].phyMath && near(alone.radios[0].phyMath.phyMbps, alone.radios[0].phyMbps, 1e-9), "radio carries matching PHY terms");
 
 console.log("\nAP-755 with a Wi-Fi 6 laptop\n");
@@ -303,6 +308,111 @@ const ap755phone = estimateCapacity({
 });
 ok(ap755phone.radios.find((r) => r.band === "2.4").standard === "be", "Wi-Fi 7 client keeps Wi-Fi 7 on 2.4");
 ok(ap755phone.radios.find((r) => r.band === "6").phyMbps > 0, "Wi-Fi 7 client uses the AP-755 6 GHz radio");
+
+console.log("\nDefault dual-band story does not pool radios\n");
+const dual = estimateCapacity({
+  radios: [
+    { id: "r24", enabled: true, band: "2.4", standard: "ax", widthMHz: 20, nss: 2 },
+    { id: "r5", enabled: true, band: "5", standard: "ax", widthMHz: 20, nss: 2 },
+  ],
+  client: { standard: "ax", nss: 2, bands: ["2.4", "5"], maxWidthMHz: 80 },
+  quality: "typical",
+  neighbor: "typical",
+  ssidCount: 3,
+  activeClients: 30,
+  targetMbps: 2,
+  splitMode: "steered",
+});
+const dual24 = dual.radios.find((r) => r.band === "2.4");
+const dual5 = dual.radios.find((r) => r.band === "5");
+const dualAvg = (dual24.usableMbps + dual5.usableMbps) / 30;
+ok(dual.bindingBand === "5", "default story is limited by 5 GHz");
+ok(dual.modeledClients === 31, `modeled maximum floors to 31 (got ${dual.modeledClients})`);
+ok(dual.recommendedClients === 21, `30% margin recommends 21 (got ${dual.recommendedClients})`);
+ok(near(dual5.perUserMbps, 2.13, 0.05), `5 GHz group gets ~2.13 Mbps (got ${dual5.perUserMbps.toFixed(2)})`);
+ok(near(dual24.perUserMbps, 8.4, 0.15), `2.4 GHz group gets ~8.4 Mbps (got ${dual24.perUserMbps.toFixed(2)})`);
+ok(dual.perUserMbps === dual5.perUserMbps, "reported speed is the tight band, not a blend");
+ok(Math.abs(dual.perUserMbps - dualAvg) > 0.5, "room average is not the reported speed");
+ok(dual.speedStory === "crowd", "30 people on both bands is a crowd");
+ok(dual.verdict === "fits", "30 people meet 2 Mbps and sit past the recommended cap");
+
+const dualOne = estimateCapacity({
+  radios: [
+    { id: "r24", enabled: true, band: "2.4", standard: "ax", widthMHz: 20, nss: 2 },
+    { id: "r5", enabled: true, band: "5", standard: "ax", widthMHz: 20, nss: 2 },
+  ],
+  client: { standard: "ax", nss: 2, bands: ["2.4", "5"], maxWidthMHz: 80 },
+  quality: "typical",
+  neighbor: "typical",
+  ssidCount: 3,
+  activeClients: 1,
+  targetMbps: 2,
+  splitMode: "steered",
+});
+const oneSum = dualOne.radios.reduce((sum, r) => sum + (r.usableMbps || 0), 0);
+ok(dualOne.speedStory === "station", "one client does not share both radios");
+ok(near(dualOne.perUserMbps, 67.9, 0.5), `one client reports the faster radio ~68 Mbps (got ${dualOne.perUserMbps.toFixed(1)})`);
+ok(dualOne.perUserMbps < oneSum - 20, "one client does not add the radios");
+
+console.log("\nDevice presets and stories\n");
+const m4book = deviceById("macbook-pro-m4");
+const m4pad = deviceById("ipad-pro-m4");
+const air2device = deviceById("ipad-air-2");
+ok(m4book.standard === "ax" && m4book.bands.includes("6") && m4book.detail.includes("6E"), "M4 MacBook Pro is Wi-Fi 6E");
+ok(m4pad.standard === "ax" && m4pad.bands.includes("6") && m4pad.detail.includes("6E"), "M4 iPad Pro is Wi-Fi 6E");
+ok(air2device.maxWidthMHz === 80 && air2device.nss === 2, "iPad Air 2 can do 80 MHz");
+
+const air2narrow = estimateCapacity({
+  radios: [{ id: "r5", enabled: true, band: "5", standard: "ac", widthMHz: 20, nss: 3 }],
+  client: { standard: air2device.standard, nss: air2device.nss, bands: air2device.bands, maxWidthMHz: air2device.maxWidthMHz },
+  quality: "excellent",
+  neighbor: "isolated",
+  ssidCount: 1,
+  activeClients: 30,
+  targetMbps: 2,
+  splitMode: "best",
+});
+ok(air2narrow.radios[0].widthMHz === 20 && near(air2narrow.radios[0].phyMbps, 173.3), "Air 2 on a 20 MHz AP stays at 173 Mbps");
+
+const air2wide = estimateCapacity({
+  radios: [{ id: "r5", enabled: true, band: "5", standard: "ac", widthMHz: 80, nss: 2 }],
+  client: { standard: air2device.standard, nss: air2device.nss, bands: air2device.bands, maxWidthMHz: air2device.maxWidthMHz },
+  quality: "excellent",
+  neighbor: "isolated",
+  ssidCount: 1,
+  activeClients: 1,
+  targetMbps: 2,
+  splitMode: "best",
+});
+ok(air2wide.radios[0].widthMHz === 80, "Air 2 takes 80 MHz when the AP offers it");
+
+const officeA = scenarioInput("office");
+officeA.radios[1].widthMHz = 80;
+officeA.radios[0].enabled = false;
+officeA.mcsOverride = 11;
+const officeB = scenarioInput("office");
+ok(officeB.radios.length === 2 && officeB.radios.every((r) => r.enabled && r.widthMHz === 20), "office story radios are a fresh 20 MHz pair");
+ok(officeB.mcsOverride == null && officeB.margin === 0.3 && officeB.splitMode === "steered", "office story clears MCS and resets the margin");
+ok(scenarioInput("office") !== officeB && scenarioInput("ipad1").radios[0].widthMHz === 20, "each story call is its own snapshot");
+ok(scenarioInput("air2").deviceId === "ipad-air-2" && scenarioInput("triband").radios[2].widthMHz === 40, "air2 and tri-band snapshots");
+
+const perBand = estimateCapacity({
+  radios: [
+    { id: "r24", enabled: true, band: "2.4", standard: "ax", widthMHz: 20, nss: 2 },
+    { id: "r5", enabled: true, band: "5", standard: "ax", widthMHz: 20, nss: 2 },
+  ],
+  client: { standard: "ax", nss: 2, bands: ["2.4", "5"], maxWidthMHz: 80 },
+  quality: "typical",
+  neighbor: "typical",
+  neighborByBand: { "2.4": "crowded" },
+  ssidCount: 1,
+  activeClients: 30,
+  targetMbps: 2,
+  splitMode: "steered",
+});
+ok(perBand.radios.find((r) => r.band === "2.4").rfUsable === 0.4, "2.4 GHz can be crowded on its own");
+ok(perBand.radios.find((r) => r.band === "5").rfUsable === 0.6, "5 GHz keeps the floor assumption");
+ok(perBand.sameRf === false, "mixed RF is called out");
 
 console.log();
 if (failed) {

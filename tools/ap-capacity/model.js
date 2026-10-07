@@ -1,13 +1,16 @@
 /**
- * AP capacity estimator — practical throughput, not datasheet PHY.
+ * AP capacity — an airtime scenario estimator, not a design.
  *
  * PHY rates follow IEEE 802.11-2020 / 802.11be (same construction as
- * typical MCS tables). Usable throughput applies:
- *   - MAC/protocol efficiency from client count
+ * typical MCS tables). Each radio then applies coarse assumptions:
+ *   - MAC/protocol efficiency from client count (one factor for the AP)
  *   - RF fraction that is actually yours (CCI/ACI / neighbors)
  *   - beacon + probe tax from SSID count
  *
- * Never quote PHY rate as user speed.
+ * People on different radios do not share one speed. The modeled
+ * headcount is the tight radio under the chosen split, then a safety
+ * margin. Never quote PHY rate as user speed, and never quote the
+ * modeled ceiling as a build number.
  */
 
 /** @typedef {"n" | "ac" | "ax" | "be"} Standard */
@@ -102,12 +105,31 @@ export const NEIGHBOR_MODES = {
   },
 };
 
+/** Spare airtime left unused. The modeled ceiling is not a design. */
+export const DESIGN_MARGINS = [
+  { value: 0, label: "No spare airtime" },
+  { value: 0.3, label: "Leave 30% unused" },
+  { value: 0.5, label: "Leave half unused" },
+];
+
+export const DEFAULT_DESIGN_MARGIN = 0.3;
+
 export const APP_PRESETS = [
-  { id: "web", label: "Web, email, chat", mbps: 1, blurb: "Light browsing, mail, messaging." },
-  { id: "classroom", label: "Classroom video", mbps: 2, blurb: "Unicast video to each student." },
-  { id: "office", label: "Office / video call", mbps: 3, blurb: "Cloud apps plus a 1080p call." },
-  { id: "hd", label: "HD streaming", mbps: 5, blurb: "One HD stream per person, give or take." },
-  { id: "power", label: "Power user / 4K", mbps: 15, blurb: "Fat downlink. Rare as a whole-room target." },
+  { id: "web", label: "Web, email, chat", mbps: 1, blurb: "Light browsing and mail. This checks megabits only." },
+  { id: "classroom", label: "Classroom video", mbps: 2, blurb: "Unicast video to each student. This checks megabits only." },
+  {
+    id: "office",
+    label: "Office / video call",
+    mbps: 3,
+    blurb: "Cloud apps plus a call. A call also needs the other direction, and it fails on delay long before it fails on megabits.",
+  },
+  {
+    id: "hd",
+    label: "HD streaming",
+    mbps: 5,
+    blurb: "One HD stream per person. A stream can still look fine after a call has already failed.",
+  },
+  { id: "power", label: "Power user / 4K", mbps: 15, blurb: "Fat downlink. Rare as a whole-room target. This checks megabits only." },
 ];
 
 /**
@@ -136,8 +158,8 @@ export const DEVICE_PRESETS = [
   {
     id: "macbook-pro-m4",
     label: "MacBook Pro M4",
-    detail: "Wi-Fi 7 · 2SS",
-    standard: "be",
+    detail: "Wi-Fi 6E · 2SS",
+    standard: "ax",
     nss: 2,
     bands: ["2.4", "5", "6"],
     maxWidthMHz: 160,
@@ -145,8 +167,8 @@ export const DEVICE_PRESETS = [
   {
     id: "ipad-pro-m4",
     label: "iPad Pro M4",
-    detail: "Wi-Fi 7 · 2SS",
-    standard: "be",
+    detail: "Wi-Fi 6E · 2SS",
+    standard: "ax",
     nss: 2,
     bands: ["2.4", "5", "6"],
     maxWidthMHz: 160,
@@ -235,11 +257,11 @@ export const DEVICE_PRESETS = [
   {
     id: "ipad-air-2",
     label: "iPad Air 2",
-    detail: "802.11ac · 2SS",
+    detail: "802.11ac · 2SS · 80 MHz",
     standard: "ac",
     nss: 2,
     bands: ["2.4", "5"],
-    maxWidthMHz: 40,
+    maxWidthMHz: 80,
   },
   {
     id: "ipad-1",
@@ -603,11 +625,21 @@ export function formatCount(n) {
 }
 
 /**
- * How clients land on enabled radios this device can actually join.
- * Steered: a little leftover on 2.4, the rest on 5/6.
- * Best: everyone on the highest band they can use.
+ * Default share left on 2.4 GHz when a higher band is also in the story.
+ * Tri-band keeps today's 10%. One higher band keeps 15%.
  */
-export function clientSplit(radios, clientBands, mode) {
+export function defaultLeftover24(has5, has6) {
+  return has5 && has6 ? 0.1 : 0.15;
+}
+
+/**
+ * How clients land on enabled radios this device can actually join.
+ * Steered: leftover24 of the crowd stays on 2.4 (an assumption). The rest
+ * splits evenly across the higher bands they can use.
+ * Best: everyone on the highest band they can use.
+ * @param {number | null | undefined} leftover24 fraction on 2.4, or omit for the default
+ */
+export function clientSplit(radios, clientBands, mode, leftover24) {
   const capable = radios.filter(
     (r) => r.enabled && clientBands.includes(r.band) && clampStandardToBand(r.standard, r.band),
   );
@@ -627,18 +659,28 @@ export function clientSplit(radios, clientBands, mode) {
   for (const r of capable) byBand[r.band].push(r);
 
   /** @type {Record<Band, number>} */
-  let weights = { "2.4": 0, 5: 0, 6: 0 };
+  const weights = { "2.4": 0, 5: 0, 6: 0 };
   const has24 = byBand["2.4"].length > 0;
   const has5 = byBand["5"].length > 0;
   const has6 = byBand["6"].length > 0;
+  const higher = [];
+  if (has5) higher.push("5");
+  if (has6) higher.push("6");
 
-  if (has6 && has5 && has24) weights = { "2.4": 0.1, 5: 0.45, 6: 0.45 };
-  else if (has6 && has5) weights = { "2.4": 0, 5: 0.5, 6: 0.5 };
-  else if (has6 && has24) weights = { "2.4": 0.15, 5: 0, 6: 0.85 };
-  else if (has5 && has24) weights = { "2.4": 0.15, 5: 0.85, 6: 0 };
-  else if (has6) weights = { "2.4": 0, 5: 0, 6: 1 };
-  else if (has5) weights = { "2.4": 0, 5: 1, 6: 0 };
-  else weights = { "2.4": 1, 5: 0, 6: 0 };
+  if (has24 && higher.length) {
+    const fallback = defaultLeftover24(has5, has6);
+    const hasOverride = leftover24 != null && leftover24 !== "" && Number.isFinite(Number(leftover24));
+    const raw = hasOverride ? Number(leftover24) : fallback;
+    const stay = Math.min(1, Math.max(0, raw));
+    weights["2.4"] = stay;
+    const rest = (1 - stay) / higher.length;
+    for (const band of higher) weights[band] = rest;
+  } else if (higher.length) {
+    const each = 1 / higher.length;
+    for (const band of higher) weights[band] = each;
+  } else {
+    weights["2.4"] = 1;
+  }
 
   for (const band of ["2.4", "5", "6"]) {
     const list = byBand[band];
@@ -777,10 +819,35 @@ export function blendedPhyMbps(parts) {
  *   activeClients: number,
  *   targetMbps: number,
  *   splitMode: "steered" | "best",
+ *   leftover24?: number | null,
+ *   margin?: number,
+ *   neighborByBand?: Partial<Record<Band, NeighborMode>>,
  *   mcsOverride?: number | null,
  *   giOverride?: number | null,
  * }} EstimateInput
  */
+
+function clampMargin(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return DEFAULT_DESIGN_MARGIN;
+  return Math.min(0.9, Math.max(0, n));
+}
+
+function neighborForBand(input, band, fallback) {
+  const id = input.neighborByBand && input.neighborByBand[band];
+  return (id && NEIGHBOR_MODES[id]) || fallback;
+}
+
+/**
+ * What one person on this radio gets.
+ * A single device, or a band with less than one person assigned, gets the
+ * whole radio. A crowd shares it. Never divide by a fraction of a person.
+ */
+function groupMbps(usableMbps, clientsHere, activeClients) {
+  if (!(usableMbps > 0) || !(activeClients > 0)) return 0;
+  if (activeClients <= 1 || !(clientsHere >= 1)) return usableMbps;
+  return usableMbps / clientsHere;
+}
 
 /**
  * Practical AP estimate.
@@ -797,8 +864,10 @@ export function estimateCapacity(input) {
   );
   const client = input.client;
   const splitMode = input.splitMode || "steered";
+  const margin = clampMargin(input.margin);
+  const leftover24 = splitMode === "steered" ? input.leftover24 : null;
 
-  const split = clientSplit(radios, client.bands, splitMode);
+  const split = clientSplit(radios, client.bands, splitMode, leftover24);
   const radioResults = [];
 
   for (const radio of radios) {
@@ -857,6 +926,7 @@ export function estimateCapacity(input) {
     // Planning load uses the medium/large-room bucket — "how many users"
     // should not assume a single-client 50% efficiency.
     const macPlan = PLAN_MAC_EFFICIENCY;
+    const bandNeighbor = neighborForBand(input, radio.band, neighbor);
     const ssidMath = ssidAirtimeBreakdown(ssidCount, radio.band);
     const ssidTax = ssidMath.fraction;
     const phyMath = phyBlended
@@ -868,14 +938,16 @@ export function estimateCapacity(input) {
           mcs: link.mcs,
           giUs: link.giUs,
         });
-    const rf = neighbor.rfUsable;
+    const rf = bandNeighbor.rfUsable;
     const protocolMbps = phyMbps * macNow;
     const protocolPlanMbps = phyMbps * macPlan;
     const air = rf * (1 - ssidTax);
     const usableMbps = protocolMbps * air;
     const planMbps = protocolPlanMbps * air;
-    const perUserMbps = clientsHere > 0 ? usableMbps / clientsHere : 0;
-    const fitHere = targetMbps > 0 ? planMbps / targetMbps : 0;
+    const perUserMbps = groupMbps(usableMbps, clientsHere, activeClients);
+    // Headcount this radio allows if the split stays put. Not "clients if
+    // everyone moved here."
+    const fitHere = share > 0 && targetMbps > 0 ? planMbps / (share * targetMbps) : 0;
 
     radioResults.push({
       id: radio.id,
@@ -902,6 +974,7 @@ export function estimateCapacity(input) {
       ssidAirtime: ssidTax,
       ssidMath,
       rfUsable: rf,
+      neighborId: bandNeighbor.id,
       protocolMbps,
       protocolPlanMbps,
       usableMbps,
@@ -915,21 +988,58 @@ export function estimateCapacity(input) {
   const serving = radioResults.filter((r) => r.planMbps > 0 && r.share > 0);
   const aggregateMbps = serving.reduce((s, r) => s + r.usableMbps, 0);
   const protocolAggregate = serving.reduce((s, r) => s + (r.protocolMbps || 0), 0);
-  // Classroom-style question: the AP is a pool. PHY × protocol × RF × SSIDs,
-  // then divide. Do not use a steered-ratio min() — that is how "30 kids
-  // on one AP" turned into "10 fit" while average Mbps still looked fine.
-  const planAggregate = serving.reduce((s, r) => s + (r.planMbps || 0), 0);
-  const clientsThatFit = targetMbps > 0 ? planAggregate / targetMbps : 0;
 
-  const perUserMbps = activeClients > 0 ? aggregateMbps / activeClients : aggregateMbps;
+  // The split is fixed. The room seats as many people as the tight radio
+  // allows. Summing the radios and dividing pretends one person can use
+  // every band at once, and pretends the fast band donates speed to the slow one.
+  let binding = null;
+  for (const radio of serving) {
+    if (!binding || radio.fitHere < binding.fitHere) binding = radio;
+  }
+  const clientsThatFit = binding ? binding.fitHere : 0;
+  const modeledClients = Math.floor(Number.isFinite(clientsThatFit) ? Math.max(0, clientsThatFit) : 0);
+  const recommendedClients = Math.floor(modeledClients * (1 - margin));
+
+  const fractional = serving.some((r) => r.clients < 1);
+  let speedStory = "none";
+  let perUserMbps = 0;
+  if (!serving.length) {
+    speedStory = "none";
+  } else if (!(activeClients > 0)) {
+    speedStory = "empty";
+  } else if (serving.length === 1) {
+    speedStory = "single";
+    perUserMbps = serving[0].perUserMbps;
+  } else if (activeClients <= 1 || fractional) {
+    // One device uses one radio. Report the faster radio, not the sum.
+    speedStory = "station";
+    perUserMbps = serving.reduce((best, r) => Math.max(best, r.usableMbps || 0), 0);
+  } else {
+    speedStory = "crowd";
+    perUserMbps = binding.perUserMbps;
+  }
 
   let verdict = "none";
-  if (aggregateMbps <= 0) verdict = "none";
-  else if (activeClients <= 0) verdict = clientsThatFit >= 1 ? "fits" : "none";
-  else if (perUserMbps >= targetMbps * 1.25) verdict = "plenty";
-  else if (perUserMbps >= targetMbps) verdict = "fits";
-  else verdict = "short";
+  if (!serving.length) {
+    verdict = "none";
+  } else if (!(activeClients > 0)) {
+    verdict = clientsThatFit >= 1 ? "fits" : "none";
+  } else if (speedStory === "station") {
+    const rates = serving.map((r) => r.usableMbps || 0);
+    const best = Math.max(...rates);
+    const worst = Math.min(...rates);
+    if (best < targetMbps) verdict = "short";
+    else if (worst < targetMbps || activeClients > recommendedClients) verdict = "fits";
+    else verdict = "plenty";
+  } else if (perUserMbps < targetMbps) {
+    verdict = "short";
+  } else if (activeClients > recommendedClients) {
+    verdict = "fits";
+  } else {
+    verdict = "plenty";
+  }
 
+  const sameRf = serving.every((r) => r.rfUsable === serving[0].rfUsable);
   const caveats = buildCaveats({
     neighbor,
     ssidCount,
@@ -938,19 +1048,29 @@ export function estimateCapacity(input) {
     activeClients,
     radios: radioResults,
     client,
+    splitMode,
+    sameRf,
+    margin,
   });
 
   return {
-    ok: aggregateMbps > 0,
+    ok: serving.length > 0,
     targetMbps,
     activeClients,
     clientsThatFit,
+    modeledClients,
+    recommendedClients,
+    margin,
+    bindingBand: binding ? binding.band : null,
+    bindingId: binding ? binding.id : null,
+    speedStory,
     protocolAggregate,
     perUserMbps,
     aggregateMbps,
     macEfficiency: macEfficiency(activeClients),
     macPlan: PLAN_MAC_EFFICIENCY,
     rfUsable: neighbor.rfUsable,
+    sameRf,
     neighbor,
     quality,
     ssidCount,
@@ -961,27 +1081,37 @@ export function estimateCapacity(input) {
   };
 }
 
-function buildCaveats({ neighbor, ssidCount, quality, mac, activeClients, radios, client }) {
+function buildCaveats({ neighbor, ssidCount, quality, mac, activeClients, radios, client, splitMode, sameRf, margin }) {
   const caveats = [];
   const rfPct = Math.round(neighbor.rfUsable * 100);
   const macPct = Math.round(mac * 100);
+  const marginPct = Math.round((margin ?? DEFAULT_DESIGN_MARGIN) * 100);
 
-  if (neighbor.id === "isolated") {
+  if (sameRf === false) {
+    const bits = [];
+    for (const radio of radios) {
+      if (!radio.phyMbps || !(radio.rfUsable > 0)) continue;
+      bits.push(`${radio.band} GHz ${Math.round(radio.rfUsable * 100)}%`);
+    }
     caveats.push(
-      `RF: this channel is treated as 100% yours — no CCI/ACI from neighboring APs. Real floors are rarely this kind.`,
+      `RF: this story uses a different assumption on each band (${bits.join(", ")}). Those percents are knobs, not a survey. 2.4, 5, and 6 GHz usually do not share contention or how far the signal goes.`,
+    );
+  } else if (neighbor.id === "isolated") {
+    caveats.push(
+      `RF: every band is treated as 100% yours — no CCI/ACI from neighboring APs. Real floors are rarely this kind. Same coarse assumption on every band.`,
     );
   } else if (neighbor.id === "typical") {
     caveats.push(
-      `RF: about ${rfPct}% of the channel is treated as yours. The rest is contention from neighbors (CCI/ACI) and leftover noise. Not a site survey.`,
+      `RF: about ${rfPct}% of each channel is treated as yours. The rest is contention from neighbors (CCI/ACI) and leftover noise. Same coarse assumption on every band — 2.4 GHz is often worse than this. Not a site survey.`,
     );
   } else {
     caveats.push(
-      `RF: only ${rfPct}% of the channel is treated as yours. Crowded spectrum. 2.4 GHz often looks like this even when 5/6 GHz does not.`,
+      `RF: only ${rfPct}% of each channel is treated as yours. Crowded spectrum, applied to every band in this story. 2.4 GHz often looks like this even when 5 and 6 GHz do not.`,
     );
   }
 
   caveats.push(
-    `Protocol: with ${activeClients || 0} active client${activeClients === 1 ? "" : "s"}, usable airtime is ~${macPct}% of PHY (IFS, ACKs, backoff, retransmits, small frames). Associated-but-idle devices are not this math.`,
+    `Protocol: with ${activeClients || 0} active client${activeClients === 1 ? "" : "s"}, this story keeps ~${macPct}% of PHY for payload (IFS, ACKs, backoff, retransmits, small frames). The 50/45/40% steps are one coarse assumption for the whole AP, not a capture. Associated-but-idle devices are not this math.`,
   );
 
   if (ssidCount <= 1) {
@@ -992,17 +1122,41 @@ function buildCaveats({ neighbor, ssidCount, quality, mac, activeClients, radios
     );
   }
 
+  const rateShift =
+    " One MCS stands for every client on that radio, and the same rate up and down. Real cells rate-shift, and uplink is often worse.";
   if (quality === "excellent") {
     caveats.push(
-      "Link: “excellent” is sitting near the AP with a clean SNR so high MCS (1024-QAM / 4096-QAM) can stick. That is not a cell-edge design target.",
+      "Link: “excellent” is sitting near the AP with a clean SNR so high MCS (1024-QAM / 4096-QAM) can stick. That is not a cell-edge story." +
+        rateShift,
     );
   } else if (quality === "edge") {
     caveats.push(
-      "Link: cell edge (16-QAM). If RSSI is this low, add an AP — do not widen the channel.",
+      "Link: cell edge (16-QAM). If RSSI is this low, add an AP — do not widen the channel." + rateShift,
     );
   } else {
     caveats.push(
-      "Link: typical coverage (~256-QAM / MCS 7–9 on 5/6 GHz; 64-QAM on 2.4). Not datasheet MCS 11/13. High QAM needs to be next to the AP.",
+      "Link: typical coverage (~256-QAM / MCS 7–9 on 5/6 GHz; 64-QAM on 2.4). Not datasheet MCS 11/13. High QAM needs to be next to the AP." +
+        rateShift,
+    );
+  }
+
+  if (splitMode === "best") {
+    caveats.push(
+      "Split: everyone is placed on the highest band they can use. That is a choice for this story, not a count of who associated.",
+    );
+  } else {
+    caveats.push(
+      "Split: the share on each band is an assumption. A real crowd does not have to land that way, and one device uses only one radio.",
+    );
+  }
+
+  if (marginPct <= 0) {
+    caveats.push(
+      "Margin: none. The modeled maximum fills this story and leaves no spare airtime. Wi-Fi does not run well full.",
+    );
+  } else {
+    caveats.push(
+      `Margin: ${marginPct}% of the modeled maximum is left unused. The smaller count is the recommendation. The larger count is the model’s ceiling, not a design.`,
     );
   }
 
@@ -1014,7 +1168,7 @@ function buildCaveats({ neighbor, ssidCount, quality, mac, activeClients, radios
   }
 
   caveats.push(
-    "This is not coverage, roaming, or a promise from a datasheet. Half-duplex. No MU-MIMO miracle, no OFDMA 4× sticker. Application payload, not PHY.",
+    "This story is one kind of device. A real room mixes generations, streams, widths, and apps, and the slow ones spend more airtime. Half-duplex. No MU-MIMO miracle, no OFDMA 4× sticker. Megabits are not application success: calls also care about delay, jitter, loss, and the other direction.",
   );
 
   return caveats;
@@ -1109,20 +1263,29 @@ export function capacityArithmetic(est) {
   const shareBits = placed.map((r) => `${r.band} GHz ${twoDec(r.share)}`);
   const split =
     est.splitMode === "best"
-      ? `Client split: everyone on the highest band they can use${shareBits.length ? ` (${shareBits.join(", ")})` : ""}.`
-      : `Client split: band-steered${shareBits.length ? ` (${shareBits.join(", ")})` : ""}.`;
+      ? `Client split: everyone on the highest band they can use${shareBits.length ? ` (${shareBits.join(", ")})` : ""}. An assumption, not a count of associations.`
+      : `Client split: band-steered${shareBits.length ? ` (${shareBits.join(", ")})` : ""}. An assumption, not a count of associations.`;
   const headcount = `${n} active client${n === 1 ? "" : "s"}`;
   const macLine = usePlan
-    ? `MAC efficiency = ${twoDec(mac)} (busy-room seat count)`
-    : `MAC efficiency = ${twoDec(mac)} (${headcount}; ${macRule(mac)})`;
+    ? `MAC efficiency = ${twoDec(mac)} (busy-room seat count, one factor for the whole AP)`
+    : `MAC efficiency = ${twoDec(mac)} (${headcount}; ${macRule(mac)}; one factor for the whole AP)`;
+  const rfBits = placed.map((r) => `${r.band} GHz ${twoDec(r.rfUsable)}`);
+  const rfLine = !placed.length
+    ? `RF fraction = ${twoDec(est.rfUsable)} (${est.neighbor?.label || "neighbors"})`
+    : est.sameRf === false
+      ? `RF fraction differs by band: ${rfBits.join(", ")}. Coarse assumptions, not a survey.`
+      : `RF fraction = ${twoDec(placed[0].rfUsable)} on every band (${est.neighbor?.label || "neighbors"}). Same coarse assumption on every band.`;
   const factorLines = [
+    "Coarse assumptions for comparing stories. Not measurements.",
     macLine,
-    `RF fraction = ${twoDec(est.rfUsable)} (${est.neighbor?.label || "neighbors"})`,
+    rfLine,
     split,
+    "One MCS per radio, same rate up and down. Real cells rate-shift.",
     "SSID tax applies to extra SSIDs. The first SSID is already inside the MAC factor.",
+    `Safety margin = ${twoDec(est.margin ?? DEFAULT_DESIGN_MARGIN)} of the modeled maximum left unused.`,
   ];
   if (usePlan) {
-    factorLines.unshift("No headcount is typed. This path is the busy-room seat count (MAC 0.40).");
+    factorLines.splice(1, 0, "No headcount is typed. This path is the busy-room seat count (MAC 0.40).");
   }
   sections.push({ heading: "Shared factors", text: factorLines.join("\n") });
 
@@ -1213,7 +1376,22 @@ function radioArithmetic(radio, est, { mac, usePlan }) {
   lines.push(chain("air", `${twoDec(radio.rfUsable)} × (1 - ${mathFixed(radio.ssidAirtime, 10)}) = ${mathFixed(air, 10)}`));
   lines.push(chain("usable", `${mathMbps(protocol)} × ${mathFixed(air, 10)} = ${mathMbps(usable)} Mbps`));
   lines.push(chain("clients", `${mathCount(est.activeClients)} × ${twoDec(radio.share)} = ${mathCount(radio.clients)}`));
-  if (!usePlan) lines.push(`  table shows ${formatMbps(radio.usableMbps)}`);
+  if (!usePlan && est.speedStory === "crowd" && radio.clients >= 1) {
+    lines.push(chain("each here", `${mathMbps(usable)} / ${mathCount(radio.clients)} = ${mathMbps(radio.perUserMbps)} Mbps`));
+  } else if (!usePlan && (est.speedStory === "station" || est.activeClients <= 1)) {
+    lines.push(chain("alone", `${mathMbps(radio.usableMbps)} Mbps if this person uses this radio`));
+  } else if (!usePlan && est.speedStory === "single") {
+    lines.push(chain("each here", `${mathMbps(usable)} / ${mathCount(est.activeClients)} = ${mathMbps(radio.perUserMbps)} Mbps`));
+  }
+  if (radio.share > 0 && est.targetMbps > 0) {
+    lines.push(
+      chain(
+        "allows",
+        `${mathMbps(radio.planMbps)} / (${twoDec(radio.share)} × ${mathMbps(est.targetMbps)}) = ${mathFixed(radio.fitHere, 6)} people`,
+      ),
+    );
+  }
+  if (!usePlan) lines.push(`  table shows ${formatMbps(radio.usableMbps)} usable on this radio`);
   return { heading, text: lines.join("\n") };
 }
 
@@ -1221,46 +1399,142 @@ function headlineArithmetic(est, { n, planMac, liveMac, usePlan }) {
   const serving = servingRadios(est);
   const lines = [];
   if (!serving.length) {
-    lines.push("No radio landed in the pool.");
-    lines.push("The headline has no per-person speed and seats 0 people.");
+    lines.push("No radio is in this story.");
+    lines.push("Modeled maximum is 0 people.");
     return { heading: "The headline", text: lines.join("\n") };
   }
 
-  const roomPool = est.aggregateMbps;
-  const planPool = serving.reduce((s, r) => s + (r.planMbps || 0), 0);
   const target = est.targetMbps;
-  const sameMac = Math.abs(liveMac - planMac) < 1e-9;
-
-  if (n > 0) {
-    const addends = serving.map((r) => mathMbps(r.usableMbps)).join(" + ");
-    lines.push(`pool = ${addends} = ${mathMbps(roomPool)} Mbps`);
-    lines.push(`each of ${mathCount(n)} = ${mathMbps(roomPool)} / ${mathCount(n)} = ${mathMbps(est.perUserMbps)} Mbps`);
-    lines.push(`shown as ${formatMbps(est.perUserMbps)}`);
-    lines.push("");
-  }
-
-  const fit = target > 0 ? planPool / target : 0;
-  const seats = Math.floor(Number.isFinite(fit) ? fit : 0);
-  if (n > 0 && sameMac) {
-    lines.push(`People who fit at ${formatMbps(target)} use this same pool.`);
-    lines.push(`${mathCount(n)} clients are already in the ${twoDec(planMac)} MAC bucket.`);
-  } else if (n > 0) {
-    lines.push(`The seat count uses MAC ${twoDec(planMac)}.`);
-    lines.push(`The per-person number above uses MAC ${twoDec(liveMac)}.`);
+  const margin = est.margin ?? DEFAULT_DESIGN_MARGIN;
+  const floorN = est.modeledClients ?? Math.floor(est.clientsThatFit || 0);
+  lines.push("Each radio limits the headcount under this split. The tight one wins.");
+  lines.push("Speeds are not averaged across radios.");
+  for (const radio of serving) {
     lines.push(
-      `plan pool = ${mathMbps(roomPool)} × ${twoDec(planMac)} / ${twoDec(liveMac)} = ${mathMbps(planPool)} Mbps`,
+      `${radio.band} GHz allows ${mathMbps(radio.planMbps)} / (${twoDec(radio.share)} × ${mathMbps(target)}) = ${mathFixed(radio.fitHere, 6)}`,
     );
-  } else {
-    const addends = serving.map((r) => mathMbps(r.planMbps)).join(" + ");
-    lines.push(`plan pool = ${addends} = ${mathMbps(planPool)} Mbps`);
-    lines.push(`busy-room chip shows ${formatMbps(planPool)}`);
-    lines.push("");
-    lines.push(`People who fit at ${formatMbps(target)}:`);
   }
-  lines.push(`${mathMbps(planPool)} / ${mathMbps(target)} = ${mathFixed(fit, 6)}`);
-  lines.push(`floor = ${seats}`);
-  lines.push(`shown as ${seats} ${seats === 1 ? "person" : "people"}`);
+  lines.push(`tight band = ${est.bindingBand} GHz`);
+  lines.push(`modeled maximum = ${mathFixed(est.clientsThatFit, 6)}`);
+  lines.push(`floor = ${floorN}`);
+  lines.push(`margin = ${twoDec(margin)} left unused`);
+  lines.push(`recommended = floor(${floorN} × ${twoDec(1 - margin)}) = ${est.recommendedClients}`);
+
+  if (n > 0 && !usePlan && Math.abs(liveMac - planMac) >= 1e-9) {
+    lines.push("");
+    lines.push(`Speeds for these ${mathCount(n)} people use MAC ${twoDec(liveMac)}.`);
+    lines.push(`The seat count uses MAC ${twoDec(planMac)}.`);
+  }
+
+  if (n > 0 && est.speedStory === "crowd") {
+    lines.push("");
+    for (const radio of serving) {
+      lines.push(`${radio.band} GHz: ${mathCount(radio.clients)} people get ${mathMbps(radio.perUserMbps)} Mbps each`);
+    }
+    lines.push("People on different radios do not share one speed.");
+  } else if (n > 0 && est.speedStory === "station") {
+    lines.push("");
+    lines.push("One device uses one radio. These speeds do not add.");
+    for (const radio of serving) {
+      lines.push(`${radio.band} GHz alone = ${mathMbps(radio.usableMbps)} Mbps`);
+    }
+  } else if (n > 0 && est.speedStory === "single") {
+    const radio = serving[0];
+    lines.push("");
+    lines.push(`${radio.band} GHz: ${mathMbps(radio.usableMbps)} / ${mathCount(n)} = ${mathMbps(radio.perUserMbps)} Mbps`);
+    lines.push(`shown as ${formatMbps(radio.perUserMbps)}`);
+  }
   return { heading: "The headline", text: lines.join("\n") };
+}
+
+/**
+ * A story is a full snapshot. Each call returns new radios so a previous
+ * width, disabled radio, or forced MCS cannot leak in.
+ */
+export function scenarioInput(id) {
+  const common = {
+    apId: "custom",
+    neighborByBand: {},
+    leftover24: null,
+    margin: DEFAULT_DESIGN_MARGIN,
+    mcsOverride: null,
+  };
+  /** @type {Record<string, () => object>} */
+  const stories = {
+    ipad1: () => ({
+      ...common,
+      id: "ipad1",
+      radioCount: 1,
+      generation: "n",
+      nss: 3,
+      radios: [{ id: "r5", enabled: true, band: "5", standard: "n", widthMHz: 20, nss: 3 }],
+      deviceId: "ipad-1",
+      quality: "excellent",
+      neighbor: "isolated",
+      ssidCount: 1,
+      activeClients: 30,
+      appId: "classroom",
+      splitMode: "best",
+    }),
+    air2: () => ({
+      ...common,
+      id: "air2",
+      radioCount: 1,
+      generation: "ac",
+      nss: 3,
+      radios: [{ id: "r5", enabled: true, band: "5", standard: "ac", widthMHz: 20, nss: 3 }],
+      deviceId: "ipad-air-2",
+      quality: "excellent",
+      neighbor: "isolated",
+      ssidCount: 1,
+      activeClients: 30,
+      appId: "classroom",
+      splitMode: "best",
+    }),
+    office: () => ({
+      ...common,
+      id: "office",
+      radioCount: 2,
+      generation: "ax",
+      nss: 2,
+      radios: [
+        { id: "r24", enabled: true, band: "2.4", standard: "ax", widthMHz: 20, nss: 2 },
+        { id: "r5", enabled: true, band: "5", standard: "ax", widthMHz: 20, nss: 2 },
+      ],
+      deviceId: "wifi6-laptop",
+      quality: "typical",
+      neighbor: "typical",
+      ssidCount: 3,
+      activeClients: 30,
+      appId: "office",
+      splitMode: "steered",
+    }),
+    triband: () => ({
+      ...common,
+      id: "triband",
+      radioCount: 3,
+      generation: "be",
+      nss: 2,
+      radios: [
+        { id: "r24", enabled: true, band: "2.4", standard: "be", widthMHz: 20, nss: 2 },
+        { id: "r5", enabled: true, band: "5", standard: "be", widthMHz: 20, nss: 2 },
+        { id: "r6", enabled: true, band: "6", standard: "be", widthMHz: 40, nss: 2 },
+      ],
+      deviceId: "iphone-16-pro",
+      quality: "typical",
+      neighbor: "typical",
+      ssidCount: 2,
+      activeClients: 40,
+      appId: "office",
+      splitMode: "steered",
+    }),
+  };
+  const build = stories[id];
+  if (!build) return null;
+  const story = build();
+  story.radios = story.radios.map((radio) => ({ ...radio }));
+  story.neighborByBand = {};
+  return story;
 }
 
 export function deviceById(id) {

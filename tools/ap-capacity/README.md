@@ -1,19 +1,23 @@
 # AP Capacity
 
-Practical “how many users can this AP support?” estimator. Not a PHY-rate brochure.
+An airtime scenario estimator for teaching and comparing assumptions. Not a PHY-rate brochure, and not a design you can build to. The real answer to “how many users can this AP support?” is “it depends”: rate shift, uplink versus downlink, different contention on 2.4 / 5 / 6 GHz, mixed clients, and where the AP actually sits are not things this page measures.
 
 ## What it does
 
 1. IEEE MCS PHY from generation, width, streams, MCS/QAM, guard interval
-2. Protocol efficiency from active client count (50% / 45% / 40%)
-3. RF that’s actually yours (isolated 100% / typical **60%** / crowded 40%)
+2. Protocol efficiency from active client count (50% / 45% / 40%) — one coarse factor for the whole AP
+3. RF that’s actually yours (isolated 100% / typical **60%** / crowded 40%), per band if you say so
 4. SSID beacon + probe tax (worse on 2.4 GHz)
 5. Client vs AP negotiation (min streams, min generation, bands the device has)
-6. Answers **how many people fit a target Mbps** and **Mbps each with N active**
+6. Names the radio that runs out first under the split you picked
+7. Shows a **modeled maximum** (no spare airtime) and a **recommended** count that leaves a margin unused (default 30%)
+
+People on different radios do not share one speed. One device uses one radio. A megabit target is not application success.
 
 ## What it is not
 
-- A coverage or channel plan
+- A coverage or channel plan, or a headcount for a design
+- A survey of placement, utilization, latency, jitter, or loss
 - MU-MIMO / OFDMA marketing multipliers
 - Permission to quote datasheet gigabits as user speed
 

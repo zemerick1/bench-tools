@@ -172,6 +172,21 @@ arith = (2 / 3) * p1 + (1 / 3) * p2
 ok(blend < arith, f"harmonic {blend:.1f} < arithmetic {arith:.1f}")
 ok(near(p2, 144.4), f"2SS n 20 MCS7 SGI = 144.4 (got {p2:.1f})")
 
+print("\nTight radio, not a pooled seat count\n")
+
+
+def clients_that_fit(parts: list[tuple[float, float]], target: float) -> float:
+    """parts are (plan Mbps, share). The room is limited by the tight radio."""
+    bounds = [plan / (share * target) for plan, share in parts if share > 0 and target > 0]
+    return min(bounds)
+
+
+# 5 GHz is the binding share. Summing the radios would seat (90+54)/2 = 72.
+tight = clients_that_fit([(90.0, 0.15), (54.0, 0.85)], 2.0)
+ok(near(tight, 54.0 / 1.7, 0.001), f"15/85 split seats {tight:.3f}, limited by 5 GHz")
+ok(tight < (90.0 + 54.0) / 2.0, "pooled headcount is larger than the tight radio")
+ok(math.floor(math.floor(tight) * 0.7) == 21, "30% margin on a 31-person ceiling recommends 21")
+
 print("\nIllegal widths have no PHY\n")
 ok(phy_mbps("n", 160, 2, 7, 0.4) is None, "11n has no 160 MHz rate")
 ok(phy_mbps("n", 80, 2, 7, 0.4) is None, "11n has no 80 MHz rate")

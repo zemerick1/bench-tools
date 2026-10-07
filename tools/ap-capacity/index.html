@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AP Capacity — how many users an AP actually supports</title>
+    <title>AP Capacity — airtime stories, not a design</title>
     <meta
       name="description"
-      content="Estimate how many users an Aruba or Juniper Mist AP can support. Practical per-client throughput from radios, streams, SSIDs, and RF — not the datasheet PHY. AP-515, AP-635, AP-755, AP43, AP45, AP47."
+      content="Compare airtime stories for an Aruba or Juniper Mist AP. Each radio, the band that runs out first, and a recommended count with spare airtime. Not a survey and not the datasheet PHY."
     />
     <link rel="canonical" href="https://tools.emerickcc.com/tools/ap-capacity/" />
     <meta name="robots" content="index, follow" />
@@ -17,20 +17,20 @@
     <meta property="og:site_name" content="Bench Tools" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:url" content="https://tools.emerickcc.com/tools/ap-capacity/" />
-    <meta property="og:title" content="AP Capacity — practical user counts, not PHY" />
+    <meta property="og:title" content="AP Capacity — airtime stories, not a design" />
     <meta
       property="og:description"
-      content="How many users can this Aruba or Juniper Mist AP actually support? Practical throughput, not brochure PHY."
+      content="Compare airtime stories for one AP. Each radio, the band that runs out first, and a recommended count. Not a survey, and not the datasheet PHY."
     />
     <meta property="og:image" content="https://tools.emerickcc.com/assets/icons/og-image.jpg" />
     <meta property="og:image:width" content="1280" />
     <meta property="og:image:height" content="720" />
     <meta property="og:image:alt" content="AP Capacity — Bench Tools" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="AP Capacity — practical user counts, not PHY" />
+    <meta name="twitter:title" content="AP Capacity — airtime stories, not a design" />
     <meta
       name="twitter:description"
-      content="How many users can this Aruba or Juniper Mist AP actually support? Practical throughput, not brochure PHY."
+      content="Compare airtime stories for one AP. Each radio, the band that runs out first, and a recommended count. Not a survey, and not the datasheet PHY."
     />
     <meta name="twitter:image" content="https://tools.emerickcc.com/assets/icons/og-image.jpg" />
     <link rel="icon" href="../../assets/icons/favicon.svg" type="image/svg+xml" />
@@ -55,7 +55,7 @@
           "operatingSystem": "Any",
           "isAccessibleForFree": true,
           "inLanguage": "en",
-          "description": "Practical Aruba and Juniper Mist access-point user capacity and per-client throughput estimator.",
+          "description": "An airtime scenario estimator for comparing assumptions on one Aruba or Juniper Mist AP. Not a survey and not a design headcount.",
           "publisher": { "@type": "Organization", "name": "Bench Tools", "url": "https://tools.emerickcc.com/" }
         },
         {
@@ -82,7 +82,7 @@
               "name": "What does 60% of the channel is yours mean?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "In a typical enterprise floor, co-channel and adjacent-channel neighbors share airtime. Isolated-cell math assumes 100%. Typical assumes 60%. Crowded assumes 40%."
+                "text": "Those percents are knobs, not measurements. Isolated-cell math assumes 100%. Typical assumes 60%. Crowded assumes 40%. The same knob on every band is one story. 2.4, 5, and 6 GHz often do not share contention, interference, or how far the signal goes."
               }
             },
             {
@@ -98,7 +98,7 @@
               "name": "QAM, MCS, spatial streams — do I have to care?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Only if you want to. MCS is a gear number. Higher QAM needs a cleaner signal. Spatial streams are how many parallel radios the client actually has. The answer is still about N people at X Mbps."
+                "text": "Only if you want to. MCS is one assumed gear for every client on that radio, same rate up and down. Real cells rate-shift. The card then names the radio that runs out first, a modeled maximum, and a smaller recommended count."
               }
             },
             {
@@ -114,7 +114,31 @@
               "name": "Is this a coverage or channel plan?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "No. It does not place APs, pick channels, or know your walls."
+                "text": "No. It does not place APs, pick channels, or know your walls. Where the AP is mounted, and what the neighbors are doing, is a measurement. This page only compares stories."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Why is the real answer “it depends”?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "A Wi-Fi cell is a shared, contention-based radio. People across the room do not hold one MCS — the rate shifts, and uplink often negotiates worse than downlink. 2.4, 5, and 6 GHz do not share interference, contention, or how far the signal goes. A real room is not one kind of device. A call can fail on delay, jitter, and loss while a stream still looks fine, because calls need both directions. Where the AP is mounted, and what the neighbors are doing, is a measurement, not a preset."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Why isn’t there one speed for each person?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "People on different radios do not share a speed, and one device cannot add radios together. The card lists each band and names the radio that runs out first."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Why is the recommended count lower than the model?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "The modeled maximum fills the story and leaves no spare airtime. Wi-Fi does not run well full. The recommended count leaves the margin you picked unused. The default leaves 30% unused."
               }
             },
             {
@@ -152,24 +176,38 @@
         <a class="back" href="../../">← Back to the toolbox</a>
         <h1>AP Capacity</h1>
         <p>
-          “How many users can this access point support?” is a sales question
-          with an engineering answer. This tab does the engineering answer:
-          <strong>if you set these things, you can expect about this many
-          people, at about this much each</strong> — not the PHY rate on the
-          box.
+          “How many users can this access point support?” does not have one
+          engineering answer. This tab compares airtime stories. You set the
+          radios, one kind of device, a megabit target, a band split, and a
+          rough guess at the neighbors. It shows what that story produces.
+          It is not a survey, and it is not a headcount to build to.
         </p>
         <div class="explainer" role="note">
           <strong>What this is:</strong>
-          a practical airtime budget. You pick the AP (radios, generation,
-          width, streams), who is connecting, what they need to do, how noisy
-          the neighbors are, and how many SSIDs you insisted on broadcasting.
-          It uses IEEE MCS rates, then derates them the way a real BSS behaves.
+          an airtime scenario estimator. IEEE MCS rates, then a few coarse
+          assumptions: protocol overhead, how much of the channel this story
+          keeps, and where people land. The card lists each radio, names the
+          one that runs out first, and shows a modeled maximum with no spare
+          airtime plus a smaller recommended count.
           <br /><br />
           <strong>What this is not:</strong>
           a coverage survey, a channel plan, a promise, or permission to quote
-          4.8&nbsp;Gbps in a meeting. Half-duplex. The slowest active client
-          sets the airtime price. Associated-but-idle does not count as a user
-          here.
+          the PHY rate in a meeting. Half-duplex. Associated-but-idle does not
+          count as a user here.
+          <br /><br />
+          <strong>The real answer is “it depends.”</strong>
+          A Wi-Fi cell is a shared, contention-based radio, and most of what
+          decides it is not on this form. People across the room do not hold
+          one MCS. The rate shifts, and uplink often negotiates worse than
+          downlink. 2.4, 5, and 6&nbsp;GHz do not share interference,
+          contention, or how far the signal goes. 2.4&nbsp;GHz is often just
+          crowded. A real room is not one laptop: mixed generations, streams,
+          channel widths, and apps share the air, and the slow devices spend
+          more of it. A call can fail on delay, jitter, and loss while a
+          stream still looks fine, because calls need both directions. Where
+          you mount the AP, and what the neighbors are doing right now,
+          changes the result. That is a measurement, not a preset. Use this
+          page to compare stories. Do not treat the number as the design.
         </div>
       </header>
 
@@ -208,8 +246,9 @@
               </p>
               <div class="form-grid">
                 <div class="field">
-                  <label for="apc-app">Each person needs</label>
+                  <label for="apc-app">Megabit target</label>
                   <select id="apc-app"></select>
+                  <p class="hint" id="apc-app-hint"></p>
                 </div>
                 <div class="field">
                   <label for="apc-clients">Active clients on this AP</label>
@@ -266,7 +305,9 @@
               <p class="panel__intro">
                 The AP and the client negotiate the worse of the two. A Wi-Fi 7
                 phone on a Wi-Fi 6 AP is a Wi-Fi 6 phone. IoT that only does
-                2.4&nbsp;GHz never sees the 6&nbsp;GHz radio.
+                2.4&nbsp;GHz never sees the 6&nbsp;GHz radio. This story is
+                one kind of device for the whole room. A real room is mixed,
+                and the slow devices spend more airtime.
               </p>
               <div class="field">
                 <label for="apc-device">Device preset</label>
@@ -312,15 +353,16 @@
               <div class="field">
                 <span class="apc-label">Link quality</span>
                 <div id="apc-quality-pills" class="apc-pills" role="radiogroup" aria-label="Link quality"></div>
-                <p class="hint">Typical coverage is 64-QAM / 256-QAM. 1024-QAM and 4096-QAM are “I am sitting under the AP.”</p>
+                <p class="hint">Typical coverage is 64-QAM / 256-QAM. 1024-QAM and 4096-QAM are “I am sitting under the AP.” One MCS stands for every client on that radio, same rate up and down. Real cells rate-shift, and uplink is often worse.</p>
               </div>
             </section>
 
             <section class="panel" aria-labelledby="apc-assume-heading">
               <h2 id="apc-assume-heading">4. Assumptions we will not hide</h2>
               <p class="panel__intro">
-                Change these if your room is a single AP in a faraday cage, or
-                a 2.4&nbsp;GHz war zone. Default is a normal floor.
+                These are coarse assumptions for comparing stories, not
+                measurements from your floor. Change them to see the story
+                move. They will not become a survey.
               </p>
               <div class="field">
                 <span class="apc-label">Neighboring APs (CCI / ACI)</span>
@@ -329,8 +371,19 @@
                   Isolated = 100% of the channel is yours.
                   Typical = <strong>60% yours</strong>.
                   Crowded = 40% yours.
+                  Until you open “Bands differ,” every band uses this same guess.
+                  2.4&nbsp;GHz is often worse than 5 and 6.
                 </p>
               </div>
+              <details class="details-block">
+                <summary>Bands differ</summary>
+                <p class="hint">
+                  2.4&nbsp;GHz is often crowded when 5 and 6 are not. Opening
+                  this does not change the numbers. Change a band when you
+                  want the story to say so.
+                </p>
+                <div id="apc-band-neighbor"></div>
+              </details>
               <div class="field">
                 <label for="apc-ssids">SSIDs broadcast on this AP</label>
                 <input id="apc-ssids" type="number" min="1" max="16" step="1" value="3" />
@@ -340,9 +393,21 @@
                 <span class="apc-label">Where clients land</span>
                 <div id="apc-split-pills" class="apc-pills" role="radiogroup" aria-label="Client split"></div>
                 <p class="hint">
-                  Band-steered: a little leftover on 2.4, the rest on 5/6 if the
-                  device can. “Best radio” piles everyone onto the highest band they speak.
+                  Band-steered leaves a share on 2.4 and puts the rest on the
+                  higher bands the device can use. That share is an assumption,
+                  not a count of who associated. “Best radio” puts everyone on
+                  the highest band they speak.
                 </p>
+              </div>
+              <div class="field" id="apc-leftover-wrap">
+                <label for="apc-leftover">Share that stays on 2.4 GHz</label>
+                <input id="apc-leftover" type="number" min="0" max="100" step="1" value="15" inputmode="numeric" />
+                <p class="hint">Percent, not a measurement. The rest splits across the higher bands in this story. One device still uses only one radio.</p>
+              </div>
+              <div class="field">
+                <span class="apc-label">Spare airtime</span>
+                <div id="apc-margin-pills" class="apc-pills" role="radiogroup" aria-label="Safety margin"></div>
+                <p class="hint">The modeled maximum fills this story. Wi-Fi does not run well full. Recommended leaves this much unused.</p>
               </div>
               <details class="details-block">
                 <summary>Force an MCS index</summary>
@@ -492,6 +557,17 @@
                 client use the worse of the two. Buying 8×8 does not make a
                 2-stream phone faster.
               </dd>
+              <dt>Modeled maximum</dt>
+              <dd>
+                How many people this story can hold before the tight radio
+                misses the megabit target, with the split you picked and no
+                spare airtime. It is the model’s ceiling, not a design.
+              </dd>
+              <dt>Recommended</dt>
+              <dd>
+                The modeled maximum with your safety margin left unused.
+                Default is 30% unused. Wi-Fi does not run well full.
+              </dd>
               <dt>SSID</dt>
               <dd>
                 The network name you broadcast. Each one sends beacons and
@@ -536,9 +612,10 @@
               <strong>Isolated</strong> is the classroom with no other BSS —
               100% of the leftover airtime after protocol overhead.
               <strong>Typical</strong> assumes about 60% remains yours.
-              <strong>Crowded</strong> is 40%, and 2.4&nbsp;GHz often lives there
-              even when 5/6 look fine. This is not a substitute for looking at
-              channel utilization on a survey.
+              <strong>Crowded</strong> is 40%. Those are knobs. Using one of
+              them on every band is a story, not a floor. 2.4&nbsp;GHz is often
+              crowded when 5 and 6 are not. This is not a substitute for
+              looking at channel utilization on a survey.
             </p>
           </details>
           <details>
@@ -558,9 +635,11 @@
               16-QAM, 64-QAM, 256-QAM, 1024-QAM, 4096-QAM) plus a coding rate.
               Higher QAM packs more bits per symbol and needs a cleaner signal.
               Spatial streams are how many parallel radios the client actually
-              has — most phones are 2SS, a pile of IoT is 1SS. We pick MCS from
-              link quality unless you override it. The answer is still “about N
-              people at X Mbps.”
+              has — most phones are 2SS, a pile of IoT is 1SS. We pick one MCS
+              from link quality unless you override it, and we use that same
+              rate up and down. Real cells rate-shift. The card names the radio
+              that runs out first, then a modeled maximum and a smaller
+              recommended count.
             </p>
           </details>
           <details>
@@ -578,8 +657,44 @@
             <p>
               No. It does not place APs, pick channels, or know your walls.
               If MCS is low with strong RSSI, that is interference, not distance.
-              If MCS is low with weak RSSI, add an AP. This tab will not walk
-              the floor for you.
+              If MCS is low with weak RSSI, add an AP. Where the AP is mounted,
+              and what the neighbors are doing right now, is a measurement.
+              This tab will not walk the floor for you.
+            </p>
+          </details>
+          <details>
+            <summary>Why is the real answer “it depends”?</summary>
+            <p>
+              A Wi-Fi cell is a shared, contention-based radio, and most of
+              the inputs are not on this form. People across the room do not
+              hold one MCS. The rate shifts, and uplink often negotiates worse
+              than downlink. 2.4, 5, and 6&nbsp;GHz do not share interference,
+              contention, or how far the signal goes, and 2.4&nbsp;GHz is often
+              just crowded. A real room is not one kind of device: generations,
+              streams, widths, and apps share the air, and the slow devices
+              spend more of it. A call can fail on delay, jitter, and loss
+              while a stream still looks fine, because calls need both
+              directions. Where you mount the AP, and what the neighbors are
+              doing, changes the result. That belongs in a survey. This page
+              compares stories. It does not settle the design.
+            </p>
+          </details>
+          <details>
+            <summary>Why isn’t there one speed for each person?</summary>
+            <p>
+              People on 2.4&nbsp;GHz and people on 5&nbsp;GHz are not in the
+              same group. Averaging them hides the band that is already full.
+              One device uses one radio and cannot add the others together.
+              The card lists each band and names the one that runs out first.
+            </p>
+          </details>
+          <details>
+            <summary>Why is the recommended count lower than the model?</summary>
+            <p>
+              The modeled maximum fills this story and leaves no spare airtime.
+              Wi-Fi does not run well full. The recommended count leaves the
+              margin you picked unused. The default leaves 30% unused. Neither
+              number is a headcount to put in a design.
             </p>
           </details>
           <details>
@@ -607,7 +722,7 @@
       </div>
     </footer>
 
-    <script type="module" src="./app.js?v=11"></script>
+    <script type="module" src="./app.js?v=12"></script>
     <script type="module" src="../../assets/js/tool-nav.js"></script>
   </body>
 </html>

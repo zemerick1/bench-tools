@@ -24,7 +24,7 @@ python3 -m http.server 8080
 | **MAC / OUI Lookup** | Parse MACs, randomized-MAC hint, offline OUI vendor |
 | **Hardware Platform Support** | Aruba AOS-10/Instant matrix + Juniper EX/QFX/AP Pathfinder |
 | **Aruba Antenna Matrix** | Which external antenna for which Aruba AP — how many, omni vs directional |
-| **AP Capacity** | How many users can this AP actually support — practical throughput, not PHY |
+| **AP Capacity** | Airtime stories for one AP — each radio and a recommended count, not a design |
 | **Client Roam** | Rooms and a hallway: when a device leaves an AP, and how long the hole is (power, min rates, 802.11r/k/v) |
 | **Client Auth** | A device logs in: who it talks to, who trusts the cert (EAP-TLS, PEAP, TTLS, TEAP, MAC). Not a packet capture |
 | **Central Alerts & Insights** | Searchable Aruba Central alert / insight catalog |
@@ -130,7 +130,7 @@ python3 tools/access-tracker/update_radius_dict.py
 
 ### AP Capacity
 
-Practical AP user-count and per-client throughput under `tools/ap-capacity/`. IEEE MCS rates, then protocol efficiency, neighbor RF (default **60% of the channel is yours**), and SSID tax. Curated internal Aruba campus and Juniper Mist APs fill radios and streams; device presets cover phones/laptops/IoT. Does **not** quote PHY as user speed.
+Airtime scenario estimator under `tools/ap-capacity/`. IEEE MCS rates, then coarse assumptions: protocol efficiency, neighbor RF (default **60% of the channel is yours**, and bands can differ), and SSID tax. The seat count is the tight radio under the split you picked, then a safety margin. Curated internal Aruba campus and Juniper Mist APs fill radios and streams. It does **not** quote PHY as user speed, and it is not a survey or a design headcount.
 
 ```bash
 python3 tools/ap-capacity/test_model.py

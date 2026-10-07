@@ -24,13 +24,16 @@ import {
   defaultRadios,
   deviceById,
   capacityArithmetic,
+  clientSplit,
+  DESIGN_MARGINS,
   estimateCapacity,
   formatCount,
   formatMbps,
   radiosFromAp,
+  scenarioInput,
   sharedNss,
   validBandsFor,
-} from "./model.js?v=11";
+} from "./model.js?v=12";
 
 /** IDs may contain dots (2.4 GHz). querySelector('#x.y') is invalid. */
 function $(sel, root = document) {
@@ -76,6 +79,9 @@ const state = {
   appId: "classroom",
   customMbps: 2,
   splitMode: "steered",
+  leftover24: null,
+  margin: 0.3,
+  neighborByBand: { "2.4": "", 5: "", 6: "" },
   mcsOverride: "",
   scenario: "",
 };
@@ -161,60 +167,25 @@ function rebuildRadios() {
 }
 
 function applyScenario(id) {
+  const spec = scenarioInput(id);
+  if (!spec) return;
   state.scenario = id;
-  state.apId = "custom";
-  if (id === "ipad1") {
-    state.radioCount = 1;
-    state.generation = "n";
-    state.nss = 3;
-    state.deviceId = "ipad-1";
-    state.quality = "excellent";
-    state.neighbor = "isolated";
-    state.ssidCount = 1;
-    state.activeClients = 30;
-    state.appId = "classroom";
-    state.splitMode = "best";
-    rebuildRadios();
-  } else if (id === "air2") {
-    state.radioCount = 1;
-    state.generation = "ac";
-    state.nss = 3;
-    state.deviceId = "ipad-air-2";
-    state.quality = "excellent";
-    state.neighbor = "isolated";
-    state.ssidCount = 1;
-    state.activeClients = 30;
-    state.appId = "classroom";
-    state.splitMode = "best";
-    rebuildRadios();
-  } else if (id === "office") {
-    state.radioCount = 2;
-    state.generation = "ax";
-    state.nss = 2;
-    state.deviceId = "wifi6-laptop";
-    state.quality = "typical";
-    state.neighbor = "typical";
-    state.ssidCount = 3;
-    state.activeClients = 30;
-    state.appId = "office";
-    state.splitMode = "steered";
-    rebuildRadios();
-  } else if (id === "triband") {
-    state.radioCount = 3;
-    state.generation = "be";
-    state.nss = 2;
-    state.deviceId = "iphone-16-pro";
-    state.quality = "typical";
-    state.neighbor = "typical";
-    state.ssidCount = 2;
-    state.activeClients = 40;
-    state.appId = "office";
-    state.splitMode = "steered";
-    rebuildRadios();
-  }
-  if (state.nss !== "mixed") {
-    for (const r of state.radios) r.nss = state.nss;
-  }
+  state.apId = spec.apId;
+  state.radioCount = spec.radioCount;
+  state.generation = spec.generation;
+  state.nss = spec.nss;
+  state.radios = spec.radios.map((radio) => ({ ...radio }));
+  state.deviceId = spec.deviceId;
+  state.quality = spec.quality;
+  state.neighbor = spec.neighbor;
+  state.neighborByBand = { "2.4": "", 5: "", 6: "" };
+  state.ssidCount = spec.ssidCount;
+  state.activeClients = spec.activeClients;
+  state.appId = spec.appId;
+  state.splitMode = spec.splitMode;
+  state.leftover24 = spec.leftover24;
+  state.margin = spec.margin;
+  state.mcsOverride = "";
   applyConstraints();
 }
 
@@ -245,6 +216,18 @@ function readNonApFields() {
   state.quality = $("input[name=apc-quality]:checked")?.value || state.quality;
   state.neighbor = $("input[name=apc-neighbor]:checked")?.value || state.neighbor;
   state.splitMode = $("input[name=apc-split]:checked")?.value || state.splitMode;
+  const marginRaw = $("input[name=apc-margin]:checked")?.value;
+  if (marginRaw != null && marginRaw !== "") state.margin = Number(marginRaw);
+  state.neighborByBand = {
+    "2.4": $("input[name=apc-nband-24]:checked")?.value || "",
+    5: $("input[name=apc-nband-5]:checked")?.value || "",
+    6: $("input[name=apc-nband-6]:checked")?.value || "",
+  };
+  const leftEl = $("#apc-leftover");
+  if (leftEl && document.activeElement === leftEl) {
+    const n = Number(leftEl.value);
+    if (Number.isFinite(n)) state.leftover24 = Math.min(1, Math.max(0, n / 100));
+  }
   state.ssidCount = Math.round(readNumber("#apc-ssids", state.ssidCount, 1, 16));
   state.activeClients = Math.floor(readNumber("#apc-clients", 0, 0, 500));
   state.appId = $("#apc-app")?.value || state.appId;
@@ -312,17 +295,32 @@ function readForm() {
 
 function estimate() {
   const mcsOverride = state.mcsOverride === "" ? null : state.mcsOverride;
+  const neighborByBand = {};
+  for (const band of ["2.4", "5", "6"]) {
+    if (state.neighborByBand[band]) neighborByBand[band] = state.neighborByBand[band];
+  }
   return estimateCapacity({
     radios: state.radios.map((r) => ({ ...r })),
     client: currentClient(),
     quality: state.quality,
     neighbor: state.neighbor,
+    neighborByBand,
     ssidCount: state.ssidCount,
     activeClients: state.activeClients,
     targetMbps: currentTarget(),
     splitMode: state.splitMode,
+    leftover24: state.splitMode === "steered" ? state.leftover24 : null,
+    margin: state.margin,
     mcsOverride,
   });
+}
+
+function leftoverApplies() {
+  if (state.splitMode !== "steered") return false;
+  const bands = currentClient().bands;
+  const has24 = state.radios.some((r) => r.enabled && r.band === "2.4" && bands.includes("2.4"));
+  const higher = state.radios.some((r) => r.enabled && r.band !== "2.4" && bands.includes(r.band));
+  return has24 && higher;
 }
 
 function pillGroup(name, options, selected) {
@@ -470,6 +468,13 @@ function renderAppExtras() {
   const wrap = $("#apc-custom-app");
   if (!wrap) return;
   wrap.hidden = state.appId !== "custom";
+  const hint = $("#apc-app-hint");
+  if (!hint) return;
+  if (state.appId === "custom") {
+    hint.textContent = "Your number, in one direction. Megabits are not delay, jitter, or loss.";
+  } else {
+    hint.textContent = appById(state.appId).blurb || "";
+  }
 }
 
 function renderArithmetic(est, open) {
@@ -497,36 +502,85 @@ function renderArithmetic(est, open) {
   `;
 }
 
+function peoplePhrase(count) {
+  const shown = formatCount(count);
+  const one = Math.abs(count - 1) < 0.05;
+  return `${shown} ${one ? "person" : "people"}`;
+}
+
+function tightRadio(est) {
+  return (est.radios || []).find((r) => r.id === est.bindingId) || null;
+}
+
 function renderAnswer(est) {
   const root = $("#apc-answer");
   if (!root) return;
   const n = state.activeClients;
-  const per = formatMbps(est.perUserMbps);
-  const fit = Math.floor(est.clientsThatFit);
   const target = formatMbps(est.targetMbps);
-  const app = state.appId === "custom" ? `${target} each` : appById(state.appId).label.toLowerCase();
-  const busyTotal = formatMbps(
-    (est.radios || []).reduce((s, r) => s + (r.share > 0 ? r.planMbps || 0 : 0), 0),
-  );
+  const app = state.appId === "custom" ? `${target}` : appById(state.appId).label.toLowerCase();
+  const floorN = est.modeledClients ?? Math.floor(est.clientsThatFit || 0);
+  const recommended = est.recommendedClients ?? 0;
+  const marginPct = Math.round((est.margin || 0) * 100);
+  const band = est.bindingBand;
+  const tight = tightRadio(est);
+  const serving = (est.radios || []).filter((r) => r.phyMbps && r.share > 0);
 
-  let eyebrow = "What to expect";
-  let headline;
-  let sub;
-  if (est.verdict === "none") {
-    headline = "This setup cannot do that job";
-    sub = `Nothing here can deliver ${target} per person. Check that the phones can use these radios.`;
+  let eyebrow = "This story assumes";
+  let headline = "Nothing to compare";
+  let sub = "";
+  if (est.verdict === "none" || !band) {
+    headline = "This story cannot serve anyone";
+    sub = `Nothing here can deliver ${target}. Check that the devices can use these radios.`;
   } else if (n <= 0) {
-    headline = `About ${formatCount(fit)} ${fit === 1 ? "person" : "people"}`;
-    sub = `That’s how many can do ${app} (${target} each) on this AP. Type how many people are actually using it to see speed per person.`;
-  } else if (est.verdict === "short") {
-    headline = `Each of ${n} people gets ${per}`;
-    sub = `That’s below the ${target} you wanted for ${app}. This AP can handle about ${fit} people at ${target}. Add an AP, or ask less of each person.`;
-  } else if (est.verdict === "plenty") {
-    headline = `Each of ${n} people gets ${per}`;
-    sub = `That clears ${target} for ${app}, with room. This AP can handle about ${fit} people at that speed.`;
+    if (marginPct <= 0) {
+      headline = `About ${peoplePhrase(floorN)}`;
+      sub = `That is the modeled maximum at ${target}, limited by ${band} GHz. No spare airtime is selected, so the recommendation matches the ceiling. Type a headcount to see each radio.`;
+    } else if (recommended > 0) {
+      headline = `About ${peoplePhrase(recommended)}`;
+      sub = `Modeled maximum is ${peoplePhrase(floorN)} at ${target}, limited by ${band} GHz. Recommended leaves ${marginPct}% unused, so ${peoplePhrase(recommended)}. Type a headcount to see each radio.`;
+    } else {
+      headline = `Modeled maximum is ${peoplePhrase(floorN)}`;
+      sub = `That ceiling is ${band} GHz at ${target}. The ${marginPct}% margin rounds the recommendation to zero.`;
+    }
+  } else if (est.speedStory === "station" && n <= 1) {
+    headline = "One person uses one radio";
+    sub = `Those speeds do not add. If you filled the room with this split, the modeled maximum is ${peoplePhrase(floorN)} at ${target}, limited by ${band} GHz. Recommended is ${peoplePhrase(recommended)}.`;
+  } else if (est.speedStory === "station") {
+    headline = "These people do not share one speed";
+    sub = `Fewer than one person lands on a band, so the speeds below do not add. Someone who joins a radio gets that radio. Modeled maximum under this split is ${peoplePhrase(floorN)}, limited by ${band} GHz. Recommended is ${peoplePhrase(recommended)}.`;
   } else {
-    headline = `Each of ${n} people gets ${per}`;
-    sub = `That just about hits ${target} for ${app}. This AP can handle about ${fit} people at that speed.`;
+    const capLine = marginPct <= 0
+      ? `Modeled maximum is ${peoplePhrase(floorN)} at ${target}. No spare airtime is selected.`
+      : `Modeled maximum is ${peoplePhrase(floorN)} at ${target}. Recommended is ${peoplePhrase(recommended)}, leaving ${marginPct}% unused.`;
+    headline = est.speedStory === "single" ? `${band} GHz carries this story` : `${band} GHz runs out first`;
+    sub = capLine;
+  }
+
+  let bandList = "";
+  if (n > 0 && serving.length && est.verdict !== "none") {
+    const items = serving.map((r) => {
+      if (est.speedStory === "station") {
+        return `<li>On ${escapeHtml(r.band)} GHz they would get ${escapeHtml(formatMbps(r.usableMbps))}.</li>`;
+      }
+      return `<li>About ${escapeHtml(peoplePhrase(r.clients))} on ${escapeHtml(r.band)} GHz get ${escapeHtml(formatMbps(r.perUserMbps))}.</li>`;
+    });
+    bandList = `<ul class="apc-bands">${items.join("")}</ul>`;
+  }
+
+  let closing = "";
+  if (n > 0 && tight && est.speedStory !== "station" && est.verdict !== "none") {
+    const rate = formatMbps(tight.perUserMbps);
+    if (est.verdict === "short") {
+      closing = `${rate} on ${band} GHz is under the ${target} for ${app}.`;
+    } else if (est.verdict === "fits") {
+      closing = `${rate} on ${band} GHz meets ${target}, and ${peoplePhrase(n)} is past the recommended ${peoplePhrase(recommended)}. That uses the spare airtime this story wanted left empty.`;
+    } else {
+      closing = `${rate} on ${band} GHz meets ${target}, and ${peoplePhrase(n)} is inside the recommended ${peoplePhrase(recommended)}.`;
+    }
+  } else if (n > 0 && est.speedStory === "station" && est.verdict === "short") {
+    closing = `Even the faster radio is under ${target}.`;
+  } else if (n > 0 && est.speedStory === "station" && est.verdict === "fits") {
+    closing = `A person only gets the radio they join. One of these radios is under ${target}.`;
   }
 
   const client = currentClient();
@@ -594,8 +648,8 @@ function renderAnswer(est) {
         <td>MCS ${r.mcs} · ${escapeHtml(qam)}</td>
         <td>${escapeHtml(formatMbps(r.phyMbps))}</td>
         <td>${escapeHtml(formatMbps(r.usableMbps))}</td>
-        <td>${Math.round(r.share * 100)}% · ${r.clients ? r.clients.toFixed(1) : "0"}</td>
-        <td>${r.clients ? escapeHtml(formatMbps(r.perUserMbps)) : "—"}</td>
+        <td>${Math.round(r.share * 100)}%${r.clients >= 1 ? ` · ${r.clients.toFixed(1)}` : r.share > 0 && est.speedStory === "station" ? " · one radio" : ""}</td>
+        <td>${r.share > 0 && n > 0 ? escapeHtml(formatMbps(est.speedStory === "station" ? r.usableMbps : r.perUserMbps)) : "—"}</td>
       </tr>`;
     })
     .join("");
@@ -605,17 +659,27 @@ function renderAnswer(est) {
     .map((note) => `<li>${escapeHtml(note)}</li>`)
     .join("");
 
+  const tightValue = !band
+    ? "—"
+    : n > 0 && tight && est.speedStory !== "station" && est.speedStory !== "empty"
+      ? `${band} GHz · ${formatMbps(tight.perUserMbps)}`
+      : `${band} GHz`;
+  const marginValue = marginPct <= 0 ? "None" : `${marginPct}% unused`;
+
   root.className = `apc-answer apc-answer--${est.verdict}`;
   root.innerHTML = `
     <p class="apc-answer__eyebrow">${escapeHtml(eyebrow)}</p>
     <p class="apc-answer__headline">${escapeHtml(headline)}</p>
     <p class="apc-answer__sub">${escapeHtml(sub)}</p>
+    ${bandList}
+    ${closing ? `<p class="apc-answer__note">${escapeHtml(closing)}</p>` : ""}
     <div class="results-meta">
-      <div class="meta-chip"><span>Each person gets</span><strong>${escapeHtml(n ? per : "—")}</strong></div>
-      <div class="meta-chip"><span>People who fit at ${escapeHtml(target)}</span><strong>${escapeHtml(String(fit))}</strong></div>
-      <div class="meta-chip"><span>This AP, busy room</span><strong>${escapeHtml(busyTotal)}</strong></div>
-      <div class="meta-chip"><span>Air this AP actually gets</span><strong>${Math.round(est.rfUsable * 100)}%</strong></div>
+      <div class="meta-chip"><span>Modeled maximum</span><strong>${escapeHtml(peoplePhrase(floorN))}</strong></div>
+      <div class="meta-chip"><span>Recommended</span><strong>${escapeHtml(peoplePhrase(recommended))}</strong></div>
+      <div class="meta-chip"><span>Tight band</span><strong>${escapeHtml(tightValue)}</strong></div>
+      <div class="meta-chip"><span>Margin</span><strong>${escapeHtml(marginValue)}</strong></div>
     </div>
+    <p class="apc-answer__note">A megabit target is not application success. Calls also need the other direction, and they fail on delay, jitter, and loss before they fail on megabits. A stream can still look fine.</p>
     ${limitHtml}
   `;
 
@@ -635,7 +699,7 @@ function renderAnswer(est) {
                 <th>PHY</th>
                 <th>Usable</th>
                 <th>Clients</th>
-                <th>Each</th>
+                <th>On this radio</th>
               </tr>
             </thead>
             <tbody>${rows}</tbody>
@@ -644,9 +708,9 @@ function renderAnswer(est) {
         ${mathHtml ? `<ul class="apc-mathline">${mathHtml}</ul>` : ""}
         ${notes ? `<ul class="apc-notes">${notes}</ul>` : ""}
         <p class="hint">
-          One person on a quiet radio keeps more of the radio’s speed (~50%).
-          A busy room keeps ~40%. “People who fit” always uses the busy-room number
-          so adding people does not magically grow the AP.
+          One person on a quiet radio keeps more of that radio’s speed (~50%).
+          A busy room keeps ~40%, and that busy-room factor is what sizes the modeled maximum.
+          The recommended count leaves the margin you picked unused. People on different radios do not share one speed.
         </p>
       </details>
     `;
@@ -767,6 +831,23 @@ function syncToolbar() {
   if (neigh) neigh.checked = true;
   const s = $(`input[name=apc-split][value="${state.splitMode}"]`);
   if (s) s.checked = true;
+  const marginEl = document.querySelector(`input[name=apc-margin][value="${state.margin}"]`);
+  if (marginEl) marginEl.checked = true;
+  for (const [band, id] of [["2.4", "24"], ["5", "5"], ["6", "6"]]) {
+    const value = state.neighborByBand[band] || "";
+    const el = [...document.querySelectorAll(`input[name="apc-nband-${id}"]`)].find((input) => input.value === value);
+    if (el) el.checked = true;
+  }
+  const leftWrap = $("#apc-leftover-wrap");
+  const left = $("#apc-leftover");
+  if (leftWrap) leftWrap.hidden = !leftoverApplies();
+  if (left && document.activeElement !== left) {
+    const share = clientSplit(state.radios, currentClient().bands, "steered", state.leftover24);
+    const pct = state.radios
+      .filter((r) => r.band === "2.4")
+      .reduce((sum, r) => sum + (share[r.id] || 0), 0);
+    left.value = String(Math.round(pct * 100));
+  }
   const mcs = $("#apc-mcs");
   if (mcs) {
     mcs.max = String(MAX_MCS[state.generation] ?? 13);
@@ -878,6 +959,34 @@ function initPills() {
     ],
     state.splitMode,
   );
+  const marginHost = $("#apc-margin-pills");
+  if (marginHost) {
+    marginHost.innerHTML = pillGroup(
+      "apc-margin",
+      DESIGN_MARGINS.map((m) => ({ value: String(m.value), label: m.label })),
+      String(state.margin),
+    );
+  }
+  const bandHost = $("#apc-band-neighbor");
+  if (bandHost) {
+    const choices = [
+      { value: "", label: "Same" },
+      ...Object.values(NEIGHBOR_MODES).map((m) => ({ value: m.id, label: m.label })),
+    ];
+    const rows = [
+      ["2.4 GHz", "apc-nband-24", state.neighborByBand["2.4"] || ""],
+      ["5 GHz", "apc-nband-5", state.neighborByBand["5"] || ""],
+      ["6 GHz", "apc-nband-6", state.neighborByBand["6"] || ""],
+    ];
+    bandHost.innerHTML = rows
+      .map(
+        ([label, name, selected]) => `<div class="field">
+          <span class="apc-label">${label}</span>
+          <div class="apc-pills" role="radiogroup" aria-label="${label} RF">${pillGroup(name, choices, selected)}</div>
+        </div>`,
+      )
+      .join("");
+  }
 }
 
 async function loadApCatalog() {
