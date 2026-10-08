@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sites Setting",
-    "version": "2609.1.0",
+    "version": "2610.1.0",
     "description": "Site settings refer to the configuration and management of of site within a Mist Organization.\n\nThese settings include access point settings, firmware upgrade schedules, and various features such as location services, occupancy analytics, and engagement analytics."
   },
   "servers": [
@@ -1832,7 +1832,7 @@
           "power_min": {
             "description": "When power=null/unset, min tx power to use, HW-specific values will be used if not set",
             "maximum": 18,
-            "minimum": 3,
+            "minimum": 0,
             "type": [
               "integer",
               "null"
@@ -1921,7 +1921,7 @@
           "power_min": {
             "description": "When power=null/unset, min tx power to use, HW-specific values will be used if not set",
             "maximum": 17,
-            "minimum": 5,
+            "minimum": 0,
             "type": [
               "integer",
               "null"
@@ -2010,7 +2010,7 @@
           "power_min": {
             "description": "When power=null/unset, min tx power to use, HW-specific values will be used if not set",
             "maximum": 18,
-            "minimum": 5,
+            "minimum": 0,
             "type": [
               "integer",
               "null"
@@ -11554,7 +11554,7 @@
           },
           "hold_time": {
             "$ref": "#/components/schemas/switch_bgp_config_hold_time",
-            "description": "Default BGP hold time for switch BGP sessions. enum: `0`."
+            "description": "Default BGP hold time for switch BGP sessions."
           },
           "import_policy": {
             "description": "Import policy must match one of the policy names defined in the `routing_policies` property.",
@@ -11871,6 +11871,50 @@
           }
         ],
         "description": "Mist Edge port used to proxy the switch management traffic to the Mist Cloud. Value in range 1-65535"
+      },
+      "switch_mgmt_radius_auth_server": {
+        "additionalProperties": false,
+        "description": "RADIUS authentication server used for switch management authentication",
+        "properties": {
+          "host": {
+            "description": "Address or hostname of the RADIUS authentication server",
+            "examples": [
+              "1.2.3.4"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for this RADIUS authentication server entry",
+            "format": "uuid",
+            "readOnly": true,
+            "type": "string"
+          },
+          "port": {
+            "$ref": "#/components/schemas/radius_auth_port",
+            "description": "UDP port used by the RADIUS authentication server"
+          },
+          "secret": {
+            "description": "Shared secret used with this RADIUS authentication server",
+            "examples": [
+              "testing123"
+            ],
+            "format": "password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "host",
+          "secret"
+        ],
+        "type": "object"
+      },
+      "switch_mgmt_radius_auth_servers": {
+        "description": "List of RADIUS authentication servers used for switch management authentication",
+        "items": {
+          "$ref": "#/components/schemas/switch_mgmt_radius_auth_server"
+        },
+        "type": "array",
+        "uniqueItems": true
       },
       "switch_mist_nac": {
         "additionalProperties": false,
@@ -12569,19 +12613,33 @@
       },
       "switch_radius": {
         "additionalProperties": false,
-        "description": "Switch RADIUS override settings. By default, the switch `radius_config` is used; set `use_different_radius` to use alternate RADIUS settings.",
+        "description": "RADIUS settings for switch management authentication. `auth_servers`, `auth_servers_retries`, and `auth_servers_timeout` are required when `enabled`==`true` and `use_different_radius`==`true`.",
         "properties": {
+          "auth_servers": {
+            "$ref": "#/components/schemas/switch_mgmt_radius_auth_servers",
+            "description": "RADIUS authentication servers used for switch management authentication. Required when `enabled`==`true` and `use_different_radius`==`true`."
+          },
+          "auth_servers_retries": {
+            "default": 3,
+            "description": "RADIUS auth session retries. Required when `enabled`==`true` and `use_different_radius`==`true`.",
+            "type": "integer"
+          },
+          "auth_servers_timeout": {
+            "default": 5,
+            "description": "RADIUS auth session timeout, in seconds. Required when `enabled`==`true` and `use_different_radius`==`true`.",
+            "type": "integer"
+          },
           "enabled": {
             "description": "Whether RADIUS is enabled for switch management authentication",
             "type": "boolean"
           },
-          "radius_config": {
-            "$ref": "#/components/schemas/switch_radius_config",
-            "description": "RADIUS configuration used when alternate RADIUS settings are required"
+          "network": {
+            "description": "Source network used for connectivity to the RADIUS servers",
+            "type": "string"
           },
           "use_different_radius": {
-            "description": "Selector for alternate RADIUS settings instead of the default switch `radius_config`",
-            "type": "string"
+            "description": "Whether to use alternate RADIUS settings instead of the default switch `radius_config`",
+            "type": "boolean"
           }
         },
         "type": "object"
