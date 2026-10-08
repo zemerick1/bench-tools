@@ -239,7 +239,9 @@ def specs_from_ssr_props(props: dict[str, Any]) -> list[dict[str, str]]:
     for definition in api_defs:
         if not isinstance(definition, dict):
             continue
-        if definition.get("type") not in (None, "openapi"):
+        # ReadMe labels OAS 3 uploads "openapi" and OAS 2 uploads "swagger".
+        # ClearPass 6.14 is the latter. Other upload types are not specs.
+        if definition.get("type") not in (None, "openapi", "swagger"):
             continue
         filename = definition.get("filename")
         if not filename or filename in seen:
@@ -264,10 +266,17 @@ def discover_specs(slug: str) -> list[dict[str, str]]:
     props = _parse_ssr_props(slug)
     specs = specs_from_ssr_props(props)
     if not specs:
+        types = sorted(
+            {
+                str(item.get("type"))
+                for item in (props.get("apiDefinitions") or [])
+                if isinstance(item, dict) and item.get("type")
+            }
+        )
         raise RuntimeError(
             f"{slug}: no OpenAPI definitions with a registry uuid "
             f"(apiDefinitions={len(props.get('apiDefinitions') or [])}, "
-            f"registries={len(registry_entries(props))})"
+            f"registries={len(registry_entries(props))}, types={types or ['none']})"
         )
     return specs
 

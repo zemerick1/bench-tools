@@ -837,6 +837,23 @@ class SpecDiscoveryTests(unittest.TestCase):
             [{"filename": "extra.json", "uuid": "from-def"}],
         )
 
+    def test_swagger_type_joins_to_the_registry(self) -> None:
+        props = {
+            "apiDefinitions": [
+                {"filename": "api-operations.json", "type": "swagger"},
+                {"filename": "notes.md", "type": "basic"},
+            ],
+            "version": {
+                "apiRegistries": [
+                    {"filename": "api-operations.json", "uuid": "cppm-uuid"},
+                ]
+            },
+        }
+        self.assertEqual(
+            specs_from_ssr_props(props),
+            [{"filename": "api-operations.json", "uuid": "cppm-uuid"}],
+        )
+
     def test_rendered_version_wins_over_an_older_stable_list(self) -> None:
         props = {
             "apiDefinitions": [{"filename": "a.json", "type": "openapi"}],
