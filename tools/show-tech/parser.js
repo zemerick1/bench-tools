@@ -30,6 +30,11 @@
       label: "AOS-CX switch",
       short: "CX",
     },
+    "aos-s": {
+      id: "aos-s",
+      label: "AOS-S switch",
+      short: "AOS-S",
+    },
     "aos-10-ap": {
       id: "aos-10-ap",
       label: "AOS-10 access point",
@@ -116,10 +121,73 @@
     return text.slice(m.index, m.index + (maxChars || 4000));
   }
 
+  // ProVision / AOS-Switch release: WC.16.11.0032, YA.16.11.0001, KB.16.11.0012, K.15.16.0024.
+  // Lookbehind keeps FL.10.x (and the other AOS-CX trains) from matching on the second letter.
+  const AOS_S_VER_SRC =
+    "(?<![A-Za-z])(?!(?:FL|DL|ML|LL|PL|TL|GL|NL|CL|XL)\\.)[A-Z]{1,2}\\.\\d{2}\\.\\d{2}\\.\\d{4}";
+
+  function aosSMatch(text, pattern) {
+    return firstLineMatch(text, new RegExp(pattern, "im"));
+  }
+
+  /** Login MOTD line: `Software revision WC.16.11.0032` with no colon. */
+  function aosSBannerRevision(text) {
+    return aosSMatch(
+      text,
+      "^[ \\t]*Software revision[ \\t]+(" + AOS_S_VER_SRC + ")[ \\t]*$"
+    );
+  }
+
+  /** `show system` two-column row. Present in show tech all even when the MOTD was not logged. */
+  function aosSShowSystemRevision(text) {
+    return aosSMatch(
+      text,
+      "Software revision\\s*:\\s*(" +
+        AOS_S_VER_SRC +
+        ")\\s+Base MAC Addr"
+    );
+  }
+
+  /**
+   * `show flash` image table plus Boot ROM or the vvv / user_version block.
+   * This shape is the switch's own flash, not a neighbor platform string.
+   */
+  function hasAosSFlash(text) {
+    const image = new RegExp(
+      "Primary Image\\s*:\\s*\\d+\\s+\\d{2}/\\d{2}/\\d{2}\\s+" + AOS_S_VER_SRC,
+      "i"
+    );
+    const rom = new RegExp(
+      "Primary Boot ROM Version\\s*:\\s*" + AOS_S_VER_SRC,
+      "i"
+    );
+    const userVer = new RegExp(
+      "user_version\\s*:\\s*" + AOS_S_VER_SRC,
+      "i"
+    );
+    const vvv = /^\s*vvv\s*:\s*[A-Z]{1,2}\s*$/m;
+    return image.test(text) && (rom.test(text) || (userVer.test(text) && vvv.test(text)));
+  }
+
+  /** Running-config stamp: `; JL258A Configuration Editor; Created on release #WC.16.11.0032`. */
+  function aosSConfigRelease(text) {
+    const m = text.match(
+      new RegExp(
+        ";\\s*([A-Z]{1,2}\\d{3,4}[A-Z]?)\\s+Configuration Editor;\\s*Created on release\\s+#(" +
+          AOS_S_VER_SRC +
+          ")",
+        "i"
+      )
+    );
+    if (!m) return null;
+    return { sku: m[1], version: m[2] };
+  }
+
   function detectFamily(text) {
     const t = text;
     const scores = {
       "aos-cx": 0,
+      "aos-s": 0,
       "aos-10-ap": 0,
       microbranch: 0,
       gateway: 0,
@@ -136,6 +204,17 @@
     if (/\bCommand\s*:\s*show system\b/i.test(t)) scores["aos-cx"] += 2;
     if (/\bShow Tech executed on\b/i.test(t)) scores["aos-cx"] += 2;
     if (/\bMy VSF Role\b/i.test(t)) scores["aos-cx"] += 1;
+
+    // AOS-S / ProVision (2930, 2540, 2530, 2920, 3810, 5400R, …).
+    // A CDP/LLDP neighbor that quotes an AP is worth about 8–10 on the AOS-10
+    // banner rules below. The switch's own login banner is the highest single
+    // clue. show tech all still has show system, show flash, and the
+    // configuration-editor stamp when the MOTD was not captured, and each of
+    // those still outranks that neighbor quote.
+    if (aosSBannerRevision(t)) scores["aos-s"] += 16;
+    if (aosSShowSystemRevision(t)) scores["aos-s"] += 14;
+    if (hasAosSFlash(t)) scores["aos-s"] += 12;
+    if (aosSConfigRelease(t)) scores["aos-s"] += 12;
 
     // Shared AP/IAP shape (prompt may use :10# or :fc# MAC nibble)
     const apPrompt = /^[A-Za-z0-9_.-]*AP[A-Za-z0-9_.-]*:[A-Za-z0-9]+#/m.test(t);
@@ -550,6 +629,82 @@
       /Total number of core dumps\s*:\s*(\d+)/i
     );
     if (cores != null) addFact(facts, "Core dump count", cores);
+
+    return dedupeFacts(facts);
+  }
+
+  function extractAosS(text) {
+    const facts = [];
+    const sysVer = aosSShowSystemRevision(text);
+    const bannerVer = aosSBannerRevision(text);
+    const cfg = aosSConfigRelease(text);
+    const primaryUser = aosSMatch(
+      text,
+      "user_version\\s*:\\s*(" + AOS_S_VER_SRC + ")"
+    );
+
+    addFact(
+      facts,
+      "Hostname",
+      firstLabelValue(text, ["System Name"]) ||
+        firstLineMatch(text, /^hostname\s+"([^"]+)"/im) ||
+        firstLineMatch(text, /^([A-Za-z][A-Za-z0-9_.-]*)#\s+show\s+tech\b/im)
+    );
+
+    const bannerModel = firstLineMatch(
+      text,
+      /^[ \t]*((?:Aruba|HPE|HP)\s+\S+\s+.+?\bSwitch)\s*$/im
+    );
+    const crashModel = firstLineMatch(
+      text,
+      /^[ \t]*Name\s*:\s*((?:Aruba|HPE|HP)\s+.+?\bSwitch)\s*$/im
+    );
+    addFact(
+      facts,
+      "Model / product",
+      bannerModel || crashModel || (cfg && cfg.sku)
+    );
+
+    addFact(
+      facts,
+      "Software version",
+      sysVer || bannerVer || primaryUser || (cfg && cfg.version)
+    );
+    addFact(
+      facts,
+      "Boot ROM",
+      firstLineMatch(text, /ROM Version\s*:\s*([A-Z]{1,2}\.[\d.]+)/i) ||
+        firstLineMatch(
+          text,
+          /Primary Boot ROM Version\s*:\s*([A-Z]{1,2}\.[\d.]+)/i
+        )
+    );
+    addFact(
+      facts,
+      "Boot image",
+      firstLineMatch(text, /Default Boot Image\s*:\s*(\S+)/i)
+    );
+    addFact(
+      facts,
+      "Serial",
+      firstLineMatch(text, /Serial Number\s*:\s*([A-Z0-9]{6,})\b/i) ||
+        firstLineMatch(text, /SerialNum\s*:\s*([A-Z0-9]{6,})\b/i)
+    );
+    addFact(
+      facts,
+      "Base MAC",
+      firstLineMatch(
+        text,
+        /Base MAC Addr(?:ess)?\s*:\s*([0-9a-f]{6}-[0-9a-f]{6})/i
+      )
+    );
+    addFact(
+      facts,
+      "Uptime",
+      firstLineMatch(text, /Up Time\s*:\s*(.+?)(?:\s{2,}Memory|\s*$)/i)
+    );
+    const cpu = firstLineMatch(text, /CPU Util \(%\)\s*:\s*(\d+\s*%?)/i);
+    if (cpu) addFact(facts, "CPU", /%/.test(cpu) ? cpu.trim() : cpu.trim() + "%");
 
     return dedupeFacts(facts);
   }
@@ -971,6 +1126,7 @@
 
   function extractFacts(text, familyId) {
     if (familyId === "aos-cx") return extractCx(text);
+    if (familyId === "aos-s") return extractAosS(text);
     if (familyId === "aos-10-ap") return extractAos10Ap(text);
     if (familyId === "microbranch") return extractMicrobranch(text);
     if (familyId === "instant") return extractInstant(text);
@@ -985,6 +1141,13 @@
     if (/\bArubaOS\s*\(MODEL:.*Version\s+8\./i.test(text))
       return extractInstant(text);
     if (/\bHostname is\s+\S*VPNC/i.test(text)) return extractVpnc(text);
+    if (
+      aosSBannerRevision(text) ||
+      aosSShowSystemRevision(text) ||
+      hasAosSFlash(text) ||
+      aosSConfigRelease(text)
+    )
+      return extractAosS(text);
     if (/\bAOS-10\s*\(MODEL:/i.test(text)) return extractAos10Ap(text);
     const ap = extractAos10Ap(text);
     if (ap.length >= 3) return ap;
