@@ -321,6 +321,104 @@ console.log("\n=== UI static contract ===");
   );
 }
 
+console.log("\n=== AOS-S switch beats a neighbor AP quote ===");
+{
+  const banner = `Aruba JL258A 2930F-8G-PoE+-2SFP+ Switch
+
+Software revision WC.16.11.0032
+
+bg1sw02# show tech all
+`;
+  const showSys = `  System Name        : bg1sw02
+  Software revision  : WC.16.11.0032        Base MAC Addr      : 104f58-e4feb0
+  ROM Version        : WC.16.01.0010        Serial Number      : TW00HKZ0V6
+  Up Time            : 23 hours             Memory   - Total   : 333,419,008
+  CPU Util (%)       : 10                              Free    : 212,570,192
+`;
+  const flash = `show flash _detail
+Primary Image    :    30293142 09/25/26 WC.16.11.0032
+Secondary Image  :    30251885 11/21/23 WC.16.11.0015
+Primary Boot ROM Version   : WC.16.01.0010
+Secondary Boot ROM Version : WC.16.01.0010
+Default Boot Image   : Primary
+   vvv          : WC
+   user_version : WC.16.11.0032
+`;
+  const cfg = `; JL258A Configuration Editor; Created on release #WC.16.11.0032
+hostname "bg1sw02"
+`;
+  const neighbor = `show cdp neighbors detail
+  Platform     : AOS-10 (MODEL: 635), Aruba AP, Version:10.8.1.1_96846 LSR
+  Version      : AOS-10 (MODEL: 635), Aruba AP, Version:10.8.1.1_96846 LSR
+`;
+
+  const full = parseTechDump([banner, showSys, flash, cfg, neighbor].join("\n"));
+  const ff = factMap(full);
+  ok(full.family.id === "aos-s", "full AOS-S with CDP AP neighbor (got " + full.family.id + ")");
+  ok(ff["Hostname"] === "bg1sw02", "AOS-S hostname");
+  ok(/2930F/.test(ff["Model / product"] || ""), "AOS-S model from banner");
+  ok(ff["Software version"] === "WC.16.11.0032", "AOS-S running version, not the neighbor AP");
+  ok(ff["Boot ROM"] === "WC.16.01.0010", "AOS-S boot ROM");
+  ok(ff["Serial"] === "TW00HKZ0V6", "AOS-S serial");
+  ok(ff["Base MAC"] === "104f58-e4feb0", "AOS-S base MAC");
+  ok(ff["Uptime"] === "23 hours", "AOS-S uptime");
+  ok(!ff["User traffic mode"], "AOS-S does not invent AP traffic mode");
+
+  const noMotd = parseTechDump([showSys, flash, cfg, neighbor].join("\n"));
+  ok(noMotd.family.id === "aos-s", "no MOTD: show system + flash + config still AOS-S");
+
+  ok(
+    parseTechDump(flash + "\n" + neighbor).family.id === "aos-s",
+    "show flash detail alone beats the neighbor AP banner"
+  );
+  ok(
+    parseTechDump(cfg + "\n" + neighbor).family.id === "aos-s",
+    "configuration editor stamp alone beats the neighbor AP banner"
+  );
+  ok(parseTechDump(banner).family.id === "aos-s", "login banner alone is AOS-S");
+  ok(
+    parseTechDump(showSys).family.id === "aos-s",
+    "show system revision row alone is AOS-S"
+  );
+
+  const ya = parseTechDump(
+    "HP J9772A 2530-48G-PoEP Switch\n\nSoftware revision YA.16.11.0013\n"
+  );
+  ok(ya.family.id === "aos-s", "YA.16 2530 banner is AOS-S");
+  ok(
+    factMap(ya)["Software version"] === "YA.16.11.0013",
+    "YA.16 version from banner"
+  );
+
+  ok(
+    parseTechDump(neighbor).family.id === "aos-10-ap",
+    "CDP quote of an AP, with no switch clues, stays an AP"
+  );
+
+  const ap = `AP-Garage:10# show tech-support
+AOS-10 (MODEL: 635), Aruba AP, Version 10.8.1.1_96846 LSR
+AP uptime is 3 days
+System Description: Aruba JL258A 2930F Switch, revision WC.16.11.0032, ROM WC.16.01.0010
+`;
+  ok(
+    parseTechDump(ap).family.id === "aos-10-ap",
+    "AP banner beats a switch revision quoted in a neighbor description"
+  );
+
+  const cx = `AOS-CX
+Version      : FL.10.17.1020
+Product Name : JL668A 6300F
+Chassis Serial Nbr : SG12345678
+Command : show system
+Software revision FL.10.13.0001
+`;
+  ok(parseTechDump(cx).family.id === "aos-cx", "CX train is not AOS-S");
+  ok(
+    parseTechDump("Software revision FL.10.13.0001\n").family.id !== "aos-s",
+    "a bare FL.10 Software revision line is not an AOS-S banner"
+  );
+}
+
 function samplePath(name) {
   return path.join(SAMPLES, name);
 }

@@ -36,6 +36,7 @@ If you need an RCA, use this output as **orientation**, then do the real work in
 | Family | Signals (examples) |
 |--------|---------------------|
 | **AOS-CX** | `FL.10.x`, Chassis Serial Nbr |
+| **AOS-S switch** | Login `Software revision WC.16.x` (highest). Also `show system`, `show flash` (Primary Image / Boot ROM / `user_version`), and `; JLxxxx Configuration Editor; Created on release #…`. Each of those beats a CDP/LLDP neighbor that quotes an AP. |
 | **AOS-10 campus AP** | AOS-10 / ArubaOS 10.x AP banner; **GRE/IPSec to gateway** vs local bridge |
 | **Instant / AOS-8 IAP** | `ArubaOS (MODEL: …), Version 8.x`; bridge by default; **IAP-VPN** if set |
 | **AOS-10 Microbranch AP** | `Microbranch AP is Enabled`, microbranch-tunnel-*, overlay to **VPNC** |

@@ -177,7 +177,7 @@ Browser helper for *reading* an Aruba show-tech / support log. A single AOS-CX d
 
 - Offline paste/drop of plain text under `tools/show-tech/`
 - Sticky note + clear facts + “looks wrong” findings + ticket paste + export
-- Personas: AOS-CX, AOS-10 AP / Microbranch / VPNC / gateway, Instant (AOS-8)
+- Personas: AOS-CX, AOS-S (ProVision), AOS-10 AP / Microbranch / VPNC / gateway, Instant (AOS-8)
 
 **What it is not**
 
