@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Role &amp; Policy Auditor — Bench Tools</title>
+    <meta
+      name="description"
+      content="Which Central roles can reach anywhere, and how many clients are sitting there. Open a row for the policy. Not a design review."
+    />
+    <link rel="canonical" href="https://tools.emerickcc.com/tools/role-auditor/" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Bench Tools" />
+    <meta name="theme-color" content="#0f6e56" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Bench Tools" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://tools.emerickcc.com/tools/role-auditor/" />
+    <meta property="og:title" content="Role &amp; Policy Auditor" />
+    <meta
+      property="og:description"
+      content="Which Central roles can reach anywhere, and how many clients are sitting there. Open a row for the policy. Not a design review."
+    />
+    <meta property="og:image" content="https://tools.emerickcc.com/assets/icons/og-image.jpg" />
+    <meta property="og:image:width" content="1280" />
+    <meta property="og:image:height" content="720" />
+    <meta property="og:image:alt" content="Bench Tools — static lab utilities" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Role &amp; Policy Auditor" />
+    <meta
+      name="twitter:description"
+      content="Which Central roles can reach anywhere, and how many clients are sitting there. Not a design review."
+    />
+    <meta name="twitter:image" content="https://tools.emerickcc.com/assets/icons/og-image.jpg" />
+    <link rel="icon" href="../../assets/icons/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="../../assets/icons/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png" />
+    <link rel="stylesheet" href="../../assets/css/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="../../">
+          <span class="brand__mark" aria-hidden="true">B</span>
+          <span>Bench Tools</span>
+        </a>
+        <nav class="nav" aria-label="Primary">
+          <a href="#credentials">Credentials</a>
+          <a href="#rules">Rules</a>
+          <a href="#ra-faq">FAQ</a>
+          <a href="../../#tools">All tools</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="site-main site-main--wide">
+      <header class="page-header page-header--full">
+        <a class="back" href="../../">← Back to the toolbox</a>
+        <h1>Role &amp; Policy Auditor</h1>
+        <p>
+          Which roles can reach <strong>anywhere</strong>, and how many clients
+          are sitting on that decision. Open a row for the policy, the service,
+          and the rest of the ACL. ANY is the easy catch. The interesting stuff
+          is whatever you tag yourself.
+        </p>
+        <div class="explainer" role="note">
+          <strong>What this is:</strong>
+          a read-only look at the shared library
+          (<span class="inline-code">view-type=LIBRARY</span>) and a headcount of
+          connected clients. The built-in checks notice ANY. Extra rules are for
+          the subnet, host, or role you already side-eye. A canned allow-any that
+          only names a service stays inside the role, protocol and ports included,
+          so “DNS to anywhere” does not get to cosplay as “the network is open.”
+          <br /><br />
+          <strong>What this is not:</strong>
+          hit counts, the config a site actually runs, or a change tool. A quiet
+          report is not a sign-off. This tab has not walked your network. A deny
+          to ANY still shows up, because the address is ANY — read the action
+          before you page someone.
+        </div>
+      </header>
+
+      <div class="stack">
+        <div class="callout callout--danger" role="note">
+          <strong>The secret stays in this browser.</strong>
+          No account, no database, no Bench Tools vault with your name on it.
+          Client ID and secret land in
+          <span class="inline-code">localStorage</span> on this device, as plain text,
+          because a browser is not a safe. The access token is held in memory for
+          the check and is not written down. A live check posts those credentials
+          to <span class="inline-code">/proxy</span> on the host that served this
+          page. The proxy hands them to HPE and does not keep a copy.
+          Anyone who can use this browser profile can read the secret. Forget it
+          when you are done on a shared machine.
+        </div>
+
+        <div class="callout callout--warn" role="note">
+          <strong>Read-only.</strong>
+          One POST, and only to trade the client credentials for a token. After
+          that, Central gets GETs: roles, policies, role ACLs, net services, and
+          connected clients. Redirects are refused. So is everything else. This
+          page will not “just fix” the rule it found.
+        </div>
+
+        <section class="panel" id="credentials" aria-labelledby="cred-heading">
+          <h2 id="cred-heading">GreenLake credentials</h2>
+          <p class="panel__intro">
+            Personal API client from HPE GreenLake. Pick the cluster the workspace
+            lives on. The secret field is a password on purpose.
+            <span class="inline-code">localStorage</span> still keeps it as plain text. Sorry.
+          </p>
+          <form id="ra-cred-form" autocomplete="off">
+            <div class="form-grid">
+              <div class="field">
+                <label for="ra-cluster">Cluster</label>
+                <select id="ra-cluster" name="cluster"></select>
+              </div>
+              <div class="field" id="ra-custom-wrap" hidden>
+                <label for="ra-base">Cluster URL</label>
+                <input id="ra-base" name="baseUrl" type="url" inputmode="url" spellcheck="false" placeholder="https://us1.api.central.arubanetworks.com" autocomplete="off" />
+                <span class="hint">Host only. It has to be an <span class="inline-code">*.api.central.arubanetworks.com</span> cluster.</span>
+              </div>
+              <div class="field">
+                <label for="ra-client-id">Client ID</label>
+                <input id="ra-client-id" name="clientId" type="text" spellcheck="false" autocomplete="off" />
+              </div>
+              <div class="field">
+                <label for="ra-client-secret">Client secret</label>
+                <input id="ra-client-secret" class="ra-secret" name="clientSecret" type="password" spellcheck="false" autocomplete="new-password" />
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn--primary" id="ra-run">Run check</button>
+              <button type="button" class="btn btn--secondary" id="ra-save">Save in this browser</button>
+              <button type="button" class="btn btn--ghost" id="ra-forget">Forget credentials</button>
+              <button type="button" class="btn btn--ghost" id="ra-example">Show an example</button>
+            </div>
+            <p class="ra-status" id="ra-status" role="status" aria-live="polite"></p>
+          </form>
+        </section>
+
+        <section class="panel" id="rules" aria-labelledby="rules-heading">
+          <h2 id="rules-heading">Ruleset</h2>
+          <p class="panel__intro">
+            ANY is the free square. One check flags a source or destination of ANY.
+            The other wants destination ANY <em>and</em> any service, and tags that
+            row <strong>Any service</strong>. Turn either off when it gets noisy.
+            Extra rules are the ones you meant: a short tag, a color, and conditions
+            that all have to match. The tag lands on the role. It stays in this browser.
+          </p>
+          <ul class="ra-rule-list" id="ra-builtin"></ul>
+          <div class="callout callout--soft ra-examples" role="note">
+            <strong>A few ways to use an extra rule.</strong>
+            <p>Curious what can reach a secure subnet? Destination contains <span class="inline-code">172.16</span>. That tags the rule.</p>
+            <p>A secure server nobody should reach? Destination is <span class="inline-code">192.168.1.10</span>. That tags the role.</p>
+            <p>Every rule for one role? Source contains <span class="inline-code">Student</span>.</p>
+          </div>
+          <h3 class="ra-subhead">Extra rules</h3>
+          <div id="ra-extra-list" class="ra-extra-list"></div>
+          <p class="hint" id="ra-extra-hint"></p>
+          <div class="form-actions">
+            <button type="button" class="btn btn--secondary" id="ra-add-rule">Add rule</button>
+          </div>
+          <form id="ra-rule-form" hidden>
+            <h3 id="ra-rule-form-title">Add rule</h3>
+            <div class="form-grid">
+              <div class="field">
+                <label for="ra-tag">Tag</label>
+                <input id="ra-tag" type="text" maxlength="32" autocomplete="off" placeholder="Open allow" />
+                <span class="hint">This is the label on the role row. Keep it short.</span>
+              </div>
+              <div class="field field--full">
+                <div class="ra-cond-head">
+                  <span id="ra-cond-label">Conditions</span>
+                  <button type="button" class="btn btn--ghost" id="ra-add-cond">Add condition</button>
+                </div>
+                <div id="ra-conditions" aria-labelledby="ra-cond-label"></div>
+                <span class="hint">Contains is a keyword: 172.16 matches 172.16.8.4. Is matches the whole address or name, such as 192.168.1.37. ALLOW is a policy allow. PERMIT is the role-ACL word.</span>
+              </div>
+              <fieldset class="field field--full ra-swatches">
+                <legend>Color</legend>
+                <label class="ra-swatch-label"><input type="radio" name="ra-color" value="red" checked /><span class="ra-swatch ra-tag--red"></span><span class="ra-swatch-name">Red</span></label>
+                <label class="ra-swatch-label"><input type="radio" name="ra-color" value="orange" /><span class="ra-swatch ra-tag--orange"></span><span class="ra-swatch-name">Orange</span></label>
+                <label class="ra-swatch-label"><input type="radio" name="ra-color" value="yellow" /><span class="ra-swatch ra-tag--yellow"></span><span class="ra-swatch-name">Yellow</span></label>
+                <label class="ra-swatch-label"><input type="radio" name="ra-color" value="green" /><span class="ra-swatch ra-tag--green"></span><span class="ra-swatch-name">Green</span></label>
+                <label class="ra-swatch-label"><input type="radio" name="ra-color" value="blue" /><span class="ra-swatch ra-tag--blue"></span><span class="ra-swatch-name">Blue</span></label>
+                <label class="ra-swatch-label"><input type="radio" name="ra-color" value="purple" /><span class="ra-swatch ra-tag--purple"></span><span class="ra-swatch-name">Purple</span></label>
+                <label class="ra-swatch-label"><input type="radio" name="ra-color" value="gray" /><span class="ra-swatch ra-tag--gray"></span><span class="ra-swatch-name">Gray</span></label>
+              </fieldset>
+            </div>
+            <p class="hint" id="ra-rule-form-hint"></p>
+            <div class="form-actions">
+              <button type="submit" class="btn btn--primary">Save rule</button>
+              <button type="button" class="btn btn--ghost" id="ra-cancel-rule">Cancel</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel" id="ra-report" aria-labelledby="report-heading" hidden>
+          <h2 id="report-heading">Report</h2>
+          <p class="ra-banner" id="ra-banner"></p>
+          <div class="ra-stats" id="ra-stats"></div>
+          <div class="field ra-filter">
+            <label for="ra-filter">Filter</label>
+            <input id="ra-filter" type="search" placeholder="Role, policy, or ACL name" autocomplete="off" />
+          </div>
+          <h3 class="ra-subhead">Roles</h3>
+          <p class="panel__intro" id="ra-roles-note"></p>
+          <div class="ra-table-wrap" id="ra-roles"></div>
+        </section>
+
+        <details class="panel details-block" id="snapshot">
+          <summary>No /proxy on this server? Load a snapshot</summary>
+          <p class="panel__intro">
+            The live check stays on this host. In the terminal that is
+            already serving the site, stop
+            <span class="inline-code">python3 -m http.server</span> and run
+            <span class="inline-code">python3 server.py</span> with the same
+            port, from the repo root. Reload this address. Or load a JSON
+            snapshot you fetched yourself. The file is read in this tab and is
+            not uploaded.
+          </p>
+          <pre class="ra-sample">{
+  "roles": { "role": [ ] },
+  "policies": { "policy": [ ] },
+  "roleAcls": { "acl": [ ] },
+  "netServices": { "net-service": [ ] },
+  "clients": { "items": [ ] }
+}</pre>
+          <div class="form-actions">
+            <label class="btn btn--secondary ra-file">
+              Load snapshot JSON
+              <input id="ra-snapshot" type="file" accept="application/json,.json" />
+            </label>
+          </div>
+        </details>
+
+        <section class="panel" id="ra-faq" aria-labelledby="faq-heading">
+          <h2 id="faq-heading">FAQ</h2>
+          <h3>Where do the credentials go?</h3>
+          <p>
+            Into <span class="inline-code">localStorage</span> on this origin.
+            A live check posts them to <span class="inline-code">/proxy</span> on
+            the same host. That proxy forwards the call to HPE and does not keep
+            a copy. There is no database. Forget them on a shared machine.
+            The access token is not stored.
+          </p>
+          <h3>What does ANY mean here?</h3>
+          <p>
+            A policy endpoint whose type is <span class="inline-code">ADDRESS_ANY</span>,
+            or a role whose name is <span class="inline-code">any</span>.
+            A protocol of ANY is any IP protocol. The address check does not use it.
+            Source <em>or</em> destination is enough to flag that rule.
+            Both sides is called out as any-to-any in the row.
+            The other built-in check wants destination ANY and any service:
+            no named net-service, application, or app category, and the protocol
+            is ANY or left unset. TCP, or a named service such as DNS, does not match.
+            A role ACL with no protocol counts as any service.
+            A protocol and port are the service. UDP port 67 shows as UDP 67.
+            A row is red only when an enabled rule matches that line.
+            Built-in checks and extra rules work the same way. Turning a check
+            off clears the red on lines that only that check matched.
+          </p>
+          <h3>How are permissions tied to a role?</h3>
+          <p>
+            A rule counts as that role’s permissions when the source is that role,
+            or when the policy or role ACL has the same name as the role. Client
+            counts come from connected clients
+            (<span class="inline-code">/network-monitoring/v1/clients</span>) and
+            only match when the role string is the same.
+          </p>
+          <h3>Why might the live check fail in the browser?</h3>
+          <p>
+            The cluster API does not send CORS headers, so the browser is not invited.
+            This page posts to
+            <span class="inline-code">/proxy</span> on this same address.
+            <span class="inline-code">python3 -m http.server</span> refuses that
+            POST. <span class="inline-code">python3 server.py</span> on the same
+            port serves the files and forwards the check. The proxy does not
+            store the secret.
+          </p>
+          <h3>Hit counts?</h3>
+          <p>
+            Not yet, and it will not invent them to look useful. A role ACL can
+            carry <span class="inline-code">count: true</span>, which means the
+            switch was asked to count. That is not a number. A match key this
+            engine does not know is skipped and named.
+          </p>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <p>Read-only. The secret stays in this browser. Quiet is not a sign-off.</p>
+      </div>
+    </footer>
+
+    <script type="module" src="./app.js"></script>
+    <script type="module" src="../../assets/js/tool-nav.js"></script>
+  </body>
+</html>

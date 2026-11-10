@@ -11,8 +11,9 @@ A small, slightly informal hub of static utilities for lab nights, cert headache
 ```bash
 git clone https://github.com/zemerick1/bench-tools.git
 cd bench-tools
-python3 -m http.server 8080
+python3 server.py 8080
 # http://localhost:8080
+# python3 -m http.server serves the pages and rejects POST /proxy with 501.
 ```
 
 ## What’s on the bench
@@ -28,6 +29,7 @@ python3 -m http.server 8080
 | **Client Roam** | Rooms and a hallway: when a device leaves an AP, and how long the hole is (power, min rates, 802.11r/k/v) |
 | **Client Auth** | A device logs in: who it talks to, who trusts the cert (EAP-TLS, PEAP, TTLS, TEAP, MAC). Not a packet capture |
 | **Central Alerts & Insights** | Searchable Aruba Central alert / insight catalog |
+| **Role & Policy Auditor** | Read-only Central role / policy / role-ACL check. Flags source or destination ANY. Credentials stay in the browser; a live read posts them to same-origin `/proxy` |
 | **Access Tracker Translator** | ClearPass session export → sticky-note story + why |
 | **CLI Explorer** | AOS-CX 10.13.x–10.18.x (per switch series) + AOS 10 and ClearPass from CLI-Bank HTML |
 | **Show-Tech Sticky Note** | Paste a novel-length show-tech → sticky facts + loud lines (**not** an RCA) |
@@ -60,6 +62,11 @@ bench-tools/
 │   │   ├── index.html / app.js / model.js / viz.js
 │   │   └── test_model.js
 │   ├── central-alerts/
+│   ├── role-auditor/              # Read-only Central role / policy / ACL check
+│   │   ├── index.html / app.js
+│   │   ├── api.js / creds.js      # GreenLake token + localStorage credentials
+│   │   ├── model.js / engine.js / rules.js / example.js
+│   │   └── test_engine.js
 │   ├── access-tracker/
 │   │   ├── decoder.js
 │   │   ├── radius-dict.json
@@ -86,6 +93,10 @@ bench-tools/
 │       ├── data/manifest.json
 │       ├── specs/               # published slices
 │       └── source/              # raw hub pulls (gitignored)
+├── server.py                    # Local static server that also answers POST /proxy
+├── functions/
+│   └── proxy.js                 # Same /proxy rules, for the Cloudflare Worker
+├── wrangler.jsonc               # Worker owns /proxy; other paths are static assets
 ├── docs/                        # Ideas / design notes
 └── README.md
 ```
@@ -199,6 +210,20 @@ See [tools/show-tech/README.md](./tools/show-tech/README.md) for personas, PuTTY
 - Refresh from Central API with `update_catalog.py` (stdlib only) — see that folder’s README
 - Put secrets in `credentials.local.json` or env vars (**gitignored**)
 
+### Role & Policy Auditor
+
+Read-only check under `tools/role-auditor/`. It reads the shared Central library (`view-type=LIBRARY`): roles, security-policy rules, and role ACLs, then counts connected clients by role. One built-in rule flags a rule when the source or the destination is ANY (`ADDRESS_ANY`, or a role named `any`). A second flags destination ANY together with any service or application: no named net-service, and protocol ANY or unset. A named service or a specific protocol such as TCP does not match that second check. `RULE_ANY` is a protocol match and is not the address check.
+
+GreenLake client ID and secret stay in this browser’s `localStorage`. The access token is memory-only. There is no database. A live check posts the secret to `/proxy` on the host you opened. `functions/proxy.js` forwards it to HPE and does not store it. The proxy allows the token POST and GETs of those four collections. Hit counts are not checked yet; an unknown match key is skipped and named.
+
+The cluster API omits CORS headers, so the page does not call it directly. Locally, `python3 server.py` answers `/proxy`. `python3 -m http.server` returns 501 for that POST. The same rules run on a JSON snapshot. The public site’s live read works after the Worker in `wrangler.jsonc` is deployed.
+
+```bash
+node tools/role-auditor/test_engine.js
+```
+
+See [tools/role-auditor/README.md](./tools/role-auditor/README.md).
+
 ### Aruba Antenna Matrix
 
 External-antenna Aruba APs × compatible antennas under `tools/antenna-matrix/`. Pairing is QuickSpecs “Select antennas (AP-xxx only)” plus connector / MIMO / band-coverage filters. Antenna purpose/docs are a separate enrichment step (HPE search + Support Antenna Options).
@@ -271,7 +296,9 @@ Raw pulls stay in `source/` (gitignored). Published slices + the manifest are co
 
 ## Deploy
 
-Point nginx or Caddy at this directory over HTTPS. No application runtime.
+The pages are static files. `/proxy` is `functions/proxy.js`. `wrangler.jsonc` sets that file as `main`, binds the site as `ASSETS`, and sets `run_worker_first` to `["/proxy"]`. Every other path stays a static asset.
+
+Locally, `python3 server.py` serves the files and answers `POST /proxy`. `python3 -m http.server` serves the files and returns 501 for that POST. nginx or Caddy pointed at the directory do the same unless they are told to run `server.py`. The public site’s live read works after the Worker in `wrangler.jsonc` is deployed. Until then, load a snapshot.
 
 ## License
 
