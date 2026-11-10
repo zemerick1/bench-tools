@@ -37,6 +37,16 @@ export const tools = [
     cta: "Browse catalog",
   },
   {
+    id: "role-auditor",
+    title: "Role & Policy Auditor",
+    description:
+      "Which Central roles can reach anywhere, and how many clients are sitting there. Open a row for the policy. Not a design review.",
+    href: "./tools/role-auditor/",
+    icon: "ACL",
+    status: "available",
+    cta: "Audit roles",
+  },
+  {
     id: "mac-lookup",
     title: "MAC / OUI Lookup",
     description:
