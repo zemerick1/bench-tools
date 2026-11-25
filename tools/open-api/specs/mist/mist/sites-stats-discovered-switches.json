@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sites Stats - Discovered Switches",
-    "version": "2610.1.0",
+    "version": "2611.1.0",
     "description": "API Calls to retrieve statistics about the Discovered Switches at the Site level"
   },
   "servers": [
@@ -61,6 +61,9 @@
     },
     {
       "csrfToken": []
+    },
+    {
+      "oauth2": []
     }
   ],
   "tags": [
@@ -152,11 +155,19 @@
         "operationId": "countSiteDiscoveredSwitches",
         "parameters": [
           {
-            "description": "Field used to group this count response. enum: `mgmt_addr`, `model`, `system_name`, `version`",
+            "description": "Field used to group this count response. enum: `device_type`, `hostname`, `mgmt_addr`, `model`, `system_name`, `vendor`, `version`",
             "in": "query",
             "name": "distinct",
             "schema": {
               "$ref": "#/components/schemas/site_discovered_switches_count_distinct"
+            }
+          },
+          {
+            "description": "Filter results by type of the discovered device. enum: `ap`, `camera`, `digital_signage`, `endpoint`, `gateway`, `switch`, `unknown`, `voip`",
+            "in": "query",
+            "name": "device_type",
+            "schema": {
+              "$ref": "#/components/schemas/discovered_device_type"
             }
           },
           {
@@ -334,6 +345,14 @@
             }
           },
           {
+            "description": "Filter results by type of the discovered device. enum: `ap`, `camera`, `digital_signage`, `endpoint`, `gateway`, `switch`, `unknown`, `voip`",
+            "in": "query",
+            "name": "device_type",
+            "schema": {
+              "$ref": "#/components/schemas/discovered_device_type"
+            }
+          },
+          {
             "$ref": "#/components/parameters/limit"
           },
           {
@@ -458,6 +477,20 @@
         "type": "array",
         "uniqueItems": true
       },
+      "discovered_device_type": {
+        "description": "Type of the discovered device. enum: `ap`, `camera`, `digital_signage`, `endpoint`, `gateway`, `switch`, `unknown`, `voip`",
+        "enum": [
+          "ap",
+          "camera",
+          "digital_signage",
+          "endpoint",
+          "gateway",
+          "switch",
+          "unknown",
+          "voip"
+        ],
+        "type": "string"
+      },
       "discovered_switch": {
         "additionalProperties": false,
         "description": "Switch discovered from AP uplink LLDP data and site switch discovery",
@@ -478,10 +511,21 @@
             "$ref": "#/components/schemas/strings",
             "description": "LLDP chassis identifier reported by the discovered switch"
           },
+          "device_type": {
+            "$ref": "#/components/schemas/discovered_device_type",
+            "description": "Type of the discovered device. enum: `ap`, `camera`, `digital_signage`, `endpoint`, `gateway`, `switch`, `unknown`, `voip`."
+          },
           "for_site": {
             "description": "Whether the discovered switch is associated with the requested site",
             "readOnly": true,
             "type": "boolean"
+          },
+          "hostname": {
+            "description": "Hostname reported by the discovered device",
+            "examples": [
+              "mist-lab-ex2300c"
+            ],
+            "type": "string"
           },
           "mgmt_addr": {
             "description": "Management IP address advertised by the discovered switch",
@@ -1137,12 +1181,15 @@
         "type": "object"
       },
       "site_discovered_switches_count_distinct": {
-        "default": "system_name",
-        "description": "enum: `mgmt_addr`, `model`, `system_name`, `version`",
+        "default": "hostname",
+        "description": "enum: `device_type`, `hostname`, `mgmt_addr`, `model`, `system_name`, `vendor`, `version`",
         "enum": [
+          "device_type",
+          "hostname",
           "mgmt_addr",
           "model",
           "system_name",
+          "vendor",
           "version"
         ],
         "type": "string"
@@ -1510,6 +1557,8 @@
                   "when": "2019-06-13T19:53:16.870+0000"
                 }
               ],
+              "device_type": "switch",
+              "hostname": "mist-lab-ex2300c",
               "mgmt_addr": "10.1.1.1",
               "model": "EX2300-C-12P",
               "org_id": "6748cfa6-4e12-11e6-9188-0242ac110007",
@@ -1605,6 +1654,18 @@
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"
+      },
+      "oauth2": {
+        "description": "OAuth2 authorization code flow (RFC 6749) with PKCE (RFC 7636) and rotating refresh tokens, for third-party applications (including MCP integrations) acting on behalf of a consenting user. It uses an Org API token with `oauth_enabled` set as the OAuth2 client, the `client_id` is its composite `oauth_client_id` (`<org_id>.<token_id>`). See the [Orgs OAuth2](/#operations/getOauthAuthorization) endpoints.\n\n**Format**:\n  `Authorization: Bearer {access_token}`\n\n**Notes**:\n* The access token carries the privileges configured on the API token, constrained to what the consenting user has\n* The access token expires after `oauth_ttl` (default 1 hour), use the refresh token to get a new one\n* No fixed scopes are defined, the scope is derived from the API token name (e.g. `custom-ServiceNow Integration`)",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "/api/v1/orgs/oauth/authorize",
+            "refreshUrl": "/api/v1/orgs/oauth/token",
+            "scopes": {},
+            "tokenUrl": "/api/v1/orgs/oauth/token"
+          }
+        },
+        "type": "oauth2"
       }
     }
   }

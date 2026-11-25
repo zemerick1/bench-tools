@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sites Device Profiles",
-    "version": "2610.1.0",
+    "version": "2611.1.0",
     "description": "The API Endpoints for the Device Profiles at the site level can be used to get the site derived networks, meaning the org level configuration with the site variables resolved.."
   },
   "servers": [
@@ -61,6 +61,9 @@
     },
     {
       "csrfToken": []
+    },
+    {
+      "oauth2": []
     }
   ],
   "tags": [
@@ -420,6 +423,11 @@
               "null"
             ]
           },
+          "locate_ble": {
+            "default": false,
+            "description": "Optional. Whether to forward BLE advertisements to the AES server for location calculation. Only Securitas Healthcare / AeroScout manufacturer data (company-id 935) is forwarded. Default is false",
+            "type": "boolean"
+          },
           "locate_connected": {
             "default": false,
             "description": "Whether to enable the feature to allow wireless clients data received and sent to AES server for location calculation",
@@ -479,10 +487,12 @@
             "type": "string"
           },
           "channel": {
-            "description": "Only if `type`==`imagotag` or `type`==`native`",
+            "description": "Only if `type`==`imagotag` or `type`==`native`. Channel selection, 0-10, not needed by default, required for manual channel override only",
             "examples": [
               3
             ],
+            "maximum": 10,
+            "minimum": 0,
             "type": "integer"
           },
           "enabled": {
@@ -498,7 +508,8 @@
             "type": "string"
           },
           "port": {
-            "description": "Only if `type`==`imagotag` or `type`==`native`",
+            "default": 0,
+            "description": "Only if `type`==`imagotag` or `type`==`native`. Defaults to 0",
             "examples": [
               0
             ],
@@ -506,7 +517,7 @@
           },
           "type": {
             "$ref": "#/components/schemas/ap_esl_type",
-            "description": "ESL integration type to enable on the AP. enum: `hanshow`, `imagotag`, `native`, `solum`."
+            "description": "ESL integration type to enable on the AP. enum: `hanshow`, `imagotag`, `native`, `solum`, `vusion`."
           },
           "verify_cert": {
             "description": "Only if `type`==`imagotag` or `type`==`native`",
@@ -517,19 +528,20 @@
           },
           "vlan_id": {
             "default": 1,
-            "description": "Only if `type`==`solum` or `type`==`hanshow`",
+            "description": "Only if `type`==`solum`, `type`==`hanshow` or `type`==`vusion`",
             "type": "integer"
           }
         },
         "type": "object"
       },
       "ap_esl_type": {
-        "description": "note: ble_config will be ignored if esl_config is enabled and with native mode. enum: `hanshow`, `imagotag`, `native`, `solum`",
+        "description": "note: ble_config will be ignored if esl_config is enabled and with native mode. enum: `hanshow`, `imagotag`, `native`, `solum`, `vusion`",
         "enum": [
           "hanshow",
           "imagotag",
           "native",
-          "solum"
+          "solum",
+          "vusion"
         ],
         "examples": [
           "imagotag"
@@ -1136,7 +1148,7 @@
           },
           "antenna_mode": {
             "$ref": "#/components/schemas/ap_radio_antenna_mode",
-            "description": "Selected radio chain mode for AP models that support antenna mode control. enum: `1x1`, `2x2`, `3x3`, `4x4`, `default`."
+            "description": "Selected radio chain mode for AP models that support antenna mode control. enum: `1x1`, `1x4`, `2x2`, `3x3`, `4x4`, `default`."
           },
           "antenna_select": {
             "$ref": "#/components/schemas/antenna_select",
@@ -1188,9 +1200,10 @@
       },
       "ap_radio_antenna_mode": {
         "default": "default",
-        "description": "enum: `1x1`, `2x2`, `3x3`, `4x4`, `default`",
+        "description": "enum: `1x1`, `1x4`, `2x2`, `3x3`, `4x4`, `default`",
         "enum": [
           "1x1",
+          "1x4",
           "2x2",
           "3x3",
           "4x4",
@@ -1219,7 +1232,7 @@
           },
           "antenna_mode": {
             "$ref": "#/components/schemas/radio_band_antenna_mode",
-            "description": "Radio chain mode for the 2.4 GHz radio. enum: `1x1`, `2x2`, `3x3`, `4x4`, `default`."
+            "description": "Radio chain mode for the 2.4 GHz radio. enum: `1x1`, `1x4`, `2x2`, `3x3`, `4x4`, `default`."
           },
           "bandwidth": {
             "$ref": "#/components/schemas/dot11_bandwidth24",
@@ -1310,7 +1323,7 @@
           },
           "antenna_mode": {
             "$ref": "#/components/schemas/radio_band_antenna_mode",
-            "description": "Radio chain mode for the 5 GHz radio. enum: `1x1`, `2x2`, `3x3`, `4x4`, `default`."
+            "description": "Radio chain mode for the 5 GHz radio. enum: `1x1`, `1x4`, `2x2`, `3x3`, `4x4`, `default`."
           },
           "bandwidth": {
             "$ref": "#/components/schemas/dot11_bandwidth5",
@@ -1399,7 +1412,7 @@
           },
           "antenna_mode": {
             "$ref": "#/components/schemas/radio_band_antenna_mode",
-            "description": "Radio chain mode for the 6 GHz radio. enum: `1x1`, `2x2`, `3x3`, `4x4`, `default`."
+            "description": "Radio chain mode for the 6 GHz radio. enum: `1x1`, `1x4`, `2x2`, `3x3`, `4x4`, `default`."
           },
           "bandwidth": {
             "$ref": "#/components/schemas/dot11_bandwidth6",
@@ -1575,10 +1588,12 @@
             ]
           },
           "channel": {
-            "description": "Only if `type`==`imagotag`, channel selection, not needed by default, required for manual channel override only",
+            "description": "Only if `type`==`imagotag`, channel selection, 0-10, not needed by default, required for manual channel override only",
             "examples": [
               3
             ],
+            "maximum": 10,
+            "minimum": 0,
             "type": "integer"
           },
           "enabled": {
@@ -1602,7 +1617,7 @@
           },
           "type": {
             "$ref": "#/components/schemas/ap_usb_type",
-            "description": "USB integration type for this legacy AP USB configuration. enum: `hanshow`, `imagotag`, `solum`."
+            "description": "USB integration type for this legacy AP USB configuration. enum: `hanshow`, `imagotag`, `solum`, `vusion`."
           },
           "verify_cert": {
             "description": "Only if `type`==`imagotag`, whether to turn on SSL verification",
@@ -1610,18 +1625,19 @@
           },
           "vlan_id": {
             "default": 1,
-            "description": "Only if `type`==`solum` or `type`==`hanshow`",
+            "description": "Only if `type`==`solum`, `type`==`hanshow` or `type`==`vusion`",
             "type": "integer"
           }
         },
         "type": "object"
       },
       "ap_usb_type": {
-        "description": "usb config type. enum: `hanshow`, `imagotag`, `solum`",
+        "description": "usb config type. enum: `hanshow`, `imagotag`, `solum`, `vusion`",
         "enum": [
           "hanshow",
           "imagotag",
-          "solum"
+          "solum",
+          "vusion"
         ],
         "examples": [
           "imagotag"
@@ -1718,6 +1734,28 @@
               "string",
               "null"
             ]
+          },
+          "power": {
+            "description": "Zigbee transmit power. Only if `power_mode`==`custom`",
+            "examples": [
+              10
+            ],
+            "type": "integer"
+          },
+          "power_mode": {
+            "$ref": "#/components/schemas/ap_zigbee_power_mode",
+            "description": "Zigbee transmit power mode. enum: `custom`, `default`."
+          },
+          "type": {
+            "$ref": "#/components/schemas/ap_zigbee_type",
+            "description": "Zigbee integration type. enum: `visionline` (default), `vostio`."
+          },
+          "vostio_network_id": {
+            "description": "If `type`==`vostio`, which `vostio.networks` entry (netId) this AP belongs to",
+            "examples": [
+              "1234"
+            ],
+            "type": "string"
           }
         },
         "type": "object"
@@ -1731,6 +1769,24 @@
         ],
         "examples": [
           "manual"
+        ],
+        "type": "string"
+      },
+      "ap_zigbee_power_mode": {
+        "default": "default",
+        "description": "enum: `custom`, `default`",
+        "enum": [
+          "custom",
+          "default"
+        ],
+        "type": "string"
+      },
+      "ap_zigbee_type": {
+        "default": "visionline",
+        "description": "enum: `visionline`, `vostio`",
+        "enum": [
+          "visionline",
+          "vostio"
         ],
         "type": "string"
       },
@@ -3220,7 +3276,7 @@
             "examples": [
               null
             ],
-            "maximum": 2147483647,
+            "maximum": 4294967295,
             "minimum": 0,
             "type": [
               "integer",
@@ -3252,8 +3308,20 @@
             "examples": [
               30
             ],
-            "maximum": 2147483647,
+            "maximum": 4294967295,
             "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "tag": {
+            "description": "Optional route tag usable by routing policy. AOS-CX supports `1-4294967295`",
+            "examples": [
+              10
+            ],
+            "maximum": 4294967295,
+            "minimum": 1,
             "type": [
               "integer",
               "null"
@@ -3549,7 +3617,15 @@
         "properties": {
           "additional_config_cmds": {
             "$ref": "#/components/schemas/additional_config_cmds",
-            "description": "For SRX only, additional Junos CLI commands appended when this gateway matching rule applies"
+            "description": "For SRX only, additional Junos CLI commands appended when this gateway matching rule applies. For MNHA, use it together with `match_node` to append per-node CLI commands to that node's configuration only"
+          },
+          "ip_configs": {
+            "$ref": "#/components/schemas/gateway_ip_configs",
+            "description": "Gateway interface IP configuration by network name applied when this matching rule applies, e.g. per-node IP addresses for MNHA"
+          },
+          "match_node": {
+            "$ref": "#/components/schemas/ha_cluster_node_enum",
+            "description": "MNHA node this rule applies to, to define per-node differences (one rule per node). enum: `node0`, `node1`."
           },
           "name": {
             "description": "Display name for the gateway matching rule",
@@ -3928,7 +4004,7 @@
           },
           "usage": {
             "$ref": "#/components/schemas/gateway_port_usage",
-            "description": "Logical usage assigned to the port. enum: `ha_control`, `ha_data`, `lan`, `wan`."
+            "description": "Logical usage assigned to the port. `ha_link` is the MNHA link port. enum: `ha_control`, `ha_data`, `ha_link`, `lan`, `wan`."
           },
           "vlan_id": {
             "$ref": "#/components/schemas/gateway_port_vlan_id_with_variable",
@@ -4036,6 +4112,13 @@
               "2001:db8::123"
             ],
             "format": "ipv6",
+            "type": "string"
+          },
+          "mnha_vip": {
+            "description": "For SRX MNHA only. Virtual IP address shared by the two nodes on this interface",
+            "examples": [
+              "203.0.113.1"
+            ],
             "type": "string"
           },
           "netmask": {
@@ -4164,10 +4247,11 @@
         "type": "array"
       },
       "gateway_port_usage": {
-        "description": "port usage name. enum: `ha_control`, `ha_data`, `lan`, `wan`",
+        "description": "port usage name. enum: `ha_control`, `ha_data`, `ha_link`, `lan`, `wan`",
         "enum": [
           "ha_control",
           "ha_data",
+          "ha_link",
           "lan",
           "wan"
         ],
@@ -4712,6 +4796,14 @@
         },
         "type": "array",
         "uniqueItems": true
+      },
+      "ha_cluster_node_enum": {
+        "description": "HA cluster node selector. enum: `node0`, `node1`",
+        "enum": [
+          "node0",
+          "node1"
+        ],
+        "type": "string"
       },
       "ibeacon_major": {
         "description": "Major number for iBeacon",
@@ -6000,9 +6092,10 @@
       },
       "radio_band_antenna_mode": {
         "default": "default",
-        "description": "enum: `1x1`, `2x2`, `3x3`, `4x4`, `default`",
+        "description": "enum: `1x1`, `1x4`, `2x2`, `3x3`, `4x4`, `default`",
         "enum": [
           "1x1",
+          "1x4",
           "2x2",
           "3x3",
           "4x4",
@@ -8076,6 +8169,10 @@
           "protocol": {
             "$ref": "#/components/schemas/sw_routing_policy_term_matching_protocol",
             "description": "Routing protocols that routes must match"
+          },
+          "tag": {
+            "$ref": "#/components/schemas/sw_routing_policy_term_matching_tag",
+            "description": "Optional route-tag values to match (1-4294967295), supported on AOS-CX. A route matches when its tag is any value in this list. `extra_routes.tag` remains a scalar integer that sets the tag on a static route"
           }
         },
         "type": "object"
@@ -8097,6 +8194,21 @@
           "static"
         ],
         "type": "string"
+      },
+      "sw_routing_policy_term_matching_tag": {
+        "description": "Route tags to match, 1-4294967295 (AOS-CX)",
+        "examples": [
+          [
+            10,
+            20
+          ]
+        ],
+        "items": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "type": "array"
       },
       "sw_routing_policy_terms": {
         "description": "Ordered switch routing policy terms; at least one term is required",
@@ -8373,6 +8485,11 @@
             "description": "Whether to suppress alarms when the switch out-of-band management interface is down",
             "type": "boolean"
           },
+          "enable_hw_resource_monitor": {
+            "default": false,
+            "description": "Alarm before a switch forwarding table (MAC, routes, next-hops) fills up, instead of silently dropping traffic",
+            "type": "boolean"
+          },
           "fips_enabled": {
             "default": false,
             "description": "Whether FIPS mode is enabled on the switch",
@@ -8592,6 +8709,17 @@
         "additionalProperties": false,
         "description": "Multicast settings for a switch network (VLAN)",
         "properties": {
+          "disable_pim": {
+            "description": "Non-EVPN only. When `true` the IRB does IGMP/snooping but forms no PIM adjacency (stays intra-VLAN), ignored in EVPN/eOISM. Default is `false`. Accepts a var, e.g. `{{mcast_no_pim}}`, for per-device control",
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
           "enabled": {
             "default": false,
             "description": "Whether to enable IGMP snooping on this VLAN",
@@ -8639,18 +8767,59 @@
             "description": "Optional, the network to be used for mgmt",
             "type": "string"
           },
+          "node1": {
+            "$ref": "#/components/schemas/switch_oob_ip_config_node1",
+            "description": "Out-of-band management IP configuration override for node1 in an HA cluster"
+          },
           "type": {
             "$ref": "#/components/schemas/ip_type",
             "description": "IP assignment mode for the out-of-band management interface. enum: `dhcp`, `static`."
           },
           "use_mgmt_vrf": {
             "default": false,
-            "description": "If supported on the platform. If enabled, DNS will be using this routing-instance, too",
+            "description": "If supported on the platform. If enabled, DNS will be using this routing-instance, too. EX/Junos switches, user-configurable (default `false`). AOS-CX, driven by the model's OOB mgmt port (true when present) and this field is ignored",
             "type": "boolean"
           },
           "use_mgmt_vrf_for_host_out": {
             "default": false,
-            "description": "For host-out traffic (NTP/TACPLUS/RADIUS/SYSLOG/SNMP), if alternative source network/ip is desired",
+            "description": "Whether to use `mgmt_junos` for host-out traffic (NTP/TACPLUS/RADIUS/SYSLOG/SNMP), if alternative source network/ip is desired",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "switch_oob_ip_config_node1": {
+        "additionalProperties": false,
+        "description": "Node1-specific out-of-band management IP configuration for switch HA clusters",
+        "properties": {
+          "gateway": {
+            "description": "Default gateway for the node1 out-of-band management interface when `type`==`static`",
+            "type": "string"
+          },
+          "ip": {
+            "description": "Static IPv4 address for the node1 out-of-band management interface when `type`==`static`",
+            "type": "string"
+          },
+          "netmask": {
+            "description": "Used only if `subnet` is not specified in `networks`",
+            "type": "string"
+          },
+          "network": {
+            "description": "Optional, the network to be used for mgmt",
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ip_type",
+            "description": "IP assignment mode for the node1 out-of-band management interface. enum: `dhcp`, `static`."
+          },
+          "use_mgmt_vrf": {
+            "default": false,
+            "description": "If supported on the platform. If enabled, DNS will be using this routing-instance, too. Ignored on AOS-CX",
+            "type": "boolean"
+          },
+          "use_mgmt_vrf_for_host_out": {
+            "default": false,
+            "description": "Whether to use `mgmt_junos` for host-out traffic (NTP/TACPLUS/RADIUS/SYSLOG/SNMP), if alternative source network/ip is desired",
             "type": "boolean"
           }
         },
@@ -8819,6 +8988,11 @@
             "description": "Only if `mode`!=`dynamic`. `inter_switch_link` is used together with `isolation` under networks. NOTE: `inter_switch_link` works only between Juniper devices. This has to be applied to both ports connected together",
             "type": "boolean"
           },
+          "keep_session_for_idle_client": {
+            "default": false,
+            "description": "When `port_auth`==`dot1x`, enabling no-mac-table-binding keeps the authentication session active even after the client MAC ages out of the Ethernet switching table. Default is false",
+            "type": "boolean"
+          },
           "mac_auth_only": {
             "description": "Only if `mode`!=`dynamic` and `enable_mac_auth`==`true`",
             "type": "boolean"
@@ -8834,6 +9008,11 @@
           "mac_limit": {
             "$ref": "#/components/schemas/switch_port_usage_mac_limit",
             "description": "Only if `mode`!=`dynamic`. Maximum number of MAC addresses allowed on the port; 0 means unlimited"
+          },
+          "mcast_router_link": {
+            "default": false,
+            "description": "For a bridged-overlay fabric (no PIM/eOISM), flag a port (ESI-LAG or plain trunk) that faces an external PIM router. Every multicast-enabled network carried on the port gets `igmp-snooping <vlan> interface <intf> multicast-router-interface`, so IGMP reports and multicast traffic forward toward that external router",
+            "type": "boolean"
           },
           "mode": {
             "$ref": "#/components/schemas/switch_port_usage_mode",
@@ -9141,10 +9320,15 @@
             "type": "integer"
           },
           {
+            "maximum": 0,
+            "minimum": 0,
+            "type": "integer"
+          },
+          {
             "type": "string"
           }
         ],
-        "description": "Only if `mode`!=`dynamic` and `port_auth`=`dot1x` reauthentication interval range (min: 10, max: 65535, default: 3600). Set to 0 to disable reauthentication (no-reauthentication)."
+        "description": "Only if `mode`!=`dynamic` and `port_auth`=`dot1x` reauthentication interval in seconds (`0` or min: 10, max: 65535, default: 3600). Set to 0 to disable reauthentication (no-reauthentication)."
       },
       "switch_port_usage_speed": {
         "default": "auto",
@@ -9296,6 +9480,11 @@
           "network": {
             "description": "Use `network`or `source_ip`. Which network the RADIUS server resides, if there's static IP for this network, we'd use it as source-ip",
             "type": "string"
+          },
+          "no_resolve_radius_hostname": {
+            "default": false,
+            "description": "By default, when a hostname is used for RADIUS, the hostname is resolved into an IP when generating configs, and failures to resolve prevent the config from being pushed. Set to `true` to not resolve the RADIUS hostname",
+            "type": "boolean"
           },
           "source_ip": {
             "description": "Use `network` or `source_ip`. Explicit source IP address for RADIUS traffic",
@@ -10968,6 +11157,18 @@
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"
+      },
+      "oauth2": {
+        "description": "OAuth2 authorization code flow (RFC 6749) with PKCE (RFC 7636) and rotating refresh tokens, for third-party applications (including MCP integrations) acting on behalf of a consenting user. It uses an Org API token with `oauth_enabled` set as the OAuth2 client, the `client_id` is its composite `oauth_client_id` (`<org_id>.<token_id>`). See the [Orgs OAuth2](/#operations/getOauthAuthorization) endpoints.\n\n**Format**:\n  `Authorization: Bearer {access_token}`\n\n**Notes**:\n* The access token carries the privileges configured on the API token, constrained to what the consenting user has\n* The access token expires after `oauth_ttl` (default 1 hour), use the refresh token to get a new one\n* No fixed scopes are defined, the scope is derived from the API token name (e.g. `custom-ServiceNow Integration`)",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "/api/v1/orgs/oauth/authorize",
+            "refreshUrl": "/api/v1/orgs/oauth/token",
+            "scopes": {},
+            "tokenUrl": "/api/v1/orgs/oauth/token"
+          }
+        },
+        "type": "oauth2"
       }
     }
   }

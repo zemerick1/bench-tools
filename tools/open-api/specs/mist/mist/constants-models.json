@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Constants Models",
-    "version": "2610.1.0",
+    "version": "2611.1.0",
     "description": "API Calls to retrieve the list of Hardware Models and their features"
   },
   "servers": [
@@ -61,6 +61,9 @@
     },
     {
       "csrfToken": []
+    },
+    {
+      "oauth2": []
     }
   ],
   "tags": [
@@ -179,6 +182,18 @@
             "$ref": "#/components/responses/HTTP429"
           }
         },
+        "security": [
+          {},
+          {
+            "apiToken": []
+          },
+          {
+            "csrfToken": []
+          },
+          {
+            "oauth2": []
+          }
+        ],
         "summary": "listMxEdgeModels",
         "tags": [
           "Constants Models"
@@ -209,6 +224,18 @@
             "$ref": "#/components/responses/HTTP429"
           }
         },
+        "security": [
+          {},
+          {
+            "apiToken": []
+          },
+          {
+            "csrfToken": []
+          },
+          {
+            "oauth2": []
+          }
+        ],
         "summary": "listSupportedOtherDeviceModels",
         "tags": [
           "Constants Models"
@@ -246,7 +273,7 @@
             "description": "Supported RF band usages for the 2.4 GHz radio on this AP model"
           },
           "ce_dfs_ok": {
-            "description": "Whether DFS operation is allowed for this AP model under CE rules",
+            "description": "EU-only. Whether DFS channels are allowed in EU countries for the AP model",
             "examples": [
               true
             ],
@@ -289,7 +316,7 @@
             "type": "object"
           },
           "fcc_dfs_ok": {
-            "description": "Whether DFS operation is allowed for this AP model under FCC rules",
+            "description": "US-only. Whether DFS channels are allowed in the US for the AP model",
             "examples": [
               true
             ],
@@ -400,7 +427,7 @@
             "type": "string"
           },
           "other_dfs_ok": {
-            "description": "Whether DFS operation is allowed for this AP model in other regulatory domains",
+            "description": "JP + all other countries. Whether DFS channels are allowed in JP and other remaining countries for the AP model",
             "examples": [
               true
             ],
@@ -671,6 +698,10 @@
             "description": "Whether the gateway model supports IRB interfaces",
             "type": "boolean"
           },
+          "has_oob": {
+            "description": "Optional (switch/gateway models). Whether the model has a dedicated out-of-band (OOB) management port. Omitted on models without one and treated as `false` when absent",
+            "type": "boolean"
+          },
           "has_poe_out": {
             "default": true,
             "description": "Whether the gateway model supports PoE output",
@@ -766,8 +797,8 @@
         "discriminator": {
           "mapping": {
             "ap": "#/components/schemas/const_device_ap",
-            "gateway": "#/components/schemas/const_device_switch",
-            "switch": "#/components/schemas/const_device_gateway"
+            "gateway": "#/components/schemas/const_device_gateway",
+            "switch": "#/components/schemas/const_device_switch"
           },
           "propertyName": "type"
         },
@@ -800,6 +831,19 @@
               "EX4100-48P-CHAS"
             ],
             "type": "string"
+          },
+          "aoscx_device": {
+            "default": false,
+            "description": "Whether this switch model is an AOS-CX (Aruba) device",
+            "examples": [
+              true
+            ],
+            "type": "boolean"
+          },
+          "cx_l2_only": {
+            "default": false,
+            "description": "CX-only. `true` marks an AOS-CX access switch that supports Layer 2 plus **only** static routes and SVIs, not full Layer 3. Mist suppresses routed (inet) interfaces/sub-interfaces/LAGs, loopbacks, custom VRFs, OSPF, BGP, VRRP, routing policies, aggregate routes and DHCP server/relay for the model. `false` marks a full Layer 3 switch (no suppression). Set explicitly on every AOS-CX switch model. When absent (non-CX models, or any model that predates the field) it defaults to `false` (full Layer 3), consumers must never interpret absence as `true`. Does not apply to non-CX models",
+            "type": "boolean"
           },
           "defaults": {
             "$ref": "#/components/schemas/const_device_switch_default",
@@ -873,12 +917,20 @@
             ],
             "type": "boolean"
           },
+          "has_oob": {
+            "description": "Optional (switch/gateway models, e.g. AOS-CX). Whether the model has a dedicated out-of-band (OOB) management port. Omitted on models without one and treated as `false` when absent",
+            "type": "boolean"
+          },
           "has_poe_out": {
             "default": false,
             "description": "Whether the switch model supports PoE output",
             "examples": [
               true
             ],
+            "type": "boolean"
+          },
+          "has_qos_dwrr": {
+            "description": "CX-only. Whether the Aruba CX switch model supports deficit weighted round robin (DWRR) QoS scheduling. `true` indicates support, `false` indicates no support. If absent, DWRR support is not advertised, consumers should not assume support. Does not describe QoS scheduling capabilities for non-CX models",
             "type": "boolean"
           },
           "has_snapshot": {
@@ -893,6 +945,13 @@
               true
             ],
             "type": "boolean"
+          },
+          "max_slots": {
+            "description": "Maximum number of line card slots for a modular switch model",
+            "examples": [
+              5
+            ],
+            "type": "integer"
           },
           "model": {
             "description": "Switch model identifier for this capability definition",
@@ -952,6 +1011,19 @@
               }
             ],
             "type": "object"
+          },
+          "skus": {
+            "description": "Orderable SKUs for this switch model",
+            "examples": [
+              [
+                "R0X24A",
+                "R0X24C"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
           "sub_required": {
             "description": "Subscription type required for this switch model",
@@ -1612,6 +1684,34 @@
             },
             "sub_required": "string",
             "type": "switch"
+          },
+          {
+            "aoscx_device": true,
+            "cx_l2_only": false,
+            "description": "Aruba CX 6400 Series",
+            "display": "CX6405",
+            "has_irb": true,
+            "has_qos_dwrr": true,
+            "max_slots": 5,
+            "model": "CX6405",
+            "modular": true,
+            "oc_device": true,
+            "skus": [
+              "R0X24A",
+              "R0X24C"
+            ],
+            "type": "switch"
+          },
+          {
+            "aoscx_device": true,
+            "cx_l2_only": true,
+            "description": "Aruba CX 6000 Series",
+            "display": "CX6000-48P",
+            "has_irb": true,
+            "has_qos_dwrr": false,
+            "model": "CX6000-48P",
+            "oc_device": true,
+            "type": "switch"
           }
         ]
       },
@@ -1686,6 +1786,18 @@
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"
+      },
+      "oauth2": {
+        "description": "OAuth2 authorization code flow (RFC 6749) with PKCE (RFC 7636) and rotating refresh tokens, for third-party applications (including MCP integrations) acting on behalf of a consenting user. It uses an Org API token with `oauth_enabled` set as the OAuth2 client, the `client_id` is its composite `oauth_client_id` (`<org_id>.<token_id>`). See the [Orgs OAuth2](/#operations/getOauthAuthorization) endpoints.\n\n**Format**:\n  `Authorization: Bearer {access_token}`\n\n**Notes**:\n* The access token carries the privileges configured on the API token, constrained to what the consenting user has\n* The access token expires after `oauth_ttl` (default 1 hour), use the refresh token to get a new one\n* No fixed scopes are defined, the scope is derived from the API token name (e.g. `custom-ServiceNow Integration`)",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "/api/v1/orgs/oauth/authorize",
+            "refreshUrl": "/api/v1/orgs/oauth/token",
+            "scopes": {},
+            "tokenUrl": "/api/v1/orgs/oauth/token"
+          }
+        },
+        "type": "oauth2"
       }
     }
   }

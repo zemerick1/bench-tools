@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Utilities LAN",
-    "version": "2610.1.0",
+    "version": "2611.1.0",
     "description": "API Calls to use Devices Troubleshooting tools specific to Wired Assurance"
   },
   "servers": [
@@ -61,6 +61,9 @@
     },
     {
       "csrfToken": []
+    },
+    {
+      "oauth2": []
     }
   ],
   "tags": [
@@ -336,6 +339,77 @@
         ]
       }
     },
+    "/api/v1/sites/{site_id}/devices/{device_id}/add_gbp_tag": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Incrementally add GBP (Group Based Policy) tags for wired-client MACs on a specific switch. The request is a `{mac: gbp_tag}` map, so many MACs can be batched in one call and each MAC carries exactly one tag. The switch resolves each MAC to its port from live state and owns the lifecycle/cleanup (e.g. removal when the client leaves). This is an incremental operation, send only the MACs to add, not the full desired list.\n\nThe batch is all-or-nothing: if any entry is invalid, nothing is sent to the switch and the response lists every invalid entry.\n\n**Validation**\n* MACs must be valid, any common format is accepted (e.g. `b0:c4:e7:00:15:43`) and normalized to lowercase hex\n* The GBP tag must be an integer in `[1, 65535]`\n* Two keys normalizing to the same MAC with different tags are rejected\n* At most 8000 MACs per request\n\nThe response is the normalized map forwarded to the switch as the `add-gbp-tag` device command.",
+        "operationId": "addSiteDeviceGbpTag",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "a0c4e7001543": 300,
+                    "b0c4e7001543": 100
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/utils_add_gbp_tag"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Example": {
+                    "value": {
+                      "a0c4e7001543": 300,
+                      "b0c4e7001543": 100
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/utils_add_gbp_tag"
+                }
+              }
+            },
+            "description": "OK, the normalized map forwarded to the switch"
+          },
+          "400": {
+            "$ref": "#/components/responses/DeviceGbpTagInvalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "addSiteDeviceGbpTag",
+        "tags": [
+          "Utilities LAN"
+        ]
+      }
+    },
     "/api/v1/sites/{site_id}/devices/{device_id}/cable_test": {
       "parameters": [
         {
@@ -603,7 +677,7 @@
         ]
       }
     },
-    "/api/v1/sites/{site_id}/devices/{device_id}/flow_records/search": {
+    "/api/v1/sites/{site_id}/devices/{device_id}/flows/search": {
       "parameters": [
         {
           "$ref": "#/components/parameters/site_id"
@@ -613,8 +687,8 @@
         }
       ],
       "get": {
-        "description": "Search network flow records for a specific device within a site.\nNote: Only supported for switch devices. The device must be manageable. The `device_mac` is automatically scoped to the device in the URL path and cannot be overridden by query parameter.",
-        "operationId": "searchSiteDeviceFlowRecords",
+        "description": "Search network flows for a specific device within a site.\nNote: Only supported for switch devices. The device must be manageable. The `device_mac` is automatically scoped to the device in the URL path and cannot be overridden by query parameter.",
+        "operationId": "searchSiteDeviceFlows",
         "parameters": [
           {
             "$ref": "#/components/parameters/start"
@@ -708,7 +782,7 @@
             "$ref": "#/components/responses/HTTP429"
           }
         },
-        "summary": "searchSiteDeviceFlowRecords",
+        "summary": "searchSiteDeviceFlows",
         "tags": [
           "Utilities LAN"
         ]
@@ -747,6 +821,77 @@
           }
         },
         "summary": "pollSiteSwitchStats",
+        "tags": [
+          "Utilities LAN"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/devices/{device_id}/remove_gbp_tag": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "post": {
+        "description": "Incrementally remove GBP (Group Based Policy) tags for wired-client MACs on a specific switch. The request is a map of MAC to `null` (the tag is not needed to remove, any value is ignored), so many MACs can be batched in one call. The switch resolves each MAC to its port from live state and owns the lifecycle/cleanup. This is an incremental operation, send only the MACs to remove, not the full desired list.\n\nThe batch is all-or-nothing: if any entry is invalid, nothing is sent to the switch and the response lists every invalid entry.\n\n**Validation**\n* MACs must be valid, any common format is accepted (e.g. `b0:c4:e7:00:15:43`) and normalized to lowercase hex\n* At most 8000 MACs per request\n\nThe response is the normalized map forwarded to the switch as the `remove-gbp-tag` device command.",
+        "operationId": "removeSiteDeviceGbpTag",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "a0c4e7001543": null,
+                    "b0c4e7001543": null
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/utils_remove_gbp_tag"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Example": {
+                    "value": {
+                      "a0c4e7001543": null,
+                      "b0c4e7001543": null
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/utils_remove_gbp_tag"
+                }
+              }
+            },
+            "description": "OK, the normalized map forwarded to the switch"
+          },
+          "400": {
+            "$ref": "#/components/responses/DeviceGbpTagInvalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "removeSiteDeviceGbpTag",
         "tags": [
           "Utilities LAN"
         ]
@@ -1059,6 +1204,125 @@
         ]
       }
     },
+    "/api/v1/sites/{site_id}/flows/search": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        }
+      ],
+      "get": {
+        "description": "Search network flows across all switch devices in a site",
+        "operationId": "searchSiteFlows",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/start"
+          },
+          {
+            "$ref": "#/components/parameters/end"
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/sort"
+          },
+          {
+            "description": "MAC address of the switch device to filter by",
+            "in": "query",
+            "name": "device_mac",
+            "schema": {
+              "examples": [
+                "5c5b350e020a"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Source IP address",
+            "in": "query",
+            "name": "src_ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Destination IP address",
+            "in": "query",
+            "name": "dst_ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Source port",
+            "in": "query",
+            "name": "src_port",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Destination port",
+            "in": "query",
+            "name": "dst_port",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Protocol (e.g. `tcp`, `udp`, `icmp`)",
+            "in": "query",
+            "name": "protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Flow state",
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Flow direction",
+            "in": "query",
+            "name": "direction",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/search_after"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DeviceFlowRecordsSearch"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "searchSiteFlows",
+        "tags": [
+          "Utilities LAN"
+        ]
+      }
+    },
     "/api/v1/sites/{site_id}/wired_clients/{client_mac}/coa": {
       "parameters": [
         {
@@ -1307,6 +1571,33 @@
         },
         "type": "object"
       },
+      "response_device_gbp_tag_invalid": {
+        "additionalProperties": false,
+        "description": "Returned when a GBP tag add/remove batch contains invalid entries. Nothing is sent to the switch",
+        "properties": {
+          "detail": {
+            "description": "Summary of the validation failure",
+            "examples": [
+              "2 invalid entries"
+            ],
+            "type": "string"
+          },
+          "invalid": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Every invalid entry, keyed by the MAC as sent, with the reason",
+            "examples": [
+              {
+                "a0c4e7001543": "gbp_tag must be an integer in [1, 65535]",
+                "not-a-mac": "invalid mac"
+              }
+            ],
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
       "response_http400": {
         "additionalProperties": false,
         "description": "Standard HTTP 400 bad request error response",
@@ -1548,6 +1839,23 @@
         },
         "type": "array"
       },
+      "utils_add_gbp_tag": {
+        "additionalProperties": {
+          "description": "GBP tag of the wired-client MAC",
+          "maximum": 65535,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "description": "Incrementally add GBP (Group Based Policy) tags for wired-client MACs on a switch. The request is a map of MAC to GBP tag, each MAC carries exactly one tag. MACs can be in any common format (e.g. `b0:c4:e7:00:15:43`) and are normalized to lowercase hex. Two keys normalizing to the same MAC with different tags are rejected. At most 8000 MACs per request, and the batch is all-or-nothing",
+        "examples": [
+          {
+            "a0c4e7001543": 300,
+            "b0c4e7001543": 100
+          }
+        ],
+        "maxProperties": 8000,
+        "type": "object"
+      },
       "utils_cable_tests": {
         "description": "Request body for running a switch cable test on a port",
         "properties": {
@@ -1594,6 +1902,20 @@
           "type": "string"
         },
         "type": "array"
+      },
+      "utils_remove_gbp_tag": {
+        "additionalProperties": {
+          "description": "Ignored. The GBP tag is not needed to remove a wired-client MAC, any value is accepted (`null` recommended, an add-tag map can be reused)"
+        },
+        "description": "Incrementally remove the GBP (Group Based Policy) tag of wired-client MACs on a switch. The request is a map of MAC to any value, which is ignored (`null` recommended, an add-tag map can be reused as is). MACs can be in any common format (e.g. `b0:c4:e7:00:15:43`) and are normalized to lowercase hex. At most 8000 MACs per request, and the batch is all-or-nothing",
+        "examples": [
+          {
+            "a0c4e7001543": null,
+            "b0c4e7001543": null
+          }
+        ],
+        "maxProperties": 8000,
+        "type": "object"
       },
       "utils_show_arp": {
         "description": "ARP table lookup request for device command output",
@@ -1708,6 +2030,31 @@
           }
         },
         "description": "OK"
+      },
+      "DeviceGbpTagInvalid": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/DeviceGbpTagInvalidExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_device_gbp_tag_invalid"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/DeviceGbpTagInvalidExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_device_gbp_tag_invalid"
+            }
+          }
+        },
+        "description": "Bad Request, the batch contains invalid entries"
       },
       "HTTP400": {
         "content": {
@@ -2001,6 +2348,15 @@
           "total": 1
         }
       },
+      "DeviceGbpTagInvalidExample": {
+        "value": {
+          "detail": "2 invalid entries",
+          "invalid": {
+            "a0c4e7001543": "gbp_tag must be an integer in [1, 65535]",
+            "not-a-mac": "invalid mac"
+          }
+        }
+      },
       "HTTP400Example": {
         "value": {
           "detail": "JSON parse error - Expecting value: line 5 column 8 (char 56)"
@@ -2042,6 +2398,18 @@
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"
+      },
+      "oauth2": {
+        "description": "OAuth2 authorization code flow (RFC 6749) with PKCE (RFC 7636) and rotating refresh tokens, for third-party applications (including MCP integrations) acting on behalf of a consenting user. It uses an Org API token with `oauth_enabled` set as the OAuth2 client, the `client_id` is its composite `oauth_client_id` (`<org_id>.<token_id>`). See the [Orgs OAuth2](/#operations/getOauthAuthorization) endpoints.\n\n**Format**:\n  `Authorization: Bearer {access_token}`\n\n**Notes**:\n* The access token carries the privileges configured on the API token, constrained to what the consenting user has\n* The access token expires after `oauth_ttl` (default 1 hour), use the refresh token to get a new one\n* No fixed scopes are defined, the scope is derived from the API token name (e.g. `custom-ServiceNow Integration`)",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "/api/v1/orgs/oauth/authorize",
+            "refreshUrl": "/api/v1/orgs/oauth/token",
+            "scopes": {},
+            "tokenUrl": "/api/v1/orgs/oauth/token"
+          }
+        },
+        "type": "oauth2"
       }
     }
   }

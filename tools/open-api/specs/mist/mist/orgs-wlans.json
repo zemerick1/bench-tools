@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Wlans",
-    "version": "2610.1.0",
+    "version": "2611.1.0",
     "description": "An Org Wlan is a wireless local area network that is configured at the Org level and applied to a WLAN template.\n\nIt allows for the creation and management of wireless network settings, such as SSIDs (service set identifiers), authentication settings, VLAN configurations, etc...\n\nOrg WLANs are created and managed at the org level and can only be referenced and used within the WLAN Templates."
   },
   "servers": [
@@ -61,6 +61,9 @@
     },
     {
       "csrfToken": []
+    },
+    {
+      "oauth2": []
     }
   ],
   "tags": [
@@ -1387,6 +1390,11 @@
             "description": "Enable AP-AP keycaching via multicast",
             "type": "boolean"
           },
+          "enable_mlo": {
+            "default": false,
+            "description": "Enable Multi-Link Operation (MLO)",
+            "type": "boolean"
+          },
           "enable_wireless_bridging": {
             "default": false,
             "description": "By default, we'd inspect all DHCP packets and drop those unrelated to the wireless client itself in the case where client is a wireless bridge (DHCP packets for other MACs will need to be forwarded), wireless_bridging can be enabled",
@@ -1636,6 +1644,11 @@
               "string",
               "null"
             ]
+          },
+          "timezone_ie": {
+            "default": false,
+            "description": "Whether to include the Time Zone information element in beacons and probe responses",
+            "type": "boolean"
           },
           "use_eapol_v1": {
             "default": false,
@@ -1927,6 +1940,11 @@
             "maximum": 32,
             "minimum": 16,
             "type": "integer"
+          },
+          "disable_gtk_rekey": {
+            "default": false,
+            "description": "Whether to disable GTK/GMK group rekey (for broadcast/multicast traffic). Only honored on AP firmware < 0.15",
+            "type": "boolean"
           },
           "eap_reauth": {
             "default": false,
@@ -5188,6 +5206,18 @@
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"
+      },
+      "oauth2": {
+        "description": "OAuth2 authorization code flow (RFC 6749) with PKCE (RFC 7636) and rotating refresh tokens, for third-party applications (including MCP integrations) acting on behalf of a consenting user. It uses an Org API token with `oauth_enabled` set as the OAuth2 client, the `client_id` is its composite `oauth_client_id` (`<org_id>.<token_id>`). See the [Orgs OAuth2](/#operations/getOauthAuthorization) endpoints.\n\n**Format**:\n  `Authorization: Bearer {access_token}`\n\n**Notes**:\n* The access token carries the privileges configured on the API token, constrained to what the consenting user has\n* The access token expires after `oauth_ttl` (default 1 hour), use the refresh token to get a new one\n* No fixed scopes are defined, the scope is derived from the API token name (e.g. `custom-ServiceNow Integration`)",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "/api/v1/orgs/oauth/authorize",
+            "refreshUrl": "/api/v1/orgs/oauth/token",
+            "scopes": {},
+            "tokenUrl": "/api/v1/orgs/oauth/token"
+          }
+        },
+        "type": "oauth2"
       }
     }
   }

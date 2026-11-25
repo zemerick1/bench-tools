@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Utilities Upgrade",
-    "version": "2610.1.0",
+    "version": "2611.1.0",
     "description": "API Calls used to manage device upgrades for a single device, at the site level or at the organization level."
   },
   "servers": [
@@ -61,6 +61,9 @@
     },
     {
       "csrfToken": []
+    },
+    {
+      "oauth2": []
     }
   ],
   "tags": [
@@ -938,19 +941,31 @@
         }
       ],
       "get": {
-        "description": "List firmware versions available for devices in a site, optionally filtered by device type and model. Use [List Org Available Device Versions](/#operations/listOrgAvailableDeviceVersions) to retrieve available device versions across the organization.",
+        "description": "List firmware versions available for devices in a site, optionally filtered by device type, device family and model. Use [List Org Available Device Versions](/#operations/listOrgAvailableDeviceVersions) to retrieve available device versions across the organization.",
         "operationId": "listSiteAvailableDeviceVersions",
         "parameters": [
           {
-            "description": "Filter results by type. enum: `ap`, `gateway`, `switch`",
+            "description": "Fetch versions for device type. `router` returns Junos firmware for MX routers only (no AOS-CX). enum: `ap`, `gateway`, `router`, `switch`",
             "in": "query",
             "name": "type",
             "schema": {
-              "$ref": "#/components/schemas/device_type_default_ap"
+              "$ref": "#/components/schemas/device_versions_type"
             }
           },
           {
-            "description": "Fetch version for device model, use/combine with `type` as needed (for switch and gateway devices)",
+            "description": "Fetch versions for device family within the device type, e.g. `aoscx` (Aruba OS) or `junos` (Junos OS)",
+            "in": "query",
+            "name": "family",
+            "schema": {
+              "examples": [
+                "aoscx",
+                "junos"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Fetch version for device model, use/combine with `type` as needed (for switch, gateway and router devices)",
             "in": "query",
             "name": "model",
             "schema": {
@@ -1378,15 +1393,6 @@
   },
   "components": {
     "schemas": {
-      "device_type": {
-        "description": "enum: `ap`, `gateway`, `switch`",
-        "enum": [
-          "ap",
-          "gateway",
-          "switch"
-        ],
-        "type": "string"
-      },
       "device_type_default_ap": {
         "default": "ap",
         "description": "enum: `ap`, `gateway`, `switch`",
@@ -1459,6 +1465,17 @@
           "version"
         ],
         "type": "object"
+      },
+      "device_versions_type": {
+        "default": "ap",
+        "description": "enum: `ap`, `gateway`, `router`, `switch`",
+        "enum": [
+          "ap",
+          "gateway",
+          "router",
+          "switch"
+        ],
+        "type": "string"
       },
       "id": {
         "description": "Unique ID of the object instance in the Mist Organization",
@@ -2593,8 +2610,8 @@
             "description": "Only if `strategy`==`canary`. Canary phase percentages for the organization upgrade"
           },
           "device_type": {
-            "$ref": "#/components/schemas/device_type",
-            "description": "Device family selected for the organization upgrade. enum: `ap`, `gateway`, `switch`."
+            "$ref": "#/components/schemas/upgrade_org_devices_device_type",
+            "description": "Device family selected for the organization upgrade. `router` is for Junos MX devices. enum: `ap`, `gateway`, `router`, `switch`."
           },
           "download_strategy": {
             "$ref": "#/components/schemas/upgrade_org_devices_download_strategy",
@@ -2716,6 +2733,16 @@
           }
         },
         "type": "object"
+      },
+      "upgrade_org_devices_device_type": {
+        "description": "Device family selected for the organization upgrade. `router` is for Junos MX devices. enum: `ap`, `gateway`, `router`, `switch`",
+        "enum": [
+          "ap",
+          "gateway",
+          "router",
+          "switch"
+        ],
+        "type": "string"
       },
       "upgrade_org_devices_download_strategy": {
         "default": "big_bang",
@@ -3787,6 +3814,18 @@
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"
+      },
+      "oauth2": {
+        "description": "OAuth2 authorization code flow (RFC 6749) with PKCE (RFC 7636) and rotating refresh tokens, for third-party applications (including MCP integrations) acting on behalf of a consenting user. It uses an Org API token with `oauth_enabled` set as the OAuth2 client, the `client_id` is its composite `oauth_client_id` (`<org_id>.<token_id>`). See the [Orgs OAuth2](/#operations/getOauthAuthorization) endpoints.\n\n**Format**:\n  `Authorization: Bearer {access_token}`\n\n**Notes**:\n* The access token carries the privileges configured on the API token, constrained to what the consenting user has\n* The access token expires after `oauth_ttl` (default 1 hour), use the refresh token to get a new one\n* No fixed scopes are defined, the scope is derived from the API token name (e.g. `custom-ServiceNow Integration`)",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "/api/v1/orgs/oauth/authorize",
+            "refreshUrl": "/api/v1/orgs/oauth/token",
+            "scopes": {},
+            "tokenUrl": "/api/v1/orgs/oauth/token"
+          }
+        },
+        "type": "oauth2"
       }
     }
   }

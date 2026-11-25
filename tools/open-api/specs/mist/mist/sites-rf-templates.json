@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sites RF Templates",
-    "version": "2610.1.0",
+    "version": "2611.1.0",
     "description": "The API Endpoints for the RF Templates at the site level can be used to get the site derived configuration, meaning the org level configuration with the site variables resolved.."
   },
   "servers": [
@@ -61,6 +61,9 @@
     },
     {
       "csrfToken": []
+    },
+    {
+      "oauth2": []
     }
   ],
   "tags": [
@@ -202,9 +205,10 @@
       },
       "radio_band_antenna_mode": {
         "default": "default",
-        "description": "enum: `1x1`, `2x2`, `3x3`, `4x4`, `default`",
+        "description": "enum: `1x1`, `1x4`, `2x2`, `3x3`, `4x4`, `default`",
         "enum": [
           "1x1",
+          "1x4",
           "2x2",
           "3x3",
           "4x4",
@@ -459,7 +463,7 @@
           },
           "antenna_mode": {
             "$ref": "#/components/schemas/radio_band_antenna_mode",
-            "description": "Radio chain mode for the 2.4 GHz radio. enum: `1x1`, `2x2`, `3x3`, `4x4`, `default`."
+            "description": "Radio chain mode for the 2.4 GHz radio. enum: `1x1`, `1x4`, `2x2`, `3x3`, `4x4`, `default`."
           },
           "bandwidth": {
             "$ref": "#/components/schemas/dot11_bandwidth24",
@@ -533,7 +537,7 @@
           },
           "antenna_mode": {
             "$ref": "#/components/schemas/radio_band_antenna_mode",
-            "description": "Radio chain mode for the 5 GHz radio. enum: `1x1`, `2x2`, `3x3`, `4x4`, `default`."
+            "description": "Radio chain mode for the 5 GHz radio. enum: `1x1`, `1x4`, `2x2`, `3x3`, `4x4`, `default`."
           },
           "bandwidth": {
             "$ref": "#/components/schemas/dot11_bandwidth5",
@@ -607,7 +611,7 @@
           },
           "antenna_mode": {
             "$ref": "#/components/schemas/radio_band_antenna_mode",
-            "description": "Radio chain mode for the 6 GHz radio. enum: `1x1`, `2x2`, `3x3`, `4x4`, `default`."
+            "description": "Radio chain mode for the 6 GHz radio. enum: `1x1`, `1x4`, `2x2`, `3x3`, `4x4`, `default`."
           },
           "bandwidth": {
             "$ref": "#/components/schemas/dot11_bandwidth6",
@@ -913,6 +917,18 @@
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"
+      },
+      "oauth2": {
+        "description": "OAuth2 authorization code flow (RFC 6749) with PKCE (RFC 7636) and rotating refresh tokens, for third-party applications (including MCP integrations) acting on behalf of a consenting user. It uses an Org API token with `oauth_enabled` set as the OAuth2 client, the `client_id` is its composite `oauth_client_id` (`<org_id>.<token_id>`). See the [Orgs OAuth2](/#operations/getOauthAuthorization) endpoints.\n\n**Format**:\n  `Authorization: Bearer {access_token}`\n\n**Notes**:\n* The access token carries the privileges configured on the API token, constrained to what the consenting user has\n* The access token expires after `oauth_ttl` (default 1 hour), use the refresh token to get a new one\n* No fixed scopes are defined, the scope is derived from the API token name (e.g. `custom-ServiceNow Integration`)",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "/api/v1/orgs/oauth/authorize",
+            "refreshUrl": "/api/v1/orgs/oauth/token",
+            "scopes": {},
+            "tokenUrl": "/api/v1/orgs/oauth/token"
+          }
+        },
+        "type": "oauth2"
       }
     }
   }

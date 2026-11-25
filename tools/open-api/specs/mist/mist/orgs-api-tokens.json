@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs API Tokens",
-    "version": "2610.1.0"
+    "version": "2611.1.0"
   },
   "servers": [
     {
@@ -60,6 +60,9 @@
     },
     {
       "csrfToken": []
+    },
+    {
+      "oauth2": []
     }
   ],
   "tags": [
@@ -104,11 +107,45 @@
         ]
       },
       "post": {
-        "description": "Create an organization API token with a display name, scoped privileges, and optional source IP restrictions.\nNote that the full token key is only available at creation time.",
+        "description": "Create an organization API token with a display name, scoped privileges, and optional source IP restrictions and OAuth2 client settings.\nNote that the full token key is only available at creation time.",
         "operationId": "createOrgApiToken",
         "requestBody": {
           "content": {
             "application/json": {
+              "examples": {
+                "API Token": {
+                  "value": {
+                    "name": "org_token_xyz",
+                    "privileges": [
+                      {
+                        "role": "admin",
+                        "scope": "org"
+                      }
+                    ],
+                    "src_ips": [
+                      "63.3.56.0/24",
+                      "63.3.55.4"
+                    ]
+                  }
+                },
+                "OAuth Token": {
+                  "value": {
+                    "name": "REDACTED",
+                    "oauth_enabled": true,
+                    "oauth_pkce_required": false,
+                    "oauth_redirect_uris": [
+                      "REDACTED"
+                    ],
+                    "oauth_ttl": 3600,
+                    "privileges": [
+                      {
+                        "role": "write",
+                        "scope": "org"
+                      }
+                    ]
+                  }
+                }
+              },
               "schema": {
                 "$ref": "#/components/schemas/org_apitoken"
               }
@@ -179,19 +216,41 @@
         ]
       },
       "put": {
-        "description": "Update an organization API token's display name or scoped privileges. Source IP restrictions are defined when the token is created.",
+        "description": "Update an organization API token's display name, scoped privileges, allowed source IPs, or OAuth2 client settings.",
         "operationId": "updateOrgApiToken",
         "requestBody": {
           "content": {
             "application/json": {
               "examples": {
-                "Example": {
+                "API Token": {
                   "value": {
-                    "name": "org_token_xyz",
+                    "name": "org_token_pqr",
                     "privileges": [
                       {
                         "org_id": "a40f5d1f-d889-42e9-94ea-b9b33585fc6b",
                         "role": "admin",
+                        "scope": "org"
+                      }
+                    ],
+                    "src_ips": [
+                      "63.3.56.0/24",
+                      "63.3.55.6"
+                    ]
+                  }
+                },
+                "OAuth Token": {
+                  "value": {
+                    "name": "REDACTED",
+                    "oauth_enabled": true,
+                    "oauth_pkce_required": true,
+                    "oauth_redirect_uris": [
+                      "REDACTED"
+                    ],
+                    "oauth_ttl": 3600,
+                    "privileges": [
+                      {
+                        "org_id": "a40f5d1f-d889-42e9-94ea-b9b33585fc6b",
+                        "role": "write",
                         "scope": "org"
                       }
                     ]
@@ -346,6 +405,42 @@
             ],
             "type": "string"
           },
+          "oauth_client_id": {
+            "description": "Composite OAuth2 `client_id` (`<org_id>.<token_id>`) to use when the token is used as an OAuth2 client. Only present when `oauth_enabled`==`true`",
+            "examples": [
+              "bc411cd9-0d1b-4713-94df-eee8617758ed.7cc917df-630a-1508-1889-e18028052dde"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "oauth_enabled": {
+            "default": false,
+            "description": "Whether this token can be used as an OAuth2 client. When enabled, the response includes an `oauth_client_id` to use as the OAuth2 `client_id`, and the token `key` is the `client_secret`",
+            "type": "boolean"
+          },
+          "oauth_pkce_required": {
+            "default": false,
+            "description": "Require PKCE (`code_challenge` with `S256`) on the authorize request for all redirect URIs. PKCE is always enforced for loopback (`http://127.0.0.1[:port]`) redirects regardless of this flag; set this to also mandate it for the pre-registered `https` redirect URIs",
+            "type": "boolean"
+          },
+          "oauth_redirect_uris": {
+            "description": "Pre-registered OAuth2 redirect URIs. Each must be an absolute `https` URL and is matched exactly at `/orgs/oauth/authorize`. The loopback URL `http://127.0.0.1[:port]` is always allowed for native/CLI clients and need not be listed",
+            "examples": [
+              [
+                "https://acme.service-now.com/oauth/callback"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "oauth_ttl": {
+            "default": 3600,
+            "description": "Access token TTL in seconds when the token is used as an OAuth2 client",
+            "maximum": 86400,
+            "type": "integer"
+          },
           "org_id": {
             "$ref": "#/components/schemas/org_id",
             "description": "Organization that owns this API token"
@@ -383,7 +478,7 @@
         "uniqueItems": true
       },
       "org_apitoken_src_ips": {
-        "description": "List of allowed IP addresses from where the token can be used from. At most 10 IP addresses can be specified, cannot be changed once the API Token is created.",
+        "description": "List of allowed IP addresses from where the token can be used from. At most 10 IP addresses can be specified.",
         "examples": [
           [
             "63.3.56.0/24",
@@ -550,8 +645,11 @@
         "content": {
           "application/json": {
             "examples": {
-              "Example": {
+              "API Token": {
                 "$ref": "#/components/examples/ApitokenOrgExample"
+              },
+              "OAuth Token": {
+                "$ref": "#/components/examples/ApitokenOrgOauthExample"
               }
             },
             "schema": {
@@ -560,8 +658,11 @@
           },
           "application/vnd.api+json": {
             "examples": {
-              "Example": {
+              "API Token": {
                 "$ref": "#/components/examples/ApitokenOrgExample"
+              },
+              "OAuth Token": {
+                "$ref": "#/components/examples/ApitokenOrgOauthExample"
               }
             },
             "schema": {
@@ -757,6 +858,35 @@
               "role": "admin",
               "scope": "org"
             }
+          ],
+          "src_ips": [
+            "63.3.56.0/24",
+            "63.3.55.4"
+          ]
+        }
+      },
+      "ApitokenOrgOauthExample": {
+        "value": {
+          "created_by": "user@mycorp.com",
+          "created_time": 1626875902,
+          "id": "497f6eca-6276-4993-bfeb-53efbbba6f08",
+          "key": "1qkb...QQCL",
+          "last_used": 1690115110,
+          "name": "ServiceNow Integration",
+          "oauth_client_id": "a40f5d1f-d889-42e9-94ea-b9b33585fc6b.497f6eca-6276-4993-bfeb-53efbbba6f08",
+          "oauth_enabled": true,
+          "oauth_pkce_required": true,
+          "oauth_redirect_uris": [
+            "https://acme.service-now.com/oauth/callback"
+          ],
+          "oauth_ttl": 3600,
+          "org_id": "a40f5d1f-d889-42e9-94ea-b9b33585fc6b",
+          "privileges": [
+            {
+              "org_id": "a40f5d1f-d889-42e9-94ea-b9b33585fc6b",
+              "role": "write",
+              "scope": "org"
+            }
           ]
         }
       },
@@ -814,6 +944,18 @@
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"
+      },
+      "oauth2": {
+        "description": "OAuth2 authorization code flow (RFC 6749) with PKCE (RFC 7636) and rotating refresh tokens, for third-party applications (including MCP integrations) acting on behalf of a consenting user. It uses an Org API token with `oauth_enabled` set as the OAuth2 client, the `client_id` is its composite `oauth_client_id` (`<org_id>.<token_id>`). See the [Orgs OAuth2](/#operations/getOauthAuthorization) endpoints.\n\n**Format**:\n  `Authorization: Bearer {access_token}`\n\n**Notes**:\n* The access token carries the privileges configured on the API token, constrained to what the consenting user has\n* The access token expires after `oauth_ttl` (default 1 hour), use the refresh token to get a new one\n* No fixed scopes are defined, the scope is derived from the API token name (e.g. `custom-ServiceNow Integration`)",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "/api/v1/orgs/oauth/authorize",
+            "refreshUrl": "/api/v1/orgs/oauth/token",
+            "scopes": {},
+            "tokenUrl": "/api/v1/orgs/oauth/token"
+          }
+        },
+        "type": "oauth2"
       }
     }
   }

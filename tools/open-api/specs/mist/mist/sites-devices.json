@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sites Devices",
-    "version": "2610.1.0",
+    "version": "2611.1.0",
     "description": "Mist provides many ways (device_type specific template, site template, device profile, per-device) to configure devices for different kind of scenarios.\n\nThe precedence goes from most specific to least specific\n\nDevice > Device Profile > RFTemplate (for AP only) > DeviceType-specific Template > Site Template > Site Setting"
   },
   "servers": [
@@ -61,6 +61,9 @@
     },
     {
       "csrfToken": []
+    },
+    {
+      "oauth2": []
     }
   ],
   "tags": [
@@ -1259,6 +1262,44 @@
         ]
       }
     },
+    "/api/v1/sites/{site_id}/devices/{device_id}/derived": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/site_id"
+        },
+        {
+          "$ref": "#/components/parameters/device_id"
+        }
+      ],
+      "get": {
+        "description": "For an AP, switch or gateway, return the fully-merged, read-only configuration that Mist would generate for the device, resolved across the configuration inheritance hierarchy. This is the *intent* config in Mist format (not the device-native CLI), it does not depend on the config last reported by the device.\n\nOnly AP, switch and gateway devices are supported. Secret fields (passwords, keys, secrets) are masked with `********`, same as other GET endpoints.",
+        "operationId": "getSiteDeviceDerivedConfig",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DeviceDerivedConfig"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "getSiteDeviceDerivedConfig",
+        "tags": [
+          "Sites Devices"
+        ]
+      }
+    },
     "/api/v1/sites/{site_id}/devices/{device_id}/image/{image_number}": {
       "parameters": [
         {
@@ -1647,6 +1688,11 @@
               "null"
             ]
           },
+          "locate_ble": {
+            "default": false,
+            "description": "Optional. Whether to forward BLE advertisements to the AES server for location calculation. Only Securitas Healthcare / AeroScout manufacturer data (company-id 935) is forwarded. Default is false",
+            "type": "boolean"
+          },
           "locate_connected": {
             "default": false,
             "description": "Whether to enable the feature to allow wireless clients data received and sent to AES server for location calculation",
@@ -1775,10 +1821,12 @@
             "type": "string"
           },
           "channel": {
-            "description": "Only if `type`==`imagotag` or `type`==`native`",
+            "description": "Only if `type`==`imagotag` or `type`==`native`. Channel selection, 0-10, not needed by default, required for manual channel override only",
             "examples": [
               3
             ],
+            "maximum": 10,
+            "minimum": 0,
             "type": "integer"
           },
           "enabled": {
@@ -1794,7 +1842,8 @@
             "type": "string"
           },
           "port": {
-            "description": "Only if `type`==`imagotag` or `type`==`native`",
+            "default": 0,
+            "description": "Only if `type`==`imagotag` or `type`==`native`. Defaults to 0",
             "examples": [
               0
             ],
@@ -1802,7 +1851,7 @@
           },
           "type": {
             "$ref": "#/components/schemas/ap_esl_type",
-            "description": "ESL integration type to enable on the AP. enum: `hanshow`, `imagotag`, `native`, `solum`."
+            "description": "ESL integration type to enable on the AP. enum: `hanshow`, `imagotag`, `native`, `solum`, `vusion`."
           },
           "verify_cert": {
             "description": "Only if `type`==`imagotag` or `type`==`native`",
@@ -1813,19 +1862,20 @@
           },
           "vlan_id": {
             "default": 1,
-            "description": "Only if `type`==`solum` or `type`==`hanshow`",
+            "description": "Only if `type`==`solum`, `type`==`hanshow` or `type`==`vusion`",
             "type": "integer"
           }
         },
         "type": "object"
       },
       "ap_esl_type": {
-        "description": "note: ble_config will be ignored if esl_config is enabled and with native mode. enum: `hanshow`, `imagotag`, `native`, `solum`",
+        "description": "note: ble_config will be ignored if esl_config is enabled and with native mode. enum: `hanshow`, `imagotag`, `native`, `solum`, `vusion`",
         "enum": [
           "hanshow",
           "imagotag",
           "native",
-          "solum"
+          "solum",
+          "vusion"
         ],
         "examples": [
           "imagotag"
@@ -2439,7 +2489,7 @@
           },
           "antenna_mode": {
             "$ref": "#/components/schemas/ap_radio_antenna_mode",
-            "description": "Selected radio chain mode for AP models that support antenna mode control. enum: `1x1`, `2x2`, `3x3`, `4x4`, `default`."
+            "description": "Selected radio chain mode for AP models that support antenna mode control. enum: `1x1`, `1x4`, `2x2`, `3x3`, `4x4`, `default`."
           },
           "antenna_select": {
             "$ref": "#/components/schemas/antenna_select",
@@ -2491,9 +2541,10 @@
       },
       "ap_radio_antenna_mode": {
         "default": "default",
-        "description": "enum: `1x1`, `2x2`, `3x3`, `4x4`, `default`",
+        "description": "enum: `1x1`, `1x4`, `2x2`, `3x3`, `4x4`, `default`",
         "enum": [
           "1x1",
+          "1x4",
           "2x2",
           "3x3",
           "4x4",
@@ -2522,7 +2573,7 @@
           },
           "antenna_mode": {
             "$ref": "#/components/schemas/radio_band_antenna_mode",
-            "description": "Radio chain mode for the 2.4 GHz radio. enum: `1x1`, `2x2`, `3x3`, `4x4`, `default`."
+            "description": "Radio chain mode for the 2.4 GHz radio. enum: `1x1`, `1x4`, `2x2`, `3x3`, `4x4`, `default`."
           },
           "bandwidth": {
             "$ref": "#/components/schemas/dot11_bandwidth24",
@@ -2613,7 +2664,7 @@
           },
           "antenna_mode": {
             "$ref": "#/components/schemas/radio_band_antenna_mode",
-            "description": "Radio chain mode for the 5 GHz radio. enum: `1x1`, `2x2`, `3x3`, `4x4`, `default`."
+            "description": "Radio chain mode for the 5 GHz radio. enum: `1x1`, `1x4`, `2x2`, `3x3`, `4x4`, `default`."
           },
           "bandwidth": {
             "$ref": "#/components/schemas/dot11_bandwidth5",
@@ -2702,7 +2753,7 @@
           },
           "antenna_mode": {
             "$ref": "#/components/schemas/radio_band_antenna_mode",
-            "description": "Radio chain mode for the 6 GHz radio. enum: `1x1`, `2x2`, `3x3`, `4x4`, `default`."
+            "description": "Radio chain mode for the 6 GHz radio. enum: `1x1`, `1x4`, `2x2`, `3x3`, `4x4`, `default`."
           },
           "bandwidth": {
             "$ref": "#/components/schemas/dot11_bandwidth6",
@@ -2994,10 +3045,12 @@
             ]
           },
           "channel": {
-            "description": "Only if `type`==`imagotag`, channel selection, not needed by default, required for manual channel override only",
+            "description": "Only if `type`==`imagotag`, channel selection, 0-10, not needed by default, required for manual channel override only",
             "examples": [
               3
             ],
+            "maximum": 10,
+            "minimum": 0,
             "type": "integer"
           },
           "enabled": {
@@ -3021,7 +3074,7 @@
           },
           "type": {
             "$ref": "#/components/schemas/ap_usb_type",
-            "description": "USB integration type for this legacy AP USB configuration. enum: `hanshow`, `imagotag`, `solum`."
+            "description": "USB integration type for this legacy AP USB configuration. enum: `hanshow`, `imagotag`, `solum`, `vusion`."
           },
           "verify_cert": {
             "description": "Only if `type`==`imagotag`, whether to turn on SSL verification",
@@ -3029,18 +3082,19 @@
           },
           "vlan_id": {
             "default": 1,
-            "description": "Only if `type`==`solum` or `type`==`hanshow`",
+            "description": "Only if `type`==`solum`, `type`==`hanshow` or `type`==`vusion`",
             "type": "integer"
           }
         },
         "type": "object"
       },
       "ap_usb_type": {
-        "description": "usb config type. enum: `hanshow`, `imagotag`, `solum`",
+        "description": "usb config type. enum: `hanshow`, `imagotag`, `solum`, `vusion`",
         "enum": [
           "hanshow",
           "imagotag",
-          "solum"
+          "solum",
+          "vusion"
         ],
         "examples": [
           "imagotag"
@@ -3095,6 +3149,68 @@
         ],
         "type": "string"
       },
+      "ap_vostio": {
+        "additionalProperties": false,
+        "description": "Vostio (ASSA ABLOY) ZigBee networks. Only relevant when `zigbee_config.type`==`vostio`. After registering a network/building in the ASSA ABLOY Vostio portal, the admin provides its netId, broker and Network (mTLS) credential here, one entry per building",
+        "properties": {
+          "networks": {
+            "$ref": "#/components/schemas/ap_vostio_networks",
+            "description": "Vostio networks keyed by network_id (netId), unique per building (1 site to N networks)"
+          }
+        },
+        "type": "object"
+      },
+      "ap_vostio_network": {
+        "additionalProperties": false,
+        "description": "Vostio network (building) broker and mTLS credential",
+        "properties": {
+          "broker_endpoint": {
+            "description": "Vostio MQTT broker endpoint",
+            "examples": [
+              "iot.eu.vostio.api.assaabloy.com"
+            ],
+            "type": "string"
+          },
+          "client_cert": {
+            "description": "Network certificate (mTLS client certificate)",
+            "examples": [
+              "-----BEGIN CERTIFICATE-----\n..."
+            ],
+            "type": "string"
+          },
+          "client_key": {
+            "description": "Network key (mTLS client key). Secret, write-only",
+            "examples": [
+              "REDACTED"
+            ],
+            "format": "password",
+            "type": "string",
+            "writeOnly": true
+          },
+          "name": {
+            "description": "Human label for the building/network",
+            "examples": [
+              "bldg-A"
+            ],
+            "type": "string"
+          },
+          "port": {
+            "description": "MQTT/mTLS broker port",
+            "examples": [
+              8883
+            ],
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ap_vostio_networks": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/ap_vostio_network"
+        },
+        "description": "Property key is the network_id (netId, Vostio network/building id)",
+        "type": "object"
+      },
       "ap_zigbee": {
         "additionalProperties": false,
         "description": "Zigbee radio and network settings applied to an AP or AP profile",
@@ -3137,6 +3253,28 @@
               "string",
               "null"
             ]
+          },
+          "power": {
+            "description": "Zigbee transmit power. Only if `power_mode`==`custom`",
+            "examples": [
+              10
+            ],
+            "type": "integer"
+          },
+          "power_mode": {
+            "$ref": "#/components/schemas/ap_zigbee_power_mode",
+            "description": "Zigbee transmit power mode. enum: `custom`, `default`."
+          },
+          "type": {
+            "$ref": "#/components/schemas/ap_zigbee_type",
+            "description": "Zigbee integration type. enum: `visionline` (default), `vostio`."
+          },
+          "vostio_network_id": {
+            "description": "If `type`==`vostio`, which `vostio.networks` entry (netId) this AP belongs to",
+            "examples": [
+              "1234"
+            ],
+            "type": "string"
           }
         },
         "type": "object"
@@ -3150,6 +3288,24 @@
         ],
         "examples": [
           "manual"
+        ],
+        "type": "string"
+      },
+      "ap_zigbee_power_mode": {
+        "default": "default",
+        "description": "enum: `custom`, `default`",
+        "enum": [
+          "custom",
+          "default"
+        ],
+        "type": "string"
+      },
+      "ap_zigbee_type": {
+        "default": "visionline",
+        "description": "enum: `visionline`, `vostio`",
+        "enum": [
+          "visionline",
+          "vostio"
         ],
         "type": "string"
       },
@@ -4010,7 +4166,7 @@
             "description": "Indicator light behavior settings for this access point"
           },
           "locked": {
-            "description": "Whether this map is considered locked down",
+            "description": "Whether this AP is considered locked (placement / orientation has been vetted)",
             "type": "boolean"
           },
           "mac": {
@@ -4122,6 +4278,10 @@
           "vars": {
             "$ref": "#/components/schemas/vars",
             "description": "Variable values that override site variables for this access point"
+          },
+          "vostio": {
+            "$ref": "#/components/schemas/ap_vostio",
+            "description": "Vostio (ASSA ABLOY) ZigBee network credentials. Only relevant when `zigbee_config.type`==`vostio`"
           },
           "x": {
             "description": "Horizontal map position of the AP, in pixels",
@@ -4633,6 +4793,14 @@
             "$ref": "#/components/schemas/aggregate_routes6",
             "description": "Additional IPv6 aggregate routes configured on this switch"
           },
+          "aoscx_internal_vlan_range": {
+            "description": "AOS-CX only. VLAN IDs reserved for routed-only ports/L3 LAGs; set when no range exists or to avoid data-VLAN conflicts. Format `N-M` (empty string means unset) with 2 <= N < M <= 4094 (M <= 4090 for 10000). Inclusive range size limits: at most 256 IDs for 8320, and at most 1280 IDs for 8325/8325H/10000. When unset/invalid, 6200 silently emits `4041-4094`; the `4041-4094` defaults of 8320/8325/8325H and `4019-4090` of 10000 are factory-only",
+            "examples": [
+              "3000-3053"
+            ],
+            "pattern": "^(\\d{1,4}-\\d{1,4})?$",
+            "type": "string"
+          },
           "bgp_config": {
             "additionalProperties": {
               "$ref": "#/components/schemas/switch_bgp_config"
@@ -4878,7 +5046,7 @@
             "description": "Virtual Chassis membership and provisioning settings for this switch"
           },
           "vrf_config": {
-            "$ref": "#/components/schemas/vrf_config",
+            "$ref": "#/components/schemas/switch_vrf_config",
             "description": "VRF configuration applied to this switch"
           },
           "vrf_instances": {
@@ -5402,7 +5570,7 @@
             "examples": [
               null
             ],
-            "maximum": 2147483647,
+            "maximum": 4294967295,
             "minimum": 0,
             "type": [
               "integer",
@@ -5434,8 +5602,20 @@
             "examples": [
               30
             ],
-            "maximum": 2147483647,
+            "maximum": 4294967295,
             "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "tag": {
+            "description": "Optional route tag usable by routing policy. AOS-CX supports `1-4294967295`",
+            "examples": [
+              10
+            ],
+            "maximum": 4294967295,
+            "minimum": 1,
             "type": [
               "integer",
               "null"
@@ -5860,8 +6040,80 @@
             "default": false,
             "description": "Whether MNHA mode is enabled",
             "type": "boolean"
+          },
+          "icl": {
+            "$ref": "#/components/schemas/gateway_mnha_config_icl",
+            "description": "Inter-Chassis Link (ICL) settings between the two MNHA nodes"
+          },
+          "node_macs": {
+            "description": "Cluster membership, positional. Index 0 is `node0`, index 1 is `node1`",
+            "examples": [
+              [
+                "2c:6b:f5:00:00:00",
+                "2c:6b:f5:00:00:01"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "redundancy_groups": {
+            "$ref": "#/components/schemas/gateway_mnha_config_redundancy_groups",
+            "description": "Redundancy groups (SRGs) overrides, keyed by the redundancy group number. Override-only: by default the primary node derives from the group number (odd -> `node0`, even -> `node1`, mirroring the chassis cluster RG1-node0/RG2-node1 convention, so active/active is SRG1 on `node0` and SRG2 on `node1`). Only list a group to override the default primary node or to set its shared `probe_host`"
           }
         },
+        "type": "object"
+      },
+      "gateway_mnha_config_icl": {
+        "additionalProperties": false,
+        "description": "Inter-Chassis Link (ICL) settings for MNHA",
+        "properties": {
+          "back_to_back": {
+            "description": "Whether the ICL is directly wired between the two nodes",
+            "type": "boolean"
+          },
+          "encrypted": {
+            "default": false,
+            "description": "Whether the ICL is encrypted (IPsec)",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "gateway_mnha_config_redundancy_group": {
+        "additionalProperties": false,
+        "description": "MNHA redundancy group (SRG) override",
+        "properties": {
+          "primary_node": {
+            "$ref": "#/components/schemas/ha_cluster_node_enum",
+            "description": "Node that is primary for this redundancy group. enum: `node0`, `node1`."
+          },
+          "probe_host": {
+            "description": "SRG activeness-probe destination IP, the same for all nodes. Defaults to the port's gateway. The source IP is automatically the node loopback router-id",
+            "examples": [
+              "8.8.8.8"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "gateway_mnha_config_redundancy_groups": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/gateway_mnha_config_redundancy_group"
+        },
+        "description": "Property key is the redundancy group (SRG) number",
+        "examples": [
+          {
+            "1": {
+              "primary_node": "node0",
+              "probe_host": "8.8.8.8"
+            }
+          }
+        ],
         "type": "object"
       },
       "gateway_oob_ip_config": {
@@ -6219,7 +6471,7 @@
           },
           "usage": {
             "$ref": "#/components/schemas/gateway_port_usage",
-            "description": "Logical usage assigned to the port. enum: `ha_control`, `ha_data`, `lan`, `wan`."
+            "description": "Logical usage assigned to the port. `ha_link` is the MNHA link port. enum: `ha_control`, `ha_data`, `ha_link`, `lan`, `wan`."
           },
           "vlan_id": {
             "$ref": "#/components/schemas/gateway_port_vlan_id_with_variable",
@@ -6327,6 +6579,13 @@
               "2001:db8::123"
             ],
             "format": "ipv6",
+            "type": "string"
+          },
+          "mnha_vip": {
+            "description": "For SRX MNHA only. Virtual IP address shared by the two nodes on this interface",
+            "examples": [
+              "203.0.113.1"
+            ],
             "type": "string"
           },
           "netmask": {
@@ -6507,10 +6766,11 @@
         "type": "array"
       },
       "gateway_port_usage": {
-        "description": "port usage name. enum: `ha_control`, `ha_data`, `lan`, `wan`",
+        "description": "port usage name. enum: `ha_control`, `ha_data`, `ha_link`, `lan`, `wan`",
         "enum": [
           "ha_control",
           "ha_data",
+          "ha_link",
           "lan",
           "wan"
         ],
@@ -8739,9 +8999,10 @@
       },
       "radio_band_antenna_mode": {
         "default": "default",
-        "description": "enum: `1x1`, `2x2`, `3x3`, `4x4`, `default`",
+        "description": "enum: `1x1`, `1x4`, `2x2`, `3x3`, `4x4`, `default`",
         "enum": [
           "1x1",
+          "1x4",
           "2x2",
           "3x3",
           "4x4",
@@ -9692,6 +9953,29 @@
           "results",
           "start",
           "total"
+        ],
+        "type": "object"
+      },
+      "response_device_derived_config": {
+        "additionalProperties": true,
+        "description": "Fully-merged, read-only configuration Mist would generate for an AP, switch or gateway, in Mist format (not device-native CLI). Only the device-relevant config keys are returned, each already resolved across the inheritance hierarchy, e.g. for a switch or gateway `networks`, `port_config`, `port_usages`, `vrf_instances`, `bgp_config`, `ospf_areas`, `extra_routes`, `dhcpd_config`, `switch_mgmt` / `gateway_mgmt`, `radius_config`, `snmp_config`, `vars`; for an AP `radio_config`, `wifi`, `ble_config`, `mesh`, `iot_config`, `usb_config`, `vars`. Secret fields (passwords, keys, secrets) are masked with `********`",
+        "examples": [
+          {
+            "networks": {
+              "vlan10": {
+                "vlan_id": 10
+              }
+            },
+            "port_usages": {
+              "uplink": {
+                "all_networks": true,
+                "mode": "trunk"
+              }
+            },
+            "switch_mgmt": {
+              "root_password": "********"
+            }
+          }
         ],
         "type": "object"
       },
@@ -11191,6 +11475,10 @@
           "protocol": {
             "$ref": "#/components/schemas/sw_routing_policy_term_matching_protocol",
             "description": "Routing protocols that routes must match"
+          },
+          "tag": {
+            "$ref": "#/components/schemas/sw_routing_policy_term_matching_tag",
+            "description": "Optional route-tag values to match (1-4294967295), supported on AOS-CX. A route matches when its tag is any value in this list. `extra_routes.tag` remains a scalar integer that sets the tag on a static route"
           }
         },
         "type": "object"
@@ -11212,6 +11500,21 @@
           "static"
         ],
         "type": "string"
+      },
+      "sw_routing_policy_term_matching_tag": {
+        "description": "Route tags to match, 1-4294967295 (AOS-CX)",
+        "examples": [
+          [
+            10,
+            20
+          ]
+        ],
+        "items": {
+          "maximum": 4294967295,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "type": "array"
       },
       "sw_routing_policy_terms": {
         "description": "Ordered switch routing policy terms; at least one term is required",
@@ -11615,6 +11918,11 @@
             "description": "Whether to suppress alarms when the switch out-of-band management interface is down",
             "type": "boolean"
           },
+          "enable_hw_resource_monitor": {
+            "default": false,
+            "description": "Alarm before a switch forwarding table (MAC, routes, next-hops) fills up, instead of silently dropping traffic",
+            "type": "boolean"
+          },
           "fips_enabled": {
             "default": false,
             "description": "Whether FIPS mode is enabled on the switch",
@@ -11834,6 +12142,17 @@
         "additionalProperties": false,
         "description": "Multicast settings for a switch network (VLAN)",
         "properties": {
+          "disable_pim": {
+            "description": "Non-EVPN only. When `true` the IRB does IGMP/snooping but forms no PIM adjacency (stays intra-VLAN), ignored in EVPN/eOISM. Default is `false`. Accepts a var, e.g. `{{mcast_no_pim}}`, for per-device control",
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
           "enabled": {
             "default": false,
             "description": "Whether to enable IGMP snooping on this VLAN",
@@ -11881,18 +12200,59 @@
             "description": "Optional, the network to be used for mgmt",
             "type": "string"
           },
+          "node1": {
+            "$ref": "#/components/schemas/switch_oob_ip_config_node1",
+            "description": "Out-of-band management IP configuration override for node1 in an HA cluster"
+          },
           "type": {
             "$ref": "#/components/schemas/ip_type",
             "description": "IP assignment mode for the out-of-band management interface. enum: `dhcp`, `static`."
           },
           "use_mgmt_vrf": {
             "default": false,
-            "description": "If supported on the platform. If enabled, DNS will be using this routing-instance, too",
+            "description": "If supported on the platform. If enabled, DNS will be using this routing-instance, too. EX/Junos switches, user-configurable (default `false`). AOS-CX, driven by the model's OOB mgmt port (true when present) and this field is ignored",
             "type": "boolean"
           },
           "use_mgmt_vrf_for_host_out": {
             "default": false,
-            "description": "For host-out traffic (NTP/TACPLUS/RADIUS/SYSLOG/SNMP), if alternative source network/ip is desired",
+            "description": "Whether to use `mgmt_junos` for host-out traffic (NTP/TACPLUS/RADIUS/SYSLOG/SNMP), if alternative source network/ip is desired",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "switch_oob_ip_config_node1": {
+        "additionalProperties": false,
+        "description": "Node1-specific out-of-band management IP configuration for switch HA clusters",
+        "properties": {
+          "gateway": {
+            "description": "Default gateway for the node1 out-of-band management interface when `type`==`static`",
+            "type": "string"
+          },
+          "ip": {
+            "description": "Static IPv4 address for the node1 out-of-band management interface when `type`==`static`",
+            "type": "string"
+          },
+          "netmask": {
+            "description": "Used only if `subnet` is not specified in `networks`",
+            "type": "string"
+          },
+          "network": {
+            "description": "Optional, the network to be used for mgmt",
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ip_type",
+            "description": "IP assignment mode for the node1 out-of-band management interface. enum: `dhcp`, `static`."
+          },
+          "use_mgmt_vrf": {
+            "default": false,
+            "description": "If supported on the platform. If enabled, DNS will be using this routing-instance, too. Ignored on AOS-CX",
+            "type": "boolean"
+          },
+          "use_mgmt_vrf_for_host_out": {
+            "default": false,
+            "description": "Whether to use `mgmt_junos` for host-out traffic (NTP/TACPLUS/RADIUS/SYSLOG/SNMP), if alternative source network/ip is desired",
             "type": "boolean"
           }
         },
@@ -12258,6 +12618,11 @@
             "description": "Only if `mode`!=`dynamic`. `inter_switch_link` is used together with `isolation` under networks. NOTE: `inter_switch_link` works only between Juniper devices. This has to be applied to both ports connected together",
             "type": "boolean"
           },
+          "keep_session_for_idle_client": {
+            "default": false,
+            "description": "When `port_auth`==`dot1x`, enabling no-mac-table-binding keeps the authentication session active even after the client MAC ages out of the Ethernet switching table. Default is false",
+            "type": "boolean"
+          },
           "mac_auth_only": {
             "description": "Only if `mode`!=`dynamic` and `enable_mac_auth`==`true`",
             "type": "boolean"
@@ -12273,6 +12638,11 @@
           "mac_limit": {
             "$ref": "#/components/schemas/switch_port_usage_mac_limit",
             "description": "Only if `mode`!=`dynamic`. Maximum number of MAC addresses allowed on the port; 0 means unlimited"
+          },
+          "mcast_router_link": {
+            "default": false,
+            "description": "For a bridged-overlay fabric (no PIM/eOISM), flag a port (ESI-LAG or plain trunk) that faces an external PIM router. Every multicast-enabled network carried on the port gets `igmp-snooping <vlan> interface <intf> multicast-router-interface`, so IGMP reports and multicast traffic forward toward that external router",
+            "type": "boolean"
           },
           "mode": {
             "$ref": "#/components/schemas/switch_port_usage_mode",
@@ -12604,10 +12974,15 @@
             "type": "integer"
           },
           {
+            "maximum": 0,
+            "minimum": 0,
+            "type": "integer"
+          },
+          {
             "type": "string"
           }
         ],
-        "description": "Only if `mode`!=`dynamic` and `port_auth`=`dot1x` reauthentication interval range (min: 10, max: 65535, default: 3600). Set to 0 to disable reauthentication (no-reauthentication)."
+        "description": "Only if `mode`!=`dynamic` and `port_auth`=`dot1x` reauthentication interval in seconds (`0` or min: 10, max: 65535, default: 3600). Set to 0 to disable reauthentication (no-reauthentication)."
       },
       "switch_port_usage_speed": {
         "default": "auto",
@@ -12776,6 +13151,11 @@
           "network": {
             "description": "Use `network`or `source_ip`. Which network the RADIUS server resides, if there's static IP for this network, we'd use it as source-ip",
             "type": "string"
+          },
+          "no_resolve_radius_hostname": {
+            "default": false,
+            "description": "By default, when a hostname is used for RADIUS, the hostname is resolved into an IP when generating configs, and failures to resolve prevent the config from being pushed. Set to `true` to not resolve the RADIUS hostname",
+            "type": "boolean"
           },
           "source_ip": {
             "description": "Use `network` or `source_ip`. Explicit source IP address for RADIUS traffic",
@@ -12973,6 +13353,49 @@
           "$ref": "#/components/schemas/switch_virtual_chassis_member"
         },
         "type": "array"
+      },
+      "switch_vrf_config": {
+        "additionalProperties": false,
+        "description": "Device-level VRF settings for a switch",
+        "properties": {
+          "enabled": {
+            "description": "Whether to enable VRF (when supported on the device)",
+            "type": "boolean"
+          },
+          "vrfs": {
+            "$ref": "#/components/schemas/switch_vrf_config_vrfs",
+            "description": "Per-device settings for each VRF instance. Property key is the VRF instance name"
+          }
+        },
+        "type": "object"
+      },
+      "switch_vrf_config_vrf": {
+        "additionalProperties": false,
+        "description": "Per-device settings of a VRF instance",
+        "properties": {
+          "loopback_ip": {
+            "description": "Per-device, per-VRF loopback (`lo0.<vrf_idx>`) IP address in the VRF routing-instance (non-EVPN; in EVPN these are auto-assigned via `evpn_auto_loopback_subnet`). The master VRF uses `router_id`",
+            "examples": [
+              "10.255.1.1"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "switch_vrf_config_vrfs": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/switch_vrf_config_vrf"
+        },
+        "description": "Property key is the VRF instance name",
+        "examples": [
+          {
+            "iot": {
+              "loopback_ip": "10.255.1.1"
+            }
+          }
+        ],
+        "type": "object"
       },
       "switch_vrf_instance": {
         "additionalProperties": false,
@@ -14252,6 +14675,31 @@
         },
         "description": "OK"
       },
+      "DeviceDerivedConfig": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/DeviceDerivedConfigExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_device_derived_config"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/DeviceDerivedConfigExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_device_derived_config"
+            }
+          }
+        },
+        "description": "OK"
+      },
       "DevicesArray": {
         "content": {
           "application/json": {
@@ -14947,6 +15395,24 @@
           "y": 173.1
         }
       },
+      "DeviceDerivedConfigExample": {
+        "value": {
+          "networks": {
+            "vlan10": {
+              "vlan_id": 10
+            }
+          },
+          "port_usages": {
+            "uplink": {
+              "all_networks": true,
+              "mode": "trunk"
+            }
+          },
+          "switch_mgmt": {
+            "root_password": "********"
+          }
+        }
+      },
       "Devicegateway": {
         "value": {
           "additional_config_cmds": [
@@ -15320,6 +15786,18 @@
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"
+      },
+      "oauth2": {
+        "description": "OAuth2 authorization code flow (RFC 6749) with PKCE (RFC 7636) and rotating refresh tokens, for third-party applications (including MCP integrations) acting on behalf of a consenting user. It uses an Org API token with `oauth_enabled` set as the OAuth2 client, the `client_id` is its composite `oauth_client_id` (`<org_id>.<token_id>`). See the [Orgs OAuth2](/#operations/getOauthAuthorization) endpoints.\n\n**Format**:\n  `Authorization: Bearer {access_token}`\n\n**Notes**:\n* The access token carries the privileges configured on the API token, constrained to what the consenting user has\n* The access token expires after `oauth_ttl` (default 1 hour), use the refresh token to get a new one\n* No fixed scopes are defined, the scope is derived from the API token name (e.g. `custom-ServiceNow Integration`)",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "/api/v1/orgs/oauth/authorize",
+            "refreshUrl": "/api/v1/orgs/oauth/token",
+            "scopes": {},
+            "tokenUrl": "/api/v1/orgs/oauth/token"
+          }
+        },
+        "type": "oauth2"
       }
     }
   }

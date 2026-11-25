@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Linked Applications",
-    "version": "2610.1.0",
+    "version": "2611.1.0",
     "description": "Linked Application are Third party applications linked to the Mist Organization. \nThis is usually using OAuth2.0 or API integrations for a Cloud-to-Cloud Communication."
   },
   "servers": [
@@ -61,6 +61,9 @@
     },
     {
       "csrfToken": []
+    },
+    {
+      "oauth2": []
     }
   ],
   "tags": [
@@ -130,6 +133,14 @@
         "requestBody": {
           "content": {
             "application/json": {
+              "examples": {
+                "Infoblox": {
+                  "value": {
+                    "api_key": "REDACTED",
+                    "cloud_name": "us"
+                  }
+                }
+              },
               "schema": {
                 "$ref": "#/components/schemas/account_oauth_add"
               }
@@ -141,7 +152,7 @@
             "$ref": "#/components/responses/OauthAppLink"
           },
           "400": {
-            "description": "Unsuccessful"
+            "description": "Unsuccessful. For VMware, `{\"detail\": \"Invalid cloud_name\"}` is returned when `cloud_name` is not a supported datacenter. For Infoblox, `detail` is one of `Missing infoblox credentials`, `Invalid cloud_name`, `Account already added`, `Invalid API Key` or `infoblox integration disabled`"
           },
           "401": {
             "$ref": "#/components/responses/HTTP401"
@@ -181,7 +192,7 @@
         }
       ],
       "put": {
-        "description": "Update app-specific settings for a linked OAuth application account, such as Zoom or Teams guest redaction settings or a Zoom daily API request quota.",
+        "description": "Update app-specific settings for a linked OAuth application account, such as Zoom or Teams guest redaction settings, a Zoom daily API request quota, or the Infoblox API key and region. For Infoblox, the account is identified by the `account_id` path parameter, the response is the updated account only, and a `400` is returned with `detail` set to `Account id not found to update the app settings`, `No updatable fields provided`, `Invalid cloud_name`, `Invalid API Key` or `infoblox integration disabled`.",
         "operationId": "updateOrgOauthAppAccount",
         "requestBody": {
           "content": {
@@ -192,17 +203,23 @@
                     "account_id": "iojzXIJWEuiD73ZvydOfg",
                     "max_daily_api_requests": 5000
                   }
+                },
+                "Infoblox": {
+                  "value": {
+                    "api_key": "REDACTED",
+                    "cloud_name": "eu"
+                  }
                 }
               },
               "schema": {
-                "$ref": "#/components/schemas/account_oauth_config"
+                "$ref": "#/components/schemas/account_oauth_update"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "$ref": "#/components/responses/OK"
+            "$ref": "#/components/responses/OauthAppLinkUpdated"
           },
           "400": {
             "$ref": "#/components/responses/HTTP400"
@@ -233,7 +250,7 @@
             "description": "Successful"
           },
           "400": {
-            "description": "Unsuccessful"
+            "description": "Unsuccessful. For Infoblox, `detail` is `Account id is required to unlink the infoblox app` or `infoblox integration disabled`"
           },
           "401": {
             "$ref": "#/components/responses/HTTP401"
@@ -279,6 +296,136 @@
           "client_id",
           "client_secret"
         ],
+        "type": "object"
+      },
+      "account_infoblox_cloud_name": {
+        "default": "us",
+        "description": "Region keyword of the Infoblox CSP console the account lives in. enum: `eu`, `us` (default)",
+        "enum": [
+          "eu",
+          "us"
+        ],
+        "examples": [
+          "us"
+        ],
+        "type": "string"
+      },
+      "account_infoblox_config": {
+        "additionalProperties": false,
+        "description": "Infoblox CSP account credentials for OAuth application linking. Returns a `400` with `Missing infoblox credentials` when `api_key` is missing, `Invalid cloud_name`, `Account already added` when the Infoblox account is already linked, `Invalid API Key`, or `infoblox integration disabled`",
+        "properties": {
+          "api_key": {
+            "description": "The API key used to query this Infoblox CSP account",
+            "examples": [
+              "REDACTED"
+            ],
+            "type": "string"
+          },
+          "cloud_name": {
+            "$ref": "#/components/schemas/account_infoblox_cloud_name",
+            "description": "Region keyword of the Infoblox CSP console this account lives in. enum: `eu`, `us` (default)"
+          }
+        },
+        "required": [
+          "api_key"
+        ],
+        "type": "object"
+      },
+      "account_infoblox_update": {
+        "additionalProperties": false,
+        "description": "Infoblox CSP account settings to update. Omitted fields keep their stored value. Returns a `400` with `Account id not found to update the app settings`, `No updatable fields provided`, `Invalid cloud_name`, `Invalid API Key`, or `infoblox integration disabled`",
+        "properties": {
+          "api_key": {
+            "description": "The updated API key. Omit to keep the stored value",
+            "examples": [
+              "REDACTED"
+            ],
+            "type": "string"
+          },
+          "cloud_name": {
+            "$ref": "#/components/schemas/account_infoblox_cloud_name",
+            "description": "The updated region keyword. Omit to keep the stored value. enum: `eu`, `us`"
+          }
+        },
+        "type": "object"
+      },
+      "account_infoblox_update_response": {
+        "additionalProperties": false,
+        "description": "The Infoblox CSP account that was updated (not the full list, use the linked accounts `GET` for all linked accounts)",
+        "properties": {
+          "account_id": {
+            "description": "PAPI-generated ID (uuid) for the linked account",
+            "examples": [
+              "1c9f2e5a-0b6d-4e7f-9a10-2b3c4d5e6f70"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "cloud_name": {
+            "$ref": "#/components/schemas/account_infoblox_cloud_name",
+            "description": "Region keyword the Infoblox CSP console lives in. enum: `eu`, `us`",
+            "readOnly": true
+          },
+          "csp_id": {
+            "description": "Numeric CSP ID associated with the linked account",
+            "examples": [
+              "2033122"
+            ],
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "expires_at": {
+            "description": "Epoch timestamp when the API key will expire",
+            "examples": [
+              1789768800
+            ],
+            "readOnly": true,
+            "type": "integer"
+          },
+          "infoblox_account_id": {
+            "description": "Infoblox's own account UUID; a link is rejected if this account is already linked",
+            "examples": [
+              "ef5740cc-63db-4c3f-a348-43fa55d159c0"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "linked": {
+            "description": "Always `true` for a successful update",
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "linked_by": {
+            "description": "Email address of the user who linked the account",
+            "examples": [
+              "admin@acme.com"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "linked_timestamp": {
+            "description": "Epoch timestamp when the account was linked",
+            "examples": [
+              1789765200
+            ],
+            "readOnly": true,
+            "type": "integer"
+          },
+          "name": {
+            "description": "Name associated with the linked account",
+            "examples": [
+              "Juniper-1"
+            ],
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
         "type": "object"
       },
       "account_jamf_config": {
@@ -374,10 +521,14 @@
           },
           {
             "$ref": "#/components/schemas/account_sentinelone_config"
+          },
+          {
+            "$ref": "#/components/schemas/account_infoblox_config"
           }
         ]
       },
       "account_oauth_config": {
+        "additionalProperties": false,
         "description": "OAuth linked apps (zoom/teams/intune) account details",
         "properties": {
           "account_id": {
@@ -455,7 +606,7 @@
             "type": "string"
           },
           "cloud_name": {
-            "description": "Name of the company whose account mist has subscribed to",
+            "description": "Cloud/datacenter the linked account authenticates against. For VMware accounts, the Workspace ONE UEM datacenter (`na`, `emea`, `apac`, `uat`) and for Infoblox accounts, the CSP console region (`us`, `eu`); may be absent or `null` for accounts linked before it was supported",
             "examples": [
               "Tapi.sase.paloaltonetworks.com"
             ],
@@ -469,6 +620,17 @@
             ],
             "readOnly": true,
             "type": "string"
+          },
+          "csp_id": {
+            "description": "For Infoblox accounts only, numeric CSP ID associated with the linked account",
+            "examples": [
+              "2033122"
+            ],
+            "readOnly": true,
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "enable_probe": {
             "description": "For Prisma accounts only, tunnel probe enable/disable",
@@ -489,6 +651,22 @@
           "errors": {
             "$ref": "#/components/schemas/oauth_account_errors",
             "description": "Problems reported during OAuth token refresh or account data sync"
+          },
+          "expires_at": {
+            "description": "For Infoblox accounts only, epoch timestamp when the API key will expire",
+            "examples": [
+              1789768800
+            ],
+            "readOnly": true,
+            "type": "integer"
+          },
+          "infoblox_account_id": {
+            "description": "For Infoblox accounts only, Infoblox's own account UUID. A link is rejected if this account is already linked",
+            "examples": [
+              "ef5740cc-63db-4c3f-a348-43fa55d159c0"
+            ],
+            "readOnly": true,
+            "type": "string"
           },
           "instance_url": {
             "description": "Customer account instance URL",
@@ -557,9 +735,10 @@
             "type": "string"
           },
           "region": {
-            "description": "For Prisma accounts only",
+            "description": "For Prisma accounts, the Prisma region. For CrowdStrike accounts, the CrowdStrike cloud region the account is hosted in",
             "examples": [
-              "americas"
+              "americas",
+              "us-1"
             ],
             "readOnly": true,
             "type": "string"
@@ -726,6 +905,17 @@
         },
         "type": "array"
       },
+      "account_oauth_update": {
+        "description": "Account settings payload for updating a linked OAuth application account. Infoblox accounts use `api_key` and `cloud_name` (the account is identified by the path); other apps use `account_id` and their app-specific settings",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/account_oauth_config"
+          },
+          {
+            "$ref": "#/components/schemas/account_infoblox_update"
+          }
+        ]
+      },
       "account_prisma_config": {
         "additionalProperties": false,
         "description": "OAuth linked CrowdStrike apps account details",
@@ -781,6 +971,19 @@
         ],
         "type": "object"
       },
+      "account_vmware_cloud_name": {
+        "description": "Workspace ONE UEM datacenter. enum: `apac` (Tokyo, JP), `emea` (Frankfurt, DE), `na` (Virginia, US), `uat` (test)",
+        "enum": [
+          "apac",
+          "emea",
+          "na",
+          "uat"
+        ],
+        "examples": [
+          "na"
+        ],
+        "type": "string"
+      },
       "account_vmware_config": {
         "additionalProperties": false,
         "description": "VMware account credentials and webhook settings for OAuth application linking",
@@ -792,6 +995,10 @@
           "client_secret": {
             "description": "Customer account Client Secret",
             "type": "string"
+          },
+          "cloud_name": {
+            "$ref": "#/components/schemas/account_vmware_cloud_name",
+            "description": "Workspace ONE UEM datacenter of the account, shown in the UEM console and matching the `as###.awmdm.com` API host (see \"Datacenter and Token URLs for OAuth 2.0 Support\" in the Workspace ONE UEM Console Basics guide). When omitted, each datacenter is tried in turn and the one that authenticates is stored. An invalid value returns a `400` with `Invalid cloud_name`. enum: `apac`, `emea`, `na`, `uat`"
           },
           "instance_url": {
             "description": "Customer account VMware instance URL",
@@ -863,9 +1070,10 @@
         "type": "array"
       },
       "oauth_app_name": {
-        "description": "enum: `crowdstrike`, `intune`, `jamf`, `mobicontrol`, `prisma`, `sentinelone`, `teams`, `vmware`, `zdx`, `zoom`",
+        "description": "enum: `crowdstrike`, `infoblox`, `intune`, `jamf`, `mobicontrol`, `prisma`, `sentinelone`, `teams`, `vmware`, `zdx`, `zoom`",
         "enum": [
           "crowdstrike",
+          "infoblox",
           "intune",
           "jamf",
           "mobicontrol",
@@ -1062,15 +1270,15 @@
         },
         "description": "Too Many Request. The API Token used for the request reached the 5000 API Calls per hour threshold"
       },
-      "OK": {
-        "description": "OK"
-      },
       "OauthAppLink": {
         "content": {
           "application/json": {
             "examples": {
               "Crowdstrike": {
                 "$ref": "#/components/examples/OauthAppLinkCrowdstrike"
+              },
+              "Infoblox": {
+                "$ref": "#/components/examples/OauthAppLinkInfoblox"
               },
               "Jamf": {
                 "$ref": "#/components/examples/OauthAppLinkJamf"
@@ -1103,6 +1311,9 @@
               "Crowdstrike": {
                 "$ref": "#/components/examples/OauthAppLinkCrowdstrike"
               },
+              "Infoblox": {
+                "$ref": "#/components/examples/OauthAppLinkInfoblox"
+              },
               "Jamf": {
                 "$ref": "#/components/examples/OauthAppLinkJamf"
               },
@@ -1131,6 +1342,31 @@
           }
         },
         "description": "OK"
+      },
+      "OauthAppLinkUpdated": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Infoblox": {
+                "$ref": "#/components/examples/OauthAppLinkInfobloxUpdate"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/account_infoblox_update_response"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Infoblox": {
+                "$ref": "#/components/examples/OauthAppLinkInfobloxUpdate"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/account_infoblox_update_response"
+            }
+          }
+        },
+        "description": "OK. For Infoblox, returns only the account that was updated"
       }
     },
     "parameters": {
@@ -1188,7 +1424,12 @@
               "last_sync": 1665465339000,
               "linked_by": "Testname1",
               "linked_timestamp": 1728275689.284758,
-              "name": "Test Company1 Ltd"
+              "name": "Test Company1 Ltd",
+              "region": "us-1",
+              "webhook_auth_type": "Bearer",
+              "webhook_enabled": true,
+              "webhook_secret": "secret-value",
+              "webhook_url": "https://websync.nac-staging.mistsys.com/v1/S_org-8dcbe9005/ae9dee49-69e7-4710-a114-5b827a777738/crowdstrike/edr"
             },
             {
               "account_id": "845a23bf-bed9-e43c-4c86-6fa474be7ae5",
@@ -1197,10 +1438,42 @@
               "last_sync": 1234567890123,
               "linked_by": "Testname2",
               "linked_timestamp": 1728275689.284758,
-              "name": "Test Company2 Ltd"
+              "name": "Test Company2 Ltd",
+              "region": "eu-1",
+              "webhook_enabled": true
             }
           ],
           "linked": true
+        }
+      },
+      "OauthAppLinkInfoblox": {
+        "value": {
+          "accounts": [
+            {
+              "account_id": "1c9f2e5a-0b6d-4e7f-9a10-2b3c4d5e6f70",
+              "cloud_name": "us",
+              "csp_id": "2033122",
+              "expires_at": 1789768800,
+              "infoblox_account_id": "ef5740cc-63db-4c3f-a348-43fa55d159c0",
+              "linked_by": "admin@acme.com",
+              "linked_timestamp": 1789765200,
+              "name": "Juniper-1"
+            }
+          ],
+          "linked": true
+        }
+      },
+      "OauthAppLinkInfobloxUpdate": {
+        "value": {
+          "account_id": "1c9f2e5a-0b6d-4e7f-9a10-2b3c4d5e6f70",
+          "cloud_name": "eu",
+          "csp_id": "2033122",
+          "expires_at": 1789768800,
+          "infoblox_account_id": "ef5740cc-63db-4c3f-a348-43fa55d159c0",
+          "linked": true,
+          "linked_by": "admin@acme.com",
+          "linked_timestamp": 1789765200,
+          "name": "Juniper-1"
         }
       },
       "OauthAppLinkJamf": {
@@ -1307,6 +1580,7 @@
           "accounts": [
             {
               "account_id": "f43ea4c4-8a97-4159-9214-112a8c7b8f22",
+              "cloud_name": "na",
               "instance_url": "as800.airwatchportals.com",
               "last_status": "success",
               "last_sync": 1665465339000,
@@ -1321,6 +1595,7 @@
             },
             {
               "account_id": "m56ea4c4-8a10-4189-9214-113a8c7b8m82",
+              "cloud_name": "emea",
               "error": "Get token failed, please re-link VMware",
               "instance_url": "as561.airwatchportals.com",
               "last_status": "failed",
@@ -1403,6 +1678,18 @@
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"
+      },
+      "oauth2": {
+        "description": "OAuth2 authorization code flow (RFC 6749) with PKCE (RFC 7636) and rotating refresh tokens, for third-party applications (including MCP integrations) acting on behalf of a consenting user. It uses an Org API token with `oauth_enabled` set as the OAuth2 client, the `client_id` is its composite `oauth_client_id` (`<org_id>.<token_id>`). See the [Orgs OAuth2](/#operations/getOauthAuthorization) endpoints.\n\n**Format**:\n  `Authorization: Bearer {access_token}`\n\n**Notes**:\n* The access token carries the privileges configured on the API token, constrained to what the consenting user has\n* The access token expires after `oauth_ttl` (default 1 hour), use the refresh token to get a new one\n* No fixed scopes are defined, the scope is derived from the API token name (e.g. `custom-ServiceNow Integration`)",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "/api/v1/orgs/oauth/authorize",
+            "refreshUrl": "/api/v1/orgs/oauth/token",
+            "scopes": {},
+            "tokenUrl": "/api/v1/orgs/oauth/token"
+          }
+        },
+        "type": "oauth2"
       }
     }
   }

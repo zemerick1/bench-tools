@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Inventory",
-    "version": "2610.1.0",
+    "version": "2611.1.0",
     "description": "The Org Inventory allows administrators to view and manage all devices registered (claimed) to the Organization."
   },
   "servers": [
@@ -61,6 +61,9 @@
     },
     {
       "csrfToken": []
+    },
+    {
+      "oauth2": []
     }
   ],
   "tags": [
@@ -93,13 +96,14 @@
             }
           },
           {
-            "description": "Filter results by device model. Accepts multiple comma-separated values.",
+            "description": "Filter results by device model. Accepts multiple comma-separated values. Use the special value `mutable` to list the common-hardware devices whose model can still be changed with [Update Inventory Model](/#operations/updateOrgInventoryModel).",
             "in": "query",
             "name": "model",
             "schema": {
               "examples": [
                 "EX4300-48T,EX4100-48MP",
-                "AP43"
+                "AP43",
+                "mutable"
               ],
               "type": "string"
             }
@@ -851,6 +855,65 @@
           "Orgs Inventory"
         ]
       }
+    },
+    "/api/v1/orgs/{org_id}/inventory/update_model": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/org_id"
+        }
+      ],
+      "post": {
+        "description": "Update Inventory Model Set the intended model (and resulting device type) of common hardware **before** the device onboards. This ensures that the device is displayed under the correct device type category in the UI. Once the device onboards, its reported model is authoritative and can no longer be changed with this API.\nOnly devices whose current model is a common-hardware chassis can be updated, and only to a model supported by the chassis. Use [Get Org Inventory](/#operations/getOrgInventory) with the `model=mutable` query parameter to list eligible devices.\nThe response is a per-MAC result: `reason` is parallel to `error` and gives the failure reason for each failed MAC address.",
+        "operationId": "updateOrgInventoryModel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": [
+                    {
+                      "mac": "aff827549235",
+                      "model": "MX304"
+                    },
+                    {
+                      "mac": "8396cd006c8c",
+                      "model": "PTX10004"
+                    }
+                  ]
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/inventory_update_models"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OrgInventoryUpdateModel"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "summary": "updateOrgInventoryModel",
+        "tags": [
+          "Orgs Inventory"
+        ]
+      }
     }
   },
   "components": {
@@ -1364,6 +1427,50 @@
         },
         "type": "array"
       },
+      "inventory_update_model": {
+        "additionalProperties": false,
+        "description": "Intended model for a common-hardware device that has not onboarded yet",
+        "properties": {
+          "mac": {
+            "description": "MAC address of the device",
+            "examples": [
+              "aff827549235"
+            ],
+            "type": "string"
+          },
+          "model": {
+            "description": "Intended model of the device. Must be a model supported by the device's current common-hardware chassis",
+            "examples": [
+              "MX304"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "mac",
+          "model"
+        ],
+        "type": "object"
+      },
+      "inventory_update_models": {
+        "description": "List of devices and their intended models",
+        "examples": [
+          [
+            {
+              "mac": "aff827549235",
+              "model": "MX304"
+            },
+            {
+              "mac": "8396cd006c8c",
+              "model": "PTX10004"
+            }
+          ]
+        ],
+        "items": {
+          "$ref": "#/components/schemas/inventory_update_model"
+        },
+        "type": "array"
+      },
       "inventory_update_operation": {
         "description": "enum:\n  * `upgrade_to_mist`: Upgrade to mist-managed\n  * `downgrade_to_jsi`: Downgrade to basic monitoring. When downgrading a VC member to jsi, we will move the cloud connection of the VC to jsi-terminator and keep all VC device/inventories intact for pain-free upgrading back to mist.\n  * `assign`: Assign inventory to a site\n  * `unassign`: Unassign inventory from a site\n  * `delete`: Delete multiple inventory from org. If the device is already assigned to a site, it will be unassigned",
         "enum": [
@@ -1718,6 +1825,54 @@
           "model",
           "serial",
           "type"
+        ],
+        "type": "object"
+      },
+      "response_inventory_update_model": {
+        "additionalProperties": false,
+        "description": "Result of an inventory model update. `reason` is parallel to `error` and gives the failure reason for each failed MAC address",
+        "properties": {
+          "error": {
+            "description": "MAC addresses of the devices whose model could not be updated",
+            "examples": [
+              [
+                "8396cd006c8c"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reason": {
+            "description": "Failure reason for each entry of `error`, in the same order. Possible values: `does not exist`, `model already resolved` (device already onboarded), `invalid model for <chassis>`, `model is required`, `invalid or missing mac`",
+            "examples": [
+              [
+                "invalid model for JNP10004-CHAS"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "success": {
+            "description": "MAC addresses of the devices whose model was updated",
+            "examples": [
+              [
+                "aff827549235"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "success",
+          "error",
+          "reason"
         ],
         "type": "object"
       },
@@ -2097,6 +2252,31 @@
           }
         },
         "description": "OK"
+      },
+      "OrgInventoryUpdateModel": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/OrgInventoryUpdateModelExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_inventory_update_model"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/OrgInventoryUpdateModelExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/response_inventory_update_model"
+            }
+          }
+        },
+        "description": "OK"
       }
     },
     "parameters": {
@@ -2310,6 +2490,19 @@
           ],
           "total": 1
         }
+      },
+      "OrgInventoryUpdateModelExample": {
+        "value": {
+          "error": [
+            "8396cd006c8c"
+          ],
+          "reason": [
+            "invalid model for JNP10004-CHAS"
+          ],
+          "success": [
+            "aff827549235"
+          ]
+        }
       }
     },
     "securitySchemes": {
@@ -2325,6 +2518,18 @@
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"
+      },
+      "oauth2": {
+        "description": "OAuth2 authorization code flow (RFC 6749) with PKCE (RFC 7636) and rotating refresh tokens, for third-party applications (including MCP integrations) acting on behalf of a consenting user. It uses an Org API token with `oauth_enabled` set as the OAuth2 client, the `client_id` is its composite `oauth_client_id` (`<org_id>.<token_id>`). See the [Orgs OAuth2](/#operations/getOauthAuthorization) endpoints.\n\n**Format**:\n  `Authorization: Bearer {access_token}`\n\n**Notes**:\n* The access token carries the privileges configured on the API token, constrained to what the consenting user has\n* The access token expires after `oauth_ttl` (default 1 hour), use the refresh token to get a new one\n* No fixed scopes are defined, the scope is derived from the API token name (e.g. `custom-ServiceNow Integration`)",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "/api/v1/orgs/oauth/authorize",
+            "refreshUrl": "/api/v1/orgs/oauth/token",
+            "scopes": {},
+            "tokenUrl": "/api/v1/orgs/oauth/token"
+          }
+        },
+        "type": "oauth2"
       }
     }
   }

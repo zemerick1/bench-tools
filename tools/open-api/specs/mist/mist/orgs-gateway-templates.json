@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Gateway Templates",
-    "version": "2610.1.0",
+    "version": "2611.1.0",
     "description": "Gateway Template is applied to a site for gateway(s) in a site.\n\nWhen Templates are not used, Site Setting holds settings for multiple device types and they can differ to set device_type specific configs, use this whatever is defined under `gateway` will overwrite/shadow the one at root-level"
   },
   "servers": [
@@ -61,6 +61,9 @@
     },
     {
       "csrfToken": []
+    },
+    {
+      "oauth2": []
     }
   ],
   "tags": [
@@ -1447,7 +1450,15 @@
         "properties": {
           "additional_config_cmds": {
             "$ref": "#/components/schemas/additional_config_cmds",
-            "description": "For SRX only, additional Junos CLI commands appended when this gateway matching rule applies"
+            "description": "For SRX only, additional Junos CLI commands appended when this gateway matching rule applies. For MNHA, use it together with `match_node` to append per-node CLI commands to that node's configuration only"
+          },
+          "ip_configs": {
+            "$ref": "#/components/schemas/gateway_ip_configs",
+            "description": "Gateway interface IP configuration by network name applied when this matching rule applies, e.g. per-node IP addresses for MNHA"
+          },
+          "match_node": {
+            "$ref": "#/components/schemas/ha_cluster_node_enum",
+            "description": "MNHA node this rule applies to, to define per-node differences (one rule per node). enum: `node0`, `node1`."
           },
           "name": {
             "description": "Display name for the gateway matching rule",
@@ -1624,8 +1635,80 @@
             "default": false,
             "description": "Whether MNHA mode is enabled",
             "type": "boolean"
+          },
+          "icl": {
+            "$ref": "#/components/schemas/gateway_mnha_config_icl",
+            "description": "Inter-Chassis Link (ICL) settings between the two MNHA nodes"
+          },
+          "node_macs": {
+            "description": "Cluster membership, positional. Index 0 is `node0`, index 1 is `node1`",
+            "examples": [
+              [
+                "2c:6b:f5:00:00:00",
+                "2c:6b:f5:00:00:01"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "redundancy_groups": {
+            "$ref": "#/components/schemas/gateway_mnha_config_redundancy_groups",
+            "description": "Redundancy groups (SRGs) overrides, keyed by the redundancy group number. Override-only: by default the primary node derives from the group number (odd -> `node0`, even -> `node1`, mirroring the chassis cluster RG1-node0/RG2-node1 convention, so active/active is SRG1 on `node0` and SRG2 on `node1`). Only list a group to override the default primary node or to set its shared `probe_host`"
           }
         },
+        "type": "object"
+      },
+      "gateway_mnha_config_icl": {
+        "additionalProperties": false,
+        "description": "Inter-Chassis Link (ICL) settings for MNHA",
+        "properties": {
+          "back_to_back": {
+            "description": "Whether the ICL is directly wired between the two nodes",
+            "type": "boolean"
+          },
+          "encrypted": {
+            "default": false,
+            "description": "Whether the ICL is encrypted (IPsec)",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "gateway_mnha_config_redundancy_group": {
+        "additionalProperties": false,
+        "description": "MNHA redundancy group (SRG) override",
+        "properties": {
+          "primary_node": {
+            "$ref": "#/components/schemas/ha_cluster_node_enum",
+            "description": "Node that is primary for this redundancy group. enum: `node0`, `node1`."
+          },
+          "probe_host": {
+            "description": "SRG activeness-probe destination IP, the same for all nodes. Defaults to the port's gateway. The source IP is automatically the node loopback router-id",
+            "examples": [
+              "8.8.8.8"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "gateway_mnha_config_redundancy_groups": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/gateway_mnha_config_redundancy_group"
+        },
+        "description": "Property key is the redundancy group (SRG) number",
+        "examples": [
+          {
+            "1": {
+              "primary_node": "node0",
+              "probe_host": "8.8.8.8"
+            }
+          }
+        ],
         "type": "object"
       },
       "gateway_oob_ip_config": {
@@ -1983,7 +2066,7 @@
           },
           "usage": {
             "$ref": "#/components/schemas/gateway_port_usage",
-            "description": "Logical usage assigned to the port. enum: `ha_control`, `ha_data`, `lan`, `wan`."
+            "description": "Logical usage assigned to the port. `ha_link` is the MNHA link port. enum: `ha_control`, `ha_data`, `ha_link`, `lan`, `wan`."
           },
           "vlan_id": {
             "$ref": "#/components/schemas/gateway_port_vlan_id_with_variable",
@@ -2091,6 +2174,13 @@
               "2001:db8::123"
             ],
             "format": "ipv6",
+            "type": "string"
+          },
+          "mnha_vip": {
+            "description": "For SRX MNHA only. Virtual IP address shared by the two nodes on this interface",
+            "examples": [
+              "203.0.113.1"
+            ],
             "type": "string"
           },
           "netmask": {
@@ -2219,10 +2309,11 @@
         "type": "array"
       },
       "gateway_port_usage": {
-        "description": "port usage name. enum: `ha_control`, `ha_data`, `lan`, `wan`",
+        "description": "port usage name. enum: `ha_control`, `ha_data`, `ha_link`, `lan`, `wan`",
         "enum": [
           "ha_control",
           "ha_data",
+          "ha_link",
           "lan",
           "wan"
         ],
@@ -2376,6 +2467,11 @@
             "$ref": "#/components/schemas/dns_suffix",
             "description": "DNS search suffixes provided by this gateway template"
           },
+          "enable_zone_based_policies": {
+            "default": false,
+            "description": "SRX only, optional. When enabled, the security policy is generated from the org zone policies (`zonepolicies`) and `service_policies` are no longer used to generate the security policy",
+            "type": "boolean"
+          },
           "extra_routes": {
             "$ref": "#/components/schemas/gateway_extra_routes",
             "description": "Additional IPv4 route defaults in this gateway template"
@@ -2468,6 +2564,10 @@
           "service_policies": {
             "$ref": "#/components/schemas/service_policies",
             "description": "Traffic service policy defaults enforced by this gateway template"
+          },
+          "snmp_config": {
+            "$ref": "#/components/schemas/snmp_config",
+            "description": "SNMP configuration applied by this gateway template, SRX only. Authorization is always read-only"
           },
           "tunnel_configs": {
             "additionalProperties": {
@@ -2951,6 +3051,14 @@
         },
         "type": "array",
         "uniqueItems": true
+      },
+      "ha_cluster_node_enum": {
+        "description": "HA cluster node selector. enum: `node0`, `node1`",
+        "enum": [
+          "node0",
+          "node1"
+        ],
+        "type": "string"
       },
       "id": {
         "description": "Unique ID of the object instance in the Mist Organization",
@@ -4230,6 +4338,773 @@
         },
         "type": "object"
       },
+      "snmp_config": {
+        "additionalProperties": false,
+        "description": "SNMP configuration for managed network devices",
+        "properties": {
+          "client_list": {
+            "$ref": "#/components/schemas/snmp_config_client_lists",
+            "description": "SNMP client allowlists that can be referenced by communities"
+          },
+          "contact": {
+            "description": "Administrative contact string advertised through SNMP",
+            "examples": [
+              "cns@juniper.net"
+            ],
+            "type": "string"
+          },
+          "description": {
+            "description": "Device description string advertised through SNMP",
+            "examples": [
+              "Juniper QFX Series Switch - 1K_5LA"
+            ],
+            "type": "string"
+          },
+          "enabled": {
+            "default": true,
+            "description": "Whether SNMP is enabled",
+            "type": "boolean"
+          },
+          "engine_id": {
+            "$ref": "#/components/schemas/snmp_config_engine_id",
+            "description": "SNMP engine ID used for SNMPv3"
+          },
+          "engine_id_type": {
+            "$ref": "#/components/schemas/snmp_config_engine_id_type",
+            "description": "Method used to derive the SNMP engine ID. enum: `local`, `use_mac_address`."
+          },
+          "location": {
+            "description": "Physical location string advertised through SNMP",
+            "examples": [
+              "Las Vegas, NV"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "System name advertised through SNMP",
+            "examples": [
+              "TGH-1K-QFX10K"
+            ],
+            "type": "string"
+          },
+          "network": {
+            "default": "default",
+            "description": "Management network used for SNMP traffic",
+            "type": "string"
+          },
+          "trap_groups": {
+            "$ref": "#/components/schemas/snmp_config_trap_groups",
+            "description": "SNMP trap group definitions"
+          },
+          "v2c_config": {
+            "$ref": "#/components/schemas/snmp_config_v2c_configs",
+            "description": "SNMPv2c community configuration entries for this SNMP profile"
+          },
+          "v3_config": {
+            "$ref": "#/components/schemas/snmpv3_config",
+            "description": "SNMPv3 user, VACM, notify, and target configuration"
+          },
+          "views": {
+            "$ref": "#/components/schemas/snmp_config_views",
+            "description": "SNMP MIB view definitions"
+          }
+        },
+        "type": "object"
+      },
+      "snmp_config_client_list": {
+        "additionalProperties": false,
+        "description": "SNMP client allowlist definition",
+        "properties": {
+          "client_list_name": {
+            "description": "Name of the SNMP client list",
+            "examples": [
+              "clist-1"
+            ],
+            "type": "string"
+          },
+          "clients": {
+            "$ref": "#/components/schemas/snmp_config_client_list_clients",
+            "description": "SNMP client IP addresses or CIDR ranges allowed by this list"
+          }
+        },
+        "type": "object"
+      },
+      "snmp_config_client_list_clients": {
+        "description": "SNMP client IP addresses or CIDR ranges allowed by a client list",
+        "items": {
+          "examples": [
+            "151.140.101.218/32"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "snmp_config_client_lists": {
+        "description": "SNMP client allowlists that can be referenced by communities",
+        "items": {
+          "$ref": "#/components/schemas/snmp_config_client_list"
+        },
+        "type": "array"
+      },
+      "snmp_config_engine_id": {
+        "description": "SNMP engine ID value used for SNMPv3",
+        "maxLength": 27,
+        "type": "string"
+      },
+      "snmp_config_engine_id_type": {
+        "default": "local",
+        "description": "Method used to derive the SNMP engine ID. enum: `local`, `use_mac_address`",
+        "enum": [
+          "local",
+          "use_mac_address"
+        ],
+        "type": "string"
+      },
+      "snmp_config_trap_group": {
+        "additionalProperties": false,
+        "description": "SNMP trap group definition",
+        "properties": {
+          "categories": {
+            "$ref": "#/components/schemas/snmp_config_trap_group_categories",
+            "description": "Trap categories included in this SNMP trap group"
+          },
+          "group_name": {
+            "description": "Trap group name for this SNMP trap group",
+            "examples": [
+              "profiler"
+            ],
+            "type": "string"
+          },
+          "targets": {
+            "$ref": "#/components/schemas/snmp_config_trap_group_targets",
+            "description": "Trap target addresses for this SNMP trap group"
+          },
+          "version": {
+            "$ref": "#/components/schemas/snmp_config_trap_version",
+            "description": "SNMP trap protocol version used by this group. enum: `all`, `v1`, `v2`."
+          }
+        },
+        "type": "object"
+      },
+      "snmp_config_trap_group_categories": {
+        "description": "Trap categories included in an SNMP trap group",
+        "items": {
+          "examples": [
+            "authentication"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "snmp_config_trap_group_targets": {
+        "description": "Trap target addresses for an SNMP trap group",
+        "items": {
+          "examples": [
+            "172.29.158.19"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "snmp_config_trap_groups": {
+        "description": "SNMP trap group definitions",
+        "items": {
+          "$ref": "#/components/schemas/snmp_config_trap_group"
+        },
+        "type": "array"
+      },
+      "snmp_config_trap_version": {
+        "default": "v2",
+        "description": "enum: `all`, `v1`, `v2`",
+        "enum": [
+          "all",
+          "v1",
+          "v2"
+        ],
+        "type": "string"
+      },
+      "snmp_config_v2c_config": {
+        "additionalProperties": false,
+        "description": "SNMPv2c community configuration entry",
+        "properties": {
+          "authorization": {
+            "description": "Access level for the SNMPv2c community",
+            "examples": [
+              "read-only"
+            ],
+            "type": "string"
+          },
+          "client_list_name": {
+            "description": "SNMP client list name referenced by this community",
+            "examples": [
+              "clist-1"
+            ],
+            "type": "string"
+          },
+          "community_name": {
+            "description": "SNMPv2c community string name",
+            "examples": [
+              "abc123"
+            ],
+            "type": "string"
+          },
+          "view": {
+            "description": "SNMP view name that must be defined in the views list",
+            "examples": [
+              "all"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "snmp_config_v2c_configs": {
+        "description": "SNMPv2c community configuration entries for this SNMP profile",
+        "items": {
+          "$ref": "#/components/schemas/snmp_config_v2c_config"
+        },
+        "type": "array"
+      },
+      "snmp_config_view": {
+        "additionalProperties": false,
+        "description": "SNMP MIB view definition",
+        "properties": {
+          "include": {
+            "description": "Whether the root OID is included in this SNMP view",
+            "type": "boolean"
+          },
+          "oid": {
+            "description": "Root OID for this SNMP view",
+            "examples": [
+              "1.3.6.1"
+            ],
+            "type": "string"
+          },
+          "view_name": {
+            "description": "Name of the SNMP MIB view definition",
+            "examples": [
+              "all"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "snmp_config_views": {
+        "description": "SNMP MIB view definitions",
+        "items": {
+          "$ref": "#/components/schemas/snmp_config_view"
+        },
+        "type": "array"
+      },
+      "snmp_usm": {
+        "additionalProperties": false,
+        "description": "SNMPv3 User-based Security Model configuration",
+        "properties": {
+          "engine_type": {
+            "$ref": "#/components/schemas/snmp_usm_engine_type",
+            "description": "SNMP engine type used for this USM configuration. enum: `local_engine`, `remote_engine`."
+          },
+          "remote_engine_id": {
+            "description": "Required only if `engine_type`==`remote_engine`",
+            "examples": [
+              "00:00:00:0b:00:00:70:10:6f:08:b6:3f"
+            ],
+            "type": "string"
+          },
+          "users": {
+            "$ref": "#/components/schemas/snmp_usm_users",
+            "description": "SNMPv3 USM users for this engine"
+          }
+        },
+        "type": "object"
+      },
+      "snmp_usm_engine_type": {
+        "description": "SNMP engine type used for this USM configuration. enum: `local_engine`, `remote_engine`",
+        "enum": [
+          "local_engine",
+          "remote_engine"
+        ],
+        "type": "string"
+      },
+      "snmp_usm_user": {
+        "additionalProperties": false,
+        "description": "SNMPv3 USM user definition",
+        "properties": {
+          "authentication_password": {
+            "description": "Not required if `authentication_type`==`authentication-none`. Include alphabetic, numeric, and special characters, but it cannot include control characters.",
+            "minLength": 7,
+            "type": "string"
+          },
+          "authentication_type": {
+            "$ref": "#/components/schemas/snmp_usm_user_authentication_type",
+            "description": "Authentication protocol used by this SNMPv3 USM user. enum: `authentication-md5`, `authentication-none`, `authentication-sha`, `authentication-sha224`, `authentication-sha256`, `authentication-sha384`, `authentication-sha512`."
+          },
+          "encryption_password": {
+            "description": "Not required if `encryption_type`==`privacy-none`. Include alphabetic, numeric, and special characters, but it cannot include control characters",
+            "minLength": 8,
+            "type": "string"
+          },
+          "encryption_type": {
+            "$ref": "#/components/schemas/snmp_usm_user_encryption_type",
+            "description": "Privacy protocol used by this SNMPv3 USM user. enum: `privacy-3des`, `privacy-aes128`, `privacy-des`, `privacy-none`."
+          },
+          "name": {
+            "description": "Username for the SNMPv3 USM user",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "snmp_usm_user_authentication_type": {
+        "description": "sha224, sha256, sha384, sha512 are supported in 21.1 and newer release. enum: `authentication-md5`, `authentication-none`, `authentication-sha`, `authentication-sha224`, `authentication-sha256`, `authentication-sha384`, `authentication-sha512`",
+        "enum": [
+          "authentication-md5",
+          "authentication-none",
+          "authentication-sha",
+          "authentication-sha224",
+          "authentication-sha256",
+          "authentication-sha384",
+          "authentication-sha512"
+        ],
+        "type": "string"
+      },
+      "snmp_usm_user_encryption_type": {
+        "description": "enum: `privacy-3des`, `privacy-aes128`, `privacy-des`, `privacy-none`",
+        "enum": [
+          "privacy-3des",
+          "privacy-aes128",
+          "privacy-des",
+          "privacy-none"
+        ],
+        "type": "string"
+      },
+      "snmp_usm_users": {
+        "description": "SNMPv3 USM user definitions",
+        "items": {
+          "$ref": "#/components/schemas/snmp_usm_user"
+        },
+        "type": "array"
+      },
+      "snmp_usms": {
+        "description": "SNMPv3 USM engine configurations",
+        "items": {
+          "$ref": "#/components/schemas/snmp_usm"
+        },
+        "type": "array"
+      },
+      "snmp_vacm": {
+        "additionalProperties": false,
+        "description": "SNMPv3 View-based Access Control Model configuration",
+        "properties": {
+          "access": {
+            "$ref": "#/components/schemas/snmp_vacm_access",
+            "description": "VACM access rules for SNMPv3"
+          },
+          "security_to_group": {
+            "$ref": "#/components/schemas/snmp_vacm_security_to_group",
+            "description": "VACM security-name to group mappings"
+          }
+        },
+        "type": "object"
+      },
+      "snmp_vacm_access": {
+        "description": "VACM access rules for SNMPv3",
+        "items": {
+          "$ref": "#/components/schemas/snmp_vacm_access_item"
+        },
+        "type": "array"
+      },
+      "snmp_vacm_access_item": {
+        "additionalProperties": false,
+        "description": "VACM access rule for an SNMP group",
+        "properties": {
+          "group_name": {
+            "description": "SNMP VACM group name",
+            "type": "string"
+          },
+          "prefix_list": {
+            "$ref": "#/components/schemas/snmp_vacm_access_item_prefix_list",
+            "description": "Context prefix rules for this VACM group"
+          }
+        },
+        "type": "object"
+      },
+      "snmp_vacm_access_item_prefix_list": {
+        "description": "Context prefix rules for a VACM access entry",
+        "items": {
+          "$ref": "#/components/schemas/snmp_vacm_access_item_prefix_list_item"
+        },
+        "type": "array"
+      },
+      "snmp_vacm_access_item_prefix_list_item": {
+        "additionalProperties": false,
+        "description": "Context prefix rule for a VACM access entry",
+        "properties": {
+          "context_prefix": {
+            "description": "Context prefix for this VACM access rule. Required only if `type`==`context_prefix`",
+            "examples": [
+              "iil"
+            ],
+            "type": "string"
+          },
+          "notify_view": {
+            "description": "Notify view name referenced by this VACM access rule",
+            "examples": [
+              "all"
+            ],
+            "type": "string"
+          },
+          "read_view": {
+            "description": "Read view name referenced by this VACM access rule",
+            "examples": [
+              "all"
+            ],
+            "type": "string"
+          },
+          "security_level": {
+            "$ref": "#/components/schemas/snmp_vacm_access_item_prefix_list_item_level",
+            "description": "Required security level for this VACM access rule. enum: `authentication`, `none`, `privacy`."
+          },
+          "security_model": {
+            "$ref": "#/components/schemas/snmp_vacm_access_item_prefix_list_item_model",
+            "description": "Required security model for this VACM access rule. enum: `any`, `usm`, `v1`, `v2c`."
+          },
+          "type": {
+            "$ref": "#/components/schemas/snmp_vacm_access_item_type",
+            "description": "VACM context matching type for this access rule. enum: `context_prefix`, `default_context_prefix`."
+          },
+          "write_view": {
+            "description": "Write view name referenced by this VACM access rule",
+            "examples": [
+              "all"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "snmp_vacm_access_item_prefix_list_item_level": {
+        "description": "enum: `authentication`, `none`, `privacy`",
+        "enum": [
+          "authentication",
+          "none",
+          "privacy"
+        ],
+        "type": "string"
+      },
+      "snmp_vacm_access_item_prefix_list_item_model": {
+        "description": "enum: `any`, `usm`, `v1`, `v2c`",
+        "enum": [
+          "any",
+          "usm",
+          "v1",
+          "v2c"
+        ],
+        "type": "string"
+      },
+      "snmp_vacm_access_item_type": {
+        "description": "VACM context matching type for this access rule. enum: `context_prefix`, `default_context_prefix`",
+        "enum": [
+          "context_prefix",
+          "default_context_prefix"
+        ],
+        "type": "string"
+      },
+      "snmp_vacm_security_model": {
+        "description": "enum: `usm`, `v1`, `v2c`",
+        "enum": [
+          "usm",
+          "v1",
+          "v2c"
+        ],
+        "type": "string"
+      },
+      "snmp_vacm_security_to_group": {
+        "additionalProperties": false,
+        "description": "VACM security-name to group mapping configuration",
+        "properties": {
+          "content": {
+            "$ref": "#/components/schemas/snmp_vacm_security_to_group_content",
+            "description": "VACM security-name to group mapping entries"
+          },
+          "security_model": {
+            "$ref": "#/components/schemas/snmp_vacm_security_model",
+            "description": "Required security model for these VACM group mappings. enum: `usm`, `v1`, `v2c`."
+          }
+        },
+        "type": "object"
+      },
+      "snmp_vacm_security_to_group_content": {
+        "description": "VACM security-name to group mapping entries",
+        "items": {
+          "$ref": "#/components/schemas/snmp_vacm_security_to_group_content_item"
+        },
+        "type": "array"
+      },
+      "snmp_vacm_security_to_group_content_item": {
+        "additionalProperties": false,
+        "description": "VACM security-name to group mapping entry",
+        "properties": {
+          "group": {
+            "description": "VACM group name referenced by this mapping",
+            "type": "string"
+          },
+          "security_name": {
+            "description": "Name of the SNMP security principal mapped to a VACM group",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "snmpv3_config": {
+        "additionalProperties": false,
+        "description": "SNMPv3 notification, target, USM, and VACM configuration",
+        "properties": {
+          "notify": {
+            "$ref": "#/components/schemas/snmpv3_config_notify",
+            "description": "SNMPv3 notification definitions used for traps and informs"
+          },
+          "notify_filter": {
+            "$ref": "#/components/schemas/snmpv3_config_notify_filter",
+            "description": "SNMPv3 notification filter profiles"
+          },
+          "target_address": {
+            "$ref": "#/components/schemas/snmpv3_config_target_address",
+            "description": "SNMPv3 notification target addresses"
+          },
+          "target_parameters": {
+            "$ref": "#/components/schemas/snmpv3_config_target_params",
+            "description": "SNMPv3 target parameter profiles"
+          },
+          "usm": {
+            "$ref": "#/components/schemas/snmp_usms",
+            "description": "SNMPv3 USM engine configurations"
+          },
+          "vacm": {
+            "$ref": "#/components/schemas/snmp_vacm",
+            "description": "SNMPv3 VACM access control configuration"
+          }
+        },
+        "type": "object"
+      },
+      "snmpv3_config_notify": {
+        "description": "SNMPv3 notification definitions used for traps and informs",
+        "items": {
+          "$ref": "#/components/schemas/snmpv3_config_notify_items"
+        },
+        "type": "array"
+      },
+      "snmpv3_config_notify_filter": {
+        "description": "SNMPv3 notification filter profiles",
+        "items": {
+          "$ref": "#/components/schemas/snmpv3_config_notify_filter_item"
+        },
+        "type": "array"
+      },
+      "snmpv3_config_notify_filter_item": {
+        "additionalProperties": false,
+        "description": "SNMPv3 notification filter profile",
+        "properties": {
+          "categories": {
+            "$ref": "#/components/schemas/snmpv3_config_notify_filter_item_categories",
+            "description": "CX only. List of SNMP trap group categories included in this filter profile. See https://www.juniper.net/documentation/software/topics/task/configuration/snmp-trap-groups-configuring-junos-nm.html for valid category names."
+          },
+          "contents": {
+            "$ref": "#/components/schemas/snmpv3_config_notify_filter_item_contents",
+            "description": "OID filter rules in this notification filter profile"
+          },
+          "profile_name": {
+            "description": "Notification filter profile name",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "snmpv3_config_notify_filter_item_categories": {
+        "description": "List of SNMP trap group category names for a CX notification filter profile",
+        "examples": [
+          [
+            "link",
+            "authentication"
+          ]
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "snmpv3_config_notify_filter_item_content": {
+        "additionalProperties": false,
+        "description": "OID filter rule for an SNMPv3 notification profile",
+        "properties": {
+          "include": {
+            "description": "Whether the matching OID subtree is included",
+            "type": "boolean"
+          },
+          "oid": {
+            "description": "Matched OID subtree for this notification filter rule",
+            "examples": [
+              "1.3.6.1.4.1"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "snmpv3_config_notify_filter_item_contents": {
+        "description": "OID filter rules in an SNMPv3 notification filter profile",
+        "items": {
+          "$ref": "#/components/schemas/snmpv3_config_notify_filter_item_content"
+        },
+        "type": "array"
+      },
+      "snmpv3_config_notify_items": {
+        "additionalProperties": false,
+        "description": "SNMPv3 notification definition for traps or informs",
+        "properties": {
+          "name": {
+            "description": "Identifier for this SNMPv3 notification definition",
+            "type": "string"
+          },
+          "tag": {
+            "description": "Notification tag used to select target addresses",
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/snmpv3_config_notify_type",
+            "description": "Delivery mode for this SNMPv3 notification, such as trap or inform"
+          }
+        },
+        "type": "object"
+      },
+      "snmpv3_config_notify_type": {
+        "description": "Delivery mode for this SNMPv3 notification, such as trap or inform. enum: `inform`, `trap`",
+        "enum": [
+          "inform",
+          "trap"
+        ],
+        "type": "string"
+      },
+      "snmpv3_config_target_address": {
+        "description": "SNMPv3 notification target addresses",
+        "items": {
+          "$ref": "#/components/schemas/snmpv3_config_target_address_item"
+        },
+        "type": "array"
+      },
+      "snmpv3_config_target_address_item": {
+        "additionalProperties": false,
+        "description": "SNMPv3 notification target address entry",
+        "properties": {
+          "address": {
+            "description": "IP address or hostname of the SNMP target",
+            "examples": [
+              "10.11.0.2"
+            ],
+            "type": "string"
+          },
+          "address_mask": {
+            "description": "Mask applied to the SNMP target address",
+            "examples": [
+              "255.255.255.0"
+            ],
+            "type": "string"
+          },
+          "port": {
+            "default": "161",
+            "description": "UDP port used by the SNMP target",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tag_list": {
+            "description": "Set of notification tags for this target address; use spaces between multiple tags",
+            "type": "string"
+          },
+          "target_address_name": {
+            "description": "Name of the SNMP target address entry",
+            "examples": [
+              "target_address_name"
+            ],
+            "type": "string"
+          },
+          "target_parameters": {
+            "description": "Target parameter profile referenced by this target address",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "snmpv3_config_target_param": {
+        "additionalProperties": false,
+        "description": "SNMPv3 target parameter profile",
+        "properties": {
+          "message_processing_model": {
+            "$ref": "#/components/schemas/snmpv3_config_target_param_mess_process_model",
+            "description": "SNMP message processing model used by this target parameter profile. enum: `v1`, `v2c`, `v3`."
+          },
+          "name": {
+            "description": "Target parameter profile name",
+            "type": "string"
+          },
+          "notify_filter": {
+            "description": "Notification filter profile referenced by this target parameter profile",
+            "type": "string"
+          },
+          "security_level": {
+            "$ref": "#/components/schemas/snmpv3_config_target_param_security_level",
+            "description": "Required security level for this target parameter profile. enum: `authentication`, `none`, `privacy`."
+          },
+          "security_model": {
+            "$ref": "#/components/schemas/snmpv3_config_target_param_security_model",
+            "description": "Required security model for this target parameter profile. enum: `usm`, `v1`, `v2c`."
+          },
+          "security_name": {
+            "description": "USM security name referenced by this target parameter profile",
+            "examples": [
+              "m01620"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "snmpv3_config_target_param_mess_process_model": {
+        "description": "enum: `v1`, `v2c`, `v3`",
+        "enum": [
+          "v1",
+          "v2c",
+          "v3"
+        ],
+        "type": "string"
+      },
+      "snmpv3_config_target_param_security_level": {
+        "description": "enum: `authentication`, `none`, `privacy`",
+        "enum": [
+          "authentication",
+          "none",
+          "privacy"
+        ],
+        "type": "string"
+      },
+      "snmpv3_config_target_param_security_model": {
+        "description": "enum: `usm`, `v1`, `v2c`",
+        "enum": [
+          "usm",
+          "v1",
+          "v2c"
+        ],
+        "type": "string"
+      },
+      "snmpv3_config_target_params": {
+        "description": "SNMPv3 target parameter profiles",
+        "items": {
+          "$ref": "#/components/schemas/snmpv3_config_target_param"
+        },
+        "type": "array"
+      },
       "ssl_proxy_ciphers_category": {
         "default": "strong",
         "description": "enum: `medium`, `strong`, `weak`",
@@ -5287,6 +6162,18 @@
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"
+      },
+      "oauth2": {
+        "description": "OAuth2 authorization code flow (RFC 6749) with PKCE (RFC 7636) and rotating refresh tokens, for third-party applications (including MCP integrations) acting on behalf of a consenting user. It uses an Org API token with `oauth_enabled` set as the OAuth2 client, the `client_id` is its composite `oauth_client_id` (`<org_id>.<token_id>`). See the [Orgs OAuth2](/#operations/getOauthAuthorization) endpoints.\n\n**Format**:\n  `Authorization: Bearer {access_token}`\n\n**Notes**:\n* The access token carries the privileges configured on the API token, constrained to what the consenting user has\n* The access token expires after `oauth_ttl` (default 1 hour), use the refresh token to get a new one\n* No fixed scopes are defined, the scope is derived from the API token name (e.g. `custom-ServiceNow Integration`)",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "/api/v1/orgs/oauth/authorize",
+            "refreshUrl": "/api/v1/orgs/oauth/token",
+            "scopes": {},
+            "tokenUrl": "/api/v1/orgs/oauth/token"
+          }
+        },
+        "type": "oauth2"
       }
     }
   }

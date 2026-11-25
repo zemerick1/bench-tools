@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Authentication",
-    "version": "2610.1.0"
+    "version": "2611.1.0"
   },
   "servers": [
     {
@@ -60,6 +60,9 @@
     },
     {
       "csrfToken": []
+    },
+    {
+      "oauth2": []
     }
   ],
   "tags": [
@@ -74,6 +77,10 @@
     {
       "description": "Admin Lookup API Call is mainly used by Web UIs to know if a user must be redirected to an SSO URL for login.",
       "name": "Admins Lookup"
+    },
+    {
+      "description": "API tokens with `oauth_enabled` set can be used as OAuth2 clients. This enables third-party applications (including MCP integrations) to obtain short-lived access tokens on behalf of a user, with explicit user consent.\n\nThe flow uses the standard OAuth2 authorization code grant (RFC 6749) with PKCE (RFC 7636) and rotating refresh tokens.\n\nThe OAuth endpoints are org-less: the `client_id` is a composite `<org_id>.<token_id>` (returned as `oauth_client_id` by the [Org API Token](/#operations/getOrgApiToken) endpoints), so a single credential encodes both the org and the client.\n\nA third-party (server-side) web application must have its `redirect_uri` pre-registered on the token via `oauth_redirect_uris`; the value is matched exactly at authorize time. Native and CLI clients (e.g. MCP tools) use a loopback `redirect_uri` (`http://127.0.0.1[:port]`), which is always allowed with PKCE and does not need to be registered.\n\n**Flow**\n1. The application redirects the user's browser to [Get OAuth2 Authorization](/#operations/getOauthAuthorization)\n2. After consent, the application receives an authorization code on its `redirect_uri` from [Grant OAuth2 Authorization](/#operations/grantOauthAuthorization)\n3. The application exchanges the code, then later the refresh tokens, at [Exchange OAuth2 Token](/#operations/exchangeOauthToken)\n4. The access token is used as `Authorization: Bearer <access_token>`",
+      "name": "Orgs OAuth2"
     },
     {
       "description": "A Mist account can be linked to OAuth2 providers:\n  1. First, login with your Mist account\n  2. Obtain the Authorization URL for Linking\n  3. Obtain the authorization code by clicking / going through Authorization URL\n  4. Link Mist Account against OAuth2 Provider by using the authorization code",
@@ -351,6 +358,225 @@
         ]
       }
     },
+    "/api/v1/orgs/oauth/authorize": {
+      "get": {
+        "description": "Validate an OAuth2 authorization code request and return the consent page data. The third-party application redirects the user's browser here.\n\nThe `client_id` is the composite `<org_id>.<token_id>` returned as `oauth_client_id` by the [Org API Token](/#operations/getOrgApiToken) endpoints. The API token must have `oauth_enabled` set.\n\nIf the user is not authenticated, a `401` is returned with an `authorize_url` to resume the flow after login.",
+        "operationId": "getOauthAuthorization",
+        "parameters": [
+          {
+            "description": "Composite `<org_id>.<token_id>` of the API token (`oauth_client_id`)",
+            "in": "query",
+            "name": "client_id",
+            "required": true,
+            "schema": {
+              "examples": [
+                "bc411cd9-0d1b-4713-94df-eee8617758ed.7cc917df-630a-1508-1889-e18028052dde"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Must exactly match one of the registered `oauth_redirect_uris` of the API token, or be the loopback URL `http://127.0.0.1[:port]`",
+            "in": "query",
+            "name": "redirect_uri",
+            "required": true,
+            "schema": {
+              "examples": [
+                "http://127.0.0.1:3000/callback"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Must be `code`. enum: `code`",
+            "in": "query",
+            "name": "response_type",
+            "required": true,
+            "schema": {
+              "enum": [
+                "code"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Opaque value returned unchanged to the client",
+            "in": "query",
+            "name": "state",
+            "required": true,
+            "schema": {
+              "examples": [
+                "abc123"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Required for a loopback redirect or when the client has `oauth_pkce_required` set. BASE64URL(SHA256(code_verifier))",
+            "in": "query",
+            "name": "code_challenge",
+            "schema": {
+              "examples": [
+                "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Required with `code_challenge`. Must be `S256`. enum: `S256`",
+            "in": "query",
+            "name": "code_challenge_method",
+            "schema": {
+              "enum": [
+                "S256"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OauthAuthorizeInfo"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/OauthLoginRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "security": [
+          {
+            "csrfToken": []
+          }
+        ],
+        "summary": "getOauthAuthorization",
+        "tags": [
+          "Orgs OAuth2"
+        ]
+      },
+      "post": {
+        "description": "The user has consented. Generate a single-use authorization code (valid for 60 seconds) and redirect the user to the client `redirect_uri` with `code` and `state` query parameters.\n\n**Privilege coverage**\n\nTo prevent privilege escalation, the consenting user must hold **at least** the role the API token grants for every scope the token covers. Otherwise the request is rejected with a `400` and `{\"detail\": \"access_denied: insufficient privileges to authorize this application\"}`.\n\nCoverage is hierarchy-aware, mirroring the runtime API permission model: a role at a higher scope covers the scopes beneath it (e.g. an org admin can authorize a site-scoped token, and an MSP admin can authorize an org-scoped token). A user with only a lower-scope privilege cannot authorize a token scoped above it.",
+        "operationId": "grantOauthAuthorization",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "client_id": "bc411cd9-0d1b-4713-94df-eee8617758ed.7cc917df-630a-1508-1889-e18028052dde",
+                    "code_challenge": "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+                    "redirect_uri": "http://127.0.0.1:3000/callback",
+                    "state": "abc123"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/oauth_authorize_grant"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "302": {
+            "$ref": "#/components/responses/OauthAuthorizeRedirect"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "security": [
+          {
+            "csrfToken": []
+          }
+        ],
+        "summary": "grantOauthAuthorization",
+        "tags": [
+          "Orgs OAuth2"
+        ]
+      }
+    },
+    "/api/v1/orgs/oauth/token": {
+      "post": {
+        "description": "Exchange an authorization code for an access token and a refresh token (`grant_type`==`authorization_code`), or rotate a refresh token for a new access token and a new refresh token (`grant_type`==`refresh_token`). Called server-to-server by the third-party application.\n\nRefresh tokens are one-time-use: each refresh returns a new `refresh_token` and invalidates the previous one. Reusing an already-rotated refresh token is treated as a compromise and revokes the entire token chain.\n\nDisabling `oauth_enabled` on the API token, or deleting the token, immediately revokes all outstanding refresh tokens. Each refresh re-validates the consenting user (still active, still holding at least the token's role for every scope it grants); otherwise the refresh is rejected and the application must obtain fresh consent.\n\nAccess tokens are stateless and remain valid until they expire (bounded by `oauth_ttl`, default 1 hour), so a revoked user loses access within one access-token lifetime.\n\nTo use the access token, pass it as a Bearer token: `Authorization: Bearer <access_token>`. It carries the privileges configured on the API token, constrained to what the consenting user has.",
+        "operationId": "exchangeOauthToken",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Authorization Code": {
+                  "value": {
+                    "client_id": "bc411cd9-0d1b-4713-94df-eee8617758ed.7cc917df-630a-1508-1889-e18028052dde",
+                    "code": "7d1b2f4e9a",
+                    "code_verifier": "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
+                    "grant_type": "authorization_code",
+                    "redirect_uri": "http://127.0.0.1:3000/callback"
+                  }
+                },
+                "Refresh Token": {
+                  "value": {
+                    "client_id": "REDACTED",
+                    "grant_type": "refresh_token",
+                    "refresh_token": "REDACTED"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/oauth_token_request"
+              }
+            }
+          },
+          "description": "Request Body"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OauthToken"
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "security": [],
+        "summary": "exchangeOauthToken",
+        "tags": [
+          "Orgs OAuth2"
+        ]
+      }
+    },
     "/api/v1/self/oauth/{provider}": {
       "parameters": [
         {
@@ -516,6 +742,228 @@
         "required": [
           "email",
           "password"
+        ],
+        "type": "object"
+      },
+      "oauth_authorize_grant": {
+        "additionalProperties": false,
+        "description": "Consent granted by the user for an OAuth2 authorization request. The user must hold at least the role the API token grants for every scope it covers (hierarchy-aware, e.g. an org admin can authorize a site-scoped token and an MSP admin can authorize an org-scoped token)",
+        "properties": {
+          "client_id": {
+            "description": "Composite `<org_id>.<token_id>` of the API token (`oauth_client_id`)",
+            "examples": [
+              "bc411cd9-0d1b-4713-94df-eee8617758ed.7cc917df-630a-1508-1889-e18028052dde"
+            ],
+            "type": "string"
+          },
+          "code_challenge": {
+            "description": "Required for a loopback redirect or when the client has `oauth_pkce_required` set. BASE64URL(SHA256(code_verifier))",
+            "examples": [
+              "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM"
+            ],
+            "type": "string"
+          },
+          "redirect_uri": {
+            "description": "Must exactly match one of the registered `oauth_redirect_uris` of the API token, or be the loopback URL `http://127.0.0.1[:port]`",
+            "examples": [
+              "http://127.0.0.1:3000/callback"
+            ],
+            "type": "string"
+          },
+          "state": {
+            "description": "Opaque value returned unchanged to the client",
+            "examples": [
+              "abc123"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "client_id",
+          "redirect_uri",
+          "state"
+        ],
+        "type": "object"
+      },
+      "oauth_authorize_info": {
+        "additionalProperties": false,
+        "description": "Consent page data for a valid OAuth2 authorization request",
+        "properties": {
+          "client_name": {
+            "description": "Name of the API token acting as the OAuth2 client",
+            "examples": [
+              "ServiceNow Integration"
+            ],
+            "type": "string"
+          },
+          "scope": {
+            "description": "Scope that will be granted to the client",
+            "examples": [
+              "custom-ServiceNow Integration"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "oauth_login_required": {
+        "additionalProperties": false,
+        "description": "Returned when the OAuth2 authorization request is made by a user who is not authenticated",
+        "properties": {
+          "authorize_url": {
+            "description": "Authorization URL to resume once the user has logged in",
+            "examples": [
+              "/api/v1/orgs/oauth/authorize?client_id=bc411cd9-0d1b-4713-94df-eee8617758ed.7cc917df-630a-1508-1889-e18028052dde&response_type=code&state=abc123"
+            ],
+            "type": "string"
+          },
+          "error": {
+            "description": "Error code. enum: `login_required`",
+            "enum": [
+              "login_required"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "oauth_token_request": {
+        "description": "OAuth2 token request. The `grant_type` selects between exchanging an authorization code and rotating a refresh token",
+        "discriminator": {
+          "mapping": {
+            "authorization_code": "#/components/schemas/oauth_token_request_authorization_code",
+            "refresh_token": "#/components/schemas/oauth_token_request_refresh_token"
+          },
+          "propertyName": "grant_type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/oauth_token_request_authorization_code"
+          },
+          {
+            "$ref": "#/components/schemas/oauth_token_request_refresh_token"
+          }
+        ]
+      },
+      "oauth_token_request_authorization_code": {
+        "additionalProperties": false,
+        "description": "Exchange an authorization code for an access token and a refresh token. Called server-to-server by the third-party application",
+        "properties": {
+          "client_id": {
+            "description": "Composite `<org_id>.<token_id>` of the API token (`oauth_client_id`)",
+            "examples": [
+              "bc411cd9-0d1b-4713-94df-eee8617758ed.7cc917df-630a-1508-1889-e18028052dde"
+            ],
+            "type": "string"
+          },
+          "client_secret": {
+            "description": "Required if PKCE was not used. The `key` of the API token",
+            "type": "string"
+          },
+          "code": {
+            "description": "Authorization code received from the authorize step",
+            "type": "string"
+          },
+          "code_verifier": {
+            "description": "Required if PKCE was used. The original random verifier string",
+            "examples": [
+              "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+            ],
+            "type": "string"
+          },
+          "grant_type": {
+            "description": "Must be `authorization_code`. enum: `authorization_code`",
+            "enum": [
+              "authorization_code"
+            ],
+            "type": "string"
+          },
+          "redirect_uri": {
+            "description": "Must match the `redirect_uri` used at the authorize step",
+            "examples": [
+              "http://127.0.0.1:3000/callback"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "grant_type",
+          "code",
+          "client_id",
+          "redirect_uri"
+        ],
+        "type": "object"
+      },
+      "oauth_token_request_refresh_token": {
+        "additionalProperties": false,
+        "description": "Rotate a refresh token for a new access token and a new refresh token. Refresh tokens are one-time-use: each refresh returns a new `refresh_token` that replaces the previous one, and the old one is invalidated. Reusing an already-rotated refresh token is treated as a compromise and revokes the entire token chain.\n\nEach refresh re-validates the consenting user: they must still be active and must still hold at least the token's role for every scope it grants (hierarchy-aware, as at authorization time). Otherwise the refresh is rejected, the rotation chain is revoked, and the application must obtain fresh consent.",
+        "properties": {
+          "client_id": {
+            "description": "Composite `<org_id>.<token_id>` of the API token (`oauth_client_id`)",
+            "examples": [
+              "bc411cd9-0d1b-4713-94df-eee8617758ed.7cc917df-630a-1508-1889-e18028052dde"
+            ],
+            "type": "string"
+          },
+          "grant_type": {
+            "description": "Must be `refresh_token`. enum: `refresh_token`",
+            "enum": [
+              "refresh_token"
+            ],
+            "type": "string"
+          },
+          "refresh_token": {
+            "description": "The most recently issued refresh token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "grant_type",
+          "client_id",
+          "refresh_token"
+        ],
+        "type": "object"
+      },
+      "oauth_token_response": {
+        "additionalProperties": false,
+        "description": "OAuth2 access token response",
+        "properties": {
+          "access_token": {
+            "description": "Short-lived JWT access token. Use it in the Authorization header as Bearer <access_token>",
+            "type": "string"
+          },
+          "expires_in": {
+            "description": "Access token lifetime in seconds (see `oauth_ttl` on the API token)",
+            "examples": [
+              3600
+            ],
+            "type": "integer"
+          },
+          "refresh_token": {
+            "description": "One-time-use refresh token that replaces the previous one",
+            "type": "string"
+          },
+          "scope": {
+            "description": "Scope granted to the access token",
+            "examples": [
+              "custom-ServiceNow Integration"
+            ],
+            "type": "string"
+          },
+          "token_type": {
+            "description": "Token type. enum: `bearer`",
+            "enum": [
+              "bearer"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "access_token",
+          "token_type",
+          "expires_in",
+          "refresh_token",
+          "scope"
         ],
         "type": "object"
       },
@@ -969,6 +1417,95 @@
       "OK": {
         "description": "OK"
       },
+      "OauthAuthorizeInfo": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/OauthAuthorizeInfoExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/oauth_authorize_info"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/OauthAuthorizeInfoExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/oauth_authorize_info"
+            }
+          }
+        },
+        "description": "OK - the authorization request is valid and the user is authenticated"
+      },
+      "OauthAuthorizeRedirect": {
+        "description": "Found - the authorization code is generated and the user is redirected to the client `redirect_uri`. The authorization code is single-use and expires after 60 seconds",
+        "headers": {
+          "Location": {
+            "description": "Client `redirect_uri` with the authorization code and the original state, e.g. `http://127.0.0.1:3000/callback?code=<authorization_code>&state=abc123`",
+            "schema": {
+              "examples": [
+                "http://127.0.0.1:3000/callback?code=7d1b2f4e9a&state=abc123"
+              ],
+              "type": "string"
+            }
+          }
+        }
+      },
+      "OauthLoginRequired": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/OauthLoginRequiredExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/oauth_login_required"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/OauthLoginRequiredExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/oauth_login_required"
+            }
+          }
+        },
+        "description": "Unauthorized - the user is not authenticated"
+      },
+      "OauthToken": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/OauthTokenExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/oauth_token_response"
+            }
+          },
+          "application/vnd.api+json": {
+            "examples": {
+              "Example": {
+                "$ref": "#/components/examples/OauthTokenExample"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/oauth_token_response"
+            }
+          }
+        },
+        "description": "OK"
+      },
       "SelfOauthLinkFailure": {
         "content": {
           "application/json": {
@@ -1096,6 +1633,27 @@
       "LoginSuccessOK": {
         "value": {}
       },
+      "OauthAuthorizeInfoExample": {
+        "value": {
+          "client_name": "ServiceNow Integration",
+          "scope": "custom-ServiceNow Integration"
+        }
+      },
+      "OauthLoginRequiredExample": {
+        "value": {
+          "authorize_url": "/api/v1/orgs/oauth/authorize?client_id=bc411cd9-0d1b-4713-94df-eee8617758ed.7cc917df-630a-1508-1889-e18028052dde&response_type=code&state=abc123",
+          "error": "login_required"
+        }
+      },
+      "OauthTokenExample": {
+        "value": {
+          "access_token": "REDACTED",
+          "expires_in": 3600,
+          "refresh_token": "REDACTED",
+          "scope": "custom-ServiceNow Integration",
+          "token_type": "bearer"
+        }
+      },
       "SelfOauthLinkFailureExample": {
         "value": {
           "error": "access_denied",
@@ -1128,6 +1686,18 @@
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"
+      },
+      "oauth2": {
+        "description": "OAuth2 authorization code flow (RFC 6749) with PKCE (RFC 7636) and rotating refresh tokens, for third-party applications (including MCP integrations) acting on behalf of a consenting user. It uses an Org API token with `oauth_enabled` set as the OAuth2 client, the `client_id` is its composite `oauth_client_id` (`<org_id>.<token_id>`). See the [Orgs OAuth2](/#operations/getOauthAuthorization) endpoints.\n\n**Format**:\n  `Authorization: Bearer {access_token}`\n\n**Notes**:\n* The access token carries the privileges configured on the API token, constrained to what the consenting user has\n* The access token expires after `oauth_ttl` (default 1 hour), use the refresh token to get a new one\n* No fixed scopes are defined, the scope is derived from the API token name (e.g. `custom-ServiceNow Integration`)",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "/api/v1/orgs/oauth/authorize",
+            "refreshUrl": "/api/v1/orgs/oauth/token",
+            "scopes": {},
+            "tokenUrl": "/api/v1/orgs/oauth/token"
+          }
+        },
+        "type": "oauth2"
       }
     }
   }

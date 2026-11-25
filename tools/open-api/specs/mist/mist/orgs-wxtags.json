@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs WxTags",
-    "version": "2610.1.0",
+    "version": "2611.1.0",
     "description": "Wxtags are tags or groups that can be created and used within the Org.\n\nThey are used to classify users and resources and can be applied to Access Points, WLAN configurations or WxRules within that site.\n\nOrg WxTags are created and managed at the org level and can only be referenced and used within the org level configuration."
   },
   "servers": [
@@ -61,6 +61,9 @@
     },
     {
       "csrfToken": []
+    },
+    {
+      "oauth2": []
     }
   ],
   "tags": [
@@ -619,7 +622,7 @@
         "uniqueItems": true
       },
       "wxlan_tag": {
-        "description": "WxLAN Tag\n  * type:\n    * client: created manually (e.g. on wireless client table, when they spot a device of interest, they can create a wxlan tag for it\n    * resource: created automatically when we discover a network resource\n    * subnet: create automatically when a subnet is discovered\n  * match:\n    * wlan_id, ap_id: values are a list of Wlan / Device ids\n    * client_mac: values are a list of MAC addresses\n  * radius_group: this is a smart tag that matches RADIUS-Filter-ID, Airespace-ACL-Name (VendorID=14179, VendorType=6) / Aruba-User-Role (VendorID=14823, VendorType=1)\n  * radius_username: this matches the ATTR-User-Name(1)\n  * radius_class: the matches the ATTR-Class(25)\n  * radius_attr: the values are [ \"6=1\" , \"26=10.2.3.4\" ], this support other RADIUS attributes where we know the type\n  * radius_vendor: the values are [ \"14179.10=1\" , \"14178.16=1.2.3.4\" ], this matches vendor attributes and will be dynamically evaluated",
+        "description": "WxLAN Tag\n  * type:\n    * client: created manually (e.g. on wireless client table, when they spot a device of interest, they can create a wxlan tag for it\n    * resource: created automatically when we discover a network resource\n    * subnet: create automatically when a subnet is discovered\n    * gbp_resource: a GBP-tagged local wireless peer, used only in `dst_allow_wxtags` / `dst_deny_wxtags` for local-peer segmentation on the AP. `gbp_tags` lists the peer tags (1-65535), empty/omitted matches any local peer. Optional `specs` narrow the peer flow by protocol / subnet / port (same form as the `spec` type)\n  * match:\n    * wlan_id, ap_id: values are a list of Wlan / Device ids\n    * client_mac: values are a list of MAC addresses\n    * gbp_tag: matches the Group Based Policy tag assigned to the client (received from RADIUS), values are a list of GBP tag numbers (1-65535). Used as a source match (in `src_wxtags`) for local-peer segmentation on the AP, it matches the client's own tag. To match a local wireless peer on the resource side, use a `gbp_resource` tag in `dst_allow_wxtags` / `dst_deny_wxtags`\n  * radius_group: this is a smart tag that matches RADIUS-Filter-ID, Airespace-ACL-Name (VendorID=14179, VendorType=6) / Aruba-User-Role (VendorID=14823, VendorType=1)\n  * radius_username: this matches the ATTR-User-Name(1)\n  * radius_class: the matches the ATTR-Class(25)\n  * radius_attr: the values are [ \"6=1\" , \"26=10.2.3.4\" ], this support other RADIUS attributes where we know the type\n  * radius_vendor: the values are [ \"14179.10=1\" , \"14178.16=1.2.3.4\" ], this matches vendor attributes and will be dynamically evaluated",
         "properties": {
           "created_time": {
             "$ref": "#/components/schemas/created_time",
@@ -629,6 +632,10 @@
             "description": "Whether this WxLAN tag is scoped to a site",
             "readOnly": true,
             "type": "boolean"
+          },
+          "gbp_tags": {
+            "$ref": "#/components/schemas/wxlan_tag_gbp_tags",
+            "description": "If `type`==`gbp_resource`, list of GBP tag numbers (1-65535) of the peer to match; empty/omitted matches any local peer"
           },
           "id": {
             "$ref": "#/components/schemas/id",
@@ -647,7 +654,7 @@
           },
           "match": {
             "$ref": "#/components/schemas/wxlan_tag_match",
-            "description": "Required if `type`==`match`; attribute compared against `values`. enum: `ap_id`, `app`, `asset_mac`, `client_mac`, `hostname`, `ip_range_subnet`, `port`, `psk_name`, `psk_role`, `radius_attr`, `radius_class`, `radius_group`, `radius_username`, `sdkclient_uuid`, `wlan_id`."
+            "description": "Required if `type`==`match`; attribute compared against `values`. enum: `ap_id`, `app`, `asset_mac`, `client_mac`, `gbp_tag`, `hostname`, `ip_range_subnet`, `port`, `psk_name`, `psk_role`, `radius_attr`, `radius_class`, `radius_group`, `radius_username`, `sdkclient_uuid`, `wlan_id`."
           },
           "modified_time": {
             "$ref": "#/components/schemas/modified_time",
@@ -682,7 +689,7 @@
           },
           "specs": {
             "$ref": "#/components/schemas/wxlan_tag_specs",
-            "description": "Traffic match specifications used when `type`==`spec`"
+            "description": "Traffic match specifications used when `type`==`spec` or `type`==`gbp_resource`"
           },
           "subnet": {
             "description": "CIDR subnet associated with this WxLAN tag when `type`==`subnet`",
@@ -690,7 +697,7 @@
           },
           "type": {
             "$ref": "#/components/schemas/wxlan_tag_type",
-            "description": "Kind of WxLAN tag and how it is populated. enum: `client`, `match`, `resource`, `spec`, `subnet`, `vlan`."
+            "description": "Kind of WxLAN tag and how it is populated. enum: `client`, `gbp_resource`, `match`, `resource`, `spec`, `subnet`, `vlan`."
           },
           "values": {
             "$ref": "#/components/schemas/wxlan_tag_values",
@@ -707,6 +714,21 @@
         ],
         "type": "object"
       },
+      "wxlan_tag_gbp_tags": {
+        "description": "GBP tag numbers (1-65535) of the peer to match when `type`==`gbp_resource`. Empty/omitted matches any local peer",
+        "examples": [
+          [
+            10,
+            20
+          ]
+        ],
+        "items": {
+          "maximum": 65535,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "type": "array"
+      },
       "wxlan_tag_last_ips": {
         "description": "Most recent IP addresses observed for a WxLAN tag",
         "items": {
@@ -716,12 +738,13 @@
         "type": "array"
       },
       "wxlan_tag_match": {
-        "description": "required if `type`==`match`. enum: `ap_id`, `app`, `asset_mac`, `client_mac`, `hostname`, `ip_range_subnet`, `port`, `psk_name`, `psk_role`, `radius_attr`, `radius_class`, `radius_group`, `radius_username`, `sdkclient_uuid`, `wlan_id`",
+        "description": "required if `type`==`match`. enum: `ap_id`, `app`, `asset_mac`, `client_mac`, `gbp_tag`, `hostname`, `ip_range_subnet`, `port`, `psk_name`, `psk_role`, `radius_attr`, `radius_class`, `radius_group`, `radius_username`, `sdkclient_uuid`, `wlan_id`",
         "enum": [
           "ap_id",
           "app",
           "asset_mac",
           "client_mac",
+          "gbp_tag",
           "hostname",
           "ip_range_subnet",
           "port",
@@ -780,16 +803,17 @@
         "type": "array"
       },
       "wxlan_tag_specs": {
-        "description": "Traffic match specifications used when `type`==`spec`",
+        "description": "Traffic match specifications used when `type`==`spec` or `type`==`gbp_resource`. For `gbp_resource`, optional, narrows the peer flow (empty means any protocol / peer subnet / port)",
         "items": {
           "$ref": "#/components/schemas/wxlan_tag_spec"
         },
         "type": "array"
       },
       "wxlan_tag_type": {
-        "description": "enum: `client`, `match`, `resource`, `spec`, `subnet`, `vlan`",
+        "description": "enum: `client`, `gbp_resource`, `match`, `resource`, `spec`, `subnet`, `vlan`",
         "enum": [
           "client",
+          "gbp_resource",
           "match",
           "resource",
           "spec",
@@ -799,7 +823,7 @@
         "type": "string"
       },
       "wxlan_tag_values": {
-        "description": "Required if `type`==`match` and\n  * `match`==`ap_id`: list of AP IDs\n  * `match`==`app`: list of Application Names\n  * `match`==`asset_mac`: list of Asset MAC addresses\n  * `match`==`client_mac`: list of Client MAC addresses\n  * `match`==`hostname`: list of Resources Hostnames\n  * `match`==`ip_range_subnet`: list of IP addresses and/or CIDRs\n  * `match`==`psk_name`: list of PSK Names\n  * `match`==`psk_role`: list of PSK Roles\n  * `match`==`port`: list of Ports or Port Ranges\n  * `match`==`radius_attr`: list of RADIUS Attributes. The values are [ \"6=1\", \"26=10.2.3.4\" ], this support other RADIUS attributes where we know the type\n  * `match`==`radius_class`: list of RADIUS Classes. This matches the ATTR-Class(25)\n  * `match`==`radius_group`: list of RADIUS Groups. This is a smart tag that matches RADIUS-Filter-ID, Airespace-ACL-Name (VendorID=14179, VendorType=6) / Aruba-User-Role (VendorID=14823, VendorType=1)\n  * `match`==`radius_username`: list of RADIUS Usernames. This matches the ATTR-User-Name(1)\n  * `match`==`sdkclient_uuid`: list of SDK UUIDs\n  * `match`==`wlan_id`: list of WLAN IDs\n\n**Notes**:\nVariables are not allowed",
+        "description": "Required if `type`==`match` and\n  * `match`==`ap_id`: list of AP IDs\n  * `match`==`app`: list of Application Names\n  * `match`==`asset_mac`: list of Asset MAC addresses\n  * `match`==`client_mac`: list of Client MAC addresses\n  * `match`==`gbp_tag`: list of GBP tag numbers (1-65535) assigned to the client (received from RADIUS)\n  * `match`==`hostname`: list of Resources Hostnames\n  * `match`==`ip_range_subnet`: list of IP addresses and/or CIDRs\n  * `match`==`psk_name`: list of PSK Names\n  * `match`==`psk_role`: list of PSK Roles\n  * `match`==`port`: list of Ports or Port Ranges\n  * `match`==`radius_attr`: list of RADIUS Attributes. The values are [ \"6=1\", \"26=10.2.3.4\" ], this support other RADIUS attributes where we know the type\n  * `match`==`radius_class`: list of RADIUS Classes. This matches the ATTR-Class(25)\n  * `match`==`radius_group`: list of RADIUS Groups. This is a smart tag that matches RADIUS-Filter-ID, Airespace-ACL-Name (VendorID=14179, VendorType=6) / Aruba-User-Role (VendorID=14823, VendorType=1)\n  * `match`==`radius_username`: list of RADIUS Usernames. This matches the ATTR-User-Name(1)\n  * `match`==`sdkclient_uuid`: list of SDK UUIDs\n  * `match`==`wlan_id`: list of WLAN IDs\n\n**Notes**:\nVariables are not allowed",
         "items": {
           "type": "string"
         },
@@ -1232,6 +1256,18 @@
         "in": "header",
         "name": "X-CSRFToken",
         "type": "apiKey"
+      },
+      "oauth2": {
+        "description": "OAuth2 authorization code flow (RFC 6749) with PKCE (RFC 7636) and rotating refresh tokens, for third-party applications (including MCP integrations) acting on behalf of a consenting user. It uses an Org API token with `oauth_enabled` set as the OAuth2 client, the `client_id` is its composite `oauth_client_id` (`<org_id>.<token_id>`). See the [Orgs OAuth2](/#operations/getOauthAuthorization) endpoints.\n\n**Format**:\n  `Authorization: Bearer {access_token}`\n\n**Notes**:\n* The access token carries the privileges configured on the API token, constrained to what the consenting user has\n* The access token expires after `oauth_ttl` (default 1 hour), use the refresh token to get a new one\n* No fixed scopes are defined, the scope is derived from the API token name (e.g. `custom-ServiceNow Integration`)",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "/api/v1/orgs/oauth/authorize",
+            "refreshUrl": "/api/v1/orgs/oauth/token",
+            "scopes": {},
+            "tokenUrl": "/api/v1/orgs/oauth/token"
+          }
+        },
+        "type": "oauth2"
       }
     }
   }
