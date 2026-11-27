@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Orgs Setting",
-    "version": "2611.1.0",
+    "version": "2611.1.1",
     "description": "API Calls to manage the Mist Organization Settings"
   },
   "servers": [
@@ -498,6 +498,43 @@
           "type": "string"
         },
         "type": "array"
+      },
+      "config_switch_local_accounts": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/config_switch_local_accounts_user"
+        },
+        "description": "Property key is the user name. For Local user authentication",
+        "type": "object"
+      },
+      "config_switch_local_accounts_user": {
+        "additionalProperties": false,
+        "description": "Local switch user account credentials and access role",
+        "properties": {
+          "password": {
+            "description": "Local password for the switch user account",
+            "examples": [
+              "Juniper123"
+            ],
+            "format": "password",
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/config_switch_local_accounts_user_role",
+            "description": "Access role granted to the local switch user account. enum: `admin`, `helpdesk`, `none`, `read`."
+          }
+        },
+        "type": "object"
+      },
+      "config_switch_local_accounts_user_role": {
+        "default": "none",
+        "description": "enum: `admin`, `helpdesk`, `none`, `read`",
+        "enum": [
+          "admin",
+          "helpdesk",
+          "none",
+          "read"
+        ],
+        "type": "string"
       },
       "created_time": {
         "description": "When the object has been created, in epoch",
@@ -1086,7 +1123,7 @@
             "description": "Configuration defaults for switches in this organization"
           },
           "switch_mgmt": {
-            "$ref": "#/components/schemas/org_setting_switch_mgmt",
+            "$ref": "#/components/schemas/switch_mgmt",
             "description": "Management settings for switches in this organization"
           },
           "switch_updown_threshold": {
@@ -2125,21 +2162,6 @@
         },
         "type": "object"
       },
-      "org_setting_switch_mgmt": {
-        "additionalProperties": false,
-        "description": "Organization-level switch management settings",
-        "properties": {
-          "ap_affinity_threshold": {
-            "default": 12,
-            "description": "If the field is set in both site/setting and org/setting, the value from site/setting will be used.",
-            "examples": [
-              10
-            ],
-            "type": "integer"
-          }
-        },
-        "type": "object"
-      },
       "org_setting_tags": {
         "description": "Labels associated with these organization settings",
         "items": {
@@ -2245,6 +2267,130 @@
           "verify_token"
         ],
         "type": "object"
+      },
+      "protect_re": {
+        "additionalProperties": false,
+        "description": "Restrict inbound-traffic to host\nwhen enabled, all traffic that is not essential to our operation will be dropped \ne.g. ntp / dns / traffic to mist will be allowed by default, if dhcpd is enabled, we'll make sure it works",
+        "properties": {
+          "allowed_services": {
+            "$ref": "#/components/schemas/protect_re_allowed_services",
+            "description": "Built-in services explicitly allowed by the Protect RE policy"
+          },
+          "custom": {
+            "$ref": "#/components/schemas/protect_re_customs",
+            "description": "Additional ACL entries allowed by the Protect RE policy"
+          },
+          "enabled": {
+            "default": false,
+            "description": "When enabled, all traffic that is not essential to our operation will be dropped\ne.g. ntp / dns / traffic to mist will be allowed by default\n     if dhcpd is enabled, we'll make sure it works",
+            "type": "boolean"
+          },
+          "hit_count": {
+            "default": false,
+            "description": "Whether to enable hit count for Protect_RE policy",
+            "type": "boolean"
+          },
+          "trusted_hosts": {
+            "$ref": "#/components/schemas/protect_re_trusted_hosts",
+            "description": "Trusted host or subnet entries allowed by the Protect RE policy"
+          }
+        },
+        "type": "object"
+      },
+      "protect_re_allowed_service": {
+        "description": "Services allowed through protect-RE filters. enum: `icmp`, `ssh`",
+        "enum": [
+          "icmp",
+          "ssh"
+        ],
+        "type": "string"
+      },
+      "protect_re_allowed_services": {
+        "description": "Built-in services explicitly allowed by the Protect RE policy",
+        "examples": [
+          [
+            "icmp",
+            "ssh"
+          ]
+        ],
+        "items": {
+          "$ref": "#/components/schemas/protect_re_allowed_service"
+        },
+        "type": "array"
+      },
+      "protect_re_custom": {
+        "additionalProperties": false,
+        "description": "Custom Protect RE ACL entry",
+        "properties": {
+          "port_range": {
+            "default": "0",
+            "description": "Matched dst port, \"0\" means any",
+            "examples": [
+              "80,1035-1040"
+            ],
+            "type": "string"
+          },
+          "protocol": {
+            "$ref": "#/components/schemas/protect_re_custom_protocol",
+            "description": "Transport protocol matched by this custom Protect RE ACL. enum: `any`, `icmp`, `tcp`, `udp`."
+          },
+          "subnets": {
+            "$ref": "#/components/schemas/protect_re_custom_subnet",
+            "description": "Source subnets matched by this custom Protect RE ACL"
+          }
+        },
+        "type": "object"
+      },
+      "protect_re_custom_protocol": {
+        "default": "any",
+        "description": "enum: `any`, `icmp`, `tcp`, `udp`",
+        "enum": [
+          "any",
+          "icmp",
+          "tcp",
+          "udp"
+        ],
+        "type": "string"
+      },
+      "protect_re_custom_subnet": {
+        "description": "Source subnets matched by a custom Protect RE ACL",
+        "items": {
+          "examples": [
+            "10.1.2.0/24"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "protect_re_customs": {
+        "description": "Custom Protect RE ACL entries",
+        "items": {
+          "$ref": "#/components/schemas/protect_re_custom"
+        },
+        "type": "array"
+      },
+      "protect_re_trusted_hosts": {
+        "description": "Host or subnet entries allowed by the Protect RE policy",
+        "items": {
+          "examples": [
+            "10.242.3.0/24"
+          ],
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "radius_auth_port": {
+        "anyOf": [
+          {
+            "maximum": 65545,
+            "minimum": 1,
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "description": "RADIUS Auth Port, value from 1 to 65535, default is 1812"
       },
       "radsec_certs_ap": {
         "description": "RADSec certificates for AP",
@@ -2587,6 +2733,186 @@
         ],
         "type": "object"
       },
+      "switch_mgmt": {
+        "additionalProperties": false,
+        "description": "Switch management-plane access and proxy settings",
+        "properties": {
+          "ap_affinity_threshold": {
+            "default": 12,
+            "description": "AP affinity threshold for switch management. If set in both site settings and organization settings, the site setting value is used.",
+            "type": "integer"
+          },
+          "cli_banner": {
+            "description": "Set Banners for switches. Allows markup formatting",
+            "examples": [
+              "\\t\\tWELCOME!"
+            ],
+            "type": "string"
+          },
+          "cli_idle_timeout": {
+            "description": "Sets timeout for switches",
+            "maximum": 60,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "config_revert_timer": {
+            "default": 10,
+            "description": "Rollback timer for commit confirmed",
+            "maximum": 30,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "dhcp_option_fqdn": {
+            "default": false,
+            "description": "Enable to provide the FQDN with DHCP option 81",
+            "type": "boolean"
+          },
+          "disable_oob_down_alarm": {
+            "description": "Whether to suppress alarms when the switch out-of-band management interface is down",
+            "type": "boolean"
+          },
+          "enable_hw_resource_monitor": {
+            "default": false,
+            "description": "Alarm before a switch forwarding table (MAC, routes, next-hops) fills up, instead of silently dropping traffic",
+            "type": "boolean"
+          },
+          "fips_enabled": {
+            "default": false,
+            "description": "Whether FIPS mode is enabled on the switch",
+            "type": "boolean"
+          },
+          "local_accounts": {
+            "$ref": "#/components/schemas/config_switch_local_accounts",
+            "description": "Local switch user accounts keyed by username"
+          },
+          "mxedge_proxy_host": {
+            "description": "IP address or FQDN of the Mist Edge used to proxy the switch management traffic to the Mist Cloud",
+            "type": "string"
+          },
+          "mxedge_proxy_port": {
+            "$ref": "#/components/schemas/switch_mgmt_mxedge_proxy_port",
+            "description": "Mist Edge proxy port used for switch management traffic"
+          },
+          "protect_re": {
+            "$ref": "#/components/schemas/protect_re",
+            "description": "Control-plane protection settings for the switch"
+          },
+          "radius": {
+            "$ref": "#/components/schemas/switch_radius",
+            "description": "Management authentication settings using RADIUS"
+          },
+          "remove_existing_configs": {
+            "default": false,
+            "description": "By default, only the configuration generated by Mist is cleaned up during the configuration process. If `true`, all the existing configuration will be removed.",
+            "type": "boolean"
+          },
+          "root_password": {
+            "description": "Root password for local switch access",
+            "format": "password",
+            "type": "string"
+          },
+          "tacacs": {
+            "$ref": "#/components/schemas/tacacs",
+            "description": "Management authentication settings using TACACS+"
+          },
+          "use_mxedge_proxy": {
+            "description": "Whether to use Mist Edge as a proxy for switch management traffic",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "switch_mgmt_mxedge_proxy_port": {
+        "anyOf": [
+          {
+            "default": 2222,
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "description": "Mist Edge port used to proxy the switch management traffic to the Mist Cloud. Value in range 1-65535"
+      },
+      "switch_mgmt_radius_auth_server": {
+        "additionalProperties": false,
+        "description": "RADIUS authentication server used for switch management authentication",
+        "properties": {
+          "host": {
+            "description": "Address or hostname of the RADIUS authentication server",
+            "examples": [
+              "1.2.3.4"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for this RADIUS authentication server entry",
+            "format": "uuid",
+            "readOnly": true,
+            "type": "string"
+          },
+          "port": {
+            "$ref": "#/components/schemas/radius_auth_port",
+            "description": "UDP port used by the RADIUS authentication server"
+          },
+          "secret": {
+            "description": "Shared secret used with this RADIUS authentication server",
+            "examples": [
+              "testing123"
+            ],
+            "format": "password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "host",
+          "secret"
+        ],
+        "type": "object"
+      },
+      "switch_mgmt_radius_auth_servers": {
+        "description": "List of RADIUS authentication servers used for switch management authentication",
+        "items": {
+          "$ref": "#/components/schemas/switch_mgmt_radius_auth_server"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "switch_radius": {
+        "additionalProperties": false,
+        "description": "RADIUS settings for switch management authentication. `auth_servers`, `auth_servers_retries`, and `auth_servers_timeout` are required when `enabled`==`true` and `use_different_radius`==`true`.",
+        "properties": {
+          "auth_servers": {
+            "$ref": "#/components/schemas/switch_mgmt_radius_auth_servers",
+            "description": "RADIUS authentication servers used for switch management authentication. Required when `enabled`==`true` and `use_different_radius`==`true`."
+          },
+          "auth_servers_retries": {
+            "default": 3,
+            "description": "RADIUS auth session retries. Required when `enabled`==`true` and `use_different_radius`==`true`.",
+            "type": "integer"
+          },
+          "auth_servers_timeout": {
+            "default": 5,
+            "description": "RADIUS auth session timeout, in seconds. Required when `enabled`==`true` and `use_different_radius`==`true`.",
+            "type": "integer"
+          },
+          "enabled": {
+            "description": "Whether RADIUS is enabled for switch management authentication",
+            "type": "boolean"
+          },
+          "network": {
+            "description": "Source network used for connectivity to the RADIUS servers",
+            "type": "string"
+          },
+          "use_different_radius": {
+            "description": "Whether to use alternate RADIUS settings instead of the default switch `radius_config`",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "synthetictest_config": {
         "additionalProperties": false,
         "description": "Synthetic test configuration for Marvis Minis",
@@ -2795,6 +3121,108 @@
           }
         },
         "type": "object"
+      },
+      "tacacs": {
+        "additionalProperties": false,
+        "description": "TACACS+ settings for switch management authentication and accounting",
+        "properties": {
+          "acct_servers": {
+            "$ref": "#/components/schemas/tacacs_acct_servers",
+            "description": "TACACS+ accounting servers used for switch management sessions"
+          },
+          "default_role": {
+            "$ref": "#/components/schemas/tacacs_default_role",
+            "description": "Default switch-management role to use for TACACS+ logins. enum: `admin`, `helpdesk`, `none`, `read`."
+          },
+          "enabled": {
+            "description": "Whether TACACS+ is enabled for switch management authentication",
+            "type": "boolean"
+          },
+          "network": {
+            "description": "Source network used for connectivity to the TACACS+ servers",
+            "type": "string"
+          },
+          "tacplus_servers": {
+            "$ref": "#/components/schemas/tacacs_auth_servers",
+            "description": "TACACS+ authentication servers used for switch management logins"
+          }
+        },
+        "type": "object"
+      },
+      "tacacs_acct_server": {
+        "additionalProperties": false,
+        "description": "TACACS+ accounting server settings",
+        "properties": {
+          "host": {
+            "description": "Address or hostname of the TACACS+ accounting server",
+            "type": "string"
+          },
+          "port": {
+            "description": "TCP port used by the TACACS+ accounting server",
+            "type": "string"
+          },
+          "secret": {
+            "description": "Shared secret used with this TACACS+ accounting server",
+            "format": "password",
+            "type": "string"
+          },
+          "timeout": {
+            "default": 10,
+            "description": "TACACS+ accounting server timeout, in seconds",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "tacacs_acct_servers": {
+        "description": "List of TACACS+ accounting servers",
+        "items": {
+          "$ref": "#/components/schemas/tacacs_acct_server"
+        },
+        "type": "array"
+      },
+      "tacacs_auth_server": {
+        "additionalProperties": false,
+        "description": "TACACS+ authentication server settings",
+        "properties": {
+          "host": {
+            "description": "Address or hostname of the TACACS+ authentication server",
+            "type": "string"
+          },
+          "port": {
+            "description": "TCP port used by the TACACS+ authentication server",
+            "type": "string"
+          },
+          "secret": {
+            "description": "Shared secret used with this TACACS+ authentication server",
+            "format": "password",
+            "type": "string"
+          },
+          "timeout": {
+            "default": 10,
+            "description": "TACACS+ authentication server timeout, in seconds",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "tacacs_auth_servers": {
+        "description": "List of TACACS+ authentication servers",
+        "items": {
+          "$ref": "#/components/schemas/tacacs_auth_server"
+        },
+        "type": "array"
+      },
+      "tacacs_default_role": {
+        "default": "none",
+        "description": "enum: `admin`, `helpdesk`, `none`, `read`",
+        "enum": [
+          "admin",
+          "helpdesk",
+          "none",
+          "read"
+        ],
+        "type": "string"
       },
       "time_of_day": {
         "default": "any",
